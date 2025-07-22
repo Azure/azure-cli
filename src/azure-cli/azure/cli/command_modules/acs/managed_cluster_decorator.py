@@ -45,6 +45,12 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AVAILABILITY_SET,
     CONST_VIRTUAL_MACHINES,
 )
+
+from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+    CONST_EXT_INSTALLATION_NAME,
+    CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
+)
+
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
     check_is_msi_cluster,
@@ -8599,12 +8605,19 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 mc.agent_pool_profiles,
             )
 
-            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v2_extension_installed
-            is_container_storage_v2_extension_installed, version_v2 = get_container_storage_v2_extension_installed(
-                self.cmd,
-                self.context.get_resource_group_name(),
-                self.context.get_name()
-            )
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_extension_installed
+            try:
+                is_container_storage_v2_extension_installed, version_v2 = get_container_storage_extension_installed(
+                    self.cmd,
+                    self.context.get_resource_group_name(),
+                    self.context.get_name(),
+                    CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
+                )
+            except Exception as ex:
+                raise UnknownError(
+                    f"An error occurred while checking if Azure Container Storage v2"
+                    f"extension is installed on the cluster: {str(ex)}"
+                ) from ex
 
             from azure.cli.command_modules.acs.azurecontainerstorage._helpers import generate_vm_sku_cache_for_region
             generate_vm_sku_cache_for_region(self.cmd.cli_ctx, self.context.get_location())
@@ -8798,10 +8811,9 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             if mc.ai_toolchain_operator_profile is None:
                 mc.ai_toolchain_operator_profile = self.models.ManagedClusterAIToolchainOperatorProfile()  # pylint: disable=no-member
             mc.ai_toolchain_operator_profile.enabled = False
-            
+
         return mc
-    
-    
+
     def update_azure_container_storage_v2(self, mc: ManagedCluster) -> ManagedCluster:
         self._ensure_mc(mc)
         enable_azure_container_storage_v2 = self.context.raw_param.get("enable_azure_container_storage_v2")
@@ -8818,19 +8830,27 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             )
 
         if enable_azure_container_storage_v2 or disable_azure_container_storage_v2:
-            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v2_extension_installed
-            is_extension_installed, _ = get_container_storage_v2_extension_installed(
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_extension_installed
+            is_extension_installed, _ = get_container_storage_extension_installed(
                 self.cmd,
                 self.context.get_resource_group_name(),
-                self.context.get_name()
+                self.context.get_name(),
+                CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
             )
 
-            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_v1_extension_installed
-            is_containerstorage_v1_installed, v1_extension_version = get_container_storage_v1_extension_installed(
-                self.cmd,
-                self.context.get_resource_group_name(),
-                self.context.get_name()
-            )
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_extension_installed
+            try:
+                is_containerstorage_v1_installed, v1_extension_version = get_container_storage_extension_installed(
+                    self.cmd,
+                    self.context.get_resource_group_name(),
+                    self.context.get_name(),
+                    CONST_EXT_INSTALLATION_NAME,
+                )
+            except Exception as ex:
+                raise UnknownError(
+                    f"An error occurred while checking if Azure Container Storage "
+                    f"extension is installed on the cluster: {str(ex)}"
+                ) from ex
 
         if enable_azure_container_storage_v2:
             from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
@@ -8848,9 +8868,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         if disable_azure_container_storage_v2:
             msg = (
-                "Please make sure there are no existing PVs and PVCs that are provisioned by Azure Container Storage before disabling. "
-                "If Azure Container Storage is disabled with remaining PVs and PVCs, the PVs and PVCs can only be cleaned up "
-                "after re-enabling it by running 'az aks update --enable-azure-container-storage-v2' "
+                "Please make sure there are no existing PVs and PVCs that are provisioned by Azure Container Storage v2 "
+                "before disabling. If Azure Container Storage v2 is disabled with remaining PVs and PVCs, "
+                "any data associated with those PVs and PVCs will not be erased and the nodes will be left in an unclean state. "
+                "The PVs and PVCs can only be cleaned up after re-enabling it by running "
+                "'az aks update --enable-azure-container-storage-v2' "
             )
             if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
                 raise DecoratorEarlyExitException()
@@ -8866,6 +8888,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         if disable_azure_container_storage_v2:
             self.context.set_intermediate("disable_azure_container_storage_v2", True)
 
+        return mc
 
     def update_cost_analysis(self, mc: ManagedCluster) -> ManagedCluster:
         self._ensure_mc(mc)

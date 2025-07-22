@@ -714,16 +714,11 @@ def perform_enable_azure_container_storage_v2(
         if long_op_result.provisioning_state == "Succeeded":
             logger.warning(op_text)
     except Exception as ex:     # pylint: disable=broad-except
-        logger.error("Azure Container Storage failed to install.\nError: %s", ex)
-        logger.warning(
-            "AKS cluster is created. "
-            "Please run `az aks update` along with `--enable-azure-container-storage-v2` "
-            "to enable Azure Container Storage v2."
-        )
-
+        logger.error("Azure Container Storage v2 failed to install.\nError: %s", ex)
         delete_extension = True
 
     if delete_extension:
+        logger.warning("Cleaning up the cluster by disabling Azure Container Storage v2...")
         try:
             delete_op_result = k8s_extension_custom_mod.delete_k8s_extension(
                 cmd,
@@ -737,6 +732,10 @@ def perform_enable_azure_container_storage_v2(
 
             LongRunningOperation(cmd.cli_ctx)(delete_op_result)
             logger.warning("Azure Container Storage v2 has been disabled.")
+            logger.warning(
+                "Please retry enabling Azure Container Storage v2 by running "
+                "`az aks update` along with `--enable-azure-container-storage-v2`"
+            )
         except Exception as delete_ex:
             raise UnknownError(
                 "Failed to disable Azure Container Storage v2 with error: %s" % delete_ex

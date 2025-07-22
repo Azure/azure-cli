@@ -196,12 +196,11 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
 
     if is_container_storage_v2_extension_installed:
         raise InvalidArgumentValueError(
-            f'Azure Container Storage v2 version {v2_extension_version} is already installed on the cluster '
-            'which is why Azure Container Storage cannot be enabled. '
-            'Try enabling Azure Container Storage in another cluster. '
-            'You can also enable Azure Container Storage by first disabling the existing Azure Container '
-            'Storage v2 using --disable-azure-container-storage-v2. '
-            'Note that this can impact existing workloads that depend on Azure Container Storage.'
+            f'Failed to enable Azure Container Storage as Azure Container Storage v2 version {v2_extension_version} '
+            'is already installed on the cluster. Try enabling Azure Container Storage in another cluster. '
+            'You can also enable Azure Container Storage by first disabling the existing installation of '
+            'Azure Container Storage v2 using --disable-azure-container-storage-v2. '
+            'Note that disabling v2 can impact existing workloads that depend on Azure Container Storage v2.'
         )
 
     if storage_pool_name is not None:
@@ -453,12 +452,11 @@ def validate_enable_azure_container_storage_v2_params(
 ):
     if is_v1_extension_installed:
         raise InvalidArgumentValueError(
-            f'Azure Container Storage version {v1_extension_version} is already installed on the cluster '
-            'which is why Azure Container Storage v2 cannot be enabled. '
-            'Try enabling Azure Container Storage v2 in another cluster. '
-            'You can also enable Azure Container Storage v2 by first disabling the existing '
-            'Azure Container Storage v1 using --disable-azure-container-storage. '
-            'Note that this can impact existing workloads that depend on Azure Container Storage.'
+            f'Failed to enable Azure Container Storage v2 as Azure Container Storage version {v1_extension_version} '
+            'is already installed on the cluster. Try enabling Azure Container Storage v2 in another cluster. '
+            'You can also enable Azure Container Storage v2 by first disabling the existing installation of '
+            'Azure Container Storage using --disable-azure-container-storage. '
+            'Note that disabling can impact existing workloads that depend on Azure Container Storage'
         )
 
     if is_v2_extension_installed:

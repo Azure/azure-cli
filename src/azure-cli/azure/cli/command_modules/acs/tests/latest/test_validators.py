@@ -1111,10 +1111,11 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         is_container_storage_v2_extension_installed = True
         v2_extension_version = "2.0.0"
         err = (
-             f'Azure Container Storage v2 version {v2_extension_version} is already installed on the cluster which is why Azure Container Storage cannot be enabled. '
-            'Try enabling Azure Container Storage in another cluster. '
-            'You can also enable Azure Container Storage by first disabling the existing Azure Container Storage v2 using --disable-azure-container-storage-v2. ' \
-            'Note that this can impact existing workloads that depend on Azure Container Storage.'
+             f'Failed to enable Azure Container Storage as Azure Container Storage v2 version {v2_extension_version} '
+            'is already installed on the cluster. Try enabling Azure Container Storage in another cluster. '
+            'You can also enable Azure Container Storage by first disabling the existing installation of '
+            'Azure Container Storage v2 using --disable-azure-container-storage-v2. '
+            'Note that disabling v2 can impact existing workloads that depend on Azure Container Storage v2.'
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
@@ -1605,10 +1606,11 @@ class TestValidateEnableAzureContainerStorageV2(unittest.TestCase):
     def test_enable_v2_when_extension_v1_installed(self):
         v1_extension_version = "1.3.0"
         err = (
-            f'Azure Container Storage version {v1_extension_version} is already installed on the cluster which is why Azure Container Storage v2 cannot be enabled. '
-            'Try enabling Azure Container Storage v2 in another cluster. '
-            'You can also enable Azure Container Storage v2 by first disabling the existing Azure Container Storage v1 using --disable-azure-container-storage. ' \
-            'Note that this can impact existing workloads that depend on Azure Container Storage.'
+            f'Failed to enable Azure Container Storage v2 as Azure Container Storage version {v1_extension_version} '
+            'is already installed on the cluster. Try enabling Azure Container Storage v2 in another cluster. '
+            'You can also enable Azure Container Storage v2 by first disabling the existing installation of '
+            'Azure Container Storage using --disable-azure-container-storage. '
+            'Note that disabling can impact existing workloads that depend on Azure Container Storage'
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_v2_params(
