@@ -1757,28 +1757,31 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if any(parameter is not None for parameter in proxy_agent_parameters):
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
         HostEndpointSettings = cmd.get_models('HostEndpointSettings')
-        wire_server = HostEndpointSettings(
-            mode=wire_server_mode,
-            in_vm_access_control_profile_reference_id=wire_server_access_control_profile_reference_id
-        )
-        imds = HostEndpointSettings(
-            mode=imds_mode,
-            in_vm_access_control_profile_reference_id=imds_access_control_profile_reference_id
-        )
+        wire_server = HostEndpointSettings()
+        imds = HostEndpointSettings()
         if vm.security_profile is None:
             vm.security_profile = SecurityProfile()
-            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, key_incarnation_id=key_incarnation_id, wire_server=wire_server, imds=imds)
+            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(wire_server=wire_server, imds=imds)
         elif vm.security_profile.proxy_agent_settings is None:
-            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, key_incarnation_id=key_incarnation_id, wire_server=wire_server, imds=imds)
+            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(wire_server=wire_server, imds=imds)
         else:
+            if vm.security_profile.proxy_agent_settings.wire_server is None:
+                vm.security_profile.proxy_agent_settings.wire_server = wire_server
+            if vm.security_profile.proxy_agent_settings.imds is None:
+                vm.security_profile.proxy_agent_settings.imds = imds
+
+        if enable_proxy_agent is not None:
             vm.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
+        if key_incarnation_id is not None:
             vm.security_profile.proxy_agent_settings.key_incarnation_id = key_incarnation_id
+        if wire_server_mode is not None:
             vm.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
+        if wire_server_access_control_profile_reference_id is not None:
             vm.security_profile.proxy_agent_settings.wire_server.in_vm_access_control_profile_reference_id = \
                 wire_server_access_control_profile_reference_id
+        if imds_mode is not None:
             vm.security_profile.proxy_agent_settings.imds.mode = imds_mode
+        if imds_access_control_profile_reference_id is not None:
             vm.security_profile.proxy_agent_settings.imds.in_vm_access_control_profile_reference_id = \
                 imds_access_control_profile_reference_id
 
@@ -4222,27 +4225,31 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         SecurityProfile = cmd.get_models('SecurityProfile')
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
         HostEndpointSettings = cmd.get_models('HostEndpointSettings')
-        wire_server = HostEndpointSettings(
-            mode=wire_server_mode,
-            in_vm_access_control_profile_reference_id=wire_server_access_control_profile_reference_id
-        )
-        imds = HostEndpointSettings(
-            mode=imds_mode,
-            in_vm_access_control_profile_reference_id=imds_access_control_profile_reference_id
-        )
+        wire_server = HostEndpointSettings()
+        imds = HostEndpointSettings()
         if vmss.virtual_machine_profile.security_profile is None:
             vmss.virtual_machine_profile.security_profile = SecurityProfile()
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, wire_server=wire_server, imds=imds)
+                wire_server=wire_server, imds=imds)
         elif vmss.virtual_machine_profile.security_profile.proxy_agent_settings is None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, wire_server=wire_server, imds=imds)
+                wire_server=wire_server, imds=imds)
         else:
+            if vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server is None:
+                vmss.virtual_machine_profile.security_profile.wire_server = wire_server
+            if vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds is None:
+                vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds = imds
+
+        if enable_proxy_agent is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
+        if wire_server_mode is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
+        if wire_server_access_control_profile_reference_id is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server. \
                 in_vm_access_control_profile_reference_id = wire_server_access_control_profile_reference_id
+        if imds_mode is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds.mode = imds_mode
+        if imds_access_control_profile_reference_id is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds. \
                 in_vm_access_control_profile_reference_id = imds_access_control_profile_reference_id
 
