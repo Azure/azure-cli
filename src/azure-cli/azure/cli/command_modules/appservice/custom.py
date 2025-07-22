@@ -1355,18 +1355,18 @@ def get_webapp_sitecontainer_log(cmd, name, resource_group, container_name, slot
 
 def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
     """
-    Convert a webapp between classic and sitecontainers mode.
+    Convert a webapp between classic (docker) and sitecontainers mode.
 
     :param cmd: CLI command context
     :param name: Name of the webapp
     :param resource_group: Resource group of the webapp
-    :param mode: Target mode, either 'classic' or 'sitecontainers'
+    :param mode: Target mode, either 'docker' or 'sitecontainers'
     :param slot: Optional deployment slot
     """
     client = web_client_factory(cmd.cli_ctx)
-    if mode not in ['classic', 'sitecontainers']:
+    if mode not in ['docker', 'sitecontainers']:
         raise InvalidArgumentValueError(
-            "Invalid mode '{}'. Allowed values: classic, sitecontainers.".format(mode)
+            "Invalid mode '{}'. Allowed values: docker, sitecontainers.".format(mode)
         )
 
     site_config = get_site_configs(cmd, resource_group, name, slot)
@@ -1374,7 +1374,7 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
  
     if mode == 'sitecontainers':
         if linux_fx_version and not linux_fx_version.startswith('DOCKER|'):
-            raise ValidationError("Cannot convert to sitecontainers mode as site is not a classic custom container app.")
+            raise ValidationError("Cannot convert to sitecontainers mode as site is not a classic custom container (docker) app.")
         acr_use_managed_identity_creds = getattr(site_config, "acr_use_managed_identity_creds", None)
         acr_user_managed_identity_id = getattr(site_config, "acr_user_managed_identity_id", None)
 
@@ -1383,10 +1383,11 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
 
         from azure.cli.core.commands.client_factory import get_subscription_id
         subscription_id = get_subscription_id(cmd.cli_ctx)
+        slot_segment = f"/slots/{slot}" if slot else ""
         url = (
             f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/"
-            f"providers/Microsoft.Web/sites/{name}/config/appsettings/list?api-version=2023-12-01"
-            )
+            f"providers/Microsoft.Web/sites/{name}{slot_segment}/config/appsettings/list?api-version=2023-12-01"
+        )
         request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
         response = send_raw_request(cmd.cli_ctx, "POST", request_url)
         app_settings_raw = response.json()
@@ -1398,7 +1399,7 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
 
         # Get docker image from linux_fx_version
         docker_image = linux_fx_version.replace("DOCKER|", "", 1)
-        sidecarmainname = "main"
+        sidecar_main_container_name = "main"
         startup_cmd = getattr(site_config, "app_command_line", None)
 
         # Prepare parameters for sitecontainers create
@@ -1406,7 +1407,7 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
             "name": name,
             "resource_group": resource_group,
             "slot": slot,
-            "container_name": sidecarmainname,
+            "container_name": sidecar_main_container_name,
             "image": docker_image,
             "target_port": websites_port,
             "startup_cmd": startup_cmd,
@@ -1422,7 +1423,7 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
                 # ACR with System-Assigned Managed Identity
                 logger.warning("Site is using System-Assigned Managed Identity for ACR authentication.")
                 sitecontainer_kwargs["system_assigned_identity"] = True
-        else: 
+        else:
             if acr_user_name and acr_user_password:
                 # ACR with User Credentials
                 logger.warning("Site is using User Credentials for ACR authentication.")
@@ -1440,15 +1441,15 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
         update_site_configs(cmd, resource_group, name, slot=slot, linux_fx_version="SITECONTAINERS")
         logger.warning("Webapp '%s' converted to sitecontainers mode.", name)
         return {"result": "success", "mode": mode}
-    else:  # mode == 'classic'
+    else:  # mode == 'docker'
         if linux_fx_version and not linux_fx_version.lower().startswith('sitecontainers'):
-            raise ValidationError("Cannot convert to classic mode as site is not a SITECONTAINERS app.")
+            raise ValidationError("Cannot convert to classic (docker) mode as site is not a SITECONTAINERS app.")
 
         # Get the main sitecontainer
         sitecontainers = list_webapp_sitecontainers(cmd, name, resource_group, slot)
         main_container = next((c for c in sitecontainers if getattr(c, "is_main", False)), None)
         if not main_container:
-            raise ResourceNotFoundError("No main sitecontainer found. Cannot convert to classic mode.")
+            raise ResourceNotFoundError("No main sitecontainer found. Cannot convert to classic mode (docker).")
 
         main_container = update_webapp_sitecontainer(cmd, name, resource_group, main_container.name, slot=slot,
                                     image=main_container.image, target_port=main_container.target_port, is_main=main_container.is_main)
@@ -1488,19 +1489,21 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
                         f"Could not find a user-assigned identity with client_id '{main_container.user_managed_identity_client_id}' assigned to the app."
                     )
             update_site_configs(cmd, resource_group, name, slot=slot, acr_identity=matched_key)
-        elif main_container.auth_type == AuthType.Anonymous:
-            update_site_configs(cmd, resource_group, name, slot=slot, acr_use_identity=False)
+        elif main_container.auth_type == AuthType.ANONYMOUS:
+            configs = get_site_configs(cmd, resource_group, name, slot)
+            setattr(configs, 'acr_use_managed_identity_creds', False)
+            _generic_site_operation(cmd.cli_ctx, resource_group, name, 'update_configuration', slot, configs)
 
-        logger.warning("Deleting all sitecontainers before converting to classic mode.")
+        logger.warning("Deleting all sitecontainers before converting to classic mode (docker).")
         # Remove all sitecontainers
         for c in sitecontainers:
             delete_webapp_sitecontainer(cmd, name, resource_group, c.name, slot)
 
-        # Set linuxFxVersion to classic custom container
+        # Set linuxFxVersion to docker
         update_site_configs(cmd, resource_group, name, slot=slot, linux_fx_version=linux_fx_version)
         if settings:
             update_app_settings(cmd, resource_group, name, settings, slot)
-        logger.warning("Webapp '%s' converted to classic custom container mode.", name)
+        logger.warning("Webapp '%s' converted to classic custom container (docker) mode.", name)
         return {"result": "success", "mode": mode}
 
 

@@ -2345,11 +2345,11 @@ examples:
 
 helps['webapp sitecontainers convert'] = """
 type: command
-short-summary: Convert a webapp from a webapp from sitecontainers to a classic custom container and vice versa.
+short-summary: Convert a webapp from sitecontainers to a classic custom container and vice versa.
 examples:
-  - name: Convert a webapp to classic custom container from sitecontainers
-    text: az webapp sitecontainers convert --mode classic --name MyWebApp --resource-group MyResourceGroup
-  - name: Convert a webapp to sitecontainers from classic custom container
+  - name: Convert a webapp to classic custom container (docker) from sitecontainers
+    text: az webapp sitecontainers convert --mode docker --name MyWebApp --resource-group MyResourceGroup
+  - name: Convert a webapp to sitecontainers from classic custom container (docker)
     text: az webapp sitecontainers convert --mode sitecontainers --name MyWebApp --resource-group MyResourceGroup
 """
 

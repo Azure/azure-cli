@@ -204,7 +204,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None, help='Name of the linux webapp')
 
     with self.argument_context("webapp sitecontainers convert") as c:
-        c.argument('mode', options_list=['--mode'], help='Mode for conversion. Allowed values: classic, sitecontainers.', choices=['classic', 'sitecontainers'])
+        c.argument('mode', options_list=['--mode'], help='Mode for conversion. Allowed values: docker, sitecontainers.', choices=['docker', 'sitecontainers'])
 
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
