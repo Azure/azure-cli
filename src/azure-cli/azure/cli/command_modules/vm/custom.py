@@ -4236,7 +4236,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 wire_server=wire_server, imds=imds)
         else:
             if vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server is None:
-                vmss.virtual_machine_profile.security_profile.wire_server = wire_server
+                vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server = wire_server
             if vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds is None:
                 vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds = imds
 
