@@ -1057,6 +1057,9 @@ parameters:
   - name: --disable-static-egress-gateway
     type: bool
     short-summary: Disable Static Egress Gateway addon to the cluster.
+  - name: --migrate-vmas-to-vms
+    type: bool
+    short-summary: Migrate cluster with VMAS node pool to VMS node pool.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
