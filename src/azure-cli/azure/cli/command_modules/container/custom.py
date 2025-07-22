@@ -146,8 +146,7 @@ def create_container(cmd,
     if standby_pool_profile_id is not None:
         vnet_address_prefix = None
         subnet_address_prefix = None
-
-    if standby_pool_profile_id is None:
+    else:
         ports = ports or [80]
         protocol = protocol or ContainerGroupNetworkProtocol.tcp
 
