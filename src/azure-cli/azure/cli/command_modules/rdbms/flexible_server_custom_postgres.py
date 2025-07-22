@@ -711,7 +711,8 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    validate_georestore_network(source_server_object, None, vnet, subnet, 'postgres')
+    if source_server_object.network.delegated_subnet_resource_id is not None:
+        validate_georestore_network(source_server_object, None, vnet, subnet, 'postgres')
 
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
