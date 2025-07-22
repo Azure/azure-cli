@@ -70,6 +70,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_MODE_ISTIO,
     CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
     CONST_ARTIFACT_SOURCE_DIRECT,
+    CONST_VIRTUAL_MACHINES,
 )
 from azure.cli.command_modules.acs._polling import RunCommandLocationPolling
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
@@ -601,11 +602,13 @@ def aks_create(
     enable_secret_rotation=False,
     rotation_poll_interval=None,
     enable_app_routing=False,
+    enable_ai_toolchain_operator=False,
     app_routing_default_nginx_controller=None,
     enable_static_egress_gateway=False,
     # nodepool paramerters
     nodepool_name="nodepool1",
     node_vm_size=None,
+    vm_sizes=None,
     os_sku=None,
     snapshot_id=None,
     vnet_subnet_id=None,
@@ -801,6 +804,8 @@ def aks_update(
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
+    enable_ai_toolchain_operator=False,
+    disable_ai_toolchain_operator=False,
     rotation_poll_interval=None,
     enable_static_egress_gateway=False,
     disable_static_egress_gateway=False,
@@ -812,6 +817,7 @@ def aks_update(
     max_count=None,
     nodepool_labels=None,
     nodepool_taints=None,
+    migrate_vmas_to_vms=False,
     # azure monitor profile
     enable_azure_monitor_metrics=False,
     azure_monitor_workspace_resource_id=None,
@@ -908,8 +914,8 @@ def aks_upgrade(cmd,
         # nodepools of a cluster. The SDK only support upgrade single nodepool at a time.
         for agent_pool_profile in instance.agent_pool_profiles:
             if vmas_cluster:
-                raise CLIError('This cluster is not using VirtualMachineScaleSets. Node image upgrade only operation '
-                               'can only be applied on VirtualMachineScaleSets cluster.')
+                raise CLIError('This cluster is using AvailabilitySet. Node image upgrade only operation '
+                               'can only be applied on VirtualMachineScaleSets or VirtualMachines cluster.')
             agent_pool_client = cf_agent_pools(cmd.cli_ctx)
             _upgrade_single_nodepool_image_version(True, agent_pool_client,
                                                    resource_group_name, name, agent_pool_profile.name)
@@ -1060,7 +1066,13 @@ def aks_scale(cmd, client, resource_group_name, name, node_count, nodepool_name=
                 raise CLIError(
                     "Cannot scale cluster autoscaler enabled node pool.")
 
-            agent_profile.count = int(node_count)  # pylint: disable=no-member
+            if agent_profile.type == CONST_VIRTUAL_MACHINES:
+                if len(agent_profile.virtual_machines_profile.scale.manual) == 1:
+                    agent_profile.virtual_machines_profile.scale.manual[0].count = int(node_count)
+                else:
+                    raise ClientRequestError("Cannot scale virtual machines node pool with more than one size.")
+            else:
+                agent_profile.count = int(node_count)  # pylint: disable=no-member
             # null out the SP profile because otherwise validation complains
             instance.service_principal_profile = None
             return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, name, instance)
@@ -2392,6 +2404,8 @@ def aks_agentpool_add(
     nodepool_name,
     kubernetes_version=None,
     node_vm_size=None,
+    vm_sizes=None,
+    vm_set_type=None,
     os_type=None,
     os_sku=None,
     snapshot_id=None,
@@ -2655,7 +2669,13 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
     if new_node_count == instance.count:
         raise CLIError(
             "The new node count is the same as the current node count.")
-    instance.count = new_node_count  # pylint: disable=no-member
+    if instance.type_properties_type == CONST_VIRTUAL_MACHINES:
+        if len(instance.virtual_machines_profile.scale.manual) == 1:
+            instance.virtual_machines_profile.scale.manual[0].count = new_node_count
+        else:
+            raise ClientRequestError("Cannot scale virtual machines node pool with more than one size.")
+    else:
+        instance.count = new_node_count  # pylint: disable=no-member
     return sdk_no_wait(
         no_wait,
         client.begin_create_or_update,
@@ -2820,6 +2840,121 @@ def aks_agentpool_delete_machines(cmd,   # pylint: disable=unused-argument
         cluster_name,
         nodepool_name,
         machines,
+    )
+
+
+def aks_agentpool_manual_scale_add(cmd,
+                                   client,
+                                   resource_group_name,
+                                   cluster_name,
+                                   nodepool_name,
+                                   vm_sizes,
+                                   node_count,
+                                   no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot add manual to a non-virtualmachines node pool.")
+
+    ManualScaleProfile = cmd.get_models(
+        "ManualScaleProfile",
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        operation_group="managed_clusters",
+    )
+    sizes = [x.strip() for x in vm_sizes.split(",")]
+    if len(sizes) != 1:
+        raise ClientRequestError("We only accept single sku size for manual profile.")
+    new_manual_scale_profile = ManualScaleProfile(size=sizes[0], count=int(node_count))
+    instance.virtual_machines_profile.scale.manual.append(new_manual_scale_profile)
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
+def aks_agentpool_manual_scale_update(cmd,    # pylint: disable=unused-argument
+                                      client,
+                                      resource_group_name,
+                                      cluster_name,
+                                      nodepool_name,
+                                      current_vm_sizes,
+                                      vm_sizes=None,
+                                      node_count=None,
+                                      no_wait=False):
+    if vm_sizes is None and node_count is None:
+        raise RequiredArgumentMissingError("specify --vm-sizes or --node-count or both.")
+
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise ClientRequestError("Cannot update manual in a non-virtualmachines node pool.")
+
+    _current_vm_sizes = [x.strip().lower() for x in current_vm_sizes.split(",")]
+    if len(_current_vm_sizes) != 1:
+        raise InvalidArgumentValueError(f"We only accept single sku size for manual profile. {current_vm_sizes} is invalid.")
+
+    _vm_sizes = [x.strip().lower() for x in vm_sizes.split(",")] if vm_sizes else []
+    if len(_vm_sizes) != 1:
+        raise InvalidArgumentValueError(f"We only accept single sku size for manual profile. {vm_sizes} is invalid.")
+
+    manual_exists = False
+    for m in instance.virtual_machines_profile.scale.manual:
+        if m.size.lower() == _current_vm_sizes[0]:
+            manual_exists = True
+            if vm_sizes:
+                m.size = _vm_sizes[0]
+            if node_count:
+                m.count = int(node_count)
+            break
+    if not manual_exists:
+        raise InvalidArgumentValueError(f"Manual with size {_current_vm_sizes[0]} doesn't exist in node pool {nodepool_name}.")
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
+    )
+
+
+def aks_agentpool_manual_scale_delete(cmd,    # pylint: disable=unused-argument
+                                      client,
+                                      resource_group_name,
+                                      cluster_name,
+                                      nodepool_name,
+                                      current_vm_sizes,
+                                      no_wait=False):
+    instance = client.get(resource_group_name, cluster_name, nodepool_name)
+    if instance.type_properties_type != CONST_VIRTUAL_MACHINES:
+        raise CLIError("Cannot delete manual in a non-virtualmachines node pool.")
+
+    _current_vm_sizes = [x.strip().lower() for x in current_vm_sizes.split(",")]
+    if len(_current_vm_sizes) != 1:
+        raise InvalidArgumentValueError(f"We only accept single sku size for manual profile. {current_vm_sizes} is invalid.")
+
+    manual_exists = False
+    for m in instance.virtual_machines_profile.scale.manual:
+        if m.size.lower() == _current_vm_sizes[0]:
+            manual_exists = True
+            instance.virtual_machines_profile.scale.manual.remove(m)
+            break
+    if not manual_exists:
+        raise InvalidArgumentValueError(f"Manual with size {_current_vm_sizes[0]} doesn't exist in node pool {nodepool_name}.")
+    if len(instance.virtual_machines_profile.scale.manual) == 0:
+        raise InvalidArgumentValueError(f"Cannot delete the last manual profile in node pool {nodepool_name}. ")
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_create_or_update,
+        resource_group_name,
+        cluster_name,
+        nodepool_name,
+        instance
     )
 
 

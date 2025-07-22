@@ -104,18 +104,8 @@ class CDNProfileUpdate(_AFDProfileUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.location._registered = False
         args_schema.sku._registered = False
         return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        existing = _AFDProfileShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group,
-            'profile_name': args.profile_name
-        })
-        existing_location = None if 'location' not in existing else existing['location']
-        args.location = existing_location
 
 
 class CDNProfileDelete(_AFDProfileDelete):
