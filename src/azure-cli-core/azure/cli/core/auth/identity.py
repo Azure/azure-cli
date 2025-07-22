@@ -171,14 +171,14 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             claims_challenge=claims_challenge)
         return check_result(result)
 
-    def login_with_device_code(self, scopes):
-        flow = self._msal_app.initiate_device_flow(scopes)
+    def login_with_device_code(self, scopes, claims_challenge=None):
+        flow = self._msal_app.initiate_device_flow(scopes, claims_challenge=claims_challenge)
         if "user_code" not in flow:
             raise ValueError(
                 "Fail to create device flow. Err: %s" % json.dumps(flow, indent=4))
         from azure.cli.core.style import print_styled_text, Style
         print_styled_text((Style.WARNING, flow["message"]), file=sys.stderr)
-        result = self._msal_app.acquire_token_by_device_flow(flow)  # By default it will block
+        result = self._msal_app.acquire_token_by_device_flow(flow, claims_challenge=claims_challenge)
         return check_result(result)
 
     def login_with_username_password(self, username, password, scopes):
