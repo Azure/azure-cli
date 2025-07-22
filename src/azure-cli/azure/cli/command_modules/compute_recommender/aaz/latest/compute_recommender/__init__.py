@@ -10,3 +10,4 @@
 
 from .__cmd_group import *
 from ._spot_placement_recommender import *
+from ._spot_placement_score import *
