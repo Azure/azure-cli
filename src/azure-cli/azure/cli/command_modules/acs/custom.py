@@ -602,6 +602,7 @@ def aks_create(
     enable_secret_rotation=False,
     rotation_poll_interval=None,
     enable_app_routing=False,
+    enable_ai_toolchain_operator=False,
     app_routing_default_nginx_controller=None,
     enable_static_egress_gateway=False,
     # nodepool paramerters
@@ -803,6 +804,8 @@ def aks_update(
     # addons
     enable_secret_rotation=False,
     disable_secret_rotation=False,
+    enable_ai_toolchain_operator=False,
+    disable_ai_toolchain_operator=False,
     rotation_poll_interval=None,
     enable_static_egress_gateway=False,
     disable_static_egress_gateway=False,
@@ -814,6 +817,7 @@ def aks_update(
     max_count=None,
     nodepool_labels=None,
     nodepool_taints=None,
+    migrate_vmas_to_vms=False,
     # azure monitor profile
     enable_azure_monitor_metrics=False,
     azure_monitor_workspace_resource_id=None,

@@ -434,6 +434,7 @@ def load_arguments(self, _):
         c.argument('rotation_poll_interval')
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_app_routing', action="store_true")
+        c.argument('enable_ai_toolchain_operator', action='store_true')
         c.argument(
             "app_routing_default_nginx_controller",
             arg_type=get_enum_type(app_routing_nginx_configs),
@@ -633,6 +634,8 @@ def load_arguments(self, _):
         # addons
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('disable_secret_rotation', action='store_true', validator=validate_keyvault_secrets_provider_disable_and_enable_parameters)
+        c.argument('enable_ai_toolchain_operator', action='store_true')
+        c.argument('disable_ai_toolchain_operator', action='store_true')
         c.argument('rotation_poll_interval')
         c.argument('enable_static_egress_gateway', action='store_true')
         c.argument('disable_static_egress_gateway', action='store_true')
@@ -649,6 +652,8 @@ def load_arguments(self, _):
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
                    help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
         c.argument('nodepool_taints', validator=validate_nodepool_taints)
+        c.argument('migrate_vmas_to_vms', action='store_true')
+
         # azure monitor profile
         c.argument('enable_azure_monitor_metrics', action='store_true')
         c.argument('azure_monitor_workspace_resource_id', validator=validate_azuremonitorworkspaceresourceid)

@@ -218,7 +218,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_EVENTHUB: None,
         ResourceType.MGMT_MONITOR: None,
         ResourceType.MGMT_MSI: '2023-01-31',
-        ResourceType.MGMT_APPSERVICE: '2023-01-01',
+        ResourceType.MGMT_APPSERVICE: '2024-11-01',
         ResourceType.MGMT_IOTHUB: '2023-06-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
@@ -253,10 +253,6 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2024_11_01_PREVIEW': "2024-11-01-preview",
         'VERSION_2025_03_01_PREVIEW': "2025-03-01-preview",
         'VERSION_2025_04_01': "2025-04-01"
-    },
-    ResourceType.MGMT_CONTAINERSERVICE: {
-        # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50
-        'ManagedClusterAddonProfile': '2020-03-01',
     },
     ResourceType.MGMT_MSI: {
         'user_assigned_identities': '2022-01-31-preview',

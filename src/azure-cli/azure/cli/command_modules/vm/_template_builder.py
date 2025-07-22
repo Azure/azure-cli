@@ -1044,7 +1044,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
                         imds_mode=None, wire_server_access_control_profile_reference_id=None,
                         imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
-                        automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None):
+                        automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
+                        enable_automatic_repairs=None):
 
     # Build IP configuration
     ip_configuration = {}
@@ -1541,6 +1542,9 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
     automatic_zone_rebalancing_policy = {}
     if enable_automatic_zone_balancing is not None:
         automatic_zone_rebalancing_policy['enabled'] = enable_automatic_zone_balancing
+        if enable_automatic_zone_balancing is True and enable_automatic_repairs is not None:
+            automatic_repairs_policy = {'enabled': enable_automatic_repairs}
+            vmss_properties['automaticRepairsPolicy'] = automatic_repairs_policy
 
     if automatic_zone_balancing_strategy is not None:
         automatic_zone_rebalancing_policy['rebalanceStrategy'] = automatic_zone_balancing_strategy
