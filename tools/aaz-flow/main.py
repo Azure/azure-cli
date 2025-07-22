@@ -17,11 +17,16 @@ def generate_code(
     aaz_path = os.getenv("AAZ_PATH", "/workspaces/aaz")
     cli_path = os.getenv("CLI_PATH", "/workspaces/azure-cli")
     cli_extension_path = os.getenv("CLI_EXTENSION_PATH", "/workspaces/azure-cli-extensions")
+    swagger_path = os.getenv("SWAGGER_PATH", "/workspaces/azure-rest-api-specs")
 
-    return (
-        f"Just run the following command in the terminal: 'aaz-dev cli generate-by-swagger-tag --aaz-path {aaz_path} --cli-path {cli_path} --cli-extension-path {cli_extension_path} --extension-or-module-name {extension_or_module_name} --swagger-module-path {swagger_module_path} --resource-provider {resource_provider} --swagger-tag {swagger_tag} --profile latest'",
+    swagger_module = swagger_module_path.split("\\")[-1]
+
+    des = (
+        f"Just run the following command in the terminal: 'aaz-dev command-model generate-from-swagger --swagger-path {swagger_path} --swagger-module-path {swagger_module_path} --aaz-path {aaz_path} --module {swagger_module} --resource-provider {resource_provider} --swagger-tag {swagger_tag}'",
+        f"After the command is run successfully, then run the following command: 'aaz-dev cli generate-by-swagger-tag --aaz-path {aaz_path} --cli-path {cli_path} --cli-extension-path {cli_extension_path} --extension-or-module-name {extension_or_module_name} --swagger-module-path {swagger_module_path} --resource-provider {resource_provider} --swagger-tag {swagger_tag} --profile latest'",
         f"After the command is run successfully, this task will be marked as completed.",
     )
+    return des
 
 
 if __name__ == "__main__":
