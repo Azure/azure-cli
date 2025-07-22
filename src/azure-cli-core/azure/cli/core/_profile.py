@@ -172,7 +172,7 @@ class Profile:
                 use_device_code = True
 
             if use_device_code:
-                user_identity = identity.login_with_device_code(scopes=scopes)
+                user_identity = identity.login_with_device_code(scopes=scopes, claims_challenge=claims_challenge)
             else:
                 user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge)
         else:
