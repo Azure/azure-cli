@@ -58,7 +58,7 @@ def load_arguments(self, _):
     deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], min_api='2019-06-01', help="The template spec resource id.")
     deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
-    deployment_validation_level_type = CLIArgumentType(options_list=['--validation-level'], required=False, arg_type=get_enum_type(ValidationLevel, None),
+    deployment_validation_level_type = CLIArgumentType(options_list=['--validation-level'], arg_type=get_enum_type(ValidationLevel, None),
                                                        help='The deployment validation level. May be set to "Provider" (the default), "Template", or '
                                                        '"ProviderNoRbac". With a validation level of "provider", ARM will perform full validation and check that'
                                                        ' you have sufficient permission to deploy all resources in the template. With a validation level of '
