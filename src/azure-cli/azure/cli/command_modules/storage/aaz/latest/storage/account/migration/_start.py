@@ -23,9 +23,9 @@ class Start(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-01-01",
+        "version": "2024-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.storage/storageaccounts/{}/startaccountmigration", "2023-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.storage/storageaccounts/{}/startaccountmigration", "2024-01-01"],
         ]
     }
 
@@ -83,7 +83,7 @@ class Start(AAZCommand):
             arg_group="Properties",
             help="Target sku name for the account",
             required=True,
-            enum={"Premium_LRS": "Premium_LRS", "Premium_ZRS": "Premium_ZRS", "Standard_GRS": "Standard_GRS", "Standard_GZRS": "Standard_GZRS", "Standard_LRS": "Standard_LRS", "Standard_RAGRS": "Standard_RAGRS", "Standard_RAGZRS": "Standard_RAGZRS", "Standard_ZRS": "Standard_ZRS"},
+            enum={"PremiumV2_LRS": "PremiumV2_LRS", "PremiumV2_ZRS": "PremiumV2_ZRS", "Premium_LRS": "Premium_LRS", "Premium_ZRS": "Premium_ZRS", "StandardV2_GRS": "StandardV2_GRS", "StandardV2_GZRS": "StandardV2_GZRS", "StandardV2_LRS": "StandardV2_LRS", "StandardV2_ZRS": "StandardV2_ZRS", "Standard_GRS": "Standard_GRS", "Standard_GZRS": "Standard_GZRS", "Standard_LRS": "Standard_LRS", "Standard_RAGRS": "Standard_RAGRS", "Standard_RAGZRS": "Standard_RAGZRS", "Standard_ZRS": "Standard_ZRS"},
         )
         return cls._args_schema
 
@@ -164,7 +164,7 @@ class Start(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-01-01",
+                    "api-version", "2024-01-01",
                     required=True,
                 ),
             }
