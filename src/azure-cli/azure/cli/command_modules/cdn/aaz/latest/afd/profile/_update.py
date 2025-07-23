@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-04-15",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2025-04-15"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2025-06-01"],
         ]
     }
 
@@ -66,13 +66,6 @@ class Update(AAZCommand):
             help="Managed service identity (system assigned and/or user assigned identities).",
             nullable=True,
         )
-        _args_schema.location = AAZResourceLocationArg(
-            arg_group="Profile",
-            help="Resource location.",
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
-        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Profile",
@@ -84,7 +77,7 @@ class Update(AAZCommand):
         identity.type = AAZStrArg(
             options=["type"],
             help="Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).",
-            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned,UserAssigned": "SystemAssigned,UserAssigned", "UserAssigned": "UserAssigned"},
         )
         identity.user_assigned_identities = AAZDictArg(
             options=["user-assigned-identities"],
@@ -253,7 +246,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-15",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -352,7 +345,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-15",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -411,7 +404,6 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
-            _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -423,7 +415,7 @@ class Update(AAZCommand):
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
-                user_assigned_identities.set_elements(AAZObjectType, ".")
+                user_assigned_identities.set_elements(AAZObjectType, ".", typ_kwargs={"nullable": True})
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -533,7 +525,9 @@ class _UpdateHelper:
         )
 
         user_assigned_identities = _schema_profile_read.identity.user_assigned_identities
-        user_assigned_identities.Element = AAZObjectType()
+        user_assigned_identities.Element = AAZObjectType(
+            nullable=True,
+        )
 
         _element = _schema_profile_read.identity.user_assigned_identities.Element
         _element.client_id = AAZStrType(

@@ -42,6 +42,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_ARTIFACT_SOURCE_CACHE,
     CONST_NONE_UPGRADE_CHANNEL,
+    CONST_AVAILABILITY_SET,
+    CONST_VIRTUAL_MACHINES,
 )
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
@@ -2250,7 +2252,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     "for more details."
                 )
             if isBasicSKULb:
-                if outbound_type is not None:
+                if not read_from_mc and outbound_type is not None:  # outbound type was default to loadbalancer for BLB creation
                     raise InvalidArgumentValueError(
                         "{outbound_type} doesn't support basic load balancer sku".format(outbound_type=outbound_type)
                     )
@@ -5412,6 +5414,32 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return self.raw_param.get("upgrade_override_until")
 
+    def get_ai_toolchain_operator(self, enable_validation: bool = False) -> bool:
+        """Internal function to obtain the value of enable_ai_toolchain_operator.
+        When enabled, if both enable_ai_toolchain_operator and
+        disable_ai_toolchain_operator are specified, raise
+        a MutuallyExclusiveArgumentError.
+        :return: bool
+        """
+        enable_ai_toolchain_operator = self.raw_param.get("enable_ai_toolchain_operator")
+        # This parameter does not need dynamic completion.
+        if enable_validation:
+            if enable_ai_toolchain_operator and self.get_disable_ai_toolchain_operator():
+                raise MutuallyExclusiveArgumentError(
+                    "Cannot specify --enable-ai-toolchain-operator and "
+                    "--disable-ai-toolchain-operator at the same time. "
+                )
+
+        return enable_ai_toolchain_operator
+
+    def get_disable_ai_toolchain_operator(self) -> bool:
+        """Obtain the value of disable_ai_toolchain_operator.
+        :return: bool
+        """
+        # Note: No need to check for mutually exclusive parameter with enable-ai-toolchain-operator here
+        # because it's already checked in get_ai_toolchain_operator
+        return self.raw_param.get("disable_ai_toolchain_operator")
+
     def _get_enable_cost_analysis(self, enable_validation: bool = False) -> bool:
         """Internal function to obtain the value of enable_cost_analysis.
         When enabled, if both enable_cost_analysis and disable_cost_analysis are
@@ -5499,6 +5527,26 @@ class AKSManagedClusterContext(BaseAKSContext):
         # Note: No need to check for mutually exclusive parameter with enable-static-egress-gateway here
         # because it's already checked in get_enable_static_egress_gateway
         return self.raw_param.get("disable_static_egress_gateway")
+
+    def get_migrate_vmas_to_vms(self) -> bool:
+        """Obtain the value of migrate_vmas_to_vms.
+        :return: bool
+        """
+        return self.raw_param.get("migrate_vmas_to_vms")
+
+    def get_node_provisioning_mode(self) -> Union[str, None]:
+        """Obtain the value of node_provisioning_mode.
+
+        :return: string or None
+        """
+        return self.raw_param.get("node_provisioning_mode")
+
+    def get_node_provisioning_default_pools(self) -> Union[str, None]:
+        """Obtain the value of node_provisioning_default_pools.
+
+        :return: string or None
+        """
+        return self.raw_param.get("node_provisioning_default_pools")
 
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
@@ -5677,6 +5725,44 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 enabled=True,
                 interval_hours=interval_hours,
             )
+
+        return mc
+
+    def set_up_node_provisioning_mode(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        mode = self.context.get_node_provisioning_mode()
+        if mode is not None:
+            if mc.node_provisioning_profile is None:
+                mc.node_provisioning_profile = (
+                    self.models.ManagedClusterNodeProvisioningProfile()  # pylint: disable=no-member
+                )
+
+            # set mode
+            mc.node_provisioning_profile.mode = mode
+
+        return mc
+
+    def set_up_node_provisioning_default_pools(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        default_pools = self.context.get_node_provisioning_default_pools()
+        if default_pools is not None:
+            if mc.node_provisioning_profile is None:
+                mc.node_provisioning_profile = (
+                    self.models.ManagedClusterNodeProvisioningProfile()  # pylint: disable=no-member
+                )
+
+            # set default_node_pools
+            mc.node_provisioning_profile.default_node_pools = default_pools
+
+        return mc
+
+    def set_up_node_provisioning_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        mc = self.set_up_node_provisioning_mode(mc)
+        mc = self.set_up_node_provisioning_default_pools(mc)
 
         return mc
 
@@ -6764,6 +6850,18 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def set_up_ai_toolchain_operator(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        if self.context.get_ai_toolchain_operator(enable_validation=True):
+            if mc.ai_toolchain_operator_profile is None:
+                mc.ai_toolchain_operator_profile = self.models.ManagedClusterAIToolchainOperatorProfile()  # pylint: disable=no-member
+            # set enabled
+            mc.ai_toolchain_operator_profile.enabled = True
+
+        # Default is disabled so no need to worry about that here
+        return mc
+
     def set_up_cost_analysis(self, mc: ManagedCluster) -> ManagedCluster:
         self._ensure_mc(mc)
 
@@ -6919,10 +7017,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_metrics_profile(mc)
         # set up node resource group profile
         mc = self.set_up_node_resource_group_profile(mc)
+        # set up AI toolchain operator
+        mc = self.set_up_ai_toolchain_operator(mc)
         # set up bootstrap profile
         mc = self.set_up_bootstrap_profile(mc)
         # set up static egress gateway profile
         mc = self.set_up_static_egress_gateway(mc)
+        # set up node provisioning profile
+        mc = self.set_up_node_provisioning_profile(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -8701,6 +8803,23 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_ai_toolchain_operator(self, mc: ManagedCluster) -> ManagedCluster:
+        """Updates the aiToolchainOperatorProfile field of the managed cluster
+        :return: the ManagedCluster object
+        """
+
+        if self.context.get_ai_toolchain_operator(enable_validation=True):
+            if mc.ai_toolchain_operator_profile is None:
+                mc.ai_toolchain_operator_profile = self.models.ManagedClusterAIToolchainOperatorProfile()  # pylint: disable=no-member
+            mc.ai_toolchain_operator_profile.enabled = True
+
+        if self.context.get_disable_ai_toolchain_operator():
+            if mc.ai_toolchain_operator_profile is None:
+                mc.ai_toolchain_operator_profile = self.models.ManagedClusterAIToolchainOperatorProfile()  # pylint: disable=no-member
+            mc.ai_toolchain_operator_profile.enabled = False
+
+        return mc
+
     def update_cost_analysis(self, mc: ManagedCluster) -> ManagedCluster:
         self._ensure_mc(mc)
 
@@ -8779,6 +8898,76 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     self.models.ManagedClusterStaticEgressGatewayProfile()  # pylint: disable=no-member
                 )
             mc.network_profile.static_egress_gateway_profile.enabled = False
+        return mc
+
+    def update_vmas_to_vms(self, mc: ManagedCluster) -> ManagedCluster:
+        """Update the agent pool profile type from VMAS to VMS and LB sku to standard
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        if self.context.get_migrate_vmas_to_vms():
+            msg = (
+                "\nWARNING: This operation will be disruptive to your workload while underway. "
+                "Do you wish to continue?"
+            )
+            if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
+                raise DecoratorEarlyExitException()
+            # Ensure we have valid vmas AP
+            if len(mc.agent_pool_profiles) == 1 and mc.agent_pool_profiles[0].type == CONST_AVAILABILITY_SET:
+                mc.agent_pool_profiles[0].type = CONST_VIRTUAL_MACHINES
+            else:
+                raise ArgumentUsageError('This is not a valid VMAS cluster with {} agent pool profiles and {} agent pool type, we cannot proceed with the migration.'.format(len(mc.agent_pool_profiles), mc.agent_pool_profiles[0].type))
+
+            if mc.network_profile.load_balancer_sku == CONST_LOAD_BALANCER_SKU_BASIC:
+                mc.network_profile.load_balancer_sku = CONST_LOAD_BALANCER_SKU_STANDARD
+
+            # Set agent pool profile count and vm_size to None
+            mc.agent_pool_profiles[0].count = None
+            mc.agent_pool_profiles[0].vm_size = None
+
+        return mc
+
+    def update_node_provisioning_mode(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        mode = self.context.get_node_provisioning_mode()
+        if mode is not None:
+            if mc.node_provisioning_profile is None:
+                mc.node_provisioning_profile = (
+                    self.models.ManagedClusterNodeProvisioningProfile()  # pylint: disable=no-member
+                )
+
+            # set mode
+            mc.node_provisioning_profile.mode = mode
+
+        return mc
+
+    def update_node_provisioning_default_pools(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        default_pools = self.context.get_node_provisioning_default_pools()
+        if default_pools is not None:
+            if mc.node_provisioning_profile is None:
+                mc.node_provisioning_profile = (
+                    self.models.ManagedClusterNodeProvisioningProfile()  # pylint: disable=no-member
+                )
+
+            # set default_node_pools
+            mc.node_provisioning_profile.default_node_pools = default_pools
+
+        return mc
+
+    def update_node_provisioning_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Updates the nodeProvisioningProfile field of the managed cluster
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        mc = self.update_node_provisioning_mode(mc)
+        mc = self.update_node_provisioning_default_pools(mc)
+
         return mc
 
     def update_mc_profile_default(self) -> ManagedCluster:
@@ -8862,12 +9051,18 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_metrics_profile(mc)
         # update node resource group profile
         mc = self.update_node_resource_group_profile(mc)
+        # update AI toolchain operator
+        mc = self.update_ai_toolchain_operator(mc)
         # update bootstrap profile
         mc = self.update_bootstrap_profile(mc)
         # update static egress gateway
         mc = self.update_static_egress_gateway(mc)
         # update kubernetes version and orchestrator version
         mc = self.update_kubernetes_version_and_orchestrator_version(mc)
+        # update VMAS to VMS
+        mc = self.update_vmas_to_vms(mc)
+        # update node provisioning profile
+        mc = self.update_node_provisioning_profile(mc)
         return mc
 
     def update_kubernetes_version_and_orchestrator_version(self, mc: ManagedCluster) -> ManagedCluster:

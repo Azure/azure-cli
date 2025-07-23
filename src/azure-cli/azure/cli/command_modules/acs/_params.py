@@ -58,7 +58,11 @@ from azure.cli.command_modules.acs._consts import (
     CONST_APP_ROUTING_ANNOTATION_CONTROLLED_NGINX,
     CONST_APP_ROUTING_EXTERNAL_NGINX,
     CONST_APP_ROUTING_INTERNAL_NGINX,
-    CONST_APP_ROUTING_NONE_NGINX)
+    CONST_APP_ROUTING_NONE_NGINX,
+    CONST_NODE_PROVISIONING_MODE_MANUAL,
+    CONST_NODE_PROVISIONING_MODE_AUTO,
+    CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE,
+    CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
@@ -190,6 +194,16 @@ node_os_upgrade_channels = [
     CONST_NODE_OS_CHANNEL_NONE,
     CONST_NODE_OS_CHANNEL_UNMANAGED,
     CONST_NODE_OS_CHANNEL_SECURITY_PATCH,
+]
+
+node_provisioning_modes = [
+    CONST_NODE_PROVISIONING_MODE_MANUAL,
+    CONST_NODE_PROVISIONING_MODE_AUTO,
+]
+
+node_provisioning_default_pools = [
+    CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE,
+    CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO,
 ]
 
 dev_space_endpoint_types = ['Public', 'Private', 'None']
@@ -434,6 +448,7 @@ def load_arguments(self, _):
         c.argument('rotation_poll_interval')
         c.argument('enable_sgxquotehelper', action='store_true')
         c.argument('enable_app_routing', action="store_true")
+        c.argument('enable_ai_toolchain_operator', action='store_true')
         c.argument(
             "app_routing_default_nginx_controller",
             arg_type=get_enum_type(app_routing_nginx_configs),
@@ -445,6 +460,7 @@ def load_arguments(self, _):
         c.argument('nodepool_name', default='nodepool1',
                    help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+        c.argument('vm_sizes')
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus_create), validator=validate_os_sku)
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('vnet_subnet_id', validator=validate_vnet_subnet_id)
@@ -532,6 +548,28 @@ def load_arguments(self, _):
         c.argument('disable_acns_security', action='store_true')
         c.argument("if_match")
         c.argument("if_none_match")
+        # node provisioning
+        c.argument(
+            "node_provisioning_mode",
+            arg_type=get_enum_type(node_provisioning_modes),
+            help=(
+                'Set the node provisioning mode of the cluster. Valid values are "Auto" and "Manual". '
+                'For more information on "Auto" mode see aka.ms/aks/nap.'
+            )
+        )
+        c.argument(
+            "node_provisioning_default_pools",
+            arg_type=get_enum_type(node_provisioning_default_pools),
+            help=(
+                'The set of default Karpenter NodePools configured for node provisioning. '
+                'Valid values are "Auto" and "None". Auto: A standard set of Karpenter NodePools are provisioned. '
+                'None: No Karpenter NodePools are provisioned. '
+                'WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter '
+                'NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. '
+                'It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted '
+                'by that action.'
+            )
+        )
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -632,6 +670,8 @@ def load_arguments(self, _):
         # addons
         c.argument('enable_secret_rotation', action='store_true')
         c.argument('disable_secret_rotation', action='store_true', validator=validate_keyvault_secrets_provider_disable_and_enable_parameters)
+        c.argument('enable_ai_toolchain_operator', action='store_true')
+        c.argument('disable_ai_toolchain_operator', action='store_true')
         c.argument('rotation_poll_interval')
         c.argument('enable_static_egress_gateway', action='store_true')
         c.argument('disable_static_egress_gateway', action='store_true')
@@ -648,6 +688,8 @@ def load_arguments(self, _):
         c.argument('nodepool_labels', nargs='*', validator=validate_nodepool_labels,
                    help='space-separated labels: key[=value] [key[=value] ...]. See https://aka.ms/node-labels for syntax of labels.')
         c.argument('nodepool_taints', validator=validate_nodepool_taints)
+        c.argument('migrate_vmas_to_vms', action='store_true')
+
         # azure monitor profile
         c.argument('enable_azure_monitor_metrics', action='store_true')
         c.argument('azure_monitor_workspace_resource_id', validator=validate_azuremonitorworkspaceresourceid)
@@ -705,6 +747,30 @@ def load_arguments(self, _):
         c.argument('disable_cost_analysis', action='store_true')
         c.argument("if_match")
         c.argument("if_none_match")
+        # node provisioning
+        c.argument(
+            "node_provisioning_mode",
+            is_preview=True,
+            arg_type=get_enum_type(node_provisioning_modes),
+            help=(
+                'Set the node provisioning mode of the cluster. Valid values are "Auto" and "Manual". '
+                'For more information on "Auto" mode see aka.ms/aks/nap.'
+            )
+        )
+        c.argument(
+            "node_provisioning_default_pools",
+            is_preview=True,
+            arg_type=get_enum_type(node_provisioning_default_pools),
+            help=(
+                'The set of default Karpenter NodePools configured for node provisioning. '
+                'Valid values are "Auto" and "None". Auto: A standard set of Karpenter NodePools are provisioned. '
+                'None: No Karpenter NodePools are provisioned. '
+                'WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter '
+                'NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. '
+                'It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted '
+                'by that action.'
+            )
+        )
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
 
@@ -823,6 +889,8 @@ def load_arguments(self, _):
 
     with self.argument_context('aks nodepool add') as c:
         c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+        c.argument('vm_sizes')
+        c.argument('vm_set_type', validator=validate_vm_set_type)
         c.argument('os_type')
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus), validator=validate_os_sku)
         c.argument('snapshot_id', validator=validate_snapshot_id)
@@ -912,6 +980,16 @@ def load_arguments(self, _):
         c.argument("undrainable_node_behavior")
         c.argument('snapshot_id', validator=validate_snapshot_id)
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+
+    with self.argument_context("aks nodepool manual-scale add") as c:
+        c.argument("vm_sizes")
+
+    with self.argument_context("aks nodepool manual-scale update") as c:
+        c.argument("current_vm_sizes")
+        c.argument("vm_sizes")
+
+    with self.argument_context("aks nodepool manual-scale delete") as c:
+        c.argument("current_vm_sizes")
 
     with self.argument_context('aks command invoke') as c:
         c.argument('command_string', options_list=[
