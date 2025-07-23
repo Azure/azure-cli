@@ -674,6 +674,9 @@ def aks_create(
     # apiserver vnet integration
     enable_apiserver_vnet_integration=False,
     apiserver_subnet_id=None,
+    # node provisioning
+    node_provisioning_mode=None,
+    node_provisioning_default_pools=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -849,7 +852,10 @@ def aks_update(
     enable_apiserver_vnet_integration=False,
     apiserver_subnet_id=None,
     enable_private_cluster=False,
-    disable_private_cluster=False
+    disable_private_cluster=False,
+    # node provisioning
+    node_provisioning_mode=None,
+    node_provisioning_default_pools=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
