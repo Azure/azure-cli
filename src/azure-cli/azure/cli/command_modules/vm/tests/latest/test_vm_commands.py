@@ -1563,7 +1563,6 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1 --sku Standard_LRS')
         vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --attach-data-disks {disk_name1} '
                       '--admin-username rp_disk_test --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
-        # self.cmd('vm create -n {vm_name2} -g {rg} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --admin-username rp_disk_test --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
