@@ -22,6 +22,7 @@ from azure.appconfiguration import ConfigurationSetting, ResourceReadOnlyError
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import (
     AzureInternalError,
+    AzureResponseError,
     FileOperationError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
@@ -768,46 +769,47 @@ def __read_kv_from_kubernetes_configmap(
     Returns:
         list: List of KeyValue objects
     """
-    key_values = []
-    from azure.cli.command_modules.acs.custom import aks_runcommand
-    from azure.cli.command_modules.acs._client_factory import cf_managed_clusters
-    
-    # Get the AKS client from the factory
-    cmd.cli_ctx.data['subscription_id'] = aks_cluster["subscription"]
-    cmd.cli_ctx.data['safe_params'] = None
-    aks_client = cf_managed_clusters(cmd.cli_ctx)
+    try:
+        key_values = []
+        from azure.cli.command_modules.acs.custom import aks_runcommand
+        from azure.cli.command_modules.acs._client_factory import cf_managed_clusters
+        
+        # Get the AKS client from the factory
+        cmd.cli_ctx.data['subscription_id'] = aks_cluster["subscription"]
+        cmd.cli_ctx.data['safe_params'] = None
+        aks_client = cf_managed_clusters(cmd.cli_ctx)
 
-    # Command to get the ConfigMap and output it as JSON
-    command = f"kubectl get configmap {configmap_name} -n {namespace} -o json"
-    
-    # Execute the command on the cluster
-    result = aks_runcommand(cmd, aks_client, aks_cluster["resource_group"], aks_cluster["name"], command_string=command)
+        # Command to get the ConfigMap and output it as JSON
+        command = f"kubectl get configmap {configmap_name} -n {namespace} -o json"
+        
+        # Execute the command on the cluster
+        result = aks_runcommand(cmd, aks_client, aks_cluster["resource_group"], aks_cluster["name"], command_string=command)
 
-    if hasattr(result, 'logs') and result.logs: 
-        if not hasattr(result, 'exit_code') or result.exit_code != 0:
-            raise CLIError(
-                f"Failed to get ConfigMap {configmap_name} in namespace {namespace}. {result.logs.strip()}"
-            )
+        if hasattr(result, 'logs') and result.logs: 
+            if not hasattr(result, 'exit_code') or result.exit_code != 0:
+                raise AzureResponseError(f"{result.logs.strip()}")
 
-        try:
-            import json
-            configmap_data = json.loads(result.logs)
-            
-            # Extract the data section which contains the key-value pairs
-            kvs = __extract_kv_from_configmap_data(
-                configmap_data, content_type, prefix_to_add, format_, depth, separator)
-            
-            key_values.extend(kvs)
-        except json.JSONDecodeError:
-            raise ValidationError(
-                f"The result from ConfigMap {configmap_name} could not be parsed as valid JSON."
-            )
-    else:
+            try:
+                import json
+                configmap_data = json.loads(result.logs)
+                
+                # Extract the data section which contains the key-value pairs
+                kvs = __extract_kv_from_configmap_data(
+                    configmap_data, content_type, prefix_to_add, format_, depth, separator)
+                
+                key_values.extend(kvs)
+            except json.JSONDecodeError:
+                raise ValidationError(
+                    f"The result from ConfigMap {configmap_name} could not be parsed as valid JSON."
+                )
+        else:
+            raise AzureResponseError("Unable to get the ConfigMap.")
+
+        return key_values
+    except Exception as exception:
         raise CLIError(
-            f"Failed to get ConfigMap {configmap_name} in namespace {namespace}."
+            f"Failed to read key-values from ConfigMap '{configmap_name}' in namespace '{namespace}'.\n{str(exception)}"
         )
-
-    return key_values
 
 def __extract_kv_from_configmap_data(configmap_data, content_type, prefix_to_add="", format_=None, depth=None, separator=None):
     """
