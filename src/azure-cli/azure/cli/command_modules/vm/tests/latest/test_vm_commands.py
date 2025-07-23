@@ -1549,6 +1549,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
     def test_vm_disk_attach_from_copy_and_restore(self):
         self.kwargs.update({
             'vm_name': self.create_random_name('vm_', length=15),
+            'vm_name2': self.create_random_name('vm_', length=15),
             'collection_name': self.create_random_name('collection_', length=20),
             'point_name': self.create_random_name('point_', length=15),
             'disk_name1': self.create_random_name('disk_', length=15),
@@ -1556,6 +1557,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk_name3': self.create_random_name('disk_', length=15),
             'disk_name4': self.create_random_name('disk_', length=15),
             'disk_name5': self.create_random_name('disk_', length=15),
+            'new_disk': self.create_random_name('disk_', 15),
             'subnet': self.create_random_name('subnet', length=15),
             'vnet': self.create_random_name('vnet', length=15)
         })
@@ -1563,6 +1565,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1 --sku Standard_LRS')
         vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --attach-data-disks {disk_name1} '
                       '--admin-username rp_disk_test --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+        # self.cmd('vm create -n {vm_name2} -g {rg} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --admin-username rp_disk_test --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -1584,15 +1587,18 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'copy_resource1_id': copy_disk['id'],
             'copy_resource2_id': copy_snapshot['id']
         })
-        self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --source-resource {copy_resource1_id} {copy_resource2_id} '
+        self.cmd('vm disk attach -g {rg} --size 20 --sku Standard_LRS --vm-name {vm_name} --source-resource {copy_resource1_id} {copy_resource2_id} '
                  ' --source-disk-rp {disk_restore_point_id}')
         self.cmd('vm show -g {rg} -n {vm_name}', checks=[
             self.check('storageProfile.dataDisks[1].sourceResource.id', '{copy_resource1_id}'),
             self.check('storageProfile.dataDisks[1].createOption', 'Copy'),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
             self.check('storageProfile.dataDisks[2].sourceResource.id', '{copy_resource2_id}'),
             self.check('storageProfile.dataDisks[2].createOption', 'Copy'),
+            self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'Standard_LRS'),
             self.check('storageProfile.dataDisks[3].sourceResource.id', '{disk_restore_point_id}'),
-            self.check('storageProfile.dataDisks[3].createOption', 'Restore')
+            self.check('storageProfile.dataDisks[3].createOption', 'Restore'),
+            self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'Standard_LRS'),
         ])
 
 
