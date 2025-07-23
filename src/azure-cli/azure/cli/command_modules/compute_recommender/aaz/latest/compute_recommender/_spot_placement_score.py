@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "compute-recommender spot-placement-score",
+    is_preview=True,
 )
 class SpotPlacementScore(AAZCommand):
     """Generate placement scores for Spot VM skus.
@@ -66,11 +67,13 @@ class SpotPlacementScore(AAZCommand):
             options=["--desired-locations"],
             arg_group="SpotPlacementScoresInput",
             help="The desired regions",
+            required=True,
         )
         _args_schema.desired_sizes = AAZListArg(
             options=["--desired-sizes"],
             arg_group="SpotPlacementScoresInput",
             help="The desired resource SKUs.",
+            required=True,
         )
 
         desired_locations = cls._args_schema.desired_locations
@@ -174,8 +177,8 @@ class SpotPlacementScore(AAZCommand):
             )
             _builder.set_prop("availabilityZones", AAZBoolType, ".availability_zones")
             _builder.set_prop("desiredCount", AAZIntType, ".desired_count")
-            _builder.set_prop("desiredLocations", AAZListType, ".desired_locations")
-            _builder.set_prop("desiredSizes", AAZListType, ".desired_sizes")
+            _builder.set_prop("desiredLocations", AAZListType, ".desired_locations", typ_kwargs={"flags": {"required": True}})
+            _builder.set_prop("desiredSizes", AAZListType, ".desired_sizes", typ_kwargs={"flags": {"required": True}})
 
             desired_locations = _builder.get(".desiredLocations")
             if desired_locations is not None:
