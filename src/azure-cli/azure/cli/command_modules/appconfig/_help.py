@@ -437,7 +437,7 @@ helps['appconfig feature set'] = """
         - name: Set a feature flag with name "Beta" and custom key ".appconfig.featureflag/MyApp1:Beta".
           text:
             az appconfig feature set -n MyAppConfiguration --feature Beta --key .appconfig.featureflag/MyApp1:Beta
-        - name: Set a feature flag with name "Beta" and custom key ".appconfig.featureflag/MyApp1:Beta" with tags "tag1=value1" and "tag2=value2".
+        - name: Set a feature flag with name "Beta" and custom key ".appconfig.featureflag/MyApp1:Beta" with tags {"tag1": "value1", "tag2": "value2"}.
           text:
             az appconfig feature set -n MyAppConfiguration --feature Beta --key .appconfig.featureflag/MyApp1:Beta --tags tag1=value1 tag2=value2
     """
