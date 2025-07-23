@@ -57,7 +57,6 @@ def load_command_table(self, _):
     with self.command_group('migrate local') as g:
         g.custom_command('create-disk-mapping', 'create_local_disk_mapping')
         g.custom_command('create-local-replication', 'create_local_server_replication')
-        g.custom_command('create-replication-advanced', 'create_local_server_replication_advanced')
         g.custom_command('get-job', 'get_local_replication_job')
         g.custom_command('init-local', 'initialize_local_replication_infrastructure')
 

@@ -14,6 +14,10 @@ from azure.cli.command_modules.migrate._powershell_utils import get_powershell_e
 
 logger = get_logger(__name__)
 
+# --------------------------------------------------------------------------------------------
+# System Environment Commands
+# --------------------------------------------------------------------------------------------
+
 
 def check_migration_prerequisites(cmd):
     """Check if the system meets migration prerequisites."""
@@ -341,6 +345,9 @@ def _get_platform_recommendations(system, checks):
     
     return recommendations
 
+# --------------------------------------------------------------------------------------------
+# Authentication and Discovery Commands
+# --------------------------------------------------------------------------------------------
 
 def get_discovered_server(cmd, resource_group_name, project_name, subscription_id=None, server_id=None, source_machine_type='VMware', output_format='json', display_fields=None):
     """Azure CLI equivalent to Get-AzMigrateDiscoveredServer PowerShell cmdlet."""
@@ -458,7 +465,6 @@ def get_discovered_servers_table(cmd, resource_group_name, project_name, source_
     """
     ps_executor = get_powershell_executor()
     
-    # This script exactly matches your PowerShell commands
     powershell_script = f"""
     # Exact equivalent of the provided PowerShell commands
     $ProjectName = '{project_name}'
@@ -478,125 +484,13 @@ def get_discovered_servers_table(cmd, resource_group_name, project_name, source_
     
     try:
         # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(powershell_script)
-        return {
-            'message': 'PowerShell commands executed successfully. Output displayed above.',
-            'commands_executed': [
-                f'$DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType {source_machine_type}',
-                'Write-Output $DiscoveredServers | Format-Table DisplayName,Name,Type'
-            ],
-            'parameters': {
-                'ProjectName': project_name,
-                'ResourceGroupName': resource_group_name,
-                'SourceMachineType': source_machine_type
-            }
-        }
-        
+        ps_executor.execute_script_interactive(powershell_script)
     except Exception as e:
         raise CLIError(f'Failed to execute PowerShell commands: {str(e)}')
 
-
-def initialize_replication_infrastructure(cmd, resource_group_name, project_name, source_appliance_name, target_appliance_name, subscription_id=None):
-    """
-    Azure CLI equivalent to Initialize-AzMigrateLocalReplicationInfrastructure PowerShell cmdlet.
-    Initializes the replication infrastructure for Azure Migrate server migration.
-    """
-    ps_executor = get_powershell_executor()
-    
-    # Check Azure authentication first
-    auth_status = ps_executor.check_azure_authentication()
-    if not auth_status.get('IsAuthenticated', False):
-        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
-    
-    # PowerShell script that executes the real cmdlet
-    infrastructure_script = f"""
-    # Azure CLI equivalent functionality for Initialize-AzMigrateLocalReplicationInfrastructure
-    $ProjectName = '{project_name}'
-    $ResourceGroupName = '{resource_group_name}'
-    $SourceApplianceName = '{source_appliance_name}'
-    $TargetApplianceName = '{target_appliance_name}'
-    
-    try {{
-        # Execute the real PowerShell cmdlet
-        $InfrastructureResult = Initialize-AzMigrateLocalReplicationInfrastructure `
-            -ProjectName $ProjectName `
-            -ResourceGroupName $ResourceGroupName `
-            -SourceApplianceName $SourceApplianceName `
-            -TargetApplianceName $TargetApplianceName
-        
-        if ($InfrastructureResult) {{
-            $InfrastructureResult | Format-List
-            
-            # Return JSON for programmatic use
-            $result = @{{
-                'Status' = 'Success'
-                'ProjectName' = $ProjectName
-                'ResourceGroupName' = $ResourceGroupName
-                'SourceApplianceName' = $SourceApplianceName
-                'TargetApplianceName' = $TargetApplianceName
-                'InfrastructureDetails' = $InfrastructureResult
-                'Message' = 'Replication infrastructure initialized successfully'
-            }}
-            $result | ConvertTo-Json -Depth 5
-        }} else {{
-            Write-Host "Infrastructure initialization completed but no detailed results returned."
-            @{{
-                'Status' = 'Completed'
-                'ProjectName' = $ProjectName
-                'ResourceGroupName' = $ResourceGroupName
-                'SourceApplianceName' = $SourceApplianceName
-                'TargetApplianceName' = $TargetApplianceName
-                'Message' = 'Infrastructure initialization completed'
-            }} | ConvertTo-Json
-        }}
-        
-    }} catch {{
-        Write-Error "Failed to initialize replication infrastructure: $($_.Exception.Message)"
-        
-        $errorResult = @{{
-            'Status' = 'Failed'
-            'Error' = $_.Exception.Message
-            'ProjectName' = $ProjectName
-            'ResourceGroupName' = $ResourceGroupName
-            'SourceApplianceName' = $SourceApplianceName
-            'TargetApplianceName' = $TargetApplianceName
-            'TroubleshootingSteps' = @(
-                'Verify Azure authentication and permissions',
-                'Check Azure Migrate project accessibility',
-                'Confirm appliance names and configuration',
-                'Ensure Server Migration solution is enabled',
-                'Test network connectivity between appliances',
-                'Review Azure Migrate documentation for infrastructure requirements'
-            )
-        }}
-        $errorResult | ConvertTo-Json -Depth 3
-        throw
-    }}
-    """
-    
-    try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(infrastructure_script)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': f'Initialize-AzMigrateLocalReplicationInfrastructure -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceApplianceName {source_appliance_name} -TargetApplianceName {target_appliance_name}',
-            'parameters': {
-                'ProjectName': project_name,
-                'ResourceGroupName': resource_group_name,
-                'SourceApplianceName': source_appliance_name,
-                'TargetApplianceName': target_appliance_name
-            }
-        }
-        
-    except Exception as e:
-        raise CLIError(f'Failed to initialize replication infrastructure: {str(e)}')
-
-
-def initialize_replication_infrastructure(cmd, resource_group_name, project_name, 
-                                         target_region, subscription_id=None):
+def initialize_replication_infrastructure(cmd, resource_group_name, project_name, target_region):
     """Initialize Azure Migrate replication infrastructure."""
     
-    # Get PowerShell executor
     ps_executor = get_powershell_executor()
     
     # Check Azure authentication first
@@ -604,7 +498,6 @@ def initialize_replication_infrastructure(cmd, resource_group_name, project_name
     if not auth_status.get('IsAuthenticated', False):
         raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
     
-    # Build the PowerShell script
     init_script = f"""
     # Initialize Azure Migrate replication infrastructure
     try {{
@@ -626,27 +519,14 @@ def initialize_replication_infrastructure(cmd, resource_group_name, project_name
     """
     
     try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(init_script)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': f'Initialize-AzMigrateReplicationInfrastructure -ProjectName {project_name} -ResourceGroupName {resource_group_name} -TargetRegion {target_region}',
-            'parameters': {
-                'ProjectName': project_name,
-                'ResourceGroupName': resource_group_name,
-                'TargetRegion': target_region,
-                'Scenario': 'agentlessVMware'
-            }
-        }
-        
+        ps_executor.execute_script_interactive(init_script)    
     except Exception as e:
         raise CLIError(f'Failed to initialize replication infrastructure: {str(e)}')
 
 
-def check_replication_infrastructure(cmd, resource_group_name, project_name, subscription_id=None):
+def check_replication_infrastructure(cmd, resource_group_name, project_name):
     """Check the status of Azure Migrate replication infrastructure."""
     
-    # Get PowerShell executor
     ps_executor = get_powershell_executor()
     
     # Check Azure authentication first
@@ -654,38 +534,33 @@ def check_replication_infrastructure(cmd, resource_group_name, project_name, sub
     if not auth_status.get('IsAuthenticated', False):
         raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
     
-    # Build the PowerShell script
     check_script = f"""
     # Check Azure Migrate replication infrastructure status
     try {{
         # Check if the Azure Migrate project exists
         $Project = Get-AzResource -ResourceGroupName "{resource_group_name}" -ResourceType "Microsoft.Migrate/MigrateProjects" -Name "{project_name}" -ErrorAction SilentlyContinue
-        if ($Project) {{
-            Write-Host "Azure Migrate Project found: $($Project.Name)"
-        }} else {{
+        if (-Not $Project) {{
             Write-Host "Azure Migrate Project not found"
         }}
         
         # Check for replication infrastructure resources
         $Vaults = Get-AzResource -ResourceGroupName "{resource_group_name}" -ResourceType "Microsoft.RecoveryServices/vaults" -ErrorAction SilentlyContinue
-        if ($Vaults) {{
-            Write-Host "Recovery Services Vault(s) found: $($Vaults.Count)"
-            $Vaults | ForEach-Object {{ Write-Host "  - $($_.Name) (Location: $($_.Location))" }}
+        if (-Not $Vaults) {{
+            Write-Host "No Recovery Services Vault(s) found"
         }}
         
         # Check for Storage Accounts (used for replication)
         $StorageAccounts = Get-AzStorageAccount -ResourceGroupName "{resource_group_name}" -ErrorAction SilentlyContinue
-        if ($StorageAccounts) {{
-            Write-Host "Storage Account(s) found: $($StorageAccounts.Count)"
-            $StorageAccounts | ForEach-Object {{ Write-Host "  - $($_.StorageAccountName) (SKU: $($_.Sku.Name))" }}
+        if (-Not $StorageAccounts) {{
+            Write-Host "No Storage Account(s) found"
         }}
         
         # Try to get existing server replications to test if infrastructure is working
         try {{
             $Replications = Get-AzMigrateServerReplication -ProjectName "{project_name}" -ResourceGroupName "{resource_group_name}" -ErrorAction SilentlyContinue
             Write-Host "Replication infrastructure is accessible"
-            if ($Replications) {{
-                Write-Host "Existing replications found: $($Replications.Count)"
+            if (-Not $Replications) {{
+                Write-Host "No existing replications found"
             }}
         }} catch {{
             if ($_.Exception.Message -like "*not initialized*") {{
@@ -693,13 +568,6 @@ def check_replication_infrastructure(cmd, resource_group_name, project_name, sub
             }} else {{
                 Write-Host "Could not test replication infrastructure: $($_.Exception.Message)"
             }}
-        }}
-        
-        return @{{
-            Status = "Check completed"
-            ResourceGroupName = "{resource_group_name}"
-            ProjectName = "{project_name}"
-            Message = "Infrastructure status check completed"
         }}
         
     }} catch {{
@@ -722,7 +590,6 @@ def connect_azure_account(cmd, subscription_id=None, tenant_id=None, device_code
     """
     ps_executor = get_powershell_executor()
     
-    # Build PowerShell connection script with rich visual feedback
     connect_script = """
     try {
         # Connection parameters
@@ -795,17 +662,7 @@ def disconnect_azure_account(cmd):
     try {
         # Check if currently connected
         $currentContext = Get-AzContext -ErrorAction SilentlyContinue
-        if (-not $currentContext) {
-            Write-Host "Not currently connected to Azure"
-            
-            @{
-                "Status" = "NotConnected"
-                "IsAuthenticated" = $false
-                "Message" = "Not currently connected to Azure"
-            } | ConvertTo-Json -Depth 3
-            return
-        }
-        
+
         Write-Host "Disconnecting from Azure..."
         Write-Host "Current account: $($currentContext.Account.Id)"
         
@@ -820,36 +677,13 @@ def disconnect_azure_account(cmd):
         
         Write-Host "Successfully disconnected from Azure"
         
-        @{{
-            "Status" = "Success"
-            "IsAuthenticated" = $false
-            "PreviousAccountId" = $previousAccountId
-            "PreviousSubscriptionId" = $previousSubscriptionId
-            "PreviousSubscriptionName" = $previousSubscriptionName
-            "PreviousTenantId" = $previousTenantId
-            "Message" = "Successfully disconnected from Azure"
-        }} | ConvertTo-Json -Depth 3
-        
     } catch {
         Write-Error "Failed to disconnect from Azure: $($_.Exception.Message)"
-        
-        @{
-            "Status" = "Failed"
-            "Error" = $_.Exception.Message
-            "Message" = "Failed to disconnect from Azure"
-        } | ConvertTo-Json -Depth 3
-        throw
     }
     """
     
     try:
-        # Use interactive execution to show real-time disconnect progress with full visibility
         ps_executor.execute_script_interactive(disconnect_script)
-        return {
-            'message': 'Azure disconnection completed. See detailed results above.',
-            'command_executed': 'Disconnect-AzAccount',
-            'help': 'Use "az migrate auth login" to reconnect to Azure'
-        }
     except Exception as e:
         raise CLIError(f'Failed to disconnect from Azure: {str(e)}')
 
@@ -868,13 +702,6 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
         $currentContext = Get-AzContext -ErrorAction SilentlyContinue
         if (-not $currentContext) {{
             Write-Host "Not currently connected to Azure. Please connect first with: az migrate auth login"
-            
-            @{{
-                'Status' = 'NotConnected'
-                'Error' = 'Not authenticated to Azure'
-                'Message' = 'Please connect to Azure first'
-            }} | ConvertTo-Json -Depth 3
-            return
         }}
         
         # Set context parameters
@@ -900,38 +727,14 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
         
         if ($newContext) {
             Write-Host "Azure context updated successfully"
-            Write-Host "Account: $($newContext.Account.Id)"
-            Write-Host "Subscription: $($newContext.Subscription.Name) ($($newContext.Subscription.Id))"
-            Write-Host "Tenant: $($newContext.Tenant.Id)"
-            
-            @{{
-                'Status' = 'Success'
-                'AccountId' = $newContext.Account.Id
-                'SubscriptionId' = $newContext.Subscription.Id
-                'SubscriptionName' = $newContext.Subscription.Name
-                'TenantId' = $newContext.Tenant.Id
-                'Message' = 'Azure context updated successfully'
-            }} | ConvertTo-Json -Depth 3
         }}
     } catch {
         Write-Error "Failed to set Azure context: $($_.Exception.Message)"
-        
-        @{{
-            'Status' = 'Failed'
-            'Error' = $_.Exception.Message
-            'Message' = 'Failed to set Azure context'
-        }} | ConvertTo-Json -Depth 3
-        throw
     }
     """
     
     try:
         ps_executor.execute_script_interactive(set_context_script)
-        return {
-            'message': 'Azure context change completed. See detailed results above.',
-            'command_executed': 'Set-AzContext with specified parameters',
-            'help': 'Context details and available subscriptions are displayed above'
-        }
     except Exception as e:
         raise CLIError(f'Failed to set Azure context: {str(e)}')
 
@@ -1043,13 +846,6 @@ def create_server_replication(cmd, resource_group_name, project_name, target_vm_
         Write-Host "Job ID: $($ReplicationJob.JobId)"
         Write-Host "Target VM Name: {target_vm_name}"
         
-        return @{{
-            JobId = $ReplicationJob.JobId
-            TargetVMName = "{target_vm_name}"
-            Status = "Started"
-            ServerName = $SelectedServer.DisplayName
-        }}
-        
     }} catch {{
         Write-Error "Error creating replication: $($_.Exception.Message)"
         throw
@@ -1057,34 +853,16 @@ def create_server_replication(cmd, resource_group_name, project_name, target_vm_
     """
     
     try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(replication_script)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': f'New-AzMigrateServerReplication for target VM: {target_vm_name}',
-            'parameters': {
-                'ProjectName': project_name,
-                'ResourceGroupName': resource_group_name,
-                'TargetVMName': target_vm_name,
-                'TargetResourceGroup': target_resource_group,
-                'TargetNetwork': target_network,
-                'ServerName': server_name,
-                'ServerIndex': server_index
-            }
-        }
-        
+        ps_executor.execute_script_interactive(replication_script)       
     except Exception as e:
         raise CLIError(f'Failed to create server replication: {str(e)}')
 
 
-def get_discovered_servers_by_display_name(cmd, resource_group_name, project_name, display_name, 
-                                          source_machine_type='VMware', subscription_id=None):
+def get_discovered_servers_by_display_name(cmd, resource_group_name, project_name, display_name, source_machine_type='VMware'):
     """Find discovered servers by display name."""
     
-    # Get PowerShell executor
     ps_executor = get_powershell_executor()
     
-    # Build the PowerShell script
     search_script = f"""
     # Find servers by display name
     try {{
@@ -1107,19 +885,7 @@ def get_discovered_servers_by_display_name(cmd, resource_group_name, project_nam
     """
     
     try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(search_script)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': f'Get-AzMigrateDiscoveredServer filtered by DisplayName: {display_name}',
-            'parameters': {
-                'ProjectName': project_name,
-                'ResourceGroupName': resource_group_name,
-                'DisplayName': display_name,
-                'SourceMachineType': source_machine_type
-            }
-        }
-        
+        ps_executor.execute_script_interactive(search_script)
     except Exception as e:
         raise CLIError(f'Failed to search for servers: {str(e)}')
 
@@ -1128,10 +894,8 @@ def get_replication_job_status(cmd, resource_group_name, project_name, vm_name=N
                               job_id=None, subscription_id=None):
     """Get replication job status for a VM or job."""
     
-    # Get PowerShell executor
     ps_executor = get_powershell_executor()
     
-    # Build the PowerShell script
     status_script = f"""
     # Get replication status
     try {{
@@ -1161,32 +925,16 @@ def get_replication_job_status(cmd, resource_group_name, project_name, vm_name=N
     """
     
     try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(status_script)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': f'Get-AzMigrateServerReplication/Get-AzMigrateJob for VM/Job: {vm_name or job_id}',
-            'parameters': {
-                'ProjectName': project_name,
-                'ResourceGroupName': resource_group_name,
-                'VMName': vm_name,
-                'JobId': job_id
-            }
-        }
-        
+        ps_executor.execute_script_interactive(status_script)
     except Exception as e:
         raise CLIError(f'Failed to get replication status: {str(e)}')
 
 
 def set_replication_target_properties(cmd, resource_group_name, project_name, vm_name, 
-                                     target_vm_size=None, target_disk_type=None, 
-                                     target_network=None, subscription_id=None):
+                                     target_vm_size=None, target_disk_type=None, target_network=None):
     """Update replication target properties."""
     
-    # Get PowerShell executor
-    ps_executor = get_powershell_executor()
-    
-    # Build the PowerShell script
+    ps_executor = get_powershell_executor()    
     update_script = f"""
     # Update replication properties
     try {{
@@ -1229,34 +977,20 @@ def set_replication_target_properties(cmd, resource_group_name, project_name, vm
     """
     
     try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(update_script)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': f'Set-AzMigrateServerReplication for VM: {vm_name}',
-            'parameters': {
-                'ProjectName': project_name,
-                'ResourceGroupName': resource_group_name,
-                'VMName': vm_name,
-                'TargetVMSize': target_vm_size,
-                'TargetDiskType': target_disk_type,
-                'TargetNetwork': target_network
-            }
-        }
-        
+        ps_executor.execute_script_interactive(update_script)     
     except Exception as e:
         raise CLIError(f'Failed to update replication properties: {str(e)}')
 
 
 # --------------------------------------------------------------------------------------------
-# Azure Stack HCI Local Migration Commands
+# Azure Local Migration Commands
 # --------------------------------------------------------------------------------------------
 
 def create_local_disk_mapping(cmd, disk_id, is_os_disk=True, is_dynamic=False, 
                              size_gb=64, format_type='VHD', physical_sector_size=512):
     """
     Azure CLI equivalent to New-AzMigrateLocalDiskMappingObject PowerShell cmdlet.
-    Creates a disk mapping object for Azure Stack HCI local migration.
+    Creates a disk mapping object for Azure Local migration.
     """
     ps_executor = get_powershell_executor()
     
@@ -1280,29 +1014,8 @@ def create_local_disk_mapping(cmd, disk_id, is_os_disk=True, is_dynamic=False,
         if ($DiskMapping) {{
             Write-Host "Disk mapping object created successfully"
             $DiskMapping | Format-List
-            
-            # Return JSON for programmatic use
-            $result = @{{
-                'DiskMapping' = $DiskMapping
-                'DiskID' = "{disk_id}"
-                'IsOSDisk' = {str(is_os_disk).lower()}
-                'IsDynamic' = {str(is_dynamic).lower()}
-                'SizeGB' = {size_gb}
-                'Format' = "{format_type}"
-                'PhysicalSectorSize' = {physical_sector_size}
-                'Message' = 'Disk mapping object created successfully'
-            }}
-            $result | ConvertTo-Json -Depth 3
-            
         }} else {{
             Write-Host "Failed to create disk mapping object"
-            
-            @{{
-                'DiskMapping' = $null
-                'Created' = $false
-                'DiskID' = "{disk_id}"
-                'Message' = 'Failed to create disk mapping object'
-            }} | ConvertTo-Json
         }}
         
     }} catch {{
@@ -1319,21 +1032,7 @@ def create_local_disk_mapping(cmd, disk_id, is_os_disk=True, is_dynamic=False,
     """
     
     try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(disk_mapping_script)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': f'New-AzMigrateLocalDiskMappingObject for disk: {disk_id}',
-            'parameters': {
-                'DiskID': disk_id,
-                'IsOSDisk': is_os_disk,
-                'IsDynamic': is_dynamic,
-                'SizeGB': size_gb,
-                'Format': format_type,
-                'PhysicalSectorSize': physical_sector_size
-            }
-        }
-        
+        ps_executor.execute_script_interactive(disk_mapping_script)   
     except Exception as e:
         raise CLIError(f'Failed to create disk mapping object: {str(e)}')
 
@@ -1341,7 +1040,7 @@ def create_local_disk_mapping(cmd, disk_id, is_os_disk=True, is_dynamic=False,
 def create_local_server_replication(cmd, resource_group_name, project_name, server_index, 
                                    target_vm_name, target_storage_path_id, target_virtual_switch_id, 
                                    target_resource_group_id, disk_size_gb=64, disk_format='VHD', 
-                                   is_dynamic=False, physical_sector_size=512, subscription_id=None):
+                                   is_dynamic=False, physical_sector_size=512):
     """
     Azure CLI equivalent to New-AzMigrateLocalServerReplication PowerShell cmdlet.
     Creates replication for Azure Stack HCI local migration.
@@ -1349,7 +1048,6 @@ def create_local_server_replication(cmd, resource_group_name, project_name, serv
     ps_executor = get_powershell_executor()
     
     local_replication_script = f"""
-    # Azure CLI equivalent functionality for New-AzMigrateLocalServerReplication
     try {{
         $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType VMware
         
@@ -1400,14 +1098,6 @@ def create_local_server_replication(cmd, resource_group_name, project_name, serv
         Write-Host "Job ID: $($ReplicationJob.JobId)"
         Write-Host "Target VM: {target_vm_name}"
         Write-Host "Source: $($DiscoveredServer.DisplayName)"
-        
-        return @{{
-            'JobId' = $ReplicationJob.JobId
-            'TargetVMName' = "{target_vm_name}"
-            'SourceServerName' = $DiscoveredServer.DisplayName
-            'Status' = 'Started'
-        }}
-        
     }} catch {{
         Write-Error "Failed to create local server replication: $($_.Exception.Message)"
         throw
@@ -1415,155 +1105,9 @@ def create_local_server_replication(cmd, resource_group_name, project_name, serv
     """
     
     try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(local_replication_script)
-        return {
-            'message': 'PowerShell command executed successfully. Output displayed above.',
-            'command_executed': f'New-AzMigrateLocalServerReplication for target VM: {target_vm_name}',
-            'parameters': {
-                'ProjectName': project_name,
-                'ResourceGroupName': resource_group_name,
-                'ServerIndex': server_index,
-                'TargetVMName': target_vm_name,
-                'TargetStoragePathId': target_storage_path_id,
-                'TargetVirtualSwitchId': target_virtual_switch_id,
-                'TargetResourceGroupId': target_resource_group_id,
-                'DiskSizeGB': disk_size_gb,
-                'DiskFormat': disk_format,
-                'IsDynamic': is_dynamic,
-                'PhysicalSectorSize': physical_sector_size
-            }
-        }
-        
+        ps_executor.execute_script_interactive(local_replication_script)
     except Exception as e:
         raise CLIError(f'Failed to create local server replication: {str(e)}')
-
-
-def create_local_server_replication_advanced(cmd, resource_group_name, project_name, 
-                                           server_name, target_vm_name, target_storage_path_id, 
-                                           target_virtual_switch_id, target_resource_group_id,
-                                           disk_mappings=None, subscription_id=None):
-    """
-    Azure CLI equivalent with advanced disk mapping support.
-    Creates replication for Azure Stack HCI local migration with custom disk mappings.
-    """
-    ps_executor = get_powershell_executor()
-    
-    # Check Azure authentication first
-    auth_status = ps_executor.check_azure_authentication()
-    if not auth_status.get('IsAuthenticated', False):
-        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
-    
-    # Parse disk mappings if provided
-    disk_mappings_param = disk_mappings or "[]"
-    
-    advanced_replication_script = f"""
-    # Azure CLI equivalent functionality for New-AzMigrateLocalServerReplication with advanced options
-    try {{
-        # Get discovered servers
-        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType VMware
-        $DiscoveredServer = $DiscoveredServers | Where-Object {{ $_.DisplayName -eq "{server_name}" }}
-        
-        if (-not $DiscoveredServer) {{
-            throw "Server with name '{server_name}' not found in project {project_name}"
-        }}
-        
-        Write-Host "Found server: $($DiscoveredServer.DisplayName)"
-        Write-Host "Server ID: $($DiscoveredServer.Id)"
-        
-        # Process disk mappings
-        $DiskMappingsArray = @()
-        $CustomMappings = '{disk_mappings_param}' | ConvertFrom-Json -ErrorAction SilentlyContinue
-        
-        if ($CustomMappings -and $CustomMappings.Count -gt 0) {{
-            Write-Host "Creating custom disk mappings..."
-            foreach ($mapping in $CustomMappings) {{
-                $diskMapping = New-AzMigrateLocalDiskMappingObject `
-                    -DiskID $mapping.DiskID `
-                    -IsOSDisk $mapping.IsOSDisk `
-                    -IsDynamic $mapping.IsDynamic `
-                    -Size $mapping.Size `
-                    -Format $mapping.Format `
-                    -PhysicalSectorSize $mapping.PhysicalSectorSize
-                $DiskMappingsArray += $diskMapping
-                Write-Host "Created mapping for disk: $($mapping.DiskID)"
-            }}
-        }} else {{
-            Write-Host "Creating default disk mapping for OS disk..."
-            if ($DiscoveredServer.Disk -and $DiscoveredServer.Disk.Count -gt 0) {{
-                $OSDisk = $DiscoveredServer.Disk | Where-Object {{ $_.IsOSDisk -eq $true }}
-                if (-not $OSDisk) {{
-                    $OSDisk = $DiscoveredServer.Disk[0]
-                }}
-                $OSDiskID = $OSDisk.Uuid
-                
-                $diskMapping = New-AzMigrateLocalDiskMappingObject `
-                    -DiskID $OSDiskID `
-                    -IsOSDisk $true `
-                    -IsDynamic $false `
-                    -Size 64 `
-                    -Format 'VHD' `
-                    -PhysicalSectorSize 512
-                $DiskMappingsArray += $diskMapping
-                Write-Host "Created default mapping for OS disk: $OSDiskID"
-            }} else {{
-                throw "No disk information found for server {server_name}"
-            }}
-        }}
-        
-        # Create local server replication
-        Write-Host "Starting local server replication..."
-        $ReplicationJob = New-AzMigrateLocalServerReplication `
-            -MachineId $DiscoveredServer.Id `
-            -OSDiskID $DiskMappingsArray[0].DiskID `
-            -TargetStoragePathId "{target_storage_path_id}" `
-            -TargetVirtualSwitchId "{target_virtual_switch_id}" `
-            -TargetResourceGroupId "{target_resource_group_id}" `
-            -TargetVMName "{target_vm_name}"
-        
-        Write-Host "Advanced local server replication created successfully"
-        if ($ReplicationJob) {{
-            Write-Host "Job ID: $($ReplicationJob.JobId)"
-            Write-Host "Target VM: {target_vm_name}"
-            Write-Host "Source: $($DiscoveredServer.DisplayName)"
-            Write-Host "Disk Mappings: $($DiskMappingsArray.Count)"
-        }}
-        
-        return @{{
-            'JobId' = $ReplicationJob.JobId
-            'TargetVMName' = "{target_vm_name}"
-            'SourceServerName' = $DiscoveredServer.DisplayName
-            'DiskMappings' = $DiskMappingsArray.Count
-            'Status' = 'Started'
-        }}
-        
-    }} catch {{
-        Write-Error "Failed to create advanced local server replication: $($_.Exception.Message)"
-        throw
-    }}
-    """
-    
-    try:
-        # Use interactive execution to show real-time PowerShell output
-        result = ps_executor.execute_script_interactive(advanced_replication_script)
-        return {
-            'message': 'Advanced Azure Stack HCI local replication created successfully. See detailed results above.',
-            'command_executed': f'New-AzMigrateLocalServerReplication (advanced) for target VM: {target_vm_name}',
-            'parameters': {
-                'ResourceGroupName': resource_group_name,
-                'ProjectName': project_name,
-                'ServerName': server_name,
-                'TargetVMName': target_vm_name,
-                'TargetStoragePathId': target_storage_path_id,
-                'TargetVirtualSwitchId': target_virtual_switch_id,
-                'TargetResourceGroupId': target_resource_group_id,
-                'CustomDiskMappings': disk_mappings_param != "[]"
-            }
-        }
-        
-    except Exception as e:
-        raise CLIError(f'Failed to create advanced local server replication: {str(e)}')
-
 
 def get_local_replication_job(cmd, resource_group_name, project_name, job_id=None, input_object=None, subscription_id=None):
     """
@@ -1659,15 +1203,6 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
                 }}
                 Write-Host "Display Name: $($Job.Property.DisplayName)"
             }}
-            
-            return @{{
-                'Id' = $Job.Id
-                'State' = $Job.Property.State
-                'DisplayName' = $Job.Property.DisplayName
-                'StartTime' = $Job.Property.StartTime
-                'EndTime' = $Job.Property.EndTime
-                'ActivityId' = $Job.Property.ActivityId
-            }}
         }} else {{
             throw "Job not found with ID: {job_id}"
         }}
@@ -1679,68 +1214,10 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
     """
     
     try:
-        result = ps_executor.execute_script_interactive(get_job_script)
-        return {
-            'message': 'Local replication job details retrieved successfully. See detailed results above.',
-            'command_executed': f'Get-AzMigrateLocalJob',
-            'parameters': {
-                'JobId': job_id,
-                'InputObject': input_object is not None
-            }
-        }
+        ps_executor.execute_script_interactive(get_job_script)
         
     except Exception as e:
         raise CLIError(f'Failed to get local replication job: {str(e)}')
-
-
-def initialize_local_replication_infrastructure(cmd, resource_group_name, project_name, 
-                                               source_appliance_name, target_appliance_name, 
-                                               subscription_id=None):
-    """
-    Azure CLI equivalent to Initialize-AzMigrateLocalReplicationInfrastructure.
-    Initializes the local replication infrastructure for Azure Stack HCI migrations.
-    """
-    ps_executor = get_powershell_executor()
-    
-    initialize_script = f"""
-    # Azure CLI equivalent functionality for Initialize-AzMigrateLocalReplicationInfrastructure
-    try {{
-        # Initialize the local replication infrastructure
-        $Result = Initialize-AzMigrateLocalReplicationInfrastructure `
-            -ProjectName "{project_name}" `
-            -ResourceGroupName "{resource_group_name}" `
-            -SourceApplianceName "{source_appliance_name}" `
-            -TargetApplianceName "{target_appliance_name}"
-        
-        Write-Host "Local replication infrastructure initialized successfully"
-        if ($Result) {{
-            $Result | Format-List
-        }}
-        
-        return $Result
-        
-    }} catch {{
-        Write-Error "Failed to initialize local replication infrastructure: $($_.Exception.Message)"
-        throw
-    }}
-    """
-    
-    try:
-        ps_executor.execute_script_interactive(initialize_script)
-        return {
-            'message': 'Local replication infrastructure initialized successfully. See detailed results above.',
-            'command_executed': f'Initialize-AzMigrateLocalReplicationInfrastructure',
-            'parameters': {
-                'ResourceGroupName': resource_group_name,
-                'ProjectName': project_name,
-                'SourceApplianceName': source_appliance_name,
-                'TargetApplianceName': target_appliance_name
-            }
-        }
-        
-    except Exception as e:
-        raise CLIError(f'Failed to initialize local replication infrastructure: {str(e)}')
-
 
 def list_resource_groups(cmd, subscription_id=None):
     """
@@ -2019,8 +1496,7 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
 
 
 def initialize_local_replication_infrastructure(cmd, resource_group_name, project_name, 
-                                               source_appliance_name, target_appliance_name, 
-                                               subscription_id=None):
+                                               source_appliance_name, target_appliance_name):
     """
     Azure CLI equivalent to Initialize-AzMigrateLocalReplicationInfrastructure.
     Initializes the local replication infrastructure for Azure Stack HCI migrations.
@@ -2048,17 +1524,6 @@ def initialize_local_replication_infrastructure(cmd, resource_group_name, projec
     
     try:
         ps_executor.execute_script_interactive(initialize_script)
-        return {
-            'message': 'Local replication infrastructure initialized successfully. See detailed results above.',
-            'command_executed': f'Initialize-AzMigrateLocalReplicationInfrastructure',
-            'parameters': {
-                'ResourceGroupName': resource_group_name,
-                'ProjectName': project_name,
-                'SourceApplianceName': source_appliance_name,
-                'TargetApplianceName': target_appliance_name
-            }
-        }
-        
     except Exception as e:
         raise CLIError(f'Failed to initialize local replication infrastructure: {str(e)}')
 
