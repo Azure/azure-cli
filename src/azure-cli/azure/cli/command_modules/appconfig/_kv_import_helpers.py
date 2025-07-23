@@ -807,7 +807,7 @@ def __read_kv_from_kubernetes_configmap(
 
         return key_values
     except Exception as exception:
-        raise CLIError(
+        raise AzureInternalError(
             f"Failed to read key-values from ConfigMap '{configmap_name}' in namespace '{namespace}'.\n{str(exception)}"
         )
 

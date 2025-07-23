@@ -14,7 +14,7 @@ from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenarioTest)
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import AzureInternalError, MutuallyExclusiveArgumentError
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -1329,5 +1329,5 @@ class AppConfigKubernetesConfigMapImportScenarioTest(ScenarioTest):
         })
         
         # This should fail gracefully
-        with self.assertRaises(CLIError):
+        with self.assertRaises(AzureInternalError):
             self.cmd('appconfig kv import -n {config_store_name} -s aks --aks-cluster {aks_cluster_name} --configmap-name {non_existent_configmap} --configmap-namespace {namespace} --label {error_label} -y')

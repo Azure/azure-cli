@@ -160,7 +160,7 @@ def validate_aks_cluster_name_or_id(cmd, namespace):
             elif namespace.connection_string:
                 config_store_name = get_store_name_from_connection_string(namespace.connection_string)
             else:
-                raise CLIError("Please provide App Configuration name or connection string for fetching the AKS cluster details. Alternatively, you can provide a valid ARM ID for the AKS cluster.")
+                raise ArgumentUsageError("Please provide App Configuration name or connection string for fetching the AKS cluster details. Alternatively, you can provide a valid ARM ID for the AKS cluster.")
 
             resource_group, _ = resolve_store_metadata(cmd, config_store_name)
             namespace.aks_cluster = {
