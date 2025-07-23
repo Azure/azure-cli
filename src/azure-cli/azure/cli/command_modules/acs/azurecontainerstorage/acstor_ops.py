@@ -8,6 +8,9 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_ACSTOR_K8S_EXTENSION_NAME,
+    CONST_ACSTOR_V2_K8S_EXTENSION_NAME,
+    CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
+    CONST_ACSTOR_V2_EXT_INSTALLATION_NAMESPACE,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
     CONST_DISK_TYPE_PV_WITH_ANNOTATION,
     CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
@@ -677,3 +680,92 @@ def perform_disable_azure_container_storage(  # pylint: disable=too-many-stateme
 
         if not disable_op_failure:
             logger.warning("Azure Container Storage storagepool type %s has been disabled.", storage_pool_type)
+
+
+def perform_enable_azure_container_storage_v2(
+    cmd,
+    resource_group,
+    cluster_name,
+):
+    client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
+    client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
+
+    k8s_extension_custom_mod = get_k8s_extension_module(CONST_K8S_EXTENSION_CUSTOM_MOD_NAME)
+    config_settings = []
+    delete_extension = False
+
+    try:
+        result = k8s_extension_custom_mod.create_k8s_extension(
+            cmd,
+            client,
+            resource_group,
+            cluster_name,
+            CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
+            "managedClusters",
+            CONST_ACSTOR_V2_K8S_EXTENSION_NAME,
+            auto_upgrade_minor_version=True,
+            release_train="stable",
+            scope="cluster",
+            release_namespace=CONST_ACSTOR_V2_EXT_INSTALLATION_NAMESPACE,
+            configuration_settings=config_settings,
+        )
+        op_text = "Azure Container Storage v2 successfully installed"
+        long_op_result = LongRunningOperation(cmd.cli_ctx)(result)
+        if long_op_result.provisioning_state == "Succeeded":
+            logger.warning(op_text)
+    except Exception as ex:     # pylint: disable=broad-except
+        logger.error("Azure Container Storage v2 failed to install.\nError: %s", ex)
+        delete_extension = True
+
+    if delete_extension:
+        logger.warning("Cleaning up the cluster by disabling Azure Container Storage v2...")
+        try:
+            delete_op_result = k8s_extension_custom_mod.delete_k8s_extension(
+                cmd,
+                client,
+                resource_group,
+                cluster_name,
+                CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
+                "managedClusters",
+                yes=True,
+            )
+
+            LongRunningOperation(cmd.cli_ctx)(delete_op_result)
+            logger.warning("Azure Container Storage v2 has been disabled.")
+            logger.warning(
+                "Please retry enabling Azure Container Storage v2 by running "
+                "`az aks update` along with `--enable-azure-container-storage-v2`"
+            )
+        except Exception as delete_ex:
+            raise UnknownError(
+                "Failed to disable Azure Container Storage v2 with error: %s" % delete_ex
+            ) from delete_ex
+
+
+def perform_disable_azure_container_storage_v2(
+    cmd,
+    resource_group,
+    cluster_name,
+):
+    client_factory = get_k8s_extension_module(CONST_K8S_EXTENSION_CLIENT_FACTORY_MOD_NAME)
+    client = client_factory.cf_k8s_extension_operation(cmd.cli_ctx)
+    k8s_extension_custom_mod = get_k8s_extension_module(CONST_K8S_EXTENSION_CUSTOM_MOD_NAME)
+
+    try:
+        delete_op_result = k8s_extension_custom_mod.delete_k8s_extension(
+            cmd,
+            client,
+            resource_group,
+            cluster_name,
+            CONST_ACSTOR_V2_EXT_INSTALLATION_NAME,
+            "managedClusters",
+            yes=True,
+            no_wait=False,
+        )
+
+        LongRunningOperation(cmd.cli_ctx)(delete_op_result)
+        logger.warning("Azure Container Storage v2 has been disabled.")
+    except Exception as delete_ex:
+        raise UnknownError(
+            "Failed to disable Azure Container Storage v2 with error: %s" % delete_ex
+        ) from delete_ex

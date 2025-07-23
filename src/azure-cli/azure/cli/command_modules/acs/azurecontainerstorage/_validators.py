@@ -182,6 +182,8 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
     nodepool_list,
     agentpool_details,
     is_extension_installed,
+    is_container_storage_v2_extension_installed,
+    v2_extension_version,
     is_azureDisk_enabled,
     is_elasticSan_enabled,
     is_ephemeralDisk_localssd_enabled,
@@ -191,6 +193,16 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
     existing_ephemeral_disk_volume_type,
     existing_ephemeral_disk_nvme_perf_tier,
 ):
+
+    if is_container_storage_v2_extension_installed:
+        raise InvalidArgumentValueError(
+            f'Failed to enable Azure Container Storage as Azure Container Storage v2 version {v2_extension_version} '
+            'is already installed on the cluster. Try enabling Azure Container Storage in another cluster. '
+            'You can also enable Azure Container Storage by first disabling the existing installation of '
+            'Azure Container Storage v2 using --disable-azure-container-storage-v2. '
+            'Note that disabling v2 can impact existing workloads that depend on Azure Container Storage v2.'
+        )
+
     if storage_pool_name is not None:
         pattern = r'[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
         is_pool_name_valid = re.fullmatch(pattern, storage_pool_name)
@@ -427,6 +439,63 @@ def _validate_storage_pool_size(storage_pool_size, storage_pool_type):
                 'Storage pools using Ephemeral disk use all capacity available on the local device. '
                 ' --storage-pool-size will be ignored.'
             )
+
+
+def validate_enable_azure_container_storage_v2_params(
+    is_v2_extension_installed,
+    is_v1_extension_installed,
+    v1_extension_version,
+    storage_pool_name,
+    storage_pool_sku,
+    storage_pool_option,
+    storage_pool_size
+):
+    if is_v1_extension_installed:
+        raise InvalidArgumentValueError(
+            f'Failed to enable Azure Container Storage v2 as Azure Container Storage version {v1_extension_version} '
+            'is already installed on the cluster. Try enabling Azure Container Storage v2 in another cluster. '
+            'You can also enable Azure Container Storage v2 by first disabling the existing installation of '
+            'Azure Container Storage using --disable-azure-container-storage. '
+            'Note that disabling can impact existing workloads that depend on Azure Container Storage'
+        )
+
+    if is_v2_extension_installed:
+        raise InvalidArgumentValueError(
+            'Cannot set --enable-azure-container-storage-v2 when'
+            ' Azure Container Storage v2 is already enabled.'
+        )
+
+    if storage_pool_name is not None:
+        raise InvalidArgumentValueError(
+            'Azure Container Storage v2 does not'
+            ' require or support a --storage-pool-name value. '
+        )
+
+    if storage_pool_sku is not None:
+        raise InvalidArgumentValueError(
+            'Azure Container Storage v2 does not'
+            ' require or support a --storage-pool-sku value. '
+        )
+
+    if storage_pool_option is not None:
+        raise InvalidArgumentValueError(
+            'Azure Container Storage v2 does not'
+            ' require or support a --storage-pool-option value. '
+        )
+
+    if storage_pool_size is not None:
+        raise InvalidArgumentValueError(
+            'Azure Container Storage v2 does not'
+            ' require or support a --storage-pool-size value. '
+        )
+
+
+def validate_disable_azure_container_storage_v2_params(is_extension_installed):
+    if not is_extension_installed:
+        raise InvalidArgumentValueError(
+            'Invalid usage of --disable-azure-container-storage-v2. '
+            'Azure Container Storage v2 is not enabled in the cluster.'
+        )
 
 
 def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
