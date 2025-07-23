@@ -1549,7 +1549,6 @@ class VMManagedDiskScenarioTest(ScenarioTest):
     def test_vm_disk_attach_from_copy_and_restore(self):
         self.kwargs.update({
             'vm_name': self.create_random_name('vm_', length=15),
-            'vm_name2': self.create_random_name('vm_', length=15),
             'collection_name': self.create_random_name('collection_', length=20),
             'point_name': self.create_random_name('point_', length=15),
             'disk_name1': self.create_random_name('disk_', length=15),
