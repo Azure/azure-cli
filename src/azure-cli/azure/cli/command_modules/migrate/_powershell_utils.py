@@ -124,10 +124,6 @@ class PowerShellExecutor:
             cmd = [self.powershell_cmd, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script_content]
             
             logger.debug(f'Executing interactive PowerShell command: {" ".join(cmd)}')
-            
-            print("=" * 60)
-            print("PowerShell Authentication Output:")
-            print("=" * 60)
            
             process = subprocess.Popen(
                 cmd,
