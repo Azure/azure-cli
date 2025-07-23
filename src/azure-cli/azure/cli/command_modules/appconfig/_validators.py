@@ -149,6 +149,7 @@ def validate_appservice_name_or_id(cmd, namespace):
         else:
             namespace.appservice_account = parse_resource_id(namespace.appservice_account)
 
+
 def validate_aks_cluster_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
