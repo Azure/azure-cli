@@ -1374,7 +1374,8 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
  
     if mode == 'sitecontainers':
         if linux_fx_version and not linux_fx_version.startswith('DOCKER|'):
-            raise ValidationError("Cannot convert to sitecontainers mode as site is not a classic custom container (docker) app.")
+            raise ValidationError("Cannot convert to sitecontainers mode as site is not a "
+                                  "classic custom container (docker) app.")
         acr_use_managed_identity_creds = getattr(site_config, "acr_use_managed_identity_creds", None)
         acr_user_managed_identity_id = getattr(site_config, "acr_user_managed_identity_id", None)
 
@@ -1435,7 +1436,7 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
         response = create_webapp_sitecontainers(cmd, **sitecontainer_kwargs)
         if response is None:
             raise AzureInternalError("Failed to create sitecontainer for conversion to sitecontainers mode.")
-        
+
         # Set linuxFxVersion to SITECONTAINERS
         logger.warning("Setting linuxFxVersion to SITECONTAINERS")
         update_site_configs(cmd, resource_group, name, slot=slot, linux_fx_version="SITECONTAINERS")
@@ -1452,7 +1453,8 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
             raise ResourceNotFoundError("No main sitecontainer found. Cannot convert to classic mode (docker).")
 
         main_container = update_webapp_sitecontainer(cmd, name, resource_group, main_container.name, slot=slot,
-                                    image=main_container.image, target_port=main_container.target_port, is_main=main_container.is_main)
+                                    image=main_container.image, target_port=main_container.target_port,
+                                    is_main=main_container.is_main)
 
         # Prepare new linux_fx_version
         docker_image = getattr(main_container, "image", None)
@@ -1476,7 +1478,8 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
             setattr(configs, 'acr_user_managed_identity_id', "")
             _generic_site_operation(cmd.cli_ctx, resource_group, name, 'update_configuration', slot, configs)
         elif main_container.auth_type == AuthType.USER_ASSIGNED:
-            app = client.web_apps.get_slot(resource_group, name, slot) if slot else client.web_apps.get(resource_group, name)
+            app = client.web_apps.get_slot(resource_group, name, slot) if slot else client.web_apps.get(resource_group,
+                                                                                                        name)
             if app.identity and app.identity.user_assigned_identities:
                 # Find the managed identity key whose client_id matches main_container.user_managed_identity_client_id
                 matched_key = None
@@ -1486,7 +1489,8 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
                         break
                 if not matched_key:
                     raise ResourceNotFoundError(
-                        f"Could not find a user-assigned identity with client_id '{main_container.user_managed_identity_client_id}' assigned to the app."
+                        f"Could not find a user-assigned identity with client_id "
+                        f"'{main_container.user_managed_identity_client_id}' assigned to the app."
                     )
             update_site_configs(cmd, resource_group, name, slot=slot, acr_identity=matched_key)
         elif main_container.auth_type == AuthType.ANONYMOUS:
@@ -2335,7 +2339,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
     if linux_fx_version:
-        if linux_fx_version.strip().lower().startswith('docker|') or linux_fx_version.strip().lower().startswith('sitecontainers'):
+        if (linux_fx_version.strip().lower().startswith('docker|') or 
+            linux_fx_version.strip().lower().startswith('sitecontainers')):
             if ('WEBSITES_ENABLE_APP_SERVICE_STORAGE' not in app_settings.properties or
                     app_settings.properties['WEBSITES_ENABLE_APP_SERVICE_STORAGE'] != 'true'):
                 update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
