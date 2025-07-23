@@ -2166,14 +2166,14 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 }
                 if size_gb is not None:
                     disk.update({
-                        'sizeGb': size_gb
+                        'diskSizeGb': size_gb
                     })
                 if sku is not None:
-                     disk.update({
-                         "managedDisk": {
-                             "storageAccountType": sku,
-                         }
-                     })
+                    disk.update({
+                        "managedDisk": {
+                            "storageAccountType": sku
+                        }
+                    })
                 disk_lun += 1
                 vm.storage_profile.data_disks.append(disk)
         if source_disk_restore_point is not None:
@@ -2189,14 +2189,14 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 }
                 if size_gb is not None:
                     disk.update({
-                        'sizeGb': size_gb
+                        'diskSizeGb': size_gb
                     })
                 if sku is not None:
-                     disk.update({
-                         "managedDisk": {
-                             "storageAccountType": sku,
-                         }
-                     })
+                    disk.update({
+                        "managedDisk": {
+                            "storageAccountType": sku
+                        }
+                    })
                 disk_lun += 1
                 vm.storage_profile.data_disks.append(disk)
 
