@@ -3373,7 +3373,7 @@ class WebappDNLTests(ScenarioTest):
             JMESPathCheck('[0].perSiteScaling', False)
         ])
         
-        result = self.cmd('webapp create -g {} -n {} --plan {} --auto-generated-domain-name-label-scope {}'.format(
+        result = self.cmd('webapp create -g {} -n {} --plan {} --domain-name-scope {}'.format(
             resource_group, webapp_name, plan, 'TenantReuse'), checks=[
                 JMESPathCheck('state', 'Running'),
                 JMESPathCheck('name', webapp_name),
