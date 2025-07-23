@@ -51,7 +51,7 @@ if ! command -v aaz-dev &> /dev/null; then
     SECONDS=0
 
     echo
-    uv pip install aaz-dev
+    uv pip install aaz-dev --link-mode=copy
 
     # `azdev` repositories
     setup_repo "azure-cli"
@@ -69,6 +69,6 @@ if ! command -v aaz-dev &> /dev/null; then
     echo -e "\n${GREEN}Finished setup! Please launch the codegen tool via:${NC}"
     echo -e "${GREEN}\$ aaz-dev run -c azure-cli -e azure-cli-extensions -s azure-rest-api-specs -a aaz${NC}\n"
 else
-    echo -e "\n${GREEN}Please launch the codegen tool via:${NC}"
-    echo -e "${GREEN}\$ aaz-dev run -c azure-cli -e azure-cli-extensions -s azure-rest-api-specs -a aaz${NC}\n"
+    echo -e "\nPlease launch the codegen tool via:"
+    echo -e "$ aaz-dev run -c azure-cli -e azure-cli-extensions -s azure-rest-api-specs -a aaz\n"
 fi
