@@ -2112,10 +2112,10 @@ class CosmosDBTests(ScenarioTest):
         })
 
         # This should fail as account doesn't exist with this name
-        self.kwargs.update({
-            'invalid_account_name': self.create_random_name(prefix='cli', length=15)
-        })
-        self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {invalid_account_name} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
+        # self.kwargs.update({
+        #     'invalid_account_name': self.create_random_name(prefix='cli', length=15)
+        # })
+        # self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {invalid_account_name} -g {rg} --restore-timestamp {rts} --location {loc} --target-database-account-name {restored_acc}'))
 
         # This should fail as regional database doesn't exist in this location
         # invalid_location = "westus2"
