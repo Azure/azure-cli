@@ -19,7 +19,7 @@ def generate_code(
     cli_extension_path = os.getenv("CLI_EXTENSION_PATH", "/workspaces/azure-cli-extensions")
     swagger_path = os.getenv("SWAGGER_PATH", "/workspaces/azure-rest-api-specs")
 
-    swagger_module = swagger_module_path.split("\\")[-1]
+    swagger_module = os.path.split(swagger_module_path)[-1]
 
     des = (
         f"Just run the following command in the terminal: 'aaz-dev command-model generate-from-swagger --swagger-path {swagger_path} --swagger-module-path {swagger_module_path} --aaz-path {aaz_path} --module {swagger_module} --resource-provider {resource_provider} --swagger-tag {swagger_tag}'",
