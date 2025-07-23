@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "compute-recommender",
-    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Manage sku/zone/region recommender info for compute resources
