@@ -97,9 +97,6 @@ from ._util import (
 
 logger = get_logger(__name__)
 
-BACKUP_STORAGE_ACCESS_TIERS = ["hot",
-                               "archive"]
-
 ###############################################
 #                Common funcs                 #
 ###############################################
@@ -576,7 +573,7 @@ _DEFAULT_SERVER_VERSION = "12.0"
 def _failover_group_update_common(
         instance,
         failover_policy=None,
-        grace_period=None,):
+        grace_period=None):
     '''
     Updates the failover group grace period and failover policy. Common logic for both Sterling and Managed Instance
     '''
@@ -643,6 +640,11 @@ class ClientAuthenticationType(Enum):
 class FailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
+
+
+class FailoverReadOnlyEndpointPolicy(Enum):
+    enabled = 'Enabled'
+    disabled = 'Disabled'
 
 
 class FailoverGroupDatabasesSecondaryType(Enum):
@@ -3103,7 +3105,6 @@ def update_long_term_retention(
         yearly_retention=None,
         week_of_year=None,
         make_backups_immutable=None,
-        backup_storage_access_tier=None,
         **kwargs):
     '''
     Updates long term retention for managed database
@@ -3121,10 +3122,6 @@ def update_long_term_retention(
         if not confirmation:
             return
 
-    if backup_storage_access_tier and backup_storage_access_tier.lower() not in BACKUP_STORAGE_ACCESS_TIERS:
-        raise CLIError('Please specify a valid backup storage access tier type for backup storage access tier.'
-                       'See \'--help\' for more details.')
-
     kwargs['weekly_retention'] = weekly_retention
 
     kwargs['monthly_retention'] = monthly_retention
@@ -3134,8 +3131,6 @@ def update_long_term_retention(
     kwargs['week_of_year'] = week_of_year
 
     kwargs['make_backups_immutable'] = make_backups_immutable
-
-    kwargs['backup_storage_access_tier'] = backup_storage_access_tier
 
     policy = client.begin_create_or_update(
         database_name=database_name,
@@ -6519,7 +6514,10 @@ def failover_group_create(
         partner_resource_group=None,
         failover_policy=FailoverPolicyType.manual.value,
         grace_period=1,
-        add_db=None):
+        add_db=None,
+        partner_server_ids=None,
+        ro_failover_policy=FailoverReadOnlyEndpointPolicy.disabled.value,
+        ro_endpoint_target=None):
     '''
     Creates a failover group.
     '''
@@ -6552,14 +6550,24 @@ def failover_group_create(
         add_db,
         [])
 
+    if partner_server_ids is not None:
+        print(partner_server_ids)
+        partner_servers = [PartnerInfo(id=p) for p in partner_server_ids]
+    else:
+        partner_servers = [partner_server]
+
+    if ro_endpoint_target is None:
+        ro_endpoint_target = partner_server_id
+
     failover_group_params = FailoverGroup(
-        partner_servers=[partner_server],
+        partner_servers=partner_servers,
         databases=databases,
         read_write_endpoint=FailoverGroupReadWriteEndpoint(
             failover_policy=failover_policy,
             failover_with_data_loss_grace_period_minutes=grace_period),
         read_only_endpoint=FailoverGroupReadOnlyEndpoint(
-            failover_policy="Disabled")
+            failover_policy=ro_failover_policy,
+            target_server=ro_endpoint_target)
     )
 
     if secondary_type is not None:
@@ -6581,7 +6589,10 @@ def failover_group_update(
         failover_policy=None,
         grace_period=None,
         add_db=None,
-        remove_db=None):
+        remove_db=None,
+        ro_endpoint_target=None,
+        ro_failover_policy=None,
+        partner_server_ids=None):
     '''
     Updates the failover group.
     '''
@@ -6608,6 +6619,13 @@ def failover_group_update(
     instance.databases = databases
     if secondary_type is not None:
         instance.secondary_type = secondary_type
+
+    if partner_server_ids is not None:
+        instance.partner_servers = [PartnerInfo(id=p) for p in partner_server_ids]
+
+    instance.read_only_endpoint = FailoverGroupReadOnlyEndpoint(
+        failover_policy=ro_failover_policy if ro_failover_policy is not None else instance.read_only_endpoint.failover_policy,
+        target_server=ro_endpoint_target if ro_endpoint_target is not None else instance.read_only_endpoint.target_server)
 
     return instance
 
