@@ -58,6 +58,7 @@ def load_arguments(self, _):
     deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], min_api='2019-06-01', help="The template spec resource id.")
     deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
+    deployment_extension_configs_type = CLIArgumentType(options_list=['--extension-configs', '-e'], action='append', nargs='+', help='the deployment extension configs') # TODO(kylealbert): help text describing merging behavior with parameters file
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
                                        'To get more information, please visit https://learn.microsoft.com/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
@@ -319,6 +320,7 @@ def load_arguments(self, _):
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'),
                    help='Incremental (only add resources to resource group) or Complete (remove extra resources from resource group)')
         c.argument('parameters', arg_type=deployment_parameters_type)
+        c.argument('extension_configs', arg_type=deployment_extension_configs_type)
         c.argument('rollback_on_error', nargs='?', action=RollbackAction,
                    help='The name of a deployment to roll back to on error, or use as a flag to roll back to the last successful deployment.')
 
@@ -352,6 +354,7 @@ def load_arguments(self, _):
         c.argument('template_spec', arg_type=deployment_template_spec_type)
         c.argument('query_string', arg_type=deployment_query_string_type)
         c.argument('parameters', arg_type=deployment_parameters_type)
+        c.argument('extension_configs', arg_type=deployment_extension_configs_type)
 
     with self.argument_context('deployment create') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
