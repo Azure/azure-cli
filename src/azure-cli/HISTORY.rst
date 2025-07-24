@@ -3,12 +3,6 @@
 Release History
 ===============
 
-2.75.1
-++++++
-**Cosmos DB**
-
-* `az cosmosdb restore`: Remove restore validations which would cause timeouts for large restore and incorrect error messages
-
 2.75.0
 ++++++
 
