@@ -58,7 +58,11 @@ from azure.cli.command_modules.acs._consts import (
     CONST_APP_ROUTING_ANNOTATION_CONTROLLED_NGINX,
     CONST_APP_ROUTING_EXTERNAL_NGINX,
     CONST_APP_ROUTING_INTERNAL_NGINX,
-    CONST_APP_ROUTING_NONE_NGINX)
+    CONST_APP_ROUTING_NONE_NGINX,
+    CONST_NODE_PROVISIONING_MODE_MANUAL,
+    CONST_NODE_PROVISIONING_MODE_AUTO,
+    CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE,
+    CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
@@ -190,6 +194,16 @@ node_os_upgrade_channels = [
     CONST_NODE_OS_CHANNEL_NONE,
     CONST_NODE_OS_CHANNEL_UNMANAGED,
     CONST_NODE_OS_CHANNEL_SECURITY_PATCH,
+]
+
+node_provisioning_modes = [
+    CONST_NODE_PROVISIONING_MODE_MANUAL,
+    CONST_NODE_PROVISIONING_MODE_AUTO,
+]
+
+node_provisioning_default_pools = [
+    CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE,
+    CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO,
 ]
 
 dev_space_endpoint_types = ['Public', 'Private', 'None']
@@ -534,6 +548,28 @@ def load_arguments(self, _):
         c.argument('disable_acns_security', action='store_true')
         c.argument("if_match")
         c.argument("if_none_match")
+        # node provisioning
+        c.argument(
+            "node_provisioning_mode",
+            arg_type=get_enum_type(node_provisioning_modes),
+            help=(
+                'Set the node provisioning mode of the cluster. Valid values are "Auto" and "Manual". '
+                'For more information on "Auto" mode see aka.ms/aks/nap.'
+            )
+        )
+        c.argument(
+            "node_provisioning_default_pools",
+            arg_type=get_enum_type(node_provisioning_default_pools),
+            help=(
+                'The set of default Karpenter NodePools configured for node provisioning. '
+                'Valid values are "Auto" and "None". Auto: A standard set of Karpenter NodePools are provisioned. '
+                'None: No Karpenter NodePools are provisioned. '
+                'WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter '
+                'NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. '
+                'It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted '
+                'by that action.'
+            )
+        )
 
     with self.argument_context('aks update') as c:
         # managed cluster paramerters
@@ -711,6 +747,30 @@ def load_arguments(self, _):
         c.argument('disable_cost_analysis', action='store_true')
         c.argument("if_match")
         c.argument("if_none_match")
+        # node provisioning
+        c.argument(
+            "node_provisioning_mode",
+            is_preview=True,
+            arg_type=get_enum_type(node_provisioning_modes),
+            help=(
+                'Set the node provisioning mode of the cluster. Valid values are "Auto" and "Manual". '
+                'For more information on "Auto" mode see aka.ms/aks/nap.'
+            )
+        )
+        c.argument(
+            "node_provisioning_default_pools",
+            is_preview=True,
+            arg_type=get_enum_type(node_provisioning_default_pools),
+            help=(
+                'The set of default Karpenter NodePools configured for node provisioning. '
+                'Valid values are "Auto" and "None". Auto: A standard set of Karpenter NodePools are provisioned. '
+                'None: No Karpenter NodePools are provisioned. '
+                'WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter '
+                'NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. '
+                'It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted '
+                'by that action.'
+            )
+        )
     with self.argument_context('aks disable-addons', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('addons', options_list=['--addons', '-a'])
 

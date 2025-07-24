@@ -5534,6 +5534,20 @@ class AKSManagedClusterContext(BaseAKSContext):
         """
         return self.raw_param.get("migrate_vmas_to_vms")
 
+    def get_node_provisioning_mode(self) -> Union[str, None]:
+        """Obtain the value of node_provisioning_mode.
+
+        :return: string or None
+        """
+        return self.raw_param.get("node_provisioning_mode")
+
+    def get_node_provisioning_default_pools(self) -> Union[str, None]:
+        """Obtain the value of node_provisioning_default_pools.
+
+        :return: string or None
+        """
+        return self.raw_param.get("node_provisioning_default_pools")
+
 
 class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
     def __init__(
@@ -5711,6 +5725,44 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 enabled=True,
                 interval_hours=interval_hours,
             )
+
+        return mc
+
+    def set_up_node_provisioning_mode(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        mode = self.context.get_node_provisioning_mode()
+        if mode is not None:
+            if mc.node_provisioning_profile is None:
+                mc.node_provisioning_profile = (
+                    self.models.ManagedClusterNodeProvisioningProfile()  # pylint: disable=no-member
+                )
+
+            # set mode
+            mc.node_provisioning_profile.mode = mode
+
+        return mc
+
+    def set_up_node_provisioning_default_pools(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        default_pools = self.context.get_node_provisioning_default_pools()
+        if default_pools is not None:
+            if mc.node_provisioning_profile is None:
+                mc.node_provisioning_profile = (
+                    self.models.ManagedClusterNodeProvisioningProfile()  # pylint: disable=no-member
+                )
+
+            # set default_node_pools
+            mc.node_provisioning_profile.default_node_pools = default_pools
+
+        return mc
+
+    def set_up_node_provisioning_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        mc = self.set_up_node_provisioning_mode(mc)
+        mc = self.set_up_node_provisioning_default_pools(mc)
 
         return mc
 
@@ -6971,6 +7023,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.set_up_bootstrap_profile(mc)
         # set up static egress gateway profile
         mc = self.set_up_static_egress_gateway(mc)
+        # set up node provisioning profile
+        mc = self.set_up_node_provisioning_profile(mc)
 
         # DO NOT MOVE: keep this at the bottom, restore defaults
         if not bypass_restore_defaults:
@@ -8874,6 +8928,48 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         return mc
 
+    def update_node_provisioning_mode(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        mode = self.context.get_node_provisioning_mode()
+        if mode is not None:
+            if mc.node_provisioning_profile is None:
+                mc.node_provisioning_profile = (
+                    self.models.ManagedClusterNodeProvisioningProfile()  # pylint: disable=no-member
+                )
+
+            # set mode
+            mc.node_provisioning_profile.mode = mode
+
+        return mc
+
+    def update_node_provisioning_default_pools(self, mc: ManagedCluster) -> ManagedCluster:
+        self._ensure_mc(mc)
+
+        default_pools = self.context.get_node_provisioning_default_pools()
+        if default_pools is not None:
+            if mc.node_provisioning_profile is None:
+                mc.node_provisioning_profile = (
+                    self.models.ManagedClusterNodeProvisioningProfile()  # pylint: disable=no-member
+                )
+
+            # set default_node_pools
+            mc.node_provisioning_profile.default_node_pools = default_pools
+
+        return mc
+
+    def update_node_provisioning_profile(self, mc: ManagedCluster) -> ManagedCluster:
+        """Updates the nodeProvisioningProfile field of the managed cluster
+
+        :return: the ManagedCluster object
+        """
+        self._ensure_mc(mc)
+
+        mc = self.update_node_provisioning_mode(mc)
+        mc = self.update_node_provisioning_default_pools(mc)
+
+        return mc
+
     def update_mc_profile_default(self) -> ManagedCluster:
         """The overall controller used to update the default ManagedCluster profile.
 
@@ -8965,6 +9061,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         mc = self.update_kubernetes_version_and_orchestrator_version(mc)
         # update VMAS to VMS
         mc = self.update_vmas_to_vms(mc)
+        # update node provisioning profile
+        mc = self.update_node_provisioning_profile(mc)
         return mc
 
     def update_kubernetes_version_and_orchestrator_version(self, mc: ManagedCluster) -> ManagedCluster:
