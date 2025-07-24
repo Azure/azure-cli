@@ -9,4 +9,14 @@
 # flake8: noqa
 
 from .__cmd_group import *
+from ._create import *
+from ._delete import *
+from ._download_update import *
 from ._get_extended_information import *
+from ._install_update import *
+from ._list import *
+from ._scan_for_update import *
+from ._show import *
+from ._show_update_summary import *
+from ._update import *
+from ._wait import *
