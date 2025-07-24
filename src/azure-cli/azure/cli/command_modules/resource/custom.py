@@ -159,7 +159,7 @@ def _try_parse_key_value_object(parameters, template_obj, value):
     return True
 
 
-def _process_parameters(template_obj, parameter_lists, extension_configs):  # pylint: disable=too-many-statements
+def _process_parameters_and_ext_configs(template_obj, parameter_lists, extension_configs):  # pylint: disable=too-many-statements
     def _try_parse_json_object(value, is_extension_configs):
         try:
             parsed = _remove_comments_from_json(value, False)
@@ -416,7 +416,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
     template_obj['resources'] = template_obj.get('resources', [])
-    parameters, ext_configs = _process_parameters(template_obj, parameters, extension_configs)
+    parameters, ext_configs = _process_parameters_and_ext_configs(template_obj, parameters, extension_configs)
     parameters = parameters or {}
     ext_configs = ext_configs or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
@@ -1184,7 +1184,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         parameters = params_file_json.get('parameters', {})
         ext_configs = params_file_json.get('extensionConfigs', {})
     else:
-        parameters, ext_configs = _process_parameters(template_obj, parameters, extension_configs)
+        parameters, ext_configs = _process_parameters_and_ext_configs(template_obj, parameters, extension_configs)
         parameters = parameters or {}
         ext_configs = ext_configs or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
@@ -1394,7 +1394,7 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
     if _is_bicepparam_file_provided(parameters):
         parameters = json.loads(bicepparam_json_content).get('parameters', {})  # pylint: disable=used-before-assignment
     else:
-        parameters, _ = _process_parameters(template_obj, parameters, None)
+        parameters, _ = _process_parameters_and_ext_configs(template_obj, parameters, None)
         parameters = parameters or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, False)
         parameters = json.loads(json.dumps(parameters))

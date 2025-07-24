@@ -16,7 +16,7 @@ from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.resource.custom import (
     _get_missing_parameters,
     _extract_lock_params,
-    _process_parameters,
+    _process_parameters_and_ext_configs,
     _find_missing_parameters,
     _prompt_for_parameters,
     _is_bicepparam_file_provided,
@@ -294,7 +294,7 @@ class TestCustom(unittest.TestCase):
 
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
-            result_parameters, _ = _process_parameters(template, parameter_list, None)
+            result_parameters, _ = _process_parameters_and_ext_configs(template, parameter_list, None)
             self.assertEqual(result_parameters, test['expected'], i)
 
     def test_deployment_parameters_with_type_references(self):
@@ -347,7 +347,7 @@ class TestCustom(unittest.TestCase):
 
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
-            result_parameters, result_ext_configs = _process_parameters(template, parameter_list, None)
+            result_parameters, result_ext_configs = _process_parameters_and_ext_configs(template, parameter_list, None)
             self.assertEqual(result_parameters, test['expected'], i)
             self.assertEqual(result_ext_configs, {}, i)
 
@@ -362,7 +362,7 @@ class TestCustom(unittest.TestCase):
         template_param_defs = template.get('parameters', {})
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters, _ = _process_parameters(template, parameter_list, None)
+        result_parameters, _ = _process_parameters_and_ext_configs(template, parameter_list, None)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         # ensure that parameters with default values are not considered missing
@@ -384,7 +384,7 @@ class TestCustom(unittest.TestCase):
         template = get_file_json(template_path, preserve_order=True)
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters, _ = _process_parameters(template, parameter_list, None)
+        result_parameters, _ = _process_parameters_and_ext_configs(template, parameter_list, None)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         param_file_order = ["['secureParam', 'boolParam', 'enumParam', 'arrayParam', 'objectParam']"]
@@ -402,7 +402,7 @@ class TestCustom(unittest.TestCase):
         template = get_file_json(template_path, preserve_order=False)
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters, _ = _process_parameters(template, parameter_list, None)
+        result_parameters, _ = _process_parameters_and_ext_configs(template, parameter_list, None)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         param_alpha_order = ["['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
@@ -467,7 +467,7 @@ class TestCustom(unittest.TestCase):
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
             extension_configs = test.get('extension_configs', None)
-            result_parameters, result_ext_configs = _process_parameters(template, parameter_list, extension_configs)
+            result_parameters, result_ext_configs = _process_parameters_and_ext_configs(template, parameter_list, extension_configs)
             self.assertEqual(result_ext_configs, test['expected'], i)
 
     @live_only()
