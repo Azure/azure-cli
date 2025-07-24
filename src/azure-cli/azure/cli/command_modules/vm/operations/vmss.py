@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from knack.log import get_logger
-from azure.cli.core.aaz import register_command
 from ..aaz.latest.vmss import ListInstances as _VMSSListInstances
 from ..aaz.latest.vmss import Deallocate as _VMSSDeallocate
 
