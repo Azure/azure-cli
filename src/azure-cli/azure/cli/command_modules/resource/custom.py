@@ -160,62 +160,69 @@ def _try_parse_key_value_object(parameters, template_obj, value):
 
 
 def _process_parameters(template_obj, parameter_lists, extension_configs):  # pylint: disable=too-many-statements
-    # NOTE(kylealbert): The historical `parsed.get('parameters', parsed)` calls use the object itself as a fallback for parameters if the
-    # `parameters` key is not found. Now that parameters and extension configs are in the same expected root object, similar logic for
-    # extension configs would conflict, so extensionConfigs can only be extracted if `parameters` is present.
-    def _try_parse_json_object(value):
+    def _try_parse_json_object(value, is_extension_configs):
         try:
             parsed = _remove_comments_from_json(value, False)
-            return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else {}
+            if is_extension_configs:
+                return parsed, True
+            return parsed.get('parameters', parsed), True
         except Exception:  # pylint: disable=broad-except
-            return None, None
+            return None, False
 
+    # NOTE(kylealbert): The historical `parsed.get('parameters', parsed)` calls use the object itself as a fallback for parameters if the
+    # `parameters` key is not found. Now that parameters and extension configs are in the same expected root object for param files, similar
+    # logic for extension configs would conflict, so extensionConfigs can only be extracted if `parameters` is present.
     def _try_load_file_object(file_path):
         try:
             is_file = os.path.isfile(file_path)
         except ValueError:
-            return None
+            return None, None, False
         if is_file is True:
             try:
                 content = read_file_content(file_path)
                 if not content:
-                    return None, None
+                    return None, None, True
                 parsed = _remove_comments_from_json(content, False, file_path)
-                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else {}
+                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else {}, True
             except Exception as ex:
                 raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
-        return None, None
+        return None, None, False
 
     def _try_load_uri(uri):
         if "://" in uri:
             try:
                 value = _urlretrieve(uri).decode('utf-8')
                 parsed = _remove_comments_from_json(value, False)
-                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else {}
+                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else {}, True
             except Exception:  # pylint: disable=broad-except
                 pass
-        return None, None
+        return None, None, False
 
     parameters = {}
-    ext_configs = {}
-
-    # TODO(kylealbert): process extension_configs
+    result_ext_configs = {}
 
     for params in parameter_lists or []:
         for item in params:
-            param_obj, ext_config_obj = _try_load_file_object(item)
-            if param_obj is None:
-                param_obj, ext_config_obj = _try_parse_json_object(item)
-            if param_obj is None:
-                param_obj, ext_config_obj = _try_load_uri(item)
+            param_obj, ext_configs_obj, is_file_item = _try_load_file_object(item)
+            if not is_file_item:
+                param_obj, is_json_obj = _try_parse_json_object(item, False) # For inline items, we do not process extension configs. That is done via separate CLI arg.
+                if not is_json_obj:
+                    param_obj, ext_configs_obj, _ = _try_load_uri(item)  # Parameters files can supply extension configs
             if param_obj is not None:
                 parameters.update(param_obj)
-            if ext_config_obj is not None:
-                ext_configs.update(ext_config_obj)
-            elif not _try_parse_key_value_object(parameters, template_obj, item):
+            elif not _try_parse_key_value_object(parameters, template_obj, item): ## TODO(kylealbert): error logic for extension configs
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
-    return parameters, ext_configs
+            if ext_configs_obj is not None:
+                result_ext_configs.update(ext_configs_obj)
+
+    if extension_configs: # This is the CLI arg for extension configs. This only accepts an inlined object
+        inlined_ext_config_obj = _try_parse_json_object(extension_configs, True)
+        if inlined_ext_config_obj is not None:
+            # Shallow merge into result_ext_configs (overwrites at the individual config level).
+            result_ext_configs.update(inlined_ext_config_obj)
+
+    return parameters, result_ext_configs
 
 
 # pylint: disable=redefined-outer-name
@@ -409,7 +416,6 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
     template_obj['resources'] = template_obj.get('resources', [])
-    # TODO(kylealbert): merge extension configs parameter, while also respecting parameters file extension configs.
     parameters, ext_configs = _process_parameters(template_obj, parameters, extension_configs)
     parameters = parameters or {}
     ext_configs = ext_configs or {}
