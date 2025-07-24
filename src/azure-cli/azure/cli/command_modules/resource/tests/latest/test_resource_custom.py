@@ -294,7 +294,7 @@ class TestCustom(unittest.TestCase):
 
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
-            result_parameters = _process_parameters(template, parameter_list, None)
+            result_parameters, _ = _process_parameters(template, parameter_list, None)
             self.assertEqual(result_parameters, test['expected'], i)
 
     def test_deployment_parameters_with_type_references(self):
@@ -362,7 +362,7 @@ class TestCustom(unittest.TestCase):
         template_param_defs = template.get('parameters', {})
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template, parameter_list, None)
+        result_parameters, _ = _process_parameters(template, parameter_list, None)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         # ensure that parameters with default values are not considered missing
@@ -384,7 +384,7 @@ class TestCustom(unittest.TestCase):
         template = get_file_json(template_path, preserve_order=True)
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template, parameter_list, None)
+        result_parameters, _ = _process_parameters(template, parameter_list, None)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         param_file_order = ["['secureParam', 'boolParam', 'enumParam', 'arrayParam', 'objectParam']"]
@@ -402,7 +402,7 @@ class TestCustom(unittest.TestCase):
         template = get_file_json(template_path, preserve_order=False)
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template, parameter_list, None)
+        result_parameters, _ = _process_parameters(template, parameter_list, None)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         param_alpha_order = ["['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
@@ -420,6 +420,7 @@ class TestCustom(unittest.TestCase):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
         parameters_path = os.path.join(curr_dir, 'param-validation-ext-configs.json').replace('\\', '\\\\')
+        parameters_path_2 = os.path.join(curr_dir, 'param-validation-ext-configs-2.json').replace('\\', '\\\\')
 
         template = get_file_json(template_path, preserve_order=True)
 
@@ -433,33 +434,40 @@ class TestCustom(unittest.TestCase):
                 "parameter_list": [],
                 "expected": {},
             },
+            {
+                "parameter_list": [],
+                "extension_configs": '{\"k8s\": {\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\" },\"secretName\": \"myKubeconfig\" }},\"namespace\": {\"value\": \"ns\"}}}',
+                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
+            },
             {  # loading from file
                 "parameter_list": [[parameters_path]],
                 "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
             },
-            {  # raw JSON (same as @file)
-                "parameter_list": [['{\"parameters\": {\"stringParam\": {\"value\": \"foo\"}},\"extensionConfigs\": {\"k8s\": {\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\" },\"secretName\": \"myKubeconfig\" }},\"namespace\": {\"value\": \"ns\"}}}}']],
+            {  # raw JSON
+                "parameter_list": [['{\"parameters\": {\"stringParam\": {\"value\": \"foo\"}}}']],
+                "extension_configs": '{\"k8s\": {\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\" },\"secretName\": \"myKubeconfig\" }},\"namespace\": {\"value\": \"ns\"}}}',
                 "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
             },
-            {  # raw JSON, but no 'parameters' key. Historical behavior uses the object as the parameters object in this case, so extensionConfigs here would be a parameter, not actual extensionConfigs.
-                "parameter_list": [['{\"stringParam\": {\"value\": \"foo\"},\"extensionConfigs\": {\"k8s\": {\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\" },\"secretName\": \"myKubeconfig\" }},\"namespace\": {\"value\": \"ns\"}}}}']],
-                "expected": {},
+            {  # raw JSON, but no 'parameters' key.
+                "parameter_list": [['{\"stringParam\": {\"value\": \"foo\"}}']],
+                "extension_configs": '{\"k8s\": {\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\" },\"secretName\": \"myKubeconfig\" }},\"namespace\": {\"value\": \"ns\"}}}',
+                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
             },
             {  # Last wins at the extension level (extensionConfigs.k8s). At the extensionConfigs level, objects are merged.
-                "parameter_list": [[
-                    '{\"parameters\": {\"stringParam\": {\"value\": \"x\"}}, \"extensionConfigs\": {\"k8s\": {\"namespace\": {\"value\": \"thisIsDiscarded\"}}, \"k8s2\":{\"namespace\": {\"value\": \"thisIsKept\"}} }}',
-                    '{\"parameters\": {\"stringParam\": {\"value\": \"x\"}}, \"extensionConfigs\": {\"k8s\": {\"kubeconfig\": {\"value\": \"thisIsLastSoKept\"}}} }']],
-                "expected": { "k8s":{"kubeconfig":{"value":"thisIsLastSoKept"}}, "k8s2":{"namespace":{"value":"thisIsKept"}} },
+                "parameter_list": [[parameters_path], [parameters_path_2]],
+                "expected": {"k8s":{"namespace":{"value":"ns2"}},"otherExt":{"stringProp":{"value":"stringPropValue"}}},
             },
-            {  # file loading overridden by inline obj
-                "parameter_list": [[parameters_path], ['{\"parameters\":{}, \"extensionConfigs\":{\"k8s\":{\"inlined\":{\"value\":\"overwrites\"}}} }']], # 'parameters' must be present otherwise 'extensionConfigs' is treated as a parameter.
-                "expected": {"k8s": {"inlined": {"value": "overwrites"}}},
+            {  # CLI arg is shallow merged with params file
+                "parameter_list": [[parameters_path]], # 'parameters' must be present otherwise 'extensionConfigs' is treated as a parameter.
+                "extension_configs": '{\"k8s\":{\"namespace\":{\"value\":\"ns2\"}},\"otherExt\":{\"stringProp\":{\"value\": \"stringPropVal\"}}}',
+                "expected": {"k8s":{"namespace":{"value":"ns2"}},"otherExt":{"stringProp":{"value":"stringPropVal"}}},
             }
         ]
 
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
-            result_parameters, result_ext_configs = _process_parameters(template, parameter_list)
+            extension_configs = test.get('extension_configs', None)
+            result_parameters, result_ext_configs = _process_parameters(template, parameter_list, extension_configs)
             self.assertEqual(result_ext_configs, test['expected'], i)
 
     @live_only()

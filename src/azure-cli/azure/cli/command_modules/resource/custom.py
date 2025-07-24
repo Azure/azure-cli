@@ -217,7 +217,7 @@ def _process_parameters(template_obj, parameter_lists, extension_configs):  # py
                 result_ext_configs.update(ext_configs_obj)
 
     if extension_configs: # This is the CLI arg for extension configs. This only accepts an inlined object
-        inlined_ext_config_obj = _try_parse_json_object(extension_configs, True)
+        inlined_ext_config_obj, _ = _try_parse_json_object(extension_configs, True)
         if inlined_ext_config_obj is not None:
             # Shallow merge into result_ext_configs (overwrites at the individual config level).
             result_ext_configs.update(inlined_ext_config_obj)
@@ -1394,7 +1394,7 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
     if _is_bicepparam_file_provided(parameters):
         parameters = json.loads(bicepparam_json_content).get('parameters', {})  # pylint: disable=used-before-assignment
     else:
-        parameters = _process_parameters(template_obj, parameters, None)
+        parameters, _ = _process_parameters(template_obj, parameters, None)
         parameters = parameters or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, False)
         parameters = json.loads(json.dumps(parameters))
