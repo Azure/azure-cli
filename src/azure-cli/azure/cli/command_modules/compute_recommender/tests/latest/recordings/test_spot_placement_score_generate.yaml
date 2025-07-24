@@ -1,0 +1,61 @@
+interactions:
+- request:
+    body: '{"availabilityZones": true, "desiredCount": 1, "desiredLocations": ["eastus",
+      "eastus2"], "desiredSizes": [{"sku": "Standard_D2_v2"}]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - compute-recommender spot-placement-score
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '134'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -l --subscription --availability-zones --desired-locations --desired-count
+        --desired-sizes
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.22621-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Compute/locations/eastus/placementScores/spot/generate?api-version=2025-06-05
+  response:
+    body:
+      string: '{"desiredLocations":["eastus","eastus2"],"desiredSizes":[{"sku":"Standard_D2_v2"}],"desiredCount":1,"availabilityZones":true,"placementScores":[{"sku":"Standard_D2_v2","region":"eastus","availabilityZone":"1","score":"RestrictedSkuNotAvailable","isQuotaAvailable":true},{"sku":"Standard_D2_v2","region":"eastus","availabilityZone":"2","score":"RestrictedSkuNotAvailable","isQuotaAvailable":true},{"sku":"Standard_D2_v2","region":"eastus","availabilityZone":"3","score":"RestrictedSkuNotAvailable","isQuotaAvailable":true},{"sku":"Standard_D2_v2","region":"eastus2","availabilityZone":"1","score":"Low","isQuotaAvailable":true},{"sku":"Standard_D2_v2","region":"eastus2","availabilityZone":"2","score":"Low","isQuotaAvailable":true},{"sku":"Standard_D2_v2","region":"eastus2","availabilityZone":"3","score":"Low","isQuotaAvailable":true}]}'
+    headers:
+      api-supported-versions:
+      - 2024-03-01-preview, 2024-06-01-preview, 2025-02-01-preview, 2025-06-05-preview,
+        2025-06-05
+      cache-control:
+      - no-cache
+      content-length:
+      - '838'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 24 Jul 2025 00:54:07 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=08e22377-6d70-4f82-b548-12ea80f00e8a/westus2/6d5eba66-9484-4bea-be37-6f3f019a6390
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 5970299CFCE942E98330E15C3118BC33 Ref B: MWH011020809025 Ref C: 2025-07-24T00:54:02Z'
+    status:
+      code: 200
+      message: OK
+version: 1
