@@ -1134,9 +1134,15 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, self.test_mi_subscription_id)
         self.assertEqual(tenant_id, self.test_mi_tenant)
 
-        # verify tenant shouldn't be specified for MSI account
-        with self.assertRaisesRegex(CLIError, "Tenant shouldn't be specified"):
-            cred, subscription_id, _ = profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
+        # Specifying the current tenant is allowed
+        cred, subscription_id, tenant_id = profile.get_raw_token(tenant=self.test_mi_tenant)
+        self.assertEqual(tenant_id, self.test_mi_tenant)
+
+        # Specifying a non-current tenant is disallowed
+        with self.assertRaisesRegex(CLIError,
+                                    "For managed identity account, getting access token for non-current tenants is "
+                                    "not supported"):
+            profile.get_raw_token(tenant='another-tenant')
 
     @mock.patch('azure.cli.core.auth.util.now_timestamp', new=now_timestamp_mock)
     @mock.patch('azure.cli.core.auth.msal_credentials.ManagedIdentityCredential', ManagedIdentityCredentialStub)
@@ -1285,9 +1291,15 @@ class TestProfile(unittest.TestCase):
         self.assertEqual(subscription_id, test_subscription_id)
         self.assertEqual(tenant_id, test_tenant_id)
 
-        # Verify tenant shouldn't be specified for Cloud Shell account
-        with self.assertRaisesRegex(CLIError, 'Cloud Shell'):
-            profile.get_raw_token(resource='http://test_resource', tenant=self.tenant_id)
+        # Specifying the current tenant is allowed
+        cred, subscription_id, tenant_id = profile.get_raw_token(tenant=test_tenant_id)
+        self.assertEqual(tenant_id, test_tenant_id)
+
+        # Specifying a non-current tenant is disallowed
+        with self.assertRaisesRegex(CLIError,
+                                    "For Cloud Shell account, getting access token for non-current tenants is "
+                                    "not supported"):
+            profile.get_raw_token(tenant='another-tenant')
 
     @mock.patch('azure.cli.core.auth.identity.Identity.get_user_credential')
     def test_get_msal_token(self, get_user_credential_mock):
