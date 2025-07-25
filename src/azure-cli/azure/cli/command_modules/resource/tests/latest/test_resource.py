@@ -886,7 +886,7 @@ class TemplateSpecsTest(ScenarioTest):
                                variables('locations')[parameters('location')],
                                parameters('group'),
                                parameters('service'),
-                               if(equals(parameters('kind'), ''), 
+                               if(equals(parameters('kind'), ''),
                                   variables('resources')[variables('provider')][variables('resourceType')],
                                   variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]"""),
             self.check('mainTemplate.variables.removeOptionalsFromHyphenedName', "[replace(variables('hyphenedName'), '--', '-')]"),
@@ -1278,7 +1278,7 @@ class DeploymentTestsWithQueryString(LiveScenarioTest):
 class DeploymentTestAtSubscriptionScope(ScenarioTest):
     def tearDown(self):
         self.cmd('policy assignment delete -n location-lock')
-        self.cmd('policy definition delete -n policy2 --yes')
+        self.cmd('policy definition delete -n policy2')
         self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
 
     @AllowLargeResponse(4096)
@@ -2309,7 +2309,7 @@ class DeploymentStacksTest(ScenarioTest):
         # update stack with resource2 set to detach
         self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-two}" "rgLocation={location}" --deny-settings-mode "none" --action-on-unmanage detachAll --yes', checks=self.check('provisioningState', 'succeeded'))
 
-        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding. 
+        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding.
         #        See https://github.com/Azure/azure-cli/issues/31719 for more information. Temporarily commenting this portion of the test out to unblock
         #        merging https://github.com/Azure/azure-cli/pull/31684.
         #
@@ -2679,7 +2679,7 @@ class DeploymentStacksTest(ScenarioTest):
         # check template spec exists in Azure
         self.cmd('resource list -g {resource-group-two} --name "{template-spec-name}"', checks=self.check("length(@)", 1))
 
-        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding. 
+        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding.
         #        See https://github.com/Azure/azure-cli/issues/31719 for more information. Temporarily commenting this portion of the test out to unblock
         #        merging https://github.com/Azure/azure-cli/pull/31684.
         #
@@ -3661,7 +3661,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.applyPolicy()
 
         # delete the policy
-        cmd = self.cmdstring('policy definition delete -n {pn} -y', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)  # ensure the policy is gone when run live.
@@ -3762,7 +3762,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.cmd('policy assignment list --disable-scope-strict-match', checks=self.check("length([?name=='{pan}'])", 0))
 
         # delete the policy set
-        cmd = self.cmdstring('policy set-definition delete -n {psn} -y', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)  # ensure the policy is gone when run live.
@@ -3798,7 +3798,7 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # delete the parameterized policy set
-        cmd = self.cmdstring('policy set-definition delete -n {psn} -y', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)  # ensure the policy is gone when run live.
@@ -3807,13 +3807,13 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
 
         # delete the policy
-        cmd = self.cmdstring('policy definition delete -n {pn} -y', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)
 
         # delete the data policy
-        cmd = self.cmdstring('policy definition delete -n {dpn} -y', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)
@@ -4364,7 +4364,7 @@ class PolicyScenarioTest(ScenarioTest):
                  checks=self.check('length(policyDefinitionGroups)', 2))
 
         # delete the policy set
-        self.cmd('policy set-definition delete -n {psn} -y')
+        self.cmd('policy set-definition delete -n {psn}')
 
         if not self.in_recording:
             time.sleep(10)  # ensure the policy is gone when run live.
@@ -4373,7 +4373,7 @@ class PolicyScenarioTest(ScenarioTest):
                  checks=self.check("length([?name=='{psn}'])", 0))
 
         # delete the policy
-        self.cmd('policy definition delete -n {pn} -y')
+        self.cmd('policy definition delete -n {pn}')
 
     @AllowLargeResponse(8192)
     def test_show_built_in_policy(self):
@@ -4422,7 +4422,7 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd('policy assignment delete -n {pan_random} -g {rg}')
         self.cmd('policy assignment list --disable-scope-strict-match',
                  checks=self.check("length([?name=='{pan_random}'])", 0))
-        cmd = self.cmdstring('policy definition delete -n {pn} -y', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
 
         if not self.in_recording:
@@ -4507,7 +4507,7 @@ class PolicyScenarioTest(ScenarioTest):
             # update the exemption
             self.kwargs['pe_desc'] = self.kwargs['pe_desc'] + '_new'
             self.kwargs['pedn'] = self.kwargs['pedn'] + '_new'
-            self.kwargs['expiration'] = '3021-04-05T00:45:13Z'
+            self.kwargs['expiration'] = '3021-04-05T00:45:13+00:00'
             cmd = self.cmdstring('policy exemption update -n {pen} -e mitigated --scope {scope} -r {prids} --expires-on {expiration} --display-name {pedn} --description {pe_desc} --metadata category={updated_metadata}'.format(**self.kwargs))
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
@@ -4519,6 +4519,13 @@ class PolicyScenarioTest(ScenarioTest):
                 self.check('expiresOn', '{expiration}')
             ])
 
+            # ensure the exemption still appears in the list results just once and the update is present
+            self.cmd('policy exemption list --scope {scope}'.format(**self.kwargs), checks=[
+                self.check("length([?name=='{pen}'])", 1),
+                self.check("[?name=='{pen}'] | [0].expiresOn", '{expiration}')
+            ])
+
+            # verify properties of the updated exemption
             cmd = self.cmdstring('policy exemption show -n {pen} --scope {scope}'.format(**self.kwargs))
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
@@ -4559,7 +4566,7 @@ class PolicyScenarioTest(ScenarioTest):
             # update the exemption
             self.kwargs['pe_desc'] = self.kwargs['pe_desc'] + '_new'
             self.kwargs['pedn'] = self.kwargs['pedn'] + '_new'
-            self.kwargs['expiration'] = '3021-04-05T00:45:13Z'
+            self.kwargs['expiration'] = '3021-04-05T00:45:13+00:00'
             cmd = self.cmdstring('policy exemption update -n {pen} -e mitigated -g {rg} -r {prids} --expires-on {expiration} --display-name {pedn} --description {pe_desc} --metadata category={updated_metadata}'.format(**self.kwargs))
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
@@ -4598,7 +4605,7 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # delete the policy set
-        cmd = self.cmdstring('policy set-definition delete -n {psn} -y', management_group, subscription)
+        cmd = self.cmdstring('policy set-definition delete -n {psn}', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)  # ensure the policy is gone when run live.
@@ -4607,13 +4614,13 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=self.check("length([?name=='{psn}'])", 0))
 
         # delete the policy
-        cmd = self.cmdstring('policy definition delete -n {pn} -y', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {pn}', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)
 
         # delete the data policy
-        cmd = self.cmdstring('policy definition delete -n {dpn} -y', management_group, subscription)
+        cmd = self.cmdstring('policy definition delete -n {dpn}', management_group, subscription)
         self.cmd(cmd)
         if not self.in_recording:
             time.sleep(10)

@@ -61,29 +61,14 @@ from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 # Customization for auto-generated Azure Policy CLI commands (cstack: 5/9/2025)
 #
 # Notes on auto-generation
-#  - Unsurprisingly, behavior of the auto-generated command code does not exactly match the
-#    existing custom cmdlets. In some cases, modest customization is able to work around these
-#    differences to prevent breaking changes. In a few cases, eliminating the breaking changes
-#    would require replacing the generated code with all custom. Comsequently, some breaking
-#    changes are accepted in order to move to auto-generated commands.
-#
-#  - Breaking changes include:
-#   o --user-assigned switch is now required to remove user-assigned identity. If not provided,
-#     identity remove silently does nothing.
-#   o identity assign used to be able to replace an existing identity, but now throws an error
-#     if the assignment already has an identity. The existing identity must be removed via
-#     identity remove before a new one can be assigned.
-#   o non-compliance-message create and show now return single items instead of the array of
-#     message items.
-#   o non-compliance-message delete now returns nothing instead of the array of remaining
-#     message items.
-#   o 'az policy definition delete' and 'az policy set-definition delete' commands now
-#     require -y to automatically bypass the confirmation prompt. Previously these two did not
-#     prompt for confirmation.
-#   o Providing an invalid/nonexistent management group name for --management-group parameter
-#     now raises InvalidArgumentValueError instead of IncorrectUsageError
-#   o The date format used for policy exemption --expires-on has changed slightly. The new format
-#     is ISO 8601, e.g. now 2025-08-05T00:45:13Z instead of 2025-08-05T00:45:13+00:00.
+#  - The behavior of the auto-generated command code required significant customization to
+#    work around differences from previous custom code. All customization is performed by
+#    overriding generated code. No modification of generated code is present.
+#  - The Common class is used for shard methods needed by the customization code.
+#  - The Completers class hosts command line completers that were previously registered in
+#    the custom commands.
+#  - The other classes in this file override generated classes to evoke the correct behavior
+#    matching the fully custom commands previously shipped.
 # --------------------------------------------------------------------------------------------
 
 
@@ -236,6 +221,11 @@ class Common:
             split = notScopes[0].split(' ')
             self.ctx.vars.instance.properties.notScopes = split
 
+    # Change UTC format from Zulu to +00:00
+    def AdjustUTCFormat(exemption):
+        if exemption.properties.expires_on:
+            exemption.properties.expires_on = exemption.properties.expires_on._data.replace('Z', '+00:00')
+
     # Apply filter to list commands based on --disable-scope-strict-match argument
     @staticmethod
     def ApplyListFilter(ctx):
@@ -244,12 +234,6 @@ class Common:
                 ctx.args.filter = "atScopeAndBelow()"
             else:
                 ctx.args.filter = "atExactScope()"
-
-    # @staticmethod
-    # def run_cli(command):
-    #     from azure.cli.core.util import run_az_cmd
-    #     stdout_buf = StringIO()
-    #     return run_az_cmd(shlex.split(command), out_file=stdout_buf)
 
     # Helper to execute Azure CLI command and return the output as JSON
     @staticmethod
@@ -782,6 +766,9 @@ class PolicyExemptionCreate(ExemptionCreate):
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
         Common.GenerateNameIfNone(self.ctx)
 
+    def post_operations(self):
+        Common.AdjustUTCFormat(self.ctx.vars.instance)
+
 
 class PolicyExemptionDelete(ExemptionDelete):
 
@@ -856,6 +843,11 @@ class PolicyExemptionList(ExemptionList):
 
         self.post_operations()
 
+    def post_operations(self):
+        listing = self.ctx.vars.instance.value
+        for item in listing:
+            Common.AdjustUTCFormat(item)
+
 
 class PolicyExemptionShow(ExemptionShow):
 
@@ -872,6 +864,9 @@ class PolicyExemptionShow(ExemptionShow):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
 
+    def post_operations(self):
+        Common.AdjustUTCFormat(self.ctx.vars.instance)
+
 
 class PolicyExemptionUpdate(ExemptionUpdate):
 
@@ -887,6 +882,9 @@ class PolicyExemptionUpdate(ExemptionUpdate):
     def pre_operations(self):
         Common.ValidateScope(self.ctx)
         Common.PopulateScopeFromContext(self.ctx, self.cli_ctx)
+
+    def post_operations(self):
+        Common.AdjustUTCFormat(self.ctx.vars.instance)
 
 
 class PolicySetDefinitionCreate(SetDefinitionCreate):
