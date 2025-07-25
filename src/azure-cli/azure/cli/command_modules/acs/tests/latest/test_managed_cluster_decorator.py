@@ -4700,7 +4700,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_node_resource_group(), "test_node_resource_group")
 
-    def test_get_enalbe_run_command(self):
+    def test_get_enable_run_command(self):
         ctx_1 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict({"enable_run_command": False}),
