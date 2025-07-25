@@ -266,7 +266,7 @@ def load_arguments(self, _):
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration store. Required for AppService arguments')
 
     with self.argument_context('appconfig kv import', arg_group='AKS') as c:
-        c.argument('aks_cluster', validator=validate_aks_cluster_name_or_id, help='ARM ID for AKS OR the name of the AKS, assuming it is in the same subscription and resource group as the App Configuration store. Required for AKS arguments'),
+        c.argument('aks_cluster', validator=validate_aks_cluster_name_or_id, help='ARM ID for AKS OR the name of the AKS, assuming it is in the same subscription and resource group as the App Configuration store. Required for AKS arguments')
         c.argument('configmap_name', help='Name of the ConfigMap. Required for AKS arguments.')
         c.argument('configmap_namespace', help='Namespace of the ConfigMap. default to "default" namespace if not specified.')
 

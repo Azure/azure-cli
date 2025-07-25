@@ -571,7 +571,7 @@ def __read_kv_from_file(
 def flatten_config_data(config_data, format_, content_type, prefix_to_add="", depth=None, separator=None):
     """
     Flatten configuration data into a dictionary of key-value pairs.
-    
+
     Args:
         config_data: The configuration data to flatten (dict or list)
         format_ (str): The format of the configuration data ('json', 'yaml', 'properties')
@@ -579,12 +579,12 @@ def flatten_config_data(config_data, format_, content_type, prefix_to_add="", de
         prefix_to_add (str): Prefix to add to each key
         depth (int): Maximum depth for flattening hierarchical data
         separator (str): Separator for hierarchical keys
-        
+
     Returns:
         dict: Flattened key-value pairs
     """
     flattened_data = {}
-    
+
     if format_ == "json" and content_type and is_json_content_type(content_type):
         for key in config_data:
             __flatten_json_key_value(
@@ -756,7 +756,7 @@ def __read_kv_from_kubernetes_configmap(
 ):
     """
     Read key-value pairs from a Kubernetes ConfigMap using aks_runcommand.
-    
+
     Args:
         cmd: The command context object
         aks_cluster (str): Name of the AKS cluster
@@ -767,56 +767,56 @@ def __read_kv_from_kubernetes_configmap(
         content_type (str): Content type to apply to the key-values
         depth (int): Maximum depth for flattening hierarchical data
         separator (str): Separator for hierarchical keys
-    
+
     Returns:
         list: List of KeyValue objects
     """
-    # try:
-    key_values = []
-    from azure.cli.command_modules.acs.custom import aks_runcommand
-    from azure.cli.command_modules.acs._client_factory import cf_managed_clusters
+    try:
+        key_values = []
+        from azure.cli.command_modules.acs.custom import aks_runcommand
+        from azure.cli.command_modules.acs._client_factory import cf_managed_clusters
 
-    # Get the AKS client from the factory
-    cmd.cli_ctx.data['subscription_id'] = aks_cluster["subscription"]
-    cmd.cli_ctx.data['safe_params'] = None
-    aks_client = cf_managed_clusters(cmd.cli_ctx)
+        # Get the AKS client from the factory
+        cmd.cli_ctx.data['subscription_id'] = aks_cluster["subscription"]
+        cmd.cli_ctx.data['safe_params'] = None
+        aks_client = cf_managed_clusters(cmd.cli_ctx)
 
-    # Command to get the ConfigMap and output it as JSON
-    command = f"kubectl get configmap {configmap_name} -n {namespace} -o json"
+        # Command to get the ConfigMap and output it as JSON
+        command = f"kubectl get configmap {configmap_name} -n {namespace} -o json"
 
-    # Execute the command on the cluster
-    result = aks_runcommand(cmd, aks_client, aks_cluster["resource_group"], aks_cluster["name"], command_string=command)
+        # Execute the command on the cluster
+        result = aks_runcommand(cmd, aks_client, aks_cluster["resource_group"], aks_cluster["name"], command_string=command)
 
-    if hasattr(result, 'logs') and result.logs:
-        if not hasattr(result, 'exit_code') or result.exit_code != 0:
-            raise AzureResponseError(f"{result.logs.strip()}")
+        if hasattr(result, 'logs') and result.logs:
+            if not hasattr(result, 'exit_code') or result.exit_code != 0:
+                raise AzureResponseError(f"{result.logs.strip()}")
 
-        try:
-            configmap_data = json.loads(result.logs)
+            try:
+                configmap_data = json.loads(result.logs)
 
-            # Extract the data section which contains the key-value pairs
-            kvs = __extract_kv_from_configmap_data(
-                configmap_data, content_type, prefix_to_add, format_, depth, separator)
+                # Extract the data section which contains the key-value pairs
+                kvs = __extract_kv_from_configmap_data(
+                    configmap_data, content_type, prefix_to_add, format_, depth, separator)
 
-            key_values.extend(kvs)
-        except json.JSONDecodeError:
-            raise ValidationError(
-                f"The result from ConfigMap {configmap_name} could not be parsed as valid JSON."
-            )
-    else:
-        raise AzureResponseError("Unable to get the ConfigMap.")
+                key_values.extend(kvs)
+            except json.JSONDecodeError:
+                raise ValidationError(
+                    f"The result from ConfigMap {configmap_name} could not be parsed as valid JSON."
+                )
+        else:
+            raise AzureResponseError("Unable to get the ConfigMap.")
 
-    return key_values
-    # except Exception as exception:
-    #     raise AzureInternalError(
-    #         f"Failed to read key-values from ConfigMap '{configmap_name}' in namespace '{namespace}'.\n{str(exception)}"
-    #     )
+        return key_values
+    except Exception as exception:
+        raise AzureInternalError(
+            f"Failed to read key-values from ConfigMap '{configmap_name}' in namespace '{namespace}'.\n{str(exception)}"
+        )
 
 
 def __extract_kv_from_configmap_data(configmap_data, content_type, prefix_to_add="", format_=None, depth=None, separator=None):
     """
     Helper function to extract key-value pairs from ConfigMap data.
-    
+
     Args:
         configmap_data (dict): The ConfigMap data as a dictionary
         prefix_to_add (str): Prefix to add to each key
@@ -824,7 +824,7 @@ def __extract_kv_from_configmap_data(configmap_data, content_type, prefix_to_add
         format_ (str): Format of the data in the ConfigMap (e.g., "json", "yaml")
         depth (int): Maximum depth for flattening hierarchical data
         separator (str): Separator for hierarchical keys
-        
+
     Returns:
         list: List of KeyValue objects
     """
@@ -833,7 +833,7 @@ def __extract_kv_from_configmap_data(configmap_data, content_type, prefix_to_add
     if 'data' not in configmap_data:
         logger.warning("ConfigMap exists but has no data")
         return key_values
-    
+
     for key, value in configmap_data['data'].items():
         if format_ in ("json", "yaml", "properties"):
             if format_ == "json":
@@ -886,7 +886,7 @@ def __extract_kv_from_configmap_data(configmap_data, content_type, prefix_to_add
                     json.loads(value)
                 except json.JSONDecodeError:
                     logger.warning(
-                        'Value "{value}" for key "{key}" is not a valid JSON object, which conflicts with the provided content type "{content_type}".',
+                        'Value "%s" for key "%s" is not a valid JSON object, which conflicts with the provided content type "%s".',
                         value, key, content_type
                     )
                     continue
