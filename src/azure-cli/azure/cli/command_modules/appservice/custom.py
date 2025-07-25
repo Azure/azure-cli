@@ -1744,6 +1744,7 @@ def _convert_webapp_to_docker(cmd, name, resource_group, slot):
 
     # Prepare app settings for registry credentials if needed
     settings = []
+    settings.append(f"DOCKER_REGISTRY_SERVER_URL=https://{main_container.image.split('/')[0]}")
     if main_container.auth_type == AuthType.USER_CREDENTIALS:
         if main_container.user_name:
             settings.append(f"DOCKER_REGISTRY_SERVER_USERNAME={main_container.user_name}")
