@@ -26,6 +26,7 @@ class VMSSListInstances(_VMSSListInstances):
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
+
 class VMSSDeallocate(_VMSSDeallocate):
     def _output(self, *args, **kwargs):
         from azure.cli.core.aaz import AAZUndefined, has_value
