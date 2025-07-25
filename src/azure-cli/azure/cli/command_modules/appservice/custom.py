@@ -1186,8 +1186,10 @@ def _validate_sitecontainer_internal(new_sitecontainer_spec, existing_sitecontai
                                   .format(new_sitecontainer_spec.target_port, new_sitecontainer_spec.name))
     # ensure that targetPort is unique
     existing_same_port_sitecontainer = next((spec for spec in existing_sitecontainers_spec
-                                             if spec.target_port == new_sitecontainer_spec.target_port and
-                                             spec.name != new_sitecontainer_spec.name), None)
+                                             if (spec.target_port is not None and
+                                                 new_sitecontainer_spec.target_port is not None and
+                                                 spec.target_port == new_sitecontainer_spec.target_port and
+                                                 spec.name != new_sitecontainer_spec.name)), None)
     if existing_same_port_sitecontainer:
         raise ValidationError(("SiteContainer '{}' with targetPort '{}' already exists. "
                               "targetPort must be unique for SiteContainer '{}'.")
@@ -1721,6 +1723,11 @@ def _convert_webapp_to_docker(cmd, name, resource_group, slot):
     main_container = next((c for c in sitecontainers if getattr(c, "is_main", False)), None)
     if not main_container:
         raise ResourceNotFoundError("No main sitecontainer found. Cannot convert to classic mode (docker).")
+    if len(sitecontainers) > 1:
+        option = prompt_y_n('More than one sitecontainer exists. Do you want to continue with the conversion?')
+        if not option:
+            raise ValidationError("Skipped converting to classic (docker) mode as more than one sitecontainer exists."
+                                  " Please remove all but the main sitecontainer before converting.")
 
     main_container = update_webapp_sitecontainer(
         cmd, name, resource_group, main_container.name, slot=slot,
