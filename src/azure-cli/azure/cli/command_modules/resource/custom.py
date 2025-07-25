@@ -205,18 +205,18 @@ def _process_parameters_and_ext_configs(template_obj, parameter_lists, extension
         for item in params:
             param_obj, ext_configs_obj, is_file_item = _try_load_file_object(item)
             if not is_file_item:
-                param_obj, is_json_obj = _try_parse_json_object(item, False) # For inline items, we do not process extension configs. That is done via separate CLI arg.
+                param_obj, is_json_obj = _try_parse_json_object(item, False)  # For inline items, we do not process extension configs. That is done via separate CLI arg.
                 if not is_json_obj:
                     param_obj, ext_configs_obj, _ = _try_load_uri(item)  # Parameters files can supply extension configs
             if param_obj is not None:
                 parameters.update(param_obj)
-            elif not _try_parse_key_value_object(parameters, template_obj, item): ## TODO(kylealbert): error logic for extension configs
+            elif not _try_parse_key_value_object(parameters, template_obj, item):  # TODO(kylealbert): error logic for extension configs
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
             if ext_configs_obj is not None:
                 result_ext_configs.update(ext_configs_obj)
 
-    if extension_configs: # This is the CLI arg for extension configs. This only accepts an inlined object
+    if extension_configs:  # This is the CLI arg for extension configs. This only accepts an inlined object
         inlined_ext_config_obj, _ = _try_parse_json_object(extension_configs, True)
         if inlined_ext_config_obj is not None:
             # Shallow merge into result_ext_configs (overwrites at the individual config level).
@@ -1180,7 +1180,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     template_obj['resources'] = template_obj.get('resources', [])
 
     if _is_bicepparam_file_provided(parameters):
-        params_file_json = json.loads(bicepparam_json_content) # pylint: disable=used-before-assignment
+        params_file_json = json.loads(bicepparam_json_content)  # pylint: disable=used-before-assignment
         parameters = params_file_json.get('parameters', {})
         ext_configs = params_file_json.get('extensionConfigs', {})
     else:

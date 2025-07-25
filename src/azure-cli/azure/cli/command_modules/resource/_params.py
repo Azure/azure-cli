@@ -58,7 +58,7 @@ def load_arguments(self, _):
     deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], min_api='2019-06-01', help="The template spec resource id.")
     deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
-    deployment_extension_configs_type = CLIArgumentType(options_list=['--extension-configs', '-e'], action='append', nargs='+', help='the deployment extension configs') # TODO(kylealbert): help text describing merging behavior with parameters file
+    deployment_extension_configs_type = CLIArgumentType(options_list=['--extension-configs', '-e'], action='append', nargs='+', help='the deployment extension configs')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
                                        'To get more information, please visit https://learn.microsoft.com/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
