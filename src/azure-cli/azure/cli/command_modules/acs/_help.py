@@ -456,7 +456,7 @@ parameters:
     long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
   - name: --disable-run-command
     type: bool
-    short-summary: Disable run command feature for the cluster.
+    short-summary: Disable Run command feature for the cluster.
   - name: --enable-defender
     type: bool
     short-summary: Enable Microsoft Defender security profile.
@@ -920,10 +920,10 @@ parameters:
     long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
   - name: --enable-run-command
     type: bool
-    short-summary: Enable run command feature for the cluster.
+    short-summary: Enable Run command feature for the cluster.
   - name: --disable-run-command
     type: bool
-    short-summary: Disable run command feature for the cluster.
+    short-summary: Disable Run command feature for the cluster.
   - name: --defender-config
     type: string
     short-summary: Path to JSON file containing Microsoft Defender profile configurations.
