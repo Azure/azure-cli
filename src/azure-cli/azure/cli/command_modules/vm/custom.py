@@ -3802,7 +3802,6 @@ def _build_identities_info(identities):
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
 
 
-
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
