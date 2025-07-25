@@ -210,7 +210,7 @@ def _process_parameters_and_ext_configs(template_obj, parameter_lists, extension
                     param_obj, ext_configs_obj, _ = _try_load_uri(item)  # Parameters files can supply extension configs
             if param_obj is not None:
                 parameters.update(param_obj)
-            elif not _try_parse_key_value_object(parameters, template_obj, item):  # TODO(kylealbert): error logic for extension configs
+            elif not _try_parse_key_value_object(parameters, template_obj, item):
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
             if ext_configs_obj is not None:
