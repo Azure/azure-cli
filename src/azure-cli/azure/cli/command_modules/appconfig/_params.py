@@ -16,7 +16,7 @@ from azure.cli.core.commands.validators import \
     get_default_location_from_resource_group
 from ._constants import ImportExportProfiles, ImportMode, FeatureFlagConstants, ARMAuthenticationMode
 
-from ._validators import (validate_appservice_name_or_id, validate_aks_cluster_name_or_id, 
+from ._validators import (validate_appservice_name_or_id, validate_aks_cluster_name_or_id,
                           validate_sku, validate_snapshot_query_fields,
                           validate_connection_string, validate_datetime,
                           validate_export, validate_import,
@@ -268,7 +268,7 @@ def load_arguments(self, _):
     with self.argument_context('appconfig kv import', arg_group='AKS') as c:
         c.argument('aks_cluster', validator=validate_aks_cluster_name_or_id, help='ARM ID for AKS OR the name of the AKS, assuming it is in the same subscription and resource group as the App Configuration store. Required for AKS arguments'),
         c.argument('configmap_name', help='Name of the ConfigMap. Required for AKS arguments.')
-        c.argument('configmap_namespace', help='Namespace of the ConfigMap. default to "default" namespace if not specified.') 
+        c.argument('configmap_namespace', help='Namespace of the ConfigMap. default to "default" namespace if not specified.')
 
     with self.argument_context('appconfig kv export') as c:
         c.argument('label', help="Only keys and feature flags with this label will be exported. If no label specified, export keys and feature flags with null label by default. When export destination is appconfig, or when export destination is file with `appconfig/kvset` profile, this argument supports asterisk and comma signs for label filtering, for instance, * means all labels, abc* means labels with abc as prefix, and abc,xyz means labels with abc or xyz.")
