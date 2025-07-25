@@ -1373,6 +1373,7 @@ def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
         )
     return {"result": "success", "mode": mode}
 
+
 # for generic updater
 def get_webapp(cmd, resource_group_name, name, slot=None):
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot)
@@ -1628,6 +1629,7 @@ def _build_identities_info(identities):
         info['userAssignedIdentities'] = {e: {} for e in external_identities}
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
 
+
 def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot):
     site_config = get_site_configs(cmd, resource_group, name, slot)
     linux_fx_version = getattr(site_config, "linux_fx_version", None)
@@ -1635,7 +1637,7 @@ def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot):
     if linux_fx_version and not linux_fx_version.startswith('DOCKER|'):
         raise ValidationError("Cannot convert to sitecontainers mode as site is not a "
                               "classic custom container (docker) app.")
-    
+
     acr_use_managed_identity_creds = getattr(site_config, "acr_use_managed_identity_creds", None)
     acr_user_managed_identity_id = getattr(site_config, "acr_user_managed_identity_id", None)
     acr_user_name = None
@@ -1706,7 +1708,8 @@ def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot):
     logger.warning("Setting linuxFxVersion to SITECONTAINERS")
     update_site_configs(cmd, resource_group, name, slot=slot, linux_fx_version="SITECONTAINERS")
     logger.warning("Webapp '%s' converted to sitecontainers mode.", name)
-    
+
+
 def _convert_webapp_to_docker(cmd, name, resource_group, slot):
     site_config = get_site_configs(cmd, resource_group, name, slot)
     linux_fx_version = getattr(site_config, "linux_fx_version", None)
@@ -1748,7 +1751,10 @@ def _convert_webapp_to_docker(cmd, name, resource_group, slot):
         _generic_site_operation(cmd.cli_ctx, resource_group, name, 'update_configuration', slot, configs)
     elif main_container.auth_type == AuthType.USER_ASSIGNED:
         client = web_client_factory(cmd.cli_ctx)
-        app = client.web_apps.get_slot(resource_group, name, slot) if slot else client.web_apps.get(resource_group, name)
+        if slot:
+            app = client.web_apps.get_slot(resource_group, name, slot)
+        else:
+            app = client.web_apps.get(resource_group, name)
         if app.identity and app.identity.user_assigned_identities:
             # Find the managed identity key whose client_id matches main_container.user_managed_identity_client_id
             matched_key = None
@@ -1777,6 +1783,7 @@ def _convert_webapp_to_docker(cmd, name, resource_group, slot):
     if settings:
         update_app_settings(cmd, resource_group, name, settings, slot)
     logger.warning("Webapp '%s' converted to classic custom container (docker) mode.", name)
+
 
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
     ManagedServiceIdentity, ResourceIdentityType = cmd.get_models('ManagedServiceIdentity',
