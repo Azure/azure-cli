@@ -222,6 +222,7 @@ class Common:
             self.ctx.vars.instance.properties.notScopes = split
 
     # Change UTC format from Zulu to +00:00
+    @staticmethod
     def AdjustUTCFormat(exemption):
         if exemption.properties.expires_on:
             exemption.properties.expires_on = exemption.properties.expires_on._data.replace('Z', '+00:00')
