@@ -360,17 +360,20 @@ class Profile:
 
         managed_identity_type, managed_identity_id = Profile._parse_managed_identity_account(account)
 
+        non_current_tenant_template = ("For {} account, getting access token for non-current tenants is not "
+                                       "supported. The specified tenant must be the current tenant "
+                                       f"{account[_TENANT_ID]}")
         if in_cloud_console() and account[_USER_ENTITY].get(_CLOUD_SHELL_ID):
             # Cloud Shell
-            if tenant:
-                raise CLIError("Tenant shouldn't be specified for Cloud Shell account")
+            if tenant and tenant != account[_TENANT_ID]:
+                raise CLIError(non_current_tenant_template.format('Cloud Shell'))
             from .auth.msal_credentials import CloudShellCredential
             cred = CloudShellCredential()
 
         elif managed_identity_type:
             # managed identity
-            if tenant:
-                raise CLIError("Tenant shouldn't be specified for managed identity account")
+            if tenant and tenant != account[_TENANT_ID]:
+                raise CLIError(non_current_tenant_template.format('managed identity'))
             cred = ManagedIdentityAuth.credential_factory(managed_identity_type, managed_identity_id)
             if credential_out:
                 credential_out['credential'] = cred
