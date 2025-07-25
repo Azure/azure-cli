@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2025-03-01"],
         ]
     }
 
@@ -134,7 +134,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2025-03-01",
                     required=True,
                 ),
             }
@@ -453,6 +453,7 @@ class Wait(AAZWaitCommand):
             )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
+                flags={"read_only": True},
             )
             replication.remote_path = AAZObjectType(
                 serialized_name="remotePath",
