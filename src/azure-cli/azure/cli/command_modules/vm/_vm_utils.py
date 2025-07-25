@@ -93,7 +93,9 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         parent_path = ''
         resource_name = id_parts['name']
         resource_type = id_parts.get('type', resource_type)
-    api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
+
+    from azure.cli.command_modules.network.aaz.latest.network.vnet import Show as VirtualNetworkShow
+    api_version = VirtualNetworkShow._aaz_info['version']
 
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
