@@ -84,6 +84,11 @@ SEC_CERTIFICATE_URL_VALUE = "secCertificateUrlValue"
 
 os_dic = {'WindowsServer2012R2Datacenter': '2012-R2-Datacenter',
           'UbuntuServer1604': '16.04-LTS',
+          'UbuntuServer1804': '18.04-LTS',
+          'UbuntuServer1804Gen2': '18_04-LTS-Gen2',
+          'UbuntuServer2004': '20_04-LTS',
+          'UbuntuServer2204': '22_04-LTS',
+          'UbuntuServer2204Gen2': '22_04-LTS-Gen2',
           'WindowsServer2016DatacenterwithContainers': '2016-Datacenter-with-Containers',
           'WindowsServer2016Datacenter': '2016-Datacenter',
           'WindowsServer1709': "Datacenter-Core-1709-smalldisk",
@@ -91,7 +96,13 @@ os_dic = {'WindowsServer2012R2Datacenter': '2012-R2-Datacenter',
           'WindowsServer1803withContainers': "Datacenter-Core-1803-with-Containers-smalldisk",
           'WindowsServer1809withContainers': "Datacenter-Core-1809-with-Containers-smalldisk",
           'WindowsServer2019Datacenter': "2019-Datacenter",
-          'WindowsServer2019DatacenterwithContainers': "2019-Datacenter-Core-with-Containers"}
+          'WindowsServer2019DatacenterGen2': "2019-Datacenter-gensecond",
+          'WindowsServer2019DatacenterwithContainers': "2019-Datacenter-Core-with-Containers",
+          'WindowsServer2022Datacenter': "2022-Datacenter",
+          'WindowsServer2022DatacenterGen2': "2022-Datacenter-G2",
+          'WindowsServer2022DatacenterAzureEdition': "2022-Datacenter-Azure-Edition",
+          'WindowsServer2022DatacenterCoreSmallDisk': "2022-Datacenter-Core-SmallDisk",
+          'WindowsServer2022DatacenterGS': "2022-Datacenter-GS"}
 
 
 def list_cluster(client, resource_group_name=None):
@@ -183,7 +194,6 @@ def new_cluster(cmd,
     cert_thumbprint = None
     output_file = None
     if parameter_file is None:
-        vm_os = os_dic[vm_os]
         reliability_level = _get_reliability_level(cluster_size)
         result = _create_certificate(cmd,
                                      cli_ctx,
@@ -201,8 +211,9 @@ def new_cluster(cmd,
         output_file = result[3]
 
         linux = None
-        if vm_os == '16.04-LTS':
+        if vm_os.startswith('Ubuntu'):
             linux = True
+        vm_os = os_dic[vm_os]
         template = _modify_template(linux)
         parameters = _set_parameters_for_default_template(cluster_location=location,
                                                           cluster_name=cluster_name,
