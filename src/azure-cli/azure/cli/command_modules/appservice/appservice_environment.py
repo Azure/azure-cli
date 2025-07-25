@@ -212,6 +212,7 @@ def _get_resource_client_factory(cli_ctx, api_version=None):
         client.api_version = VERSION_2019_10_01
     return client
 
+
 def _resource_deployments_client_factory(cli_ctx, **_):
     from azure.cli.core.profiles import ResourceType
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS)

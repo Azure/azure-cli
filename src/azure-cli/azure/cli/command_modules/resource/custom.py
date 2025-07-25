@@ -1522,7 +1522,7 @@ def _get_custom_or_builtin_policy(cmd, client, name, subscription=None, manageme
     if subscription:
         subscription_id = _get_subscription_id_from_subscription(cmd.cli_ctx, subscription)
         client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_POLICY,
-                                            subscription_id=subscription_id)
+                                         subscription_id=subscription_id)
         policy_operations = client.policy_set_definitions if for_policy_set else client.policy_definitions
     try:
         if not management_group:
@@ -3195,18 +3195,16 @@ def create_policy_assignment(cmd, policy=None, policy_set_definition=None,
     assignment = PolicyAssignment(display_name=display_name, policy_definition_id=policy_id, scope=scope, enforcement_mode=enforcement_mode, description=description)
     assignment.parameters = params if params else None
 
-    if cmd.supported_api_version(min_api='2017-06-01-preview'):
-        if not_scopes:
-            kwargs_list = []
-            for id_arg in not_scopes.split(' '):
-                id_parts = parse_resource_id(id_arg)
-                if id_parts.get('subscription') or _is_management_group_scope(id_arg):
-                    kwargs_list.append(id_arg)
-                else:
-                    raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
-            assignment.not_scopes = kwargs_list
+    if not_scopes:
+        kwargs_list = []
+        for id_arg in not_scopes.split(' '):
+            id_parts = parse_resource_id(id_arg)
+            if id_parts.get('subscription') or _is_management_group_scope(id_arg):
+                kwargs_list.append(id_arg)
+            else:
+                raise InvalidArgumentValueError("Invalid resource ID value in --not-scopes: '%s'" % id_arg)
+        assignment.not_scopes = kwargs_list
 
-    identities = None
     identities = None
     if location:
         assignment.location = location
