@@ -234,6 +234,25 @@ subscription than the app service environment, please use the resource ID for --
                    help='Include the runtime details of the regions.', is_preview=True)
         c.argument('runtime', help="limit the output to just the specified runtime", is_preview=True)
 
+    with self.argument_context('functionapp flex-migration list') as c:
+        c.argument('ignore_slots', arg_type=get_three_state_flag(return_label=True),
+                   help="Skip the check for slots for the existing function app. Please note that Flex Consumption does not support slots, so this should only be used if you do not intend to use slots.")
+
+    with self.argument_context('functionapp flex-migration start') as c:
+        c.argument('source_resource_group', help='The resource group of the source function app to migrate from.')
+        c.argument('source_name', help='The name of the source function app to migrate from.')
+        c.argument('resource_group', help='The resource group of the target function app to migrate to.')
+        c.argument('name', help='The name of the target function app to migrate to.')
+        c.argument('storage_account', help='The storage account to use for the target function app.')
+        c.argument('maximum_instance_count', type=int, help="The maximum number of instances.")
+        c.argument('skip_managed_identities', options_list=['--skip-managed-identities', '--smi'], arg_type=get_three_state_flag(return_label=True), help="Skip managed identities migration.")
+        c.argument('skip_access_restrictions', options_list=['--skip-access-restrictions', '--sar'], arg_type=get_three_state_flag(return_label=True), help="Skip access restrictions migration.")
+        c.argument('skip_storage_mount', options_list=['--skip-storage-mount', '--ssm'], arg_type=get_three_state_flag(return_label=True), help="Skip storage mount migration.")
+        c.argument('skip_hostnames', options_list=['--skip-hostnames', '--sh'], arg_type=get_three_state_flag(return_label=True), help="Skip hostnames migration.")
+        c.argument('skip_cors', options_list=['--skip-cors', '--sc'], arg_type=get_three_state_flag(return_label=True), help="Skip CORS migration.")
+        c.argument('ignore_slots', arg_type=get_three_state_flag(return_label=True),
+                   help="Skip the check for slots for the existing function app. Please note that Flex Consumption does not support slots, so this should only be used if you do not intend to use slots.")
+
     with self.argument_context('webapp deleted list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
         c.argument('slot', options_list=['--slot', '-s'], help='Name of the deleted web app slot.')

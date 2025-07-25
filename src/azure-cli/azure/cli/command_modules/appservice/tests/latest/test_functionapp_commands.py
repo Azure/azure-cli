@@ -809,6 +809,264 @@ class FunctionappDapr(LiveScenarioTest):
         ])
 
 
+class FunctionAppFlexMigrationTest(LiveScenarioTest):
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_migration_list_candidates(self, resource_group, storage_account):
+        eligible_functionapp_name = self.create_random_name('consumption-func', 24)
+        noneligible_functionapp_name = self.create_random_name('noneligible-func', 24)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, eligible_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.9 --functions-version 4'
+                  .format(resource_group, noneligible_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        candidates = self.cmd('functionapp flex-migration list').get_output_in_json()
+
+        candidate_names = [candidate.get('name') for candidate in candidates if 'name' in candidate]
+
+        self.assertTrue(eligible_functionapp_name in candidate_names)
+        self.assertTrue(noneligible_functionapp_name not in candidate_names)
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_site_configuration(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+        location = FLEX_ASP_LOCATION_FUNCTIONAPP
+
+        self.cmd(
+            'functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+            .format(resource_group, src_name, location, storage_account)
+        )
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, src_name), checks=[
+            JMESPathCheck('http20Enabled', True),
+            JMESPathCheck('minTlsVersion', '1.2'),
+            JMESPathCheck('minTlsCipherSuite', None)])
+
+        self.cmd('functionapp config set -g {} -n {} --http20-enabled false --min-tls-version 1.3'.format(resource_group, src_name), checks=[
+            JMESPathCheck('http20Enabled', False),
+            JMESPathCheck('minTlsVersion', '1.3')
+        ])
+
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO=BAR'.format(resource_group, src_name))
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group2, tgt_name), checks=[
+            JMESPathCheck("[?name=='FOO'].value|[0]", "BAR")])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group2, tgt_name), checks=[
+            JMESPathCheck('http20Enabled', False),
+            JMESPathCheck('minTlsVersion', '1.3')
+        ])
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_storage_mounts(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+        location = FLEX_ASP_LOCATION_FUNCTIONAPP
+
+        self.cmd(
+            'functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+            .format(resource_group, src_name, location, storage_account)
+        )
+
+        self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
+                  '--share-name sharename --access-key key --mount-path /path/to/mount')
+                  .format(resource_group, src_name)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group2, tgt_name)).assert_with_checks([
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
+            JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
+
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_managed_identities(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+        location = FLEX_ASP_LOCATION_FUNCTIONAPP
+
+        self.cmd(
+            'functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+            .format(resource_group, src_name, location, storage_account)
+        )
+
+        self.cmd('functionapp identity assign -g {} -n {}'.format(resource_group, src_name))
+
+        user_identity_name = self.create_random_name('useridentity', 24)
+        user_identity = self.cmd('identity create -g {} -n {}'.format(resource_group, user_identity_name)).get_output_in_json()
+        user_identity_id = user_identity['id']
+
+        self.cmd('functionapp identity assign -g {} -n {} --identities {}'.format(resource_group, src_name, user_identity_id))
+
+        src_identity_info = self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
+        system_identity_principal_id = src_identity_info['principalId']
+
+        self.cmd('role assignment create --assignee {} --role "Storage Blob Data Contributor" --scope /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'
+                 .format(system_identity_principal_id, self.get_subscription_id(), resource_group, storage_account))
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        tgt_identity_info = self.cmd('functionapp identity show -g {} -n {}'.format(resource_group2, tgt_name)).get_output_in_json()
+        self.assertTrue(tgt_identity_info['type'] in ['SystemAssigned', 'SystemAssigned, UserAssigned'])
+        self.assertTrue('userAssignedIdentities' in tgt_identity_info)
+        self.assertTrue(user_identity_id in tgt_identity_info['userAssignedIdentities'])
+
+        tgt_system_principal_id = tgt_identity_info['principalId']
+        self.cmd('role assignment list --assignee {} --all'.format(tgt_system_principal_id), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].roleDefinitionName', 'Storage Blob Data Contributor')
+        ])
+
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_access_restrictions(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+        location = FLEX_ASP_LOCATION_FUNCTIONAPP
+
+        self.cmd(
+            'functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+            .format(resource_group, src_name, location, storage_account)
+        )
+
+        self.cmd('webapp config access-restriction add -g {} -n {} --rule-name afd-extended --action Allow --service-tag AzureFrontDoor.Backend --priority 200 --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a x-azure-FDID=next-id x-forwarded-host=contoso.com'.format(resource_group, src_name), checks=[
+            JMESPathCheck('length(@)', 2),
+            JMESPathCheck('[0].name', 'afd-extended'),
+            JMESPathCheck('[0].action', 'Allow'),
+            JMESPathCheck('[0].ipAddress', 'AzureFrontDoor.Backend'),
+            JMESPathCheck('[0].tag', 'ServiceTag'),
+            JMESPathCheck('length([0].headers)', 2),
+            JMESPathCheck('length([0].headers.\"x-azure-fdid\")', 2),
+            JMESPathCheck('length([0].headers.\"x-forwarded-host\")', 1)
+        ])
+
+        self.cmd('az network vnet create -g {} -n {} --address-prefixes 10.0.0.0/16 --subnet-name endpoint-subnet --subnet-prefixes 10.0.0.0/24'.format(resource_group, vnet_name), checks=[
+            JMESPathCheck('subnets[0].serviceEndpoints', None)
+        ])
+
+        self.cmd('webapp config access-restriction add -g {} -n {} --rule-name vnet-integration --action Allow --vnet-name {} --subnet endpoint-subnet --priority 150'.format(resource_group, src_name, vnet_name), checks=[
+            JMESPathCheck('length(@)', 3),
+            JMESPathCheck('[1].name', 'vnet-integration'),
+            JMESPathCheck('[1].action', 'Allow')
+        ])
+
+        self.cmd('webapp config access-restriction add -g {} -n {} --rule-name multi-source --action Allow --ip-address "2004::1000/120,192.168.0.0/24" --priority 200'.format(resource_group, src_name), checks=[
+            JMESPathCheck('length(@)', 4),
+            JMESPathCheck('[2].name', 'multi-source'),
+            JMESPathCheck('[2].action', 'Allow'),
+            JMESPathCheck('[2].ipAddress', '2004::1000/120,192.168.0.0/24')
+        ])
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        self.cmd('webapp config access-restriction show -g {} -n {}'.format(resource_group2, tgt_name), checks=[
+            JMESPathCheck('length(@)', 5),
+            JMESPathCheck('length(ipSecurityRestrictions)', 4),
+            JMESPathCheck('ipSecurityRestrictions[0].name', 'afd-extended'),
+            JMESPathCheck('ipSecurityRestrictions[0].action', 'Allow'),
+            JMESPathCheck('ipSecurityRestrictions[0].ip_address', 'AzureFrontDoor.Backend'),
+            JMESPathCheck('ipSecurityRestrictions[0].tag', 'ServiceTag'),
+            JMESPathCheck('length(ipSecurityRestrictions[0].headers)', 2),
+            JMESPathCheck('ipSecurityRestrictions[1].name', 'vnet-integration'),
+            JMESPathCheck('ipSecurityRestrictions[1].action', 'Allow'),
+            JMESPathCheck('ipSecurityRestrictions[2].name', 'multi-source'),
+            JMESPathCheck('ipSecurityRestrictions[2].action', 'Allow'),
+            JMESPathCheck('ipSecurityRestrictions[2].ip_address', '2004::1000/120,192.168.0.0/24'),
+            JMESPathCheck('ipSecurityRestrictions[3].name', 'Deny all'),
+            JMESPathCheck('ipSecurityRestrictions[3].action', 'Deny'),
+            JMESPathCheck('length(scmIpSecurityRestrictions)', 1),
+            JMESPathCheck('scmIpSecurityRestrictions[0].name', 'Allow all'),
+            JMESPathCheck('scmIpSecurityRestrictions[0].action', 'Allow'),
+            JMESPathCheck('scmIpSecurityRestrictionsUseMain', False),
+            JMESPathCheck('pSecurityRestrictionsDefaultAction', None),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
+        ])
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_cors(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+        location = FLEX_ASP_LOCATION_FUNCTIONAPP
+
+        self.cmd(
+            'functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+            .format(resource_group, src_name, location, storage_account)
+        )
+
+        self.cmd('functionapp cors add -g {} -n {} --allowed-origins https://example.com https://api.example.com https://localhost:3000'
+                 .format(resource_group, src_name))
+
+        self.cmd('functionapp cors credentials -g {} -n {} --enable'
+                 .format(resource_group, src_name))
+
+        src_cors_config = self.cmd('functionapp cors show -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
+
+        self.assertTrue('allowedOrigins' in src_cors_config)
+        self.assertTrue('https://example.com' in src_cors_config['allowedOrigins'])
+        self.assertTrue('https://api.example.com' in src_cors_config['allowedOrigins'])
+        self.assertTrue('https://localhost:3000' in src_cors_config['allowedOrigins'])
+        self.assertTrue(src_cors_config['supportCredentials'])
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        tgt_cors_config = self.cmd('functionapp cors show -g {} -n {}'.format(resource_group2, tgt_name)).get_output_in_json()
+
+        self.assertTrue('allowedOrigins' in tgt_cors_config, "Target app should have allowedOrigins")
+        self.assertTrue('https://example.com' in tgt_cors_config['allowedOrigins'],
+                       "https://example.com should be migrated to target app")
+        self.assertTrue('https://api.example.com' in tgt_cors_config['allowedOrigins'],
+                       "https://api.example.com should be migrated to target app")
+        self.assertTrue('https://localhost:3000' in tgt_cors_config['allowedOrigins'],
+                       "https://localhost:3000 should be migrated to target app")
+
+        self.assertTrue(tgt_cors_config['supportCredentials'])
+
+
 class FunctionAppFlex(LiveScenarioTest):
     def test_functionapp_list_flexconsumption_locations(self):
         locations = self.cmd('functionapp list-flexconsumption-locations').get_output_in_json()

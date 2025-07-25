@@ -954,6 +954,645 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
             logger.warning("App settings may not be propagated to the SCM site")
 
 
+def _is_linux_consumption_function_app(cmd, site):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient)
+
+    if site.kind != 'functionapp,linux':
+        return False
+
+    if not is_valid_resource_id(site.server_farm_id):
+        return False
+
+    try:
+        parsed_plan_id = parse_resource_id(site.server_farm_id)
+        plan_info = web_client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+        if plan_info is None:
+            return False
+        return plan_info.sku.tier.lower() == 'dynamic'
+    except Exception:  # pylint: disable=broad-except
+        return False
+
+
+def list_flex_migration_candidates(cmd, ignore_slots=False):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient)
+
+    logger.warning("Searching for function apps under the subscription '%s' that are eligible for Flex "
+                   "Consumption migration...\n", subscription_id)
+
+    all_sites = list(web_client.web_apps.list())
+    eligible_sites = []
+    ineligible_sites = []
+
+    flex_regions = [region['name'] for region in list_flexconsumption_locations(cmd)]
+
+    for site in all_sites:
+        parsed_site_id = parse_resource_id(site.id)
+
+        if not _is_linux_consumption_function_app(cmd, site):
+            continue
+
+        try:
+            if validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions, ignore_slots):
+                eligible_sites.append({
+                    'name': site.name,
+                    'resource_group': parsed_site_id['resource_group']
+                })
+        except ValidationError as e:
+            ineligible_sites.append({
+                'name': site.name,
+                'resource_group': parsed_site_id['resource_group'],
+                'reason': str(e)
+            })
+
+    if len(eligible_sites) == 0:
+        logger.warning("No Linux Consumption function apps found that are eligible for Flex Consumption migration.")
+
+    else:
+        logger.warning("Found %s Linux Consumption function app(s) eligible for Flex Consumption "
+                       "migration:\n", len(eligible_sites))
+        logger.warning("Name                    Resource Group")
+        logger.warning("-" * 80)
+
+        for candidate in eligible_sites:
+            logger.warning("%-23s %-23s", candidate['name'][:23], candidate['resource_group'])
+
+    if len(ineligible_sites) > 0:
+        logger.warning("\nFound %s Linux Consumption function app(s) that are NOT eligible for Flex Consumption "
+                       "migration:\n", len(ineligible_sites))
+        logger.warning("Name                    Reason")
+        logger.warning("-" * 120)
+
+        for ineligible in ineligible_sites:
+            reason_display = ineligible['reason'][:100]
+            logger.warning("%-23s %-23s", ineligible['name'][:23], reason_display)
+
+    return eligible_sites
+
+
+def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions, ignore_slots=False):
+    # Validating that the site is in a Flex-supported region
+    normalized_site_location = _normalize_location(cmd, site.location)
+    if normalized_site_location not in flex_regions:
+        raise ValidationError("The site '{}' is not in a Flex-supported region. "
+                              "Please see the list of Flex-supported regions by running az functionapp "
+                              "list-flexconsumption-locations".format(site.name))
+
+    # Validating that the site is using a Flex-supported runtime
+    parsed_site_id = parse_resource_id(site.id)
+    resource_group = parsed_site_id['resource_group']
+    site_config = get_site_configs(cmd, resource_group, site.name)
+    linux_fx_version = getattr(site_config, 'linux_fx_version', None)
+    runtime_info = _get_functionapp_runtime_info_helper(cmd, linux_fx_version, None, None, True)
+    runtime = runtime_info['app_runtime']
+    runtime_version = runtime_info['app_runtime_version']
+
+    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, normalized_site_location, runtime)
+    matched_runtime = runtime_helper.resolve(runtime, runtime_version)
+
+    if not matched_runtime:
+        raise ValidationError("The site '{}' is not using a supported runtime for Flex migration. "
+                              "Please see the list of Flex-supported runtimes by running "
+                              "az functionapp list-flexconsumption-runtimes".format(site.name))
+
+    # Validating that the site does not have slots configured
+    if not ignore_slots:
+        slots = list_slots(cmd, resource_group, site.name)
+        if len(slots) > 0:
+            raise ValidationError("The site '{}' has slots configured. "
+                                  "Slots are not supported in FlexConsumption.".format(site.name))
+    else:
+        logger.warning("Skipping slots check for site '%s'. Please note that slots are not supported "
+                       "in FlexConsumption.", site.name)
+
+    # Validating that the site does not have SSL bindings configured
+    for ssl_state in site.host_name_ssl_states or []:
+        if ssl_state.ssl_state != 'Disabled':
+            raise ValidationError("The site '{}' has SSL bindings configured. "
+                                  "SSL bindings are not supported in FlexConsumption.".format(site.name))
+
+    # Validating that the site has triggers supported in FlexConsumption
+    functions = list_functions(cmd, resource_group, site.name)
+    unsupported_blob_triggers = []
+
+    for function in functions:
+        if not hasattr(function, 'config') or not function.config:
+            continue
+        bindings = function.config.get('bindings', [])
+        if not bindings:
+            continue
+        for binding in bindings:
+            if binding.get('type', None) == 'blobTrigger' and binding.get('source', None) != 'EventGrid':
+                unsupported_blob_triggers.append(function.name)
+
+    if unsupported_blob_triggers:
+        function_list = '\n'.join(['  - {}'.format(func_name) for func_name in unsupported_blob_triggers])
+        raise ValidationError("The site '{}' has {} blob storage trigger(s) that don't use Event Grid "
+                              "as the source:\n{}\nFlexConsumption only supports Event Grid-based blob triggers. "
+                              "Please convert these triggers to use Event Grid or replace them with Event Grid "
+                              "triggers before migration.".format(site.name, len(unsupported_blob_triggers),
+                                                                  function_list))
+
+    return True
+
+
+def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resource_group, name, storage_account,
+                                maximum_instance_count=None, skip_managed_identities=False,
+                                skip_access_restrictions=False, skip_storage_mount=False, skip_hostnames=False,
+                                skip_cors=False, ignore_slots=False):
+
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient)
+
+    # Validate that the app is eligible for Flex migration
+    logger.warning("Validating that the app '%s' is eligible for Flex migration...", source_name)
+    flex_regions = [region['name'] for region in list_flexconsumption_locations(cmd)]
+    source = web_client.web_apps.get(source_resource_group, source_name)
+
+    if not _is_linux_consumption_function_app(cmd, source):
+        raise ValidationError("The site '{}' is not on a Linux Dynamic (Consumption) plan. "
+                              "Flex migration is only supported for Function Apps on Linux Consumption plans."
+                              .format(source.name))
+
+    if validate_flex_migration_eligibility_for_linux_consumption_app(cmd, source, flex_regions, ignore_slots):
+        logger.warning("Source app '%s' is eligible for Flex migration", source_name)
+
+    source_site_configs = get_site_configs(cmd, source_resource_group, source_name)
+    source_linux_fx_version = getattr(source_site_configs, 'linux_fx_version', None)
+    source_runtime_info = _get_functionapp_runtime_info_helper(cmd, source_linux_fx_version, None, None, True)
+    source_runtime = source_runtime_info['app_runtime']
+    source_runtime_version = source_runtime_info['app_runtime_version']
+
+    # Create flex function app
+    logger.warning("\nCreating FlexConsumption function app '%s' in resource group '%s'...", name, resource_group)
+    try:
+        create_functionapp(cmd, resource_group, name, storage_account, flexconsumption_location=source.location,
+                           runtime=source_runtime, runtime_version=source_runtime_version,
+                           maximum_instance_count=maximum_instance_count)
+    except Exception:
+        logger.error("There was an error creating the FlexConsumption function app. You might want to delete "
+                     "the resources created so far and try again.")
+        raise
+    logger.warning("FlexConsumption function app '%s' created successfully", name)
+
+    # Migrate app settings, site configs and site properties
+    _migrate_app_settings(cmd, source_resource_group, source_name, resource_group, name)
+    _migrate_site_configs(cmd, source_site_configs, resource_group, name)
+    _migrate_site_properties(cmd, source, resource_group, name)
+    _migrate_basic_publishing_credentials_policies(cmd, source_resource_group, source_name, resource_group, name)
+
+    # CORS migration
+    if not skip_cors:
+        _migrate_cors_settings(cmd, source_site_configs, source_name, resource_group, name)
+    else:
+        logger.warning("\nSkipping CORS settings migration")
+
+    # Custom hostname migration
+    if not skip_hostnames:
+        _migrate_custom_hostnames(cmd, source_resource_group, source_name, resource_group, name)
+    else:
+        logger.warning("\nSkipping custom hostname migration")
+
+    # Storage mount migration
+    if not skip_storage_mount:
+        _migrate_storage_mounts(cmd, source_resource_group, source_name, resource_group, name)
+    else:
+        logger.warning("\nSkipping storage mount migration")
+
+    # Access restrictions migration
+    if not skip_access_restrictions:
+        _migrate_access_restrictions(cmd, source_resource_group, source_name, resource_group, name)
+    else:
+        logger.warning("\nSkipping access restrictions migration")
+
+    # Managed identities migration
+    if not skip_managed_identities:
+        _migrate_managed_identities_and_roles(cmd, source, resource_group, name)
+    else:
+        logger.warning("\nSkipping managed identities migration")
+
+    logger.warning("\nInitial migration steps complete. Function app '%s' migrated to FlexConsumption app '%s'. "
+                   "Next: deploy code, test functions, then delete the source app."
+                   "\nFor more details on the migration, please visit: "
+                   "https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex",
+                   source_name, name)
+
+    return get_functionapp(cmd, resource_group, name)
+
+
+def _migrate_app_settings(cmd, source_resource_group, source_name, resource_group, name):
+    logger.warning("\nMigrating app settings from source function app '%s' to target function app '%s'...",
+                   source_name, name)
+    try:
+        source_app_settings = get_app_settings(cmd, source_resource_group, source_name)
+
+        excluded_settings = {
+            'WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED',
+            'WEBSITE_MOUNT_ENABLED',
+            'ENABLE_ORYX_BUILD',
+            'FUNCTIONS_EXTENSION_VERSION',
+            'FUNCTIONS_WORKER_RUNTIME',
+            'FUNCTIONS_WORKER_RUNTIME_VERSION',
+            'FUNCTIONS_MAX_HTTP_CONCURRENCY',
+            'FUNCTIONS_WORKER_PROCESS_COUNT',
+            'FUNCTIONS_WORKER_DYNAMIC_CONCURRENCY_ENABLED',
+            'SCM_DO_BUILD_DURING_DEPLOYMENT',
+            'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
+            'WEBSITE_CONTENTOVERVNET',
+            'WEBSITE_CONTENTSHARE',
+            'WEBSITE_DNS_SERVER',
+            'WEBSITE_MAX_DYNAMIC_APPLICATION_SCALE_OUT',
+            'WEBSITE_NODE_DEFAULT_VERSION',
+            'WEBSITE_RUN_FROM_PACKAGE',
+            'WEBSITE_SKIP_CONTENTSHARE_VALIDATION',
+            'WEBSITE_VNET_ROUTE_ALL',
+            'APPLICATIONINSIGHTS_CONNECTION_STRING',
+            'AZUREWEBJOBSDASHBOARD'
+        }
+
+        migrated_app_settings = []
+        for setting in source_app_settings:
+            setting_name = setting['name'].upper()
+            if setting_name not in excluded_settings and not setting_name.startswith('AZUREWEBJOBSSTORAGE'):
+                migrated_app_settings.append(f"{setting['name']}={setting['value']}")
+
+        if migrated_app_settings:
+            setting_names = [setting.split('=')[0] for setting in migrated_app_settings]
+            update_app_settings(cmd, resource_group, name, migrated_app_settings)
+            logger.warning("Successfully migrated %d app settings to target function app: %s",
+                           len(migrated_app_settings), ', '.join(setting_names))
+        else:
+            logger.warning("No app settings to migrate")
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Failed to migrate app settings with error %s. Skipping app settings migration due to error. "
+                       "Run 'az functionapp config appsettings set' to add them manually", str(e))
+
+
+def _migrate_site_configs(cmd, source_site_configs, resource_group, name):
+    logger.warning("\nMigrating site configs from source to target function app '%s'...", name)
+    try:
+        site_configs = {
+            'http20_enabled': str(source_site_configs.http20_enabled).lower(),
+            'min_tls_version': source_site_configs.min_tls_version,
+            'min_tls_cipher_suite': source_site_configs.min_tls_cipher_suite
+        }
+
+        update_site_configs(cmd, resource_group, name, **site_configs)
+        logger.warning("Successfully migrated the following site configs to target function app '%s': %s",
+                       name, ', '.join(site_configs.keys()))
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Failed to update site configs for function app '%s' with error %s. "
+                       "Run 'az functionapp config set' to add them manually", name, str(e))
+
+
+def _migrate_site_properties(cmd, source, resource_group, name):
+    logger.warning("\nMigrating site properties from source to target function app '%s'...", name)
+    try:
+        functionapp = get_functionapp(cmd, resource_group, name)
+        functionapp.https_only = source.https_only
+        functionapp.client_cert_enabled = source.client_cert_enabled
+        functionapp.client_cert_mode = source.client_cert_mode
+        functionapp.client_cert_exclusion_paths = source.client_cert_exclusion_paths
+
+        set_functionapp(cmd, resource_group, name, parameters=functionapp)
+        logger.warning("Successfully updated the following properties for function app '%s': "
+                       "https_only, client_cert_enabled, client_cert_mode, client_cert_exclusion_paths", name)
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Failed to update function app '%s' with error %s. Skipping site properties migration"
+                       " due to error. Run 'az functionapp update' to configure the site properties manually",
+                       name, str(e))
+
+
+def _migrate_basic_publishing_credentials_policies(cmd, source_resource_group, source_name, resource_group, name):
+    logger.warning("\nMigrating basic publishing credentials policies from source function app '%s' to target "
+                   "function app '%s'...", source_name, name)
+    try:
+        from ..resource.custom import show_resource, update_resource
+
+        source_scm_policy = show_resource(
+            cmd,
+            resource_group_name=source_resource_group,
+            resource_provider_namespace='Microsoft.Web',
+            parent_resource_path='sites/{}'.format(source_name),
+            resource_type='basicPublishingCredentialsPolicies',
+            resource_name='scm'
+        )
+
+        scm_basic_publishing_credential_enabled = source_scm_policy.properties.get('allow', False)
+
+        if scm_basic_publishing_credential_enabled:
+            scm_policy_update = {
+                "location": source_scm_policy.location,
+                "properties": {
+                    "allow": True
+                }
+            }
+
+            update_resource(cmd,
+                            resource_group_name=resource_group,
+                            resource_provider_namespace='Microsoft.Web',
+                            parent_resource_path='sites/{}'.format(name),
+                            resource_type='basicPublishingCredentialsPolicies',
+                            resource_name='scm',
+                            parameters=scm_policy_update)
+
+            logger.warning("Successfully enabled SCM basic publishing credentials")
+
+        else:
+            logger.warning("SCM basic publishing credentials are not enabled in the source function app. "
+                           "No action needed.")
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Failed to migrate basic publishing credentials policies with error %s. "
+                       "Run 'az resource update' to configure them manually", str(e))
+
+
+def _migrate_cors_settings(cmd, source_site_configs, source_name, resource_group, name):
+    logger.warning("\nMigrating CORS settings from source function app '%s' to target function app '%s'...",
+                   source_name, name)
+    try:
+        source_cors_settings = source_site_configs.cors
+        if source_cors_settings and source_cors_settings.allowed_origins:
+            add_cors(cmd, resource_group, name, source_cors_settings.allowed_origins)
+            logger.warning("Successfully migrated CORS allowed origins")
+        if source_cors_settings and source_cors_settings.support_credentials:
+            enable_credentials(cmd, resource_group, name, enable=True)
+            logger.warning("Enabled Access-Control-Allow-Credentials")
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Failed to migrate CORS settings with error %s. Skipping CORS settings migration due to error. "
+                       "Run 'az functionapp cors add' to configure them manually", str(e))
+
+
+def _migrate_custom_hostnames(cmd, source_resource_group, source_name, resource_group, name):
+    logger.warning("\nMigrating custom hostnames from source function app '%s' to target function app '%s'...",
+                   source_name, name)
+    try:
+        source_hostnames = list_hostnames(cmd, source_resource_group, source_name)
+
+        custom_hostnames = []
+        for hostname_binding in source_hostnames:
+            hostname = hostname_binding.name
+            if not hostname.endswith('.azurewebsites.net'):
+                custom_hostnames.append(hostname)
+
+        if custom_hostnames:
+            logger.warning("Found %d custom domain(s) to migrate:", len(custom_hostnames))
+            for hostname in custom_hostnames:
+                logger.warning("  - %s", hostname)
+
+            for hostname in custom_hostnames:
+                add_hostname(cmd, resource_group, name, hostname)
+                logger.warning("Successfully migrated hostname: %s", hostname)
+        else:
+            logger.warning("No custom domains found to migrate")
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Failed to migrate hostnames with error %s. Skipping hostname migration due to error. "
+                       "Run 'az functionapp config hostname add' to add them manually", str(e))
+
+
+def _migrate_storage_mounts(cmd, source_resource_group, source_name, resource_group, name):
+    logger.warning("\nMigrating storage mounts from source function app '%s' to target function app '%s'...",
+                   source_name, name)
+    try:
+        source_storage_accounts = get_azure_storage_accounts(cmd, source_resource_group, source_name)
+
+        if not source_storage_accounts:
+            logger.warning("No storage mounts found to migrate")
+            return
+
+        for storage_config in source_storage_accounts:
+            try:
+                custom_id = storage_config['name']
+                storage_info = storage_config['value']
+
+                add_azure_storage_account(
+                    cmd=cmd,
+                    resource_group_name=resource_group,
+                    name=name,
+                    custom_id=custom_id,
+                    storage_type=storage_info.type,
+                    account_name=storage_info.account_name,
+                    share_name=storage_info.share_name,
+                    access_key=storage_info.access_key,
+                    mount_path=storage_info.mount_path,
+                    slot=None,
+                    slot_setting=False
+                )
+                logger.warning("Migrated storage mount '%s' (Account: %s, Share: %s)",
+                               custom_id, storage_info.account_name, storage_info.share_name)
+
+            except Exception as e:  # pylint: disable=broad-except
+                logger.warning("Failed to migrate storage mount '%s' with error: %s", custom_id, str(e))
+                continue
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Failed to migrate storage mounts with error %s. Skipping storage mount migration due to error. "
+                       "Run 'az webapp config storage-account add' to add them manually", str(e))
+
+
+def _migrate_access_restrictions(cmd, source_resource_group, source_name, resource_group, name):
+    logger.warning("\nMigrating access restrictions from source function app '%s' to target function app '%s'...",
+                   source_name, name)
+
+    try:
+        from . import access_restrictions
+
+        source_restrictions = access_restrictions.show_webapp_access_restrictions(
+            cmd, source_resource_group, source_name
+        )
+
+        if not source_restrictions:
+            logger.warning("No access restrictions found in source function app to migrate")
+            return
+
+        ip_restrictions = source_restrictions.get('ipSecurityRestrictions', [])
+        scm_restrictions = source_restrictions.get('scmIpSecurityRestrictions', [])
+        scm_use_main = source_restrictions.get('scmIpSecurityRestrictionsUseMain', False)
+        default_action = source_restrictions.get('ipSecurityRestrictionsDefaultAction')
+        scm_default_action = source_restrictions.get('scmIpSecurityRestrictionsDefaultAction')
+
+        # validated
+        if scm_use_main is not None or default_action or scm_default_action:
+            try:
+                access_restrictions.set_webapp_access_restriction(
+                    cmd, resource_group, name,
+                    use_same_restrictions_for_scm_site=scm_use_main,
+                    default_action=default_action,
+                    scm_default_action=scm_default_action
+                )
+                logger.warning("Set access restriction configuration: scmUseMain=%s, defaultAction=%s, "
+                               "scmDefaultAction=%s", scm_use_main, default_action, scm_default_action)
+            except Exception as e:  # pylint: disable=broad-except
+                logger.warning("Failed to set access restriction configuration: %s", str(e))
+
+        for restriction in ip_restrictions:
+            _add_single_access_restriction(
+                cmd, resource_group, name, restriction, scm_site=False
+            )
+
+        if not scm_use_main and scm_restrictions:
+            for restriction in scm_restrictions:
+                _add_single_access_restriction(
+                    cmd, resource_group, name, restriction, scm_site=True
+                )
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Failed to migrate access restrictions with error %s. Skipping access restrictions "
+                       "migration due to error. Run 'az webapp config access-restriction add' to add them manually",
+                       str(e))
+
+
+def _add_single_access_restriction(cmd, resource_group, name, restriction, scm_site=False):
+    from . import access_restrictions
+
+    rule_name = restriction.get('name')
+    priority = restriction.get('priority')
+    action = restriction.get('action', 'Allow')
+    description = restriction.get('description')
+    tag = restriction.get('tag', 'Default')
+    ip_address = restriction.get('ip_address')
+    subnet_id = restriction.get('vnet_subnet_resource_id')
+    headers = restriction.get('headers')
+
+    if not ip_address and not subnet_id:
+        logger.warning("Skipping restriction with no valid IP address or subnet: %s", rule_name or 'unnamed')
+        return
+
+    try:
+        if subnet_id:
+            access_restrictions.add_webapp_access_restriction(
+                cmd=cmd,
+                resource_group_name=resource_group,
+                name=name,
+                priority=priority,
+                rule_name=rule_name,
+                action=action,
+                subnet=subnet_id,
+                description=description,
+                scm_site=scm_site,
+                ignore_missing_vnet_service_endpoint=True,
+                http_headers=_format_headers_for_add(headers) if headers else None
+            )
+            logger.warning("Migrated %s subnet restriction: %s (Priority: %d)",
+                           "SCM" if scm_site else "main", rule_name or subnet_id, priority)
+
+        elif ip_address:
+            if tag == 'ServiceTag':
+                access_restrictions.add_webapp_access_restriction(
+                    cmd=cmd,
+                    resource_group_name=resource_group,
+                    name=name,
+                    priority=priority,
+                    rule_name=rule_name,
+                    action=action,
+                    service_tag=ip_address,
+                    description=description,
+                    scm_site=scm_site,
+                    http_headers=_format_headers_for_add(headers) if headers else None
+                )
+                logger.warning("Migrated %s service tag restriction: %s (Priority: %d)",
+                               "SCM" if scm_site else "main", rule_name or ip_address, priority)
+            else:
+                access_restrictions.add_webapp_access_restriction(
+                    cmd=cmd,
+                    resource_group_name=resource_group,
+                    name=name,
+                    priority=priority,
+                    rule_name=rule_name,
+                    action=action,
+                    ip_address=ip_address,
+                    description=description,
+                    scm_site=scm_site,
+                    http_headers=_format_headers_for_add(headers) if headers else None
+                )
+                logger.warning("Migrated %s IP restriction: %s (Priority: %d)",
+                               "SCM" if scm_site else "main", rule_name or ip_address, priority)
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Failed to add %s restriction '%s' with error: %s",
+                       "SCM" if scm_site else "main", rule_name or 'unnamed', str(e))
+
+
+def _format_headers_for_add(headers_dict):
+    if not headers_dict:
+        return None
+
+    headers_list = []
+    for header_name, header_values in headers_dict.items():
+        for value in header_values:
+            headers_list.append(f"{header_name}={value}")
+
+    return headers_list if headers_list else None
+
+
+def _migrate_managed_identities_and_roles(cmd, source, resource_group, name):
+    logger.warning("\nMigrating managed identities and role assignments from source function app '%s' "
+                   "to target function app '%s'...", source.name, name)
+
+    try:
+        from azure.cli.command_modules.role.custom import list_role_assignments
+
+        source_identity = source.identity
+
+        if source_identity and 'SystemAssigned' in source_identity.type:
+            system_role_assignments = list_role_assignments(cmd,
+                                                            assignee_object_id=source_identity.principal_id,
+                                                            show_all=True)
+
+            assign_identity(cmd, resource_group, name, assign_identities=['[system]'])
+            target_identity = show_identity(cmd, resource_group, name)
+            logger.warning("Assigned system-assigned identity to target function app '%s' with principal ID '%s'",
+                           name, target_identity.principal_id)
+            _migrate_role_assignments(cmd, system_role_assignments, target_identity.principal_id)
+
+        if source_identity and source_identity.user_assigned_identities:
+            user_identity_ids = list(source_identity.user_assigned_identities.keys())
+            assign_identity(cmd, resource_group, name, assign_identities=user_identity_ids)
+            logger.warning("Assigned user-assigned identities to target function app '%s': %s",
+                           name, ', '.join(user_identity_ids))
+
+        logger.warning("Successfully migrated managed identities and role assignments")
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Failed to migrate managed identities and role assignments with error %s. Run "
+                       "'az functionapp identity assign' and 'az role assignment create' to configure "
+                       "them manually", str(e))
+
+
+def _migrate_role_assignments(cmd, source_role_assignments, target_principal_id):
+    try:
+        from azure.cli.command_modules.role.custom import create_role_assignment
+
+        # Create role assignments for target system-assigned identity
+        for assignment in source_role_assignments:
+            try:
+                # Extract role name/ID from the role definition ID
+                role_definition_id = assignment['roleDefinitionId']
+                role_name = role_definition_id.split('/')[-1]  # Get the GUID part
+                scope = assignment['scope']
+
+                # Use the existing create_role_assignment function
+                create_role_assignment(
+                    cmd=cmd,
+                    role=role_name,
+                    scope=scope,
+                    assignee_object_id=target_principal_id,
+                    assignee_principal_type='ServicePrincipal'
+                )
+
+                logger.warning("Created role assignment for scope '%s' with role '%s' for principal ID '%s'",
+                               scope, assignment.get('roleDefinitionName', role_name), target_principal_id)
+
+            except Exception as e:  # pylint: disable=broad-except
+                logger.warning("Failed to create role assignment for scope '%s': %s",
+                               scope, str(e))
+                continue
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.warning("Failed to migrate role assignments: %s", str(e))
+
+
 def validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot=None):
     settings = get_app_settings(cmd, resource_group_name, name, slot)
 
@@ -2205,7 +2844,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     for arg in args[3:]:
         if arg in int_flags and values[arg] is not None:
             values[arg] = validate_and_convert_to_int(arg, values[arg])
+        # logger.warning("Checking '%s' = '%s'", arg, values.get(arg, None))
         if arg != 'generic_configurations' and values.get(arg, None):
+            # logger.warning("Setting '%s' to '%s'", arg, values[arg])
             setattr(configs, arg, values[arg] if arg not in bool_flags else values[arg] == 'true')
 
     generic_configurations = generic_configurations or []
@@ -2270,18 +2911,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if max_replicas is not None:
             setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
-    try:
-        return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
-    except Exception as ex:  # pylint: disable=broad-exception-caught
-        error_message = str(ex)
-        if "Conflict" in error_message:
-            logger.error("Operation returned an invalid status 'Conflict'. "
-                         "For more details, run the command with the --debug parameter.")
-        elif "Bad Request" in error_message:
-            logger.error("Operation returned an invalid status 'Bad Request'. "
-                         "For more details, run the command with the --debug parameter.")
-        else:
-            raise
+    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
 
 def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
@@ -4732,6 +5362,27 @@ class _FlexFunctionAppStackRuntimeHelper:
         stacks = self.get_flex_raw_function_app_stacks(self._cmd, self._location, self._runtime)
         self._parse_raw_stacks(stacks)
 
+    def _get_version_variants(self, version):
+        variants = {version}
+
+        if '.' in version:
+            if version.endswith('.0'):
+                variants.add(version[:-2])
+        else:
+            variants.add(f"{version}.0")
+
+        return variants
+
+    def _find_matching_runtime_version(self, runtimes, version):
+        version_variants = self._get_version_variants(version)
+
+        for variant in version_variants:
+            matched_runtime = next((r for r in runtimes if r.version == variant), None)
+            if matched_runtime:
+                return matched_runtime
+
+        return None
+
     def resolve(self, runtime, version=None):
         runtimes = [r for r in self.stacks if runtime == r.name]
         if not runtimes:
@@ -4739,19 +5390,12 @@ class _FlexFunctionAppStackRuntimeHelper:
                                   .format(runtime))
         if version is None:
             return self.get_default_version()
+
         matched_runtime_version = next((r for r in runtimes if r.version == version), None)
+
         if not matched_runtime_version:
-            old_to_new_version = {
-                "11": "11.0",
-                "8": "8.0",
-                "8.0": "8",
-                "7": "7.0",
-                "6.0": "6",
-                "1.8": "8.0",
-                "17": "17.0"
-            }
-            new_version = old_to_new_version.get(version)
-            matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
+            matched_runtime_version = self._find_matching_runtime_version(runtimes, version)
+
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
             raise ValidationError("Invalid version {0} for runtime {1} for function apps on the Flex Consumption"
@@ -5025,8 +5669,7 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_
         location=location,
         sku=sku_def,
         reserved=True,
-        kind="functionapp",
-        name=name
+        kind="functionapp"
     )
 
     if zone_redundant:
@@ -5357,19 +6000,16 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                subnet_name=subnet_info["subnet_name"],
                                subnet_service_delegation=FLEX_SUBNET_DELEGATION if flexconsumption_location else None)
         subnet_resource_id = subnet_info["subnet_resource_id"]
-        vnet_route_all_enabled = True
         site_config.vnet_route_all_enabled = True
     else:
         subnet_resource_id = None
-        vnet_route_all_enabled = None
 
     # if this is a managed function app (Azure Functions on Azure Containers), http20_proxy_flag must be None
     if environment is not None:
         site_config.http20_proxy_flag = None
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
-                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
-                           vnet_route_all_enabled=vnet_route_all_enabled)
+                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only)
 
     plan_info = None
     if runtime is not None:
@@ -6909,7 +7549,6 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                subnet_service_delegation=FLEX_SUBNET_DELEGATION if is_flex else None)
 
     app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
-    app.vnet_route_all_enabled = True
     app.site_config.vnet_route_all_enabled = True
 
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
