@@ -13,4 +13,15 @@
 
 
 def load_command_table(self, _):  # pylint: disable=unused-argument
-    pass
+    with self.command_group(
+        'az compute-recommender spot-placement-recommender',
+        deprecate_info=self.deprecate(
+            redirect='az compute-recommender spot-placement-score',
+            hide=True,
+            message=(
+                'This command group has been replaced by "az compute-recommender spot-placement-score". '
+                'Please update your scripts accordingly.'
+            )
+        )
+    ):
+        pass
