@@ -2034,9 +2034,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: string or None
         """
         # read the original value passed by the command
-        load_balancer_sku = safe_lower(self.raw_param.get("load_balancer_sku", CONST_LOAD_BALANCER_SKU_STANDARD))
+        load_balancer_sku = safe_lower(self.raw_param.get("load_balancer_sku"))
         # try to read the property value corresponding to the parameter from the `mc` object
         if (
+            load_balancer_sku is None and
             self.mc and
             self.mc.network_profile and
             self.mc.network_profile.load_balancer_sku is not None
@@ -2044,6 +2045,9 @@ class AKSManagedClusterContext(BaseAKSContext):
             load_balancer_sku = safe_lower(
                 self.mc.network_profile.load_balancer_sku
             )
+        if self.decorator_mode == DecoratorMode.CREATE and load_balancer_sku is None:
+            # default value
+            load_balancer_sku = CONST_LOAD_BALANCER_SKU_STANDARD
 
         # validation
         if enable_validation:
@@ -7923,6 +7927,10 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             mc.network_profile.ip_families = ip_families
 
         self.update_network_plugin_settings(mc)
+
+        loadbalancer_sku = self.context.get_load_balancer_sku()
+        if loadbalancer_sku:
+            mc.network_profile.load_balancer_sku = loadbalancer_sku
 
         return mc
 

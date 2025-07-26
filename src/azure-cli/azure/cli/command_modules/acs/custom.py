@@ -852,6 +852,7 @@ def aks_update(
     load_balancer_outbound_ports=None,
     load_balancer_idle_timeout=None,
     load_balancer_backend_pool_type=None,
+    load_balancer_sku=None,
     nat_gateway_managed_outbound_ip_count=None,
     nat_gateway_idle_timeout=None,
     outbound_type=None,

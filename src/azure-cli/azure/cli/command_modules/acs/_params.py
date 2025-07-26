@@ -584,6 +584,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
+        c.argument("load_balancer_sku", arg_type=get_enum_type([CONST_LOAD_BALANCER_SKU_STANDARD]), validator=validate_load_balancer_sku)
         c.argument('nrg_lockdown_restriction_level', arg_type=get_enum_type(nrg_lockdown_restriction_levels))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)

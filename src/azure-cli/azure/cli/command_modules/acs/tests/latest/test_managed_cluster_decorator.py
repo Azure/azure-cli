@@ -1423,6 +1423,40 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         self.assertEqual(ctx_5.get_load_balancer_sku(), "standard")
 
+        # UPDATE mode: None parameter should return None (not default)
+        ctx_6 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"load_balancer_sku": None}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_6.get_load_balancer_sku(), None)
+
+        # UPDATE mode: custom value should be returned
+        ctx_7 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"load_balancer_sku": CONST_LOAD_BALANCER_SKU_STANDARD}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_7.get_load_balancer_sku(), CONST_LOAD_BALANCER_SKU_STANDARD)
+
+        # UPDATE mode: read from existing mc when parameter is None
+        mc_8 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku=CONST_LOAD_BALANCER_SKU_BASIC
+            ),
+        )
+        ctx_8 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"load_balancer_sku": None}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_8.attach_mc(mc_8)
+        self.assertEqual(ctx_8.get_load_balancer_sku(), CONST_LOAD_BALANCER_SKU_BASIC)
+
     def test_get_load_balancer_managed_outbound_ip_count(self):
         # default
         ctx_1 = AKSManagedClusterContext(
@@ -9327,6 +9361,56 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         print(dec_mc_3.network_profile.load_balancer_profile)
         print(ground_truth_mc_3.network_profile.load_balancer_profile)
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+    def test_update_network_profile_load_balancer_sku(self):
+        # default (no update)
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku=CONST_LOAD_BALANCER_SKU_BASIC
+            ),
+        )
+        dec_1.context.attach_mc(mc_1)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_network_profile(None)
+        dec_mc_1 = dec_1.update_network_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku=CONST_LOAD_BALANCER_SKU_BASIC
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # upgrade from basic to standard
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"load_balancer_sku": CONST_LOAD_BALANCER_SKU_STANDARD},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku=CONST_LOAD_BALANCER_SKU_BASIC
+            ),
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_network_profile(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku=CONST_LOAD_BALANCER_SKU_STANDARD
+            ),
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
     def test_update_nat_gateway_profile(self):
         # default value in `aks_update`
