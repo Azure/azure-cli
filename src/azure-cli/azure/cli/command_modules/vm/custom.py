@@ -2121,7 +2121,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
         DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
             'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
         if size_gb is None:
-            size_gb = 1023
+            default_size_gb = 1023
 
         if disk_ids is not None:
             disks = disk_ids
@@ -2135,7 +2135,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
             if new:
                 data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.empty,
                                      name=parse_resource_id(disk_item)['name'],
-                                     disk_size_gb=size_gb, caching=caching,
+                                     disk_size_gb=size_gb if size_gb else default_size_gb, caching=caching,
                                      managed_disk=ManagedDiskParameters(storage_account_type=sku))
             else:
                 params = ManagedDiskParameters(id=disk_item, storage_account_type=sku)
@@ -2158,6 +2158,16 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                         "id": disk_item
                     }
                 }
+                if size_gb is not None:
+                    disk.update({
+                        'diskSizeGb': size_gb
+                    })
+                if sku is not None:
+                    disk.update({
+                        "managedDisk": {
+                            "storageAccountType": sku
+                        }
+                    })
                 disk_lun += 1
                 vm.storage_profile.data_disks.append(disk)
         if source_disk_restore_point is not None:
@@ -2171,6 +2181,16 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                         "id": disk_item
                     }
                 }
+                if size_gb is not None:
+                    disk.update({
+                        'diskSizeGb': size_gb
+                    })
+                if sku is not None:
+                    disk.update({
+                        "managedDisk": {
+                            "storageAccountType": sku
+                        }
+                    })
                 disk_lun += 1
                 vm.storage_profile.data_disks.append(disk)
 
