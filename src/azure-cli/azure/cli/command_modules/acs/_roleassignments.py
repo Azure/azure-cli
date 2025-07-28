@@ -93,21 +93,9 @@ def add_role_assignment_executor(cmd, role, assignee, resource_group_name=None,
         mod="models",
         operation_group="role_assignments",
     )
-    if cmd.supported_api_version(min_api="2018-01-01-preview", resource_type=ResourceType.MGMT_AUTHORIZATION):
-        parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id,
-                                                    principal_type=assignee_principal_type)
-        return assignments_client.create(scope, assignment_name, parameters, headers=custom_headers)
-
-    # for backward compatibility
-    RoleAssignmentProperties = get_sdk(
-        cmd.cli_ctx,
-        ResourceType.MGMT_AUTHORIZATION,
-        "RoleAssignmentProperties",
-        mod="models",
-        operation_group="role_assignments",
-    )
-    properties = RoleAssignmentProperties(role_definition_id=role_id, principal_id=object_id)
-    return assignments_client.create(scope, assignment_name, properties, headers=custom_headers)
+    parameters = RoleAssignmentCreateParameters(role_definition_id=role_id, principal_id=object_id,
+                                                principal_type=assignee_principal_type)
+    return assignments_client.create(scope, assignment_name, parameters, headers=custom_headers)
 
 
 def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principal=True,
@@ -271,11 +259,9 @@ def delete_role_assignments_executor(
 def subnet_role_assignment_exists(cmd, scope):
     factory = get_auth_management_client(cmd.cli_ctx, scope)
     assignments_client = factory.role_assignments
-
-    if cmd.supported_api_version(min_api='2018-01-01-preview', resource_type=ResourceType.MGMT_AUTHORIZATION):
-        for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
-            if i.scope == scope and i.role_definition_id.endswith(CONST_NETWORK_CONTRIBUTOR_ROLE_ID):
-                return True
+    for i in assignments_client.list_for_scope(scope=scope, filter='atScope()'):
+        if i.scope == scope and i.role_definition_id.endswith(CONST_NETWORK_CONTRIBUTOR_ROLE_ID):
+            return True
     return False
 
 
