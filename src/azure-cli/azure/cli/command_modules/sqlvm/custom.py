@@ -978,16 +978,16 @@ def set_assessment_properties(
             # deploy ARM template
             deployment_name = 'vm_deploy_' + random_string(32)
             client = get_mgmt_service_client(
-                cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+                cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS).deployments
             DeploymentProperties = cmd.get_models(
                 'DeploymentProperties',
-                resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+                resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
 
             properties = DeploymentProperties(
                 template=template, parameters={}, mode='incremental')
 
             Deployment = cmd.get_models(
-                'Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+                'Deployment', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
             deployment = Deployment(properties=properties)
 
             # creates the AMA DEPLOYMENT

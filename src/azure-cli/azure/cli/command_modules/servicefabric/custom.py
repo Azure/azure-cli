@@ -49,7 +49,7 @@ from azure.mgmt.storage.models import StorageAccountCreateParameters
 
 from knack.log import get_logger
 
-from ._client_factory import (resource_client_factory,
+from ._client_factory import (deployments_client_factory,
                               keyvault_client_factory,
                               compute_client_factory,
                               storage_client_factory)
@@ -1288,20 +1288,17 @@ def _deploy_arm_template_core(cmd,
                               mode='incremental',
                               validate_only=False,
                               no_wait=False):
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
     properties = DeploymentProperties(
         template=template, template_link=None, parameters=parameters, mode=mode)
-    client = resource_client_factory(cmd.cli_ctx)
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    client = deployments_client_factory(cmd.cli_ctx)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
     deployment = Deployment(properties=properties)
 
     if validate_only:
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            deploy_poll = sdk_no_wait(no_wait, client.deployments.begin_validate, resource_group_name, deployment_name,
-                                      deployment)
-            return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
-
-        return sdk_no_wait(no_wait, client.deployments.validate, resource_group_name, deployment_name, deployment)
+        deploy_poll = sdk_no_wait(no_wait, client.deployments.begin_validate, resource_group_name, deployment_name,
+                                    deployment)
+        return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
 
     deploy_poll = sdk_no_wait(no_wait, client.deployments.begin_create_or_update, resource_group_name, deployment_name,
                               deployment)
