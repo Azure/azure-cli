@@ -5,5 +5,6 @@
 
 from azure.cli.core.breaking_change import register_command_deprecate
 
-register_command_deprecate('compute-recommender spot-placement-recommender', 
-	redirect='az compute-recommender spot-placement-score', hide=True)
+register_command_deprecate('compute-recommender spot-placement-recommender',
+    redirect='az compute-recommender spot-placement-score',
+    hide=True)
