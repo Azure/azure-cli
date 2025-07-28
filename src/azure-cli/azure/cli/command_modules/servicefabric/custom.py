@@ -1085,6 +1085,8 @@ def _create_certificate(cmd,
                                     secret_identifier)
 
     output_file = None
+    if location is None:
+        location = _get_resource_group_by_name(cli_ctx, resource_group_name).location
     vault_id = None
     secret_url = None
     certificate_thumbprint = None

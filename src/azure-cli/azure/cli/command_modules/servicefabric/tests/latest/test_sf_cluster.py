@@ -23,10 +23,23 @@ class ServiceFabricClusterTests(ScenarioTest):
             'loc': 'westus',
             'cert_name': self.create_random_name('sfrp-cli-', 24),
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
-            'vm_password': "Pass123!@#",
+            'vm_password': self.create_random_name('Pass@', 9),
             'policy_path': os.path.join(TEST_DIR, 'policy.json')
         })
         _create_cluster_with_separate_kv(self, self.kwargs)
+        _wait_for_cluster_state_ready(self, self.kwargs)
+
+    @ResourceGroupPreparer(location='westus')
+    def test_create_cluster_with_location_different_from_resource_group(self):
+        self.kwargs.update({
+            'kv_name': self.create_random_name('sfrp-cli-kv-', 24),
+            'loc': 'southcentralus',
+            'cert_name': self.create_random_name('sfrp-cli-', 24),
+            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'vm_password': self.create_random_name('Pass@', 9),
+            'cluster_size': '5'
+        })
+        _create_cluster(self, self.kwargs)
         _wait_for_cluster_state_ready(self, self.kwargs)
 
     @ResourceGroupPreparer()
@@ -36,7 +49,7 @@ class ServiceFabricClusterTests(ScenarioTest):
             'loc': 'westus',
             'cert_name': self.create_random_name('sfrp-cli-', 24),
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
-            'vm_password': "Pass123!@#",
+            'vm_password': self.create_random_name('Pass@', 9),
             'primary_node_type': 'nt1vm',
             'new_node_type': 'nt2',
             'cluster_size': '5'
@@ -68,7 +81,7 @@ class ServiceFabricClusterTests(ScenarioTest):
             'loc': 'southcentralus',
             'cert_name': self.create_random_name('sfrp-cli-', 24),
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
-            'vm_password': "Pass123!@#",
+            'vm_password': self.create_random_name('Pass@', 9),
             'cluster_size': '3',
             'new_node_type': 'nt2'
         })
@@ -108,7 +121,7 @@ class ServiceFabricClusterTests(ScenarioTest):
             'loc': 'southcentralus',
             'cert_name': self.create_random_name('sfrp-cli-', 24),
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
-            'vm_password': "Pass123!@#",
+            'vm_password': self.create_random_name('Pass@', 9),
             'primary_node_type': 'nt1vm',
             'cluster_size': '5'
         })
