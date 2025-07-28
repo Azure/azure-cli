@@ -421,6 +421,7 @@ class TestCustom(unittest.TestCase):
         template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
         parameters_path = os.path.join(curr_dir, 'param-validation-ext-configs.json').replace('\\', '\\\\')
         parameters_path_2 = os.path.join(curr_dir, 'param-validation-ext-configs-2.json').replace('\\', '\\\\')
+        only_params_path = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
 
         template = get_file_json(template_path, preserve_order=True)
 
@@ -428,11 +429,19 @@ class TestCustom(unittest.TestCase):
         tests = [
             {  # empty JSON works
                 "parameter_list": [["{}"]],
-                "expected": {},
+                "expected": None,
             },
             {  # empty parameters works
                 "parameter_list": [],
-                "expected": {},
+                "expected": None,
+            },
+            {  # empty JSON works with root properties
+                "parameter_list": [['{\"parameters\":{},\"extensionConfigs\":{}}']],
+                "expected": None,
+            },
+            {  # only parameters
+                "parameter_list": [[only_params_path]],
+                "expected": None
             },
             {  # only extension configs
                 "parameter_list": [['{\"parameters\":{},\"extensionConfigs\":{\"k8s\":{\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\"},\"secretName\":\"myKubeconfig\"}},\"namespace\":{\"value\":\"ns\"}}}}']],

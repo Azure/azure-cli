@@ -166,7 +166,7 @@ def _process_parameters_and_ext_configs(template_obj, parameter_lists):  # pylin
     def _try_parse_parameters_json_object(value):
         try:
             parsed = _remove_comments_from_json(value, False)
-            return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else {}, True
+            return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else None, True
         except Exception:  # pylint: disable=broad-except
             return None, None, False
 
@@ -181,7 +181,7 @@ def _process_parameters_and_ext_configs(template_obj, parameter_lists):  # pylin
                 if not content:
                     return None, None, True
                 parsed = _remove_comments_from_json(content, False, file_path)
-                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else {}, True
+                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else None, True
             except Exception as ex:
                 raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
         return None, None, False
@@ -191,7 +191,7 @@ def _process_parameters_and_ext_configs(template_obj, parameter_lists):  # pylin
             try:
                 value = _urlretrieve(uri).decode('utf-8')
                 parsed = _remove_comments_from_json(value, False)
-                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else {}, True
+                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else None, True
             except Exception:  # pylint: disable=broad-except
                 pass
         return None, None, False
@@ -214,7 +214,7 @@ def _process_parameters_and_ext_configs(template_obj, parameter_lists):  # pylin
             if ext_configs_obj is not None:
                 result_ext_configs.update(ext_configs_obj)
 
-    return parameters, result_ext_configs
+    return parameters, result_ext_configs or None
 
 
 # pylint: disable=redefined-outer-name
@@ -410,7 +410,6 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     template_obj['resources'] = template_obj.get('resources', [])
     parameters, ext_configs = _process_parameters_and_ext_configs(template_obj, parameters)
     parameters = parameters or {}
-    ext_configs = ext_configs or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
 
     parameters = json.loads(json.dumps(parameters))
@@ -1173,7 +1172,6 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     else:
         parameters, ext_configs = _process_parameters_and_ext_configs(template_obj, parameters)
         parameters = parameters or {}
-        ext_configs = ext_configs or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
         parameters = json.loads(json.dumps(parameters))
 
