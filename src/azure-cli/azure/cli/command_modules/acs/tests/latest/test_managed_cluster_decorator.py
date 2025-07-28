@@ -50,6 +50,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
     CONST_AZURE_SERVICE_MESH_MODE_DISABLED,
     CONST_ARTIFACT_SOURCE_DIRECT,
+    CONST_AVAILABILITY_SET,
+    CONST_VIRTUAL_MACHINES,
 )
 from azure.cli.command_modules.acs.agentpool_decorator import AKSAgentPoolContext, AKSAgentPoolParamDict
 from azure.cli.command_modules.acs.managed_cluster_decorator import (
@@ -82,7 +84,6 @@ from azure.core.exceptions import HttpResponseError
 from knack.prompting import NoTTYException
 import datetime
 from dateutil.parser import parse
-
 
 class AKSManagedClusterModelsTestCase(unittest.TestCase):
     def setUp(self):
@@ -1421,6 +1422,40 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             DecoratorMode.CREATE,
         )
         self.assertEqual(ctx_5.get_load_balancer_sku(), "standard")
+
+        # UPDATE mode: None parameter should return None (not default)
+        ctx_6 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"load_balancer_sku": None}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_6.get_load_balancer_sku(), None)
+
+        # UPDATE mode: custom value should be returned
+        ctx_7 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"load_balancer_sku": CONST_LOAD_BALANCER_SKU_STANDARD}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_7.get_load_balancer_sku(), CONST_LOAD_BALANCER_SKU_STANDARD)
+
+        # UPDATE mode: read from existing mc when parameter is None
+        mc_8 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku=CONST_LOAD_BALANCER_SKU_BASIC
+            ),
+        )
+        ctx_8 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"load_balancer_sku": None}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        ctx_8.attach_mc(mc_8)
+        self.assertEqual(ctx_8.get_load_balancer_sku(), CONST_LOAD_BALANCER_SKU_BASIC)
 
     def test_get_load_balancer_managed_outbound_ip_count(self):
         # default
@@ -4698,6 +4733,65 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         )
         ctx_1.attach_mc(mc)
         self.assertEqual(ctx_1.get_node_resource_group(), "test_node_resource_group")
+
+    def test_get_enable_run_command(self):
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"enable_run_command": False}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_enable_run_command(), False)
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                disable_run_command=False
+            )
+        )
+        ctx_1.attach_mc(mc_1)
+        self.assertEqual(ctx_1.get_enable_run_command(), True)
+
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"enable_run_command": True, "disable_run_command": True}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        # fail on mutually exclusive enable_run_command and disable_run_command
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            self.assertEqual(ctx_2.get_enable_run_command(), True)
+
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"enable_run_command": True}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                disable_run_command=True
+            )
+        )
+        ctx_3.attach_mc(mc_3)
+        self.assertEqual(ctx_3.get_enable_run_command(), True)
+
+    def test_get_disable_run_command(self):
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"disable_run_command": False}),
+            self.models,
+            DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_1.get_disable_run_command(), False)
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                disable_run_command=True
+            )
+        )
+        ctx_1.attach_mc(mc_1)
+        self.assertEqual(ctx_1.get_disable_run_command(), False)
 
     def test_get_defender_config(self):
         ctx_1 = AKSManagedClusterContext(
@@ -8437,6 +8531,66 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         with self.assertRaises(UnknownError):
             dec_2.set_up_static_egress_gateway(mc_2)
 
+    def test_set_up_node_provisioning_profile(self):
+        dec_0 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # Not specified case
+        mc_0 = self.models.ManagedCluster(location="test_location")
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.set_up_node_provisioning_profile(mc_0)
+        ground_truth_mc_0 = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc_0, ground_truth_mc_0)
+
+        # Set Mode to Auto
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "node_provisioning_mode": "Auto",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_node_provisioning_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            node_provisioning_profile=self.models.ManagedClusterNodeProvisioningProfile(
+                mode="Auto",
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # Set Mode to Auto and DefaultPools to None
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "node_provisioning_mode": "Auto",
+                "node_provisioning_default_pools": "None",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.set_up_node_provisioning_profile(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            node_provisioning_profile=self.models.ManagedClusterNodeProvisioningProfile(
+                mode="Auto",
+                default_node_pools="None",
+            ),
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
 class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -9207,6 +9361,56 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         print(dec_mc_3.network_profile.load_balancer_profile)
         print(ground_truth_mc_3.network_profile.load_balancer_profile)
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+    def test_update_network_profile_load_balancer_sku(self):
+        # default (no update)
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku=CONST_LOAD_BALANCER_SKU_BASIC
+            ),
+        )
+        dec_1.context.attach_mc(mc_1)
+        # fail on passing the wrong mc object
+        with self.assertRaises(CLIInternalError):
+            dec_1.update_network_profile(None)
+        dec_mc_1 = dec_1.update_network_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku=CONST_LOAD_BALANCER_SKU_BASIC
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # upgrade from basic to standard
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"load_balancer_sku": CONST_LOAD_BALANCER_SKU_STANDARD},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku=CONST_LOAD_BALANCER_SKU_BASIC
+            ),
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_network_profile(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                load_balancer_sku=CONST_LOAD_BALANCER_SKU_STANDARD
+            ),
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
     def test_update_nat_gateway_profile(self):
         # default value in `aks_update`
@@ -11450,6 +11654,38 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_9, ground_truth_mc_9)
 
+    def test_enable_disable_ai_toolchain_operator(self):
+        # Should not update mc if unset
+        dec_0 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.update_ai_toolchain_operator(mc_0)
+        ground_truth_mc_0 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_0, ground_truth_mc_0)
+
+        # Should error if both set
+        dec_6 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {"disable_ai_toolchain_operator": True, "enable_ai_toolchain_operator": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_6 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_6.context.attach_mc(mc_6)
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            dec_6.update_ai_toolchain_operator(mc_6)
+
     def test_enable_disable_cost_analysis(self):
         # Should not update mc if unset
         dec_0 = AKSManagedClusterUpdateDecorator(
@@ -12442,7 +12678,25 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         ground_truth_mc_1 = self.models.ManagedCluster(location="test_location", security_profile=sec_profile)
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
-    
+
+    def test_set_up_run_command(self):
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {"disable_run_command": True},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_run_command(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+                api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                    disable_run_command=True
+                )
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
     def test_set_up_ingress_web_app_routing(self):
         dec_1 = AKSManagedClusterCreateDecorator(
             self.cmd,
@@ -12800,6 +13054,76 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
+    def test_update_run_command(self):
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_run_command": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_run_command(mc_1)
+
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                disable_run_command=True
+            )
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_run_command": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                disable_run_command=True
+            )
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_run_command(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                disable_run_command=False
+            )
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_run_command": False,
+                "disable_run_command": False,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                disable_run_command=True
+            )
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_run_command(mc_3)
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            api_server_access_profile=self.models.ManagedClusterAPIServerAccessProfile(
+                disable_run_command=True
+            )
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
     def test_enable_disable_static_egress_gateway(self):
         # Should not update mc if unset
         dec_0 = AKSManagedClusterUpdateDecorator(
@@ -12911,6 +13235,171 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(dec_mc_4, ground_truth_mc_4)
+
+    def test_update_vmas_to_vms(self):
+        # Should not update mc if unset
+        dec_0 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_0 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.update_vmas_to_vms(mc_0)
+        ground_truth_mc_0 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        self.assertEqual(dec_mc_0, ground_truth_mc_0)
+
+        # Should raise error if trying to migrate non-vmas cluster to vms
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "migrate_vmas_to_vms": True,
+                 "yes": True,
+           },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        ap_1 = self.models.ManagedClusterAgentPoolProfile(
+            name="test_np_name",
+            type=CONST_VIRTUAL_MACHINE_SCALE_SETS,
+        )
+        mc_1.agent_pool_profiles = [ap_1]
+        dec_1.context.attach_mc(mc_1)
+        with self.assertRaises(ArgumentUsageError):
+            dec_1.update_vmas_to_vms(mc_1)
+
+        # Should raise error if cluster has more than 1 AP
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "migrate_vmas_to_vms": True,
+                "yes": True,                
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        ap_2_1 = self.models.ManagedClusterAgentPoolProfile(
+            name="test_np_name_1",
+            type=CONST_AVAILABILITY_SET,
+        )
+        ap_2_2 = self.models.ManagedClusterAgentPoolProfile(
+            name="test_np_name_2",
+            type=CONST_AVAILABILITY_SET,
+        )
+        mc_2.agent_pool_profiles = [ap_2_1, ap_2_2]
+        dec_2.context.attach_mc(mc_2)
+        with self.assertRaises(ArgumentUsageError):
+            dec_2.update_vmas_to_vms(mc_2)
+
+        # Should migrate vmas-blb to vms-slb
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "migrate_vmas_to_vms": True,
+                "yes": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        ap_3 = self.models.ManagedClusterAgentPoolProfile(
+            name="test_np_name",
+            type=CONST_AVAILABILITY_SET,
+        )
+        network_profile_3 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_sku=CONST_LOAD_BALANCER_SKU_BASIC,
+        )
+        mc_3.agent_pool_profiles = [ap_3]
+        mc_3.network_profile = network_profile_3
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_vmas_to_vms(mc_3)
+
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        ground_truth_ap_3 = self.models.ManagedClusterAgentPoolProfile(
+            name="test_np_name",
+            type=CONST_VIRTUAL_MACHINES,
+        )
+        ground_truth_network_profile_3 = self.models.ContainerServiceNetworkProfile(
+            load_balancer_sku=CONST_LOAD_BALANCER_SKU_STANDARD,
+        )
+        ground_truth_mc_3.agent_pool_profiles = [ground_truth_ap_3]
+        ground_truth_mc_3.network_profile = ground_truth_network_profile_3
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
+    def test_update_node_provisioning_profile(self):
+        dec_0 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # Not specified case
+        mc_0 = self.models.ManagedCluster(location="test_location")
+        dec_0.context.attach_mc(mc_0)
+        dec_mc_0 = dec_0.update_node_provisioning_profile(mc_0)
+        ground_truth_mc_0 = self.models.ManagedCluster(location="test_location")
+        self.assertEqual(dec_mc_0, ground_truth_mc_0)
+
+        # Set Mode to Auto
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "node_provisioning_mode": "Auto",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_node_provisioning_profile(mc_1)
+        ground_truth_mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            node_provisioning_profile=self.models.ManagedClusterNodeProvisioningProfile(
+                mode="Auto",
+            ),
+        )
+        self.assertEqual(dec_mc_1, ground_truth_mc_1)
+
+        # Set Mode to Auto and DefaultPools to None
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "node_provisioning_mode": "Auto",
+                "node_provisioning_default_pools": "None",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_node_provisioning_profile(mc_2)
+        ground_truth_mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            node_provisioning_profile=self.models.ManagedClusterNodeProvisioningProfile(
+                mode="Auto",
+                default_node_pools="None",
+            ),
+        )
+        self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
 
 if __name__ == "__main__":

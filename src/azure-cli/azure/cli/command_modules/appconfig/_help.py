@@ -34,6 +34,8 @@ examples:
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --arm-auth-mode pass-through
   - name: Create an App Configuration store with name, location and resource group with ARM authentication mode set to Pass-through and private network access via ARM Private Link enabled.
     text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --arm-auth-mode pass-through --enable-arm-private-network-access true
+  - name: Create an App Configuration store with a key-value revision retention period of one day (in seconds).
+    text: az appconfig create -g MyResourceGroup -n MyAppConfiguration -l westus --sku Standard --kv-revision-retention-period 86400
 """
 
 helps['appconfig list-deleted'] = """
@@ -410,6 +412,8 @@ examples:
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --arm-auth-mode pass-through
   - name: Update an App Configuration store to set ARM authentication mode set to Pass-through and enable private network access via ARM Private Link.
     text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --arm-auth-mode pass-through --enable-arm-private-network-access true
+  - name: Update an App Configuration store to set a key-value revision retention period of one day (in seconds).
+    text: az appconfig update -g MyResourceGroup -n MyAppConfiguration --kv-revision-retention-period 86400
 """
 
 helps['appconfig feature'] = """
@@ -433,6 +437,9 @@ helps['appconfig feature set'] = """
         - name: Set a feature flag with name "Beta" and custom key ".appconfig.featureflag/MyApp1:Beta".
           text:
             az appconfig feature set -n MyAppConfiguration --feature Beta --key .appconfig.featureflag/MyApp1:Beta
+        - name: Set a feature flag with name "Beta" and custom key ".appconfig.featureflag/MyApp1:Beta" with tags "tag1=value1" and "tag2=value2".
+          text:
+            az appconfig feature set -n MyAppConfiguration --feature Beta --key .appconfig.featureflag/MyApp1:Beta --tags tag1=value1 tag2=value2
     """
 
 helps['appconfig feature delete'] = """
@@ -451,6 +458,9 @@ helps['appconfig feature delete'] = """
         - name: Delete a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta".
           text:
             az appconfig feature delete -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta --yes
+        - name: Delete a feature whose name is "Beta" but key is ".appconfig.featureflag/MyApp1:Beta" with tags "tag1=value1" and "tag2=value2".
+          text:
+            az appconfig feature delete -n MyAppConfiguration --key .appconfig.featureflag/MyApp1:Beta --tags tag1=value1 tag2=value2 --yes
     """
 
 helps['appconfig feature show'] = """
@@ -496,6 +506,12 @@ helps['appconfig feature list'] = """
         - name: List all features starting with "MyApp1".
           text:
             az appconfig feature list -n MyAppConfiguration --key .appconfig.featureflag/MyApp1*
+        - name: List all feature flags with specific tags.
+          text:
+            az appconfig feature list -n MyAppConfiguration --tags tag1=value1 tag2=value2
+        - name: List all feature flags with tag name "tag1" with empty value.
+          text:
+            az appconfig feature list -n MyAppConfiguration --tags tag1=
     """
 
 helps['appconfig feature lock'] = """

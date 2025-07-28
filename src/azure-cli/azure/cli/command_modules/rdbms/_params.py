@@ -931,7 +931,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('action_name', options_list=['--action-name'], help='The name of the github action')
             c.argument('repository', options_list=['--repo'], help='The name of your github username and repository e.g., Azure/azure-cli ')
             c.argument('branch', options_list=['--branch'], help='The name of the branch you want upload github action file. The default will be your current branch.')
-            c.argument('allow_push', default=False, options_list=['--allow-push'], arg_type=get_three_state_flag(), help='Push the action yml file to the remote repository. The changes will be pushed to origin repository, speicified branch or current branch if not specified.')
+            c.argument('allow_push', default=False, options_list=['--allow-push'], arg_type=get_three_state_flag(), help='Push the action yml file to the remote repository. The changes will be pushed to origin repository, specified branch or current branch if not specified.')
 
         with self.argument_context('{} flexible-server deploy run'.format(command_group)) as c:
             c.argument('action_name', options_list=['--action-name'], help='The name of the github action')

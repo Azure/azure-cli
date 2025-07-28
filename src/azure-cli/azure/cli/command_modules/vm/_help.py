@@ -2960,11 +2960,6 @@ examples:
     crafted: true
 """
 
-helps['capacity reservation'] = """
-type: group
-short-summary: Manage capacity.
-"""
-
 helps['capacity reservation group create'] = """
 type: command
 short-summary: Create capacity reservation group.
@@ -2993,56 +2988,6 @@ examples:
     text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup
   - name: Get a capacity reservation group containing the instance views of the capacity reservations under the capacity reservation group
     text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup --instance-view
-"""
-
-
-helps['capacity reservation create'] = """
-type: command
-short-summary: Create capacity reservation.
-examples:
-  - name: Create a capacity reservation.
-    text: |
-        az capacity reservation create -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --sku Standard_A0
-  - name: Create a capacity reservation with specific capacity and zones.
-    text: |
-        az capacity reservation create -c ReservationGroupName -n ReservationName -l centraluseuap \\
-            -g MyResourceGroup  --sku Standard_A1_v2 --capacity 5 \\
-                --zone 1 --tags key=val
-"""
-
-helps['capacity reservation update'] = """
-type: command
-short-summary: Update capacity reservation.
-examples:
-  - name: Update a capacity reservation.
-    text: |
-        az capacity reservation update -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --capacity 5 --tags key=val
-"""
-
-helps['capacity reservation show'] = """
-type: command
-short-summary: Show capacity reservation.
-examples:
-  - name: Get a capacity reservation.
-    text: az capacity reservation show -c ReservationGroupName -n ReservationName -g MyResourceGroup
-  - name: Get a capacity reservation containing the instance views.
-    text: |
-        az capacity reservation show -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --instance-view
-"""
-
-helps['capacity reservation show'] = """
-type: command
-short-summary: Show capacity reservation.
-examples:
-  - name: Get a capacity reservation.
-    text: az capacity reservation show -c ReservationGroupName -n ReservationName -g MyResourceGroup
-  - name: Get a capacity reservation containing the instance views.
-    text: |
-        az capacity reservation show -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --instance-view
 """
 
 helps['restore-point'] = """
