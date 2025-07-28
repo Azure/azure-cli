@@ -778,6 +778,10 @@ parameters:
     type: string
     short-summary: Load balancer backend pool type.
     long-summary: Define the LoadBalancer backend pool type of managed inbound backend pool. The nodeIP means the VMs will be attached to the LoadBalancer by adding its private IP address to the backend pool. The nodeIPConfiguration means the VMs will be attached to the LoadBalancer by referencing the backend pool ID in the VM's NIC.
+  - name: --load-balancer-sku
+    type: string
+    short-summary: Azure Load Balancer SKU selection for your cluster. only standard is accepted.
+    long-summary: Upgrade to Standard Azure Load Balancer SKU for your AKS cluster.
   - name: --nat-gateway-managed-outbound-ip-count
     type: int
     short-summary: NAT gateway managed outbound IP count.
@@ -1167,6 +1171,8 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto
   - name: Update a kubernetes cluster to use auto node provisioning mode with no default pools.
     text: az aks update -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
+  - name: Upgrade load balancer sku to standard
+    text: az aks update --load-balancer-sku standard -g MyResourceGroup -n MyManagedCluster
 """
 
 helps['aks delete'] = """
