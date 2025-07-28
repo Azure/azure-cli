@@ -328,7 +328,7 @@ class PolicyInsightsTests(ScenarioTest):
             ])
         finally:
             self.cmd('policy assignment delete -n {pan}')
-            self.cmd('policy set-definition delete -n {psn} -y')
+            self.cmd('policy set-definition delete -n {psn}')
 
     # This is record only since MG auth can take a while to propagate and management groups can be disruptive
     def test_policy_insights_remediation_management_group(self):
