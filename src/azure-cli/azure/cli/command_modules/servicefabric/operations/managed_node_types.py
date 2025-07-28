@@ -44,7 +44,8 @@ def create_node_type(cmd,
                      capacity=None,
                      placement_property=None,
                      is_stateless=False,
-                     multiple_placement_groups=False):
+                     multiple_placement_groups=False,
+                     tags=None):
 
     #  set defult parameters
     if disk_size is None:
@@ -78,7 +79,8 @@ def create_node_type(cmd,
                                  capacities=capacity,
                                  placement_properties=placement_property,
                                  is_stateless=is_stateless,
-                                 multiple_placement_groups=multiple_placement_groups)
+                                 multiple_placement_groups=multiple_placement_groups,
+                                 tags=tags)
 
         if application_start_port and application_end_port:
             new_node_type.application_ports = EndpointRangeDescription(start_port=application_start_port,
@@ -103,12 +105,14 @@ def update_node_type(cmd,
                      cluster_name,
                      node_type_name,
                      instance_count=None,
+                     vm_size=None,
                      application_start_port=None,
                      application_end_port=None,
                      ephemeral_start_port=None,
                      ephemeral_end_port=None,
                      capacity=None,
-                     placement_property=None):
+                     placement_property=None,
+                     tags=None):
     try:
         node_type = client.node_types.get(resource_group_name, cluster_name, node_type_name)
 
@@ -128,6 +132,12 @@ def update_node_type(cmd,
 
         if placement_property is not None:
             node_type.placement_properties = placement_property
+
+        if vm_size is not None:
+            node_type.vm_size = vm_size
+
+        if tags is not None:
+            node_type.tags = tags
 
         poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, node_type)
         return LongRunningOperation(cmd.cli_ctx)(poller)
