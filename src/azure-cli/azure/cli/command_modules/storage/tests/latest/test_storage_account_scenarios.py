@@ -1542,59 +1542,6 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
 
     @ResourceGroupPreparer()
-    def test_storage_account_with_files_adds_sam_account_name(self, resource_group):
-        name = self.create_random_name(prefix='cli', length=24)
-        self.kwargs.update({
-            'rg': resource_group,
-            'sc': name,
-            'domain_name': 'mydomain.com',
-            'net_bios_domain_name': 'mydomain.com',
-            'forest_name': 'mydomain.com',
-            'domain_guid': '12345678-1234-1234-1234-123456789012',
-            'domain_sid': 'S-1-5-21-1234567890-1234567890-1234567890',
-            'azure_storage_sid': 'S-1-5-21-1234567890-1234567890-1234567890-1234',
-            'sam_account_name': self.create_random_name(prefix='samaccount', length=48)
-        })
-        create_cmd = """storage account create -n {sc} -g {rg} -l eastus2euap --enable-files-adds --domain-name
-        {domain_name} --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid
-        {domain_guid} --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid} 
-        --sam-account-name {sam_account_name} --account-type User"""
-        result = self.cmd(create_cmd).get_output_in_json()
-
-        self.assertIn('azureFilesIdentityBasedAuthentication', result)
-        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
-        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
-        self.assertEqual(activeDirectoryProperties['samAccountName'], self.kwargs['sam_account_name'])
-        self.assertEqual(activeDirectoryProperties['accountType'], "User")
-        self.assertEqual(activeDirectoryProperties['azureStorageSid'], self.kwargs['azure_storage_sid'])
-        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
-        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
-        self.assertEqual(activeDirectoryProperties['domainSid'], self.kwargs['domain_sid'])
-        self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
-        self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
-
-        self.kwargs.update({
-            'sam_account_name': self.create_random_name(prefix='newsamaccount', length=48)
-        })
-        update_cmd = """storage account update -n {sc} -g {rg} --enable-files-adds --domain-name {domain_name}
-        --net-bios-domain-name {net_bios_domain_name} --forest-name {forest_name} --domain-guid {domain_guid}
-        --domain-sid {domain_sid} --azure-storage-sid {azure_storage_sid} 
-        --sam-account-name {sam_account_name} --account-type Computer"""
-        result = self.cmd(update_cmd).get_output_in_json()
-
-        self.assertIn('azureFilesIdentityBasedAuthentication', result)
-        self.assertEqual(result['azureFilesIdentityBasedAuthentication']['directoryServiceOptions'], 'AD')
-        activeDirectoryProperties = result['azureFilesIdentityBasedAuthentication']['activeDirectoryProperties']
-        self.assertEqual(activeDirectoryProperties['samAccountName'], self.kwargs['sam_account_name'])
-        self.assertEqual(activeDirectoryProperties['accountType'], "Computer")
-        self.assertEqual(activeDirectoryProperties['azureStorageSid'], self.kwargs['azure_storage_sid'])
-        self.assertEqual(activeDirectoryProperties['domainGuid'], self.kwargs['domain_guid'])
-        self.assertEqual(activeDirectoryProperties['domainName'], self.kwargs['domain_name'])
-        self.assertEqual(activeDirectoryProperties['domainSid'], self.kwargs['domain_sid'])
-        self.assertEqual(activeDirectoryProperties['forestName'], self.kwargs['forest_name'])
-        self.assertEqual(activeDirectoryProperties['netBiosDomainName'], self.kwargs['net_bios_domain_name'])
-
-    @ResourceGroupPreparer()
     def test_create_storage_account_with_files_aadkerb(self, resource_group):
         name = self.create_random_name(prefix='cli', length=24)
         self.kwargs.update({

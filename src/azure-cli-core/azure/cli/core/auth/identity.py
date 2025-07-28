@@ -145,7 +145,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             Identity._service_principal_store_instance = ServicePrincipalStore(store)
         return Identity._service_principal_store_instance
 
-    def login_with_auth_code(self, scopes, **kwargs):
+    def login_with_auth_code(self, scopes, claims_challenge=None):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
 
@@ -168,21 +168,21 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             success_template=success_template, error_template=error_template,
             parent_window_handle=self._msal_app.CONSOLE_WINDOW_HANDLE, on_before_launching_ui=_prompt_launching_ui,
             enable_msa_passthrough=True,
-            **kwargs)
+            claims_challenge=claims_challenge)
         return check_result(result)
 
-    def login_with_device_code(self, scopes, **kwargs):
-        flow = self._msal_app.initiate_device_flow(scopes, **kwargs)
+    def login_with_device_code(self, scopes):
+        flow = self._msal_app.initiate_device_flow(scopes)
         if "user_code" not in flow:
             raise ValueError(
                 "Fail to create device flow. Err: %s" % json.dumps(flow, indent=4))
         from azure.cli.core.style import print_styled_text, Style
         print_styled_text((Style.WARNING, flow["message"]), file=sys.stderr)
-        result = self._msal_app.acquire_token_by_device_flow(flow, **kwargs)  # By default it will block
+        result = self._msal_app.acquire_token_by_device_flow(flow)  # By default it will block
         return check_result(result)
 
-    def login_with_username_password(self, username, password, scopes, **kwargs):
-        result = self._msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
+    def login_with_username_password(self, username, password, scopes):
+        result = self._msal_app.acquire_token_by_username_password(username, password, scopes)
         return check_result(result)
 
     def login_with_service_principal(self, client_id, credential, scopes):

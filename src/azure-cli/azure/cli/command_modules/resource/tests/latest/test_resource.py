@@ -91,6 +91,22 @@ class ResourceGroupScenarioTest(ScenarioTest):
         result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-resource-name-params --query "parameters"')
 
         self.assertEqual('{}\n', result.output)
+    
+    @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
+    def test_resource_group_export_output_format_bicep(self, resource_group):
+        self.kwargs.update({
+            'vnet': 'vnet1'
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+        self.kwargs['vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
+        result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --export-format bicep').get_output_in_json()
+        
+        # Check for Bicep-specific syntax
+        bicep_text = str(result)
+        self.assertFalse(bicep_text.strip().startswith('{'))  # Bicep files do not start with '{'
+        self.assertNotIn('$schema', bicep_text)
+        self.assertNotIn('parameters', bicep_text)
 
     @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
     def test_resource_group_force_deletion_type(self, resource_group):
