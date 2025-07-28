@@ -1384,6 +1384,12 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
                 self.check('properties.provisioningState', 'Succeeded')
             ])
 
+        # Enable this when what-if extensibility is fully supported.
+        # self.cmd(
+        #     'deployment sub what-if -n {dn} --location {location} --template-file "{tf}" --parameters @"{params}"', checks=[
+        #         self.check('properties.provisioningState', 'Succeeded')
+        #     ])
+
         self.cmd(
             'deployment sub create -n {dn} --location {location} --template-file "{tf}" --parameters @"{params}"', checks=[
                 self.check('properties.provisioningState', 'Succeeded'),
@@ -1602,6 +1608,12 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
                 self.check('properties.provisioningState', 'Succeeded')
             ])
 
+        # Enable this when what-if extensibility is fully supported
+        # self.cmd(
+        #     'deployment group what-if --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params}"', checks=[
+        #         self.check('properties.provisioningState', 'Succeeded')
+        #     ])
+
         self.cmd(
             'deployment group create --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params}"', checks=[
                 self.check('properties.provisioningState', 'Succeeded'),
@@ -1742,6 +1754,13 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
             checks=[
                 self.check('properties.provisioningState', 'Succeeded')
             ])
+
+        # Enable this when what-if extensibility is fully supported.
+        # self.cmd(
+        #     'deployment mg what-if -n {dn} --management-group-id {mg} --location {location} --template-file "{tf}" --parameters @"{params}"',
+        #     checks=[
+        #         self.check('properties.provisioningState', 'Succeeded')
+        #     ])
 
         self.cmd(
             'deployment mg create -n {dn} --management-group-id {mg} --location {location} --template-file "{tf}" --parameters @"{params}"', checks=[
