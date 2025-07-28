@@ -408,16 +408,11 @@ short-summary: Validate whether a template is valid at subscription scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -440,16 +435,11 @@ short-summary: Start a deployment at subscription scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -561,16 +551,11 @@ short-summary: Validate whether a template is valid at subscription scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -596,16 +581,11 @@ short-summary: Start a deployment at subscription scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -639,16 +619,11 @@ short-summary: Execute a deployment What-If operation at subscription scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -754,16 +729,11 @@ short-summary: Validate whether a template is valid at resource group.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -791,16 +761,11 @@ short-summary: Start a deployment at resource group.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -851,16 +816,11 @@ short-summary: Execute a deployment What-If operation at resource group scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -968,16 +928,11 @@ short-summary: Validate whether a template is valid at management group.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1005,16 +960,11 @@ short-summary: Execute a deployment What-If operation at management group scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1047,16 +997,11 @@ short-summary: Start a deployment at management group.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1160,16 +1105,11 @@ long-summary: Please specify only one of --template-file FILE | --template-uri U
 parameters:
   - name: --parameters -p
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1195,16 +1135,11 @@ short-summary: Execute a deployment What-If operation at tenant scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1235,16 +1170,11 @@ short-summary: Start a deployment at tenant scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1454,16 +1384,11 @@ type: command
 short-summary: Start a deployment.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from this will replace
-        a config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
 examples:
   - name: Create a deployment from a remote template file, using parameters from a local JSON file.
     text: >
@@ -1498,16 +1423,11 @@ type: command
 short-summary: Validate whether a template is syntactically correct.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
+    short-summary: Supply deployment parameter values and extension configurations.
     long-summary: >
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Parameters files can also provide extension configs.
-  - name: --extension-configs -e
-    short-summary: Supply deployment extension configs.
-    long-summary: >
-        Extension configs may be supplied using a JSON string. If extensions configs are also provided by a parameters file, configs
-        supplied by this parameter will be shallowly merged into them. That means supplying a config to an extension from here will replace
-        the extension's config sourced from the parameters file.
+        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+        Extension configurations can be supplied with parameters files. Inlining extension configs minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs.
 examples:
   - name: Validate whether a template is syntactically correct. (autogenerated)
     text: |
