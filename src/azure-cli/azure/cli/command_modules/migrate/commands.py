@@ -56,9 +56,13 @@ def load_command_table(self, _):
     # Azure Stack HCI Local Migration Commands
     with self.command_group('migrate local') as g:
         g.custom_command('create-disk-mapping', 'create_local_disk_mapping')
-        g.custom_command('create-local-replication', 'create_local_server_replication')
+        g.custom_command('create-replication', 'create_local_server_replication')
         g.custom_command('get-job', 'get_local_replication_job')
-        g.custom_command('init-local', 'initialize_local_replication_infrastructure')
+        g.custom_command('init', 'initialize_local_replication_infrastructure')
+        g.custom_command('create-vm-replication', 'create_azstackhci_vm_replication')
+        g.custom_command('set-vm-replication', 'set_azstackhci_vm_replication')
+        g.custom_command('remove-vm-replication', 'remove_azstackhci_vm_replication')
+        g.custom_command('get-vm-replication', 'get_azstackhci_vm_replication')
 
     # Azure Resource Management Commands
     with self.command_group('migrate resource') as g:

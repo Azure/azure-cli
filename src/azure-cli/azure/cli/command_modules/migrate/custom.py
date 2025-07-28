@@ -1644,3 +1644,241 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
         
     except Exception as e:
         raise CLIError(f'Failed to check PowerShell module {module_name}: {str(e)}')
+
+# --------------------------------------------------------------------------------------------
+# Azure Stack HCI VM Replication Commands
+# --------------------------------------------------------------------------------------------
+
+def create_azstackhci_vm_replication(cmd, vm_name, target_vm_name, resource_group_name, 
+                                     source_appliance_name, target_appliance_name,
+                                     replication_frequency=None, recovery_point_history=None,
+                                     app_consistent_frequency=None):
+    """
+    Azure CLI equivalent to New-AzStackHCIVMReplication.
+    Creates a new VM replication for Azure Stack HCI migration.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Build the PowerShell script with parameters
+    params = [
+        f'-VMName "{vm_name}"',
+        f'-TargetVMName "{target_vm_name}"',
+        f'-ResourceGroupName "{resource_group_name}"',
+        f'-SourceApplianceName "{source_appliance_name}"',
+        f'-TargetApplianceName "{target_appliance_name}"'
+    ]
+    
+    if replication_frequency:
+        params.append(f'-ReplicationFrequency {replication_frequency}')
+    if recovery_point_history:
+        params.append(f'-RecoveryPointHistory {recovery_point_history}')
+    if app_consistent_frequency:
+        params.append(f'-AppConsistentFrequency {app_consistent_frequency}')
+    
+    create_vm_replication_script = f"""
+    try {{
+        Write-Host ""
+        Write-Host "🔄 Creating Azure Stack HCI VM Replication..." -ForegroundColor Cyan
+        Write-Host "VM Name: {vm_name}" -ForegroundColor White
+        Write-Host "Target VM Name: {target_vm_name}" -ForegroundColor White
+        Write-Host "Resource Group: {resource_group_name}" -ForegroundColor White
+        Write-Host ""
+        
+        $Result = New-AzStackHCIVMReplication {' '.join(params)}
+        
+        if ($Result) {{
+            Write-Host "✅ VM replication created successfully!" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "Replication Details:" -ForegroundColor Yellow
+            Write-Host "===================" -ForegroundColor Gray
+            $Result | Format-List
+        }} else {{
+            Write-Host "❌ Failed to create VM replication" -ForegroundColor Red
+        }}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to create Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        throw
+    }}
+    """
+    
+    try:
+        ps_executor.execute_script_interactive(create_vm_replication_script)
+    except Exception as e:
+        raise CLIError(f'Failed to create Azure Stack HCI VM replication: {str(e)}')
+
+
+def set_azstackhci_vm_replication(cmd, vm_name, resource_group_name, 
+                                  replication_frequency=None, recovery_point_history=None,
+                                  app_consistent_frequency=None, enable_compression=None):
+    """
+    Azure CLI equivalent to Set-AzStackHCIVMReplication.
+    Updates settings for an existing Azure Stack HCI VM replication.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Build the PowerShell script with parameters
+    params = [
+        f'-VMName "{vm_name}"',
+        f'-ResourceGroupName "{resource_group_name}"'
+    ]
+    
+    if replication_frequency:
+        params.append(f'-ReplicationFrequency {replication_frequency}')
+    if recovery_point_history:
+        params.append(f'-RecoveryPointHistory {recovery_point_history}')
+    if app_consistent_frequency:
+        params.append(f'-AppConsistentFrequency {app_consistent_frequency}')
+    if enable_compression is not None:
+        params.append(f'-EnableCompression ${str(enable_compression).lower()}')
+    
+    set_vm_replication_script = f"""
+    try {{
+        Write-Host ""
+        Write-Host "Updating Azure Stack HCI VM Replication Settings..." -ForegroundColor Cyan
+        Write-Host "VM Name: {vm_name}" -ForegroundColor White
+        Write-Host "Resource Group: {resource_group_name}" -ForegroundColor White
+        Write-Host ""
+        
+        $Result = Set-AzStackHCIVMReplication {' '.join(params)}
+        
+        if ($Result) {{
+            Write-Host "✅ VM replication settings updated successfully!" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "Updated Settings:" -ForegroundColor Yellow
+            Write-Host "================" -ForegroundColor Gray
+            $Result | Format-List
+        }} else {{
+            Write-Host "❌ Failed to update VM replication settings" -ForegroundColor Red
+        }}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to update Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        throw
+    }}
+    """
+    
+    try:
+        ps_executor.execute_script_interactive(set_vm_replication_script)
+    except Exception as e:
+        raise CLIError(f'Failed to update Azure Stack HCI VM replication: {str(e)}')
+
+
+def remove_azstackhci_vm_replication(cmd, vm_name, resource_group_name, force=False):
+    """
+    Azure CLI equivalent to Remove-AzStackHCIVMReplication.
+    Removes an existing Azure Stack HCI VM replication.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Build the PowerShell script with parameters
+    params = [
+        f'-VMName "{vm_name}"',
+        f'-ResourceGroupName "{resource_group_name}"'
+    ]
+    
+    if force:
+        params.append('-Force')
+    
+    remove_vm_replication_script = f"""
+    try {{
+        Write-Host ""
+        Write-Host "🗑️ Removing Azure Stack HCI VM Replication..." -ForegroundColor Cyan
+        Write-Host "VM Name: {vm_name}" -ForegroundColor White
+        Write-Host "Resource Group: {resource_group_name}" -ForegroundColor White
+        Write-Host ""
+        
+        {"# Confirmation prompt" if not force else "# Force removal without confirmation"}
+        {"$confirmation = Read-Host 'Are you sure you want to remove VM replication? (y/N)'" if not force else ""}
+        {"if ($confirmation -eq 'y' -or $confirmation -eq 'Y') {" if not force else ""}
+            $Result = Remove-AzStackHCIVMReplication {' '.join(params)}
+            
+            Write-Host "✅ VM replication removed successfully!" -ForegroundColor Green
+            Write-Host ""
+        {"} else {" if not force else ""}
+        {"    Write-Host '❌ Operation cancelled by user' -ForegroundColor Yellow" if not force else ""}
+        {"}" if not force else ""}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to remove Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        throw
+    }}
+    """
+    
+    try:
+        ps_executor.execute_script_interactive(remove_vm_replication_script)
+    except Exception as e:
+        raise CLIError(f'Failed to remove Azure Stack HCI VM replication: {str(e)}')
+
+
+def get_azstackhci_vm_replication(cmd, vm_name=None, resource_group_name=None):
+    """
+    Azure CLI equivalent to Get-AzStackHCIVMReplication.
+    Retrieves Azure Stack HCI VM replication status and details.
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Build the PowerShell script with parameters
+    params = []
+    if vm_name:
+        params.append(f'-VMName "{vm_name}"')
+    if resource_group_name:
+        params.append(f'-ResourceGroupName "{resource_group_name}"')
+    
+    get_vm_replication_script = f"""
+    try {{
+        Write-Host ""
+        Write-Host "📊 Retrieving Azure Stack HCI VM Replication Status..." -ForegroundColor Cyan
+        {"Write-Host 'VM Name: " + vm_name + "' -ForegroundColor White" if vm_name else "Write-Host 'Listing all VM replications' -ForegroundColor White"}
+        {"Write-Host 'Resource Group: " + resource_group_name + "' -ForegroundColor White" if resource_group_name else ""}
+        Write-Host ""
+        
+        $Replications = Get-AzStackHCIVMReplication {' '.join(params)}
+        
+        if ($Replications) {{
+            Write-Host "✅ VM replication details retrieved successfully!" -ForegroundColor Green
+            Write-Host ""
+            Write-Host "Replication Status:" -ForegroundColor Yellow
+            Write-Host "==================" -ForegroundColor Gray
+            
+            if ($Replications -is [array]) {{
+                foreach ($replication in $Replications) {{
+                    Write-Host ""
+                    Write-Host "VM Name: $($replication.VMName)" -ForegroundColor Cyan
+                    Write-Host "Status: $($replication.ReplicationStatus)" -ForegroundColor White
+                    Write-Host "Health: $($replication.ReplicationHealth)" -ForegroundColor White
+                    Write-Host "Last Replication Time: $($replication.LastReplicationTime)" -ForegroundColor White
+                    Write-Host "Target Location: $($replication.TargetLocation)" -ForegroundColor White
+                    Write-Host "Recovery Points: $($replication.RecoveryPointCount)" -ForegroundColor White
+                    Write-Host "---"
+                }}
+            }} else {{
+                $Replications | Format-List
+            }}
+            
+        }} else {{
+            Write-Host "ℹ️ No VM replications found" -ForegroundColor Yellow
+        }}
+        
+    }} catch {{
+        Write-Host ""
+        Write-Host "❌ Failed to get Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host ""
+        throw
+    }}
+    """
+    
+    try:
+        ps_executor.execute_script_interactive(get_vm_replication_script)
+    except Exception as e:
+        raise CLIError(f'Failed to get Azure Stack HCI VM replication: {str(e)}')

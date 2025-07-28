@@ -272,7 +272,7 @@ def load_arguments(self, _):
                   help='Disk format type. Default is VHD.')
         c.argument('physical_sector_size', type=int, help='Physical sector size in bytes. Default is 512.')
 
-    with self.argument_context('migrate local create-local-replication') as c:
+    with self.argument_context('migrate local create-replication') as c:
         c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
         c.argument('server_index', type=int, help='Index of the discovered server to replicate (0-based).', required=True)
@@ -294,7 +294,7 @@ def load_arguments(self, _):
         c.argument('input_object', help='Input object containing job information (JSON string).')
         c.argument('subscription_id', help='Azure subscription ID.')
 
-    with self.argument_context('migrate local init-local') as c:
+    with self.argument_context('migrate local init') as c:
         c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
         c.argument('source_appliance_name', help='Name of the source appliance.', required=True)
@@ -306,3 +306,43 @@ def load_arguments(self, _):
     with self.argument_context('migrate powershell check-module') as c:
         c.argument('module_name', help='Name of the PowerShell module to check. Default is Az.Migrate.')
         c.argument('subscription_id', help='Azure subscription ID.')
+
+    # Azure Stack HCI VM Replication Commands
+    with self.argument_context('migrate local create-vm-replication') as c:
+        c.argument('vm_name', help='Name of the source VM to replicate.', required=True)
+        c.argument('target_vm_name', help='Name for the target VM in Azure Stack HCI.', required=True)
+        c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], 
+                  help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('source_appliance_name', help='Name of the source appliance.', required=True)
+        c.argument('target_appliance_name', help='Name of the target appliance.', required=True)
+        c.argument('replication_frequency', type=int, 
+                  help='Replication frequency in seconds (e.g., 300 for 5 minutes).')
+        c.argument('recovery_point_history', type=int, 
+                  help='Number of recovery points to maintain.')
+        c.argument('app_consistent_frequency', type=int, 
+                  help='Application-consistent snapshot frequency in seconds.')
+
+    with self.argument_context('migrate local set-vm-replication') as c:
+        c.argument('vm_name', help='Name of the VM with existing replication.', required=True)
+        c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], 
+                  help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('replication_frequency', type=int, 
+                  help='Updated replication frequency in seconds.')
+        c.argument('recovery_point_history', type=int, 
+                  help='Updated number of recovery points to maintain.')
+        c.argument('app_consistent_frequency', type=int, 
+                  help='Updated application-consistent snapshot frequency in seconds.')
+        c.argument('enable_compression', action='store_true', 
+                  help='Enable compression for replication traffic.')
+
+    with self.argument_context('migrate local remove-vm-replication') as c:
+        c.argument('vm_name', help='Name of the VM to remove replication for.', required=True)
+        c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], 
+                  help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('force', action='store_true', 
+                  help='Force removal without confirmation prompt.')
+
+    with self.argument_context('migrate local get-vm-replication') as c:
+        c.argument('vm_name', help='Name of the VM to get replication status for. If not specified, lists all VM replications.')
+        c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], 
+                  help='Name of the resource group containing the Azure Migrate project.')
