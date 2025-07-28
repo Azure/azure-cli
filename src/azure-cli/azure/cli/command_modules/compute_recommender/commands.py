@@ -14,7 +14,7 @@
 
 def load_command_table(self, _):  # pylint: disable=unused-argument
     with self.command_group(
-        'az compute-recommender spot-placement-recommender',
+        'compute-recommender spot-placement-recommender',
         deprecate_info=self.deprecate(
             redirect='az compute-recommender spot-placement-score',
             hide=True,
