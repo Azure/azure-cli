@@ -1518,6 +1518,50 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             self.check('properties.provisioningState', 'Canceled')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_group_deployment_extensibility')
+    def test_resource_group_extensibility_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update(
+            {
+                'tf': os.path.join(curr_dir, 'simple_extensibility_deploy.json').replace('\\', '\\\\'),
+                'params': os.path.join(curr_dir, 'simple_extensibility_deploy_params.json').replace('\\', '\\\\'),
+                'params_invalid': os.path.join(curr_dir, 'simple_extensibility_deploy_params_invalid.json').replace('\\', '\\\\'),
+                'dn': self.create_random_name('azure-cli-rg-extensibility-deployment', 60),
+                'dn2': self.create_random_name('azure-cli-rg-extensibility-deployment', 60),
+                'inlineExtConfigs': '{"parameters":{},"extensionConfigs":{"contoso":{"configOne":{"value":"cliParamValue"}}}}'.replace('"', '\\"')
+            })
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'deployment group validate --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params_invalid}" --no-prompt true')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'deployment group create --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params_invalid}"')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
+        self.cmd(
+            'deployment group validate --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params}"', checks=[
+                self.check('properties.provisioningState', 'Succeeded')
+            ])
+
+        self.cmd(
+            'deployment group validate --resource-group {rg} -n {dn2} --template-file "{tf}" --parameters @"{params}" --parameters "{inlineExtConfigs}"',
+            checks=[
+                self.check('properties.provisioningState', 'Succeeded')
+            ])
+
+        self.cmd(
+            'deployment group create --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params}"', checks=[
+                self.check('properties.provisioningState', 'Succeeded'),
+            ])
+
+        self.cmd(
+            'deployment group create --resource-group {rg} -n {dn2} --template-file "{tf}" --parameters @"{params}" --parameters "{inlineExtConfigs}"', checks=[
+                self.check('properties.provisioningState', 'Succeeded'),
+            ])
+
 
 class DeploymentTestAtManagementGroup(ScenarioTest):
 

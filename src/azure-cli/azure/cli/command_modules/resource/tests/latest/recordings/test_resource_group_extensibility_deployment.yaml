@@ -1,0 +1,797 @@
+interactions:
+- request:
+    body: "{\"properties\": {\"parameters\": {\"strParam1\": {\"value\": \"strParam1Value\"}},
+      \"extensionConfigs\": {}, \"mode\": \"Incremental\", template:{\r\n  \"$schema\":
+      \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \ \"languageVersion\": \"2.2-experimental\",\r\n  \"contentVersion\": \"1.0.0.0\",\r\n
+      \ \"parameters\": {\r\n    \"strParam1\": {\r\n      \"type\": \"string\",\r\n
+      \     \"defaultValue\": \"strParam1Default\"\r\n    }\r\n  },\r\n  \"extensions\":
+      {\r\n    \"contoso\": {\r\n      \"name\": \"Contoso\",\r\n      \"version\":
+      \"2.0.0\"\r\n    }\r\n  },\r\n  \"resources\": {\r\n    \"example1\": {\r\n
+      \     \"extension\": \"contoso\",\r\n      \"type\": \"Contoso/example@v1\",\r\n
+      \     \"properties\": {\r\n        \"foo\": 42,\r\n        \"bar\": true\r\n
+      \     }\r\n    }\r\n  }\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '720'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters --no-prompt
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2025-04-01
+  response:
+    body:
+      string: '{"error":{"code":"InvalidTemplateDeployment","message":"The template
+        deployment ''azure-cli-rg-extensibility-deployment000002'' is not valid according
+        to the validation procedure. The tracking id is ''80fbb927-12c5-49c4-b3bb-622218b3b128''.
+        See inner errors for details.","details":[{"code":"MissingConfig","target":"/extensions/contoso/config","message":"Config
+        cannot be null or undefined."}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '392'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:05:23 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 9274282A544845D4B39F940D07CC09F3 Ref B: BL2AA2030101033 Ref C: 2025-07-28T18:05:21Z'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: "{\"properties\": {\"parameters\": {\"strParam1\": {\"value\": \"strParam1Value\"}},
+      \"extensionConfigs\": {}, \"mode\": \"Incremental\", template:{\r\n  \"$schema\":
+      \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \ \"languageVersion\": \"2.2-experimental\",\r\n  \"contentVersion\": \"1.0.0.0\",\r\n
+      \ \"parameters\": {\r\n    \"strParam1\": {\r\n      \"type\": \"string\",\r\n
+      \     \"defaultValue\": \"strParam1Default\"\r\n    }\r\n  },\r\n  \"extensions\":
+      {\r\n    \"contoso\": {\r\n      \"name\": \"Contoso\",\r\n      \"version\":
+      \"2.0.0\"\r\n    }\r\n  },\r\n  \"resources\": {\r\n    \"example1\": {\r\n
+      \     \"extension\": \"contoso\",\r\n      \"type\": \"Contoso/example@v1\",\r\n
+      \     \"properties\": {\r\n        \"foo\": 42,\r\n        \"bar\": true\r\n
+      \     }\r\n    }\r\n  }\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '720'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2025-04-01
+  response:
+    body:
+      string: '{"error":{"code":"InvalidTemplateDeployment","message":"The template
+        deployment ''azure-cli-rg-extensibility-deployment000002'' is not valid according
+        to the validation procedure. The tracking id is ''6c846598-9030-4c3c-ac69-3680794cb48c''.
+        See inner errors for details.","details":[{"code":"MissingConfig","target":"/extensions/contoso/config","message":"Config
+        cannot be null or undefined."}]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '392'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:05:24 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: EC184C85257E45DE9164F1BAE05D443C Ref B: MNZ221060609039 Ref C: 2025-07-28T18:05:23Z'
+    status:
+      code: 400
+      message: Bad Request
+- request:
+    body: "{\"properties\": {\"parameters\": {\"strParam1\": {\"value\": \"strParam1Value\"}},
+      \"extensionConfigs\": {\"contoso\": {\"configOne\": {\"value\": \"config1\"},
+      \"configTwo\": {\"value\": true}}}, \"mode\": \"Incremental\", template:{\r\n
+      \ \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \ \"languageVersion\": \"2.2-experimental\",\r\n  \"contentVersion\": \"1.0.0.0\",\r\n
+      \ \"parameters\": {\r\n    \"strParam1\": {\r\n      \"type\": \"string\",\r\n
+      \     \"defaultValue\": \"strParam1Default\"\r\n    }\r\n  },\r\n  \"extensions\":
+      {\r\n    \"contoso\": {\r\n      \"name\": \"Contoso\",\r\n      \"version\":
+      \"2.0.0\"\r\n    }\r\n  },\r\n  \"resources\": {\r\n    \"example1\": {\r\n
+      \     \"extension\": \"contoso\",\r\n      \"type\": \"Contoso/example@v1\",\r\n
+      \     \"properties\": {\r\n        \"foo\": 42,\r\n        \"bar\": true\r\n
+      \     }\r\n    }\r\n  }\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '796'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2025-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/azure-cli-rg-extensibility-deployment000002","name":"azure-cli-rg-extensibility-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1162621365160699601","parameters":{"strParam1":{"type":"String","value":"strParam1Value"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2025-07-28T18:05:27.2954074Z","duration":"PT0S","correlationId":"a1aa65eb-1fe9-4ca0-9031-7af0f1afc6e3","providers":[],"dependencies":[],"validatedResources":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:05:27 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: B696BC42944B4FE38B66CEAC5B7B744F Ref B: BL2AA2030101053 Ref C: 2025-07-28T18:05:26Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"strParam1\": {\"value\": \"strParam1Value\"}},
+      \"extensionConfigs\": {\"contoso\": {\"configOne\": {\"value\": \"cliParamValue\"}}},
+      \"mode\": \"Incremental\", template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \ \"languageVersion\": \"2.2-experimental\",\r\n  \"contentVersion\": \"1.0.0.0\",\r\n
+      \ \"parameters\": {\r\n    \"strParam1\": {\r\n      \"type\": \"string\",\r\n
+      \     \"defaultValue\": \"strParam1Default\"\r\n    }\r\n  },\r\n  \"extensions\":
+      {\r\n    \"contoso\": {\r\n      \"name\": \"Contoso\",\r\n      \"version\":
+      \"2.0.0\"\r\n    }\r\n  },\r\n  \"resources\": {\r\n    \"example1\": {\r\n
+      \     \"extension\": \"contoso\",\r\n      \"type\": \"Contoso/example@v1\",\r\n
+      \     \"properties\": {\r\n        \"foo\": 42,\r\n        \"bar\": true\r\n
+      \     }\r\n    }\r\n  }\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group validate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '772'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2025-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/azure-cli-rg-extensibility-deployment000003","name":"azure-cli-rg-extensibility-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1162621365160699601","parameters":{"strParam1":{"type":"String","value":"strParam1Value"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2025-07-28T18:05:29.1271528Z","duration":"PT0S","correlationId":"ae2792ef-a881-424d-8c07-04f7e4bf90ea","providers":[],"dependencies":[],"validatedResources":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:05:28 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 06D161F4413D4C1A8D388B09E5457AB4 Ref B: MNZ221060610011 Ref C: 2025-07-28T18:05:28Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"strParam1\": {\"value\": \"strParam1Value\"}},
+      \"extensionConfigs\": {\"contoso\": {\"configOne\": {\"value\": \"config1\"},
+      \"configTwo\": {\"value\": true}}}, \"mode\": \"Incremental\", template:{\r\n
+      \ \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \ \"languageVersion\": \"2.2-experimental\",\r\n  \"contentVersion\": \"1.0.0.0\",\r\n
+      \ \"parameters\": {\r\n    \"strParam1\": {\r\n      \"type\": \"string\",\r\n
+      \     \"defaultValue\": \"strParam1Default\"\r\n    }\r\n  },\r\n  \"extensions\":
+      {\r\n    \"contoso\": {\r\n      \"name\": \"Contoso\",\r\n      \"version\":
+      \"2.0.0\"\r\n    }\r\n  },\r\n  \"resources\": {\r\n    \"example1\": {\r\n
+      \     \"extension\": \"contoso\",\r\n      \"type\": \"Contoso/example@v1\",\r\n
+      \     \"properties\": {\r\n        \"foo\": 42,\r\n        \"bar\": true\r\n
+      \     }\r\n    }\r\n  }\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '796'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2025-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/azure-cli-rg-extensibility-deployment000002","name":"azure-cli-rg-extensibility-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1162621365160699601","parameters":{"strParam1":{"type":"String","value":"strParam1Value"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2025-07-28T18:05:30.9299146Z","duration":"PT0S","correlationId":"17d00ec0-3db8-484d-bd5c-9a150a0757ef","providers":[],"dependencies":[],"validatedResources":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:05:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: CE45A0753D794F9D95580306A4A1FD4B Ref B: BL2AA2030101047 Ref C: 2025-07-28T18:05:29Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"strParam1\": {\"value\": \"strParam1Value\"}},
+      \"extensionConfigs\": {\"contoso\": {\"configOne\": {\"value\": \"config1\"},
+      \"configTwo\": {\"value\": true}}}, \"mode\": \"Incremental\", template:{\r\n
+      \ \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \ \"languageVersion\": \"2.2-experimental\",\r\n  \"contentVersion\": \"1.0.0.0\",\r\n
+      \ \"parameters\": {\r\n    \"strParam1\": {\r\n      \"type\": \"string\",\r\n
+      \     \"defaultValue\": \"strParam1Default\"\r\n    }\r\n  },\r\n  \"extensions\":
+      {\r\n    \"contoso\": {\r\n      \"name\": \"Contoso\",\r\n      \"version\":
+      \"2.0.0\"\r\n    }\r\n  },\r\n  \"resources\": {\r\n    \"example1\": {\r\n
+      \     \"extension\": \"contoso\",\r\n      \"type\": \"Contoso/example@v1\",\r\n
+      \     \"properties\": {\r\n        \"foo\": 42,\r\n        \"bar\": true\r\n
+      \     }\r\n    }\r\n  }\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '796'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2025-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/azure-cli-rg-extensibility-deployment000002","name":"azure-cli-rg-extensibility-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1162621365160699601","parameters":{"strParam1":{"type":"String","value":"strParam1Value"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2025-07-28T18:05:32.7221356Z","duration":"PT0.0004192S","correlationId":"97e28405-6dc4-4394-b475-be94b17aaed2","providers":[],"dependencies":[]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/azure-cli-rg-extensibility-deployment000002/operationStatuses/08584478809527489360?api-version=2025-04-01&t=638893227349254660&c=MIIHhzCCBm-gAwIBAgITfAh_EjM5CPJ1HOWmNAAACH8SMzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwNzE3MDk0NTA0WhcNMjYwMTEzMDk0NTA0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMVFdvrsA5Ktxap8eNkW-y7upqcrDgJYyFE4duefCbarjG14TP5gqSv1NIH3heGW-yMTsDnNIU_jmw1wrzp8GVWsEgOnSqxoYhHUqwcvL05RcO-X-yHyxFjEaVc0StnO1GNb6OjUZQGc09gBwXVvzcyy9Ky0Re5siPZfQSCZSxRL3yQvLFWcH2c5c_zzzUXjRnUtRimKDO1uU8_FgAVGPIMQABDu4zlBNNz9aRmo7e8KH8UAOb2aHDjTIgqN5LkTfCYPkqfEVp-PwkT2uupBMf8FB-5z7HRacAbZV9rLx6gBkgrwsVfSLFIXx0HVGV7eRor0sx2RGYZGR7Dhb3kxibECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTAt-Ym0GYtCbtN9z3ypu-p5ShcEjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFKMj8anaTbAXm33UCO7vYNhNpy44oz5yO7ZjJb3j0N71NuEks5a1qeIsv0py0SkYVFbN5ij9j9ZdfP-8fbfSKxDqFsZ-TgzxaYdEm5_QOoFga6iyS42Gk4ER_xE5zr8LDaiFzG9DgD3y_Q3VqHY0mFqQLjgNmPaG2KySPeIoSkGpTkYGD0-x_-45E9IsSRk4J5cj1wY1ZoeyBr8ZIpAlxr6sK7EiKTUJljR0eQKFMr8iO-lb0WYRshpzQjU9EPNYzSQghm_xSNH6_DbHARnd1_5YCc6QG76LhyMwzYIyRW5P379sef7Zbu1bCqAt-G940BTh2B0K0VEqqdRx_NjSrk&s=FsFrD_BHHomKbHDZmnFGdlxL58r5OVJ0BV5--hTruxrrAnREu1grGX-9WZGpPn6myWb_XxSkzfKjlqXuyHjqm-GgPrhbjtc_d5zCi9JZ7Md_Q0rRUVqzA9jg2kFNK-BOQt9akQAOjrMru-48NYee5KseNn7sWqQiWKa-nWBxFhZ4guIPBiOE5_0UvnJXHOA-0mCdj5tY8-2DuSHW-GeZfiVHPQBZDbcLUCGYoHZ5OjEK433G5crsC3BHaKFgH8eiHg3j4V-vGPLzG56DcRj53nzY0NY7QJQemdMa3TL9C41VheTB18Ut_pHpzKgHl7t3ZD1bubIxZQEljyRN_4FoXQ&h=N00Q3WaLf7UkiPrCHL7kwUN49efR9XgYsGPsLTwehd0
+      cache-control:
+      - no-cache
+      content-length:
+      - '641'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:05:34 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-deployment-engine-version:
+      - 1.404.0
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 261077F8FD7741BABF65EA6FE1B339FD Ref B: MNZ221060610035 Ref C: 2025-07-28T18:05:31Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584478809527489360?api-version=2025-04-01&t=638893227349254660&c=MIIHhzCCBm-gAwIBAgITfAh_EjM5CPJ1HOWmNAAACH8SMzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwNzE3MDk0NTA0WhcNMjYwMTEzMDk0NTA0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMVFdvrsA5Ktxap8eNkW-y7upqcrDgJYyFE4duefCbarjG14TP5gqSv1NIH3heGW-yMTsDnNIU_jmw1wrzp8GVWsEgOnSqxoYhHUqwcvL05RcO-X-yHyxFjEaVc0StnO1GNb6OjUZQGc09gBwXVvzcyy9Ky0Re5siPZfQSCZSxRL3yQvLFWcH2c5c_zzzUXjRnUtRimKDO1uU8_FgAVGPIMQABDu4zlBNNz9aRmo7e8KH8UAOb2aHDjTIgqN5LkTfCYPkqfEVp-PwkT2uupBMf8FB-5z7HRacAbZV9rLx6gBkgrwsVfSLFIXx0HVGV7eRor0sx2RGYZGR7Dhb3kxibECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTAt-Ym0GYtCbtN9z3ypu-p5ShcEjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFKMj8anaTbAXm33UCO7vYNhNpy44oz5yO7ZjJb3j0N71NuEks5a1qeIsv0py0SkYVFbN5ij9j9ZdfP-8fbfSKxDqFsZ-TgzxaYdEm5_QOoFga6iyS42Gk4ER_xE5zr8LDaiFzG9DgD3y_Q3VqHY0mFqQLjgNmPaG2KySPeIoSkGpTkYGD0-x_-45E9IsSRk4J5cj1wY1ZoeyBr8ZIpAlxr6sK7EiKTUJljR0eQKFMr8iO-lb0WYRshpzQjU9EPNYzSQghm_xSNH6_DbHARnd1_5YCc6QG76LhyMwzYIyRW5P379sef7Zbu1bCqAt-G940BTh2B0K0VEqqdRx_NjSrk&s=FsFrD_BHHomKbHDZmnFGdlxL58r5OVJ0BV5--hTruxrrAnREu1grGX-9WZGpPn6myWb_XxSkzfKjlqXuyHjqm-GgPrhbjtc_d5zCi9JZ7Md_Q0rRUVqzA9jg2kFNK-BOQt9akQAOjrMru-48NYee5KseNn7sWqQiWKa-nWBxFhZ4guIPBiOE5_0UvnJXHOA-0mCdj5tY8-2DuSHW-GeZfiVHPQBZDbcLUCGYoHZ5OjEK433G5crsC3BHaKFgH8eiHg3j4V-vGPLzG56DcRj53nzY0NY7QJQemdMa3TL9C41VheTB18Ut_pHpzKgHl7t3ZD1bubIxZQEljyRN_4FoXQ&h=N00Q3WaLf7UkiPrCHL7kwUN49efR9XgYsGPsLTwehd0
+  response:
+    body:
+      string: '{"status":"Accepted"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '21'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:05:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 3FFAA6ECE5E1498593A583F96A1C9C10 Ref B: MNZ221060619019 Ref C: 2025-07-28T18:05:35Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584478809527489360?api-version=2025-04-01&t=638893227349254660&c=MIIHhzCCBm-gAwIBAgITfAh_EjM5CPJ1HOWmNAAACH8SMzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwNzE3MDk0NTA0WhcNMjYwMTEzMDk0NTA0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMVFdvrsA5Ktxap8eNkW-y7upqcrDgJYyFE4duefCbarjG14TP5gqSv1NIH3heGW-yMTsDnNIU_jmw1wrzp8GVWsEgOnSqxoYhHUqwcvL05RcO-X-yHyxFjEaVc0StnO1GNb6OjUZQGc09gBwXVvzcyy9Ky0Re5siPZfQSCZSxRL3yQvLFWcH2c5c_zzzUXjRnUtRimKDO1uU8_FgAVGPIMQABDu4zlBNNz9aRmo7e8KH8UAOb2aHDjTIgqN5LkTfCYPkqfEVp-PwkT2uupBMf8FB-5z7HRacAbZV9rLx6gBkgrwsVfSLFIXx0HVGV7eRor0sx2RGYZGR7Dhb3kxibECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTAt-Ym0GYtCbtN9z3ypu-p5ShcEjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFKMj8anaTbAXm33UCO7vYNhNpy44oz5yO7ZjJb3j0N71NuEks5a1qeIsv0py0SkYVFbN5ij9j9ZdfP-8fbfSKxDqFsZ-TgzxaYdEm5_QOoFga6iyS42Gk4ER_xE5zr8LDaiFzG9DgD3y_Q3VqHY0mFqQLjgNmPaG2KySPeIoSkGpTkYGD0-x_-45E9IsSRk4J5cj1wY1ZoeyBr8ZIpAlxr6sK7EiKTUJljR0eQKFMr8iO-lb0WYRshpzQjU9EPNYzSQghm_xSNH6_DbHARnd1_5YCc6QG76LhyMwzYIyRW5P379sef7Zbu1bCqAt-G940BTh2B0K0VEqqdRx_NjSrk&s=FsFrD_BHHomKbHDZmnFGdlxL58r5OVJ0BV5--hTruxrrAnREu1grGX-9WZGpPn6myWb_XxSkzfKjlqXuyHjqm-GgPrhbjtc_d5zCi9JZ7Md_Q0rRUVqzA9jg2kFNK-BOQt9akQAOjrMru-48NYee5KseNn7sWqQiWKa-nWBxFhZ4guIPBiOE5_0UvnJXHOA-0mCdj5tY8-2DuSHW-GeZfiVHPQBZDbcLUCGYoHZ5OjEK433G5crsC3BHaKFgH8eiHg3j4V-vGPLzG56DcRj53nzY0NY7QJQemdMa3TL9C41VheTB18Ut_pHpzKgHl7t3ZD1bubIxZQEljyRN_4FoXQ&h=N00Q3WaLf7UkiPrCHL7kwUN49efR9XgYsGPsLTwehd0
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:06:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 7B1114E06CAC42B4BD869935A9B253CC Ref B: BL2AA2010204031 Ref C: 2025-07-28T18:06:05Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2025-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/azure-cli-rg-extensibility-deployment000002","name":"azure-cli-rg-extensibility-deployment000002","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1162621365160699601","parameters":{"strParam1":{"type":"String","value":"strParam1Value"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2025-07-28T18:05:38.1740279Z","duration":"PT5.4518923S","correlationId":"97e28405-6dc4-4394-b475-be94b17aaed2","providers":[],"dependencies":[],"outputResources":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '663'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:06:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 101488ACA4AD4F28A39AC0A56894AFD8 Ref B: MNZ221060610019 Ref C: 2025-07-28T18:06:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"strParam1\": {\"value\": \"strParam1Value\"}},
+      \"extensionConfigs\": {\"contoso\": {\"configOne\": {\"value\": \"cliParamValue\"}}},
+      \"mode\": \"Incremental\", template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \ \"languageVersion\": \"2.2-experimental\",\r\n  \"contentVersion\": \"1.0.0.0\",\r\n
+      \ \"parameters\": {\r\n    \"strParam1\": {\r\n      \"type\": \"string\",\r\n
+      \     \"defaultValue\": \"strParam1Default\"\r\n    }\r\n  },\r\n  \"extensions\":
+      {\r\n    \"contoso\": {\r\n      \"name\": \"Contoso\",\r\n      \"version\":
+      \"2.0.0\"\r\n    }\r\n  },\r\n  \"resources\": {\r\n    \"example1\": {\r\n
+      \     \"extension\": \"contoso\",\r\n      \"type\": \"Contoso/example@v1\",\r\n
+      \     \"properties\": {\r\n        \"foo\": 42,\r\n        \"bar\": true\r\n
+      \     }\r\n    }\r\n  }\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '772'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment/validate?api-version=2025-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/azure-cli-rg-extensibility-deployment000003","name":"azure-cli-rg-extensibility-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1162621365160699601","parameters":{"strParam1":{"type":"String","value":"strParam1Value"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2025-07-28T18:06:08.0544606Z","duration":"PT0S","correlationId":"32daa0d2-cd49-4b43-9a65-1592377dc4e7","providers":[],"dependencies":[],"validatedResources":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '658'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:06:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 6B0B8AC05EF242BEAAA9C3E44340A001 Ref B: MNZ221060609017 Ref C: 2025-07-28T18:06:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"properties\": {\"parameters\": {\"strParam1\": {\"value\": \"strParam1Value\"}},
+      \"extensionConfigs\": {\"contoso\": {\"configOne\": {\"value\": \"cliParamValue\"}}},
+      \"mode\": \"Incremental\", template:{\r\n  \"$schema\": \"https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#\",\r\n
+      \ \"languageVersion\": \"2.2-experimental\",\r\n  \"contentVersion\": \"1.0.0.0\",\r\n
+      \ \"parameters\": {\r\n    \"strParam1\": {\r\n      \"type\": \"string\",\r\n
+      \     \"defaultValue\": \"strParam1Default\"\r\n    }\r\n  },\r\n  \"extensions\":
+      {\r\n    \"contoso\": {\r\n      \"name\": \"Contoso\",\r\n      \"version\":
+      \"2.0.0\"\r\n    }\r\n  },\r\n  \"resources\": {\r\n    \"example1\": {\r\n
+      \     \"extension\": \"contoso\",\r\n      \"type\": \"Contoso/example@v1\",\r\n
+      \     \"properties\": {\r\n        \"foo\": 42,\r\n        \"bar\": true\r\n
+      \     }\r\n    }\r\n  }\r\n}\r\n}}"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '772'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2025-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/azure-cli-rg-extensibility-deployment000003","name":"azure-cli-rg-extensibility-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1162621365160699601","parameters":{"strParam1":{"type":"String","value":"strParam1Value"}},"mode":"Incremental","provisioningState":"Accepted","timestamp":"2025-07-28T18:06:09.8808926Z","duration":"PT0.0008298S","correlationId":"8487fb8c-43c1-452c-93bc-fe11d03d16d2","providers":[],"dependencies":[]}}'
+    headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/azure-cli-rg-extensibility-deployment000003/operationStatuses/08584478809155886596?api-version=2025-04-01&t=638893227718184325&c=MIIHhzCCBm-gAwIBAgITfAh_EjM5CPJ1HOWmNAAACH8SMzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwNzE3MDk0NTA0WhcNMjYwMTEzMDk0NTA0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMVFdvrsA5Ktxap8eNkW-y7upqcrDgJYyFE4duefCbarjG14TP5gqSv1NIH3heGW-yMTsDnNIU_jmw1wrzp8GVWsEgOnSqxoYhHUqwcvL05RcO-X-yHyxFjEaVc0StnO1GNb6OjUZQGc09gBwXVvzcyy9Ky0Re5siPZfQSCZSxRL3yQvLFWcH2c5c_zzzUXjRnUtRimKDO1uU8_FgAVGPIMQABDu4zlBNNz9aRmo7e8KH8UAOb2aHDjTIgqN5LkTfCYPkqfEVp-PwkT2uupBMf8FB-5z7HRacAbZV9rLx6gBkgrwsVfSLFIXx0HVGV7eRor0sx2RGYZGR7Dhb3kxibECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTAt-Ym0GYtCbtN9z3ypu-p5ShcEjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFKMj8anaTbAXm33UCO7vYNhNpy44oz5yO7ZjJb3j0N71NuEks5a1qeIsv0py0SkYVFbN5ij9j9ZdfP-8fbfSKxDqFsZ-TgzxaYdEm5_QOoFga6iyS42Gk4ER_xE5zr8LDaiFzG9DgD3y_Q3VqHY0mFqQLjgNmPaG2KySPeIoSkGpTkYGD0-x_-45E9IsSRk4J5cj1wY1ZoeyBr8ZIpAlxr6sK7EiKTUJljR0eQKFMr8iO-lb0WYRshpzQjU9EPNYzSQghm_xSNH6_DbHARnd1_5YCc6QG76LhyMwzYIyRW5P379sef7Zbu1bCqAt-G940BTh2B0K0VEqqdRx_NjSrk&s=E7hjjfJJL82HhaWa_48ZqGNavgq89a0_8XoKDkmrxAxDtMWu_FESsrFslPEN9AfM33Ad3cJGL9v6RG1KakZYcj5uWJkX5OEh5kW_jvPi_0NTLuLmoDSZTtpVQ96AONbRhYPqsoA1psJAdeqzyidmwxaq7_FOAS1RjzLHjk-AAcMIBUIWeXWOeWS3uJSHTKfQQ10EU3jEWO2uaYFaP3NAejOzzMQL3l-Od-5XgACyk1Y0Sd_0hapOBKLy-zx1Cq-m1xacfIHSpAcAJklA2p49eLF0ir_b4ADR3uVGNOqKt5F6qK_pk5NNIZ1LceRnCGMTIfLYU2vQlMGhOJ15MI1Adg&h=_4RGSPYX_nOFkvNGVBM122XEXBXjA-7kRouZx_VzLMY
+      cache-control:
+      - no-cache
+      content-length:
+      - '641'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:06:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-deployment-engine-version:
+      - 1.404.0
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 3CC409D40BDC4FBC8B1B2AB6F3EBBD82 Ref B: MNZ221060608035 Ref C: 2025-07-28T18:06:08Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584478809155886596?api-version=2025-04-01&t=638893227718184325&c=MIIHhzCCBm-gAwIBAgITfAh_EjM5CPJ1HOWmNAAACH8SMzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwNzE3MDk0NTA0WhcNMjYwMTEzMDk0NTA0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMVFdvrsA5Ktxap8eNkW-y7upqcrDgJYyFE4duefCbarjG14TP5gqSv1NIH3heGW-yMTsDnNIU_jmw1wrzp8GVWsEgOnSqxoYhHUqwcvL05RcO-X-yHyxFjEaVc0StnO1GNb6OjUZQGc09gBwXVvzcyy9Ky0Re5siPZfQSCZSxRL3yQvLFWcH2c5c_zzzUXjRnUtRimKDO1uU8_FgAVGPIMQABDu4zlBNNz9aRmo7e8KH8UAOb2aHDjTIgqN5LkTfCYPkqfEVp-PwkT2uupBMf8FB-5z7HRacAbZV9rLx6gBkgrwsVfSLFIXx0HVGV7eRor0sx2RGYZGR7Dhb3kxibECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTAt-Ym0GYtCbtN9z3ypu-p5ShcEjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFKMj8anaTbAXm33UCO7vYNhNpy44oz5yO7ZjJb3j0N71NuEks5a1qeIsv0py0SkYVFbN5ij9j9ZdfP-8fbfSKxDqFsZ-TgzxaYdEm5_QOoFga6iyS42Gk4ER_xE5zr8LDaiFzG9DgD3y_Q3VqHY0mFqQLjgNmPaG2KySPeIoSkGpTkYGD0-x_-45E9IsSRk4J5cj1wY1ZoeyBr8ZIpAlxr6sK7EiKTUJljR0eQKFMr8iO-lb0WYRshpzQjU9EPNYzSQghm_xSNH6_DbHARnd1_5YCc6QG76LhyMwzYIyRW5P379sef7Zbu1bCqAt-G940BTh2B0K0VEqqdRx_NjSrk&s=E7hjjfJJL82HhaWa_48ZqGNavgq89a0_8XoKDkmrxAxDtMWu_FESsrFslPEN9AfM33Ad3cJGL9v6RG1KakZYcj5uWJkX5OEh5kW_jvPi_0NTLuLmoDSZTtpVQ96AONbRhYPqsoA1psJAdeqzyidmwxaq7_FOAS1RjzLHjk-AAcMIBUIWeXWOeWS3uJSHTKfQQ10EU3jEWO2uaYFaP3NAejOzzMQL3l-Od-5XgACyk1Y0Sd_0hapOBKLy-zx1Cq-m1xacfIHSpAcAJklA2p49eLF0ir_b4ADR3uVGNOqKt5F6qK_pk5NNIZ1LceRnCGMTIfLYU2vQlMGhOJ15MI1Adg&h=_4RGSPYX_nOFkvNGVBM122XEXBXjA-7kRouZx_VzLMY
+  response:
+    body:
+      string: '{"status":"Running"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '20'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:06:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 6312C6E479AB474AB0B57511FDFE8134 Ref B: BL2AA2010204045 Ref C: 2025-07-28T18:06:12Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584478809155886596?api-version=2025-04-01&t=638893227718184325&c=MIIHhzCCBm-gAwIBAgITfAh_EjM5CPJ1HOWmNAAACH8SMzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwNzE3MDk0NTA0WhcNMjYwMTEzMDk0NTA0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMVFdvrsA5Ktxap8eNkW-y7upqcrDgJYyFE4duefCbarjG14TP5gqSv1NIH3heGW-yMTsDnNIU_jmw1wrzp8GVWsEgOnSqxoYhHUqwcvL05RcO-X-yHyxFjEaVc0StnO1GNb6OjUZQGc09gBwXVvzcyy9Ky0Re5siPZfQSCZSxRL3yQvLFWcH2c5c_zzzUXjRnUtRimKDO1uU8_FgAVGPIMQABDu4zlBNNz9aRmo7e8KH8UAOb2aHDjTIgqN5LkTfCYPkqfEVp-PwkT2uupBMf8FB-5z7HRacAbZV9rLx6gBkgrwsVfSLFIXx0HVGV7eRor0sx2RGYZGR7Dhb3kxibECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBTAt-Ym0GYtCbtN9z3ypu-p5ShcEjAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFKMj8anaTbAXm33UCO7vYNhNpy44oz5yO7ZjJb3j0N71NuEks5a1qeIsv0py0SkYVFbN5ij9j9ZdfP-8fbfSKxDqFsZ-TgzxaYdEm5_QOoFga6iyS42Gk4ER_xE5zr8LDaiFzG9DgD3y_Q3VqHY0mFqQLjgNmPaG2KySPeIoSkGpTkYGD0-x_-45E9IsSRk4J5cj1wY1ZoeyBr8ZIpAlxr6sK7EiKTUJljR0eQKFMr8iO-lb0WYRshpzQjU9EPNYzSQghm_xSNH6_DbHARnd1_5YCc6QG76LhyMwzYIyRW5P379sef7Zbu1bCqAt-G940BTh2B0K0VEqqdRx_NjSrk&s=E7hjjfJJL82HhaWa_48ZqGNavgq89a0_8XoKDkmrxAxDtMWu_FESsrFslPEN9AfM33Ad3cJGL9v6RG1KakZYcj5uWJkX5OEh5kW_jvPi_0NTLuLmoDSZTtpVQ96AONbRhYPqsoA1psJAdeqzyidmwxaq7_FOAS1RjzLHjk-AAcMIBUIWeXWOeWS3uJSHTKfQQ10EU3jEWO2uaYFaP3NAejOzzMQL3l-Od-5XgACyk1Y0Sd_0hapOBKLy-zx1Cq-m1xacfIHSpAcAJklA2p49eLF0ir_b4ADR3uVGNOqKt5F6qK_pk5NNIZ1LceRnCGMTIfLYU2vQlMGhOJ15MI1Adg&h=_4RGSPYX_nOFkvNGVBM122XEXBXjA-7kRouZx_VzLMY
+  response:
+    body:
+      string: '{"status":"Succeeded"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '22'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:06:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: B8A48F32A3DB47B88E135B4B72F21A9E Ref B: MNZ221060608029 Ref C: 2025-07-28T18:06:42Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - deployment group create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group -n --template-file --parameters --parameters
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/mock-deployment?api-version=2025-04-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_resource_group_deployment_extensibility000001/providers/Microsoft.Resources/deployments/azure-cli-rg-extensibility-deployment000003","name":"azure-cli-rg-extensibility-deployment000003","type":"Microsoft.Resources/deployments","properties":{"templateHash":"1162621365160699601","parameters":{"strParam1":{"type":"String","value":"strParam1Value"}},"mode":"Incremental","provisioningState":"Succeeded","timestamp":"2025-07-28T18:06:13.1239065Z","duration":"PT3.2430139S","correlationId":"8487fb8c-43c1-452c-93bc-fe11d03d16d2","providers":[],"dependencies":[],"outputResources":[]}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '663'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 28 Jul 2025 18:06:42 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 5B447FFC360C4CEEAE11C84BF9AB484B Ref B: BL2AA2010205035 Ref C: 2025-07-28T18:06:42Z'
+    status:
+      code: 200
+      message: OK
+version: 1
