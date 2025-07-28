@@ -565,6 +565,12 @@ examples:
   - name: Update placement properties of the node type. This will overwrite older placement properties if any.
     text: >
         az sf managed-node-type update -g testRG -c testCluster -n snt --placement-property NodeColor=Red SomeProperty=6
+  - name: Update vm size of the node type. This will initiate an in-place swap of the vm size.
+    text: >
+        az sf managed-node-type update -g testRG -c testCluster -n snt --vm-size Standard_DS2_v2
+  - name: Update the node type tags.
+    text: >
+        az sf managed-node-type update -g testRG -c testCluster -n snt --tags key1=value1 key2=value2
 """
 
 helps['sf managed-node-type delete'] = """
