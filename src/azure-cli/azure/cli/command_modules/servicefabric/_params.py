@@ -312,7 +312,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf managed-node-type') as c:
         c.argument('node_type_name', options_list=['-n', '--name', '--node-type-name'], help='node type name.')
-        
+
     with self.argument_context('sf managed-node-type create') as c:
         c.argument('instance_count', help='"The number of nodes in the node type.')
         c.argument('primary', arg_type=get_three_state_flag(), help='Specify if the node type is primary. On this node type will run system services. Only one node type should be marked as primary. Primary node type cannot be deleted or changed for existing clusters.')
