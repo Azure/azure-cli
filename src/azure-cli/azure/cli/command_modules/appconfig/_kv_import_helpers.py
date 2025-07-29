@@ -551,7 +551,7 @@ def __read_kv_from_file(
     except OSError:
         raise FileOperationError("File is not available.")
 
-    flattened_data = flatten_config_data(
+    flattened_data = __flatten_config_data(
         config_data=config_data,
         format_=format_,
         content_type=content_type,
@@ -568,7 +568,7 @@ def __read_kv_from_file(
     return key_values
 
 
-def flatten_config_data(config_data, format_, content_type, prefix_to_add="", depth=None, separator=None):
+def __flatten_config_data(config_data, format_, content_type, prefix_to_add="", depth=None, separator=None):
     """
     Flatten configuration data into a dictionary of key-value pairs.
 
@@ -787,6 +787,8 @@ def __read_kv_from_kubernetes_configmap(
         # Execute the command on the cluster
         result = aks_runcommand(cmd, aks_client, aks_cluster["resource_group"], aks_cluster["name"], command_string=command)
 
+        logger.warning(result)
+
         if hasattr(result, 'logs') and result.logs:
             if not hasattr(result, 'exit_code') or result.exit_code != 0:
                 raise AzureResponseError(f"{result.logs.strip()}")
@@ -800,7 +802,7 @@ def __read_kv_from_kubernetes_configmap(
 
                 key_values.extend(kvs)
             except json.JSONDecodeError:
-                raise ValidationError(
+                raise ValueError(
                     f"The result from ConfigMap {configmap_name} could not be parsed as valid JSON."
                 )
         else:
@@ -864,7 +866,7 @@ def __extract_kv_from_configmap_data(configmap_data, content_type, prefix_to_add
                     )
                     continue
 
-            flattened_data = flatten_config_data(
+            flattened_data = __flatten_config_data(
                 config_data=value,
                 format_=format_,
                 content_type=content_type,
@@ -873,13 +875,11 @@ def __extract_kv_from_configmap_data(configmap_data, content_type, prefix_to_add
                 separator=separator
             )
 
-            key_values = []
             for k, v in flattened_data.items():
                 if validate_import_key(key=k):
                     key_values.append(KeyValue(key=k, value=v))
-            return key_values
 
-        if validate_import_key(key):
+        elif validate_import_key(key):
             # If content_type is JSON, validate the value
             if content_type and is_json_content_type(content_type):
                 try:
