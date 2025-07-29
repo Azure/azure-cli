@@ -205,6 +205,10 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context("webapp sitecontainers list") as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None, help='Name of the linux webapp')
 
+    with self.argument_context("webapp sitecontainers convert") as c:
+        c.argument('mode', options_list=['--mode'], help='Mode for conversion.',
+                   arg_type=get_enum_type(['docker', 'sitecontainers']))
+
     with self.argument_context('webapp show') as c:
         c.argument('name', arg_type=webapp_name_arg_type)
 
