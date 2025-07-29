@@ -17,11 +17,11 @@ Release History
 * `az aks`: Support Virtual Machines node pools in AKS commands (#31780)
 * `az aks update`: Support VMAS to VMS agent pool migration in AKS commands (#31831)
 * `az aks create/update`: Add new parameter `--enable-ai-toolchain-operator` to enable Kaito addon (#31485)
-* `az aks`: Add `--node-provisioning-mode` and `--node-provisioning-default-pools` parameters (#31836)
+* `az aks create/update`: Add `--node-provisioning-mode` and `--node-provisioning-default-pools` parameters (#31836)
 * `az aks safeguards`: Add command group to manage deployment safeguards (#31793)
-* `az aks create`: Update prom and logs addon to use sdk (#31828)
+* `az aks create`: Support the Azure Monitor metrics and logs addon functionality (#31828)
 * `az aks create`: Add new parameter `--disable-run-command` to disable run command feature for the cluster (#31854)
-* `az aks update`: Add  new parameters `--disable-run-command` and `--enable-run-command` to toggle the run command feature on or off (#31854)
+* `az aks update`: Add new parameters `--disable-run-command` and `--enable-run-command` to toggle the run command feature on or off (#31854)
 * `az aks update`: Support updating load balancer sku from basic to standard (#31874)
 
 **App Config**
@@ -38,7 +38,7 @@ Release History
 
 * `az group export`: Add `--export-format` to specify the format of the exported template (#31667)
 * Fix #31709: `az deployment`: Fix `the content for this response was already consumed` when create resource (#31722)
-* `az deployment`: Expose `--validation-level` parameter at all scopes for `create`, `validate`, and `what-if` subcommands (#31747)
+* `az deployment create/validate/what-if`: Expose `--validation-level` parameter at all scopes (#31747)
 
 **Backup**
 
@@ -54,13 +54,9 @@ Release History
 * `az sig in-vm-access-control-profile-version`: Add command group to manage in VM access control profile version (#31720)
 * `az vm disk attach`: Add new parameters `--source-snapshots-or-disks` `--source-disk-restore-point` to support implicit disk creation from snapshot and disk restore points (#31830)
 * `az vmss create`: Add new parameter `--enable-automatic-repairs` to support setting automatic repairs policy (#31722)
-* Fix issue #31685: `az vm/vmss update` Fix error with `NoneType` object has no attribute `mode` when update wireserver profile (#31855)
+* Fix #31685: `az vm/vmss update` Fix error with `NoneType` object has no attribute `mode` when update wireserver profile (#31855)
 * `az vm disk attach`: Add support for setting disk size and sku of implicit disk creation from snapshot and disk restore points (#31862)
 * `az compute-recommender spot-placement-score`: Add new command to replace original command `az compute-recommender spot-placement-recommender` (#31858)
-
-**Consumption**
-
-* `az consumption budget create`: Add command example (#31553)
 
 **Container**
 
@@ -105,10 +101,9 @@ Release History
 
 * `az sf managed-cluster network-security-rule`: Add new parameter `--source-addr-prefix` to specify the CIDR or source IP range (#31714)
 * `az sf managed-cluster network-security-rule`: Add new parameter `--dest-addr-prefix` to specify the destination port or range (#31714)
-* `az sf managed-cluster network-security-rule`: Add  new parameter `--source-port-range` to specify the CIDR or source IP range (#31714)
-* `az sf managed-cluster network-security-rule`: Add  new parameter `--dest-port-range` to specify the destination address prefix (#31714)
+* `az sf managed-cluster network-security-rule`: Add new parameter `--source-port-range` to specify the CIDR or source IP range (#31714)
+* `az sf managed-cluster network-security-rule`: Add new parameter `--dest-port-range` to specify the destination address prefix (#31714)
 * `az sf cluster create`: Add more options for parameter `--vm-os` (#31808)
-* `az sf cluster setting`: Add examples for using `--settings-section` parameter (#31809)
 * `az sf managed-node-type update`: Add parameters `--vm-size` and `--tags` (#31844)
 
 **SQL**
