@@ -21,23 +21,71 @@ logger = get_logger(__name__)
 
 def check_migration_prerequisites(cmd):
     """Check if the system meets migration prerequisites."""
-    ps_executor = get_powershell_executor()
+    import platform
+    
+    prereqs = {
+        'platform': platform.system(),
+        'platform_version': platform.version(),
+        'python_version': platform.python_version(),
+        'powershell_available': False,
+        'powershell_version': None,
+        'azure_powershell_available': False,
+        'recommendations': []
+    }
     
     try:
-        prereqs = ps_executor.check_migration_prerequisites()
-        
-        logger.info(f"PowerShell Version: {prereqs.get('PowerShell Version', 'Unknown')}")
-        logger.info(f"Platform: {prereqs.get('Platform', 'Unknown')}")
-        logger.info(f"Edition: {prereqs.get('Edition', 'Unknown')}")
-        
-        if prereqs.get('Platform') == 'Win32NT':
-            if not prereqs.get('IsAdmin', False):
-                logger.warning("Running without administrator privileges. Some migration operations may require elevated permissions.")
-        
-        return prereqs
-        
+        ps_executor = get_powershell_executor()
+        if ps_executor:
+            is_available, cmd_path = ps_executor.check_powershell_availability()
+            if is_available:
+                prereqs['powershell_available'] = True
+                try:
+                    # Check PowerShell version
+                    result = ps_executor.execute_script('$PSVersionTable.PSVersion.ToString()')
+                    prereqs['powershell_version'] = result.get('stdout', '').strip()
+                    
+                    # Check Azure PowerShell modules
+                    module_result = ps_executor.execute_script('Get-Module -ListAvailable Az.* | Select-Object -First 1')
+                    if module_result.get('stdout'):
+                        prereqs['azure_powershell_available'] = True
+                    
+                except Exception:
+                    prereqs['recommendations'].append('Azure PowerShell modules may not be installed')
+            else:
+                prereqs['recommendations'].append('PowerShell is not available')
+        else:
+            prereqs['recommendations'].append('PowerShell executor could not be initialized')
+            
     except Exception as e:
-        raise CLIError(f'Failed to check migration prerequisites: {str(e)}')
+        prereqs['powershell_error'] = str(e)
+        prereqs['recommendations'].append('PowerShell is not available or not configured properly')
+    
+    # Platform-specific recommendations
+    if not prereqs['powershell_available']:
+        if prereqs['platform'] == 'Windows':
+            prereqs['recommendations'].append('Install PowerShell Core from https://github.com/PowerShell/PowerShell')
+        elif prereqs['platform'] == 'Linux':
+            prereqs['recommendations'].append('Install PowerShell Core: sudo apt install powershell (Ubuntu) or sudo yum install powershell (RHEL)')
+        elif prereqs['platform'] == 'Darwin':
+            prereqs['recommendations'].append('Install PowerShell Core: brew install powershell')
+    
+    if not prereqs['azure_powershell_available'] and prereqs['powershell_available']:
+        prereqs['recommendations'].append('Install Azure PowerShell: Install-Module -Name Az -Force')
+    
+    # Display results
+    logger.info(f"Platform: {prereqs['platform']} {prereqs.get('platform_version', 'Unknown')}")
+    logger.info(f"Python Version: {prereqs['python_version']}")
+    logger.info(f"PowerShell Available: {prereqs['powershell_available']}")
+    if prereqs['powershell_version']:
+        logger.info(f"PowerShell Version: {prereqs['powershell_version']}")
+    logger.info(f"Azure PowerShell Available: {prereqs['azure_powershell_available']}")
+    
+    if prereqs['recommendations']:
+        logger.warning("Recommendations:")
+        for rec in prereqs['recommendations']:
+            logger.warning(f"  - {rec}")
+    
+    return prereqs
 
 def setup_migration_environment(cmd, install_powershell=False, check_only=False):
     """Configure the system environment for migration operations."""    
@@ -48,302 +96,281 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
         'platform': system,
         'checks': [],
         'actions_taken': [],
-        'recommendations': [],
+        'cross_platform_ready': False,
+        'powershell_status': 'not_checked'
+    }
+    
+    logger.info(f"Setting up migration environment for {system}")
+    
+    # 1. Check PowerShell availability
+    try:
+        ps_executor = get_powershell_executor()
+        is_available, ps_cmd = ps_executor.check_powershell_availability()
+        
+        if is_available:
+            setup_results['powershell_status'] = 'available'
+            setup_results['powershell_command'] = ps_cmd
+            setup_results['checks'].append('✅ PowerShell is available')
+            
+            # Check PowerShell version compatibility
+            try:
+                version_result = ps_executor.execute_script('$PSVersionTable.PSVersion.Major')
+                major_version = int(version_result.get('stdout', '0').strip())
+                
+                if major_version >= 7:  # PowerShell Core 7+
+                    setup_results['checks'].append('✅ PowerShell Core 7+ detected (cross-platform compatible)')
+                    setup_results['cross_platform_ready'] = True
+                elif major_version >= 5 and system == 'windows':
+                    setup_results['checks'].append('⚠️ Windows PowerShell 5+ detected (Windows only)')
+                    setup_results['cross_platform_ready'] = False
+                else:
+                    setup_results['checks'].append('❌ PowerShell version too old')
+                    setup_results['cross_platform_ready'] = False
+                    
+            except Exception as e:
+                setup_results['checks'].append(f'⚠️ Could not determine PowerShell version: {e}')
+                
+        else:
+            setup_results['powershell_status'] = 'not_available'
+            setup_results['checks'].append('❌ PowerShell is not available')
+            
+            if install_powershell and not check_only:
+                # Attempt automatic installation
+                install_result = _attempt_powershell_installation(system)
+                setup_results['actions_taken'].append(install_result)
+            else:
+                setup_results['checks'].append(_get_powershell_install_instructions(system))
+                
+    except Exception as e:
+        setup_results['powershell_status'] = 'error'
+        setup_results['checks'].append(f'❌ PowerShell check failed: {str(e)}')
+    
+    # 2. Check Azure PowerShell modules
+    if setup_results['powershell_status'] == 'available':
+        try:
+            ps_executor = get_powershell_executor()
+            az_check = ps_executor.execute_script('Get-Module -ListAvailable Az.Migrate | Select-Object -First 1')
+            
+            if az_check.get('stdout', '').strip():
+                setup_results['checks'].append('✅ Az.Migrate module is available')
+            else:
+                setup_results['checks'].append('❌ Az.Migrate module is not installed')
+                if not check_only:
+                    setup_results['checks'].append('💡 Install with: Install-Module -Name Az.Migrate -Force')
+                    
+        except Exception as e:
+            setup_results['checks'].append(f'⚠️ Could not check Azure modules: {str(e)}')
+    
+    # 3. Platform-specific environment checks
+    platform_checks = _perform_platform_specific_checks(system)
+    setup_results['checks'].extend(platform_checks)
+    
+    # Display results
+    logger.info("Environment Setup Results:")
+    for check in setup_results['checks']:
+        logger.info(f"  {check}")
+    
+    if setup_results['actions_taken']:
+        logger.info("Actions taken:")
+        for action in setup_results['actions_taken']:
+            logger.info(f"  {action}")
+    
+    return setup_results
+
+
+def _get_powershell_install_instructions(system):
+    """Get platform-specific PowerShell installation instructions."""
+    instructions = {
+        'windows': '💡 Install PowerShell Core: winget install Microsoft.PowerShell or visit https://github.com/PowerShell/PowerShell',
+        'linux': '💡 Install PowerShell Core: sudo apt install powershell (Ubuntu) or sudo yum install powershell (RHEL)',
+        'darwin': '💡 Install PowerShell Core: brew install powershell'
+    }
+    return instructions.get(system, instructions['linux'])
+
+
+def _attempt_powershell_installation(system):
+    """Attempt to automatically install PowerShell (platform-dependent)."""
+    if system == 'windows':
+        try:
+            # Try winget first
+            import subprocess
+            result = subprocess.run(['winget', 'install', 'Microsoft.PowerShell'], 
+                                  capture_output=True, text=True, timeout=300)
+            if result.returncode == 0:
+                return '✅ PowerShell Core installed via winget'
+            else:
+                return f'❌ winget installation failed: {result.stderr}'
+        except Exception as e:
+            return f'❌ Automatic installation failed: {str(e)}'
+    
+    elif system == 'linux':
+        # Note: This would require sudo, so we just provide instructions
+        return '💡 Automatic installation requires sudo. Please run: sudo apt install powershell'
+    
+    elif system == 'darwin':
+        try:
+            import subprocess
+            result = subprocess.run(['brew', 'install', 'powershell'], 
+                                  capture_output=True, text=True, timeout=300)
+            if result.returncode == 0:
+                return '✅ PowerShell Core installed via Homebrew'
+            else:
+                return f'❌ Homebrew installation failed: {result.stderr}'
+        except Exception as e:
+            return f'❌ Automatic installation failed: {str(e)}'
+    
+    return '❌ Automatic installation not supported for this platform'
+
+
+def _perform_platform_specific_checks(system):
+    """Perform platform-specific environment checks."""
+    checks = []
+    
+    if system == 'windows':
+        checks.append('✅ Windows detected - native PowerShell support')
+        
+        # Check if running as administrator
+        try:
+            import ctypes
+            is_admin = ctypes.windll.shell32.IsUserAnAdmin()
+            if is_admin:
+                checks.append('✅ Running with administrator privileges')
+            else:
+                checks.append('⚠️ Not running as administrator - some operations may require elevation')
+        except Exception:
+            checks.append('⚠️ Could not determine administrator status')
+            
+    elif system == 'linux':
+        checks.append('✅ Linux detected - PowerShell Core required')
+        
+        # Check common package managers
+        import shutil
+        if shutil.which('apt'):
+            checks.append('✅ APT package manager available')
+        elif shutil.which('yum'):
+            checks.append('✅ YUM package manager available')
+        elif shutil.which('dnf'):
+            checks.append('✅ DNF package manager available')
+        else:
+            checks.append('⚠️ No common package manager detected')
+            
+    elif system == 'darwin':
+        checks.append('✅ macOS detected - PowerShell Core required')
+        
+        # Check if Homebrew is available
+        import shutil
+        if shutil.which('brew'):
+            checks.append('✅ Homebrew available for PowerShell installation')
+        else:
+            checks.append('⚠️ Homebrew not found - install from https://brew.sh/')
+    
+    else:
+        checks.append(f'⚠️ Unsupported platform: {system}')
+    
+    return checks
+
+
+def setup_migration_environment(cmd, install_powershell=False, check_only=False):
+    """Configure the system environment for migration operations with cross-platform support."""    
+    logger = get_logger(__name__)
+    system = platform.system().lower()
+    
+    setup_results = {
+        'platform': system,
+        'checks': [],
+        'actions_taken': [],
+        'cross_platform_ready': False,
+        'powershell_status': 'not_checked',
         'status': 'success'
     }
     
+    logger.info(f"Setting up migration environment for {system}")
+    
     try:
+        # 1. Check Python version
         python_version = sys.version_info
         if python_version.major >= 3 and python_version.minor >= 7:
-            setup_results['checks'].append({
-                'component': 'Python',
-                'status': 'passed',
-                'version': f"{python_version.major}.{python_version.minor}.{python_version.micro}",
-                'message': 'Python version is compatible'
-            })
+            setup_results['checks'].append(f'✅ Python {python_version.major}.{python_version.minor}.{python_version.micro} is compatible')
         else:
-            setup_results['checks'].append({
-                'component': 'Python',
-                'status': 'failed',
-                'version': f"{python_version.major}.{python_version.minor}.{python_version.micro}",
-                'message': 'Python 3.7 or higher is required'
-            })
+            setup_results['checks'].append(f'❌ Python {python_version.major}.{python_version.minor}.{python_version.micro} - requires 3.7+')
             setup_results['status'] = 'warning'
         
-        powershell_check = _check_powershell_availability(system)
-        setup_results['checks'].append(powershell_check)
-        
-        if powershell_check['status'] == 'failed' and install_powershell and not check_only:
-            install_result = _install_powershell(system, logger)
-            setup_results['actions_taken'].append(install_result)
+        # 2. Check PowerShell availability
+        try:
+            ps_executor = get_powershell_executor()
+            is_available, ps_cmd = ps_executor.check_powershell_availability()
             
-            powershell_recheck = _check_powershell_availability(system)
-            setup_results['checks'].append({
-                'component': 'PowerShell (after installation)',
-                'status': powershell_recheck['status'],
-                'version': powershell_recheck.get('version', 'Unknown'),
-                'message': powershell_recheck['message']
-            })
+            if is_available:
+                setup_results['powershell_status'] = 'available'
+                setup_results['checks'].append('✅ PowerShell is available')
+                
+                # Check PowerShell version compatibility
+                try:
+                    version_result = ps_executor.execute_script('$PSVersionTable.PSVersion.Major')
+                    major_version = int(version_result.get('stdout', '0').strip())
+                    
+                    if major_version >= 7:  # PowerShell Core 7+
+                        setup_results['checks'].append('✅ PowerShell Core 7+ detected (cross-platform compatible)')
+                        setup_results['cross_platform_ready'] = True
+                    elif major_version >= 5 and system == 'windows':
+                        setup_results['checks'].append('⚠️ Windows PowerShell 5+ detected (Windows only)')
+                        setup_results['cross_platform_ready'] = False
+                    else:
+                        setup_results['checks'].append('❌ PowerShell version too old')
+                        setup_results['cross_platform_ready'] = False
+                        
+                except Exception as e:
+                    setup_results['checks'].append(f'⚠️ Could not determine PowerShell version: {e}')
+                    
+            else:
+                setup_results['powershell_status'] = 'not_available'
+                setup_results['checks'].append('❌ PowerShell is not available')
+                
+                if install_powershell and not check_only:
+                    # Attempt automatic installation
+                    install_result = _attempt_powershell_installation(system)
+                    setup_results['actions_taken'].append(install_result)
+                else:
+                    setup_results['checks'].append(_get_powershell_install_instructions(system))
+                    
+        except Exception as e:
+            setup_results['powershell_status'] = 'error'
+            setup_results['checks'].append(f'❌ PowerShell check failed: {str(e)}')
         
-        if system == 'windows':
-            setup_results['checks'].extend(_check_windows_tools())
-        elif system == 'linux':
-            setup_results['checks'].extend(_check_linux_tools())
-        elif system == 'darwin':
-            setup_results['checks'].extend(_check_macos_tools())
+        # 3. Check Azure PowerShell modules
+        if setup_results['powershell_status'] == 'available':
+            try:
+                ps_executor = get_powershell_executor()
+                az_check = ps_executor.execute_script('Get-Module -ListAvailable Az.Migrate | Select-Object -First 1')
+                
+                if az_check.get('stdout', '').strip():
+                    setup_results['checks'].append('✅ Az.Migrate module is available')
+                else:
+                    setup_results['checks'].append('❌ Az.Migrate module is not installed')
+                    if not check_only:
+                        setup_results['checks'].append('💡 Install with: Install-Module -Name Az.Migrate -Force')
+                        
+            except Exception as e:
+                setup_results['checks'].append(f'⚠️ Could not check Azure modules: {str(e)}')
         
-        setup_results['recommendations'] = _get_platform_recommendations(system, setup_results['checks'])
+        # 4. Platform-specific environment checks
+        platform_checks = _perform_platform_specific_checks(system)
+        setup_results['checks'].extend(platform_checks)
         
-        failed_checks = [c for c in setup_results['checks'] if c['status'] == 'failed']
-        if failed_checks:
-            setup_results['status'] = 'failed' if any(c['component'] == 'PowerShell' for c in failed_checks) else 'warning'
+        # Display results
+        logger.info("Environment Setup Results:")
+        for check in setup_results['checks']:
+            logger.info(f"  {check}")
+        
+        if setup_results['actions_taken']:
+            logger.info("Actions taken:")
+            for action in setup_results['actions_taken']:
+                logger.info(f"  {action}")
         
         return setup_results
         
     except Exception as e:
         raise CLIError(f'Failed to setup migration environment: {str(e)}')
-
-
-def _check_powershell_availability(system):
-    """Check if PowerShell is available on the system."""
-    
-    try:
-        executor = PowerShellExecutor()
-        is_available, command = executor.check_powershell_available()
-        
-        if is_available:
-            try:
-                if command == 'pwsh':
-                    result = run_cmd([command, '--version'], capture_output=True, timeout=10)
-                else:
-                    result = run_cmd([command, '-Command', '$PSVersionTable.PSVersion.ToString()'], 
-                                   capture_output=True, timeout=10)
-                
-                if result.returncode == 0:
-                    version = result.stdout.strip().split('\n')[0] if result.stdout else 'Unknown'
-                else:
-                    version = 'Available'
-            except Exception:
-                version = 'Available'
-            
-            return {
-                'component': 'PowerShell',
-                'status': 'passed',
-                'version': version,
-                'command': command,
-                'message': f'PowerShell is available via {command}'
-            }
-    except Exception as e:
-        pass
-    
-    return {
-        'component': 'PowerShell',
-        'status': 'failed',
-        'version': None,
-        'command': None,
-        'message': 'PowerShell is not available. Install PowerShell Core or ensure Windows PowerShell is accessible.'
-    }
-
-
-def _install_powershell(system, logger):
-    """Attempt to install PowerShell on the system."""
-    
-    install_result = {
-        'component': 'PowerShell Installation',
-        'status': 'attempted',
-        'message': '',
-        'commands': []
-    }
-    
-    try:
-        if system == 'windows':
-            try:
-                result = run_cmd(['winget', 'install', 'Microsoft.PowerShell'], 
-                                capture_output=True, timeout=300)
-                if result.returncode == 0:
-                    install_result['status'] = 'success'
-                    install_result['message'] = 'PowerShell Core installed via winget'
-                    install_result['commands'].append('winget install Microsoft.PowerShell')
-                else:
-                    install_result['status'] = 'failed'
-                    install_result['message'] = 'winget installation failed. Please install manually from https://github.com/PowerShell/PowerShell'
-            except Exception:
-                install_result['status'] = 'failed'
-                install_result['message'] = 'winget not available. Please install PowerShell Core manually from https://github.com/PowerShell/PowerShell'
-        
-        elif system == 'linux':
-            install_result['status'] = 'manual_required'
-            install_result['message'] = 'Please install PowerShell Core using your distribution package manager'
-            install_result['commands'] = [
-                '# Ubuntu/Debian: sudo apt update && sudo apt install -y powershell',
-                '# CentOS/RHEL: sudo yum install -y powershell',
-                '# Or download from: https://github.com/PowerShell/PowerShell'
-            ]
-        
-        elif system == 'darwin':
-            try:
-                result = run_cmd(['brew', 'install', 'powershell'], 
-                                capture_output=True, timeout=300)
-                if result.returncode == 0:
-                    install_result['status'] = 'success'
-                    install_result['message'] = 'PowerShell Core installed via Homebrew'
-                    install_result['commands'].append('brew install powershell')
-                else:
-                    install_result['status'] = 'failed'
-                    install_result['message'] = 'Homebrew installation failed'
-            except Exception:
-                install_result['status'] = 'manual_required'
-                install_result['message'] = 'Homebrew not available. Please install PowerShell Core manually'
-                install_result['commands'] = [
-                    'brew install powershell',
-                    '# Or download from: https://github.com/PowerShell/PowerShell'
-                ]
-        
-        logger.info(f"PowerShell installation result: {install_result['message']}")
-        return install_result
-        
-    except Exception as e:
-        install_result['status'] = 'error'
-        install_result['message'] = f'Installation attempt failed: {str(e)}'
-        return install_result
-
-
-def _check_windows_tools():
-    """Check for Windows-specific migration tools."""
-    
-    checks = []    
-    powershell_modules = [
-        'Hyper-V',
-        'SqlServer',
-        'WindowsFeature',
-        'Storage'
-    ]
-    
-    for module in powershell_modules:
-        try:
-            result = run_cmd([
-                'powershell', '-Command', 
-                f'Get-Module -ListAvailable -Name {module} | Select-Object -First 1'
-            ], capture_output=True, timeout=30)
-            
-            if result.returncode == 0 and result.stdout.strip():
-                checks.append({
-                    'component': f'PowerShell Module: {module}',
-                    'status': 'passed',
-                    'message': f'{module} module is available'
-                })
-            else:
-                checks.append({
-                    'component': f'PowerShell Module: {module}',
-                    'status': 'warning',
-                    'message': f'{module} module not found (optional for some migrations)'
-                })
-        except Exception:
-            checks.append({
-                'component': f'PowerShell Module: {module}',
-                'status': 'warning',
-                'message': f'Could not check {module} module availability'
-            })
-    
-    return checks
-
-
-def _check_linux_tools():
-    """Check for Linux-specific tools that might be useful for migration."""
-    
-    checks = []    
-    tools = [
-        ('curl', 'Data transfer tool'),
-        ('wget', 'File download tool'),
-        ('rsync', 'File synchronization tool'),
-        ('ssh', 'Secure shell client')
-    ]
-    
-    for tool, description in tools:
-        try:
-            result = run_cmd(['which', tool], capture_output=True, timeout=5)
-            if result.returncode == 0:
-                checks.append({
-                    'component': f'Tool: {tool}',
-                    'status': 'passed',
-                    'message': f'{description} is available'
-                })
-            else:
-                checks.append({
-                    'component': f'Tool: {tool}',
-                    'status': 'warning',
-                    'message': f'{description} not found (may be useful for some migrations)'
-                })
-        except Exception:
-            checks.append({
-                'component': f'Tool: {tool}',
-                'status': 'warning',
-                'message': f'Could not check {tool} availability'
-            })
-    
-    return checks
-
-
-def _check_macos_tools():
-    """Check for macOS-specific tools."""
-    
-    checks = []    
-    try:
-        result = run_cmd(['brew', '--version'], capture_output=True, timeout=5)
-        if result.returncode == 0:
-            checks.append({
-                'component': 'Homebrew',
-                'status': 'passed',
-                'message': 'Package manager available for installing additional tools'
-            })
-        else:
-            checks.append({
-                'component': 'Homebrew',
-                'status': 'warning',
-                'message': 'Homebrew not available (useful for installing additional tools)'
-            })
-    except Exception:
-        checks.append({
-            'component': 'Homebrew',
-            'status': 'warning',
-            'message': 'Homebrew not installed. Consider installing from https://brew.sh'
-        })
-    
-    return checks
-
-
-def _get_platform_recommendations(system, checks):
-    """Get platform-specific recommendations based on check results."""
-    recommendations = []
-    
-    powershell_checks = [c for c in checks if 'PowerShell' in c['component']]
-    if any(c['status'] == 'failed' for c in powershell_checks):
-        if system == 'windows':
-            recommendations.append("Install PowerShell Core from https://github.com/PowerShell/PowerShell or use 'winget install Microsoft.PowerShell'")
-        elif system == 'linux':
-            recommendations.append("Install PowerShell Core using your package manager or from https://github.com/PowerShell/PowerShell")
-        elif system == 'darwin':
-            recommendations.append("Install PowerShell Core using 'brew install powershell' or from https://github.com/PowerShell/PowerShell")
-    
-    if system == 'windows':
-        recommendations.extend([
-            "Consider installing Hyper-V PowerShell module for VM migrations: Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-Management-PowerShell",
-            "For SQL Server migrations, install SQL Server PowerShell module: Install-Module -Name SqlServer",
-            "Ensure you have appropriate permissions for accessing system resources"
-        ])
-    elif system == 'linux':
-        recommendations.extend([
-            "Install common migration tools: sudo apt install curl wget rsync openssh-client (Ubuntu/Debian)",
-            "For database migrations, consider installing database client tools",
-            "Ensure Docker is available if containerization is part of your migration strategy"
-        ])
-    elif system == 'darwin':
-        recommendations.extend([
-            "Install Homebrew for easy tool management: /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\"",
-            "Consider installing common migration tools via Homebrew: brew install curl wget rsync"
-        ])
-    
-    return recommendations
 
 # --------------------------------------------------------------------------------------------
 # Authentication and Discovery Commands
@@ -1657,6 +1684,9 @@ def create_azstackhci_vm_replication(cmd, vm_name, target_vm_name, resource_grou
     Azure CLI equivalent to New-AzStackHCIVMReplication.
     Creates a new VM replication for Azure Stack HCI migration.
     """
+    # Cross-platform prerequisite check
+    _check_cross_platform_prerequisites()
+    
     ps_executor = get_powershell_executor()
     
     # Build the PowerShell script with parameters
@@ -1708,7 +1738,7 @@ def create_azstackhci_vm_replication(cmd, vm_name, target_vm_name, resource_grou
     try:
         ps_executor.execute_script_interactive(create_vm_replication_script)
     except Exception as e:
-        raise CLIError(f'Failed to create Azure Stack HCI VM replication: {str(e)}')
+        raise _create_cross_platform_error('create Azure Stack HCI VM replication', str(e))
 
 
 def set_azstackhci_vm_replication(cmd, vm_name, resource_group_name, 
@@ -1718,6 +1748,9 @@ def set_azstackhci_vm_replication(cmd, vm_name, resource_group_name,
     Azure CLI equivalent to Set-AzStackHCIVMReplication.
     Updates settings for an existing Azure Stack HCI VM replication.
     """
+    # Cross-platform prerequisite check
+    _check_cross_platform_prerequisites()
+    
     ps_executor = get_powershell_executor()
     
     # Build the PowerShell script with parameters
@@ -1767,7 +1800,7 @@ def set_azstackhci_vm_replication(cmd, vm_name, resource_group_name,
     try:
         ps_executor.execute_script_interactive(set_vm_replication_script)
     except Exception as e:
-        raise CLIError(f'Failed to update Azure Stack HCI VM replication: {str(e)}')
+        raise _create_cross_platform_error('update Azure Stack HCI VM replication', str(e))
 
 
 def remove_azstackhci_vm_replication(cmd, vm_name, resource_group_name, force=False):
@@ -1775,6 +1808,9 @@ def remove_azstackhci_vm_replication(cmd, vm_name, resource_group_name, force=Fa
     Azure CLI equivalent to Remove-AzStackHCIVMReplication.
     Removes an existing Azure Stack HCI VM replication.
     """
+    # Cross-platform prerequisite check
+    _check_cross_platform_prerequisites()
+    
     ps_executor = get_powershell_executor()
     
     # Build the PowerShell script with parameters
@@ -1817,7 +1853,7 @@ def remove_azstackhci_vm_replication(cmd, vm_name, resource_group_name, force=Fa
     try:
         ps_executor.execute_script_interactive(remove_vm_replication_script)
     except Exception as e:
-        raise CLIError(f'Failed to remove Azure Stack HCI VM replication: {str(e)}')
+        raise _create_cross_platform_error('remove Azure Stack HCI VM replication', str(e))
 
 
 def get_azstackhci_vm_replication(cmd, vm_name=None, resource_group_name=None):
@@ -1873,6 +1909,7 @@ def get_azstackhci_vm_replication(cmd, vm_name=None, resource_group_name=None):
         Write-Host ""
         Write-Host "❌ Failed to get Azure Stack HCI VM replication:" -ForegroundColor Red
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host "   Platform: $($PSVersionTable.Platform)" -ForegroundColor Gray
         Write-Host ""
         throw
     }}
@@ -1881,4 +1918,269 @@ def get_azstackhci_vm_replication(cmd, vm_name=None, resource_group_name=None):
     try:
         ps_executor.execute_script_interactive(get_vm_replication_script)
     except Exception as e:
-        raise CLIError(f'Failed to get Azure Stack HCI VM replication: {str(e)}')
+        raise _create_cross_platform_error('get Azure Stack HCI VM replication', str(e))
+
+
+# --------------------------------------------------------------------------------------------
+# Cross-Platform Helper Functions
+# --------------------------------------------------------------------------------------------
+
+
+def _check_cross_platform_prerequisites():
+    """Check cross-platform prerequisites before executing PowerShell commands."""
+    try:
+        ps_executor = get_powershell_executor()
+        is_available, _ = ps_executor.check_powershell_availability()
+        
+        if not is_available:
+            system = platform.system().lower()
+            install_guide = _get_powershell_install_instructions(system)
+            raise CLIError(f"PowerShell is required but not available. {install_guide}")
+            
+    except Exception as e:
+        if "PowerShell is required" in str(e):
+            raise
+        else:
+            raise CLIError(f"Failed to check PowerShell prerequisites: {str(e)}")
+
+
+def _create_cross_platform_error(operation, error_message):
+    """Create a cross-platform friendly error message."""
+    system = platform.system().lower()
+    
+    error_details = f"Failed to {operation}: {error_message}"
+    
+    # Add platform-specific troubleshooting tips
+    if "not recognized" in error_message.lower() or "command not found" in error_message.lower():
+        if system == 'windows':
+            error_details += "\n💡 Troubleshooting:\n"
+            error_details += "   - Ensure PowerShell is installed and in PATH\n"
+            error_details += "   - Try: winget install Microsoft.PowerShell\n"
+            error_details += "   - Restart your terminal after installation"
+        elif system == 'linux':
+            error_details += "\n💡 Troubleshooting:\n"
+            error_details += "   - Install PowerShell Core: sudo apt install powershell (Ubuntu)\n"
+            error_details += "   - Or: sudo yum install powershell (RHEL/CentOS)\n"
+            error_details += "   - Ensure /usr/bin/pwsh exists"
+        elif system == 'darwin':
+            error_details += "\n💡 Troubleshooting:\n"
+            error_details += "   - Install PowerShell Core: brew install powershell\n"
+            error_details += "   - Ensure /usr/local/bin/pwsh exists"
+    
+    elif "module" in error_message.lower() and "not found" in error_message.lower():
+        error_details += "\n💡 Install Azure PowerShell modules:\n"
+        error_details += "   PowerShell> Install-Module -Name Az.Migrate -Force\n"
+        error_details += "   PowerShell> Install-Module -Name Az.StackHCI -Force"
+    
+    return CLIError(error_details)
+
+
+def _get_platform_capabilities():
+    """Get platform-specific capabilities and limitations."""
+    system = platform.system().lower()
+    
+    capabilities = {
+        'windows': {
+            'powershell_native': True,
+            'powershell_core_supported': True,
+            'azure_powershell_compatible': True,
+            'limitations': [],
+            'recommendations': [
+                'Use PowerShell Core for best cross-platform compatibility',
+                'Consider Windows PowerShell 5.1 as fallback'
+            ]
+        },
+        'linux': {
+            'powershell_native': False,
+            'powershell_core_supported': True,
+            'azure_powershell_compatible': True,
+            'limitations': [
+                'Requires PowerShell Core installation',
+                'Some Windows-specific cmdlets may not work'
+            ],
+            'recommendations': [
+                'Install PowerShell Core 7+',
+                'Use package manager for installation'
+            ]
+        },
+        'darwin': {
+            'powershell_native': False,
+            'powershell_core_supported': True,
+            'azure_powershell_compatible': True,
+            'limitations': [
+                'Requires PowerShell Core installation',
+                'Some Windows-specific cmdlets may not work'
+            ],
+            'recommendations': [
+                'Install PowerShell Core via Homebrew',
+                'Ensure Xcode command line tools are installed'
+            ]
+        }
+    }
+    
+    return capabilities.get(system, capabilities['linux'])
+
+
+def _validate_cross_platform_environment():
+    """Validate that the environment is properly configured for cross-platform operations."""
+    system = platform.system().lower()
+    validation_results = {
+        'platform': system,
+        'is_supported': True,
+        'powershell_available': False,
+        'azure_modules_available': False,
+        'warnings': [],
+        'errors': []
+    }
+    
+    try:
+        # Check PowerShell availability
+        ps_executor = get_powershell_executor()
+        is_available, ps_cmd = ps_executor.check_powershell_availability()
+        
+        validation_results['powershell_available'] = is_available
+        
+        if is_available:
+            # Check PowerShell version
+            try:
+                version_result = ps_executor.execute_script('$PSVersionTable.PSVersion.ToString()')
+                ps_version = version_result.get('stdout', '').strip()
+                validation_results['powershell_version'] = ps_version
+                
+                # Check if it's PowerShell Core (cross-platform)
+                platform_result = ps_executor.execute_script('$PSVersionTable.PSEdition')
+                ps_edition = platform_result.get('stdout', '').strip()
+                
+                if ps_edition == 'Core':
+                    validation_results['warnings'].append('✅ PowerShell Core detected (cross-platform compatible)')
+                elif ps_edition == 'Desktop' and system == 'windows':
+                    validation_results['warnings'].append('⚠️ Windows PowerShell detected (Windows-only)')
+                
+            except Exception as e:
+                validation_results['warnings'].append(f'Could not determine PowerShell version: {e}')
+            
+            # Check Azure modules
+            try:
+                az_result = ps_executor.execute_script('Get-Module -ListAvailable Az.Migrate | Select-Object -First 1 | ConvertTo-Json')
+                if az_result.get('stdout', '').strip():
+                    validation_results['azure_modules_available'] = True
+                    validation_results['warnings'].append('✅ Az.Migrate module available')
+                else:
+                    validation_results['warnings'].append('⚠️ Az.Migrate module not found')
+                    
+            except Exception as e:
+                validation_results['warnings'].append(f'Could not check Azure modules: {e}')
+                
+        else:
+            validation_results['errors'].append('PowerShell is not available')
+            validation_results['is_supported'] = False
+            
+    except Exception as e:
+        validation_results['errors'].append(f'Environment validation failed: {e}')
+        validation_results['is_supported'] = False
+    
+    return validation_results
+
+
+def validate_cross_platform_environment_cmd(cmd):
+    """
+    CLI command to validate cross-platform environment for Azure Migrate operations.
+    This command checks PowerShell availability and Azure module prerequisites.
+    """
+    from azure.cli.core import telemetry
+    
+    try:
+        # Run comprehensive environment validation
+        results = _validate_cross_platform_environment()
+        
+        # Display results in a user-friendly format
+        print("\n🔍 Azure Migrate Cross-Platform Environment Check")
+        print("=" * 50)
+        
+        # Platform information
+        print(f"\n📍 Platform Information:")
+        print(f"   Operating System: {results['platform'].title()}")
+        
+        # PowerShell availability
+        print(f"\n🔧 PowerShell Status:")
+        if results['powershell_available']:
+            print("   ✅ PowerShell Available")
+            if 'powershell_version' in results:
+                print(f"   📦 Version: {results['powershell_version']}")
+        else:
+            print("   ❌ PowerShell Not Available")
+        
+        # Azure modules
+        print(f"\n📦 Azure Module Status:")
+        if results['azure_modules_available']:
+            print("   ✅ Az.Migrate Module Available")
+        else:
+            print("   ⚠️ Az.Migrate Module Not Found")
+        
+        # Platform capabilities
+        capabilities = _get_platform_capabilities()
+        print(f"\n🎯 Platform Capabilities:")
+        print(f"   Native PowerShell: {'✅' if capabilities['powershell_native'] else '❌'}")
+        print(f"   PowerShell Core Support: {'✅' if capabilities['powershell_core_supported'] else '❌'}")
+        print(f"   Azure PowerShell Compatible: {'✅' if capabilities['azure_powershell_compatible'] else '❌'}")
+        
+        # Warnings and recommendations
+        if results['warnings']:
+            print(f"\n⚠️ Status Messages:")
+            for warning in results['warnings']:
+                print(f"   {warning}")
+        
+        if capabilities['limitations']:
+            print(f"\n🚧 Platform Limitations:")
+            for limitation in capabilities['limitations']:
+                print(f"   • {limitation}")
+        
+        if capabilities['recommendations']:
+            print(f"\n💡 Recommendations:")
+            for recommendation in capabilities['recommendations']:
+                print(f"   • {recommendation}")
+        
+        # Errors
+        if results['errors']:
+            print(f"\n❌ Issues Found:")
+            for error in results['errors']:
+                print(f"   • {error}")
+        
+        # Installation instructions if needed
+        if not results['powershell_available']:
+            system = platform.system().lower()
+            install_guide = _get_powershell_install_instructions(system)
+            print(f"\n📥 Installation Instructions:")
+            print(f"   {install_guide}")
+        
+        if not results['azure_modules_available'] and results['powershell_available']:
+            print(f"\n📥 Azure Module Installation:")
+            print(f"   Run in PowerShell: Install-Module -Name Az.Migrate -Force")
+            print(f"   Run in PowerShell: Install-Module -Name Az.StackHCI -Force")
+        
+        # Overall status
+        print(f"\n📊 Overall Status:")
+        if results['is_supported']:
+            print("   ✅ Environment is ready for Azure Migrate operations")
+        else:
+            print("   ❌ Environment requires setup before using Azure Migrate")
+        
+        print("\n" + "=" * 50)
+        
+        # Return results for programmatic access
+        return results
+        
+    except Exception as e:
+        telemetry.set_exception(e, 'validate-environment-failed')
+        raise CLIError(f"Failed to validate environment: {str(e)}")
+
+
+def _get_powershell_install_instructions(system):
+    """Get platform-specific PowerShell installation instructions."""
+    instructions = {
+        'windows': "Install PowerShell Core: winget install Microsoft.PowerShell",
+        'linux': "Install PowerShell Core: sudo apt install powershell (Ubuntu) or sudo yum install powershell (RHEL/CentOS)",
+        'darwin': "Install PowerShell Core: brew install powershell"
+    }
+    
+    return instructions.get(system, instructions['linux'])

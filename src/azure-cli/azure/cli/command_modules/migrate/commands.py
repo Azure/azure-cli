@@ -33,6 +33,7 @@ def load_command_table(self, _):
         g.custom_command('create-replication', 'create_server_replication')
         g.custom_command('show-replication-status', 'get_replication_job_status')
         g.custom_command('update-replication', 'set_replication_target_properties')
+        g.custom_command('check-environment', 'validate_cross_platform_environment_cmd')
 
     # Azure Migrate project management
     with self.command_group('migrate project', migrate_projects_sdk) as g:

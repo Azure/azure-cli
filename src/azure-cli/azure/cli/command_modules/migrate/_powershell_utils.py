@@ -739,23 +739,12 @@ class PowerShellExecutor:
         
         context_script += f"    $context = {context_cmd}\n"
         context_script += """
-    if ($context) {
-        $contextResult = @{
-            'Success' = $true
-            'AccountId' = $context.Account.Id
-            'SubscriptionId' = $context.Subscription.Id
-            'SubscriptionName' = $context.Subscription.Name
-            'TenantId' = $context.Tenant.Id
-            'Environment' = $context.Environment.Name
-        }
-    } else {
+    if (-Not $context) {
         $contextResult = @{
             'Success' = $false
             'Error' = 'Failed to set Azure context'
         }
-    }
-    
-    $contextResult | ConvertTo-Json -Depth 3
+    }    
 } catch {
     $errorResult = @{
         'Success' = $false
@@ -766,22 +755,7 @@ class PowerShellExecutor:
 """
         
         try:
-            result = self.execute_script(context_script)
-            
-            stdout_content = result.get('stdout', '').strip()
-            json_start = stdout_content.find('{')
-            json_end = stdout_content.rfind('}')
-            
-            if json_start != -1 and json_end != -1:
-                json_content = stdout_content[json_start:json_end + 1]
-                context_result = json.loads(json_content)
-                return context_result
-            else:
-                return {
-                    'Success': False,
-                    'Error': 'No valid JSON response from Set-AzContext'
-                }
-                
+            self.execute_script(context_script)
         except Exception as e:
             return {
                 'Success': False,
@@ -795,26 +769,13 @@ class PowerShellExecutor:
 try {
     $context = Get-AzContext
     
-    if ($context) {
-        $contextInfo = @{
-            'Success' = $true
-            'IsAuthenticated' = $true
-            'AccountId' = $context.Account.Id
-            'SubscriptionId' = $context.Subscription.Id
-            'SubscriptionName' = $context.Subscription.Name
-            'TenantId' = $context.Tenant.Id
-            'Environment' = $context.Environment.Name
-            'AccountType' = $context.Account.Type
-        }
-    } else {
+    if (-Not $context) {
         $contextInfo = @{
             'Success' = $true
             'IsAuthenticated' = $false
             'Message' = 'No Azure context found. Please run Connect-AzAccount.'
         }
     }
-    
-    $contextInfo | ConvertTo-Json -Depth 3
 } catch {
     $errorResult = @{
         'Success' = $false
@@ -825,22 +786,7 @@ try {
 """
         
         try:
-            result = self.execute_script(context_script)
-            
-            stdout_content = result.get('stdout', '').strip()
-            json_start = stdout_content.find('{')
-            json_end = stdout_content.rfind('}')
-            
-            if json_start != -1 and json_end != -1:
-                json_content = stdout_content[json_start:json_end + 1]
-                context_result = json.loads(json_content)
-                return context_result
-            else:
-                return {
-                    'Success': False,
-                    'Error': 'No valid JSON response from Get-AzContext'
-                }
-                
+            self.execute_script(context_script)
         except Exception as e:
             return {
                 'Success': False,
