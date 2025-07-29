@@ -54,7 +54,7 @@ Release History
 * `az sig in-vm-access-control-profile-version`: Add command group to manage in VM access control profile version (#31720)
 * `az vm disk attach`: Add new parameters `--source-snapshots-or-disks` `--source-disk-restore-point` to support implicit disk creation from snapshot and disk restore points (#31830)
 * `az vmss create`: Add new parameter `--enable-automatic-repairs` to support setting automatic repairs policy (#31722)
-* Fix #31685: `az vm/vmss update` Fix error with `NoneType` object has no attribute `mode` when update wireserver profile (#31855)
+* Fix #31685: `az vm/vmss update`: Fix error with `NoneType` object has no attribute `mode` when update wireserver profile (#31855)
 * `az vm disk attach`: Add support for setting disk size and sku of implicit disk creation from snapshot and disk restore points (#31862)
 * `az compute-recommender spot-placement-score`: Add new command to replace original command `az compute-recommender spot-placement-recommender` (#31858)
 
