@@ -23,7 +23,7 @@ from azure.cli.core.local_context import ALL
 from azure.cli.core.util import CLIError, sdk_no_wait, user_confirmation
 from azure.core.exceptions import HttpResponseError, ResourceNotFoundError
 from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
-from azure.cli.core.azclierror import BadRequestError, FileOperationError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError
+from azure.cli.core.azclierror import BadRequestError, FileOperationError, MutuallyExclusiveArgumentError, RequiredArgumentMissingError, ArgumentUsageError, InvalidArgumentValueError, ValidationError
 from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
@@ -43,7 +43,7 @@ from .flexible_server_virtual_network import prepare_private_network, prepare_pr
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name, \
-    validate_virtual_endpoint_name_availability, validate_database_name, compare_sku_names
+    validate_virtual_endpoint_name_availability, validate_database_name, compare_sku_names, is_citus_cluster
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -597,7 +597,6 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
         source_server_id = source_server
 
     source_server_id_parts = parse_resource_id(source_server_id)
-    validate_citus_cluster(cmd, source_server_id_parts['resource_group'], source_server_id_parts['name'])
     try:
         source_server_object = client.get(source_server_id_parts['resource_group'], source_server_id_parts['name'])
     except Exception as e:
@@ -712,7 +711,8 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
-    validate_georestore_network(source_server_object, None, vnet, subnet, 'postgres')
+    if source_server_object.network.delegated_subnet_resource_id is not None:
+        validate_georestore_network(source_server_object, None, vnet, subnet, 'postgres')
 
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
@@ -822,7 +822,12 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
 
 def flexible_replica_promote(cmd, client, resource_group_name, server_name, promote_mode='standalone', promote_option='planned'):
     validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
+    if is_citus_cluster(cmd, resource_group_name, server_name):
+        # some settings validation
+        if promote_mode.lower() == 'standalone':
+            raise ValidationError("Standalone replica promotion on elastic cluster isn't currently supported. Please use 'switchover' instead.")
+        if promote_option.lower() == 'planned':
+            raise ValidationError("Planned replica promotion on elastic cluster isn't currently supported. Please use 'forced' instead.")
 
     try:
         server_object = client.get(resource_group_name, server_name)

@@ -51,7 +51,8 @@ def set_feature(cmd,
                 yes=False,
                 connection_string=None,
                 auth_mode="key",
-                endpoint=None):
+                endpoint=None,
+                tags=None):
     if key is None and feature is None:
         raise CLIErrors.RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
 
@@ -67,7 +68,6 @@ def set_feature(cmd,
             raise exception
 
     # when creating a new Feature flag, these defaults will be used
-    tags = {}
     default_conditions = {FeatureFlagConstants.CLIENT_FILTERS: []}
 
     if requirement_type:
@@ -145,6 +145,7 @@ def set_feature(cmd,
 
             # Convert KeyValue object to required FeatureFlag format for
             # display
+
             feature_flag = map_keyvalue_to_featureflag(set_kv, show_all_details=True)
             entry = json.dumps(feature_flag, default=lambda o: o.__dict__, indent=2, sort_keys=True, ensure_ascii=False)
 
@@ -185,7 +186,8 @@ def delete_feature(cmd,
                    yes=False,
                    connection_string=None,
                    auth_mode="key",
-                   endpoint=None):
+                   endpoint=None,
+                   tags=None):
     if key is None and feature is None:
         raise CLIErrors.RequiredArgumentMissingError("Please provide either `--key` or `--feature` value.")
     if key and feature:
@@ -204,9 +206,10 @@ def delete_feature(cmd,
     retrieved_keyvalues = __list_all_keyvalues(azconfig_client,
                                                key_filter=key_filter,
                                                label=SearchFilterOptions.EMPTY_LABEL if label is None else label,
-                                               correlation_request_id=correlation_request_id)
+                                               correlation_request_id=correlation_request_id,
+                                               tags=tags)
 
-    confirmation_message = "Found '{}' feature flags matching the specified feature and label. Are you sure you want to delete these feature flags?".format(len(retrieved_keyvalues))
+    confirmation_message = "Found '{}' feature flags matching the specified feature, label, and tags. Are you sure you want to delete these feature flags?".format(len(retrieved_keyvalues))
     user_confirmation(confirmation_message, yes)
 
     deleted_kvs = []
@@ -304,7 +307,8 @@ def list_feature(cmd,
                  top=None,
                  all_=False,
                  auth_mode="key",
-                 endpoint=None):
+                 endpoint=None,
+                 tags=None):
     return __list_features(
         cmd=cmd,
         feature=feature,
@@ -316,7 +320,8 @@ def list_feature(cmd,
         top=top,
         all_=all_,
         auth_mode=auth_mode,
-        endpoint=endpoint
+        endpoint=endpoint,
+        tags=tags
     )
 
 
