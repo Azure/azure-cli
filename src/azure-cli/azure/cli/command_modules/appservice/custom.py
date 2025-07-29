@@ -115,7 +115,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
-                  public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth=""):
+                  public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
+                  auto_generated_domain_name_label_scope=None):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -221,7 +222,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
-                      public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled)
+                      public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled,
+                      auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
@@ -1186,8 +1188,10 @@ def _validate_sitecontainer_internal(new_sitecontainer_spec, existing_sitecontai
                                   .format(new_sitecontainer_spec.target_port, new_sitecontainer_spec.name))
     # ensure that targetPort is unique
     existing_same_port_sitecontainer = next((spec for spec in existing_sitecontainers_spec
-                                             if spec.target_port == new_sitecontainer_spec.target_port and
-                                             spec.name != new_sitecontainer_spec.name), None)
+                                             if (spec.target_port is not None and
+                                                 new_sitecontainer_spec.target_port is not None and
+                                                 spec.target_port == new_sitecontainer_spec.target_port and
+                                                 spec.name != new_sitecontainer_spec.name)), None)
     if existing_same_port_sitecontainer:
         raise ValidationError(("SiteContainer '{}' with targetPort '{}' already exists. "
                               "targetPort must be unique for SiteContainer '{}'.")
@@ -1351,6 +1355,27 @@ def get_webapp_sitecontainer_log(cmd, name, resource_group, container_name, slot
             time.sleep(100)  # so that ctrl+c can stop the command
     except Exception as ex:
         raise AzureInternalError("Failed to fetch sitecontainer logs. Error: {}".format(str(ex)))
+
+
+def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
+    """
+    Convert a webapp between classic (docker) and sitecontainers mode.
+
+    :param cmd: CLI command context
+    :param name: Name of the webapp
+    :param resource_group: Resource group of the webapp
+    :param mode: Target mode, either 'docker' or 'sitecontainers'
+    :param slot: Optional deployment slot
+    """
+    if mode == 'sitecontainers':
+        _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot)
+    elif mode == 'docker':
+        _convert_webapp_to_docker(cmd, name, resource_group, slot)
+    else:
+        raise InvalidArgumentValueError(
+            "Invalid mode '{}'. Allowed values: docker, sitecontainers.".format(mode)
+        )
+    return {"result": "success", "mode": mode}
 
 
 # for generic updater
@@ -1607,6 +1632,167 @@ def _build_identities_info(identities):
     if external_identities:
         info['userAssignedIdentities'] = {e: {} for e in external_identities}
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
+
+
+def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot):
+    site_config = get_site_configs(cmd, resource_group, name, slot)
+    linux_fx_version = getattr(site_config, "linux_fx_version", None)
+
+    if linux_fx_version and not linux_fx_version.startswith('DOCKER|'):
+        raise ValidationError("Cannot convert to sitecontainers mode as site is not a "
+                              "classic custom container (docker) app.")
+
+    acr_use_managed_identity_creds = getattr(site_config, "acr_use_managed_identity_creds", None)
+    acr_user_managed_identity_id = getattr(site_config, "acr_user_managed_identity_id", None)
+    acr_user_name = None
+    acr_user_password = None
+
+    # Get app settings to check for ACR credentials
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    slot_segment = f"/slots/{slot}" if slot else ""
+    url = (
+        f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/"
+        f"providers/Microsoft.Web/sites/{name}{slot_segment}/config/appsettings/list?api-version=2023-12-01"
+    )
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
+    response = send_raw_request(cmd.cli_ctx, "POST", request_url)
+    app_settings_raw = response.json()
+    app_settings = app_settings_raw.get("properties", {})
+
+    acr_user_password = app_settings.get("DOCKER_REGISTRY_SERVER_PASSWORD", None)
+    acr_user_name = app_settings.get("DOCKER_REGISTRY_SERVER_USERNAME", None)
+    websites_port = app_settings.get("WEBSITES_PORT", None) or app_settings.get("PORT", None)
+
+    # Get docker image from linux_fx_version
+    docker_image = linux_fx_version.replace("DOCKER|", "", 1)
+    sidecar_main_container_name = "main"
+    startup_cmd = getattr(site_config, "app_command_line", None)
+
+    # Prepare parameters for sitecontainers create
+    sitecontainer_kwargs = {
+        "name": name,
+        "resource_group": resource_group,
+        "slot": slot,
+        "container_name": sidecar_main_container_name,
+        "image": docker_image,
+        "target_port": websites_port,
+        "startup_cmd": startup_cmd,
+        "is_main": True,
+    }
+
+    if acr_use_managed_identity_creds:
+        if acr_user_managed_identity_id:
+            # ACR with User-Assigned Managed Identity
+            logger.warning("Site is using User-Assigned Managed Identity for ACR authentication.")
+            sitecontainer_kwargs["user_assigned_identity"] = acr_user_managed_identity_id
+        else:
+            # ACR with System-Assigned Managed Identity
+            logger.warning("Site is using System-Assigned Managed Identity for ACR authentication.")
+            sitecontainer_kwargs["system_assigned_identity"] = True
+    else:
+        if acr_user_name and acr_user_password:
+            # ACR with User Credentials
+            logger.warning("Site is using User Credentials for ACR authentication.")
+            sitecontainer_kwargs["registry_username"] = acr_user_name
+            sitecontainer_kwargs["registry_password"] = acr_user_password
+        else:
+            # No ACR authentication, using anonymous access
+            logger.warning("Site is using anonymous access for ACR authentication.")
+    response = create_webapp_sitecontainers(cmd, **sitecontainer_kwargs)
+    if response is None:
+        logger.warning("Failed to create sitecontainer, deleting all sitecontainers")
+        sitecontainers = list_webapp_sitecontainers(cmd, name, resource_group, slot)
+        # Remove all sitecontainers
+        for c in sitecontainers:
+            delete_webapp_sitecontainer(cmd, name, resource_group, c.name, slot)
+        raise AzureInternalError("Failed to create sitecontainer for conversion to sitecontainers mode.")
+
+    # Set linuxFxVersion to SITECONTAINERS
+    logger.warning("Setting linuxFxVersion to SITECONTAINERS")
+    update_site_configs(cmd, resource_group, name, slot=slot, linux_fx_version="SITECONTAINERS")
+    logger.warning("Webapp '%s' converted to sitecontainers mode.", name)
+
+
+def _convert_webapp_to_docker(cmd, name, resource_group, slot):
+    site_config = get_site_configs(cmd, resource_group, name, slot)
+    linux_fx_version = getattr(site_config, "linux_fx_version", None)
+    if linux_fx_version and not linux_fx_version.lower().startswith('sitecontainers'):
+        raise ValidationError("Cannot convert to classic (docker) mode as site is not a SITECONTAINERS app.")
+
+    # Get the main sitecontainer
+    sitecontainers = list_webapp_sitecontainers(cmd, name, resource_group, slot)
+    main_container = next((c for c in sitecontainers if getattr(c, "is_main", False)), None)
+    if not main_container:
+        raise ResourceNotFoundError("No main sitecontainer found. Cannot convert to classic mode (docker).")
+    if len(sitecontainers) > 1:
+        option = prompt_y_n('More than one sitecontainer exists. Do you want to continue with the conversion?')
+        if not option:
+            raise ValidationError("Skipped converting to classic (docker) mode as more than one sitecontainer exists."
+                                  " Please remove all but the main sitecontainer before converting.")
+
+    main_container = update_webapp_sitecontainer(
+        cmd, name, resource_group, main_container.name, slot=slot,
+        image=main_container.image, target_port=main_container.target_port,
+        is_main=main_container.is_main
+    )
+
+    # Prepare new linux_fx_version
+    docker_image = getattr(main_container, "image", None)
+    if not docker_image:
+        raise ValidationError("Main sitecontainer does not have an image specified.")
+
+    linux_fx_version = _format_fx_version(docker_image)
+
+    # Prepare app settings for registry credentials if needed
+    settings = []
+    settings.append(f"DOCKER_REGISTRY_SERVER_URL=https://{main_container.image.split('/')[0]}")
+    if main_container.auth_type == AuthType.USER_CREDENTIALS:
+        if main_container.user_name:
+            settings.append(f"DOCKER_REGISTRY_SERVER_USERNAME={main_container.user_name}")
+        if main_container.password_secret:
+            settings.append(f"DOCKER_REGISTRY_SERVER_PASSWORD={main_container.password_secret}")
+        if main_container.target_port:
+            settings.append(f"WEBSITES_PORT={main_container.target_port}")
+    elif main_container.auth_type == AuthType.SYSTEM_IDENTITY:
+        configs = get_site_configs(cmd, resource_group, name, slot)
+        setattr(configs, 'acr_use_managed_identity_creds', True)
+        setattr(configs, 'acr_user_managed_identity_id', "")
+        _generic_site_operation(cmd.cli_ctx, resource_group, name, 'update_configuration', slot, configs)
+    elif main_container.auth_type == AuthType.USER_ASSIGNED:
+        client = web_client_factory(cmd.cli_ctx)
+        if slot:
+            app = client.web_apps.get_slot(resource_group, name, slot)
+        else:
+            app = client.web_apps.get(resource_group, name)
+        if app.identity and app.identity.user_assigned_identities:
+            # Find the managed identity key whose client_id matches main_container.user_managed_identity_client_id
+            matched_key = None
+            for key, identity in app.identity.user_assigned_identities.items():
+                if identity.client_id == main_container.user_managed_identity_client_id:
+                    matched_key = key
+                    break
+            if not matched_key:
+                raise ResourceNotFoundError(
+                    f"Could not find a user-assigned identity with client_id "
+                    f"'{main_container.user_managed_identity_client_id}' assigned to the app."
+                )
+        update_site_configs(cmd, resource_group, name, slot=slot, acr_identity=matched_key)
+    elif main_container.auth_type == AuthType.ANONYMOUS:
+        configs = get_site_configs(cmd, resource_group, name, slot)
+        setattr(configs, 'acr_use_managed_identity_creds', False)
+        _generic_site_operation(cmd.cli_ctx, resource_group, name, 'update_configuration', slot, configs)
+
+    logger.warning("Deleting all sitecontainers before converting to classic mode (docker).")
+    # Remove all sitecontainers
+    for c in sitecontainers:
+        delete_webapp_sitecontainer(cmd, name, resource_group, c.name, slot)
+
+    # Set linuxFxVersion to docker
+    update_site_configs(cmd, resource_group, name, slot=slot, linux_fx_version=linux_fx_version)
+    if settings:
+        update_app_settings(cmd, resource_group, name, settings, slot)
+    logger.warning("Webapp '%s' converted to classic custom container (docker) mode.", name)
 
 
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
@@ -2181,7 +2367,8 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
     if linux_fx_version:
-        if linux_fx_version.strip().lower().startswith('docker|'):
+        if (linux_fx_version.strip().lower().startswith('docker|') or
+                linux_fx_version.strip().lower().startswith('sitecontainers')):
             if ('WEBSITES_ENABLE_APP_SERVICE_STORAGE' not in app_settings.properties or
                     app_settings.properties['WEBSITES_ENABLE_APP_SERVICE_STORAGE'] != 'true'):
                 update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
@@ -5360,6 +5547,10 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
     else:
         subnet_resource_id = None
         vnet_route_all_enabled = None
+
+    # if this is a managed function app (Azure Functions on Azure Containers), http20_proxy_flag must be None
+    if environment is not None:
+        site_config.http20_proxy_flag = None
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,

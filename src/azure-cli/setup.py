@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.75.0"
+VERSION = "2.76.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -64,7 +64,7 @@ DEPENDENCIES = [
     'azure-keyvault-securitydomain==1.0.0b1',
     'azure-mgmt-advisor==9.0.0',
     'azure-mgmt-apimanagement==4.0.0',
-    'azure-mgmt-appconfiguration==3.1.0',
+    'azure-mgmt-appconfiguration==5.0.0',
     'azure-mgmt-appcontainers==2.0.0',
     'azure-mgmt-applicationinsights~=1.0.0',
     'azure-mgmt-authorization~=4.0.0',
@@ -77,21 +77,20 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==14.1.0b1',
-    'azure-mgmt-containerservice~=37.0.0',
+    'azure-mgmt-containerservice~=38.0.0',
     'azure-mgmt-cosmosdb==9.8.0',
     'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
-    'azure-mgmt-dns~=8.0.0',
     'azure-mgmt-eventgrid==10.2.0b2',
-    'azure-mgmt-eventhub~=10.1.0',
+    'azure-mgmt-eventhub~=12.0.0b1',
     'azure-mgmt-extendedlocation==1.0.0b2',
     'azure-mgmt-hdinsight==9.0.0b3',
     'azure-mgmt-imagebuilder~=1.3.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==3.0.0',
     'azure-mgmt-iothubprovisioningservices==1.1.0',
-    'azure-mgmt-keyvault==11.0.0',
+    'azure-mgmt-keyvault==12.0.0',
     'azure-mgmt-loganalytics==13.0.0b4',
     'azure-mgmt-managementgroups~=1.0.0',
     'azure-mgmt-maps~=2.0.0',
@@ -116,7 +115,7 @@ DEPENDENCIES = [
     'azure-mgmt-resource-templatespecs==1.0.0b1',
     'azure-mgmt-search~=9.0',
     'azure-mgmt-security==6.0.0',
-    'azure-mgmt-servicebus~=8.2.0',
+    'azure-mgmt-servicebus~=10.0.0b1',
     'azure-mgmt-servicefabricmanagedclusters==2.1.0b1',
     'azure-mgmt-servicelinker==1.2.0b3',
     'azure-mgmt-servicefabric~=2.1.0',
@@ -126,7 +125,7 @@ DEPENDENCIES = [
     'azure-mgmt-storage==23.0.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
-    'azure-mgmt-web==7.3.1',
+    'azure-mgmt-web==9.0.0',
     'azure-monitor-query==1.2.0',
     'azure-multiapi-storage==1.4.1',
     'azure-storage-common~=1.4',
