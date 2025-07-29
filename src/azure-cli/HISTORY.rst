@@ -37,7 +37,7 @@ Release History
 **ARM**
 
 * `az group export`: Add `--export-format` to specify the format of the exported template (#31667)
-* Fix #31709: `az deployment`: Fix `the content for this response was already consumed` when create resource (#31722)
+* Fix #31709: `az deployment`: Fix `the content for this response was already consumed` error when create resource (#31722)
 * `az deployment create/validate/what-if`: Expose `--validation-level` parameter at all scopes (#31747)
 
 **Backup**
