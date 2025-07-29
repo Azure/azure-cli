@@ -91,7 +91,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
         result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-resource-name-params --query "parameters"')
 
         self.assertEqual('{}\n', result.output)
-    
+
     @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
     def test_resource_group_export_output_format_bicep(self, resource_group):
         self.kwargs.update({
@@ -101,7 +101,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.kwargs['vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
         result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --export-format bicep').get_output_in_json()
-        
+
         # Check for Bicep-specific syntax
         bicep_text = str(result)
         self.assertFalse(bicep_text.strip().startswith('{'))  # Bicep files do not start with '{'
@@ -902,7 +902,7 @@ class TemplateSpecsTest(ScenarioTest):
                                variables('locations')[parameters('location')],
                                parameters('group'),
                                parameters('service'),
-                               if(equals(parameters('kind'), ''), 
+                               if(equals(parameters('kind'), ''),
                                   variables('resources')[variables('provider')][variables('resourceType')],
                                   variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]"""),
             self.check('mainTemplate.variables.removeOptionalsFromHyphenedName', "[replace(variables('hyphenedName'), '--', '-')]"),
@@ -1287,6 +1287,96 @@ class DeploymentTestsWithQueryString(LiveScenarioTest):
         ])
 
         self.cmd('deployment sub create -l {resource_group_location} --template-uri {blob_url} --query-string "{sas_token}" --parameters keyVaultName="{key_vault}" rgName="{resource_group}" rgLocation="{resource_group_location}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+class DeploymentTestsWithValidationLevel(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_validation_level_rg', location='eastus')
+    def test_rg_deployment_with_validation_level(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_rg.json')
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'tf': tf,
+        })
+
+        self.cmd('deployment group validate -g {resource_group} --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if -g {resource_group} --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create -g {resource_group} --template-file "{tf}" --validation-level provider', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+    def test_sub_deployment_with_validation_level(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_sub.json')
+
+        self.kwargs.update({
+            'tf': tf,
+        })
+
+        self.cmd('deployment sub validate -l eastus --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment sub what-if -l eastus --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment sub create -l eastus --template-file "{tf}" --validation-level provider', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+    def test_mg_deployment_with_validation_level(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_mg.json')
+
+        self.kwargs.update({
+            'tf': tf,
+            'mg': self.create_random_name('azure-cli-management', 30),
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment mg validate --management-group-id {mg} -l eastus --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment mg what-if --management-group-id {mg} -l eastus --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment mg create --management-group-id {mg} -l eastus --template-file "{tf}" --validation-level provider', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+    def test_tenant_deployment_with_validation_level(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_tenant.json')
+
+        self.kwargs.update({
+            'tf': tf,
+        })
+
+        self.cmd('deployment tenant validate -l eastus --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment tenant what-if -l eastus --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment tenant create -l eastus --template-file "{tf}" --validation-level provider', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -2484,7 +2574,7 @@ class DeploymentStacksTest(ScenarioTest):
         # update stack with resource2 set to detach
         self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-two}" "rgLocation={location}" --deny-settings-mode "none" --action-on-unmanage detachAll --yes', checks=self.check('provisioningState', 'succeeded'))
 
-        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding. 
+        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding.
         #        See https://github.com/Azure/azure-cli/issues/31719 for more information. Temporarily commenting this portion of the test out to unblock
         #        merging https://github.com/Azure/azure-cli/pull/31684.
         #
@@ -2854,7 +2944,7 @@ class DeploymentStacksTest(ScenarioTest):
         # check template spec exists in Azure
         self.cmd('resource list -g {resource-group-two} --name "{template-spec-name}"', checks=self.check("length(@)", 1))
 
-        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding. 
+        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding.
         #        See https://github.com/Azure/azure-cli/issues/31719 for more information. Temporarily commenting this portion of the test out to unblock
         #        merging https://github.com/Azure/azure-cli/pull/31684.
         #
