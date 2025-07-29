@@ -22,7 +22,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'loc': 'eastasia',
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
-            'tags': "key1=value1 key2=value2"
+            'tags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_basic_cluster"
         })
 
         cluster = self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags}',
@@ -55,7 +55,7 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'vm_password': self.create_random_name('Pass@', 9),
             'vm_image_sku': '2022-datacenter-azure-edition',
             'vm_size': 'Standard_D2s_v3',
-            'tags': "SFRP.DisableDefaultOutboundAccess=True SFRP.EnableDiagnosticMI=True",
+            'tags': "SFRP.DisableDefaultOutboundAccess=True SFRP.EnableDiagnosticMI=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_network_security_rule",
             'name': self.create_random_name('NSR-', 10),
             'access': 'allow',
             'inv_access': 'deny',
@@ -141,15 +141,53 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
 
     @ResourceGroupPreparer()
+    def test_node_type_update(self):
+        self.kwargs.update({
+            'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
+            'loc': 'eastasia',
+            'cluster_name': self.create_random_name('sfrp-cli-', 24),
+            'vm_password': self.create_random_name('Pass@', 9),
+            'clusterTags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_node_type_update",
+            'nodeTypeTags': "SFRP.WaitTimeBetweenUD=00:00:10",
+            'nodeTypeTags2': "SFRP.WaitTimeBetweenUD=00:00:11"
+        })
+
+        self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard --upgrade-mode Automatic --upgrade-cadence Wave1 --tags {clusterTags}',
+                 checks=[self.check('provisioningState', 'Succeeded'),
+                         self.check('clusterState', 'WaitingForNodes'),
+                         self.check('clusterUpgradeMode', 'Automatic'),
+                         self.check('clusterUpgradeCadence', 'Wave1')])
+
+        self.cmd('az sf managed-node-type create -g {rg} -c {cluster_name} -n pnt --instance-count 5 --primary --disk-type Premium_LRS --vm-size Standard_DS2 --tags {nodeTypeTags}',
+                 checks=[self.check('provisioningState', 'Succeeded'),
+                         self.check('dataDiskType', 'Premium_LRS'),
+                         self.check('isStateless', False),
+                         self.check('tags', {'SFRP.WaitTimeBetweenUD': '00:00:10'})])
+        
+        self.cmd('az sf managed-node-type update -g {rg} -c {cluster_name} -n pnt --vm-size Standard_DS3_v2 --tags {nodeTypeTags2}',
+                 checks=[self.check('provisioningState', 'Succeeded'),
+                         self.check('vmSize', 'Standard_DS3_v2'),
+                         self.check('dataDiskType', 'Premium_LRS'),
+                         self.check('vmInstanceCount', 5),
+                         self.check('tags', {'SFRP.WaitTimeBetweenUD': '00:00:11'})])
+        
+        self.cmd('az sf managed-cluster delete -g {rg} -c {cluster_name}')
+
+        # SystemExit 3 'not found'
+        with self.assertRaisesRegex(SystemExit, '3'):
+            self.cmd('az sf managed-cluster show -g {rg} -c {cluster_name}')
+
+    @ResourceGroupPreparer()
     def test_node_type_operation(self):
         self.kwargs.update({
             'cert_tp': '123BDACDCDFB2C7B250192C6078E47D1E1DB119B',
             'loc': 'eastasia',
             'cluster_name': self.create_random_name('sfrp-cli-', 24),
             'vm_password': self.create_random_name('Pass@', 9),
+            'tags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_node_type_operation"
         })
 
-        self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard --upgrade-mode Automatic --upgrade-cadence Wave1',
+        self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --sku Standard --upgrade-mode Automatic --upgrade-cadence Wave1 --tags {tags}',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('clusterState', 'WaitingForNodes'),
                          self.check('clusterUpgradeMode', 'Automatic'),
@@ -218,10 +256,11 @@ class ServiceFabricManagedClustersTests(ScenarioTest):
             'extType': 'BGInfo',
             'extVer': '2.1',
             'kv_name': key_vault,
-            'cert_name': self.create_random_name('sfrp-cli-', 24)
+            'cert_name': self.create_random_name('sfrp-cli-', 24),
+            'tags': "SFRP.EnableDiagnosticMI=True SFRP.DisableDefaultOutboundAccess=True SFRP.UseUnmonitoredAutoClusterUpgradePolicy=True testName=test_cert_and_ext"
         })
 
-        self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password}',
+        self.cmd('az sf managed-cluster create -g {rg} -c {cluster_name} -l {loc} --cert-thumbprint {cert_tp} --cert-is-admin --admin-password {vm_password} --tags {tags}',
                  checks=[self.check('provisioningState', 'Succeeded'),
                          self.check('clusterState', 'WaitingForNodes')])
 
