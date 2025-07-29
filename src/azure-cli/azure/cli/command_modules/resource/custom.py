@@ -124,7 +124,7 @@ def _resolve_type_from_path(current_ref, segments, definitions):
     return current
 
 
-def _try_parse_key_value_object(parameters, template_obj, value):
+def _try_parse_key_value_object(parameters, extension_configs, template_obj, value):
     # support situation where empty JSON "{}" is provided
     if value == '{}' and not parameters:
         return True
@@ -134,6 +134,26 @@ def _try_parse_key_value_object(parameters, template_obj, value):
     except ValueError:
         return False
 
+    # Check if it's for extension configs.
+    if key.startswith('extensionConfigs.'):
+        keys = key.split('.')
+
+        if len(keys) < 3 or len(keys) > 4:
+            raise CLIError(f"Unable to parse extension configs key '{key}'. Expected format is: 'extensionConfigs.extAlias.propertyName=JSONToken'. Example: 'extensionConfigs.extAlias.propertyName=\"aStringValue\"'")
+
+        ext_alias, ext_config_property, ext_config_prop_value_inner_prop = keys[1], keys[2], keys[3] if len(keys) == 4 else None
+        extension_configs[ext_alias] = extension_configs.get(ext_alias, {})
+
+        if ext_config_prop_value_inner_prop:
+            extension_configs[ext_alias][ext_config_property] = {
+                f'{ext_config_prop_value_inner_prop}': shell_safe_json_parse(value)
+            }
+        else:
+            extension_configs[ext_alias][ext_config_property] = { 'value': shell_safe_json_parse(value) }
+
+        return True
+
+    # Otherwise treat as a parameter.
     param = template_obj.get('parameters', {}).get(key, None)
     if param is None:
         raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
@@ -201,18 +221,17 @@ def _process_parameters_and_ext_configs(template_obj, parameter_lists):  # pylin
 
     for params in parameter_lists or []:
         for item in params:
-            param_obj, ext_configs_obj, is_file_item = _try_load_file_object(item)
-            if not is_file_item:
-                param_obj, ext_configs_obj, is_json_obj = _try_parse_parameters_json_object(item)
-                if not is_json_obj:
-                    param_obj, ext_configs_obj, _ = _try_load_uri(item)  # Parameters files can supply extension configs
+            param_obj, ext_configs_obj, handled = _try_load_file_object(item)
+            if not handled:
+                param_obj, ext_configs_obj, handled = _try_parse_parameters_json_object(item)
+                if not handled:
+                    param_obj, ext_configs_obj, handled = _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
-            elif not _try_parse_key_value_object(parameters, template_obj, item):
-                raise CLIError('Unable to parse parameter: {}'.format(item))
-
             if ext_configs_obj is not None:
                 result_ext_configs.update(ext_configs_obj)
+            if not handled and not _try_parse_key_value_object(parameters, result_ext_configs, template_obj, item):
+                raise CLIError('Unable to parse parameter: {}'.format(item))
 
     return parameters, result_ext_configs or None
 
@@ -1019,23 +1038,24 @@ def _get_bicepparam_file_path(parameters):
 
 def _parse_bicepparam_inline_params(parameters, template_obj):
     parsed_inline_params = {}
+    parsed_inline_ext_configs = {}
 
     for parameter_list in parameters:
         for parameter_item in parameter_list:
             if is_bicepparam_file(parameter_item):
                 continue
 
-            if not _try_parse_key_value_object(parsed_inline_params, template_obj, parameter_item):
+            if not _try_parse_key_value_object(parsed_inline_params, parsed_inline_ext_configs, template_obj, parameter_item):
                 raise InvalidArgumentValueError(f"Unable to parse parameter: {parameter_item}. Only correctly formatted in-line parameters are allowed with a .bicepparam file")
 
     name_value_obj = {}
     for k, v in parsed_inline_params.items():
         name_value_obj[k] = v['value']
 
-    return name_value_obj
+    return name_value_obj, parsed_inline_ext_configs or None
 
 
-def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_params=None):
+def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_params=None, inline_ext_configs=None):
     custom_env = os.environ.copy()
     if inline_params:
         custom_env["BICEP_PARAMETERS_OVERRIDES"] = json.dumps(inline_params)
@@ -1054,6 +1074,13 @@ def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_param
     if "templateSpecId" in build_bicepparam_output_json:
         template_spec_id = build_bicepparam_output_json["templateSpecId"]
     parameters_content = build_bicepparam_output_json["parametersJson"]
+
+    if inline_ext_configs:  # There's currently not a way to inject inlined values into the build command, so inlined will be shallowly merged below at the config property level.
+        parameters_content["extensionConfigs"] = parameters_content.get("extensionConfigs", {})
+
+        for ext_alias, inline_ext_config in inline_ext_configs.items():
+            ext_config = parameters_content["extensionConfigs"][ext_alias] = parameters_content["extensionConfigs"].get(ext_alias, {})
+            ext_config.update(inline_ext_config)
 
     return template_content, template_spec_id, parameters_content
 
@@ -1083,10 +1110,10 @@ def _parse_bicepparam_file(cmd, template_file, parameters):
         else:
             template_obj = _remove_comments_from_json(template_content)
 
-        inline_params = _parse_bicepparam_inline_params(parameters, template_obj)
+        inline_params, inline_ext_configs = _parse_bicepparam_inline_params(parameters, template_obj)
 
         # re-invoke build-params to process inline parameters
-        template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file, inline_params)
+        template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file, inline_params, inline_ext_configs)
 
     return template_content, template_spec_id, parameters_content
 
@@ -1168,7 +1195,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     if _is_bicepparam_file_provided(parameters):
         params_file_json = json.loads(bicepparam_json_content)  # pylint: disable=used-before-assignment
         parameters = params_file_json.get('parameters', {})
-        ext_configs = params_file_json.get('extensionConfigs', {})
+        ext_configs = params_file_json.get('extensionConfigs', None)
     else:
         parameters, ext_configs = _process_parameters_and_ext_configs(template_obj, parameters)
         parameters = parameters or {}
@@ -1376,7 +1403,9 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
     template_obj['resources'] = template_obj.get('resources', [])
 
     if _is_bicepparam_file_provided(parameters):
-        parameters = json.loads(bicepparam_json_content).get('parameters', {})  # pylint: disable=used-before-assignment
+        bicepparam_json_content = json.loads(bicepparam_json_content)  # pylint: disable=used-before-assignment
+        parameters = bicepparam_json_content.get('parameters', {})
+        #ext_configs = bicepparam_json_content.get('extensionConfigs', None)
     else:
         parameters, _ = _process_parameters_and_ext_configs(template_obj, parameters)
         parameters = parameters or {}
@@ -1384,6 +1413,7 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
         parameters = json.loads(json.dumps(parameters))
 
     deployment_stack_model.parameters = parameters
+    # TODO: assign extension configs when stacks SDK is updated
 
     return deployment_stack_model
 

@@ -462,6 +462,18 @@ class TestCustom(unittest.TestCase):
             {  # Inlined is shallow merged with parameters file.
                 "parameter_list": [[parameters_path], ['{\"parameters\":{},\"extensionConfigs\":{\"k8s\":{\"namespace\":{\"value\":\"ns2\"}},\"otherExt\":{\"stringProp\":{\"value\":\"stringPropVal\"}}}}']], # 'parameters' must be present otherwise 'extensionConfigs' is treated as a parameter.
                 "expected": {"k8s":{"namespace":{"value":"ns2"}},"otherExt":{"stringProp":{"value":"stringPropVal"}}},
+            },
+            {  # Key-value pair
+                "parameter_list": [['extensionConfigs.extAlias.propertyName="propertyValue"']],
+                "expected": {"extAlias":{"propertyName":{"value":"propertyValue"}}},
+            },
+            {  # Key-value pair merges with existing config
+                "parameter_list": [[parameters_path], ['extensionConfigs.k8s.namespace="kvpValue"']],
+                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"kvpValue"}}},
+            },
+            {  # Key vault reference can be set
+                "parameter_list": [['extensionConfigs.extAlias.propertyName.keyVaultReference={\"keyVault\":{\"id\":\"idHere\"},\"secretName\":\"mySecret\"}']],
+                "expected": {"extAlias":{"propertyName":{"keyVaultReference":{"keyVault":{"id":"idHere"},"secretName":"mySecret"}}}}
             }
         ]
 
