@@ -149,7 +149,7 @@ def _try_parse_key_value_object(parameters, extension_configs, template_obj, val
                 f'{ext_config_prop_value_inner_prop}': shell_safe_json_parse(value)
             }
         else:
-            extension_configs[ext_alias][ext_config_property] = { 'value': shell_safe_json_parse(value) }
+            extension_configs[ext_alias][ext_config_property] = {'value': shell_safe_json_parse(value)}
 
         return True
 
@@ -1439,7 +1439,7 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
     if _is_bicepparam_file_provided(parameters):
         bicepparam_json_content = json.loads(bicepparam_json_content)  # pylint: disable=used-before-assignment
         parameters = bicepparam_json_content.get('parameters', {})
-        #ext_configs = bicepparam_json_content.get('extensionConfigs', None)
+        # ext_configs = bicepparam_json_content.get('extensionConfigs', None)
     else:
         parameters, _ = _process_parameters_and_ext_configs(template_obj, parameters)
         parameters = parameters or {}
