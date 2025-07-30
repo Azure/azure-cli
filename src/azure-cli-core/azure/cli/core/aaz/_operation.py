@@ -5,6 +5,7 @@
 
 # pylint: disable=too-few-public-methods, protected-access, too-many-nested-blocks, too-many-branches
 
+from urllib.parse import parse_qs, urljoin, urlparse, quote
 import json
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, \
@@ -17,11 +18,6 @@ from ._content_builder import AAZContentBuilder
 from ._field_type import AAZSimpleType, AAZObjectType, AAZBaseDictType, AAZListType
 from ._field_value import AAZList, AAZObject, AAZBaseDictValue
 from .exceptions import AAZInvalidValueError
-
-try:
-    from urllib import quote  # type: ignore
-except ImportError:
-    from urllib.parse import quote  # type: ignore
 
 
 class AAZOperation:
@@ -292,9 +288,14 @@ class AAZHttpOperation(AAZOperation):
         """
         if self.ctx.next_link:
             # support making request for next link
+            _parsed_next_link = urlparse(self.ctx.next_link)
+            _next_request_params = {
+                key: [quote(v) for v in value]
+                for key, value in parse_qs(_parsed_next_link.query).items()
+            }
             request = self.client._request(
-                "GET", self.ctx.next_link, {}, self.header_parameters,
-                self.content, self.form_content, None)
+                "GET", urljoin(self.ctx.next_link, _parsed_next_link.path), _next_request_params,
+                self.header_parameters, self.content, self.form_content, None)
 
         elif self.method in ("GET",):
             request = self.client._request(
@@ -646,8 +647,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
         if disc_schema is not None:
             schemas.append(disc_schema)
         for schema in schemas:
-            for key in schema._fields:
-                yield key
+            yield from schema._fields
 
     def _throw_and_show_options(self, instance, part, path, flatten):
         parent = '.'.join(path[:-1]).replace('.[', '[')

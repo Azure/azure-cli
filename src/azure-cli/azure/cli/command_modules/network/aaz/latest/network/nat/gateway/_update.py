@@ -71,6 +71,11 @@ class Update(AAZCommand):
             help="Space-separated list of public IP prefixes (Names or IDs).",
             nullable=True,
         )
+        _args_schema.tags = AAZDictArg(
+            options=["--tags"],
+            help="Space-separated tags: key[=value] [key[=value] ...].",
+            nullable=True,
+        )
 
         pip_addresses = cls._args_schema.pip_addresses
         pip_addresses.Element = AAZObjectArg(
@@ -80,6 +85,7 @@ class Update(AAZCommand):
         _element = cls._args_schema.pip_addresses.Element
         _element.id = AAZStrArg(
             options=["id"],
+            help="Resource ID.",
             nullable=True,
         )
 
@@ -91,6 +97,12 @@ class Update(AAZCommand):
         _element = cls._args_schema.pip_prefixes.Element
         _element.id = AAZStrArg(
             options=["id"],
+            help="Resource ID.",
+            nullable=True,
+        )
+
+        tags = cls._args_schema.tags
+        tags.Element = AAZStrArg(
             nullable=True,
         )
 
@@ -333,6 +345,7 @@ class Update(AAZCommand):
                 typ=AAZObjectType
             )
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -355,6 +368,10 @@ class Update(AAZCommand):
             _elements = _builder.get(".properties.publicIpPrefixes[]")
             if _elements is not None:
                 _elements.set_prop("id", AAZStrType, ".id")
+
+            tags = _builder.get(".tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
 
             return _instance_value
 

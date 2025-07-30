@@ -12,7 +12,7 @@ CLI_COMMON_KWARGS = ['min_api', 'max_api', 'resource_type', 'operation_group',
 
 CLI_COMMAND_KWARGS = ['transform', 'table_transformer', 'confirmation', 'exception_handler',
                       'client_factory', 'operations_tmpl', 'no_wait_param', 'supports_no_wait', 'validator',
-                      'client_arg_name', 'doc_string_source', 'deprecate_info',
+                      'client_arg_name', 'doc_string_source', 'deprecate_info', 'sensitive_info',
                       'supports_local_cache', 'model_path'] + CLI_COMMON_KWARGS
 CLI_PARAM_KWARGS = \
     ['id_part', 'completer', 'validator', 'options_list', 'configured_default', 'arg_group', 'arg_type',
@@ -30,3 +30,5 @@ CONFIRM_PARAM_NAME = 'yes'
 DEFAULT_QUERY_TIME_RANGE = 3600000
 
 BLOCKED_MODS = ['context', 'shell', 'documentdb', 'component']
+
+CREDENTIAL_WARNING_EXCLUSIVE_COMMANDS = ['ad sp create-for-rbac', 'ad app credential reset', 'ad sp credential reset']

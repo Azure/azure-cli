@@ -91,6 +91,18 @@ class StorageTableScenarioTests(StorageScenarioMixin, ScenarioTest):
                          table_name, marker.get('nextpartitionkey'), marker.get('nextrowkey')).assert_with_checks(
                              JMESPathCheck('length(items)', 1))
 
+        self.storage_cmd('storage entity insert -t {} -e rowkey=003 partitionkey=003 value=0152',
+                         account_info, table_name)
+        self.storage_cmd('storage entity show -t {} --row-key 003 --partition-key 003',
+                         account_info, table_name) \
+            .assert_with_checks(JMESPathCheck('value', 152))
+        self.storage_cmd('storage entity insert -t {} -e rowkey=003 partitionkey=003 value=0152 '
+                         'value@odata.type=Edm.String --if-exists replace',
+                         account_info, table_name)
+        self.storage_cmd('storage entity show -t {} --row-key 003 --partition-key 003',
+                         account_info, table_name) \
+            .assert_with_checks(JMESPathCheck('value', '0152'))
+
     def verify_table_acl_operations(self, account_info, table_name):
         self.storage_cmd('storage table policy list -t {}', account_info,
                          table_name).assert_with_checks(NoneCheck())

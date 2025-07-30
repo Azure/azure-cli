@@ -14,7 +14,7 @@ from azure.cli.testsdk.vcr_test_base import COMMAND_COVERAGE_CONTROL_ENV
 
 
 # pylint: disable=too-few-public-methods
-class CommandCoverageContext(object):
+class CommandCoverageContext:
     FILE_NAME = 'command_coverage.txt'
 
     def __init__(self, data_file_path):
@@ -54,7 +54,7 @@ def run_command_coverage(modules):
 
 
 # pylint: disable=too-few-public-methods
-class CoverageContext(object):
+class CoverageContext:
     def __init__(self):
         from coverage import Coverage
         self._cov = Coverage(cover_pylib=False)

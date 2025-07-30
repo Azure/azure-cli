@@ -4,77 +4,121 @@
 # --------------------------------------------------------------------------------------------
 import uuid
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, is_valid_resource_id
+from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
+from azure.cli.core.aaz import has_value
+from .aaz.latest.managedservices.definition import (
+    Create as _DefinitionCreate, Delete as _DefinitionDelete, List as _DefinitionList, Show as _DefinitionShow)
+from .aaz.latest.managedservices.assignment import (
+    Create as _AssignmentCreate, Delete as _AssignmentDelete, List as _AssignmentList, Show as _AssignmentShow)
 
 logger = get_logger(__name__)
 
 # region Definitions Custom Commands
 
 
-# pylint: disable=unused-argument
-def cli_definition_create(cmd, client,
-                          name, tenant_id, principal_id, role_definition_id,
-                          plan_name=None, plan_product=None, plan_publisher=None, plan_version=None, description=None,
-                          definition_id=None):
-    from azure.mgmt.managedservices.models import RegistrationDefinitionProperties, Plan, \
-        Authorization
+# pylint: disable=unused-argument, protected-access
+class DefinitionCreate(_DefinitionCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.auth_principal_id = AAZStrArg(
+            options=["--principal-id"],
+            help="The principal id.",
+            required=True
+        )
+        args_schema.auth_role_definition_id = AAZStrArg(
+            options=["--role-definition-id "],
+            help="The role definition id.",
+            required=True
+        )
+        args_schema.scope._registered = False
+        args_schema.authorizations._registered = False
+        args_schema.name._required = True
+        args_schema.tenant_id._required = True
+        args_schema.definition_id._required = False
+        args_schema.scope._required = False
+        return args_schema
 
-    if not definition_id:
-        definition_id = str(uuid.uuid4())
+    def pre_operations(self):
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        args = self.ctx.args
+        if not args.definition_id:
+            args.definition_id = str(uuid.uuid4())
 
-    subscription = _get_subscription_id_from_cmd(cmd)
-    scope = _get_scope(subscription)
-
-    if plan_name and plan_product and plan_publisher and plan_version:
-        plan = Plan(plan_name, plan_publisher, plan_product, plan_version)
-    else:
-        plan = None
-
-    authorization = Authorization(
-        principal_id=principal_id,
-        role_definition_id=role_definition_id)
-
-    authorizations = [authorization]
-
-    properties = RegistrationDefinitionProperties(
-        description=description,
-        authorizations=authorizations,
-        registration_definition_name=name,
-        managed_by_tenant_id=tenant_id,
-        Plan=plan,
-    )
-
-    return client.create_or_update(
-        registration_definition_id=definition_id,
-        scope=scope,
-        properties=properties)
-
-
-# pylint: disable=unused-argument
-def cli_definition_get(cmd, client,
-                       definition):
-    subscription = _get_subscription_id_from_cmd(cmd)
-    definition_id, sub_id, rg_name = _get_resource_id_parts(cmd, definition, subscription)
-    scope = _get_scope(sub_id, rg_name)
-    return client.get(
-        scope=scope,
-        registration_definition_id=definition_id)
-
-
-# pylint: disable=unused-argument
-def cli_definition_list(cmd, client):
-    subscription = _get_subscription_id_from_cmd(cmd)
-    scope = _get_scope(subscription)
-    return client.list(scope=scope)
+        subscription = get_subscription_id(self.cli_ctx)
+        scope = _get_scope(subscription)
+        args.scope = scope
+        authorizations = {}
+        if has_value(args.auth_principal_id):
+            authorizations.update({
+                'principalId': args.auth_principal_id.to_serialized_data()
+            })
+        if has_value(args.auth_role_definition_id):
+            authorizations.update({
+                'roleDefinitionId': args.auth_role_definition_id.to_serialized_data()
+            })
+        if authorizations:
+            args.authorizations = [authorizations]
+        if not has_value(args.plan_name) or not has_value(args.plan_product) \
+                or not has_value(args.plan_publisher) or not has_value(args.plan_product):
+            args.plan_name = None
+            args.plan_product = None
+            args.plan_publisher = None
+            args.plan_version = None
 
 
-def cli_definition_delete(cmd, client, definition):
-    subscription = _get_subscription_id_from_cmd(cmd)
-    definition_id, sub_id, rg_name = _get_resource_id_parts(cmd, definition, subscription)
-    scope = _get_scope(sub_id, rg_name)
-    return client.delete(
-        scope=scope,
-        registration_definition_id=definition_id)
+class DefinitionShow(_DefinitionShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.scope._registered = False
+        args_schema.scope._required = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        subscription = _get_subscription_id_from_cmd(self.cli_ctx)
+        definition_id, sub_id, rg_name = _get_resource_id_parts(self.cli_ctx,
+                                                                args.definition.to_serialized_data(), subscription)
+        scope = _get_scope(sub_id, rg_name)
+        args.scope = scope
+        args.definition = definition_id
+
+
+class DefinitionList(_DefinitionList):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.scope._registered = False
+        args_schema.scope._required = False
+        return args_schema
+
+    def pre_operations(self):
+        from azure.cli.core.commands.client_factory import get_subscription_id
+        args = self.ctx.args
+        subscription = get_subscription_id(self.cli_ctx)
+        scope = _get_scope(subscription)
+        args.scope = scope
+
+
+class DefinitionDelete(_DefinitionDelete):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.scope._registered = False
+        args_schema.scope._required = False
+        args_schema.definition._required = True
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        subscription = _get_subscription_id_from_cmd(self.cli_ctx)
+        definition_id, sub_id, rg_name = _get_resource_id_parts(self.cli_ctx,
+                                                                args.definition.to_serialized_data(), subscription)
+        scope = _get_scope(sub_id, rg_name)
+        args.scope = scope
+        args.definition = definition_id
 
 
 # endregion
@@ -82,77 +126,123 @@ def cli_definition_delete(cmd, client, definition):
 # region Assignments Custom Commands
 
 # pylint: disable=unused-argument
-def cli_assignment_create(cmd, client,
-                          definition,
-                          assignment_id=None,
-                          resource_group_name=None):
-    from azure.mgmt.managedservices.models import RegistrationAssignmentProperties
-    if not is_valid_resource_id(definition):
-        raise ValueError(
-            "definition should be a valid resource id. For example, "
-            "/subscriptions/id/providers/Microsoft.ManagedServices/registrationDefinitions/id")
 
-    if not assignment_id:
-        assignment_id = str(uuid.uuid4())
+class AssignmentCreate(_AssignmentCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.resource_group_name = AAZStrArg(
+            options=["--resource-group", "-g"],
+            help="Name of resource group."
+                 " You can configure the default group using `az configure --defaults group=<name>`",
+        )
+        args_schema.assignment_id._required = False
+        args_schema.scope._registered = False
+        args_schema.definition._required = True
+        args_schema.scope._required = False
+        return args_schema
 
-    subscription = _get_subscription_id_from_cmd(cmd)
-    scope = _get_scope(subscription, resource_group_name)
-    properties = RegistrationAssignmentProperties(
-        registration_definition_id=definition)
-    return client.create_or_update(
-        scope=scope,
-        registration_assignment_id=assignment_id,
-        properties=properties)
+    def pre_operations(self):
+        args = self.ctx.args
+        resource_group_name = args.resource_group_name if has_value(args.resource_group_name) else None
+        if not is_valid_resource_id(args.definition.to_serialized_data()):
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError(
+                "definition should be a valid resource id. For example, "
+                "/subscriptions/id/providers/Microsoft.ManagedServices/registrationDefinitions/id")
+        if not args.assignment_id:
+            args.assignment_id = str(uuid.uuid4())
 
-
-# pylint: disable=unused-argument
-def cli_assignment_get(cmd, client,
-                       assignment,
-                       resource_group_name=None,
-                       include_definition=None):
-    subscription = _get_subscription_id_from_cmd(cmd)
-    assignment_id, sub_id, rg_name = _get_resource_id_parts(cmd, assignment, subscription, resource_group_name)
-    scope = _get_scope(sub_id, rg_name)
-    return client.get(
-        scope=scope,
-        registration_assignment_id=assignment_id,
-        expand_registration_definition=include_definition)
+        subscription = _get_subscription_id_from_cmd(self.cli_ctx)
+        scope = _get_scope(subscription, resource_group_name)
+        args.scope = scope
 
 
-# pylint: disable=unused-argument
-def cli_assignment_delete(cmd, client,
-                          assignment,
-                          resource_group_name=None):
-    subscription = _get_subscription_id_from_cmd(cmd)
-    assignment_id, sub_id, rg_name = _get_resource_id_parts(cmd, assignment, subscription, resource_group_name)
-    scope = _get_scope(sub_id, rg_name)
-    return client.delete(
-        scope=scope,
-        registration_assignment_id=assignment_id)
+class AssignmentShow(_AssignmentShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.resource_group_name = AAZStrArg(
+            options=["--resource-group", "-g"],
+            help="Name of resource group."
+                 " You can configure the default group using `az configure --defaults group=<name>`",
+        )
+        args_schema.scope._registered = False
+        args_schema.scope._required = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        resource_group_name = args.resource_group_name if has_value(args.resource_group_name) else None
+        subscription = _get_subscription_id_from_cmd(self.cli_ctx)
+        assignment_id, sub_id, rg_name = _get_resource_id_parts(self.cli_ctx, args.assignment.to_serialized_data(),
+                                                                subscription, resource_group_name)
+        scope = _get_scope(sub_id, rg_name)
+        args.scope = scope
+        args.assignment = assignment_id
 
 
-# pylint: disable=unused-argument
-def cli_assignment_list(cmd, client,
-                        resource_group_name=None,
-                        include_definition=None):
-    sub_id = _get_subscription_id_from_cmd(cmd)
-    scope = _get_scope(sub_id, resource_group_name)
-    return client.list(
-        scope=scope,
-        expand_registration_definition=include_definition)
+class AssignmentDelete(_AssignmentDelete):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.resource_group_name = AAZStrArg(
+            options=["--resource-group", "-g"],
+            help="Name of resource group."
+                 " You can configure the default group using `az configure --defaults group=<name>`",
+        )
+        args_schema.scope._registered = False
+        args_schema.scope._required = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        rg_name = args.resource_group_name.to_serialized_data() if has_value(args.resource_group_name) else None
+        subscription = _get_subscription_id_from_cmd(self.cli_ctx)
+        assignment_id, sub_id, rg_name = _get_resource_id_parts(self.cli_ctx, args.assignment.to_serialized_data(),
+                                                                subscription, rg_name)
+        scope = _get_scope(sub_id, rg_name)
+        args.scope = scope
+        args.assignment = assignment_id
+
+
+class AssignmentList(_AssignmentList):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.resource_group_name = AAZStrArg(
+            options=["--resource-group", "-g"],
+            help="Name of resource group."
+                 " You can configure the default group using `az configure --defaults group=<name>`",
+        )
+        args_schema.scope._registered = False
+        args_schema.scope._required = False
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        resource_group_name = args.resource_group_name if has_value(args.resource_group_name) else None
+        sub_id = _get_subscription_id_from_cmd(self.cli_ctx)
+        scope = _get_scope(sub_id, resource_group_name)
+        args.scope = scope
+
 
 # endregion
 
 # region private methods
 
 
-def _get_subscription_id_from_cmd(cmd):
+def _get_subscription_id_from_cmd(cli_ctx):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    subscription = get_subscription_id(cmd.cli_ctx)
+    subscription = get_subscription_id(cli_ctx)
     return subscription
 
 
-def _get_resource_id_parts(cmd, name_or_id, subscription=None, resource_group_name=None):
+def _get_resource_id_parts(cli_ctx, name_or_id, subscription=None, resource_group_name=None):
     rg_name = None
     if is_valid_resource_id(name_or_id):
         id_parts = parse_resource_id(name_or_id)
@@ -163,7 +253,7 @@ def _get_resource_id_parts(cmd, name_or_id, subscription=None, resource_group_na
     else:
         rg_name = resource_group_name
         name = name_or_id
-        sub_id = _get_subscription_id_from_cmd(cmd)
+        sub_id = _get_subscription_id_from_cmd(cli_ctx)
     return name, sub_id, rg_name
 
 

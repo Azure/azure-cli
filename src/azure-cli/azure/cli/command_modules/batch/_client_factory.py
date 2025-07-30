@@ -3,106 +3,66 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.util import in_cloud_console
-
 
 def mgmt_batch_account_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).batch_account
+    return batch_mgmt_client_factory(cli_ctx).batch_account
 
 
 def mgmt_pool_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).pool
+    return batch_mgmt_client_factory(cli_ctx).pool
 
 
 def mgmt_private_link_resource_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).private_link_resource
+    return batch_mgmt_client_factory(cli_ctx).private_link_resource
 
 
 def mgmt_private_endpoint_connection_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).private_endpoint_connection
+    return batch_mgmt_client_factory(cli_ctx).private_endpoint_connection
 
 
 def mgmt_application_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).application
+    return batch_mgmt_client_factory(cli_ctx).application
 
 
 def mgmt_application_package_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).application_package
+    return batch_mgmt_client_factory(cli_ctx).application_package
 
 
 def mgmt_location_client_factory(cli_ctx, _):
-    return batch_client_factory(cli_ctx).location
+    return batch_mgmt_client_factory(cli_ctx).location
 
 
-def application_client_factory(cli_ctx, kwargs):
-    return batch_data_service_factory(cli_ctx, kwargs).application
-
-
-def account_client_factory(cli_ctx, kwargs):
-    return batch_data_service_factory(cli_ctx, kwargs).account
-
-
-def certificate_client_factory(cli_ctx, kwargs):
-    return batch_data_service_factory(cli_ctx, kwargs).certificate
-
-
-def pool_client_factory(cli_ctx, kwargs):
-    return batch_data_service_factory(cli_ctx, kwargs).pool
-
-
-def job_client_factory(cli_ctx, kwargs):
-    return batch_data_service_factory(cli_ctx, kwargs).job
-
-
-def job_schedule_client_factory(cli_ctx, kwargs):
-    return batch_data_service_factory(cli_ctx, kwargs).job_schedule
-
-
-def task_client_factory(cli_ctx, kwargs):
-    return batch_data_service_factory(cli_ctx, kwargs).task
-
-
-def file_client_factory(cli_ctx, kwargs):
-    return batch_data_service_factory(cli_ctx, kwargs).file
-
-
-def compute_node_client_factory(cli_ctx, kwargs):
-    return batch_data_service_factory(cli_ctx, kwargs).compute_node
-
-
-def batch_client_factory(cli_ctx, **_):
+def batch_mgmt_client_factory(cli_ctx, **_):
     from azure.mgmt.batch import BatchManagementClient
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     return get_mgmt_service_client(cli_ctx, BatchManagementClient)
 
 
-def batch_data_service_factory(cli_ctx, kwargs):
-    import azure.batch._batch_service_client as batch
-    import azure.batch.batch_auth as batchauth
+def batch_data_client_factory(cli_ctx, kwargs):
+    from azure.batch import BatchClient
 
     account_name = kwargs.pop('account_name', None)
     account_key = kwargs.pop('account_key', None)
     account_endpoint = kwargs.pop('account_endpoint', None)
-    kwargs.pop('yes', None)
+    token_credential = kwargs.pop('token_credential', None)
 
-    credentials = None
-    if not account_key:
+    credential = None
+
+    if not token_credential and not account_key:
         from azure.cli.core._profile import Profile
         profile = Profile(cli_ctx=cli_ctx)
-        # in order to use AAD auth in cloud shell mode, we will use mgmt AAD token
-        # instead of Batch AAD token to auth
-        if in_cloud_console():
-            resource = cli_ctx.cloud.endpoints.active_directory_resource_id
-        else:
-            resource = cli_ctx.cloud.endpoints.batch_resource_id
-        credentials, _, _ = profile.get_login_credentials(resource=resource)
+        token_credential, _, _ = profile.get_login_credentials()
+
+    if account_key:
+        from azure.core.credentials import AzureNamedKeyCredential
+        credential = AzureNamedKeyCredential(name=account_name, key=account_key)
     else:
-        # Verify all values are populated and display readable error
-        if not all([account_name, account_key, account_endpoint]):
-            raise ValueError(
-                'usage error: --account-name NAME --account-key KEY --account-endpoint ENDPOINT')
-        credentials = batchauth.SharedKeyCredentials(account_name, account_key)
+        credential = token_credential
+
     if not (account_endpoint.startswith('https://') or
             account_endpoint.startswith('http://')):
         account_endpoint = 'https://' + account_endpoint
-    return batch.BatchServiceClient(credentials, batch_url=account_endpoint.rstrip('/'))
+
+    from azure.cli.core.auth.util import resource_to_scopes
+    return BatchClient(credential=credential, endpoint=account_endpoint.rstrip('/'),
+                       credential_scopes=resource_to_scopes(cli_ctx.cloud.endpoints.batch_resource_id))

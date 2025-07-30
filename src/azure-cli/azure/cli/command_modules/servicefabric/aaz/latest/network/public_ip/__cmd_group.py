@@ -14,7 +14,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Manage public IP addresses.
 
-    To learn more about public IP addresses visit https://docs.microsoft.com/azure/virtual-network/virtual-network-public-ip-address.
+    To learn more about public IP addresses visit https://learn.microsoft.com/azure/virtual-network/virtual-network-public-ip-address.
     """
     pass
 

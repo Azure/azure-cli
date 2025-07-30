@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressrouteports/{}", "2023-09-01"],
         ]
     }
 
@@ -83,6 +83,14 @@ class Create(AAZCommand):
         # define Arg Group "Parameters"
 
         # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.billing_type = AAZStrArg(
+            options=["--billing-type"],
+            arg_group="Properties",
+            help="The billing type of the ExpressRoutePort resource.",
+            enum={"MeteredData": "MeteredData", "UnlimitedData": "UnlimitedData"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -166,7 +174,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -198,6 +206,7 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("bandwidthInGbps", AAZIntType, ".bandwidth_in_gbps")
+                properties.set_prop("billingType", AAZStrType, ".billing_type")
                 properties.set_prop("encapsulation", AAZStrType, ".encapsulation")
                 properties.set_prop("peeringLocation", AAZStrType, ".peering_location")
 
@@ -277,6 +286,9 @@ class Create(AAZCommand):
             properties.bandwidth_in_gbps = AAZIntType(
                 serialized_name="bandwidthInGbps",
             )
+            properties.billing_type = AAZStrType(
+                serialized_name="billingType",
+            )
             properties.circuits = AAZListType(
                 flags={"read_only": True},
             )
@@ -327,6 +339,10 @@ class Create(AAZCommand):
             properties = cls._schema_on_200_201.properties.links.Element.properties
             properties.admin_state = AAZStrType(
                 serialized_name="adminState",
+            )
+            properties.colo_location = AAZStrType(
+                serialized_name="coloLocation",
+                flags={"read_only": True},
             )
             properties.connector_type = AAZStrType(
                 serialized_name="connectorType",

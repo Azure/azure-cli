@@ -434,7 +434,7 @@ def validate_client_encryption_policy(ns):
                                             "policyFormatVersion is an integer type. "
                                             "Supported versions are 1 and 2.")
 
-        if(policyFormatVersion < 1 or policyFormatVersion > 2):
+        if (policyFormatVersion < 1 or policyFormatVersion > 2):
             raise InvalidArgumentValueError("Invalid policyFormatVersion used in Client Encryption Policy. "
                                             "Please verify your Client Encryption Policy JSON string. "
                                             "Supported versions are 1 and 2.")
@@ -455,7 +455,7 @@ def _validate_included_paths_in_cep(partition_key_path, includedPaths, policyFor
             raise InvalidArgumentValueError("Invalid encryptionType included in Client Encryption Policy. "
                                             "encryptionType cannot be null or empty.")
 
-        if(encryptionType != "Deterministic" and encryptionType != "Randomized"):
+        if (encryptionType != "Deterministic" and encryptionType != "Randomized"):
             raise InvalidArgumentValueError(f"Invalid Encryption Type {encryptionType} used. "
                                             "Supported types are Deterministic or Randomized.")
 
@@ -474,7 +474,7 @@ def _validate_included_paths_in_cep(partition_key_path, includedPaths, policyFor
 
         listOfPaths.append(path)
 
-        if(path[0] != "/" or path.rfind('/') != 0):
+        if (path[0] != "/" or path.rfind('/') != 0):
             raise InvalidArgumentValueError("Invalid path included in Client Encryption Policy. "
                                             "Only top level paths supported. Paths should begin with /.")
 

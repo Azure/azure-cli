@@ -6,7 +6,7 @@
 # pylint: disable=protected-access
 
 import unittest
-from azure.cli.core.auth.util import scopes_to_resource, resource_to_scopes, _normalize_scopes, _generate_login_command
+from azure.cli.core.auth.util import scopes_to_resource, resource_to_scopes, _generate_login_command
 
 
 class TestUtil(unittest.TestCase):
@@ -50,28 +50,33 @@ class TestUtil(unittest.TestCase):
         self.assertEqual(resource_to_scopes('https://managedhsm.azure.com'),
                          ['https://managedhsm.azure.com/.default'])
 
-    def test_normalize_scopes(self):
-        # Test no scopes
-        self.assertIsNone(_normalize_scopes(()))
-        self.assertIsNone(_normalize_scopes([]))
-        self.assertIsNone(_normalize_scopes(None))
-
-        # Test multiple scopes, with the first one discarded
-        scopes = _normalize_scopes(("https://management.core.windows.net//.default",
-                                    "https://management.core.chinacloudapi.cn//.default"))
-        self.assertEqual(list(scopes), ["https://management.core.chinacloudapi.cn//.default"])
-
-        # Test single scopes (the correct usage)
-        scopes = _normalize_scopes(("https://management.core.chinacloudapi.cn//.default",))
-        self.assertEqual(list(scopes), ["https://management.core.chinacloudapi.cn//.default"])
-
     def test_generate_login_command(self):
         # No parameter is given
         assert _generate_login_command() == 'az login'
 
-        # scopes
+        # tenant
+        actual = _generate_login_command(tenant='21987a97-4e85-47c5-9a13-9dc3e11b2a9a')
+        assert actual == 'az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a"'
+
+        # scope
         actual = _generate_login_command(scopes=["https://management.core.windows.net//.default"])
-        assert actual == 'az login --scope https://management.core.windows.net//.default'
+        assert actual == 'az login --scope "https://management.core.windows.net//.default"'
+
+        # tenant and scopes
+        actual = _generate_login_command(tenant='21987a97-4e85-47c5-9a13-9dc3e11b2a9a',
+                                         scopes=["https://management.core.windows.net//.default"])
+        assert actual == ('az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a" '
+                          '--scope "https://management.core.windows.net//.default"')
+
+        # tenant, scopes and claims_challenge
+        actual = _generate_login_command(
+            tenant='21987a97-4e85-47c5-9a13-9dc3e11b2a9a',
+            scopes=["https://management.core.windows.net//.default"],
+            claims_challenge='{"access_token":{"acrs":{"essential":true,"values":["p1"]}}}')
+        assert actual == ('az logout\n'
+                          'az login --tenant "21987a97-4e85-47c5-9a13-9dc3e11b2a9a" '
+                          '--scope "https://management.core.windows.net//.default" '
+                          '--claims-challenge "eyJhY2Nlc3NfdG9rZW4iOnsiYWNycyI6eyJlc3NlbnRpYWwiOnRydWUsInZhbHVlcyI6WyJwMSJdfX19"')
 
 
 if __name__ == '__main__':

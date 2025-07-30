@@ -17,5 +17,6 @@ docker run --rm \
            -e CLI_VERSION=$CLI_VERSION \
            -e CLI_VERSION_REVISION=1~$DISTRO \
            -e DEBIAN_FRONTEND=noninteractive \
+           -e PIP_INDEX_URL=$PIP_INDEX_URL \
            $DISTRO_BASE_IMAGE \
            /mnt/repo/scripts/release/debian/build.sh

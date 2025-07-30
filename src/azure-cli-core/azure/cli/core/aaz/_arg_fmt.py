@@ -5,6 +5,8 @@
 # pylint: disable=line-too-long, too-few-public-methods
 
 import abc
+import base64
+import json
 import os.path
 import re
 import math
@@ -13,7 +15,7 @@ from knack.log import get_logger
 
 from ._command_ctx import AAZCommandCtx
 from ._field_type import AAZSimpleType
-from ._field_value import AAZUndefined, AAZSimpleValue, AAZDict, AAZFreeFormDict, AAZList, AAZObject
+from ._field_value import AAZUndefined, AAZSimpleValue, AAZDict, AAZList, AAZObject
 from .exceptions import AAZInvalidArgValueError
 
 logger = get_logger(__name__)
@@ -464,32 +466,9 @@ class AAZDictArgFormat(AAZBaseArgFormat):
         return value
 
 
-class AAZFreeFormDictArgFormat(AAZBaseArgFormat):
-
-    def __init__(self, max_properties=None, min_properties=None):
-        self._max_properties = max_properties
-        self._min_properties = min_properties
-
-    def __call__(self, ctx, value):
-        assert isinstance(value, AAZFreeFormDict)
-        data = value._data
-        if data == AAZUndefined or data is None:
-            return value
-
-        assert isinstance(data, dict)
-
-        if value._is_patch:
-            return value
-
-        if self._min_properties and len(value) < self._min_properties:
-            raise AAZInvalidArgValueError(
-                f"Invalid format: dict length is less than {self._min_properties}")
-
-        if self._max_properties and len(value) > self._max_properties:
-            raise AAZInvalidArgValueError(
-                f"Invalid format: dict length is greater than {self._max_properties}")
-
-        return value
+# Warning: This type should not be used any more, the new aaz-dev-tools only use AAZDictArgFormat
+class AAZFreeFormDictArgFormat(AAZDictArgFormat):
+    pass
 
 
 class AAZListArgFormat(AAZBaseArgFormat):
@@ -657,14 +636,16 @@ class AAZResourceIdArgFormat(AAZBaseArgFormat):
 
             return data
 
-    def __init__(self, template=None):
+    def __init__(self, template=None, cross_tenants=True):
         """
 
         :param template: template property is used to verify a resource Id or construct resource Id.
+        :param cross_tenants: if cross_tenants is True, the resource id will apply to cross-tenants scenarios.
         """
         self._template = None
         if template:
             self._template = self._Template(template)
+        self._cross_tenants = cross_tenants
 
     def __call__(self, ctx, value):
         from azure.mgmt.core.tools import parse_resource_id
@@ -680,7 +661,7 @@ class AAZResourceIdArgFormat(AAZBaseArgFormat):
 
         parsed_id = parse_resource_id(data)
         subscription_id = parsed_id.get('subscription', None)
-        if subscription_id:
+        if subscription_id and self._cross_tenants:
             # update subscription_id to support cross tenants
             ctx.update_aux_subscriptions(subscription_id)
 
@@ -757,7 +738,6 @@ class AAZFileArgTextFormat(AAZFileArgFormat):
 class AAZFileArgBase64EncodeFormat(AAZFileArgFormat):
 
     def read_file(self, file_path):
-        import base64
         with open(file_path, 'rb') as f:
             contents = f.read()
             base64_data = base64.b64encode(contents)
@@ -766,3 +746,41 @@ class AAZFileArgBase64EncodeFormat(AAZFileArgFormat):
             except UnicodeDecodeError:
                 data = str(base64_data)
         return data
+
+
+class AAZPaginationTokenArgFormat(AAZBaseArgFormat):
+    def __call__(self, ctx, value):
+        def validate_json(s):
+            try:
+                obj = json.loads(s)
+            except json.JSONDecodeError:
+                raise AAZInvalidArgValueError("Invalid JSON object.")
+
+            if not isinstance(obj, dict):
+                raise AAZInvalidArgValueError("Decoded object is not a dictionary.")
+
+            try:
+                _, _ = obj["next_link"], obj["offset"]
+            except KeyError:
+                raise AAZInvalidArgValueError("`next_link` or `offset` doesn't exist.")
+
+        assert isinstance(value, AAZSimpleValue)
+        data = value._data
+        if data == AAZUndefined or data is None or value._is_patch:
+            return value
+
+        assert isinstance(data, str)
+        try:
+            decoded_bytes = base64.b64decode(data)
+        except base64.binascii.Error:
+            raise AAZInvalidArgValueError("Invalid Base64 string.")
+
+        try:
+            decoded_string = decoded_bytes.decode("utf-8")
+        except UnicodeDecodeError:
+            raise AAZInvalidArgValueError("Error decoding UTF-8.")
+
+        validate_json(decoded_string)
+        value._data = decoded_string
+
+        return value

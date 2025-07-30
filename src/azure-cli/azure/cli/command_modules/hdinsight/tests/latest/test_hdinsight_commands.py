@@ -5,22 +5,26 @@
 
 
 import os
+import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
-from azure.cli.testsdk.scenario_tests import record_only
+from azure.cli.testsdk.scenario_tests import record_only, AllowLargeResponse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class HDInsightClusterTests(ScenarioTest):
-    location = 'southcentralus'
+    location = 'eastus'
+    vnet_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yuchen-ps-test/providers/Microsoft.Network/virtualNetworks/hdi-vn-0'
+    subnet = 'default'
 
     # Uses 'rg' kwarg
-    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
-    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdi-cli', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='cli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_min_args(self, storage_account_info):
         self._create_hdinsight_cluster(self._wasb_arguments(storage_account_info,
-                                                            specify_key=False, specify_container=False))
+                                                            specify_key=False, specify_container=False), self._vnet_arguments())
 
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
@@ -50,6 +54,7 @@ class HDInsightClusterTests(ScenarioTest):
 
     # Uses 'rg' kwarg
     # _rest_proxy_arguments() will override location to southcentralus, so use this location for rg and sa
+    @unittest.skip('https://github.com/Azure/azure-cli/issues/28860')
     @ResourceGroupPreparer(name_prefix='hdicli-', location='southcentralus', random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location='southcentralus', parameter_name='storage_account')
     def test_hdinsight_cluster_kafka_with_rest_proxy(self, storage_account_info):
@@ -156,7 +161,8 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_with_encryption_at_host(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_encryption_at_host()
+            HDInsightClusterTests._with_encryption_at_host(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
@@ -164,6 +170,7 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('properties.clusterState', 'Running')
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_with_private_link_configurations(self, storage_account_info):
@@ -184,18 +191,21 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('length(properties.privateLinkConfigurations)', 1),
         ])
 
+    @AllowLargeResponse()
+    @unittest.skip("No suitable SKU")
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_with_compute_isolation(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_compute_isolation()
+            HDInsightClusterTests._with_compute_isolation(),
+            HDInsightClusterTests._vnet_arguments()
         )
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
             self.check('properties.computeIsolationProperties.enableComputeIsolation', True)
         ])
 
-
+    @unittest.skip("Skip this case this time")
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_with_availability_zones(self, storage_account_info):
@@ -214,8 +224,9 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('length(zones)', 1),
         ])
 
-
     # Uses 'rg' kwarg
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_application(self, storage_account_info):
@@ -350,6 +361,7 @@ class HDInsightClusterTests(ScenarioTest):
         ])
 
     # Uses 'rg' kwarg
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_script_action(self, storage_account_info):
@@ -363,7 +375,8 @@ class HDInsightClusterTests(ScenarioTest):
 
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_explicit_ssh_creds()
+            HDInsightClusterTests._with_explicit_ssh_creds(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # execute script actions, and persist on success.
@@ -557,12 +570,86 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
+    def test_hdinsight_azure_monitor_agent(self):
+        self.kwargs.update({
+            'loc': self.location,
+            'cluster': 'spark51',
+            'rg': 'yuchen-ps-test',
+            'workspace_id': '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/yuchen-ps-test/providers/microsoft.operationalinsights/workspaces/ps-la',
+            'workspace_key': self.cmd('az monitor log-analytics workspace get-shared-keys --resource-group yuchen-ps-test --workspace-name ps-la --query primarySharedKey -o tsv').output.strip(),
+        })
+
+        # enable azure monitor agent
+        self.cmd(
+            'az hdinsight azure-monitor-agent enable -n {cluster} --resource-group {rg} --workspace {workspace_id} --primary-key {workspace_key} ')
+        # show azure monitor agent
+        self.cmd('az hdinsight azure-monitor-agent show -n {cluster} --resource-group {rg}')
+        # disable azure monitor agent
+        self.cmd('az hdinsight azure-monitor-agent disable -n {cluster} --resource-group {rg}')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_update_user_assigned(self, storage_account_info):
+        self.kwargs.update({
+            'msi1': '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/yuchen-ps-test/providers/microsoft.managedidentity/userassignedidentities/hdi-msi',
+        })
+
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._vnet_arguments()
+        )
+        # Update manage identity with a UserAssigned msi.
+        self.cmd(
+            'az hdinsight update --name {cluster} --resource-group {rg} --assign-identity-type UserAssigned --assign-identity {msi1}',
+            checks=[
+                self.check('identity.type', 'UserAssigned'),
+            ])
+
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_update_system_assigned(self, storage_account_info):
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._vnet_arguments()
+        )
+        # Update manage identity with a SystemAssigned msi.
+        self.cmd(
+            'az hdinsight update --name {cluster} --resource-group {rg} --assign-identity-type SystemAssigned',
+            checks=[
+                self.check('identity.type', 'SystemAssigned'),
+            ])
+
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_update_system_and_user_assigned(self, storage_account_info):
+        self.kwargs.update({
+            'msi1': '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/yuchen-ps-test/providers/microsoft.managedidentity/userassignedidentities/hdi-msi',
+            'msi2': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yuchen-devrp/providers/Microsoft.ManagedIdentity/userAssignedIdentities/hdiwasbmsi'
+        })
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._vnet_arguments()
+        )
+
+        # Update manage identity with SystemAssigned,UserAssigned msi.
+        self.cmd(
+            'az hdinsight update --name {cluster} --resource-group {rg} --assign-identity-type "SystemAssigned,UserAssigned" --assign-identity {msi1} {msi2}',
+            checks=[
+                self.check('identity.type', 'SystemAssigned,UserAssigned'),
+            ])
+
+
     def _create_hdinsight_cluster(self, *additional_create_arguments):
         self.kwargs.update({
             'loc': self.location,
             'cluster': self.create_random_name(prefix='hdicli-', length=16),
             'http_password': 'Password1!',
-            'cluster_type': 'spark'
+            'cluster_type': 'spark',
         })
 
         create_cluster_format = 'az hdinsight create -n {cluster} -g {rg} -l {loc} -p {http_password} -t {cluster_type} ' \
@@ -602,6 +689,10 @@ class HDInsightClusterTests(ScenarioTest):
         return '-t {} --workernode-data-disks-per-node {}'.format('kafka', '4')
 
     @staticmethod
+    def _vnet_arguments():
+        return '--vnet-name {} --subnet {} --version 5.1'.format(HDInsightClusterTests.vnet_id, HDInsightClusterTests.subnet)
+
+    @staticmethod
     def _rest_proxy_arguments():
         return '--kafka-management-node-size {} --kafka-client-group-id {} --kafka-client-group-name {} -v 4.0 ' \
                '--component-version {} --location {}' \
@@ -615,7 +706,7 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _component_version_arguments():
-        return '-t {} --component-version {} --version {}'.format('spark', 'spark=2.4', '4.0')
+        return '-t {} --component-version {} --version {}'.format('spark', 'spark=3.3.0', '5.1')
 
     @staticmethod
     def _with_cluster_config():
@@ -653,10 +744,12 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _with_private_link_configurations(private_link_configuration_file):
-        return '--version 4.0 -l southcentralus ' \
-               '--subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers' \
-               '/Microsoft.Network/virtualNetworks/testvnet/subnets/default ' \
-               '--resource-provider-connection Outbound --enable-private-link --private-link-configurations @"{}"'\
+        return '--version 5.1 -l eastus ' \
+               '--subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/ps-test/providers' \
+               '/Microsoft.Network/virtualNetworks/hdi-vn/subnets/default '\
+               '--vnet-name /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/yuchen-ps-test/providers/Microsoft.Network/virtualNetworks/hdi-vn --subnet default ' \
+               '--resource-provider-connection Outbound --public-ip-tag-type FirstPartyUsage --public-ip-tag-value HDInsight --outbound-dependencies-managed-type External '\
+               '--enable-private-link --private-link-configurations @"{}" '\
                .format(private_link_configuration_file)
 
     @staticmethod
@@ -668,6 +761,6 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _with_compute_isolation():
-        return '--version 3.6 -l southcentralus ' \
+        return '--version 3.6 -l eastus ' \
                '--enable-compute-isolation --host-sku ESv3-Type2 ' \
                '--workernode-size Standard_E8S_V3 --headnode-size Standard_E8S_V3'

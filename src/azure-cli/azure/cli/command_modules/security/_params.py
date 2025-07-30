@@ -16,7 +16,7 @@ from ._validators import (validate_alert_status,
                           validate_auto_provisioning_toggle,
                           validate_pricing_tier,
                           validate_assessment_status_code)
-from .actions import AppendBaselines, AppendBaseline
+from .actions import AppendBaselines, AppendBaseline, GetExtension
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME', help='name of the resource to be fetched')
 home_region_arg_type = CLIArgumentType(options_list=('--home-region', '-hr'), metavar='HOMEREGION', help='home region that was selected for the subscription')
@@ -58,14 +58,10 @@ va_sql_vm_uuid_arg_type = CLIArgumentType(options_list=('--vm-uuid'), metavar='V
 # Auto Provisioning
 auto_provisioning_auto_provision_arg_type = CLIArgumentType(options_list=('--auto-provision'), metavar='AUTOPROVISION', help='Automatic provisioning toggle. possible values are "On" or "Off"')
 
-# Contacts
-contact_email_arg_type = CLIArgumentType(options_list=('--email'), metavar='EMAIL', help='E-mail of the security contact')
-contact_phone_arg_type = CLIArgumentType(options_list=('--phone'), metavar='PHONE', help='Phone of the security contact')
-contact_alert_notifications_arg_type = CLIArgumentType(options_list=('--alert-notifications'), metavar='ALERTNOTIFICATIONS', help='Whether to send mail notifications to the security contacts')
-contact_alerts_admins_arg_type = CLIArgumentType(options_list=('--alerts-admins'), metavar='ALERTADMINS', help='Whether to send mail notifications to the subscription administrators')
-
 # Pricing
 pricing_tier_arg_type = CLIArgumentType(options_list=('--tier'), metavar='TIER', help='pricing tier type')
+pricing_tier_subplan_arg_type = CLIArgumentType(options_list=('--subplan'), metavar='SUBPLAN', help='bundle suplan', required=False)
+pricing_tier_extensions_arg_type = CLIArgumentType(options_list=('--extensions'), metavar='EXTENSIONS', help='pricing extensions', required=False, action=GetExtension, nargs='*')
 
 # Workspace settings
 workspace_setting_target_workspace_arg_type = CLIArgumentType(options_list=('--target-workspace'), metavar='TARGETWORKSPACE', help='An ID of the workspace resource that will hold the security data')
@@ -73,8 +69,8 @@ workspace_setting_target_workspace_arg_type = CLIArgumentType(options_list=('--t
 # Assessments
 assessment_assessed_resource_id_arg_type = CLIArgumentType(options_list=('--assessed-resource-id'), metavar='ASSESSEDRESOURCEID', help='The target resource for this assessment')
 assessment_additional_data_arg_type = CLIArgumentType(options_list=('--additional-data'), metavar='ADDITIONALDATA', help='Data that is attached to the assessment result for better investigations or status clarity')
-assessment_status_code_arg_type = CLIArgumentType(options_list=('--status-code'), metavar='STATUSCODE', help='Progremmatic code for the result of the assessment. can be "Healthy", "Unhealthy" or "NotApplicable"')
-assessment_status_cause_arg_type = CLIArgumentType(options_list=('--status-cause'), metavar='STATUSCAUSE', help='Progremmatic code for the cause of the assessment result')
+assessment_status_code_arg_type = CLIArgumentType(options_list=('--status-code'), metavar='STATUSCODE', help='Programmatic code for the result of the assessment. can be "Healthy", "Unhealthy" or "NotApplicable"')
+assessment_status_cause_arg_type = CLIArgumentType(options_list=('--status-cause'), metavar='STATUSCAUSE', help='Programmatic code for the cause of the assessment result')
 assessment_status_description_arg_type = CLIArgumentType(options_list=('--status-description'), metavar='STATUSDESCRIPTION', help='Human readable description of the cause of the assessment result')
 
 # Assessment metadata
@@ -137,8 +133,6 @@ def load_arguments(self, _):
                   'atp',
                   'va sql',
                   'task',
-                  'setting',
-                  'contact',
                   'auto-provisioning-setting',
                   'discovered-security-solution',
                   'external-security-solution',
@@ -324,27 +318,22 @@ def load_arguments(self, _):
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument('baseline_latest', options_list=('--latest'), metavar='BASELINE', help='Use this argument without parameters to set baseline upon latest scan results', arg_type=get_three_state_flag())
 
-    for scope in ['contact create']:
-        with self.argument_context('security {}'.format(scope)) as c:
-            c.argument(
-                'email',
-                arg_type=contact_email_arg_type)
-            c.argument(
-                'phone',
-                arg_type=contact_phone_arg_type)
-            c.argument(
-                'alert_notifications',
-                arg_type=contact_alert_notifications_arg_type)
-            c.argument(
-                'alerts_admins',
-                arg_type=contact_alerts_admins_arg_type)
-
     for scope in ['pricing create']:
         with self.argument_context('security {}'.format(scope)) as c:
             c.argument(
                 'tier',
                 validator=validate_pricing_tier,
                 arg_type=pricing_tier_arg_type)
+
+            c.argument(
+                'subplan',
+                arg_type=pricing_tier_subplan_arg_type)
+
+            c.argument('baseline', arg_type=va_sql_baseline_multiple_arg_type)
+
+            c.argument(
+                'extensions',
+                arg_type=pricing_tier_extensions_arg_type)
 
     for scope in ['workspace-setting create']:
         with self.argument_context('security {}'.format(scope)) as c:

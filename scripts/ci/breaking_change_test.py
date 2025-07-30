@@ -44,6 +44,9 @@ def get_diff_meta_files():
     cmd = ['azdev', 'command-change', 'meta-export', '--src', src_branch, '--tgt', target_branch, '--repo', get_cli_repo_path(), '--meta-output-path', diff_meta_path]
     print(cmd)
     subprocess.run(cmd)
+    cmd = ['ls', '-al', diff_meta_path]
+    print(cmd)
+    subprocess.run(cmd)
 
 
 def get_base_meta_files():
@@ -59,13 +62,18 @@ def get_base_meta_files():
     cmd = ['azdev', 'command-change', 'meta-export', 'CLI', '--meta-output-path', base_meta_path]
     print(cmd)
     subprocess.run(cmd)
+    cmd = ['ls', '-al', base_meta_path]
+    print(cmd)
+    subprocess.run(cmd)
 
 
-def meta_diff():
+def meta_diff(only_break=False):
     if os.path.exists(diff_meta_path):
         for file in os.listdir(diff_meta_path):
             if file.endswith('.json'):
                 cmd = ['azdev', 'command-change', 'meta-diff', '--base-meta-file', os.path.join(base_meta_path, file), '--diff-meta-file', os.path.join(diff_meta_path, file), '--output-file', os.path.join(output_path, file)]
+                if only_break:
+                    cmd.append('--only-break')
                 print(cmd)
                 subprocess.run(cmd)
         cmd = ['ls', '-al', output_path]
@@ -73,7 +81,7 @@ def meta_diff():
         subprocess.run(cmd)
 
 
-def get_pipeline_result():
+def get_pipeline_result(only_break=False):
     pipeline_result = {
         "breaking_change_test": {
             "Details": [
@@ -113,7 +121,18 @@ def get_pipeline_result():
             "Status": "Succeeded",
             "Content": ""
         })
-    print(json.dumps(pipeline_result, indent=4))
+
+    result_length = len(json.dumps(pipeline_result, indent=4))
+    if result_length > 65535:
+        if only_break:
+            logger.error("Breaking change report exceeds 65535 characters even with only_break=True.")
+            return pipeline_result
+
+        logger.info("Regenerating breaking change report with only_break=True to control length within 65535.")
+        meta_diff(only_break=True)
+        pipeline_result = get_pipeline_result(only_break=True)
+        return pipeline_result
+
     return pipeline_result
 
 
@@ -126,12 +145,13 @@ def sort_by_content(item):
 
 def build_markdown_content(item, content):
     if content == "":
-        content = f'|is_break|cmd_name|rule_message|suggest_message|\n|---|---|---|---|\n'
-    is_break = '❌True' if item['is_break'] else '⚠️False'
+        content = f'|rule|cmd_name|rule_message|suggest_message|\n|---|---|---|---|\n'
+    rule_link = f'[{item["rule_id"]} - {item["rule_name"]}]({item["rule_link_url"]})'
+    rule = f'❌ {rule_link} ' if item['is_break'] else f'⚠️ {rule_link}'
     cmd_name = item['cmd_name'] if 'cmd_name' in item else item['subgroup_name']
     rule_message = item['rule_message']
     suggest_message = item['suggest_message']
-    content += f'|{is_break}|{cmd_name}|{rule_message}|{suggest_message}|\n'
+    content += f'|{rule}|{cmd_name}|{rule_message}|{suggest_message}|\n'
     return content
 
 

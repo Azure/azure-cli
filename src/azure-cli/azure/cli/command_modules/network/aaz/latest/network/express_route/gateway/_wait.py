@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}", "2023-09-01"],
         ]
     }
 
@@ -116,7 +116,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -166,6 +166,9 @@ class Wait(AAZWaitCommand):
             )
 
             properties = cls._schema_on_200.properties
+            properties.allow_non_virtual_wan_traffic = AAZBoolType(
+                serialized_name="allowNonVirtualWanTraffic",
+            )
             properties.auto_scale_configuration = AAZObjectType(
                 serialized_name="autoScaleConfiguration",
             )
@@ -207,6 +210,9 @@ class Wait(AAZWaitCommand):
             properties.enable_internet_security = AAZBoolType(
                 serialized_name="enableInternetSecurity",
             )
+            properties.enable_private_link_fast_path = AAZBoolType(
+                serialized_name="enablePrivateLinkFastPath",
+            )
             properties.express_route_circuit_peering = AAZObjectType(
                 serialized_name="expressRouteCircuitPeering",
                 flags={"required": True},
@@ -233,6 +239,14 @@ class Wait(AAZWaitCommand):
                 serialized_name="associatedRouteTable",
             )
             _WaitHelper._build_schema_sub_resource_read(routing_configuration.associated_route_table)
+            routing_configuration.inbound_route_map = AAZObjectType(
+                serialized_name="inboundRouteMap",
+            )
+            _WaitHelper._build_schema_sub_resource_read(routing_configuration.inbound_route_map)
+            routing_configuration.outbound_route_map = AAZObjectType(
+                serialized_name="outboundRouteMap",
+            )
+            _WaitHelper._build_schema_sub_resource_read(routing_configuration.outbound_route_map)
             routing_configuration.propagated_route_tables = AAZObjectType(
                 serialized_name="propagatedRouteTables",
             )
@@ -259,6 +273,9 @@ class Wait(AAZWaitCommand):
             vnet_routes.static_routes = AAZListType(
                 serialized_name="staticRoutes",
             )
+            vnet_routes.static_routes_config = AAZObjectType(
+                serialized_name="staticRoutesConfig",
+            )
 
             bgp_connections = cls._schema_on_200.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.bgp_connections
             bgp_connections.Element = AAZObjectType()
@@ -278,6 +295,15 @@ class Wait(AAZWaitCommand):
 
             address_prefixes = cls._schema_on_200.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes.Element.address_prefixes
             address_prefixes.Element = AAZStrType()
+
+            static_routes_config = cls._schema_on_200.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes_config
+            static_routes_config.propagate_static_routes = AAZBoolType(
+                serialized_name="propagateStaticRoutes",
+                flags={"read_only": True},
+            )
+            static_routes_config.vnet_local_route_override_criteria = AAZStrType(
+                serialized_name="vnetLocalRouteOverrideCriteria",
+            )
 
             virtual_hub = cls._schema_on_200.properties.virtual_hub
             virtual_hub.id = AAZStrType()

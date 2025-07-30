@@ -20,14 +20,9 @@ jobs:
   steps:
     - task: UsePythonVersion@0
       inputs:
-        versionSpec: '3.10'
-        displayName: "Use Python 3.10"
-    - task: AzureCLI@1
-      displayName: 'update version'
-      inputs:
-        azureSubscription: 'Azure CLI release'
-        scriptLocation: inlineScript
-        inlineScript: |
+        versionSpec: '3.12'
+        displayName: "Use Python 3.12"
+    - bash: |
           set -ev
 
           # git config
@@ -58,6 +53,7 @@ jobs:
           git add .
           git commit -m "update version"
           git push --set-upstream azclibot regression_test_$(Build.BuildId)
+      displayName: 'update version'
 
 - job: RerunTests
   displayName: CLI Regression tests
@@ -88,14 +84,9 @@ jobs:
   steps:
     - task: UsePythonVersion@0
       inputs:
-        versionSpec: '3.10'
-        displayName: "Use Python 3.10"
-    - task: AzureCLI@1
-      displayName: 'Checkout Target Branch'
-      inputs:
-        azureSubscription: 'Azure CLI release'
-        scriptLocation: inlineScript
-        inlineScript: |
+        versionSpec: '3.12'
+        displayName: "Use Python 3.12"
+    - bash: |
           set -ev
           # git config
           if [[ -n "$(CUSTOM_REPO)" && -n "$(CUSTOM_BRANCH)" && -n "$(CUSTOM_GITHUB_TOKEN)" ]]; then
@@ -110,21 +101,30 @@ jobs:
           git config --global user.email "AzPyCLI@microsoft.com"
           git config --global user.name "Azure CLI Team"
           git remote add ${GITHUB_REPO} https://${GITHUB_REPO}:${GITHUB_TOKEN}@github.com/${GITHUB_REPO}/azure-cli.git
-          git fetch ${GITHUB_REPO}
+          git fetch ${GITHUB_REPO} ${GITHUB_BRANCH}
 
           git checkout -b ${GITHUB_BRANCH} ${GITHUB_REPO}/${GITHUB_BRANCH}
+      displayName: 'Checkout Target Branch'
     - template: ../../.azure-pipelines/templates/azdev_setup.yml
-    - bash: |
-        set -ev
-
-        source env/bin/activate
-
-        az login -u $(CLI_LIVE_TEST_ACCOUNT) -p "$(CLI_LIVE_TEST_PASSWORD)"
-        az account set -s 0b1f6471-1bf0-4dda-aec3-cb9272f09590
-
-        serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
-        python scripts/ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules" "True"
-      displayName: "Rerun tests"
+    - task: AzureCLI@2
+      displayName: 'Rerun tests'
+      inputs:
+        connectedServiceNameARM: $(azure-cli-live-test-bami-connected-service)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
+          set -ev
+  
+          source env/bin/activate
+  
+          if [[ -n "$(CUSTOM_WHL_URL)" ]]; then
+            pip install $(CUSTOM_WHL_URL) --force-reinstall
+          fi
+  
+          az account set -s $(azure-cli-live-test-bami-sub-id)
+  
+          serial_modules="appservice botservice cloud network azure-cli-core azure-cli-telemetry"
+          python scripts/ci/automation_full_test.py "8" "$(Instance_idx)" "latest" "$serial_modules" "True"
     - task: PublishTestResults@2
       inputs:
         testResultsFiles: '/$(HOME)/.azdev/env_config/mnt/vss/_work/1/s/env/test_results_*.xml'
@@ -133,15 +133,11 @@ jobs:
 - job: CreatePR
   displayName: CLI Regression Test Create PR
   dependsOn: RerunTests
+  condition: in(dependencies.RerunTests.result, 'Succeeded', 'Skipped')
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
-    - task: AzureCLI@1
-      displayName: 'Create PR'
-      inputs:
-        azureSubscription: 'Azure CLI release'
-        scriptLocation: inlineScript
-        inlineScript: |
+    - bash: |
           set -ev
           # git config
           if [[ -n "$(CUSTOM_REPO)" && -n "$(CUSTOM_BRANCH)" && -n "$(CUSTOM_GITHUB_TOKEN)" ]]; then

@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "vmss extension image list-names",
 )
 class ListNames(AAZCommand):
-    """List a list of virtual machine extension image types.
+    """List virtual machine extension image types.
     """
 
     _aaz_info = {
@@ -42,7 +42,6 @@ class ListNames(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
-            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             required=True,
             id_part="name",
         )

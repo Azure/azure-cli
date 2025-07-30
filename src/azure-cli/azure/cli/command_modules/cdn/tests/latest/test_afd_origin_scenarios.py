@@ -8,7 +8,7 @@ from .afdx_scenario_mixin import CdnAfdScenarioMixin
 
 
 class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(additional_tags={'owner': 'jingnanxu'})
     def test_afd_origin_crud(self, resource_group):
         profile_name = self.create_random_name(prefix='profile', length=16)
         self.afd_profile_create_cmd(resource_group, profile_name, sku="Premium_AzureFrontDoor")
@@ -67,6 +67,7 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                        JMESPathCheck('@[0].name', origin_name),
                        JMESPathCheck('@[1].name', origin_name1)]
         self.afd_origin_list_cmd(resource_group, profile_name, origin_group_name, checks=list_checks)
+        self.afd_origin_delete_cmd(resource_group, profile_name, origin_group_name, origin_name1)
 
         update_checks = [JMESPathCheck('name', origin_name),
                          JMESPathCheck('hostName', "plstestcli.blob.core.windows.net"),
@@ -167,7 +168,6 @@ class CdnAfdOriginScenarioTest(CdnAfdScenarioMixin, ScenarioTest):
                                    checks=update_checks)
 
         self.afd_origin_delete_cmd(resource_group, profile_name, origin_group_name, origin_name)
-        self.afd_origin_delete_cmd(resource_group, profile_name, origin_group_name, origin_name1)
 
         list_checks = [JMESPathCheck('length(@)', 0)]
         self.afd_origin_list_cmd(resource_group, profile_name, origin_group_name, list_checks)

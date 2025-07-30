@@ -337,3 +337,37 @@ class StorageSASScenario(StorageScenarioMixin, LiveScenarioTest):
         self.assertIn('sp=r', dir_sas, 'SAS token {} does not contain permission segment'.format(dir_sas))
         self.assertIn('ses=', dir_sas, 'SAS token {} does not contain ses segment'.format(dir_sas))
 
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    def test_storage_table_entity_sas(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        table_name = self.create_random_name('table', 24)
+        self.storage_cmd('storage table create -n {} --fail-on-exist', account_info, table_name) \
+            .assert_with_checks(JMESPathCheck('created', True))
+
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+        sas_token_a = self.storage_cmd('storage table generate-sas -n {} --expiry {} --permissions a', account_info,
+                                       table_name, expiry).get_output_in_json()
+        account_name = account_info[0]
+        self.cmd('storage entity insert --account-name {} -t {} -e rowkey=003 partitionkey=003 name=test3 '
+                 'value=something3 --sas-token {}'.format(account_name, table_name, sas_token_a))
+        from azure.core.exceptions import ResourceExistsError, HttpResponseError
+        with self.assertRaises(ResourceExistsError):
+            # by default --if-exists action is fail
+            self.cmd('storage entity insert --account-name {} -t {} -e rowkey=003 partitionkey=003 name=test3 '
+                     'value=something3 --sas-token {}'.format(account_name, table_name, sas_token_a))
+        with self.assertRaises(ResourceExistsError):
+            # should fail without sas as well
+            self.storage_cmd('storage entity insert -t {} -e rowkey=003 partitionkey=003 name=test3 '
+                             'value=something3', account_info, table_name, sas_token_a)
+
+        sas_token_au = self.storage_cmd('storage table generate-sas -n {} --expiry {} --permissions au', account_info,
+                                        table_name, expiry).get_output_in_json()
+        with self.assertRaises(HttpResponseError) as ex:
+            # permission with add only fails with upsert
+            self.cmd('storage entity insert --account-name {} -t {} -e rowkey=003 partitionkey=003 name=test3 '
+                     'value=something3 --sas-token {} '
+                     '--if-exists replace'.format(account_name, table_name, sas_token_a))
+        self.cmd('storage entity insert --account-name {} -t {} -e rowkey=003 partitionkey=003 name=test3 '
+                 'value=something3 --sas-token {} --if-exists replace'.format(account_name, table_name, sas_token_au))

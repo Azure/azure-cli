@@ -16,7 +16,7 @@ helps['config set'] = """
 type: command
 short-summary: Set a configuration.
 long-summary: |
-    For available configuration options, see https://docs.microsoft.com/cli/azure/azure-cli-configuration.
+    For available configuration options, see https://learn.microsoft.com/cli/azure/azure-cli-configuration.
     By default without specifying --local, the configuration will be saved to `~/.azure/config`.
 examples:
   - name: Disable color with `core.no_color`.

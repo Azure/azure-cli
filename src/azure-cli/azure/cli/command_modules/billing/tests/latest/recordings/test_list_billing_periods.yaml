@@ -2,61 +2,255 @@ interactions:
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [billing period list]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 billingmanagementclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.6+dev]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - billing period list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.53.1 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods?api-version=2018-03-01-preview
   response:
-    body: {string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201706-1","type":"Microsoft.Billing/billingPeriods","name":"201706-1","properties":{"billingPeriodStartDate":"2017-04-27","billingPeriodEndDate":"2017-05-26"}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201705-1","type":"Microsoft.Billing/billingPeriods","name":"201705-1","properties":{"billingPeriodStartDate":"2017-03-27","billingPeriodEndDate":"2017-04-26","invoiceIds":["/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/invoices/201705-217089190378988"]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201704-1","type":"Microsoft.Billing/billingPeriods","name":"201704-1","properties":{"billingPeriodStartDate":"2017-02-27","billingPeriodEndDate":"2017-03-26","invoiceIds":["/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/invoices/201704-117949190364043"]}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201703-1","type":"Microsoft.Billing/billingPeriods","name":"201703-1","properties":{"billingPeriodStartDate":"2017-01-27","billingPeriodEndDate":"2017-02-26"}}]}'}
+    body:
+      string: '{"nextLink":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods?$skiptoken=L2FhZC9mdWxsdHJ1c3QvY29tbWVyY2VBY2NvdW50cy9hNzExNmZhMS01YWI0LTQ1ODItOGQxNy03N2U2NGI0NmIzNDkvc3Vic2NyaXB0aW9ucy8wYjFmNjQ3MS0xYmYwLTRkZGEtYWVjMy1jYjkyNzJmMDk1OTAvYmlsbGluZ1BlcmlvZHM%2FJHNraXB0b2tlbj1leUpUYTJsd1ZHOXJaVzRpT2lKYmUxd2lkRzlyWlc1Y0lqcGNJaXRTU1VRNmZuQnNjRk5CVUV4M05EUmhNRUZzZDBKQlFVSkJSR2M5UFNOU1ZEb3hJMVJTUXpvMU1DTlNWRVE2V0V4Vk5VdFBSemhxTldrMFkwMTFjRUpoUlRSQ1ZFMTRUV3B2ZVUxM1FUMGpTVk5XT2pJalNVVlBPalkxTlRVeEkxRkRSam80WENJc1hDSnlZVzVuWlZ3aU9udGNJbTFwYmx3aU9sd2lNRFZETVVVNU5EQmNJaXhjSW0xaGVGd2lPbHdpTURWRE1VVTVOakJjSW4xOVhTSXNJbEYxWlhKNVVHRnlZVzFsZEdWeWN5STZleUpoY0drdGRtVnljMmx2YmlJNld5SXlNREl3TFRBeExUQXhJbDBzSWlSMGIzQWlPbHNpTlRBaVhYMTkmYXBpLXZlcnNpb249MjAyMC0wMS0wMQ%3D%3D&api-version=2018-03-01-preview","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202401-1","name":"202401-1","properties":{"billingPeriodEndDate":"2023-11-30","billingPeriodStartDate":"2023-11-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202312-1","name":"202312-1","properties":{"billingPeriodEndDate":"2023-10-31","billingPeriodStartDate":"2023-10-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202311-1","name":"202311-1","properties":{"billingPeriodEndDate":"2023-09-30","billingPeriodStartDate":"2023-09-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202310-1","name":"202310-1","properties":{"billingPeriodEndDate":"2023-08-31","billingPeriodStartDate":"2023-08-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202309-1","name":"202309-1","properties":{"billingPeriodEndDate":"2023-07-31","billingPeriodStartDate":"2023-07-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202308-1","name":"202308-1","properties":{"billingPeriodEndDate":"2023-06-30","billingPeriodStartDate":"2023-06-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202307-1","name":"202307-1","properties":{"billingPeriodEndDate":"2023-05-31","billingPeriodStartDate":"2023-05-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202306-1","name":"202306-1","properties":{"billingPeriodEndDate":"2023-04-30","billingPeriodStartDate":"2023-04-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202305-1","name":"202305-1","properties":{"billingPeriodEndDate":"2023-03-31","billingPeriodStartDate":"2023-03-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202304-1","name":"202304-1","properties":{"billingPeriodEndDate":"2023-02-28","billingPeriodStartDate":"2023-02-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202303-1","name":"202303-1","properties":{"billingPeriodEndDate":"2023-01-31","billingPeriodStartDate":"2023-01-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202302-1","name":"202302-1","properties":{"billingPeriodEndDate":"2022-12-31","billingPeriodStartDate":"2022-12-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202301-1","name":"202301-1","properties":{"billingPeriodEndDate":"2022-11-30","billingPeriodStartDate":"2022-11-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202212-1","name":"202212-1","properties":{"billingPeriodEndDate":"2022-10-31","billingPeriodStartDate":"2022-10-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202211-1","name":"202211-1","properties":{"billingPeriodEndDate":"2022-09-30","billingPeriodStartDate":"2022-09-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202210-1","name":"202210-1","properties":{"billingPeriodEndDate":"2022-08-31","billingPeriodStartDate":"2022-08-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202209-1","name":"202209-1","properties":{"billingPeriodEndDate":"2022-07-31","billingPeriodStartDate":"2022-07-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202208-1","name":"202208-1","properties":{"billingPeriodEndDate":"2022-06-30","billingPeriodStartDate":"2022-06-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202207-1","name":"202207-1","properties":{"billingPeriodEndDate":"2022-05-31","billingPeriodStartDate":"2022-05-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202206-1","name":"202206-1","properties":{"billingPeriodEndDate":"2022-04-30","billingPeriodStartDate":"2022-04-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202205-1","name":"202205-1","properties":{"billingPeriodEndDate":"2022-03-31","billingPeriodStartDate":"2022-03-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202204-1","name":"202204-1","properties":{"billingPeriodEndDate":"2022-02-28","billingPeriodStartDate":"2022-02-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202203-1","name":"202203-1","properties":{"billingPeriodEndDate":"2022-01-31","billingPeriodStartDate":"2022-01-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202202-1","name":"202202-1","properties":{"billingPeriodEndDate":"2021-12-31","billingPeriodStartDate":"2021-12-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202201-1","name":"202201-1","properties":{"billingPeriodEndDate":"2021-11-30","billingPeriodStartDate":"2021-11-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202112-1","name":"202112-1","properties":{"billingPeriodEndDate":"2021-10-31","billingPeriodStartDate":"2021-10-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202111-1","name":"202111-1","properties":{"billingPeriodEndDate":"2021-09-30","billingPeriodStartDate":"2021-09-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202110-1","name":"202110-1","properties":{"billingPeriodEndDate":"2021-08-31","billingPeriodStartDate":"2021-08-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202109-1","name":"202109-1","properties":{"billingPeriodEndDate":"2021-07-31","billingPeriodStartDate":"2021-07-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202108-1","name":"202108-1","properties":{"billingPeriodEndDate":"2021-06-30","billingPeriodStartDate":"2021-06-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202107-1","name":"202107-1","properties":{"billingPeriodEndDate":"2021-05-31","billingPeriodStartDate":"2021-05-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202106-1","name":"202106-1","properties":{"billingPeriodEndDate":"2021-04-30","billingPeriodStartDate":"2021-04-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202105-1","name":"202105-1","properties":{"billingPeriodEndDate":"2021-03-31","billingPeriodStartDate":"2021-03-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202104-1","name":"202104-1","properties":{"billingPeriodEndDate":"2021-02-28","billingPeriodStartDate":"2021-02-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202103-1","name":"202103-1","properties":{"billingPeriodEndDate":"2021-01-31","billingPeriodStartDate":"2021-01-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202102-1","name":"202102-1","properties":{"billingPeriodEndDate":"2020-12-31","billingPeriodStartDate":"2020-12-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202101-1","name":"202101-1","properties":{"billingPeriodEndDate":"2020-11-30","billingPeriodStartDate":"2020-11-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202012-1","name":"202012-1","properties":{"billingPeriodEndDate":"2020-10-31","billingPeriodStartDate":"2020-10-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202011-1","name":"202011-1","properties":{"billingPeriodEndDate":"2020-09-30","billingPeriodStartDate":"2020-09-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202010-1","name":"202010-1","properties":{"billingPeriodEndDate":"2020-08-31","billingPeriodStartDate":"2020-08-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202009-1","name":"202009-1","properties":{"billingPeriodEndDate":"2020-07-31","billingPeriodStartDate":"2020-07-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202008-1","name":"202008-1","properties":{"billingPeriodEndDate":"2020-06-30","billingPeriodStartDate":"2020-06-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202007-1","name":"202007-1","properties":{"billingPeriodEndDate":"2020-05-31","billingPeriodStartDate":"2020-05-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202006-1","name":"202006-1","properties":{"billingPeriodEndDate":"2020-04-30","billingPeriodStartDate":"2020-04-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202005-1","name":"202005-1","properties":{"billingPeriodEndDate":"2020-03-31","billingPeriodStartDate":"2020-03-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202004-1","name":"202004-1","properties":{"billingPeriodEndDate":"2020-02-29","billingPeriodStartDate":"2020-02-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202003-1","name":"202003-1","properties":{"billingPeriodEndDate":"2020-01-31","billingPeriodStartDate":"2020-01-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202002-1","name":"202002-1","properties":{"billingPeriodEndDate":"2019-12-31","billingPeriodStartDate":"2019-12-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202001-1","name":"202001-1","properties":{"billingPeriodEndDate":"2019-11-30","billingPeriodStartDate":"2019-11-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201912-1","name":"201912-1","properties":{"billingPeriodEndDate":"2019-10-31","billingPeriodStartDate":"2019-10-01"},"type":"Microsoft.Billing/BillingPeriods"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['1317']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 17 May 2017 01:56:01 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['99']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      api-supported-versions:
+      - 2017-04-24-preview, 2018-03-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '13944'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 08 Nov 2023 09:09:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - DENY
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-ms-service-version:
+      - 10.6.2490.425
+    status:
+      code: 200
+      message: OK
 - request:
     body: null
     headers:
-      Accept: [application/json]
-      Accept-Encoding: ['gzip, deflate']
-      CommandName: [billing period show]
-      Connection: [keep-alive]
-      Content-Type: [application/json; charset=utf-8]
-      User-Agent: [python/3.6.1 (Windows-10-10.0.15063-SP0) requests/2.9.1 msrest/0.4.7
-          msrest_azure/0.4.7 billingmanagementclient/0.1.0 Azure-SDK-For-Python AZURECLI/2.0.6+dev]
-      accept-language: [en-US]
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - billing period list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.53.1 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201706-1?api-version=2018-03-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods?$skiptoken=L2FhZC9mdWxsdHJ1c3QvY29tbWVyY2VBY2NvdW50cy9hNzExNmZhMS01YWI0LTQ1ODItOGQxNy03N2U2NGI0NmIzNDkvc3Vic2NyaXB0aW9ucy8wYjFmNjQ3MS0xYmYwLTRkZGEtYWVjMy1jYjkyNzJmMDk1OTAvYmlsbGluZ1BlcmlvZHM/JHNraXB0b2tlbj1leUpUYTJsd1ZHOXJaVzRpT2lKYmUxd2lkRzlyWlc1Y0lqcGNJaXRTU1VRNmZuQnNjRk5CVUV4M05EUmhNRUZzZDBKQlFVSkJSR2M5UFNOU1ZEb3hJMVJTUXpvMU1DTlNWRVE2V0V4Vk5VdFBSemhxTldrMFkwMTFjRUpoUlRSQ1ZFMTRUV3B2ZVUxM1FUMGpTVk5XT2pJalNVVlBPalkxTlRVeEkxRkRSam80WENJc1hDSnlZVzVuWlZ3aU9udGNJbTFwYmx3aU9sd2lNRFZETVVVNU5EQmNJaXhjSW0xaGVGd2lPbHdpTURWRE1VVTVOakJjSW4xOVhTSXNJbEYxWlhKNVVHRnlZVzFsZEdWeWN5STZleUpoY0drdGRtVnljMmx2YmlJNld5SXlNREl3TFRBeExUQXhJbDBzSWlSMGIzQWlPbHNpTlRBaVhYMTkmYXBpLXZlcnNpb249MjAyMC0wMS0wMQ%3D%3D&api-version=2018-03-01-preview
   response:
-    body: {string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201706-1","type":"Microsoft.Billing/billingPeriods","name":"201706-1","properties":{"billingPeriodStartDate":"2017-04-27","billingPeriodEndDate":"2017-05-26"}}'}
+    body:
+      string: '{"nextLink":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods?$skiptoken=L2FhZC9mdWxsdHJ1c3QvY29tbWVyY2VBY2NvdW50cy9hNzExNmZhMS01YWI0LTQ1ODItOGQxNy03N2U2NGI0NmIzNDkvc3Vic2NyaXB0aW9ucy8wYjFmNjQ3MS0xYmYwLTRkZGEtYWVjMy1jYjkyNzJmMDk1OTAvYmlsbGluZ1BlcmlvZHM%2FJHNraXB0b2tlbj1leUpUYTJsd1ZHOXJaVzRpT2lKYmUxd2lkRzlyWlc1Y0lqcGNJaXRTU1VRNmZuQnNjRk5CVUV4M05EUmhhRXRSYzBGQlFVSkJSR2M5UFNOU1ZEb3lJMVJTUXpveE1EQWpVbFJFT2xoTVZUVkxUMGM0YWpWcE5HTk5kWEJDWVVVMFFsUk5lRTFxV1hsTlVVRTlJMGxUVmpveUkwbEZUem8yTlRVMU1TTlJRMFk2T0Z3aUxGd2ljbUZ1WjJWY0lqcDdYQ0p0YVc1Y0lqcGNJakExUXpGRk9UUXdYQ0lzWENKdFlYaGNJanBjSWpBMVF6RkZPVFl3WENKOWZWMGlMQ0pSZFdWeWVWQmhjbUZ0WlhSbGNuTWlPbnNpWVhCcExYWmxjbk5wYjI0aU9sc2lNakF5TUMwd01TMHdNU0pkTENJa2RHOXdJanBiSWpVd0lsMTlmUSZhcGktdmVyc2lvbj0yMDIwLTAxLTAx&api-version=2018-03-01-preview","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201911-1","name":"201911-1","properties":{"billingPeriodEndDate":"2019-09-30","billingPeriodStartDate":"2019-09-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201910-1","name":"201910-1","properties":{"billingPeriodEndDate":"2019-08-31","billingPeriodStartDate":"2019-08-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201909-1","name":"201909-1","properties":{"billingPeriodEndDate":"2019-07-31","billingPeriodStartDate":"2019-07-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201908-1","name":"201908-1","properties":{"billingPeriodEndDate":"2019-06-30","billingPeriodStartDate":"2019-06-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201907-1","name":"201907-1","properties":{"billingPeriodEndDate":"2019-05-31","billingPeriodStartDate":"2019-05-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201906-1","name":"201906-1","properties":{"billingPeriodEndDate":"2019-04-30","billingPeriodStartDate":"2019-04-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201905-1","name":"201905-1","properties":{"billingPeriodEndDate":"2019-03-31","billingPeriodStartDate":"2019-03-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201904-1","name":"201904-1","properties":{"billingPeriodEndDate":"2019-02-28","billingPeriodStartDate":"2019-02-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201903-1","name":"201903-1","properties":{"billingPeriodEndDate":"2019-01-31","billingPeriodStartDate":"2019-01-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201902-1","name":"201902-1","properties":{"billingPeriodEndDate":"2018-12-31","billingPeriodStartDate":"2018-12-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201901-1","name":"201901-1","properties":{"billingPeriodEndDate":"2018-11-30","billingPeriodStartDate":"2018-11-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201812-1","name":"201812-1","properties":{"billingPeriodEndDate":"2018-10-31","billingPeriodStartDate":"2018-10-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201811-1","name":"201811-1","properties":{"billingPeriodEndDate":"2018-09-30","billingPeriodStartDate":"2018-09-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201810-1","name":"201810-1","properties":{"billingPeriodEndDate":"2018-08-31","billingPeriodStartDate":"2018-08-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201809-1","name":"201809-1","properties":{"billingPeriodEndDate":"2018-07-31","billingPeriodStartDate":"2018-07-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201808-1","name":"201808-1","properties":{"billingPeriodEndDate":"2018-06-30","billingPeriodStartDate":"2018-06-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201807-1","name":"201807-1","properties":{"billingPeriodEndDate":"2018-05-31","billingPeriodStartDate":"2018-05-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201806-1","name":"201806-1","properties":{"billingPeriodEndDate":"2018-04-30","billingPeriodStartDate":"2018-04-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201805-1","name":"201805-1","properties":{"billingPeriodEndDate":"2018-03-31","billingPeriodStartDate":"2018-03-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201804-1","name":"201804-1","properties":{"billingPeriodEndDate":"2018-02-28","billingPeriodStartDate":"2018-02-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201803-1","name":"201803-1","properties":{"billingPeriodEndDate":"2018-01-31","billingPeriodStartDate":"2018-01-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201802-1","name":"201802-1","properties":{"billingPeriodEndDate":"2017-12-31","billingPeriodStartDate":"2017-12-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201801-1","name":"201801-1","properties":{"billingPeriodEndDate":"2017-11-30","billingPeriodStartDate":"2017-11-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201712-1","name":"201712-1","properties":{"billingPeriodEndDate":"2017-10-31","billingPeriodStartDate":"2017-10-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201711-1","name":"201711-1","properties":{"billingPeriodEndDate":"2017-09-30","billingPeriodStartDate":"2017-09-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201710-1","name":"201710-1","properties":{"billingPeriodEndDate":"2017-08-31","billingPeriodStartDate":"2017-08-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201709-1","name":"201709-1","properties":{"billingPeriodEndDate":"2017-07-31","billingPeriodStartDate":"2017-07-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201708-1","name":"201708-1","properties":{"billingPeriodEndDate":"2017-06-30","billingPeriodStartDate":"2017-06-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201707-1","name":"201707-1","properties":{"billingPeriodEndDate":"2017-05-31","billingPeriodStartDate":"2017-05-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201706-1","name":"201706-1","properties":{"billingPeriodEndDate":"2017-04-30","billingPeriodStartDate":"2017-04-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201705-1","name":"201705-1","properties":{"billingPeriodEndDate":"2017-03-31","billingPeriodStartDate":"2017-03-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201704-1","name":"201704-1","properties":{"billingPeriodEndDate":"2017-02-28","billingPeriodStartDate":"2017-02-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201703-1","name":"201703-1","properties":{"billingPeriodEndDate":"2017-01-31","billingPeriodStartDate":"2017-01-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201702-1","name":"201702-1","properties":{"billingPeriodEndDate":"2016-12-31","billingPeriodStartDate":"2016-12-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201701-1","name":"201701-1","properties":{"billingPeriodEndDate":"2016-11-30","billingPeriodStartDate":"2016-11-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201612-1","name":"201612-1","properties":{"billingPeriodEndDate":"2016-10-31","billingPeriodStartDate":"2016-10-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201611-1","name":"201611-1","properties":{"billingPeriodEndDate":"2016-09-30","billingPeriodStartDate":"2016-09-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201610-1","name":"201610-1","properties":{"billingPeriodEndDate":"2016-08-31","billingPeriodStartDate":"2016-08-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201609-1","name":"201609-1","properties":{"billingPeriodEndDate":"2016-07-31","billingPeriodStartDate":"2016-07-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201608-1","name":"201608-1","properties":{"billingPeriodEndDate":"2016-06-30","billingPeriodStartDate":"2016-06-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201607-1","name":"201607-1","properties":{"billingPeriodEndDate":"2016-05-31","billingPeriodStartDate":"2016-05-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201606-1","name":"201606-1","properties":{"billingPeriodEndDate":"2016-04-30","billingPeriodStartDate":"2016-04-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201605-1","name":"201605-1","properties":{"billingPeriodEndDate":"2016-03-31","billingPeriodStartDate":"2016-03-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201604-1","name":"201604-1","properties":{"billingPeriodEndDate":"2016-02-29","billingPeriodStartDate":"2016-02-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201603-1","name":"201603-1","properties":{"billingPeriodEndDate":"2016-01-31","billingPeriodStartDate":"2016-01-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201602-1","name":"201602-1","properties":{"billingPeriodEndDate":"2015-12-31","billingPeriodStartDate":"2015-12-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201601-1","name":"201601-1","properties":{"billingPeriodEndDate":"2015-11-30","billingPeriodStartDate":"2015-11-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201512-1","name":"201512-1","properties":{"billingPeriodEndDate":"2015-10-31","billingPeriodStartDate":"2015-10-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201511-1","name":"201511-1","properties":{"billingPeriodEndDate":"2015-09-30","billingPeriodStartDate":"2015-09-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201510-1","name":"201510-1","properties":{"billingPeriodEndDate":"2015-08-31","billingPeriodStartDate":"2015-08-01"},"type":"Microsoft.Billing/BillingPeriods"}]}'
     headers:
-      cache-control: [no-cache]
-      content-length: ['261']
-      content-type: [application/json; charset=utf-8]
-      date: ['Wed, 17 May 2017 01:56:06 GMT']
-      expires: ['-1']
-      pragma: [no-cache]
-      server: [Microsoft-IIS/8.5]
-      strict-transport-security: [max-age=31536000; includeSubDomains]
-      transfer-encoding: [chunked]
-      vary: [Accept-Encoding]
-      x-aspnet-version: [4.0.30319]
-      x-ms-ratelimit-remaining-subscription-resource-requests: ['98']
-      x-powered-by: [ASP.NET]
-    status: {code: 200, message: OK}
+      api-supported-versions:
+      - 2017-04-24-preview, 2018-03-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '13940'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 08 Nov 2023 09:09:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - DENY
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '98'
+      x-ms-service-version:
+      - 10.6.2490.425
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - billing period list
+      Connection:
+      - keep-alive
+      User-Agent:
+      - AZURECLI/2.53.1 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods?$skiptoken=L2FhZC9mdWxsdHJ1c3QvY29tbWVyY2VBY2NvdW50cy9hNzExNmZhMS01YWI0LTQ1ODItOGQxNy03N2U2NGI0NmIzNDkvc3Vic2NyaXB0aW9ucy8wYjFmNjQ3MS0xYmYwLTRkZGEtYWVjMy1jYjkyNzJmMDk1OTAvYmlsbGluZ1BlcmlvZHM/JHNraXB0b2tlbj1leUpUYTJsd1ZHOXJaVzRpT2lKYmUxd2lkRzlyWlc1Y0lqcGNJaXRTU1VRNmZuQnNjRk5CVUV4M05EUmhhRXRSYzBGQlFVSkJSR2M5UFNOU1ZEb3lJMVJTUXpveE1EQWpVbFJFT2xoTVZUVkxUMGM0YWpWcE5HTk5kWEJDWVVVMFFsUk5lRTFxV1hsTlVVRTlJMGxUVmpveUkwbEZUem8yTlRVMU1TTlJRMFk2T0Z3aUxGd2ljbUZ1WjJWY0lqcDdYQ0p0YVc1Y0lqcGNJakExUXpGRk9UUXdYQ0lzWENKdFlYaGNJanBjSWpBMVF6RkZPVFl3WENKOWZWMGlMQ0pSZFdWeWVWQmhjbUZ0WlhSbGNuTWlPbnNpWVhCcExYWmxjbk5wYjI0aU9sc2lNakF5TUMwd01TMHdNU0pkTENJa2RHOXdJanBiSWpVd0lsMTlmUSZhcGktdmVyc2lvbj0yMDIwLTAxLTAx&api-version=2018-03-01-preview
+  response:
+    body:
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201509-1","name":"201509-1","properties":{"billingPeriodEndDate":"2015-07-31","billingPeriodStartDate":"2015-07-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201508-1","name":"201508-1","properties":{"billingPeriodEndDate":"2015-06-30","billingPeriodStartDate":"2015-06-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201507-1","name":"201507-1","properties":{"billingPeriodEndDate":"2015-05-31","billingPeriodStartDate":"2015-05-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201506-1","name":"201506-1","properties":{"billingPeriodEndDate":"2015-04-30","billingPeriodStartDate":"2015-04-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201505-1","name":"201505-1","properties":{"billingPeriodEndDate":"2015-03-31","billingPeriodStartDate":"2015-03-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201504-1","name":"201504-1","properties":{"billingPeriodEndDate":"2015-02-28","billingPeriodStartDate":"2015-02-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201503-1","name":"201503-1","properties":{"billingPeriodEndDate":"2015-01-31","billingPeriodStartDate":"2015-01-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201502-1","name":"201502-1","properties":{"billingPeriodEndDate":"2014-12-31","billingPeriodStartDate":"2014-12-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201501-1","name":"201501-1","properties":{"billingPeriodEndDate":"2014-11-30","billingPeriodStartDate":"2014-11-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/201412-1","name":"201412-1","properties":{"billingPeriodEndDate":"2014-10-31","billingPeriodStartDate":"2014-10-01"},"type":"Microsoft.Billing/BillingPeriods"}]}'
+    headers:
+      api-supported-versions:
+      - 2017-04-24-preview, 2018-03-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '2631'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 08 Nov 2023 09:09:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - DENY
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '97'
+      x-ms-service-version:
+      - 10.6.2490.425
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - billing period show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.53.1 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202401-1?api-version=2018-03-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202401-1","name":"202401-1","properties":{"billingPeriodEndDate":"2023-11-30","billingPeriodStartDate":"2023-11-01"},"type":"Microsoft.Billing/BillingPeriods"}'
+    headers:
+      api-supported-versions:
+      - 2017-04-24-preview, 2018-03-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '261'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 08 Nov 2023 09:09:55 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - DENY
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '98'
+      x-ms-service-version:
+      - 10.6.2490.425
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - billing period list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --top
+      User-Agent:
+      - AZURECLI/2.53.1 (AAZ) azsdk-python-core/1.26.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods?$top=3&api-version=2018-03-01-preview
+  response:
+    body:
+      string: '{"nextLink":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods?$skiptoken=L2FhZC9mdWxsdHJ1c3QvY29tbWVyY2VBY2NvdW50cy9hNzExNmZhMS01YWI0LTQ1ODItOGQxNy03N2U2NGI0NmIzNDkvc3Vic2NyaXB0aW9ucy8wYjFmNjQ3MS0xYmYwLTRkZGEtYWVjMy1jYjkyNzJmMDk1OTAvYmlsbGluZ1BlcmlvZHM%2FJHNraXB0b2tlbj1leUpUYTJsd1ZHOXJaVzRpT2lKYmUxd2lkRzlyWlc1Y0lqcGNJaXRTU1VRNmZuQnNjRk5CVUV4M05EUmlka0UwTkVKQlFVTkpSR2M5UFNOU1ZEb3hJMVJTUXpvekkxSlVSRHBZVEZVMVMwOUhPR28xYVRSalRYVndRbUZGTkVKVVRYaE5lbEY1VFdkQlBTTkpVMVk2TWlOSlJVODZOalUxTlRFalVVTkdPamhjSWl4Y0luSmhibWRsWENJNmUxd2liV2x1WENJNlhDSXdOVU14UlRrME1Gd2lMRndpYldGNFhDSTZYQ0l3TlVNeFJUazJNRndpZlgxZElpd2lVWFZsY25sUVlYSmhiV1YwWlhKeklqcDdJbUZ3YVMxMlpYSnphVzl1SWpwYklqSXdNakF0TURFdE1ERWlYU3dpSkhSdmNDSTZXeUl6SWwxOWZRJmFwaS12ZXJzaW9uPTIwMjAtMDEtMDE%3D&api-version=2018-03-01-preview","value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202401-1","name":"202401-1","properties":{"billingPeriodEndDate":"2023-11-30","billingPeriodStartDate":"2023-11-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202312-1","name":"202312-1","properties":{"billingPeriodEndDate":"2023-10-31","billingPeriodStartDate":"2023-10-01"},"type":"Microsoft.Billing/BillingPeriods"},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Billing/billingPeriods/202311-1","name":"202311-1","properties":{"billingPeriodEndDate":"2023-09-30","billingPeriodStartDate":"2023-09-01"},"type":"Microsoft.Billing/BillingPeriods"}]}'
+    headers:
+      api-supported-versions:
+      - 2017-04-24-preview, 2018-03-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1624'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 08 Nov 2023 09:09:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding,Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - DENY
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '99'
+      x-ms-service-version:
+      - 10.6.2490.425
+    status:
+      code: 200
+      message: OK
 version: 1

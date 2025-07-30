@@ -18,7 +18,7 @@ graph_client = GraphClient(cli_ctx)
 
 ## Request
 
-The underlying Microsoft Graph API is exposed as `GraphClient` methods. For example, [Create application](https://docs.microsoft.com/en-us/graph/api/application-post-applications) API corresponds to `application_create`.
+The underlying Microsoft Graph API is exposed as `GraphClient` methods. For example, [Create application](https://learn.microsoft.com/graph/api/application-post-applications) API corresponds to `application_create`.
 
 The order of the verb ("create") and the noun ("application") is inverted to keep alignment with Azure CLI commands like `az ad app create` and old Python SDK `azure-graphrbac` methods like `graph_client.applications.create`. This makes it easier to find a method/API from the new `GraphClient` and migrate to it:
 
@@ -27,7 +27,7 @@ The order of the verb ("create") and the noun ("application") is inverted to kee
 + graph_client.application_create(body)
 ```
 
-The `body` argument for the request should be a `dict` object as defined by the underlying API. For example, [Create application](https://docs.microsoft.com/en-us/graph/api/application-post-applications) takes a `dict` object defined by [application resource type](https://docs.microsoft.com/en-us/graph/api/resources/application).
+The `body` argument for the request should be a `dict` object as defined by the underlying API. For example, [Create application](https://learn.microsoft.com/graph/api/application-post-applications) takes a `dict` object defined by [application resource type](https://learn.microsoft.com/graph/api/resources/application).
 
 For example, to create an application with certain `displayName`:
 

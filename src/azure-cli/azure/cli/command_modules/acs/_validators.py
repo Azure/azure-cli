@@ -3,19 +3,25 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from __future__ import unicode_literals
-
 import os
 import re
 from ipaddress import ip_network
 from math import isclose, isnan
 
+from azure.mgmt.containerservice.models import KubernetesSupportPlan
 from azure.cli.command_modules.acs._consts import (
     CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
     CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+    CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
     CONST_OS_SKU_AZURELINUX,
     CONST_OS_SKU_CBLMARINER,
     CONST_OS_SKU_MARINER,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+    CONST_NODEPOOL_MODE_GATEWAY,
+    CONST_VIRTUAL_MACHINE_SCALE_SETS,
+    CONST_AVAILABILITY_SET,
+    CONST_VIRTUAL_MACHINES,
 )
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (
@@ -80,8 +86,8 @@ def validate_ip_ranges(namespace):
     ip_ranges = [ip.strip() for ip in namespace.api_server_authorized_ip_ranges.split(",")]
 
     if restrict_traffic_to_agentnodes in ip_ranges and len(ip_ranges) > 1:
-        raise CLIError(("Setting --api-server-authorized-ip-ranges to 0.0.0.0/32 is not allowed with other IP ranges."
-                        "Refer to https://aka.ms/aks/whitelist for more details"))
+        raise CLIError("Setting --api-server-authorized-ip-ranges to 0.0.0.0/32 is not allowed with other IP ranges."
+                       "Refer to https://aka.ms/aks/whitelist for more details")
 
     if allow_all_traffic in ip_ranges and len(ip_ranges) > 1:
         raise CLIError("--api-server-authorized-ip-ranges cannot be disabled and simultaneously enabled")
@@ -182,9 +188,12 @@ def validate_vm_set_type(namespace):
     if namespace.vm_set_type is not None:
         if namespace.vm_set_type == '':
             return
-        if namespace.vm_set_type.lower() != "availabilityset" and \
-                namespace.vm_set_type.lower() != "virtualmachinescalesets":
-            raise CLIError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet")
+        if (
+            namespace.vm_set_type.lower() != CONST_VIRTUAL_MACHINE_SCALE_SETS.lower() and
+            namespace.vm_set_type.lower() != CONST_AVAILABILITY_SET.lower() and
+            namespace.vm_set_type.lower() != CONST_VIRTUAL_MACHINES.lower()
+        ):
+            raise CLIError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet or VirtualMachines")
 
 
 def validate_load_balancer_sku(namespace):
@@ -201,8 +210,19 @@ def validate_sku_tier(namespace):
     if namespace.tier is not None:
         if namespace.tier == '':
             return
-        if namespace.tier.lower() not in (CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD):
-            raise InvalidArgumentValueError("--tier can only be free or standard")
+        if namespace.tier.lower() not in (
+                CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
+                CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM):
+            raise InvalidArgumentValueError("--tier can only be free, standard and premium")
+
+
+def validate_k8s_support_plan(namespace):
+    if namespace.k8s_support_plan is not None:
+        if namespace.k8s_support_plan == '':
+            return
+        if namespace.k8s_support_plan.lower() not in (
+                KubernetesSupportPlan.KUBERNETES_OFFICIAL.lower(), KubernetesSupportPlan.AKS_LONG_TERM_SUPPORT.lower()):
+            raise InvalidArgumentValueError("--k8s-support-plan can only be KubernetesOfficial or AKSLongTermSupport")
 
 
 def validate_load_balancer_outbound_ips(namespace):
@@ -267,18 +287,31 @@ def validate_nodes_count(namespace):
             raise CLIError('--max-count must be in the range [0,1000]')
 
 
-def validate_taints(namespace):
+def validate_nodepool_taints(namespace):
+    """Validates that provided node labels is a valid format"""
+
+    if hasattr(namespace, 'nodepool_taints'):
+        taintsStr = namespace.nodepool_taints
+    else:
+        taintsStr = namespace.node_taints
+
+    if taintsStr is None or taintsStr == '':
+        return
+
+    for taint in taintsStr.split(','):
+        validate_taint(taint)
+
+
+def validate_taint(taint):
     """Validates that provided taint is a valid format"""
 
     regex = re.compile(r"^[a-zA-Z\d][\w\-\.\/]{0,252}=[a-zA-Z\d][\w\-\.]{0,62}:(NoSchedule|PreferNoSchedule|NoExecute)$")  # pylint: disable=line-too-long
 
-    if namespace.node_taints is not None and namespace.node_taints != '':
-        for taint in namespace.node_taints.split(','):
-            if taint == "":
-                continue
-            found = regex.findall(taint)
-            if not found:
-                raise CLIError('Invalid node taint: %s' % taint)
+    if taint == "":
+        return
+    found = regex.findall(taint)
+    if not found:
+        raise ArgumentUsageError('Invalid node taint: %s' % taint)
 
 
 def validate_priority(namespace):
@@ -317,6 +350,17 @@ def validate_spot_max_price(namespace):
 def validate_acr(namespace):
     if namespace.attach_acr and namespace.detach_acr:
         raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
+    if namespace.assignee_principal_type and not namespace.attach_acr:
+        raise CLIError('The "--assignee-principal-type" argument can only be used with "--attach-acr".')
+    if namespace.attach_acr:
+        # Validate assignee_principal_type if specified
+        if namespace.assignee_principal_type:
+            valid_types = ['User', 'ServicePrincipal', 'Group']
+            if namespace.assignee_principal_type not in valid_types:
+                raise CLIError(
+                    f"Invalid value for --assignee_principal_type. "
+                    f"Allowed values are: {', '.join(valid_types)}"
+                )
 
 
 def validate_nodepool_tags(ns):
@@ -336,10 +380,24 @@ def validate_pod_subnet_id(namespace):
     _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
 
 
+def validate_pod_ip_allocation_mode(namespace):
+    """Validates the pod ip allocation mode string."""
+    if namespace.pod_ip_allocation_mode is not None:
+        if namespace.pod_ip_allocation_mode not in (
+            CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
+            CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+        ):
+            raise InvalidArgumentValueError("--pod-ip-allocation-mode can only be DynamicIndividual or StaticBlock")
+
+
+def validate_apiserver_subnet_id(namespace):
+    _validate_subnet_id(namespace.apiserver_subnet_id, "--apiserver-subnet-id")
+
+
 def _validate_subnet_id(subnet_id, name):
     if subnet_id is None or subnet_id == '':
         return
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if not is_valid_resource_id(subnet_id):
         raise InvalidArgumentValueError(name + " is not a valid Azure resource ID.")
 
@@ -348,9 +406,17 @@ def validate_ppg(namespace):
     if namespace.ppg is not None:
         if namespace.ppg == '':
             return
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.ppg):
             raise CLIError("--ppg is not a valid Azure resource ID.")
+
+
+def validate_node_public_ip_tags(ns):
+    if isinstance(ns.node_public_ip_tags, list):
+        tags_dict = {}
+        for item in ns.node_public_ip_tags:
+            tags_dict.update(validate_tag(item))
+        ns.node_public_ip_tags = tags_dict
 
 
 def validate_nodepool_labels(namespace):
@@ -440,11 +506,26 @@ def validate_max_surge(namespace):
         raise CLIError("--max-surge should be an int or percentage")
 
 
+def validate_max_unavailable(namespace):
+    """validates parameters max unavailable are positive integers or percents."""
+    if namespace.max_unavailable is None:
+        return
+    int_or_percent = namespace.max_unavailable
+    if int_or_percent.endswith('%'):
+        int_or_percent = int_or_percent.rstrip('%')
+
+    try:
+        if int(int_or_percent) < 0:
+            raise InvalidArgumentValueError("--max-unavailable must be positive")
+    except ValueError:
+        raise InvalidArgumentValueError("--max-unavailable should be an int or percentage")
+
+
 def validate_assign_identity(namespace):
     if namespace.assign_identity is not None:
         if namespace.assign_identity == '':
             return
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.assign_identity):
             raise InvalidArgumentValueError("--assign-identity is not a valid Azure resource ID.")
 
@@ -453,29 +534,38 @@ def validate_assign_kubelet_identity(namespace):
     if namespace.assign_kubelet_identity is not None:
         if namespace.assign_kubelet_identity == '':
             return
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.assign_kubelet_identity):
             raise InvalidArgumentValueError("--assign-kubelet-identity is not a valid Azure resource ID.")
 
 
 def validate_nodepool_id(namespace):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if not is_valid_resource_id(namespace.nodepool_id):
         raise InvalidArgumentValueError("--nodepool-id is not a valid Azure resource ID.")
 
 
 def validate_snapshot_id(namespace):
     if namespace.snapshot_id:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.snapshot_id):
             raise InvalidArgumentValueError("--snapshot-id is not a valid Azure resource ID.")
 
 
 def validate_host_group_id(namespace):
     if namespace.host_group_id:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(namespace.host_group_id):
             raise InvalidArgumentValueError("--host-group-id is not a valid Azure resource ID.")
+
+
+def validate_crg_id(namespace):
+    if namespace.crg_id is None:
+        return
+    from azure.mgmt.core.tools import is_valid_resource_id
+    if not is_valid_resource_id(namespace.crg_id):
+        raise InvalidArgumentValueError(
+            "--crg-id is not a valid Azure resource ID.")
 
 
 def extract_comma_separated_string(
@@ -572,7 +662,7 @@ def validate_azure_keyvault_kms_key_id(namespace):
     key_id = namespace.azure_keyvault_kms_key_id
     if key_id:
         # pylint:disable=line-too-long
-        err_msg = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. See https://docs.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
+        err_msg = '--azure-keyvault-kms-key-id is not a valid Key Vault key ID. See https://learn.microsoft.com/en-us/azure/key-vault/general/about-keys-secrets-certificates#vault-name-and-object-name'
 
         https_prefix = "https://"
         if not key_id.startswith(https_prefix):
@@ -587,7 +677,7 @@ def validate_azure_keyvault_kms_key_vault_resource_id(namespace):
     key_vault_resource_id = namespace.azure_keyvault_kms_key_vault_resource_id
     if key_vault_resource_id is None or key_vault_resource_id == '':
         return
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if not is_valid_resource_id(key_vault_resource_id):
         raise InvalidArgumentValueError("--azure-keyvault-kms-key-vault-resource-id is not a valid Azure resource ID.")
 
@@ -629,6 +719,16 @@ def sanitize_resource_id(resource_id):
 
 
 # pylint:disable=line-too-long
+def validate_azuremonitor_privatelinkscope_resourceid(namespace):
+    resource_id = namespace.ampls_resource_id
+    if resource_id is None:
+        return
+    resource_id = sanitize_resource_id(resource_id)
+    if (bool(re.match(r'/subscriptions/.*/resourcegroups/.*/providers/microsoft.insights/privatelinkscopes/.*', resource_id))) is False:
+        raise InvalidArgumentValueError("--ampls-resource-id  not in the correct format. It should match `/subscriptions/<subscriptionId>/resourceGroups/<resourceGroupName>/providers/microsoft.insights/privatelinkscopes/<resourceName>`")
+
+
+# pylint:disable=line-too-long
 def validate_azuremonitorworkspaceresourceid(namespace):
     resource_id = namespace.azure_monitor_workspace_resource_id
     if resource_id is None:
@@ -660,3 +760,153 @@ def validate_os_sku(namespace):
             CONST_OS_SKU_CBLMARINER,
             CONST_OS_SKU_MARINER,
         )
+
+
+def validate_utc_offset(namespace):
+    """Validates --utc-offset for aks maintenanceconfiguration add/update commands."""
+    if namespace.utc_offset is None:
+        return
+    # The regex here is used to match strings to the "+HH:MM" or "-HH:MM" time format.
+    # The complete regex breakdown is as follows:
+    # ^ matches the start of the string and $ matches to the end of the string, respectively.
+    # [+-] match to either + or -
+    # \d{2}:\d{2} will match to two digits followed by a colon and two digits. (example: +05:30 which is 5 hours and 30 minutes ahead or -12:00 which is 12 hours behind)
+    utc_offset_regex = re.compile(r'^[+-]\d{2}:\d{2}$')
+    found = utc_offset_regex.findall(namespace.utc_offset)
+    if not found:
+        raise InvalidArgumentValueError('--utc-offset must be in format: "+/-HH:mm". For example, "+05:30" and "-12:00".')
+
+
+def validate_start_date(namespace):
+    """Validates --start-date for aks maintenanceconfiguration add/update commands."""
+    if namespace.start_date is None:
+        return
+    # The regex here is used to match strings to the "yyyy-MM-dd" date format.
+    # The complete regex breakdown is as follows:
+    # ^ matches the start of the string and $ matches to the end of the string, respectively.
+    # ^\d{4}-\d{2}-\d{2} will match four digits, followed by a -, two digits, followed by a -. (example: 2023-01-01 which is January 1st 2023)
+    start_dt_regex = re.compile(r'^\d{4}-\d{2}-\d{2}$')
+    found = start_dt_regex.findall(namespace.start_date)
+    if not found:
+        raise InvalidArgumentValueError('--start-date must be in format: "yyyy-MM-dd". For example, "2023-01-01".')
+
+
+def validate_start_time(namespace):
+    """Validates --start-time for aks maintenanceconfiguration add/update commands."""
+    if namespace.start_time is None:
+        return
+    # The regex here is used to match strings to the "HH:MM" or "HH:MM" time format.
+    # The complete regex breakdown is as follows:
+    # ^ matches the start of the string and $ matches to the end of the string, respectively.
+    # \d{2}:\d{2} will match to two digits followed by a colon and two digits. (example: 09:30 which is 9 hours and 30 minutes or 17:00 which is 17 hours and 00 minutes)
+    start_time_regex = re.compile(r'^\d{2}:\d{2}$')
+    found = start_time_regex.findall(namespace.start_time)
+
+    if not found:
+        raise InvalidArgumentValueError('--start-time must be in format "HH:mm". For example, "09:30" and "17:00".')
+
+
+def validate_force_upgrade_disable_and_enable_parameters(namespace):
+    if namespace.disable_force_upgrade and namespace.enable_force_upgrade:
+        raise MutuallyExclusiveArgumentError('Providing both --disable-force-upgrade and --enable-force-upgrade flags is invalid')
+
+
+def validate_allowed_host_ports(namespace):
+    if hasattr(namespace, "nodepool_allowed_host_ports"):
+        host_ports = namespace.nodepool_allowed_host_ports
+    else:
+        host_ports = namespace.allowed_host_ports
+    if not host_ports:
+        return
+
+    # Parse the port range. The format is either `<int>/<protocol>` or `<int>-<int>/<protocol>`.
+    # e.g. `80/tcp` | `22/udp` | `4000-5000/tcp`
+    regex = re.compile(r'^((\d+)|(\d+-\d+))/(tcp|udp)$')
+    for port_range in host_ports:
+        found = regex.findall(port_range.lower())
+        if found:
+            continue
+        raise InvalidArgumentValueError(
+            "--allowed-host-ports must be a space-separated list of port ranges in the format of <port-range>/<protocol>: '{}'".format(port_range)
+        )
+
+
+def validate_application_security_groups(namespace):
+    is_nodepool_operation = False
+    if hasattr((namespace), "nodepool_asg_ids"):
+        is_nodepool_operation = True
+        asg_ids = namespace.nodepool_asg_ids
+        host_ports = namespace.nodepool_allowed_host_ports
+    else:
+        asg_ids = namespace.asg_ids
+        host_ports = namespace.allowed_host_ports
+
+    if not asg_ids:
+        return
+
+    if not host_ports:
+        if is_nodepool_operation:
+            raise ArgumentUsageError(
+                '--nodepool-asg-ids must be used with --nodepool-allowed-host-ports'
+            )
+        raise ArgumentUsageError(
+            '--asg-ids must be used with --allowed-host-ports'
+        )
+
+    from azure.mgmt.core.tools import is_valid_resource_id
+    for asg in asg_ids:
+        if not is_valid_resource_id(asg):
+            raise InvalidArgumentValueError(asg + " is not a valid Azure resource ID.")
+
+
+def validate_azure_service_mesh_revision(namespace):
+    """Validates the user provided revision parameter for azure service mesh commands."""
+    if namespace.revision is None:
+        return
+    revision = namespace.revision
+    asm_revision_regex = re.compile(r'^asm-\d+-\d+$')
+    found = asm_revision_regex.findall(revision)
+    if not found:
+        raise InvalidArgumentValueError(f"Revision {revision} is not supported by the service mesh add-on.")
+
+
+def validate_disable_windows_outbound_nat(namespace):
+    """Validates disable_windows_outbound_nat can only be used on Windows."""
+    if namespace.disable_windows_outbound_nat:
+        if hasattr(namespace, 'os_type') and str(namespace.os_type).lower() != "windows":
+            raise ArgumentUsageError(
+                '--disable-windows-outbound-nat can only be set for Windows nodepools')
+
+
+def validate_message_of_the_day(namespace):
+    """Validates message of the day can only be used on Linux."""
+    if namespace.message_of_the_day is not None and namespace.message_of_the_day != "":
+        if namespace.os_type is not None and namespace.os_type != "Linux":
+            raise ArgumentUsageError(
+                '--message-of-the-day can only be set for linux nodepools')
+
+
+def validate_bootstrap_container_registry_resource_id(namespace):
+    container_registry_resource_id = namespace.bootstrap_container_registry_resource_id
+    if container_registry_resource_id is None or container_registry_resource_id == '':
+        return
+    from azure.mgmt.core.tools import is_valid_resource_id
+    if not is_valid_resource_id(container_registry_resource_id):
+        raise InvalidArgumentValueError("--bootstrap-container-registry-resource-id is not a valid Azure resource ID.")
+
+
+def validate_custom_ca_trust_certificates(namespace):
+    """Validates Custom CA Trust Certificates can only be used on Linux."""
+    if namespace.custom_ca_trust_certificates is not None and namespace.custom_ca_trust_certificates != "":
+        if hasattr(namespace, 'os_type') and namespace.os_type != "Linux":
+            raise ArgumentUsageError(
+                '--custom-ca-trust-certificates can only be set for linux nodepools')
+
+
+def validate_gateway_prefix_size(namespace):
+    """Validates the gateway prefix size."""
+    if namespace.gateway_prefix_size is not None:
+        if not hasattr(namespace, 'mode') or namespace.mode != CONST_NODEPOOL_MODE_GATEWAY:
+            raise ArgumentUsageError("--gateway-prefix-size can only be set for Gateway-mode nodepools")
+        if namespace.gateway_prefix_size < 28 or namespace.gateway_prefix_size > 31:
+            raise InvalidArgumentValueError("--gateway-prefix-size must be in the range [28, 31]")

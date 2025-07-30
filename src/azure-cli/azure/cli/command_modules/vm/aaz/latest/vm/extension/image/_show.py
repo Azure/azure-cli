@@ -22,13 +22,13 @@ class Show(AAZCommand):
 
     :example: Show the latest version of the Docker extension.
         az vm extension image list-versions --publisher Microsoft.Azure.Extensions -l westus -n DockerExtension --query "[].name" -o tsv | sort | tail -n 1
-        az vm extension image show -l westus \\ --publisher Microsoft.Azure.Extensions -n DockerExtension --version LatestVersion
+        az vm extension image show -l westus --publisher Microsoft.Azure.Extensions -n DockerExtension --version LatestVersion
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmextension/types/{}/versions/{}", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmextension/types/{}/versions/{}", "2024-11-01"],
         ]
     }
 
@@ -49,7 +49,6 @@ class Show(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
-            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             required=True,
             id_part="name",
         )
@@ -146,7 +145,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -186,7 +185,7 @@ class Show(AAZCommand):
                 flags={"required": True},
             )
             _schema_on_200.name = AAZStrType(
-                flags={"required": True, "read_only": True},
+                flags={"read_only": True},
             )
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},

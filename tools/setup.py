@@ -27,7 +27,7 @@ DEPENDENCIES = [
     'nose>=1.3.7',
     'readme_renderer>=17.2',
     'requests',
-    'pyyaml~=5.2',
+    'pyyaml',
     'knack',
     'tabulate>=0.7.7',
     'colorama>=0.3.7'

@@ -21,11 +21,22 @@ class BillingCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         from azure.cli.core.profiles import ResourceType
         billing_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.billing.custom#{}')
-        super(BillingCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=billing_custom,
-                                                    resource_type=ResourceType.MGMT_BILLING)
+        super().__init__(cli_ctx=cli_ctx, custom_command_type=billing_custom,
+                         resource_type=ResourceType.MGMT_BILLING)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.billing.commands import load_command_table
+        from azure.cli.core.aaz import load_aaz_command_table
+        try:
+            from . import aaz
+        except ImportError:
+            aaz = None
+        if aaz:
+            load_aaz_command_table(
+                loader=self,
+                aaz_pkg_name=aaz.__name__,
+                args=args
+            )
         load_command_table(self, args)
         try:
             from .generated.commands import load_command_table as load_command_table_generated

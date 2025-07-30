@@ -1,18 +1,19 @@
 {
     "properties": {
-        "SourceDBServerResourceId": "/subscriptions/bb5358e5-fa78-4717-87e1-e57f1b4da5d1/resourceGroups/Sterling2MeruRG/providers/Microsoft.DBforPostgreSQL/servers/source-server-longhaul",
-        "SecretParameters": {
-            "AdminCredentials": {
-                "SourceServerPassword": "XXXXX",
-                "TargetServerPassword": "XXXXX"
-            }
+        "sourceDbServerResourceId": "/subscriptions/ac0271d6-426b-4b0d-b88d-0d0e4bd693ae/resourceGroups/autobot-singleserver-resourcegroup/providers/Microsoft.DBforPostgreSQL/servers/autobot-orcas-postgresql-ss",
+        "secretParameters": {
+            "adminCredentials": {
+                "sourceServerPassword": "XXXXXXXXX",
+                "targetServerPassword": "XXXXXXXXX"
+            },
+            "sourceServerUsername": "autobot@autobot-orcas-postgresql-ss",
+            "targetServerUsername": "portaltestuser"
         },
-        "DBsToMigrate": [
-            "dvdrental"
+        "dbsToMigrate": [
+            "postgres"
         ],
-        "SetupLogicalReplicationOnSourceDBIfNeeded": "true",
-        "OverwriteDBsinTarget": "true",
-        "MigrationMode": "Offline"
+        "setupLogicalReplicationOnSourceDbIfNeeded": "false",
+        "overwriteDbsinTarget": "true"
     },
-    "location": "Southeast Asia"
+    "location": "eastus2euap"
 }

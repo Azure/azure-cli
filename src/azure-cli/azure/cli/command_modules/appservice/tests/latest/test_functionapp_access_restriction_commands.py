@@ -17,7 +17,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
-WINDOWS_ASP_LOCATION_WEBAPP = 'japanwest'
+WINDOWS_ASP_LOCATION_WEBAPP = 'northeurope'
 WINDOWS_ASP_LOCATION_FUNCTIONAPP = 'francecentral'
 LINUX_ASP_LOCATION_WEBAPP = 'eastus2'
 LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
@@ -25,7 +25,7 @@ LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 
 class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_show(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
@@ -37,18 +37,20 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
         ])
 
         self.cmd('functionapp config access-restriction show -g {rg} -n {app_name}', checks=[
-            JMESPathCheck('length(@)', 3),
+            JMESPathCheck('length(@)', 5),
             JMESPathCheck('length(ipSecurityRestrictions)', 1),
             JMESPathCheck('ipSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('ipSecurityRestrictions[0].action', 'Allow'),
             JMESPathCheck('length(scmIpSecurityRestrictions)', 1),
             JMESPathCheck('scmIpSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('scmIpSecurityRestrictions[0].action', 'Allow'),
-            JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
+            JMESPathCheck('scmIpSecurityRestrictionsUseMain', False),
+            JMESPathCheck('pSecurityRestrictionsDefaultAction', None),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
         ])
 
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_set_simple(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
@@ -63,8 +65,23 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', True)
         ])
 
+        self.cmd('functionapp config access-restriction set -g {rg} -n {app_name} --default-action Deny', checks=[
+            JMESPathCheck('ipSecurityRestrictionsDefaultAction', 'Deny'),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
+        ])
+
+        self.cmd('functionapp config access-restriction set -g {rg} -n {app_name} --default-action Allow --scm-default-action Deny', checks=[
+            JMESPathCheck('ipSecurityRestrictionsDefaultAction', 'Allow'),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', 'Deny')
+        ])
+
+        self.cmd('functionapp config access-restriction set -g {rg} -n {app_name} --default-action Deny', checks=[
+            JMESPathCheck('ipSecurityRestrictionsDefaultAction', 'Deny'),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', 'Deny')
+        ])
+
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_set_complex(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
@@ -85,7 +102,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(random_name_length=17, parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
     # random_name_length is temporary until the bug fix in the API is deployed successfully & then should be removed.
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_add(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
@@ -105,7 +122,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_add_ip_address_validation(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
@@ -134,7 +151,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
 
     @unittest.skip("Invalid test case that cannot pass in the live mode.")
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_add_service_endpoint(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
@@ -160,7 +177,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_remove(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
@@ -186,7 +203,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_add_scm(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
@@ -206,7 +223,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_remove_scm(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
@@ -233,7 +250,7 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
 
     @unittest.skip("Function app slot shouldn't use webapp")
     @ResourceGroupPreparer(parameter_name_for_location='location', location=WINDOWS_ASP_LOCATION_WEBAPP)
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_functionapp_access_restriction_slot(self, resource_group, location):
         self.kwargs.update({
             'app_name': self.create_random_name(prefix='cli-funcapp-nwr', length=24),
@@ -249,14 +266,16 @@ class FunctionAppAccessRestrictionScenarioTest(ScenarioTest):
         ])
 
         self.cmd('functionapp config access-restriction show -g {rg} -n {app_name} --slot {slot_name}', checks=[
-            JMESPathCheck('length(@)', 3),
+            JMESPathCheck('length(@)', 5),
             JMESPathCheck('length(ipSecurityRestrictions)', 1),
             JMESPathCheck('ipSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('ipSecurityRestrictions[0].action', 'Allow'),
             JMESPathCheck('length(scmIpSecurityRestrictions)', 1),
             JMESPathCheck('scmIpSecurityRestrictions[0].name', 'Allow all'),
             JMESPathCheck('scmIpSecurityRestrictions[0].action', 'Allow'),
-            JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
+            JMESPathCheck('scmIpSecurityRestrictionsUseMain', False),
+            JMESPathCheck('pSecurityRestrictionsDefaultAction', None),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
         ])
 
         self.cmd('functionapp config access-restriction add -g {rg} -n {app_name} --rule-name developers --action Allow --ip-address 130.220.0.0/27 --priority 200 --slot {slot_name}', checks=[

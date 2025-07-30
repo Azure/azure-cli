@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01-preview",
+        "version": "2024-05-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2022-10-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.eventhub/namespaces/{}/eventhubs/{}", "2024-05-01-preview"],
         ]
     }
 
@@ -59,6 +59,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9-]{6,50}[a-zA-Z0-9]$",
                 max_length=50,
                 min_length=6,
             ),
@@ -107,7 +108,6 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Avro": "Avro", "AvroDeflate": "AvroDeflate"},
         )
-        _args_schema.encoding._registered = False
         _args_schema.capture_interval = AAZIntArg(
             options=["--capture-interval"],
             arg_group="CaptureDescription",
@@ -125,6 +125,40 @@ class Update(AAZCommand):
             arg_group="CaptureDescription",
             help="A value that indicates whether to Skip Empty Archives",
             nullable=True,
+        )
+
+        # define Arg Group "Destination"
+
+        _args_schema = cls._args_schema
+        _args_schema.identity = AAZObjectArg(
+            options=["--identity"],
+            arg_group="Destination",
+            help="A value that indicates whether capture description is enabled.",
+            nullable=True,
+        )
+
+        identity = cls._args_schema.identity
+        identity.type = AAZStrArg(
+            options=["type"],
+            help="Type of Azure Active Directory Managed Identity.",
+            nullable=True,
+            enum={"SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned"},
+        )
+        identity.user_assigned_identity = AAZStrArg(
+            options=["user-assigned-identity"],
+            help="ARM ID of Managed User Identity. This property is required is the type is UserAssignedIdentity. If type is SystemAssigned, then the System Assigned Identity Associated with the namespace will be used.",
+            nullable=True,
+        )
+
+        # define Arg Group "MessageTimestampDescription"
+
+        _args_schema = cls._args_schema
+        _args_schema.timestamp_type = AAZStrArg(
+            options=["--timestamp-type"],
+            arg_group="MessageTimestampDescription",
+            help="Denotes the type of timestamp the message will hold.Two types of timestamp types - \"AppendTime\" and \"CreateTime\". AppendTime refers the time in which message got appended inside broker log. CreateTime refers to the time in which the message was generated on source side and producers can set this timestamp while sending the message. Default value is AppendTime. If you are using AMQP protocol, CreateTime equals AppendTime and its behavior remains the same.",
+            nullable=True,
+            enum={"Create": "Create", "LogAppend": "LogAppend"},
         )
 
         # define Arg Group "Properties"
@@ -146,6 +180,12 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Active": "Active", "Creating": "Creating", "Deleting": "Deleting", "Disabled": "Disabled", "ReceiveDisabled": "ReceiveDisabled", "Renaming": "Renaming", "Restoring": "Restoring", "SendDisabled": "SendDisabled", "Unknown": "Unknown"},
         )
+        _args_schema.user_metadata = AAZStrArg(
+            options=["--user-metadata"],
+            arg_group="Properties",
+            help="Gets and Sets Metadata of User.",
+            nullable=True,
+        )
 
         # define Arg Group "RetentionDescription"
 
@@ -155,7 +195,13 @@ class Update(AAZCommand):
             arg_group="RetentionDescription",
             help="Enumerates the possible values for cleanup policy",
             nullable=True,
-            enum={"Compaction": "Compaction", "Delete": "Delete"},
+            enum={"Compact": "Compact", "Delete": "Delete", "DeleteOrCompact": "DeleteOrCompact"},
+        )
+        _args_schema.min_compaction_lag_time_in_minutes = AAZIntArg(
+            options=["--min-lag", "--min-compaction-lag-in-mins"],
+            arg_group="RetentionDescription",
+            help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.",
+            nullable=True,
         )
         _args_schema.retention_time_in_hours = AAZIntArg(
             options=["--retention-time", "--retention-time-in-hours"],
@@ -253,7 +299,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2024-05-01-preview",
                     required=True,
                 ),
             }
@@ -340,7 +386,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01-preview",
+                    "api-version", "2024-05-01-preview",
                     required=True,
                 ),
             }
@@ -403,9 +449,11 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("captureDescription", AAZObjectType)
+                properties.set_prop("messageTimestampDescription", AAZObjectType)
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("retentionDescription", AAZObjectType)
                 properties.set_prop("status", AAZStrType, ".status")
+                properties.set_prop("userMetadata", AAZStrType, ".user_metadata")
 
             capture_description = _builder.get(".properties.captureDescription")
             if capture_description is not None:
@@ -418,8 +466,14 @@ class Update(AAZCommand):
 
             destination = _builder.get(".properties.captureDescription.destination")
             if destination is not None:
+                destination.set_prop("identity", AAZObjectType, ".identity")
                 destination.set_prop("name", AAZStrType, ".destination_name")
                 destination.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+            identity = _builder.get(".properties.captureDescription.destination.identity")
+            if identity is not None:
+                identity.set_prop("type", AAZStrType, ".type")
+                identity.set_prop("userAssignedIdentity", AAZStrType, ".user_assigned_identity")
 
             properties = _builder.get(".properties.captureDescription.destination.properties")
             if properties is not None:
@@ -427,9 +481,14 @@ class Update(AAZCommand):
                 properties.set_prop("blobContainer", AAZStrType, ".blob_container")
                 properties.set_prop("storageAccountResourceId", AAZStrType, ".storage_account")
 
+            message_timestamp_description = _builder.get(".properties.messageTimestampDescription")
+            if message_timestamp_description is not None:
+                message_timestamp_description.set_prop("timestampType", AAZStrType, ".timestamp_type")
+
             retention_description = _builder.get(".properties.retentionDescription")
             if retention_description is not None:
                 retention_description.set_prop("cleanupPolicy", AAZStrType, ".cleanup_policy")
+                retention_description.set_prop("minCompactionLagTimeInMinutes", AAZIntType, ".min_compaction_lag_time_in_minutes")
                 retention_description.set_prop("retentionTimeInHours", AAZIntType, ".retention_time_in_hours")
                 retention_description.set_prop("tombstoneRetentionTimeInHours", AAZIntType, ".tombstone_retention_time_in_hours")
 
@@ -491,8 +550,14 @@ class _UpdateHelper:
             serialized_name="createdAt",
             flags={"read_only": True},
         )
+        properties.identifier = AAZStrType(
+            flags={"read_only": True},
+        )
         properties.message_retention_in_days = AAZIntType(
             serialized_name="messageRetentionInDays",
+        )
+        properties.message_timestamp_description = AAZObjectType(
+            serialized_name="messageTimestampDescription",
         )
         properties.partition_count = AAZIntType(
             serialized_name="partitionCount",
@@ -508,6 +573,9 @@ class _UpdateHelper:
         properties.updated_at = AAZStrType(
             serialized_name="updatedAt",
             flags={"read_only": True},
+        )
+        properties.user_metadata = AAZStrType(
+            serialized_name="userMetadata",
         )
 
         capture_description = _schema_eventhub_read.properties.capture_description
@@ -525,9 +593,16 @@ class _UpdateHelper:
         )
 
         destination = _schema_eventhub_read.properties.capture_description.destination
+        destination.identity = AAZObjectType()
         destination.name = AAZStrType()
         destination.properties = AAZObjectType(
             flags={"client_flatten": True},
+        )
+
+        identity = _schema_eventhub_read.properties.capture_description.destination.identity
+        identity.type = AAZStrType()
+        identity.user_assigned_identity = AAZStrType(
+            serialized_name="userAssignedIdentity",
         )
 
         properties = _schema_eventhub_read.properties.capture_description.destination.properties
@@ -550,12 +625,20 @@ class _UpdateHelper:
             serialized_name="storageAccountResourceId",
         )
 
+        message_timestamp_description = _schema_eventhub_read.properties.message_timestamp_description
+        message_timestamp_description.timestamp_type = AAZStrType(
+            serialized_name="timestampType",
+        )
+
         partition_ids = _schema_eventhub_read.properties.partition_ids
         partition_ids.Element = AAZStrType()
 
         retention_description = _schema_eventhub_read.properties.retention_description
         retention_description.cleanup_policy = AAZStrType(
             serialized_name="cleanupPolicy",
+        )
+        retention_description.min_compaction_lag_time_in_minutes = AAZIntType(
+            serialized_name="minCompactionLagTimeInMinutes",
         )
         retention_description.retention_time_in_hours = AAZIntType(
             serialized_name="retentionTimeInHours",

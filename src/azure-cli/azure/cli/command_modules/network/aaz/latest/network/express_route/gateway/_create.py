@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2023-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/expressroutegateways/{}", "2023-09-01"],
         ]
     }
 
@@ -58,6 +58,10 @@ class Create(AAZCommand):
             fmt=AAZResourceLocationArgFormat(
                 resource_group_arg="resource_group",
             ),
+        )
+        _args_schema.allow_non_vwan_traffic = AAZBoolArg(
+            options=["--allow-non-vwan-traffic"],
+            help="Configures this gateway to accept traffic from non Virtual WAN networks.",
         )
         _args_schema.virtual_hub = AAZStrArg(
             options=["--virtual-hub"],
@@ -190,7 +194,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-09-01",
                     required=True,
                 ),
             }
@@ -221,6 +225,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("allowNonVirtualWanTraffic", AAZBoolType, ".allow_non_vwan_traffic")
                 properties.set_prop("autoScaleConfiguration", AAZObjectType)
                 properties.set_prop("virtualHub", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
 
@@ -278,6 +283,9 @@ class Create(AAZCommand):
             )
 
             properties = cls._schema_on_200_201.properties
+            properties.allow_non_virtual_wan_traffic = AAZBoolType(
+                serialized_name="allowNonVirtualWanTraffic",
+            )
             properties.auto_scale_configuration = AAZObjectType(
                 serialized_name="autoScaleConfiguration",
             )
@@ -319,6 +327,9 @@ class Create(AAZCommand):
             properties.enable_internet_security = AAZBoolType(
                 serialized_name="enableInternetSecurity",
             )
+            properties.enable_private_link_fast_path = AAZBoolType(
+                serialized_name="enablePrivateLinkFastPath",
+            )
             properties.express_route_circuit_peering = AAZObjectType(
                 serialized_name="expressRouteCircuitPeering",
                 flags={"required": True},
@@ -345,6 +356,14 @@ class Create(AAZCommand):
                 serialized_name="associatedRouteTable",
             )
             _CreateHelper._build_schema_sub_resource_read(routing_configuration.associated_route_table)
+            routing_configuration.inbound_route_map = AAZObjectType(
+                serialized_name="inboundRouteMap",
+            )
+            _CreateHelper._build_schema_sub_resource_read(routing_configuration.inbound_route_map)
+            routing_configuration.outbound_route_map = AAZObjectType(
+                serialized_name="outboundRouteMap",
+            )
+            _CreateHelper._build_schema_sub_resource_read(routing_configuration.outbound_route_map)
             routing_configuration.propagated_route_tables = AAZObjectType(
                 serialized_name="propagatedRouteTables",
             )
@@ -371,6 +390,9 @@ class Create(AAZCommand):
             vnet_routes.static_routes = AAZListType(
                 serialized_name="staticRoutes",
             )
+            vnet_routes.static_routes_config = AAZObjectType(
+                serialized_name="staticRoutesConfig",
+            )
 
             bgp_connections = cls._schema_on_200_201.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.bgp_connections
             bgp_connections.Element = AAZObjectType()
@@ -390,6 +412,15 @@ class Create(AAZCommand):
 
             address_prefixes = cls._schema_on_200_201.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes.Element.address_prefixes
             address_prefixes.Element = AAZStrType()
+
+            static_routes_config = cls._schema_on_200_201.properties.express_route_connections.Element.properties.routing_configuration.vnet_routes.static_routes_config
+            static_routes_config.propagate_static_routes = AAZBoolType(
+                serialized_name="propagateStaticRoutes",
+                flags={"read_only": True},
+            )
+            static_routes_config.vnet_local_route_override_criteria = AAZStrType(
+                serialized_name="vnetLocalRouteOverrideCriteria",
+            )
 
             virtual_hub = cls._schema_on_200_201.properties.virtual_hub
             virtual_hub.id = AAZStrType()

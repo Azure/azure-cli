@@ -70,7 +70,6 @@ def get_migrate_mysql_to_azuredbformysql_sync_input(database_options_json,
                                                       target_connection_info,
                                                       has_schema_migration_options=True,
                                                       has_consistent_snapshot_options=True,
-                                                      requires_consistent_snapshot=True,
                                                       has_binlog_position=False)
 
 
@@ -82,7 +81,6 @@ def get_migrate_mysql_to_azuredbformysql_offline_input(database_options_json,
                                                       target_connection_info,
                                                       has_schema_migration_options=True,
                                                       has_consistent_snapshot_options=True,
-                                                      requires_consistent_snapshot=False,
                                                       has_binlog_position=False)
 
 
@@ -94,7 +92,6 @@ def get_migrate_mysql_to_azuredbformysql_cdc_input(database_options_json,
                                                       target_connection_info,
                                                       has_schema_migration_options=False,
                                                       has_consistent_snapshot_options=False,
-                                                      requires_consistent_snapshot=False,
                                                       has_binlog_position=True)
 
 
@@ -103,7 +100,6 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
                                                target_connection_info,
                                                has_schema_migration_options: bool,
                                                has_consistent_snapshot_options: bool,
-                                               requires_consistent_snapshot: bool,
                                                has_binlog_position: bool):
     database_options = []
     migration_level_settings = {}
@@ -140,12 +136,12 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
         if not isinstance(migration_level_settings, dict):
             raise ValidationError('migration_level_settings should be a dictionary')
 
-    if requires_consistent_snapshot:
-        migration_level_settings['enableConsistentBackup'] = 'true'
-    elif has_consistent_snapshot_options:
+    if has_consistent_snapshot_options:
         make_source_server_read_only = database_options_json.get('make_source_server_read_only', False)
         set_optional(migration_level_settings, 'enableConsistentBackup', database_options_json,
                      'enable_consistent_backup')
+        set_optional(migration_level_settings, 'enableConsistentBackupWithoutLocks', database_options_json,
+                     'enable_consistent_backup_without_locks')
 
     if has_schema_migration_options:
         extract_schema_migration_options(migration_properties, database_options_json)

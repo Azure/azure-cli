@@ -19,10 +19,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2021-12-01-preview",
+        "version": "2025-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.operationalinsights/workspaces", "2021-12-01-preview"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces", "2021-12-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.operationalinsights/workspaces", "2025-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces", "2025-02-01"],
         ]
     }
 
@@ -47,25 +47,287 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.WorkspacesListByResourceGroup(ctx=self.ctx)()
-        if condition_1:
             self.WorkspacesList(ctx=self.ctx)()
+        if condition_1:
+            self.WorkspacesListByResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
         return result
+
+    class WorkspacesList(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/providers/Microsoft.OperationalInsights/workspaces",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "GET"
+
+        @property
+        def error_format(self):
+            return "MgmtErrorFormat"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2025-02-01",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.etag = AAZStrType()
+            _element.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.identity = AAZIdentityObjectType()
+            _element.location = AAZStrType(
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _element.tags = AAZDictType()
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            identity = cls._schema_on_200.value.Element.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.created_date = AAZStrType(
+                serialized_name="createdDate",
+                flags={"read_only": True},
+            )
+            properties.customer_id = AAZStrType(
+                serialized_name="customerId",
+                flags={"read_only": True},
+            )
+            properties.default_data_collection_rule_resource_id = AAZStrType(
+                serialized_name="defaultDataCollectionRuleResourceId",
+            )
+            properties.failover = AAZObjectType()
+            properties.features = AAZFreeFormDictType()
+            properties.force_cmk_for_query = AAZBoolType(
+                serialized_name="forceCmkForQuery",
+            )
+            properties.modified_date = AAZStrType(
+                serialized_name="modifiedDate",
+                flags={"read_only": True},
+            )
+            properties.private_link_scoped_resources = AAZListType(
+                serialized_name="privateLinkScopedResources",
+                flags={"read_only": True},
+            )
+            properties.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+            properties.public_network_access_for_ingestion = AAZStrType(
+                serialized_name="publicNetworkAccessForIngestion",
+            )
+            properties.public_network_access_for_query = AAZStrType(
+                serialized_name="publicNetworkAccessForQuery",
+            )
+            properties.replication = AAZObjectType()
+            properties.retention_in_days = AAZIntType(
+                serialized_name="retentionInDays",
+                nullable=True,
+            )
+            properties.sku = AAZObjectType()
+            properties.workspace_capping = AAZObjectType(
+                serialized_name="workspaceCapping",
+            )
+
+            failover = cls._schema_on_200.value.Element.properties.failover
+            failover.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
+            )
+            failover.state = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            private_link_scoped_resources = cls._schema_on_200.value.Element.properties.private_link_scoped_resources
+            private_link_scoped_resources.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.private_link_scoped_resources.Element
+            _element.resource_id = AAZStrType(
+                serialized_name="resourceId",
+            )
+            _element.scope_id = AAZStrType(
+                serialized_name="scopeId",
+            )
+
+            replication = cls._schema_on_200.value.Element.properties.replication
+            replication.created_date = AAZStrType(
+                serialized_name="createdDate",
+                flags={"read_only": True},
+            )
+            replication.enabled = AAZBoolType()
+            replication.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
+            )
+            replication.location = AAZStrType()
+            replication.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
+            )
+
+            sku = cls._schema_on_200.value.Element.properties.sku
+            sku.capacity_reservation_level = AAZIntType(
+                serialized_name="capacityReservationLevel",
+            )
+            sku.last_sku_update = AAZStrType(
+                serialized_name="lastSkuUpdate",
+                flags={"read_only": True},
+            )
+            sku.name = AAZStrType(
+                flags={"required": True},
+            )
+
+            workspace_capping = cls._schema_on_200.value.Element.properties.workspace_capping
+            workspace_capping.daily_quota_gb = AAZFloatType(
+                serialized_name="dailyQuotaGb",
+            )
+            workspace_capping.data_ingestion_status = AAZStrType(
+                serialized_name="dataIngestionStatus",
+                flags={"read_only": True},
+            )
+            workspace_capping.quota_next_reset_time = AAZStrType(
+                serialized_name="quotaNextResetTime",
+                flags={"read_only": True},
+            )
+
+            system_data = cls._schema_on_200.value.Element.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
+
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
+
+            return cls._schema_on_200
 
     class WorkspacesListByResourceGroup(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -111,7 +373,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -150,12 +412,11 @@ class List(AAZCommand):
             value.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element
-            _element.e_tag = AAZStrType(
-                serialized_name="eTag",
-            )
+            _element.etag = AAZStrType()
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -174,6 +435,35 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
+            identity = cls._schema_on_200.value.Element.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
             properties = cls._schema_on_200.value.Element.properties
             properties.created_date = AAZStrType(
                 serialized_name="createdDate",
@@ -186,7 +476,8 @@ class List(AAZCommand):
             properties.default_data_collection_rule_resource_id = AAZStrType(
                 serialized_name="defaultDataCollectionRuleResourceId",
             )
-            properties.features = AAZObjectType()
+            properties.failover = AAZObjectType()
+            properties.features = AAZFreeFormDictType()
             properties.force_cmk_for_query = AAZBoolType(
                 serialized_name="forceCmkForQuery",
             )
@@ -208,6 +499,7 @@ class List(AAZCommand):
             properties.public_network_access_for_query = AAZStrType(
                 serialized_name="publicNetworkAccessForQuery",
             )
+            properties.replication = AAZObjectType()
             properties.retention_in_days = AAZIntType(
                 serialized_name="retentionInDays",
                 nullable=True,
@@ -217,40 +509,39 @@ class List(AAZCommand):
                 serialized_name="workspaceCapping",
             )
 
-            features = cls._schema_on_200.value.Element.properties.features
-            features.cluster_resource_id = AAZStrType(
-                serialized_name="clusterResourceId",
-                nullable=True,
+            failover = cls._schema_on_200.value.Element.properties.failover
+            failover.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
             )
-            features.disable_local_auth = AAZBoolType(
-                serialized_name="disableLocalAuth",
-                nullable=True,
-            )
-            features.enable_data_export = AAZBoolType(
-                serialized_name="enableDataExport",
-                nullable=True,
-            )
-            features.enable_log_access_using_only_resource_permissions = AAZBoolType(
-                serialized_name="enableLogAccessUsingOnlyResourcePermissions",
-                nullable=True,
-            )
-            features.immediate_purge_data_on30_days = AAZBoolType(
-                serialized_name="immediatePurgeDataOn30Days",
-                nullable=True,
+            failover.state = AAZStrType(
+                flags={"read_only": True},
             )
 
             private_link_scoped_resources = cls._schema_on_200.value.Element.properties.private_link_scoped_resources
-            private_link_scoped_resources.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            private_link_scoped_resources.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.private_link_scoped_resources.Element
             _element.resource_id = AAZStrType(
                 serialized_name="resourceId",
-                flags={"read_only": True},
             )
             _element.scope_id = AAZStrType(
                 serialized_name="scopeId",
+            )
+
+            replication = cls._schema_on_200.value.Element.properties.replication
+            replication.created_date = AAZStrType(
+                serialized_name="createdDate",
+                flags={"read_only": True},
+            )
+            replication.enabled = AAZBoolType()
+            replication.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
+            )
+            replication.location = AAZStrType()
+            replication.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
                 flags={"read_only": True},
             )
 
@@ -282,27 +573,21 @@ class List(AAZCommand):
             system_data = cls._schema_on_200.value.Element.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
-                flags={"read_only": True},
             )
             system_data.created_by = AAZStrType(
                 serialized_name="createdBy",
-                flags={"read_only": True},
             )
             system_data.created_by_type = AAZStrType(
                 serialized_name="createdByType",
-                flags={"read_only": True},
             )
             system_data.last_modified_at = AAZStrType(
                 serialized_name="lastModifiedAt",
-                flags={"read_only": True},
             )
             system_data.last_modified_by = AAZStrType(
                 serialized_name="lastModifiedBy",
-                flags={"read_only": True},
             )
             system_data.last_modified_by_type = AAZStrType(
                 serialized_name="lastModifiedByType",
-                flags={"read_only": True},
             )
 
             tags = cls._schema_on_200.value.Element.tags
@@ -310,244 +595,9 @@ class List(AAZCommand):
 
             return cls._schema_on_200
 
-    class WorkspacesList(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
 
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/providers/Microsoft.OperationalInsights/workspaces",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "MgmtErrorFormat"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.value = AAZListType()
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.e_tag = AAZStrType(
-                serialized_name="eTag",
-            )
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.location = AAZStrType(
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _element.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.created_date = AAZStrType(
-                serialized_name="createdDate",
-                flags={"read_only": True},
-            )
-            properties.customer_id = AAZStrType(
-                serialized_name="customerId",
-                flags={"read_only": True},
-            )
-            properties.default_data_collection_rule_resource_id = AAZStrType(
-                serialized_name="defaultDataCollectionRuleResourceId",
-            )
-            properties.features = AAZObjectType()
-            properties.force_cmk_for_query = AAZBoolType(
-                serialized_name="forceCmkForQuery",
-            )
-            properties.modified_date = AAZStrType(
-                serialized_name="modifiedDate",
-                flags={"read_only": True},
-            )
-            properties.private_link_scoped_resources = AAZListType(
-                serialized_name="privateLinkScopedResources",
-                flags={"read_only": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.public_network_access_for_ingestion = AAZStrType(
-                serialized_name="publicNetworkAccessForIngestion",
-            )
-            properties.public_network_access_for_query = AAZStrType(
-                serialized_name="publicNetworkAccessForQuery",
-            )
-            properties.retention_in_days = AAZIntType(
-                serialized_name="retentionInDays",
-                nullable=True,
-            )
-            properties.sku = AAZObjectType()
-            properties.workspace_capping = AAZObjectType(
-                serialized_name="workspaceCapping",
-            )
-
-            features = cls._schema_on_200.value.Element.properties.features
-            features.cluster_resource_id = AAZStrType(
-                serialized_name="clusterResourceId",
-                nullable=True,
-            )
-            features.disable_local_auth = AAZBoolType(
-                serialized_name="disableLocalAuth",
-                nullable=True,
-            )
-            features.enable_data_export = AAZBoolType(
-                serialized_name="enableDataExport",
-                nullable=True,
-            )
-            features.enable_log_access_using_only_resource_permissions = AAZBoolType(
-                serialized_name="enableLogAccessUsingOnlyResourcePermissions",
-                nullable=True,
-            )
-            features.immediate_purge_data_on30_days = AAZBoolType(
-                serialized_name="immediatePurgeDataOn30Days",
-                nullable=True,
-            )
-
-            private_link_scoped_resources = cls._schema_on_200.value.Element.properties.private_link_scoped_resources
-            private_link_scoped_resources.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
-
-            _element = cls._schema_on_200.value.Element.properties.private_link_scoped_resources.Element
-            _element.resource_id = AAZStrType(
-                serialized_name="resourceId",
-                flags={"read_only": True},
-            )
-            _element.scope_id = AAZStrType(
-                serialized_name="scopeId",
-                flags={"read_only": True},
-            )
-
-            sku = cls._schema_on_200.value.Element.properties.sku
-            sku.capacity_reservation_level = AAZIntType(
-                serialized_name="capacityReservationLevel",
-            )
-            sku.last_sku_update = AAZStrType(
-                serialized_name="lastSkuUpdate",
-                flags={"read_only": True},
-            )
-            sku.name = AAZStrType(
-                flags={"required": True},
-            )
-
-            workspace_capping = cls._schema_on_200.value.Element.properties.workspace_capping
-            workspace_capping.daily_quota_gb = AAZFloatType(
-                serialized_name="dailyQuotaGb",
-            )
-            workspace_capping.data_ingestion_status = AAZStrType(
-                serialized_name="dataIngestionStatus",
-                flags={"read_only": True},
-            )
-            workspace_capping.quota_next_reset_time = AAZStrType(
-                serialized_name="quotaNextResetTime",
-                flags={"read_only": True},
-            )
-
-            system_data = cls._schema_on_200.value.Element.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-                flags={"read_only": True},
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-                flags={"read_only": True},
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-                flags={"read_only": True},
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-                flags={"read_only": True},
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-                flags={"read_only": True},
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
-                flags={"read_only": True},
-            )
-
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
-
-            return cls._schema_on_200
+class _ListHelper:
+    """Helper class for List"""
 
 
 __all__ = ["List"]

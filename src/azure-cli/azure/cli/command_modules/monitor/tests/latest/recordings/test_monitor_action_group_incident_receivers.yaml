@@ -1,0 +1,337 @@
+interactions:
+- request:
+    body: '{"location": "Global", "properties": {"enabled": true, "groupShortName":
+      "cliactiongro", "incidentReceivers": [{"connection": {"id": "8be638e7-1419-42d4-a059-437a5f4f4e4e",
+      "name": "testconn"}, "incidentManagementService": "Icm", "mappings": {"Icm.title":
+      "${data.essentials.severity}:${data.essentials.monitorCondition} ${data.essentials.monitoringService}:${data.essentials.signalType}
+      ${data.essentials.alertTargetIds}", "Icm.occurringlocation.environment": "PROD",
+      "Icm.routingid": "${data.essentials.monitoringService}://${data.essentials.signalType}",
+      "Icm.automitigationenabled": "true", "Icm.monitorid": "${data.essentials.alertRule}",
+      "Icm.correlationid": "${data.essentials.signalType}://${data.essentials.originAlertId}",
+      "Icm.tsgid": "https://microsoft.com"}, "name": "testag"}]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor action-group create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '792'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --incident-receivers
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_ag_incident000001/providers/Microsoft.Insights/actionGroups/cliactiongrouptest000002?api-version=2024-10-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_ag_incident000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002","type":"Microsoft.Insights/ActionGroups","name":"cliactiongrouptest000002","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"cliactiongro","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"eventHubReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[],"incidentReceivers":[{"name":"testag","connection":{"Name":"testconn","id":"8be638e7-1419-42d4-a059-437a5f4f4e4e"},"mappings":{"Icm.title":"${data.essentials.severity}:${data.essentials.monitorCondition}
+        ${data.essentials.monitoringService}:${data.essentials.signalType} ${data.essentials.alertTargetIds}","Icm.occurringlocation.environment":"PROD","Icm.routingid":"${data.essentials.monitoringService}://${data.essentials.signalType}","Icm.automitigationenabled":"true","Icm.monitorid":"${data.essentials.alertRule}","Icm.correlationid":"${data.essentials.signalType}://${data.essentials.originAlertId}","Icm.tsgid":"https://microsoft.com"},"incidentManagementService":"Icm"}]}}'
+    headers:
+      access-control-expose-headers:
+      - x-activityid
+      api-supported-versions:
+      - 2016-09-01-preview, 2017-03-01-preview, 2017-04-01, 2018-03-01, 2018-09-01,
+        2019-03-01, 2019-06-01, 2021-09-01, 2022-04-01, 2022-06-01, 2023-01-01, 2023-03-01-preview,
+        2023-05-01-preview, 2023-05-01, 2023-08-01-preview, 2023-09-01-preview, 2024-10-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1290'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 07 Apr 2025 03:08:57 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-activityid:
+      - a10267db-135d-11f0-8b37-902e1671aeaf
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=52a2fda8-c59f-4bde-8c4d-48ffa466fefc/southeastasia/73f0af18-916e-4e69-84ad-5c1b5ccac4ab
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '24'
+      x-msedge-ref:
+      - 'Ref A: 0941937DBADF4FAAA1F77FF1B04DE61B Ref B: MAA201060513017 Ref C: 2025-04-07T03:08:52Z'
+      x-servedby:
+      - WUS2ONEIM000000
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor action-group update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -r -n -g
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_ag_incident000001/providers/Microsoft.Insights/actionGroups/cliactiongrouptest000002?api-version=2024-10-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_ag_incident000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002","type":"Microsoft.Insights/ActionGroups","name":"cliactiongrouptest000002","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"cliactiongro","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"eventHubReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[],"incidentReceivers":[{"name":"testag","connection":{"Name":"testconn","id":"8be638e7-1419-42d4-a059-437a5f4f4e4e"},"mappings":{"Icm.title":"${data.essentials.severity}:${data.essentials.monitorCondition}
+        ${data.essentials.monitoringService}:${data.essentials.signalType} ${data.essentials.alertTargetIds}","Icm.occurringlocation.environment":"PROD","Icm.routingid":"${data.essentials.monitoringService}://${data.essentials.signalType}","Icm.automitigationenabled":"true","Icm.monitorid":"${data.essentials.alertRule}","Icm.correlationid":"${data.essentials.signalType}://${data.essentials.originAlertId}","Icm.tsgid":"https://microsoft.com"},"incidentManagementService":"Icm"}]}}'
+    headers:
+      access-control-expose-headers:
+      - x-activityid
+      api-supported-versions:
+      - 2016-09-01-preview, 2017-03-01-preview, 2017-04-01, 2018-03-01, 2018-09-01,
+        2019-03-01, 2019-06-01, 2021-09-01, 2022-04-01, 2022-06-01, 2023-01-01, 2023-03-01-preview,
+        2023-05-01-preview, 2023-05-01, 2023-08-01-preview, 2023-09-01-preview, 2024-10-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1290'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 07 Apr 2025 03:08:58 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-activityid:
+      - a5485776-135d-11f0-985c-902e1671aeaf
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: 2E2B01A9BFB84D668540B50A185085E8 Ref B: MAA201060514025 Ref C: 2025-04-07T03:08:58Z'
+      x-servedby:
+      - WUS2ONEIM000006
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "Global", "properties": {"armRoleReceivers": [], "automationRunbookReceivers":
+      [], "azureAppPushReceivers": [], "azureFunctionReceivers": [], "emailReceivers":
+      [], "enabled": true, "eventHubReceivers": [], "groupShortName": "cliactiongro",
+      "incidentReceivers": [], "itsmReceivers": [], "logicAppReceivers": [], "smsReceivers":
+      [], "voiceReceivers": [], "webhookReceivers": []}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor action-group update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '390'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -r -n -g
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_ag_incident000001/providers/Microsoft.Insights/actionGroups/cliactiongrouptest000002?api-version=2024-10-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_ag_incident000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002","type":"Microsoft.Insights/ActionGroups","name":"cliactiongrouptest000002","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"cliactiongro","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"eventHubReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[],"incidentReceivers":[]}}'
+    headers:
+      access-control-expose-headers:
+      - x-activityid
+      api-supported-versions:
+      - 2016-09-01-preview, 2017-03-01-preview, 2017-04-01, 2018-03-01, 2018-09-01,
+        2019-03-01, 2019-06-01, 2021-09-01, 2022-04-01, 2022-06-01, 2023-01-01, 2023-03-01-preview,
+        2023-05-01-preview, 2023-05-01, 2023-08-01-preview, 2023-09-01-preview, 2024-10-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 07 Apr 2025 03:09:01 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-activityid:
+      - a5485776-135d-11f0-985c-902e1671aeaf
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=52a2fda8-c59f-4bde-8c4d-48ffa466fefc/southeastasia/5167066a-7d02-41e5-a49d-f2e8bc8c02c1
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '24'
+      x-msedge-ref:
+      - 'Ref A: 62E1AC0969DC4C5D9F00B6CAEEC1F0B5 Ref B: MAA201060514025 Ref C: 2025-04-07T03:08:58Z'
+      x-servedby:
+      - EUS2ONEIM000001
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor action-group update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --incident-receivers
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_ag_incident000001/providers/Microsoft.Insights/actionGroups/cliactiongrouptest000002?api-version=2024-10-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_ag_incident000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002","type":"Microsoft.Insights/ActionGroups","name":"cliactiongrouptest000002","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"cliactiongro","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"eventHubReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[],"incidentReceivers":[]}}'
+    headers:
+      access-control-expose-headers:
+      - x-activityid
+      api-supported-versions:
+      - 2016-09-01-preview, 2017-03-01-preview, 2017-04-01, 2018-03-01, 2018-09-01,
+        2019-03-01, 2019-06-01, 2021-09-01, 2022-04-01, 2022-06-01, 2023-01-01, 2023-03-01-preview,
+        2023-05-01-preview, 2023-05-01, 2023-08-01-preview, 2023-09-01-preview, 2024-10-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '635'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 07 Apr 2025 03:09:03 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-activityid:
+      - a7db9680-135d-11f0-881a-902e1671aeaf
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '249'
+      x-msedge-ref:
+      - 'Ref A: BE02517CF3AD47BEB821579915BA1CB8 Ref B: MAA201060516025 Ref C: 2025-04-07T03:09:02Z'
+      x-servedby:
+      - WUS2ONEIM000008
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "Global", "properties": {"armRoleReceivers": [], "automationRunbookReceivers":
+      [], "azureAppPushReceivers": [], "azureFunctionReceivers": [], "emailReceivers":
+      [], "enabled": true, "eventHubReceivers": [], "groupShortName": "cliactiongro",
+      "incidentReceivers": [{"connection": {"id": "8be638e7-1419-42d4-a059-437a5f4f4e4e",
+      "name": "testconn"}, "incidentManagementService": "Icm", "mappings": {"Icm.title":
+      "${data.essentials.severity}:${data.essentials.monitorCondition} ${data.essentials.monitoringService}:${data.essentials.signalType}
+      ${data.essentials.alertTargetIds}", "Icm.occurringlocation.environment": "PROD",
+      "Icm.routingid": "${data.essentials.monitoringService}://${data.essentials.signalType}",
+      "Icm.automitigationenabled": "true", "Icm.monitorid": "${data.essentials.alertRule}",
+      "Icm.correlationid": "${data.essentials.signalType}://${data.essentials.originAlertId}",
+      "Icm.tsgid": "https://microsoft.com"}, "name": "testag"}], "itsmReceivers":
+      [], "logicAppReceivers": [], "smsReceivers": [], "voiceReceivers": [], "webhookReceivers":
+      []}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor action-group update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '1068'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --incident-receivers
+      User-Agent:
+      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_ag_incident000001/providers/Microsoft.Insights/actionGroups/cliactiongrouptest000002?api-version=2024-10-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_monitor_ag_incident000001/providers/microsoft.insights/actionGroups/cliactiongrouptest000002","type":"Microsoft.Insights/ActionGroups","name":"cliactiongrouptest000002","location":"Global","kind":null,"tags":null,"properties":{"groupShortName":"cliactiongro","enabled":true,"emailReceivers":[],"smsReceivers":[],"webhookReceivers":[],"eventHubReceivers":[],"itsmReceivers":[],"azureAppPushReceivers":[],"automationRunbookReceivers":[],"voiceReceivers":[],"logicAppReceivers":[],"azureFunctionReceivers":[],"armRoleReceivers":[],"incidentReceivers":[{"name":"testag","connection":{"Name":"testconn","id":"8be638e7-1419-42d4-a059-437a5f4f4e4e"},"mappings":{"Icm.title":"${data.essentials.severity}:${data.essentials.monitorCondition}
+        ${data.essentials.monitoringService}:${data.essentials.signalType} ${data.essentials.alertTargetIds}","Icm.occurringlocation.environment":"PROD","Icm.routingid":"${data.essentials.monitoringService}://${data.essentials.signalType}","Icm.automitigationenabled":"true","Icm.monitorid":"${data.essentials.alertRule}","Icm.correlationid":"${data.essentials.signalType}://${data.essentials.originAlertId}","Icm.tsgid":"https://microsoft.com"},"incidentManagementService":"Icm"}]}}'
+    headers:
+      access-control-expose-headers:
+      - x-activityid
+      api-supported-versions:
+      - 2016-09-01-preview, 2017-03-01-preview, 2017-04-01, 2018-03-01, 2018-09-01,
+        2019-03-01, 2019-06-01, 2021-09-01, 2022-04-01, 2022-06-01, 2023-01-01, 2023-03-01-preview,
+        2023-05-01-preview, 2023-05-01, 2023-08-01-preview, 2023-09-01-preview, 2024-10-01-preview
+      cache-control:
+      - no-cache
+      content-length:
+      - '1290'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 07 Apr 2025 03:09:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-activityid:
+      - a7db9680-135d-11f0-881a-902e1671aeaf
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=52a2fda8-c59f-4bde-8c4d-48ffa466fefc/southeastasia/ebdf7a1f-ea04-4cb0-8094-f955a14c1b88
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '24'
+      x-msedge-ref:
+      - 'Ref A: BF8FD980F99F4076AEE828185026E55C Ref B: MAA201060516025 Ref C: 2025-04-07T03:09:03Z'
+      x-servedby:
+      - WUS2ONEIM000003
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -21,15 +21,15 @@ def billing_invoice_download(client,
     :param download_urls: An array of download urls for individual.
     """
     if account_name and invoice_name and download_token:
-        return client.download_invoice(account_name, invoice_name, download_token)
+        return client.begin_download_invoice(account_name, invoice_name, download_token)
     if account_name and download_urls:
-        return client.download_multiple_modern_invoice(account_name, download_urls)
+        return client.begin_download_multiple_billing_profile_invoices(account_name, download_urls)
 
     if download_urls:
-        return client.download_multiple_billing_subscription_invoice(download_urls)
+        return client.begin_download_multiple_billing_subscription_invoices(download_urls)
 
     if invoice_name and download_token:
-        return client.download_billing_subscription_invoice(
+        return client.begin_download_billing_subscription_invoice(
             invoice_name, download_token
         )
 

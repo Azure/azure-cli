@@ -2,9 +2,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import unittest
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, record_only, StorageAccountPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
+from azure.core.exceptions import HttpResponseError, ResourceExistsError
 
 
 class TestLogProfileScenarios(ScenarioTest):
@@ -18,7 +19,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --tags clitest=myron", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'pergb2018')
+            self.check('sku.name', 'PerGB2018')
         ])
 
         self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --retention-time 100", checks=[
@@ -58,6 +59,63 @@ class TestLogProfileScenarios(ScenarioTest):
         ])
 
         self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_update_sku', location='westus')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_update_sku(self, resource_group):
+        workspace_name = self.create_random_name('clitest', 20)
+        self.kwargs.update({
+            'name': workspace_name
+        })
+
+        self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --quota 1 --sku PerGB2018", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('retentionInDays', 30),
+            self.check('sku.name', 'PerGB2018'),
+            self.check('workspaceCapping.dailyQuotaGb', 1.0)
+        ])
+
+        self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --quota 2 --level 100 --sku CapacityReservation", checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('sku.name', 'CapacityReservation'),
+            self.check('sku.capacityReservationLevel', 100),
+            self.check('workspaceCapping.dailyQuotaGb', 2.0)
+        ])
+
+        self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
+
+    @record_only()
+    def test_monitor_log_analytics_workspace_failover_failback(self):
+        self.kwargs.update({
+            'name': "clitestfailoverfailback",
+            'rg': "workspace-test"
+        })
+        # workspace enabled with replication cannot be processed in 24 hours, manage this resource manually, resource group in westus, test failover and failback api only
+        # self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --tags clitest=liwa --replication-enabled 1 --replication-location eastus", checks=[
+        #     self.check('provisioningState', 'Succeeded'),
+        #     self.check('tags.clitest', 'liwa'),
+        #     self.check('replication.enabled', True),
+        #     self.check('replication.location', 'eastus')
+        # ])
+
+        self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
+            self.check('tags.clitest', 'liwa'),
+            self.check('replication.enabled', True),
+            self.check('replication.location', 'eastus')
+        ])
+
+        # following error message is given from servic side based on service business logic and might change at runtime
+        with self.assertRaisesRegex(HttpResponseError, "Workspace failover can't be triggered at this time because replication was enabled less than 24 hours ago."):
+            self.cmd('monitor log-analytics workspace failover -g {rg} --workspace-name {name} --location eastus')
+
+        with self.assertRaisesRegex(ResourceExistsError, "Failover is not active for this workspace."):
+            self.cmd("monitor log-analytics workspace failback -g {rg} --workspace-name {name}")
+
+        with self.assertRaisesRegex(HttpResponseError, " Workspace replication cannot be disabled at this time because it was enabled in the last hour"):
+            self.cmd("monitor log-analytics workspace update -g {rg} -n {name} --replication-enabled 0")
+
+        with self.assertRaisesRegex(ResourceExistsError, "Workspace '{0}' cannot be deleted because it is linked to DataCollectionEndpoint".format(self.kwargs['name'])):
+            self.cmd("monitor log-analytics workspace delete -g {rg} -n {name} -y")
 
     @record_only()
     def test_monitor_log_analytics_workspace_linked_service_common_scenario(self):
@@ -123,7 +181,7 @@ class TestLogProfileScenarios(ScenarioTest):
                             location='eastus')
     def test_monitor_log_analytics_workspace_linked_storage(self, resource_group, account_1,
                                                             account_2, account_3, account_4):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'name': self.create_random_name('clitest', 20),
             'name_2': self.create_random_name('clitest', 20),
@@ -161,14 +219,14 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --tags clitest=myron", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'pergb2018')
+            self.check('sku.name', 'PerGB2018')
         ])
 
         self.cmd('monitor log-analytics workspace linked-storage create '
                  '--type CustomLogs -g {rg} -n {name} --storage-accounts {sa_1}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_1}'),
-                     self.check('name', 'customlogs')
+                     self.check('name', 'CustomLogs')
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage add '
@@ -196,14 +254,14 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace create -g {rg} -n {name_2} --tags clitest=myron", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'pergb2018')
+            self.check('sku.name', 'PerGB2018')
         ])
 
         self.cmd('monitor log-analytics workspace linked-storage create '
                  '--type AzureWatson -g {rg} -n {name} --storage-accounts {sa_1}',
                  checks=[
                      self.check('storageAccountIds[0]', '{sa_id_1}'),
-                     self.check('name', 'azurewatson')
+                     self.check('name', 'AzureWatson')
                  ])
 
         self.cmd('monitor log-analytics workspace linked-storage list '
@@ -247,7 +305,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('publicNetworkAccessForQuery', 'Disabled')
         ])
 
-    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_recover', location='WestEurope')
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_recover', location='eastus')
     @AllowLargeResponse()
     def test_monitor_log_analytics_workspace_recover(self, resource_group):
         workspace_name = self.create_random_name('clitest', 20)
@@ -258,7 +316,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace create -g {rg} -n {name} --quota 1 --level 100 --sku CapacityReservation", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.name', 'CapacityReservation'),
             self.check('sku.capacityReservationLevel', 100),
             self.check('workspaceCapping.dailyQuotaGb', 1.0)
         ])
@@ -290,7 +348,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace recover -g {rg} -n {name}", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.name', 'CapacityReservation'),
             self.check('sku.capacityReservationLevel', 200),
             self.check('workspaceCapping.dailyQuotaGb', 2.0)
         ])
@@ -298,7 +356,7 @@ class TestLogProfileScenarios(ScenarioTest):
         self.cmd("monitor log-analytics workspace show -g {rg} -n {name}", checks=[
             self.check('provisioningState', 'Succeeded'),
             self.check('retentionInDays', 30),
-            self.check('sku.name', 'capacityreservation'),
+            self.check('sku.name', 'CapacityReservation'),
             self.check('sku.capacityReservationLevel', 200),
             self.check('workspaceCapping.dailyQuotaGb', 2.0)
         ])
@@ -382,7 +440,7 @@ class TestLogProfileScenarios(ScenarioTest):
     @StorageAccountPreparer(name_prefix='saws1', kind='StorageV2', sku='Standard_LRS', parameter_name='account_1',
                             location='eastus')
     def test_monitor_log_analytics_workspace_data_export(self, resource_group, account_1):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'workspace_name': self.create_random_name('clitest', 20),
             'data_export_name': 'clitest',
@@ -404,7 +462,7 @@ class TestLogProfileScenarios(ScenarioTest):
             checks=[
                 self.check('provisioningState', 'Succeeded'),
                 self.check('retentionInDays', 30),
-                self.check('sku.name', 'capacityreservation'),
+                self.check('sku.name', 'CapacityReservation'),
                 self.check('sku.capacityReservationLevel', 100),
                 self.check('workspaceCapping.dailyQuotaGb', 1.0)
             ])
@@ -418,22 +476,22 @@ class TestLogProfileScenarios(ScenarioTest):
                  ])
 
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
+        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace. See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t "SecurityEvent Heartbeat"',
                      checks=[
                      ])
-        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
+        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace. See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t {table_name}',
                      checks=[
                      ])
-        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
+        with self.assertRaisesRegex(HttpResponseError, 'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace. See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t ABC',
                      checks=[
                      ])
-        with self.assertRaisesRegex(HttpResponseError,'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace . See http://aka.ms/LADataExport#limitations'):
+        with self.assertRaisesRegex(HttpResponseError,'You are adding a destination that is already defined in rule: clitest. Destination must be unique across export rules in your workspace. See http://aka.ms/LADataExport#limitations'):
             self.cmd('monitor log-analytics workspace data-export create -g {rg} --workspace-name {workspace_name} -n {data_export_name_2} '
                      '--destination {sa_id_1} --enable -t AppPerformanceCounters',
                      checks=[
@@ -475,6 +533,7 @@ class TestLogProfileScenarios(ScenarioTest):
         ])
 
     @record_only()
+    @unittest.skip('resource not available')
     def test_monitor_log_analytics_workspace_data_collection_rules(self):
         self.kwargs.update({
             'ws_name': 'wsn1',
@@ -511,7 +570,7 @@ class TestLogProfileScenarios(ScenarioTest):
             self.check('schema.columns[1].name', 'TimeGenerated'),
             self.check('schema.columns[1].type', 'datetime'),
         ])
-        self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --columns col2=guid', checks=[
+        self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --columns col2=guid TimeGenerated=datetime', checks=[
             self.check('name', '{table_name}'),
             self.check('retentionInDays', 50),
             self.check('totalRetentionInDays', 80),
@@ -528,9 +587,9 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd('monitor log-analytics workspace table search-job create -n {table2_name} -g {rg} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --start-search-time "2021-08-01 05:29:18" --end-search-time "2021-08-02 05:29:18" --search-query "Heartbeat" --limit 1', checks=[
             self.check('name', '{table2_name}'),
-            self.check('schema.searchResults.query', 'Heartbeat'),
-            self.check('schema.searchResults.limit', 1),
-            self.check('schema.searchResults.sourceTable', "Heartbeat"),
+            self.check('searchResults.query', 'Heartbeat'),
+            self.check('searchResults.limit', 1),
+            self.check('searchResults.sourceTable', "Heartbeat"),
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table_total_retention', location='WestEurope')
@@ -554,7 +613,7 @@ class TestLogProfileScenarios(ScenarioTest):
                 self.check('schema.columns[1].type', 'datetime'),
             ])
         self.cmd(
-            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --total-retention-time 400 --columns col2=guid',
+            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --total-retention-time 400 --columns col2=guid TimeGenerated=datetime',
             checks=[
                 self.check('name', '{table_name}'),
                 self.check('totalRetentionInDays', 400),
@@ -584,3 +643,135 @@ class TestLogProfileScenarios(ScenarioTest):
 
         self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
 
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table', location='WestEurope')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_table_restore_datetime_adjust(self, resource_group):
+
+        self.kwargs.update({
+            'ws_name':self.create_random_name('ws-', 10),
+            'table_name': self.create_random_name('TB', 10) + '_CL',
+            'table2_name': self.create_random_name('TB', 10) + '_RST'
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
+        self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 45 --total-retention-time 70 --plan Analytics --columns col1=guid TimeGenerated=datetime', checks=[
+            self.check('name', '{table_name}'),
+            self.check('retentionInDays', 45),
+            self.check('totalRetentionInDays', 70),
+            self.check('schema.columns[0].name', 'col1'),
+            self.check('schema.columns[0].type', 'guid'),
+            self.check('schema.columns[1].name', 'TimeGenerated'),
+            self.check('schema.columns[1].type', 'datetime'),
+        ])
+
+        self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}', checks=[
+            self.check('name', '{table_name}')
+        ])
+
+        import re
+        pattern = re.compile("Table {0} has no data on the specified date range".format(self.kwargs["table_name"]) + r"(.*?)8/11/2023 12:00:00 AM(.*?)8/17/2023 12:00:00 AM(.*?)")
+        with self.assertRaisesRegex(HttpResponseError, pattern):
+            self.cmd('monitor log-analytics workspace table restore create -n {table2_name} -g {rg} --workspace-name {ws_name} --restore-source-table {table_name} --start-restore-time "2023-08-11 05:29:18" --end-restore-time "2023-08-17 05:29:18"')
+
+        self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table_name_valid', location='WestEurope')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_table_name_validation(self, resource_group):
+
+        self.kwargs.update({
+            'ws_name':self.create_random_name('ws-', 10),
+            'table_name': self.create_random_name('TB', 10) + '_CL',
+            'table1_name': self.create_random_name('TB', 10),
+            'table2_name': self.create_random_name('TB', 10)
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
+        self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 45 --total-retention-time 70 --plan Analytics --columns col1=guid TimeGenerated=datetime', checks=[
+            self.check('name', '{table_name}'),
+            self.check('retentionInDays', 45),
+            self.check('totalRetentionInDays', 70),
+            self.check('schema.columns[0].name', 'col1'),
+            self.check('schema.columns[0].type', 'guid'),
+            self.check('schema.columns[1].name', 'TimeGenerated'),
+            self.check('schema.columns[1].type', 'datetime'),
+        ])
+
+        self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}', checks=[
+            self.check('name', '{table_name}')
+        ])
+        from knack.util import CLIError
+        with self.assertRaisesRegex(CLIError, "usage: The table name needs to end with _RST"):
+            self.cmd('monitor log-analytics workspace table restore create -n {table2_name} -g {rg} --workspace-name {ws_name} --restore-source-table {table_name} --start-restore-time "2023-08-11 05:29:18" --end-restore-time "2023-08-17 05:29:18"')
+
+        self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
+
+        with self.assertRaisesRegex(CLIError, "usage: The table name needs to end with _SRCH"):
+            self.cmd('monitor log-analytics workspace table search-job create -n {table1_name} -g {rg} --workspace-name {ws_name} --retention-time 50 --total-retention-time 80 --start-search-time "2023-08-21 05:29:18" --end-search-time "2023-09-12 05:29:18" --search-query "Heartbeat" --limit 1')
+
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage: The table name needs to end with _SRCH"):
+            self.cmd('monitor log-analytics workspace table search-job cancel -n {table1_name} -g {rg} --workspace-name {ws_name}')
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_monitor_workspace_table_retention_validation', location='WestEurope')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_table_retention_validation(self, resource_group):
+        self.kwargs.update({
+            'ws_name': self.create_random_name('ws-', 10),
+            'table_name': self.create_random_name('TB', 10) + '_CL',
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --retention-time should between 4 and 730"):
+            self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 3 --total-retention-time 3 --plan Analytics --columns col1=guid TimeGenerated=datetime')
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --total-retention-time should between 4 and 4383"):
+            self.cmd('monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time -1 --total-retention-time 3 --plan Analytics --columns col1=guid TimeGenerated=datetime')
+
+        self.cmd(
+            'monitor log-analytics workspace table create -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time -1 --total-retention-time -1 --plan Analytics --columns col1=guid TimeGenerated=datetime',
+            checks=[
+                self.check('name', '{table_name}'),
+                self.check('schema.columns[0].name', 'col1'),
+                self.check('schema.columns[0].type', 'guid'),
+                self.check('schema.columns[1].name', 'TimeGenerated'),
+                self.check('schema.columns[1].type', 'datetime'),
+            ])
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --retention-time should between 4 and 730"):
+            self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 2 --total-retention-time 2')
+        with self.assertRaisesRegex(InvalidArgumentValueError, "usage error: --total-retention-time should between 4 and 4383"):
+            self.cmd('monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 4 --total-retention-time 2')
+        self.cmd(
+            'monitor log-analytics workspace table update -g {rg} -n {table_name} --workspace-name {ws_name} --retention-time 4 --total-retention-time 4383 --columns col2=guid TimeGenerated=datetime',
+            checks=[
+                self.check('name', '{table_name}'),
+                self.check('retentionInDays', 4),
+                self.check('totalRetentionInDays', 4383),
+                self.check('schema.columns[0].name', 'col2'),
+                self.check('schema.columns[0].type', 'guid'),
+            ])
+        self.cmd('monitor log-analytics workspace table show -g {rg} -n {table_name} --workspace-name {ws_name}',
+                 checks=[
+                     self.check('name', '{table_name}'),
+                     self.check('retentionInDays', 4),
+                     self.check('totalRetentionInDays', 4383),
+                 ])
+
+        self.cmd('monitor log-analytics workspace table delete -g {rg} -n {table_name} --workspace-name {ws_name} -y')
+
+    @ResourceGroupPreparer(name_prefix='test_monitor_log_analytics_workspace_link_target', location='WestUs')
+    @AllowLargeResponse()
+    def test_monitor_log_analytics_workspace_link_target_available_service(self, resource_group):
+        self.kwargs.update({
+            'ws_name': self.create_random_name('ws-', 10),
+        })
+
+        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws_name}')
+        from azure.core.exceptions import ResourceNotFoundError
+        with self.assertRaises(ResourceNotFoundError):
+            self.cmd("monitor log-analytics workspace list-link-target")
+        self.cmd("monitor log-analytics workspace list-available-service-tier -g {rg} --workspace-name {ws_name}")

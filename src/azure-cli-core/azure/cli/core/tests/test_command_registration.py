@@ -69,13 +69,13 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('test register', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('sample-vm-get', 'sample_vm_get')
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                super().load_arguments(command)
                 with self.argument_context('test register sample-vm-get') as c:
                     c.argument('vm_name', options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...', required=False)
 
@@ -93,8 +93,8 @@ class TestCommandRegistration(unittest.TestCase):
         }
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
         self.assertEqual(command_metadata.arguments['vm_name'].options_list, ('--wonky-name', '-n'))
 
     def test_register_command(self):
@@ -102,13 +102,13 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('test command', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('sample-vm-get', 'sample_vm_get')
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                super().load_arguments(command)
                 with self.argument_context('test register sample-vm-get') as c:
                     c.argument('vm_name', options_list=('--wonky-name', '-n'), metavar='VMNAME', help='Completely WONKY name...', required=False)
 
@@ -137,8 +137,8 @@ class TestCommandRegistration(unittest.TestCase):
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
         self.assertEqual(command_metadata.arguments['resource_group_name'].options_list,
                          ['--resource-group-name'])
 
@@ -298,10 +298,10 @@ class TestCommandRegistration(unittest.TestCase):
         loader.load_command_table(["hello", "mod-only"])
         _check_index()
 
-        with mock.patch("azure.cli.core.__version__", "2.7.0"), mock.patch.object(cli.cloud, "profile", "2019-03-01-hybrid"):
+        with mock.patch.object(cli.cloud, "profile", "2019-03-01-hybrid"):
             def update_and_check_index():
                 loader.load_command_table(["hello", "mod-only"])
-                self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_VERSION], "2.7.0")
+                self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_VERSION], __version__)
                 self.assertEqual(INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE], "2019-03-01-hybrid")
                 self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
 
@@ -395,6 +395,7 @@ class TestCommandRegistration(unittest.TestCase):
     @mock.patch('azure.cli.core.extension.get_extension_modname', _mock_get_extension_modname)
     @mock.patch('azure.cli.core.extension.get_extensions', _mock_get_extensions)
     def test_command_index_always_loaded_extensions(self):
+        import azure
         from azure.cli.core import CommandIndex
 
         cli = DummyCli()
@@ -403,14 +404,14 @@ class TestCommandRegistration(unittest.TestCase):
         index.invalidate()
 
         # Test azext_always_loaded is loaded when command index is rebuilt
-        with mock.patch('azure.cli.core.ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
+        with mock.patch.object(azure.cli.core,'ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
             loader.load_command_table(["hello", "mod-only"])
             self.assertEqual(TestCommandRegistration.test_hook, "FAKE_HANDLER")
 
         TestCommandRegistration.test_hook = []
 
         # Test azext_always_loaded is loaded when command index is used
-        with mock.patch('azure.cli.core.ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
+        with mock.patch.object(azure.cli.core,'ALWAYS_LOADED_EXTENSIONS', ['azext_always_loaded']):
             loader.load_command_table(["hello", "mod-only"])
             self.assertEqual(TestCommandRegistration.test_hook, "FAKE_HANDLER")
 
@@ -454,7 +455,7 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('test', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('vm-get', 'sample_vm_get')
                     g.command('command vm-get-1', 'sample_vm_get')
@@ -462,7 +463,7 @@ class TestCommandRegistration(unittest.TestCase):
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                super().load_arguments(command)
                 with self.argument_context('test') as c:
                     c.argument('vm_name', global_vm_name_type)
 
@@ -492,13 +493,13 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('test command', operations_tmpl='{}#TestCommandRegistration.{{}}'.format(__name__)) as g:
                     g.command('sample-vm-get', 'sample_vm_get')
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                super().load_arguments(command)
                 with self.argument_context('test command sample-vm-get') as c:
                     c.extra('added_param', options_list=['--added-param'], metavar='ADDED', help='Just added this right now!', required=True)
 
@@ -517,8 +518,8 @@ class TestCommandRegistration(unittest.TestCase):
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
 
     def test_command_build_argument_help_text(self):
 
@@ -539,7 +540,7 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('test command', operations_tmpl='{}#{{}}'.format(__name__)) as g:
                     g.command('foo', sample_sdk_method_with_weird_docstring.__name__)
                 return self.command_table
@@ -561,8 +562,8 @@ class TestCommandRegistration(unittest.TestCase):
 
         for probe in some_expected_arguments:
             existing = next(arg for arg in command_metadata.arguments if arg == probe)
-            self.assertDictContainsSubset(some_expected_arguments[existing].settings,
-                                          command_metadata.arguments[existing].options)
+            self.assertLessEqual(some_expected_arguments[existing].settings.items(),
+                                 command_metadata.arguments[existing].options.items())
 
     def test_override_existing_option_string(self):
         arg = CLIArgumentType(options_list=('--funky', '-f'))
@@ -595,13 +596,13 @@ class TestCommandRegistration(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('override_using_register_cli_argument', operations_tmpl='{}#{{}}'.format(__name__)) as g:
                     g.command('foo', 'sample_sdk_method')
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                super().load_arguments(command)
                 with self.argument_context('override_using_register_cli_argument') as c:
                     c.argument('param_a', options_list=('--overridden', '-r'), required=False,
                                validator=test_validator_completer, completer=test_validator_completer)

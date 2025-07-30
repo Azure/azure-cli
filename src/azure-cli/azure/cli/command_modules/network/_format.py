@@ -2,25 +2,15 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-
+#
+# pylint: disable=line-too-long
 from collections import OrderedDict
 
 
 def transform_dns_record_set_output(result):
-    from azure.mgmt.dns.models import RecordSetListResult
-
-    def _strip_null_records(item):
-        for prop in [x for x in dir(item) if 'record' in x]:
-            if not getattr(item, prop):
-                delattr(item, prop)
-
-    if isinstance(result, RecordSetListResult):
-        result = list(result)
-        for item in result:
-            _strip_null_records(item)
-    else:
-        _strip_null_records(result)
+    for prop in [x for x in dir(result) if 'record' in x]:
+        if not getattr(result, prop):
+            delattr(result, prop)
 
     return result
 
@@ -32,9 +22,9 @@ def transform_dns_record_set_table_output(result):
         table_row = OrderedDict()
         table_row['Name'] = item['name']
         table_row['ResourceGroup'] = item['resourceGroup']
-        table_row['Ttl'] = item['ttl']
+        table_row['Ttl'] = item.get('ttl') or item.get('TTL')
         table_row['Type'] = item['type'].rsplit('/', 1)[1]
-        metadata = item['metadata']
+        metadata = item.get('metadata')
         if metadata:
             table_row['Metadata'] = ' '.join(['{}="{}"'.format(x, metadata[x]) for x in sorted(metadata)])
         else:
@@ -91,8 +81,8 @@ def transform_vnet_table_output(result):
         item['NumSubnets'] = len(result.get('subnets', []))
         item['Prefixes'] = ', '.join(result['addressSpace']['addressPrefixes']) or ' '
         item['DnsServers'] = ', '.join((result.get('dhcpOptions') or {}).get('dnsServers', [])) or ' '
-        item['DDOSProtection'] = result['enableDdosProtection']
-        item['VMProtection'] = result['enableVmProtection']
+        item["DDOSProtection"] = result.get("enableDdosProtection", " ")
+        item["VMProtection"] = result.get("enableVmProtection", " ")
         return item
     if isinstance(result, list):
         return [_transform(r) for r in result]
@@ -112,16 +102,15 @@ def transform_nsg_rule_table_output(result):
     item['Name'] = result['name']
     item['ResourceGroup'] = result['resourceGroup']
     item['Priority'] = result['priority']
-    item['SourcePortRanges'] = result.get('sourcePortRange', ' '.join(result['sourcePortRanges']))
-    item['SourceAddressPrefixes'] = result.get('sourceAddressPrefix', ' '.join(result['sourceAddressPrefixes']))
-    item['SourceASG'] = result.get('sourceApplicationSecurityGroups', 'None')
+    item['SourcePortRanges'] = result.get('sourcePortRange', None) or ' '.join(result['sourcePortRanges'])
+    item['SourceAddressPrefixes'] = result.get('sourceAddressPrefix', None) or ' '.join(result['sourceAddressPrefixes'])
+    item['SourceASG'] = result.get('sourceApplicationSecurityGroups', None) or 'None'
     item['Access'] = result['access']
     item['Protocol'] = result['protocol']
     item['Direction'] = result['direction']
-    item['DestinationPortRanges'] = result.get('destinationPortRange', ' '.join(result['destinationPortRanges']))
-    item['DestinationAddressPrefixes'] = result.get('destinationAddressPrefix',
-                                                    ' '.join(result['destinationAddressPrefixes']))
-    item['DestinationASG'] = result.get('destinationApplicationSecurityGroups', 'None')
+    item['DestinationPortRanges'] = result.get('destinationPortRange', None) or ' '.join(result['destinationPortRanges'])
+    item['DestinationAddressPrefixes'] = result.get('destinationAddressPrefix', None) or ' '.join(result['destinationAddressPrefixes'])
+    item['DestinationASG'] = result.get('destinationApplicationSecurityGroups', None) or 'None'
     return item
 
 
@@ -201,7 +190,7 @@ def transform_effective_route_table(result):
 
 
 def transform_effective_nsg(result):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     transformed = []
     for item in result['value']:
         association = item['association']

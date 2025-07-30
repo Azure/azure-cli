@@ -4,8 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 from ._base import AAZBaseValue, AAZUndefined
-from ._field_value import AAZSimpleValue, AAZBaseDictValue, AAZDict, AAZFreeFormDict, AAZList, AAZObject
-from ._field_type import AAZObjectType
+from ._field_value import AAZSimpleValue, AAZBaseDictValue, AAZDict, AAZList, AAZObject
+from ._field_type import AAZObjectType, AAZAnyType
 from ._arg_browser import AAZArgBrowser
 
 # pylint: disable=protected-access, too-many-nested-blocks, too-many-return-statements
@@ -79,8 +79,9 @@ class AAZContentBuilder:
                             value[prop_name] = {}
                     else:
                         raise NotImplementedError()
-                sub_values.append(value[prop_name])
-                sub_args.append(sub_arg)
+                if value != None:  # noqa: E711, pylint: disable=singleton-comparison
+                    sub_values.append(value[prop_name])
+                    sub_args.append(sub_arg)
 
         if sub_values:
             self._sub_prop_builders[prop_name] = AAZContentBuilder(sub_values, sub_args)
@@ -130,19 +131,10 @@ class AAZContentBuilder:
 
         return None
 
+    # Warning: This method is not used by the new aaz-dev-tools, it should be kept for backward compatibility
     def set_anytype_elements(self, arg_key=None):
         """Set any type elements of free from dictionary"""
-        for value, arg in zip(self._values, self._args):
-            if not isinstance(value, AAZFreeFormDict):
-                raise NotImplementedError()
-
-            for key, sub_arg in arg.get_anytype_elements():
-                if sub_arg is not None and sub_arg.data != AAZUndefined:
-                    sub_arg = sub_arg.get_prop(arg_key)
-
-                if sub_arg is not None and sub_arg.data != AAZUndefined:
-                    if not sub_arg.is_patch and arg_key:
-                        value[key] = sub_arg.data
+        self.set_elements(AAZAnyType, arg_key=arg_key)
 
     def discriminate_by(self, prop_name, prop_value):
         """discriminate object by a specify property"""
@@ -171,9 +163,31 @@ class AAZContentBuilder:
         """Get sub builder by key"""
         if not key or key == '.':
             return self
-        parts = [part for part in key.replace('[', '.[').replace('{', '.{').split('.') if part]
+        parts = self._split_key(key)
 
         return self._get(*parts)
+
+    @staticmethod
+    def _split_key(key):
+        parts = []
+        # when discriminator value contains `.` value, like `Microsoft.Network/publicIPAddresses` the key.
+        # It will separate the value in several parts.
+        pending_disc_part = None
+        for part in key.replace('[', '.[').replace('{', '.{').split('.'):
+            if pending_disc_part is not None:
+                pending_disc_part += '.' + part
+                if pending_disc_part.endswith("}"):
+                    parts.append(pending_disc_part)
+                    pending_disc_part = None
+                continue
+            if part.startswith("{") and not part.endswith("}"):
+                # value is separated
+                pending_disc_part = part
+                continue
+            if not part:
+                continue
+            parts.append(part)
+        return parts
 
     def _get(self, *key_parts):
         if not key_parts:
@@ -190,7 +204,8 @@ class AAZContentBuilder:
             sub_builder = self._sub_elements_builder
         elif key_parts[0].startswith('{'):
             # discriminator
-            key, value = key_parts[0][1:-1].split(":")
+            assert key_parts[0].endswith('}'), "Invalid key_parts {}".format(key_parts)
+            key, value = key_parts[0][1:-1].split(":", maxsplit=1)
             if key != self._discriminator_prop_name:
                 return None
             sub_builder = self._discriminator_builders.get(value, None)

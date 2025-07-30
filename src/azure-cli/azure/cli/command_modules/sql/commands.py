@@ -79,7 +79,8 @@ from ._util import (
     get_sql_instance_failover_groups_operations,
     get_sql_database_ledger_digest_uploads_operations,
     get_sql_database_encryption_protector_operations,
-    get_sql_managed_database_ledger_digest_uploads_operations
+    get_sql_managed_database_ledger_digest_uploads_operations,
+    get_sql_managed_database_move_operations
 )
 
 from ._validators import (
@@ -331,8 +332,7 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-policy',
                             database_long_term_retention_policies_operations,
-                            client_factory=get_sql_database_long_term_retention_policies_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_database_long_term_retention_policies_operations) as g:
 
         g.custom_command('set', 'update_long_term_retention')
         g.custom_show_command('show', 'get_long_term_retention')
@@ -343,8 +343,7 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-backup',
                             database_long_term_retention_backups_operations,
-                            client_factory=get_sql_database_long_term_retention_backups_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_database_long_term_retention_backups_operations) as g:
 
         g.show_command('show', 'get')
         g.custom_command('list', 'list_long_term_retention_backups')
@@ -352,8 +351,8 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-backup',
                             database_operations,
-                            client_factory=get_sql_databases_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_databases_operations) as g:
+
         g.custom_command(
             'restore',
             'restore_long_term_retention_backup',
@@ -366,16 +365,14 @@ def load_command_table(self, _):
 
     with self.command_group('sql db geo-backup',
                             database_geo_backups_operations,
-                            client_factory=get_sql_database_recoverable_databases_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_database_recoverable_databases_operations) as g:
 
         g.custom_show_command('show', 'recoverable_databases_get')
         g.custom_command('list', 'list_geo_backups')
 
     with self.command_group('sql db geo-backup',
                             database_operations,
-                            client_factory=get_sql_databases_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_databases_operations) as g:
         g.custom_command(
             'restore',
             'restore_geo_backup')
@@ -386,8 +383,7 @@ def load_command_table(self, _):
 
     with self.command_group('sql db str-policy',
                             backup_short_term_retention_policies_operations,
-                            client_factory=get_sql_backup_short_term_retention_policies_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_backup_short_term_retention_policies_operations) as g:
 
         g.custom_command('set', 'update_short_term_retention', supports_no_wait=True)
         g.custom_show_command('show', 'get_short_term_retention')
@@ -550,7 +546,8 @@ def load_command_table(self, _):
                          table_transformer=instance_pool_table_format)
         g.generic_update_command('update',
                                  custom_func_name='instance_pool_update',
-                                 setter_name='begin_update')
+                                 setter_name='begin_update',
+                                 supports_no_wait=True)
         g.command('delete', 'begin_delete', supports_no_wait=True, confirmation=True)
         g.custom_command('create', 'instance_pool_create',
                          supports_no_wait=True, table_transformer=instance_pool_table_format)
@@ -1004,6 +1001,38 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'managed_ledger_digest_uploads_show')
         g.custom_command('enable', 'managed_ledger_digest_uploads_enable')
         g.custom_command('disable', 'managed_ledger_digest_uploads_disable')
+
+    with self.command_group('sql midb move',
+                            managed_databases_operations,
+                            client_factory=get_sql_managed_databases_operations) as g:
+
+        g.custom_command('start', 'managed_db_move_start', supports_no_wait=True)
+        g.custom_command('complete', 'managed_db_move_copy_complete', supports_no_wait=True)
+        g.custom_command('cancel', 'managed_db_move_copy_cancel', supports_no_wait=True)
+
+    with self.command_group('sql midb copy',
+                            managed_databases_operations,
+                            client_factory=get_sql_managed_databases_operations) as g:
+
+        g.custom_command('start', 'managed_db_copy_start', supports_no_wait=True)
+        g.custom_command('complete', 'managed_db_move_copy_complete', supports_no_wait=True)
+        g.custom_command('cancel', 'managed_db_move_copy_cancel', supports_no_wait=True)
+
+    managed_databases_move_operations = CliCommandType(
+        operations_tmpl='azure.mgmt.sql.operations#ManagedDatabaseMoveOperationsOperations.{}',
+        client_factory=get_sql_managed_database_move_operations)
+
+    with self.command_group('sql midb move',
+                            managed_databases_move_operations,
+                            client_factory=get_sql_managed_database_move_operations) as g:
+
+        g.custom_command('list', 'managed_db_move_list')
+
+    with self.command_group('sql midb copy',
+                            managed_databases_move_operations,
+                            client_factory=get_sql_managed_database_move_operations) as g:
+
+        g.custom_command('list', 'managed_db_copy_list')
 
     ###############################################
     #                sql virtual cluster         #

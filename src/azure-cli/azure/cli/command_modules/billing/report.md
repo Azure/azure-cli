@@ -350,8 +350,8 @@ az billing invoice list --account-name "{billingAccountName}" --profile-name "{b
 |------|----|-----------|----------|------------|
 |**--account-name**|string|The ID that uniquely identifies a billing account.|account_name|billingAccountName|
 |**--profile-name**|string|The ID that uniquely identifies a billing profile.|profile_name|billingProfileName|
-|**--period-start-date**|string|The start date to fetch the invoices. The date should be specified in MM-DD-YYYY format.|period_start_date|periodStartDate|
-|**--period-end-date**|string|The end date to fetch the invoices. The date should be specified in MM-DD-YYYY format.|period_end_date|periodEndDate|
+|**--period-start-date**|string|The start date to fetch the invoices. The date should be specified in YYYY-MM-DD format.|period_start_date|periodStartDate|
+|**--period-end-date**|string|The end date to fetch the invoices. The date should be specified in YYYY-MM-DD format.|period_end_date|periodEndDate|
 
 #### <a name="InvoicesListByBillingAccount">Command `az billing invoice list`</a>
 

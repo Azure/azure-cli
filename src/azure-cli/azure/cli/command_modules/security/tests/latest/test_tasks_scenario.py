@@ -5,7 +5,7 @@
 
 from azure.cli.testsdk import ScenarioTest
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from msrestazure.tools import parse_resource_id
+from azure.mgmt.core.tools import parse_resource_id
 import re
 
 

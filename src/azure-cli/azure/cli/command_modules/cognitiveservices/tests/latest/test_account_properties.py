@@ -8,7 +8,7 @@ import unittest
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 
-class CognitiveServicesApiPropertiesTests(ScenarioTest):
+class CognitiveServicesPropertiesTests(ScenarioTest):
     @ResourceGroupPreparer()
     def test_cognitiveservices_account_capabilities(self, resource_group):
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)
@@ -16,7 +16,7 @@ class CognitiveServicesApiPropertiesTests(ScenarioTest):
         self.kwargs.update({
             'sname': sname,
             'kind': 'FormRecognizer',
-            'sku': 'F0',
+            'sku': 'S0',
             'location': 'SOUTHCENTRALUS'
         })
 

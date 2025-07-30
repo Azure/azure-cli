@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "capacity reservation group",
 )
 class __CMDGroup(AAZCommandGroup):
-    """test
+    """Manage capacity reservation group.
     """
     pass
 

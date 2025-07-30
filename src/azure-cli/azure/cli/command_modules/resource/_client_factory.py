@@ -34,6 +34,12 @@ def _resource_links_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_LINKS)
 
 
+def _resource_deployments_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
+
+
 def _resource_deploymentscripts_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
@@ -64,6 +70,12 @@ def _resource_templatespecs_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
 
 
+def _resource_deploymentstacks_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTSTACKS)
+
+
 def _resource_privatelinks_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
@@ -87,11 +99,11 @@ def cf_tags(cli_ctx, _):
 
 
 def cf_deployments(cli_ctx, _):
-    return _resource_client_factory(cli_ctx).deployments
+    return _resource_deployments_client_factory(cli_ctx).deployments
 
 
 def cf_deployment_operations(cli_ctx, _):
-    return _resource_client_factory(cli_ctx).deployment_operations
+    return _resource_deployments_client_factory(cli_ctx).deployment_operations
 
 
 def cf_features(cli_ctx, _):
@@ -156,6 +168,10 @@ def cf_hierarchy_settings(cli_ctx, _):
 
 def cf_resource_templatespecs(cli_ctx, _):
     return _resource_templatespecs_client_factory(cli_ctx).template_specs
+
+
+def cf_resource_deploymentstacks(cli_ctx, _):
+    return _resource_deploymentstacks_client_factory(cli_ctx).deployment_stacks
 
 
 def cf_resource_privatelinkassociations(cli_ctx, _):

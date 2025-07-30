@@ -68,7 +68,7 @@ class ManagedServicesTests(ScenarioTest):
                      self.check('name', '{assignment-id}'), ])
 
         # delete assignment
-        self.cmd('az managedservices assignment  delete --assignment {assignment-id}')
+        self.cmd('az managedservices assignment  delete --assignment {assignment-id} -y')
 
         # list assignments
         assignments_list = self.cmd('az managedservices assignment  list').get_output_in_json()
@@ -79,7 +79,7 @@ class ManagedServicesTests(ScenarioTest):
             self.assertTrue(assignment_id not in assignments)
 
         # delete definition
-        self.cmd('az managedservices definition delete --definition {definition-id}')
+        self.cmd('az managedservices definition delete --definition {definition-id} -y')
 
         # list definitions
         definitions_list = self.cmd('az managedservices definition list').get_output_in_json()

@@ -8,7 +8,7 @@ import os
 import datetime
 
 ARTIFACT_DIR = sys.argv[1]
-ACCOUNT_KEY = sys.argv[2]
+ACCOUNT_KEY = sys.argv[2] # not used
 USER_LIVE = sys.argv[3]
 
 
@@ -22,8 +22,8 @@ def main():
     else:
         mode = ''
     container = date + mode
-    cmd = 'az storage container create -n {} --account-name clitestresultstac --account-key {} --public-access container'
-    os.popen(cmd.format(container, ACCOUNT_KEY))
+    cmd = 'az storage container create -n {} --account-name clitestresultstac --public-access container --auth-mode login'
+    os.popen(cmd.format(container))
 
     # Upload files
     for root, dirs, files in os.walk(ARTIFACT_DIR):

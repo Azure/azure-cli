@@ -12,7 +12,8 @@ from azure.cli.command_modules.servicefabric._validators import (
     validate_create_service, validate_update_application,
     validate_update_managed_application, validate_update_managed_service,
     validate_create_managed_service_correlation, validate_create_managed_service_load_metric,
-    validate_update_managed_service_load_metric, validate_update_managed_service_correlation)
+    validate_update_managed_service_load_metric, validate_update_managed_service_correlation,
+    validate_network_security_rule)
 from azure.cli.core.commands.parameters import (get_enum_type,
                                                 get_three_state_flag,
                                                 resource_group_name_type,
@@ -278,8 +279,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('thumbprint', nargs='+', help='A single or Space-separated list of client certificate thumbprint(s) to be remove.')
         c.argument('common_name', nargs='+', help='A single or Space-separated list of client certificate common name(s) to be remove.')
 
-    # managed node type
+    with self.argument_context('sf managed-cluster network-security-rule', validator=validate_network_security_rule) as c:
+        c.argument('name', help='Network security rule name')
+        c.argument('access', arg_type=get_enum_type(['allow', 'deny']), help='Allows or denies network traffic')
+        c.argument('direction', arg_type=get_enum_type(['inbound', 'outbound']), help='Network security rule direction')
+        c.argument('description', help='Network security rule description')
+        c.argument('priority', type=int, help='Integer that shows priority for rule')
+        c.argument('protocol', arg_type=get_enum_type(['tcp', 'https', 'http', 'udp', 'icmp', 'ah', 'esp', 'any']), help='Network protocol')
+        c.argument('source_port_ranges', nargs='+', help='A single or space separated list of source port ranges')
+        c.argument('dest_port_ranges', nargs='+', help='A single or space separated list of destination port ranges')
+        c.argument('source_port_range', help='The source port or range. Integer or range between 0 and 65535. Asterisk \'*\' can also be used to match all ports.')
+        c.argument('dest_port_range', help='The destination port or range. Integer or range between 0 and 65535. Asterisk \'*\' can also be used to match all ports.')
+        c.argument('source_addr_prefixes', nargs='+', help='The CIDR or source IP ranges. A single or space separated list of source address prefixes')
+        c.argument('dest_addr_prefixes', nargs='+', help='CIDR or destination IP ranges. A single or space separated list of destination address prefixes')
+        c.argument('source_addr_prefix', help='The CIDR or source IP range. Asterisk \'*\' can also be used to match all source IPs. Default tags such as \'VirtualNetwork\', \'AzureLoadBalancer\' and \'Internet\' can also be used. If this is an ingress rule, specifies where network traffic originates from.')
+        c.argument('dest_addr_prefix', help='The destination address prefix. CIDR or destination IP range. Asterisk \'*\' can also be used to match all source IPs. Default tags such as \'VirtualNetwork\', \'AzureLoadBalancer\' and \'Internet\' can also be used.')
 
+    # managed node type
     capacity = CLIArgumentType(
         options_list=['--capacity'],
         action=AddNodeTypeCapacityAction,
@@ -296,11 +312,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf managed-node-type') as c:
         c.argument('node_type_name', options_list=['-n', '--name', '--node-type-name'], help='node type name.')
-        c.argument('instance_count', help='essage = "The number of nodes in the node type.')
+
+    with self.argument_context('sf managed-node-type create') as c:
+        c.argument('instance_count', help='"The number of nodes in the node type.')
         c.argument('primary', arg_type=get_three_state_flag(), help='Specify if the node type is primary. On this node type will run system services. Only one node type should be marked as primary. Primary node type cannot be deleted or changed for existing clusters.')
         c.argument('disk_size', type=int, options_list=['--disk-size', '--data-disk-size'], help='Disk size for each vm in the node type in GBs.', default=100)
         c.argument('disk_type', arg_type=get_enum_type(DiskType), options_list=['--disk-type', '--data-disk-type'],
-                   help='Managed data disk type. IOPS and throughput are given by the disk size, to see more information go to https://docs.microsoft.com/azure/virtual-machines/disks-types. Default StandardSSD_LRS'
+                   help='Managed data disk type. IOPS and throughput are given by the disk size, to see more information go to https://learn.microsoft.com/azure/virtual-machines/disks-types. Default StandardSSD_LRS'
                    'Standard_LRS: Standard HDD locally redundant storage. Best for backup, non-critical, and infrequent access.'
                    'StandardSSD_LRS: Standard SSD locally redundant storage. Best for web servers, lightly used enterprise applications and dev/test.'
                    'Premium_LRS: Premium SSD locally redundant storage. Best for production and performance sensitive workloads.')
@@ -318,6 +336,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('is_stateless', arg_type=get_three_state_flag(), help='Indicates if the node type can only host Stateless workloads.', default=False)
         c.argument('multiple_placement_groups', options_list=['--multiple-placement-groups', '--multi-place-groups'], arg_type=get_three_state_flag(),
                    help='Indicates if scale set associated with the node type can be composed of multiple placement groups.', default=False)
+        c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('sf managed-node-type update') as c:
+        c.argument('instance_count', help='"The number of nodes in the node type.')
+        c.argument('application_start_port', options_list=['--application-start-port', '--app-start-port'], help='Application start port of a range of ports.')
+        c.argument('application_end_port', options_list=['--application-end-port', '--app-end-port'], help='Application End port of a range of ports.')
+        c.argument('ephemeral_start_port', help='Ephemeral start port of a range of ports.')
+        c.argument('ephemeral_end_port', help='Ephemeral end port of a range of ports.')
+        c.argument('vm_size', help='The size of virtual machines in the pool. All virtual machines in a pool are the same size.')
+        c.argument('capacity', arg_type=capacity)
+        c.argument('placement_property', arg_type=placement_property)
+        c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('sf managed-node-type node') as c:
         c.argument('node_name', nargs='+', help='list of target nodes to perform the operation.')
@@ -336,7 +366,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf managed-node-type vm-secret') as c:
         c.argument('source_vault_id', help='Key Vault resource id containing the certificates.')
-        c.argument('certificate_url', help='This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://docs.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be It is the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  \"data\":\"<Base64-encoded-certificate>\",<br>  \"dataType\":\"pfx\",<br>  \"password\":\"<pfx-file-password>\"<br>}/')
+        c.argument('certificate_url', help='This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://learn.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be It is the Base64 encoding of the following JSON Object which is encoded in UTF-8: `<br><br> {<br>  \"data\":\"<Base64-encoded-certificate>\",<br>  \"dataType\":\"pfx\",<br>  \"password\":\"<pfx-file-password>\"<br>}/`')
         c.argument('certificate_store', help='Specifies the certificate store on the Virtual Machine to which the certificate should be added. The specified certificate store is implicitly in the LocalMachine account.')
 
     # managed-application-type

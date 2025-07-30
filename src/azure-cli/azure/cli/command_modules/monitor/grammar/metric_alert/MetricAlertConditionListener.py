@@ -2,11 +2,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# Generated from MetricAlertCondition.g4 by ANTLR 4.9.3
+# Generated from MetricAlertCondition.g4 by ANTLR 4.13.1
 # encoding: utf-8
 # pylint: disable=all
 from antlr4 import *
-if __name__ is not None and "." in __name__:
+if "." in __name__:
     from .MetricAlertConditionParser import MetricAlertConditionParser
 else:
     from MetricAlertConditionParser import MetricAlertConditionParser

@@ -49,11 +49,13 @@ class ListAdvertisedRoutes(AAZCommand):
             options=["-n", "--name"],
             help="The name of the Route Server Peering.",
             required=True,
+            id_part="child_name_1",
         )
         _args_schema.routeserver = AAZStrArg(
             options=["--routeserver"],
             help="The name of the Route Server.",
             required=True,
+            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -211,6 +213,10 @@ class ListAdvertisedRoutes(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _ListAdvertisedRoutesHelper:
+    """Helper class for ListAdvertisedRoutes"""
 
 
 __all__ = ["ListAdvertisedRoutes"]

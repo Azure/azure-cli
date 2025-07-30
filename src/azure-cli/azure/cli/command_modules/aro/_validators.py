@@ -9,17 +9,14 @@ import re
 import uuid
 from os.path import exists
 
-from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
+from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as subnet_show
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, \
     RequiredArgumentMissingError
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
 from knack.log import get_logger
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id
-from msrestazure.tools import parse_resource_id
-from msrestazure.tools import resource_id
 
 logger = get_logger(__name__)
 
@@ -83,7 +80,7 @@ def validate_disk_encryption_set(cmd, namespace):
     try:
         compute_client.disk_encryption_sets.get(resource_group_name=desid['resource_group'],
                                                 disk_encryption_set_name=desid['name'])
-    except CloudError as err:
+    except HttpResponseError as err:
         raise InvalidArgumentValueError(
             f"Invalid --disk-encryption-set, error when getting '{namespace.disk_encryption_set}':"
             f" {str(err)}") from err
@@ -114,9 +111,28 @@ def validate_pull_secret(namespace):
                 namespace.pull_secret = file.read().rstrip('\n')
 
         if not isinstance(json.loads(namespace.pull_secret), dict):
-            raise Exception()
+            raise Exception()  # pylint: disable=broad-exception-raised
     except Exception as e:
         raise InvalidArgumentValueError("Invalid --pull-secret.") from e
+
+
+def validate_outbound_type(namespace):
+    outbound_type = getattr(namespace, 'outbound_type')
+    if outbound_type not in {'UserDefinedRouting', 'Loadbalancer', None}:
+        raise InvalidArgumentValueError('Invalid --outbound-type: must be "UserDefinedRouting" or "Loadbalancer"')
+
+    ingress_visibility = getattr(namespace, 'ingress_visibility')
+    apiserver_visibility = getattr(namespace, 'apiserver_visibility')
+
+    if (outbound_type == 'UserDefinedRouting' and
+            (is_visibility_public(ingress_visibility) or is_visibility_public(apiserver_visibility))):
+        raise InvalidArgumentValueError('Invalid --outbound-type: cannot use UserDefinedRouting when ' +
+                                        'either --apiserver-visibility or --ingress-visibility is set ' +
+                                        'to Public or not defined')
+
+
+def is_visibility_public(visibility):
+    return visibility == 'Public' or visibility is None
 
 
 def validate_subnet(key):
@@ -158,10 +174,8 @@ def validate_subnet(key):
         if parts['child_type_1'].lower() != 'subnets':
             raise InvalidArgumentValueError(f"--{key.replace('_', '-')} child type '{subnet}' must equal subnets.")
 
-        from .aaz.latest.network.vnet.subnet import Show
-
         try:
-            Show(cli_ctx=cmd.cli_ctx)(command_args={
+            subnet_show(cli_ctx=cmd.cli_ctx)(command_args={
                 "name": parts['child_name_1'],
                 "vnet_name": parts['name'],
                 "resource_group": parts['resource_group']
@@ -258,3 +272,14 @@ def validate_refresh_cluster_credentials(namespace):
 def validate_version_format(namespace):
     if namespace.version is not None and not re.match(r'^[4-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}$', namespace.version):
         raise InvalidArgumentValueError('--version is invalid')
+
+
+def validate_load_balancer_managed_outbound_ip_count(namespace):
+    if namespace.load_balancer_managed_outbound_ip_count is None:
+        return
+
+    minimum_managed_outbound_ips = 1
+    maximum_managed_outbound_ips = 20
+    if namespace.load_balancer_managed_outbound_ip_count < minimum_managed_outbound_ips or namespace.load_balancer_managed_outbound_ip_count > maximum_managed_outbound_ips:  # pylint: disable=line-too-long
+        error_msg = f"--load-balancer-managed-outbound-ip-count must be between {minimum_managed_outbound_ips} and {maximum_managed_outbound_ips} (inclusive)."  # pylint: disable=line-too-long
+        raise InvalidArgumentValueError(error_msg)

@@ -12,8 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network virtual-appliance site list",
-    is_preview=True,
+    "network virtual-appliance site list"
 )
 class List(AAZCommand):
     """List all Azure network virtual appliance site.

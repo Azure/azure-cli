@@ -18,7 +18,7 @@ COMPLETION_TIME_OUT = 10
 def subnet_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
 
     def worker(cmd, prefix, namespace):  # pylint: disable=unused-argument
-        from msrestazure.tools import parse_resource_id
+        from azure.mgmt.core.tools import parse_resource_id
         from .aaz.latest.network.vnet.subnet import List
 
         subnets = []
@@ -72,7 +72,7 @@ def get_resource_name_completion_list_under_subscription(resource_type):
     return completer
 
 
-class HDInsightCompleter():
+class HDInsightCompleter:
 
     def __init__(self, worker=None, timeout=COMPLETION_TIME_OUT):
         self.worker = worker

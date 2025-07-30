@@ -6,7 +6,9 @@
 # pylint: disable=line-too-long
 
 import json
-import re
+import azure.cli.core.azclierror as CLIErrors
+
+from datetime import datetime
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import (InvalidArgumentValueError,
@@ -22,16 +24,28 @@ from ._utils import (is_valid_connection_string,
 from ._models import QueryFields
 from ._constants import ImportExportProfiles
 from ._featuremodels import FeatureQueryFields
+from ._snapshotmodels import SnapshotQueryFields
 
 logger = get_logger(__name__)
 
 
 def validate_datetime(namespace):
-    ''' valid datetime format:YYYY-MM-DDThh:mm:ssZ '''
-    datetime_format = '^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])T(2[0-3]|[01][0-9]):[0-5][0-9]:[0-5][0-9][a-zA-Z]{0,5}$'
-    if namespace.datetime is not None and re.search(datetime_format, namespace.datetime) is None:
-        raise CLIError(
-            'The input datetime is invalid. Correct format should be YYYY-MM-DDThh:mm:ssZ ')
+    ''' valid datetime format: YYYY-MM-DDThh:mm:ss["Z"/±hh:mm]'''
+    supported_formats = ["%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%Sz", "%Y-%m-%dT%H:%M:%S%z"]
+    if namespace.datetime is not None:
+        for supported_format in supported_formats:
+            if __tryparse_datetime(namespace.datetime, supported_format):
+                return
+
+        raise InvalidArgumentValueError('The input datetime is invalid. Correct format should be YYYY-MM-DDThh:mm:ss["Z"/±hh:mm].')
+
+
+def __tryparse_datetime(datetime_string, dt_format):
+    try:
+        datetime.strptime(datetime_string, dt_format)
+        return True
+    except ValueError:
+        return False
 
 
 def validate_connection_string(cmd, namespace):
@@ -110,7 +124,7 @@ def validate_export(namespace):
 
 def validate_appservice_name_or_id(cmd, namespace):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import is_valid_resource_id, parse_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
     if namespace.appservice_account:
         if not is_valid_resource_id(namespace.appservice_account):
             config_store_name = ""
@@ -148,6 +162,16 @@ def validate_feature_query_fields(namespace):
             for feature_query_field in FeatureQueryFields:
                 if field.lower() == feature_query_field.name.lower():
                     fields.append(feature_query_field)
+        namespace.fields = fields
+
+
+def validate_snapshot_query_fields(namespace):
+    if namespace.fields:
+        fields = []
+        for field in namespace.fields:
+            for snapshot_query_field in SnapshotQueryFields:
+                if field.lower() == snapshot_query_field.name.lower():
+                    fields.append(snapshot_query_field)
         namespace.fields = fields
 
 
@@ -206,7 +230,7 @@ def validate_identity(namespace):
         return
 
     for identity in identities:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if identity == '[all]' and subcommand == 'remove':
             continue
 
@@ -216,23 +240,23 @@ def validate_identity(namespace):
 
 def validate_secret_identifier(namespace):
     """ Validate the format of keyvault reference secret identifier """
-    from azure.keyvault.key_vault_id import KeyVaultIdentifier
+    from azure.keyvault.secrets._shared import parse_key_vault_id
 
     identifier = getattr(namespace, 'secret_identifier', None)
     try:
         # this throws an exception for invalid format of secret identifier
-        KeyVaultIdentifier(uri=identifier)
+        parse_key_vault_id(source_id=identifier)
     except Exception as e:
         raise CLIError("Received an exception while validating the format of secret identifier.\n{0}".format(str(e)))
 
 
 def validate_key(namespace):
-    if namespace.key:
-        input_key = str(namespace.key).lower()
-        if input_key == '.' or input_key == '..' or '%' in input_key:
-            raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
-    else:
+    if not namespace.key or str(namespace.key).isspace():
         raise RequiredArgumentMissingError("Key cannot be empty.")
+
+    input_key = str(namespace.key).lower()
+    if input_key == '.' or input_key == '..' or '%' in input_key:
+        raise InvalidArgumentValueError("Key is invalid. Key cannot be a '.' or '..', or contain the '%' character.")
 
 
 def validate_resolve_keyvault(namespace):
@@ -270,6 +294,8 @@ def validate_import_profile(namespace):
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='prefix')
         if namespace.skip_features:
             raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='skip-features')
+        if namespace.tags:
+            raise __construct_kvset_invalid_argument_error(is_exporting=False, argument='tags')
 
 
 def validate_export_profile(namespace):
@@ -286,6 +312,8 @@ def validate_export_profile(namespace):
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='resolve-keyvault')
         if namespace.separator is not None:
             raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='separator')
+        if namespace.dest_tags:
+            raise __construct_kvset_invalid_argument_error(is_exporting=True, argument='dest-tags')
 
 
 def validate_strict_import(namespace):
@@ -301,7 +329,142 @@ def validate_export_as_reference(namespace):
         if namespace.destination != 'appservice':
             raise InvalidArgumentValueError("The option '--export-as-reference' can only be used when exporting to app service.")
 
+        if namespace.snapshot:
+            raise MutuallyExclusiveArgumentError("Cannot export snapshot key-values as references to App Service.")
+
 
 def __construct_kvset_invalid_argument_error(is_exporting, argument):
     action = 'exporting' if is_exporting else 'importing'
     return InvalidArgumentValueError("The option '{0}' is not supported when {1} using '{2}' profile".format(argument, action, ImportExportProfiles.KVSET))
+
+
+def validate_snapshot_filters(namespace):
+    if not namespace.filters:
+        raise RequiredArgumentMissingError("A list of at least one filter is required.")
+
+    if isinstance(namespace.filters, list):
+        if len(namespace.filters) < 1:
+            raise InvalidArgumentValueError("At least one filter is required.")
+
+        if len(namespace.filters) > 3:
+            raise InvalidArgumentValueError("Too many filters supplied. A maximum of 3 filters allowed.")
+
+        filter_parameters = []
+
+        for filter_param in namespace.filters:
+            try:
+                parsed_filter = json.loads(filter_param)
+                if not isinstance(parsed_filter, dict):
+                    raise InvalidArgumentValueError('Parameter must be an escaped JSON object. Value of type {} was supplied.'.format(type(parsed_filter).__name__))
+
+                key_filter_value = parsed_filter.get("key", None)
+
+                if not key_filter_value:
+                    raise InvalidArgumentValueError("Key filter value required.")
+
+                if not isinstance(key_filter_value, str) or len(key_filter_value) < 1:
+                    raise InvalidArgumentValueError("Invalid key filter value. Value must be a non-empty string.")
+
+                if parsed_filter.get("label", None) and not isinstance(parsed_filter["label"], str):
+                    raise InvalidArgumentValueError("Label filter must be a string if specified.")
+
+                if parsed_filter.get("tags", None):
+                    if not isinstance(parsed_filter["tags"], list) or not all(isinstance(tag, str) for tag in parsed_filter["tags"]):
+                        raise InvalidArgumentValueError("Tags filter must be a list of strings if specified.")
+
+                filter_parameters.append(parsed_filter)
+
+            except ValueError:
+                raise InvalidArgumentValueError("Parameter must be an escaped JSON object. {} is not a valid JSON object.".format(filter_param))
+
+        namespace.filters = filter_parameters
+
+
+def validate_snapshot_export(namespace):
+    if namespace.snapshot:
+        if any([namespace.key, namespace.label, namespace.skip_features, namespace.skip_keyvault]):
+            raise MutuallyExclusiveArgumentError("'--snapshot' cannot be specified with '--key',  '--label', '--skip-keyvault' or '--skip-features' arguments.")
+
+
+def validate_snapshot_import(namespace):
+    if namespace.src_snapshot:
+        if namespace.source != 'appconfig':
+            raise InvalidArgumentValueError("--src-snapshot is only applicable when importing from a configuration store.")
+        if any([namespace.src_key, namespace.src_label, namespace.skip_features]):
+            raise MutuallyExclusiveArgumentError("'--src-snapshot' cannot be specified with '--src-key', '--src-label', or '--skip-features' arguments.")
+
+
+def validate_sku(namespace):
+    if namespace.sku.lower() == 'free':
+        if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica or namespace.enable_arm_private_network_access):  # pylint: disable=too-many-boolean-expressions
+            logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' , 'enable-arm-private-network-access' and '--retention-days' will be ignored when creating a free store.")
+            namespace.retention_days = None
+            namespace.enable_purge_protection = None
+            namespace.replica_name = None
+            namespace.replica_location = None
+            namespace.no_replica = None
+            namespace.enable_arm_private_network_access = None
+            return
+
+    if namespace.sku.lower() == 'developer':
+        if (namespace.enable_purge_protection or namespace.retention_days or namespace.replica_name or namespace.replica_location or namespace.no_replica):  # pylint: disable=too-many-boolean-expressions
+            logger.warning("Options '--enable-purge-protection', '--replica-name', '--replica-location' , '--no-replica' and '--retention-days' will be ignored when creating a developer store.")
+            namespace.retention_days = None
+            namespace.enable_purge_protection = None
+            namespace.replica_name = None
+            namespace.replica_location = None
+            namespace.no_replica = None
+            return
+
+    if namespace.sku.lower() == 'premium' and not namespace.no_replica:
+        if any(arg is None for arg in [namespace.replica_name, namespace.replica_location]):
+            raise RequiredArgumentMissingError("Options '--replica-name' and '--replica-location' are required when creating a premium tier store. To avoid creating replica please provide explicit argument '--no-replica'.")
+
+    if namespace.no_replica and (namespace.replica_name or namespace.replica_location):
+        raise CLIErrors.MutuallyExclusiveArgumentError("Please provide either '--no-replica' or both '--replica-name' and '--replica-location'. See 'az appconfig create -h' for examples.")
+
+    if namespace.replica_name:
+        if namespace.replica_location is None:
+            raise RequiredArgumentMissingError("To create a replica, '--replica-location' is required.")
+    else:
+        if namespace.replica_location is not None:
+            raise RequiredArgumentMissingError("To create a replica, '--replica-name' is required.")
+
+
+def _validate_tag_filter_list(tag_list):
+    if not tag_list or not isinstance(tag_list, list):
+        return
+
+    if len(tag_list) > 5:
+        raise InvalidArgumentValueError("Too many tag filters provided. Maximum allowed is 5.")
+
+    for tag in tag_list:
+        if tag:
+            comps = tag.split('=', 1)
+            if comps[0] == "":
+                raise InvalidArgumentValueError("Tag filter name cannot be empty.")
+
+
+def validate_tag_filters(namespace):
+    """Validates tag filters in the 'tags' attribute."""
+    _validate_tag_filter_list(getattr(namespace, 'tags', None))
+
+
+def validate_import_tag_filters(namespace):
+    """Validates tag filters in the 'src_tags' attribute."""
+    _validate_tag_filter_list(getattr(namespace, 'src_tags', None))
+
+
+def validate_dry_run(namespace):
+    if namespace.dry_run and namespace.yes:
+        raise MutuallyExclusiveArgumentError("The '--dry-run' and '--yes' options cannot be specified together.")
+
+
+def validate_kv_revision_retention_period(namespace):
+    if namespace.kv_revision_retention_period is None:
+        return
+
+    retention_period = int(namespace.kv_revision_retention_period)
+
+    if retention_period < 0:
+        raise InvalidArgumentValueError("The key value revision retention period cannot be negative.")

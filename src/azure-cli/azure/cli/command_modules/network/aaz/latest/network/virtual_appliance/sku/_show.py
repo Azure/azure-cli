@@ -12,8 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network virtual-appliance sku show",
-    is_preview=True,
+    "network virtual-appliance sku show"
 )
 class Show(AAZCommand):
     """Show the detail of an Azure network virtual appliance sku.

@@ -6,8 +6,8 @@ from dateutil import parser
 import re
 from knack.util import CLIError
 from knack.log import get_logger
-from msrestazure.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
-from azure.cli.core.azclierror import ValidationError, ArgumentUsageError
+from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id, is_valid_resource_name
+from azure.cli.core.azclierror import ValidationError, ArgumentUsageError, InvalidArgumentValueError
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.util import parse_proxy_resource_id
 from azure.cli.core.profiles import ResourceType
@@ -105,8 +105,10 @@ def mysql_restore_tier_validator(target_tier, source_tier, sku_info):
 def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, backup_retention=None, server_name=None,
                               zone=None, standby_availability_zone=None, high_availability=None, backup_byok_key=None,
                               public_access=None, version=None, auto_grow=None, replication_role=None, subnet=None,
-                              byok_identity=None, backup_byok_identity=None, byok_key=None, geo_redundant_backup=None,
-                              disable_data_encryption=None, iops=None, auto_io_scaling=None, instance=None):
+                              byok_identity=None, backup_interval=None, backup_byok_identity=None, byok_key=None,
+                              geo_redundant_backup=None, disable_data_encryption=None, iops=None, auto_io_scaling=None,
+                              accelerated_logs=None, instance=None, data_source_type=None,
+                              mode=None, data_source_backup_dir=None, data_source_sas_token=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforMySQL/flexibleServers')
 
     list_skus_info = get_mysql_list_skus_info(db_context.cmd, location, server_name=instance.name if instance else None)
@@ -130,7 +132,36 @@ def mysql_arguments_validator(db_context, location, tier, sku_name, storage_gb, 
     mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance)
     _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_byok_key,
                           disable_data_encryption, geo_redundant_backup, instance)
+    _mysql_backup_interval_validator(backup_interval)
     _mysql_iops_validator(iops, auto_io_scaling, instance)
+    mysql_accelerated_logs_validator(accelerated_logs, tier)
+    _mysql_import_data_source_type_validator(data_source_type, data_source_backup_dir, data_source_sas_token)
+    _mysql_import_mode_validator(mode)
+
+
+def _mysql_import_data_source_type_validator(data_source_type, data_source_backup_dir=None, data_source_sas_token=None):
+    allowed_values = ['mysql_single', 'azure_blob']
+    if data_source_type is not None and data_source_type.lower() not in allowed_values:
+        raise InvalidArgumentValueError('Incorrect value for --data-source-type. Allowed values : {}'
+                                        .format(allowed_values))
+    if data_source_type is not None and data_source_type.lower() == 'mysql_single':
+        if data_source_backup_dir is not None or data_source_sas_token is not None:
+            raise CLIError('Incorrect usage: --data-source-backup-dir and --data-source-sas-token. '
+                           'These parameters are not valid for data_source_type mysql_single. '
+                           'Make sure to provide correct parameters. Read more at help section. ')
+
+
+def _mysql_import_mode_validator(mode):
+    allowed_values = ['offline', 'online']
+    if mode is not None and mode.lower() not in allowed_values:
+        raise InvalidArgumentValueError('Incorrect value for --mode. Allowed values : {}'.format(allowed_values))
+
+
+def mysql_import_single_server_ready_validator(source_single_server_object):
+    if source_single_server_object.user_visible_state != 'Ready':
+        raise CLIError('The source server should be in {} state for migration. Instead it is in {} state. '
+                       'Please start the server and try again.'
+                       .format('Ready', source_single_server_object.user_visible_state))
 
 
 def mysql_retention_validator(backup_retention, sku_info, tier):
@@ -153,6 +184,13 @@ def mysql_storage_validator(storage_gb, sku_info, tier, instance):
         if not max(min_mysql_storage, storage_sizes[0]) <= storage_gb <= storage_sizes[1]:
             raise CLIError('Incorrect value for --storage-size. Allowed values(in GiB) : Integers ranging {}-{}'
                            .format(max(min_mysql_storage, storage_sizes[0]), storage_sizes[1]))
+
+
+def mysql_import_storage_validator(source_storage_mb, user_storage_gb):
+    if source_storage_mb > user_storage_gb * 1024:
+        raise CLIError('The target server storage {} GiB is smaller than the source server storage {} GiB. '
+                       'Storage size of the target server must be larger than the source server.'
+                       .format(user_storage_gb, source_storage_mb // 1024))
 
 
 def mysql_georedundant_backup_validator(geo_redundant_backup, geo_paired_regions):
@@ -186,6 +224,20 @@ def _mysql_version_validator(version, sku_info, tier, instance):
         versions = get_mysql_versions(sku_info, tier)
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(versions))
+
+
+def mysql_import_version_validator(source_single_server_object, target_version):
+    allowed_single_server_source_version = ['5.7', '8.0']
+    source_single_server_version = source_single_server_object.version
+    if source_single_server_version not in allowed_single_server_source_version:
+        raise CLIError('Unsupported source server version {}. Only 5.7 and 8.0 servers can be migrated.'
+                       .format(source_single_server_version))
+    if source_single_server_version == '8.0':
+        source_single_server_version = '8.0.21'
+    if source_single_server_version != target_version:
+        raise CLIError('The source server version {} is different from the target server version {}. '
+                       'Target server must have the same version as the source server.'
+                       .format(source_single_server_object.version, target_version))
 
 
 def mysql_auto_grow_validator(auto_grow, replication_role, high_availability, instance):
@@ -250,6 +302,13 @@ def _mysql_byok_validator(byok_identity, backup_byok_identity, byok_key, backup_
                        "Use the primary server instead.")
 
 
+def _mysql_backup_interval_validator(backup_interval):
+    if backup_interval is None:
+        return
+    if backup_interval not in [6, 12, 24]:
+        raise ArgumentUsageError("Incorrect value for --backup-interval. Allowed values: [6, 12, 24]")
+
+
 def _mysql_iops_validator(iops, auto_io_scaling, instance):
     if iops is None:
         return
@@ -257,6 +316,12 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
         auto_io_scaling = instance.storage.auto_io_scaling if auto_io_scaling is None else auto_io_scaling
     if auto_io_scaling.lower() == 'enabled':
         logger.warning("The server has enabled the auto scale iops. So the iops will be ignored.")
+
+
+def mysql_accelerated_logs_validator(accelerated_logs, tier):
+    if tier != "MemoryOptimized" and accelerated_logs is not None and accelerated_logs.lower() == "enabled":
+        logger.warning("Accelerated logs is only supported for Memory Optimized tier. "
+                       "So the accelerated logs will be disabled.")
 
 
 def _network_arg_validator(subnet, public_access):
@@ -355,10 +420,10 @@ def _valid_range(addr_range):
 
 
 def firewall_rule_name_validator(ns):
-    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{1,126}[_a-zA-Z0-9]$', ns.firewall_rule_name):
+    if not re.search(r'^[a-zA-Z0-9][-_a-zA-Z0-9]{0,79}(?<!-)$', ns.firewall_rule_name):
         raise ValidationError("The firewall rule name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'. "
-                              "Additionally, the name of the firewall rule must be at least 3 characters "
-                              "and no more than 128 characters in length. ")
+                              "Additionally, the name of the firewall rule must be at least 1 character "
+                              "and no more than 80 characters in length. ")
 
 
 def validate_server_name(db_context, server_name, type_):
@@ -493,3 +558,21 @@ def validate_byok_identity(cmd, namespace):
 def validate_identities(cmd, namespace):
     if namespace.identities:
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
+
+
+def validate_action_name(namespace):
+    if not re.search(r'^[-_a-zA-Z0-9]+$', namespace.action_name):
+        raise ValidationError("The action name can only contain 0-9, a-z, A-Z, \'-\' and \'_\'.")
+
+
+def validate_branch(namespace):
+    if not re.search(r'^[-_a-zA-Z0-9]+$', namespace.branch):
+        raise ValidationError("The branch can only contain 0-9, a-z, A-Z, \'-\' and \'_\'.")
+
+
+def validate_and_format_maintenance_start_time(maintenance_start_time):
+    try:
+        return parser.parse(maintenance_start_time)
+    except:
+        raise ValidationError("The maintenance_start_time value has incorrect date format. "
+                              "Please use ISO format e.g., 2024-06-01T00:08:23+00:00")

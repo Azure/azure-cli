@@ -76,8 +76,9 @@ examples:
 
 # Tips to write effective help for your command
 
+For a complete list of guidelines, see [Azure CLI reference and conceptual content guidelines](reference_doc_guidelines.md).  Here are some additional tips:
+
 - Make sure the doc contains all the details that someone unfamiliar with the API needs to use the command.
-- Examples are worth a thousand words. Provide examples that cover common use cases.
 - Don't use "etc". Sometimes it makes sense to spell out a list completely. Sometimes it works to say "like ..." instead of "..., etc".
 - Use active voice. For example, say "Update web app configurations" instead of "Updates web app configurations" or "Updating web app configurations".
 - Don't use highly formal language. If you imagine that another dev sat down with you and you were telling him what he needs to know to use the command, that's exactly what you need to write, in those words.
@@ -173,7 +174,7 @@ Examples
 
 The help that you author above will be available online as reference documentation.
 
-https://docs.microsoft.com/cli/azure/reference-index
+https://learn.microsoft.com/cli/azure/reference-index
 
 If you are not satisfied with the heading that is automatically provided, please create a PR to update the following file:
 

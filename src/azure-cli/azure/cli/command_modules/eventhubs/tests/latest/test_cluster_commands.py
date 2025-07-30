@@ -61,7 +61,7 @@ class EHNamespaceCURDScenarioTest(ScenarioTest):
 
         # Delete cluster
         # commented as the cluster can be deleted only after 4 hours
-        self.cmd('eventhubs cluster delete --resource-group test-migration --name {clustername} --yes')
+        #self.cmd('eventhubs cluster delete --resource-group test-migration --name {clustername} --yes')
 
     @AllowLargeResponse()
     def test_eh_self_serve_cluster(self):

@@ -14,7 +14,7 @@ from azure.cli.core.aaz import *
 class __CMDGroup(AAZCommandGroup):
     """Check if a private IP address is available for use within a virtual network.
 
-    To learn more about Virtual Networks visit https://docs.microsoft.com/azure/virtual-network/virtual-network-manage-network.
+    To learn more about Virtual Networks visit https://learn.microsoft.com/azure/virtual-network/virtual-network-manage-network.
     """
     pass
 

@@ -14,8 +14,8 @@ from azure.cli.command_modules.storage.storage_url_helpers import StorageResourc
 
 class MockCLI(CLI):
     def __init__(self):
-        super(MockCLI, self).__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
-                                      config_env_var_prefix=ENV_VAR_PREFIX)
+        super().__init__(cli_name='mock_cli', config_dir=GLOBAL_CONFIG_DIR,
+                         config_env_var_prefix=ENV_VAR_PREFIX)
         self.cloud = get_active_cloud(self)
 
 

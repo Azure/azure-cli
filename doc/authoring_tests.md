@@ -10,7 +10,7 @@ For integration tests, we provide the `ScenarioTest` and `LiveScenarioTest` clas
 
 ### About replayable tests
 
-Azure CLI translates user inputs into Azure Python SDK calls which communicate with [Azure REST API](https://docs.microsoft.com/rest/api/). These HTTP communications are captured and recorded so the integration tests can be replayed in an automation environment without making actual HTTP calls. This ensures that the commands actually work against the service when they are recorded (and then can be re-run live to verify) and provides protection against regressions or breaking changes when they are played back.
+Azure CLI translates user inputs into Azure Python SDK calls which communicate with [Azure REST API](https://learn.microsoft.com/rest/api/). These HTTP communications are captured and recorded so the integration tests can be replayed in an automation environment without making actual HTTP calls. This ensures that the commands actually work against the service when they are recorded (and then can be re-run live to verify) and provides protection against regressions or breaking changes when they are played back.
 
 ### Nightly live test run
 

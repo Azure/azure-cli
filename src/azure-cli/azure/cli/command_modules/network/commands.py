@@ -8,15 +8,10 @@ from azure.cli.core.commands import DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import (
     deployment_validate_table_format, handle_template_based_exception)
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.profiles import get_api_version, ResourceType
 
-from azure.cli.command_modules.network._client_factory import (
-    cf_dns_mgmt_record_sets, cf_dns_mgmt_zones,
-    cf_dns_references)
 from azure.cli.command_modules.network._format import (
     transform_local_gateway_table_output, transform_dns_record_set_output,
-    transform_dns_record_set_table_output, transform_dns_zone_table_output,
-    transform_public_ip_create_output,
+    transform_dns_zone_table_output, transform_public_ip_create_output,
     transform_traffic_manager_create_output,
     transform_geographic_hierachy_table_output,
     transform_service_community_table_output, transform_waf_rule_sets_table_output,
@@ -37,28 +32,6 @@ NETWORK_VROUTER_PEERING_DEPRECATION_INFO = 'network routeserver peering'
 
 # pylint: disable=too-many-locals, too-many-statements
 def load_command_table(self, _):
-
-    # region Command Types
-    network_dns_zone_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.dns.operations#ZonesOperations.{}',
-        client_factory=cf_dns_mgmt_zones,
-        resource_type=ResourceType.MGMT_NETWORK_DNS
-    )
-
-    network_dns_record_set_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.dns.operations#RecordSetsOperations.{}',
-        client_factory=cf_dns_mgmt_record_sets,
-        resource_type=ResourceType.MGMT_NETWORK_DNS
-    )
-
-    network_dns_reference_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.dns.operations#DnsResourceReferenceOperations.{}',
-        client_factory=cf_dns_references,
-        resource_type=ResourceType.MGMT_NETWORK_DNS,
-        min_api='2018-05-01'
-    )
-    # endregion
-
     # region NetworkRoot
     with self.command_group('network'):
         from azure.cli.command_modules.network.custom import UsagesList
@@ -189,6 +162,10 @@ def load_command_table(self, _):
         from .custom import WAFCustomRuleMatchConditionAdd
         self.command_table["network application-gateway waf-policy custom-rule match-condition add"] = WAFCustomRuleMatchConditionAdd(loader=self)
 
+    with self.command_group("network application-gateway waf-policy managed-rule exception") as g:
+        g.custom_command("remove", "remove_waf_managed_rule_exception")
+        g.custom_command("list", "list_waf_managed_rules")
+
     with self.command_group("network application-gateway waf-policy managed-rule exclusion") as g:
         g.custom_command("remove", "remove_waf_managed_rule_exclusion")
         g.custom_command("list", "list_waf_managed_rules")
@@ -217,56 +194,125 @@ def load_command_table(self, _):
     # endregion
 
     # region DNS
-    with self.command_group('network dns', network_dns_reference_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
-        g.command('list-references', 'get_by_target_resources')
+    from .operations.dns import DNSListReferences
+    self.command_table["network dns list-references"] = DNSListReferences(loader=self)
 
-    with self.command_group('network dns zone', network_dns_zone_sdk) as g:
-        g.command('delete', 'begin_delete', confirmation=True)
-        g.show_command('show', 'get', table_transformer=transform_dns_zone_table_output)
-        g.custom_command('list', 'list_dns_zones', table_transformer=transform_dns_zone_table_output)
+    with self.command_group('network dns zone') as g:
         g.custom_command('import', 'import_zone')
         g.custom_command('export', 'export_zone')
-        g.custom_command('create', 'create_dns_zone', client_factory=cf_dns_mgmt_zones)
-        g.generic_update_command('update', custom_func_name='update_dns_zone')
+        g.custom_command('create', 'create_dns_zone', table_transformer=transform_dns_zone_table_output)
 
-    api_version = str(get_api_version(self.cli_ctx, ResourceType.MGMT_NETWORK_DNS))
-    api_version = api_version.replace('-', '_')
-    dns_doc_string = 'azure.mgmt.dns.v' + api_version + '.operations#RecordSetsOperations.create_or_update'
-
-    supported_records = ['a', 'aaaa', 'mx', 'ns', 'ptr', 'srv', 'txt', 'caa']
+    supported_records = ['a', 'aaaa', 'ds', 'mx', 'naptr', 'ns', 'ptr', 'srv', 'tlsa', 'txt', 'caa']
+    experimental_records = ['ds', 'naptr', 'tlsa']
     for record in supported_records:
-        with self.command_group('network dns record-set {}'.format(record), network_dns_record_set_sdk, resource_type=ResourceType.MGMT_NETWORK_DNS) as g:
-            g.show_command('show', 'get', transform=transform_dns_record_set_output)
-            g.command('delete', 'delete', confirmation=True)
-            g.custom_command('list', 'list_dns_record_set', transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
-            g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
+        is_experimental = record in experimental_records
+        with self.command_group('network dns record-set {}'.format(record), is_experimental=is_experimental) as g:
             g.custom_command('add-record', 'add_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
             g.custom_command('remove-record', 'remove_dns_{}_record'.format(record), transform=transform_dns_record_set_output)
 
+    with self.command_group('network dns record-set soa') as g:
+        g.custom_command('update', 'update_dns_soa_record', transform=transform_dns_record_set_output)
+
+    with self.command_group('network dns record-set cname') as g:
+        g.custom_command('set-record', 'add_dns_cname_record', transform=transform_dns_record_set_output)
+        g.custom_command('remove-record', 'remove_dns_cname_record', transform=transform_dns_record_set_output)
+
+    from .operations.dns import RecordSetAShow as DNSRecordSetAShow, RecordSetAAAAShow as DNSRecordSetAAAAShow, \
+        RecordSetDSShow as DNSRecordSetDSShow, RecordSetMXShow as DNSRecordSetMXShow, \
+        RecordSetNAPTRShow as DNSRecordSetNAPTRShow, RecordSetNSShow as DNSRecordSetNSShow, \
+        RecordSetPTRShow as DNSRecordSetPTRShow, RecordSetSRVShow as DNSRecordSetSRVShow, \
+        RecordSetTLSAShow as DNSRecordSetTLSAShow, RecordSetTXTShow as DNSRecordSetTXTShow, \
+        RecordSetCAAShow as DNSRecordSetCAAShow, RecordSetCNAMEShow as DNSRecordSetCNAMEShow, \
+        RecordSetSOAShow as DNSRecordSetSOAShow
+    self.command_table["network dns record-set a show"] = DNSRecordSetAShow(loader=self)
+    self.command_table["network dns record-set aaaa show"] = DNSRecordSetAAAAShow(loader=self)
+    self.command_table["network dns record-set ds show"] = DNSRecordSetDSShow(loader=self)
+    self.command_table["network dns record-set mx show"] = DNSRecordSetMXShow(loader=self)
+    self.command_table["network dns record-set naptr show"] = DNSRecordSetNAPTRShow(loader=self)
+    self.command_table["network dns record-set ns show"] = DNSRecordSetNSShow(loader=self)
+    self.command_table["network dns record-set ptr show"] = DNSRecordSetPTRShow(loader=self)
+    self.command_table["network dns record-set srv show"] = DNSRecordSetSRVShow(loader=self)
+    self.command_table["network dns record-set tlsa show"] = DNSRecordSetTLSAShow(loader=self)
+    self.command_table["network dns record-set txt show"] = DNSRecordSetTXTShow(loader=self)
+    self.command_table["network dns record-set caa show"] = DNSRecordSetCAAShow(loader=self)
+    self.command_table["network dns record-set cname show"] = DNSRecordSetCNAMEShow(loader=self)
+    self.command_table["network dns record-set soa show"] = DNSRecordSetSOAShow(loader=self)
+
+    from .operations.dns import RecordSetAList as DNSRecordSetAList, RecordSetAAAAList as DNSRecordSetAAAAList, \
+        RecordSetDSList as DNSRecordSetDSList, RecordSetMXList as DNSRecordSetMXList, \
+        RecordSetNAPTRList as DNSRecordSetNAPTRList, RecordSetNSList as DNSRecordSetNSList, \
+        RecordSetPTRList as DNSRecordSetPTRList, RecordSetSRVList as DNSRecordSetSRVList, \
+        RecordSetTLSAList as DNSRecordSetTLSAList, RecordSetTXTList as DNSRecordSetTXTList, \
+        RecordSetCAAList as DNSRecordSetCAAList, RecordSetCNAMEList as DNSRecordSetCNAMEList
+    self.command_table["network dns record-set a list"] = DNSRecordSetAList(loader=self)
+    self.command_table["network dns record-set aaaa list"] = DNSRecordSetAAAAList(loader=self)
+    self.command_table["network dns record-set ds list"] = DNSRecordSetDSList(loader=self)
+    self.command_table["network dns record-set mx list"] = DNSRecordSetMXList(loader=self)
+    self.command_table["network dns record-set naptr list"] = DNSRecordSetNAPTRList(loader=self)
+    self.command_table["network dns record-set ns list"] = DNSRecordSetNSList(loader=self)
+    self.command_table["network dns record-set ptr list"] = DNSRecordSetPTRList(loader=self)
+    self.command_table["network dns record-set srv list"] = DNSRecordSetSRVList(loader=self)
+    self.command_table["network dns record-set tlsa list"] = DNSRecordSetTLSAList(loader=self)
+    self.command_table["network dns record-set txt list"] = DNSRecordSetTXTList(loader=self)
+    self.command_table["network dns record-set caa list"] = DNSRecordSetCAAList(loader=self)
+    self.command_table["network dns record-set cname list"] = DNSRecordSetCNAMEList(loader=self)
+
+    from .operations.dns import RecordSetACreate as DNSRecordSetACreate, RecordSetAAAACreate as DNSRecordSetAAAACreate, \
+        RecordSetDSCreate as DNSRecordSetDSCreate, RecordSetMXCreate as DNSRecordSetMXCreate, \
+        RecordSetNAPTRCreate as DNSRecordSetNAPTRCreate, RecordSetNSCreate as DNSRecordSetNSCreate, \
+        RecordSetPTRCreate as DNSRecordSetPTRCreate, RecordSetSRVCreate as DNSRecordSetSRVCreate, \
+        RecordSetTLSACreate as DNSRecordSetTLSACreate, RecordSetTXTCreate as DNSRecordSetTXTCreate, \
+        RecordSetCAACreate as DNSRecordSetCAACreate, RecordSetCNAMECreate as DNSRecordSetCNAMECreate
+    self.command_table["network dns record-set a create"] = DNSRecordSetACreate(loader=self)
+    self.command_table["network dns record-set aaaa create"] = DNSRecordSetAAAACreate(loader=self)
+    self.command_table["network dns record-set ds create"] = DNSRecordSetDSCreate(loader=self)
+    self.command_table["network dns record-set mx create"] = DNSRecordSetMXCreate(loader=self)
+    self.command_table["network dns record-set naptr create"] = DNSRecordSetNAPTRCreate(loader=self)
+    self.command_table["network dns record-set ns create"] = DNSRecordSetNSCreate(loader=self)
+    self.command_table["network dns record-set ptr create"] = DNSRecordSetPTRCreate(loader=self)
+    self.command_table["network dns record-set srv create"] = DNSRecordSetSRVCreate(loader=self)
+    self.command_table["network dns record-set tlsa create"] = DNSRecordSetTLSACreate(loader=self)
+    self.command_table["network dns record-set txt create"] = DNSRecordSetTXTCreate(loader=self)
+    self.command_table["network dns record-set caa create"] = DNSRecordSetCAACreate(loader=self)
+    self.command_table["network dns record-set cname create"] = DNSRecordSetCNAMECreate(loader=self)
+
     from .operations.dns import RecordSetAUpdate as DNSRecordSetAUpdate, RecordSetAAAAUpdate as DNSRecordSetAAAAUpdate, \
-        RecordSetMXUpdate as DNSRecordSetMXUpdate, RecordSetNSUpdate as DNSRecordSetNSUpdate, \
+        RecordSetDSUpdate as DNSRecordSetDSUpdate, RecordSetMXUpdate as DNSRecordSetMXUpdate, \
+        RecordSetNAPTRUpdate as DNSRecordSetNAPTRUpdate, RecordSetNSUpdate as DNSRecordSetNSUpdate, \
         RecordSetPTRUpdate as DNSRecordSetPTRUpdate, RecordSetSRVUpdate as DNSRecordSetSRVUpdate, \
-        RecordSetTXTUpdate as DNSRecordSetTXTUpdate, RecordSetCAAUpdate as DNSRecordSetCAAUpdate
+        RecordSetTLSAUpdate as DNSRecordSetTLSAUpdate, RecordSetTXTUpdate as DNSRecordSetTXTUpdate, \
+        RecordSetCAAUpdate as DNSRecordSetCAAUpdate, RecordSetCNAMEUpdate as DNSRecordSetCNAMEUpdate
     self.command_table["network dns record-set a update"] = DNSRecordSetAUpdate(loader=self)
     self.command_table["network dns record-set aaaa update"] = DNSRecordSetAAAAUpdate(loader=self)
+    self.command_table["network dns record-set ds update"] = DNSRecordSetDSUpdate(loader=self)
     self.command_table["network dns record-set mx update"] = DNSRecordSetMXUpdate(loader=self)
+    self.command_table["network dns record-set naptr update"] = DNSRecordSetNAPTRUpdate(loader=self)
     self.command_table["network dns record-set ns update"] = DNSRecordSetNSUpdate(loader=self)
     self.command_table["network dns record-set ptr update"] = DNSRecordSetPTRUpdate(loader=self)
     self.command_table["network dns record-set srv update"] = DNSRecordSetSRVUpdate(loader=self)
+    self.command_table["network dns record-set tlsa update"] = DNSRecordSetTLSAUpdate(loader=self)
     self.command_table["network dns record-set txt update"] = DNSRecordSetTXTUpdate(loader=self)
     self.command_table["network dns record-set caa update"] = DNSRecordSetCAAUpdate(loader=self)
+    self.command_table["network dns record-set cname update"] = DNSRecordSetCNAMEUpdate(loader=self)
 
-    with self.command_group('network dns record-set soa', network_dns_record_set_sdk) as g:
-        g.show_command('show', 'get', transform=transform_dns_record_set_output)
-        g.custom_command('update', 'update_dns_soa_record', transform=transform_dns_record_set_output)
-
-    with self.command_group('network dns record-set cname', network_dns_record_set_sdk) as g:
-        g.show_command('show', 'get', transform=transform_dns_record_set_output)
-        g.command('delete', 'delete', confirmation=True)
-        g.custom_command('list', 'list_dns_record_set', client_factory=cf_dns_mgmt_record_sets, transform=transform_dns_record_set_output, table_transformer=transform_dns_record_set_table_output)
-        g.custom_command('create', 'create_dns_record_set', transform=transform_dns_record_set_output, doc_string_source=dns_doc_string)
-        g.custom_command('set-record', 'add_dns_cname_record', transform=transform_dns_record_set_output)
-        g.custom_command('remove-record', 'remove_dns_cname_record', transform=transform_dns_record_set_output)
+    from .operations.dns import RecordSetADelete as DNSRecordSetADelete, RecordSetAAAADelete as DNSRecordSetAAAADelete, \
+        RecordSetDSDelete as DNSRecordSetDSDelete, RecordSetMXDelete as DNSRecordSetMXDelete, \
+        RecordSetNAPTRDelete as DNSRecordSetNAPTRDelete, RecordSetNSDelete as DNSRecordSetNSDelete, \
+        RecordSetPTRDelete as DNSRecordSetPTRDelete, RecordSetSRVDelete as DNSRecordSetSRVDelete, \
+        RecordSetTLSADelete as DNSRecordSetTLSADelete, RecordSetTXTDelete as DNSRecordSetTXTDelete, \
+        RecordSetCAADelete as DNSRecordSetCAADelete, RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete
+    self.command_table["network dns record-set a delete"] = DNSRecordSetADelete(loader=self)
+    self.command_table["network dns record-set aaaa delete"] = DNSRecordSetAAAADelete(loader=self)
+    self.command_table["network dns record-set ds delete"] = DNSRecordSetDSDelete(loader=self)
+    self.command_table["network dns record-set mx delete"] = DNSRecordSetMXDelete(loader=self)
+    self.command_table["network dns record-set naptr delete"] = DNSRecordSetNAPTRDelete(loader=self)
+    self.command_table["network dns record-set ns delete"] = DNSRecordSetNSDelete(loader=self)
+    self.command_table["network dns record-set ptr delete"] = DNSRecordSetPTRDelete(loader=self)
+    self.command_table["network dns record-set srv delete"] = DNSRecordSetSRVDelete(loader=self)
+    self.command_table["network dns record-set tlsa delete"] = DNSRecordSetTLSADelete(loader=self)
+    self.command_table["network dns record-set txt delete"] = DNSRecordSetTXTDelete(loader=self)
+    self.command_table["network dns record-set caa delete"] = DNSRecordSetCAADelete(loader=self)
+    self.command_table["network dns record-set cname delete"] = DNSRecordSetCNAMEDelete(loader=self)
     # endregion
 
     # region ExpressRoutes
@@ -618,14 +664,24 @@ def load_command_table(self, _):
 
     # region VirtualNetworkGateways
     with self.command_group('network vnet-gateway'):
-        from .custom import VnetGatewayCreate, VnetGatewayUpdate, VnetGatewayVpnConnectionsDisconnect
+        from .custom import VnetGatewayCreate, VnetGatewayUpdate, VnetGatewayVpnConnectionsDisconnect, VNetGatewayShow, VNetGatewayList
         from .aaz.latest.network.vnet_gateway import ListBgpPeerStatus, ListAdvertisedRoutes, ListLearnedRoutes
         self.command_table['network vnet-gateway create'] = VnetGatewayCreate(loader=self)
         self.command_table['network vnet-gateway update'] = VnetGatewayUpdate(loader=self)
         self.command_table['network vnet-gateway disconnect-vpn-connections'] = VnetGatewayVpnConnectionsDisconnect(loader=self)
+        self.command_table["network vnet-gateway show"] = VNetGatewayShow(loader=self)
+        self.command_table["network vnet-gateway list"] = VNetGatewayList(loader=self)
         self.command_table['network vnet-gateway list-bgp-peer-status'] = ListBgpPeerStatus(loader=self, table_transformer=transform_vnet_gateway_bgp_peer_table)
         self.command_table['network vnet-gateway list-advertised-routes'] = ListAdvertisedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
         self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
+
+    with self.command_group('network vnet-gateway migration') as g:
+        from .operations.vnet_gateway_migration import VNetGatewayMigrationAbort, VNetGatewayMigrationExecute, \
+            VNetGatewayMigrationCommit, VNetGatewayMigrationPrepare
+        self.command_table['network vnet-gateway migration abort'] = VNetGatewayMigrationAbort(loader=self)
+        self.command_table['network vnet-gateway migration execute'] = VNetGatewayMigrationExecute(loader=self)
+        self.command_table['network vnet-gateway migration commit'] = VNetGatewayMigrationCommit(loader=self)
+        self.command_table['network vnet-gateway migration prepare'] = VNetGatewayMigrationPrepare(loader=self)
 
     with self.command_group('network vnet-gateway packet-capture'):
         from .aaz.latest.network.vnet_gateway import Wait
@@ -724,6 +780,7 @@ def load_command_table(self, _):
     # endregion
 
     # region CustomIp
-    from .custom import CustomIpPrefixUpdate
+    from .custom import CustomIpPrefixCreate, CustomIpPrefixUpdate
+    self.command_table["network custom-ip prefix create"] = CustomIpPrefixCreate(loader=self)
     self.command_table["network custom-ip prefix update"] = CustomIpPrefixUpdate(loader=self)
     # endregion

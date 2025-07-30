@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.monitor._client_factory import cf_metrics
+# pylint: disable=protected-access
 
 from knack.log import get_logger
 
@@ -11,7 +11,7 @@ logger = get_logger(__name__)
 
 
 # region ActivityLog
-def list_activity_log(client, correlation_id=None, resource_group=None, resource_id=None,
+def list_activity_log(cmd, correlation_id=None, resource_group=None, resource_id=None,
                       resource_provider=None, start_time=None, end_time=None, caller=None, status=None, max_events=50,
                       select=None, offset='6h'):
     odata_filters = _build_activity_log_odata_filter(correlation_id, resource_group, resource_id, resource_provider,
@@ -20,7 +20,14 @@ def list_activity_log(client, correlation_id=None, resource_group=None, resource
     select_filters = _activity_log_select_filter_builder(select)
     logger.info('OData Filter: %s', odata_filters)
     logger.info('Select Filter: %s', select_filters)
-    activity_log = client.list(filter=odata_filters, select=select_filters)
+
+    from .aaz.latest.monitor.activity_log import List
+    # activity_log = client.list(filter=odata_filters, select=select_filters)
+    activity_log = List(cli_ctx=cmd.cli_ctx)(command_args={
+        "filter": odata_filters,
+        "select": select_filters,
+    })
+
     return _limit_results(activity_log, max_events)
 
 
@@ -101,7 +108,6 @@ def list_metrics(cmd, resource,
                  metadata=None, dimension=None, aggregation=None, metrics=None,
                  filters=None, metric_namespace=None, orderby=None, top=10):
 
-    from azure.mgmt.monitor.models import ResultType
     from datetime import datetime
     import dateutil.parser
     from urllib.parse import quote_plus
@@ -118,16 +124,33 @@ def list_metrics(cmd, resource,
 
     timespan = '{}/{}'.format(start_time, end_time)
 
-    client = cf_metrics(cmd.cli_ctx, None)
-    return client.list(
-        resource_uri=resource,
-        timespan=quote_plus(timespan),
-        interval=interval,
-        metricnames=','.join(metrics) if metrics else None,
-        aggregation=','.join(aggregation) if aggregation else None,
-        top=top,
-        orderby=orderby,
-        filter=filters,
-        result_type=ResultType.metadata if metadata else None,
-        metricnamespace=metric_namespace)
+    from .aaz.latest.monitor.metrics import List
+    return List(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_uri": resource,
+        "timespan": quote_plus(timespan),
+        "interval": interval,
+        "metricnames": ','.join(metrics) if metrics else None,
+        "aggregation": ','.join(aggregation) if aggregation else None,
+        "top": top,
+        "orderby": orderby,
+        "filter": filters,
+        "result_typ": "Metadata" if metadata else None,
+        "metricnamespac": metric_namespace
+    })
+
+
+def list_definations(cmd, resource_uri, metricnamespace=None):
+    from .aaz.latest.monitor.metrics import ListDefinitions
+    return ListDefinitions(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_uri": resource_uri,
+        "metricnamespace": metricnamespace
+    })
+
+
+def list_namespaces(cmd, resource_uri, start_time=None):
+    from .aaz.latest.monitor.metrics import ListNamespaces
+    return ListNamespaces(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_uri": resource_uri,
+        "start_time": start_time
+    })
 # endregion

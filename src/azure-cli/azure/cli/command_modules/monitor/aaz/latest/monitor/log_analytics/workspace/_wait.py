@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2021-12-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/workspaces/{}", "2025-02-01"],
         ]
     }
 
@@ -61,11 +61,11 @@ class Wait(AAZWaitCommand):
         self.WorkspacesGet(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -121,7 +121,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2021-12-01-preview",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -154,12 +154,11 @@ class Wait(AAZWaitCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.e_tag = AAZStrType(
-                serialized_name="eTag",
-            )
+            _schema_on_200.etag = AAZStrType()
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
@@ -178,6 +177,35 @@ class Wait(AAZWaitCommand):
                 flags={"read_only": True},
             )
 
+            identity = cls._schema_on_200.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
             properties = cls._schema_on_200.properties
             properties.created_date = AAZStrType(
                 serialized_name="createdDate",
@@ -190,7 +218,8 @@ class Wait(AAZWaitCommand):
             properties.default_data_collection_rule_resource_id = AAZStrType(
                 serialized_name="defaultDataCollectionRuleResourceId",
             )
-            properties.features = AAZObjectType()
+            properties.failover = AAZObjectType()
+            properties.features = AAZFreeFormDictType()
             properties.force_cmk_for_query = AAZBoolType(
                 serialized_name="forceCmkForQuery",
             )
@@ -212,6 +241,7 @@ class Wait(AAZWaitCommand):
             properties.public_network_access_for_query = AAZStrType(
                 serialized_name="publicNetworkAccessForQuery",
             )
+            properties.replication = AAZObjectType()
             properties.retention_in_days = AAZIntType(
                 serialized_name="retentionInDays",
                 nullable=True,
@@ -221,40 +251,39 @@ class Wait(AAZWaitCommand):
                 serialized_name="workspaceCapping",
             )
 
-            features = cls._schema_on_200.properties.features
-            features.cluster_resource_id = AAZStrType(
-                serialized_name="clusterResourceId",
-                nullable=True,
+            failover = cls._schema_on_200.properties.failover
+            failover.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
             )
-            features.disable_local_auth = AAZBoolType(
-                serialized_name="disableLocalAuth",
-                nullable=True,
-            )
-            features.enable_data_export = AAZBoolType(
-                serialized_name="enableDataExport",
-                nullable=True,
-            )
-            features.enable_log_access_using_only_resource_permissions = AAZBoolType(
-                serialized_name="enableLogAccessUsingOnlyResourcePermissions",
-                nullable=True,
-            )
-            features.immediate_purge_data_on30_days = AAZBoolType(
-                serialized_name="immediatePurgeDataOn30Days",
-                nullable=True,
+            failover.state = AAZStrType(
+                flags={"read_only": True},
             )
 
             private_link_scoped_resources = cls._schema_on_200.properties.private_link_scoped_resources
-            private_link_scoped_resources.Element = AAZObjectType(
-                flags={"read_only": True},
-            )
+            private_link_scoped_resources.Element = AAZObjectType()
 
             _element = cls._schema_on_200.properties.private_link_scoped_resources.Element
             _element.resource_id = AAZStrType(
                 serialized_name="resourceId",
-                flags={"read_only": True},
             )
             _element.scope_id = AAZStrType(
                 serialized_name="scopeId",
+            )
+
+            replication = cls._schema_on_200.properties.replication
+            replication.created_date = AAZStrType(
+                serialized_name="createdDate",
+                flags={"read_only": True},
+            )
+            replication.enabled = AAZBoolType()
+            replication.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
+            )
+            replication.location = AAZStrType()
+            replication.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
                 flags={"read_only": True},
             )
 
@@ -286,33 +315,31 @@ class Wait(AAZWaitCommand):
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(
                 serialized_name="createdAt",
-                flags={"read_only": True},
             )
             system_data.created_by = AAZStrType(
                 serialized_name="createdBy",
-                flags={"read_only": True},
             )
             system_data.created_by_type = AAZStrType(
                 serialized_name="createdByType",
-                flags={"read_only": True},
             )
             system_data.last_modified_at = AAZStrType(
                 serialized_name="lastModifiedAt",
-                flags={"read_only": True},
             )
             system_data.last_modified_by = AAZStrType(
                 serialized_name="lastModifiedBy",
-                flags={"read_only": True},
             )
             system_data.last_modified_by_type = AAZStrType(
                 serialized_name="lastModifiedByType",
-                flags={"read_only": True},
             )
 
             tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _WaitHelper:
+    """Helper class for Wait"""
 
 
 __all__ = ["Wait"]

@@ -8,10 +8,10 @@
 import re
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.tools import parse_resource_id
 from dateutil.parser import parse   # pylint: disable=import-error,relative-import
 
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+from azure.mgmt.core.tools import parse_resource_id
 from azure.mgmt.eventgrid.models import (
     EventSubscription,
     EventSubscriptionUpdateParameters,
@@ -715,7 +715,7 @@ def cli_domain_topic_event_subscription_delete(
         domain_topic_name,
         event_subscription_name):
 
-    client.begin_delete(
+    return client.begin_delete(
         resource_group_name=resource_group_name,
         domain_name=domain_name,
         topic_name=domain_topic_name,

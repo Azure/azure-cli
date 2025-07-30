@@ -8,20 +8,16 @@ from azure.cli.core.azclierror import (
 )
 
 
-def run_cli_cmd(cmd, retry=0):
-    '''Run a CLI command
-    :param cmd: The CLI command to be executed
-    :param retry: The times to re-try
+def get_resource_group(cmd, resource_group_name):
+    '''Get resource group info
+    :param cmd: The cmd context
+    :param resource_group_name: The resource group to be fetched
     '''
-    import json
-    import subprocess
-
-    output = subprocess.run(cmd, shell=True, check=False, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    if output.returncode != 0:
-        if retry:
-            run_cli_cmd(cmd, retry - 1)
-        else:
-            raise CLIInternalError('Command execution failed, command is: '
-                                   '{}, error message is: {}'.format(cmd, output.stderr))
-
-    return json.loads(output.stdout) if output.stdout else json.loads(None)
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    try:
+        resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+        resource_group = resource_client.resource_groups.get(resource_group_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        raise CLIInternalError('Resource group fetch execution failed, error message is: {}'.format(str(ex)))
+    return resource_group

@@ -2,140 +2,125 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from knack.log import get_logger
+# pylint: disable=line-too-long, protected-access
+from azure.cli.core.aaz import has_value, register_command
+from azure.cli.core.azclierror import ArgumentUsageError
+from azure.cli.core.util import parse_proxy_resource_id
 
-logger = get_logger(__name__)
-
-
-# region Private Link Scope
-def show_private_link_scope(client, resource_group_name, scope_name):
-    return client.get(resource_group_name=resource_group_name,
-                      scope_name=scope_name)
-
-
-def delete_private_link_scope(client, resource_group_name, scope_name):
-    return client.begin_delete(resource_group_name=resource_group_name,
-                               scope_name=scope_name)
+from ..aaz.latest.monitor.private_link_scope import Create as _PrivateLinkScopeCreate
+from ..aaz.latest.monitor.private_link_scope.private_endpoint_connection import Delete as _ConnectionDelete, \
+    Show as _ConnectionShow, Update
 
 
-def list_private_link_scope(client, resource_group_name=None):
-    if not resource_group_name:
-        return client.list()
-    return client.list_by_resource_group(resource_group_name=resource_group_name)
+def validate_private_endpoint_connection_id(args):
+    if has_value(args.id):
+        data = parse_proxy_resource_id(args.id.to_serialized_data())
+        args.name = data["child_name_1"]
+        args.resource_group = data["resource_group"]
+        args.scope_name = data["name"]
+
+    if not all([has_value(args.name), has_value(args.resource_group), has_value(args.scope_name)]):
+        err_msg = "Incorrect usage. Please provide [--id ID] or [--n NAME -g NAME --scope-name NAME]."
+        raise ArgumentUsageError(error_msg=err_msg)
 
 
-def create_private_link_scope(client, resource_group_name, scope_name, location='Global', tags=None):
-    from azure.mgmt.monitor.models import AzureMonitorPrivateLinkScope
-    private_link_scope = AzureMonitorPrivateLinkScope(location=location, tags=tags)
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   scope_name=scope_name,
-                                   azure_monitor_private_link_scope_payload=private_link_scope)
+class PrivateLinkScopeCreate(_PrivateLinkScopeCreate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.location._required = False
+        args_schema.location._registered = False
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.location = "global"
 
 
-def update_private_link_scope(client, resource_group_name, scope_name, tags):
-    from azure.mgmt.monitor.models import TagsResource
-    tags = TagsResource(tags=tags)
-    return client.update_tags(resource_group_name=resource_group_name,
-                              scope_name=scope_name,
-                              private_link_scope_tags=tags)
-# endregion
+class ConnectionDelete(_ConnectionDelete):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.id = AAZStrArg(
+            options=["--id"],
+            help="ID of the private endpoint connection associated with the private link scope. "
+                 "Values from `az monitor private-link-scope show`."
+        )
+        args_schema.name._required = False
+        args_schema.resource_group._required = False
+        args_schema.scope_name._required = False
+
+        return args_schema
+
+    def pre_operations(self):
+        validate_private_endpoint_connection_id(self.ctx.args)
 
 
-# region Private Link Scope Resource
-def show_private_link_scope_resource(client, resource_group_name, scope_name, resource_name):
-    return client.get(resource_group_name=resource_group_name,
-                      scope_name=scope_name,
-                      name=resource_name)
+class ConnectionShow(_ConnectionShow):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.id = AAZStrArg(
+            options=["--id"],
+            help="ID of the private endpoint connection associated with the private link scope. "
+                 "Values from `az monitor private-link-scope show`."
+        )
+        args_schema.name._required = False
+        args_schema.resource_group._required = False
+        args_schema.scope_name._required = False
+
+        return args_schema
+
+    def pre_operations(self):
+        validate_private_endpoint_connection_id(self.ctx.args)
 
 
-def delete_private_link_scope_resource(client, resource_group_name, scope_name, resource_name):
-    return client.begin_delete(resource_group_name=resource_group_name,
-                               scope_name=scope_name,
-                               name=resource_name)
+@register_command("monitor private-link-scope private-endpoint-connection approve")
+class ConnectionApprove(Update):
+    """ Approve a private endpoint connection of a private link scope resource.
+
+    :example: Approve a private endpoint connection of a private link scope resource.
+        az monitor private-link-scope private-endpoint-connection approve --name MyPrivateEndpointConnection --resource-group MyResourceGroup --scope-name MyScope
+    """
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.status._registered = False
+        args_schema.name._required = False
+        args_schema.resource_group._required = False
+        args_schema.scope_name._required = False
+
+        return args_schema
+
+    def pre_operations(self):
+        args = self.ctx.args
+        args.status = "Approved"
+        validate_private_endpoint_connection_id(args)
 
 
-def list_private_link_scope_resource(client, resource_group_name, scope_name):
-    return client.list_by_private_link_scope(resource_group_name=resource_group_name,
-                                             scope_name=scope_name)
+@register_command("monitor private-link-scope private-endpoint-connection reject")
+class ConnectionReject(Update):
+    """ Reject a private endpoint connection of a private link scope resource.
 
+    :example: Reject a private endpoint connection of a private link scope resource.
+        az monitor private-link-scope private-endpoint-connection reject --name MyPrivateEndpointConnection --resource-group MyResourceGroup --scope-name MyScope
+    """
 
-def create_private_link_scope_resource(client, resource_group_name, scope_name, resource_name,
-                                       linked_resource_id):
-    from azure.mgmt.monitor.models import ScopedResource
-    scoped_resource = ScopedResource(linked_resource_id=linked_resource_id)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         scope_name=scope_name,
-                                         name=resource_name,
-                                         parameters=scoped_resource)
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.status._registered = False
+        args_schema.name._required = False
+        args_schema.resource_group._required = False
+        args_schema.scope_name._required = False
 
-# endregion
+        return args_schema
 
-
-# region Private Link Resource
-def list_private_link_resource(client, resource_group_name, scope_name):
-    return client.list_by_private_link_scope(resource_group_name=resource_group_name,
-                                             scope_name=scope_name)
-
-
-def show_private_link_resource(client, resource_group_name, scope_name, group_name):
-    return client.get(resource_group_name=resource_group_name,
-                      scope_name=scope_name,
-                      group_name=group_name)
-# endregion
-
-
-# region Private Endpoint Connection
-def show_private_endpoint_connection(client, resource_group_name, scope_name, private_endpoint_connection_name):
-    return client.get(resource_group_name=resource_group_name,
-                      scope_name=scope_name,
-                      private_endpoint_connection_name=private_endpoint_connection_name)
-
-
-def delete_private_endpoint_connection(client, resource_group_name, scope_name, private_endpoint_connection_name):
-    return client.begin_delete(resource_group_name=resource_group_name,
-                               scope_name=scope_name,
-                               private_endpoint_connection_name=private_endpoint_connection_name)
-
-
-def list_private_endpoint_connection(client, resource_group_name, scope_name):
-    return client.list_by_private_link_scope(resource_group_name=resource_group_name,
-                                             scope_name=scope_name)
-
-
-# pylint: disable=line-too-long, unused-argument
-def _update_private_endpoint_connection_status(cmd, client, resource_group_name, scope_name,
-                                               private_endpoint_connection_name, is_approved=True, description=None):
-    private_endpoint_connection = client.get(resource_group_name=resource_group_name, scope_name=scope_name,
-                                             private_endpoint_connection_name=private_endpoint_connection_name)
-
-    old_status = private_endpoint_connection.private_link_service_connection_state.status
-    new_status = "Approved" if is_approved else "Rejected"
-    if old_status == new_status:
-        logger.warning('The status has been satisfied. Skip this command.')
-        return None
-    private_endpoint_connection.private_link_service_connection_state.status = new_status
-    private_endpoint_connection.private_link_service_connection_state.description = description
-    from azure.mgmt.monitor.models import PrivateEndpointConnection
-    private_endpoint_connection = PrivateEndpointConnection(private_link_service_connection_state=private_endpoint_connection.private_link_service_connection_state)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         scope_name=scope_name,
-                                         private_endpoint_connection_name=private_endpoint_connection_name,
-                                         parameters=private_endpoint_connection)
-
-
-def approve_private_endpoint_connection(cmd, client, resource_group_name, scope_name,
-                                        private_endpoint_connection_name, description=""):
-
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name=resource_group_name, scope_name=scope_name, is_approved=True,
-        private_endpoint_connection_name=private_endpoint_connection_name, description=description
-    )
-
-
-def reject_private_endpoint_connection(cmd, client, resource_group_name, scope_name,
-                                       private_endpoint_connection_name, description=""):
-    return _update_private_endpoint_connection_status(
-        cmd, client, resource_group_name=resource_group_name, scope_name=scope_name, is_approved=False,
-        private_endpoint_connection_name=private_endpoint_connection_name, description=description
-    )
-# endregion
+    def pre_operations(self):
+        args = self.ctx.args
+        args.status = "Rejected"
+        validate_private_endpoint_connection_id(args)

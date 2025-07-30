@@ -668,6 +668,29 @@ examples:
         az eventhubs namespace identity remove --namespace-name mynamespace -g MyResourceGroup --system-assigned --user-assigned /subscriptions/{subscriptionId}}/resourceGroups/{resourcegroup}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MSIName
 """
 
+helps['eventhubs namespace replica'] = """
+type: group
+short-summary: Manage eventhubs namespace replicas.
+"""
+
+helps['eventhubs namespace replica add'] = """
+type: command
+short-summary: Add one or more Replica properties to a namespace.
+examples:
+  - name: Add one or more Replica properties to a namespace.
+    text: |
+        az eventhubs namespace replica add --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation cluster-arm-id=/subscriptions/{mysubcriptionid}/resourceGroups/{myResourcegroup}/providers/Microsoft.EventHub/clusters/{clustername}
+"""
+
+helps['eventhubs namespace replica remove'] = """
+type: command
+short-summary: Remove one or more Replica properties to a namespace.
+examples:
+  - name: Remove one or more Replica properties to a namespace.
+    text: |
+        az eventhubs namespace replica remove --namespace-name mynamespace -g MyResourceGroup --geo-data-replication-config role-type=Secondary location-name=mylocation cluster-arm-id=/subscriptions/{mysubcriptionid}/resourceGroups/{myResourcegroup}/providers/Microsoft.EventHub/clusters/{clustername}
+"""
+
 helps['eventhubs namespace schema-registry'] = """
 type: group
 short-summary: Manages eventhubs namespace schema registry.

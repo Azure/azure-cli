@@ -3,16 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from urllib.parse import urlsplit
+
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.mgmt.web import WebSiteManagementClient
 from azure.mgmt.web.models import HostType
-
-try:
-    # Try importing Python 3 urllib.parse
-    from urllib.parse import urlsplit
-except ImportError:
-    # If urllib.parse was not imported, use Python 2 module urlparse
-    from urlparse import urlsplit  # pylint: disable=import-error
 
 
 class WebAppOperations:

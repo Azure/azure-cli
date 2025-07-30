@@ -23,8 +23,8 @@ class ApimCommandsLoader(AzCommandsLoader):
 
         apim_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.apim.custom#{}', client_factory=cf_apim)
 
-        super(ApimCommandsLoader, self).__init__(cli_ctx=cli_ctx, custom_command_type=apim_custom,
-                                                 resource_type=ResourceType.MGMT_APIMANAGEMENT)
+        super().__init__(cli_ctx=cli_ctx, custom_command_type=apim_custom,
+                         resource_type=ResourceType.MGMT_APIMANAGEMENT)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.apim.commands import load_command_table

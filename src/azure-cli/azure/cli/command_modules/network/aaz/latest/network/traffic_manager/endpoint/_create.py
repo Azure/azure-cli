@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-04-01-preview",
+        "version": "2022-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2022-04-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/trafficmanagerprofiles/{}/{}/{}", "2022-04-01"],
         ]
     }
 
@@ -91,7 +91,7 @@ class Create(AAZCommand):
             options=["--endpoint-monitor-status"],
             arg_group="Properties",
             help="The monitoring status of the endpoint.",
-            enum={"CheckingEndpoint": "CheckingEndpoint", "Degraded": "Degraded", "Disabled": "Disabled", "Inactive": "Inactive", "Online": "Online", "Stopped": "Stopped"},
+            enum={"CheckingEndpoint": "CheckingEndpoint", "Degraded": "Degraded", "Disabled": "Disabled", "Inactive": "Inactive", "Online": "Online", "Stopped": "Stopped", "Unmonitored": "Unmonitored"},
         )
         _args_schema.endpoint_status = AAZStrArg(
             options=["--endpoint-status"],
@@ -252,7 +252,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-04-01-preview",
+                    "api-version", "2022-04-01",
                     required=True,
                 ),
             }

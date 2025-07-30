@@ -3,11 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-try:
-    from urllib.parse import urlencode, urlparse, urlunparse
-except ImportError:
-    from urllib import urlencode
-    from urlparse import urlparse, urlunparse
+from urllib.parse import urlencode, urlparse, urlunparse
 
 import time
 from json import loads
@@ -54,10 +50,13 @@ class RepoAccessTokenPermission(Enum):
     DELETED_READ = 'deleted_read'
     DELETED_RESTORE = 'deleted_restore'
     PULL = 'pull'
+    PUSH = 'push'
+    PULL_PUSH = '{},{}'.format(PULL, PUSH)
     META_WRITE_META_READ = '{},{}'.format(METADATA_WRITE, METADATA_READ)
     DELETE_META_READ = '{},{}'.format(DELETE, METADATA_READ)
     PULL_META_READ = '{},{}'.format(PULL, METADATA_READ)
     DELETED_READ_RESTORE = '{},{}'.format(DELETED_READ, DELETED_RESTORE)
+    PULL_PUSH_META_WRITE_META_READ_DELETE = '{},{},{},{},{}'.format(PULL, PUSH, METADATA_WRITE, METADATA_READ, DELETE)
 
 
 class RegistryAccessTokenPermission(Enum):
@@ -99,7 +98,7 @@ def _handle_challenge_phase(login_server,
 
     request_url = 'https://' + login_server + '/v2/'
     logger.debug(add_timestamp("Sending a HTTP Get request to {}".format(request_url)))
-    challenge = requests.get(request_url, verify=(not should_disable_connection_verify()))
+    challenge = requests.get(request_url, verify=not should_disable_connection_verify())
 
     if challenge.status_code != 401 or 'WWW-Authenticate' not in challenge.headers:
         from ._errors import CONNECTIVITY_CHALLENGE_ERROR
@@ -136,7 +135,8 @@ def _get_aad_token_after_challenge(cli_ctx,
                                    artifact_repository,
                                    permission,
                                    is_diagnostics_context,
-                                   use_acr_audience):
+                                   use_acr_audience,
+                                   verify_user_permissions):
     authurl = urlparse(token_params['realm'])
     authhost = urlunparse((authurl[0], authurl[1], '/oauth2/exchange', '', '', ''))
 
@@ -149,8 +149,7 @@ def _get_aad_token_after_challenge(cli_ctx,
         scope = "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
 
     # this might be a cross tenant scenario, so pass subscription to get_raw_token
-    subscription = get_subscription_id(cli_ctx)
-    creds, _, tenant = profile.get_raw_token(subscription=subscription,
+    creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx),
                                              resource=scope)
 
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
@@ -162,8 +161,8 @@ def _get_aad_token_after_challenge(cli_ctx,
     }
 
     logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
-    response = requests.post(authhost, urlencode(content), headers=headers,
-                             verify=(not should_disable_connection_verify()))
+    response = requests.post(url=authhost, data=urlencode(content), headers=headers,
+                             verify=not should_disable_connection_verify())
 
     if response.status_code == 429:
         if is_diagnostics_context:
@@ -198,8 +197,8 @@ def _get_aad_token_after_challenge(cli_ctx,
     }
 
     logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
-    response = requests.post(authhost, urlencode(content), headers=headers,
-                             verify=(not should_disable_connection_verify()))
+    response = requests.post(url=authhost, data=urlencode(content), headers=headers,
+                             verify=not should_disable_connection_verify())
 
     if response.status_code not in [200]:
         from ._errors import CONNECTIVITY_ACCESS_TOKEN_ERROR
@@ -208,7 +207,57 @@ def _get_aad_token_after_challenge(cli_ctx,
         raise CLIError(CONNECTIVITY_ACCESS_TOKEN_ERROR.format_error_message(login_server, response.status_code)
                        .get_error_message())
 
-    return loads(response.content.decode("utf-8"))["access_token"]
+    access_token = loads(response.content.decode("utf-8"))["access_token"]
+    if verify_user_permissions:
+        return _verify_allowed_actions(access_token, permission, is_diagnostics_context)
+
+    return access_token
+
+
+def _verify_allowed_actions(access_token, permission, is_diagnostics_context):
+    actions_value = None
+    try:
+        import jwt
+        decoded_token = jwt.decode(access_token, options={"verify_signature": False})
+        access_list = decoded_token.get("access", [])
+        if isinstance(access_list, list):
+            access_value = access_list[0] if access_list else {}
+            actions_value = access_value.get('actions', [])
+    except Exception as err:
+        raise CLIError(f"Failed to decode access token: {str(err)}")
+
+    required_actions = permission.split(',')
+
+    if not actions_value or not isinstance(actions_value, list):
+        missing_actions_value_str = _convert_action_list_to_str(required_actions)
+        from ._errors import CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
+
+        if is_diagnostics_context:
+            return CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message("no", missing_actions_value_str)
+        raise CLIError(CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message("no", missing_actions_value_str)
+                       .get_error_message())
+
+    missing_actions_value = [action for action in required_actions if action not in actions_value]
+    if missing_actions_value:
+        missing_actions_value_str = _convert_action_list_to_str(missing_actions_value)
+        allowed_actions_value_str = _convert_action_list_to_str(actions_value)
+        from ._errors import CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR
+
+        if is_diagnostics_context:
+            return CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(
+                allowed_actions_value_str, missing_actions_value_str)
+        raise CLIError(CONNECTIVITY_ACCESS_TOKEN_PERMISSIONS_ERROR.format_error_message(
+            allowed_actions_value_str, missing_actions_value_str).get_error_message())
+
+    return access_token
+
+
+def _convert_action_list_to_str(actions):
+    if len(actions) > 1:
+        res = ', '.join(actions[:-1]) + ' and ' + actions[-1]
+    else:
+        res = ''.join(actions)
+    return res
 
 
 def _get_aad_token(cli_ctx,
@@ -218,13 +267,17 @@ def _get_aad_token(cli_ctx,
                    artifact_repository=None,
                    permission=None,
                    is_diagnostics_context=False,
-                   use_acr_audience=False):
-    """Obtains refresh and access tokens for an AAD-enabled registry.
+                   use_acr_audience=False,
+                   verify_user_permissions=False):
+    """Obtains refresh and access tokens for an AAD-enabled registry. Will return the allowed actions if
+    verify_user_permissions is set to True.
     :param str login_server: The registry login server URL to log in to
     :param bool only_refresh_token: Whether to ask for only refresh token, or for both refresh and access tokens
     :param str repository: Repository for which the access token is requested
     :param str artifact_repository: Artifact repository for which the access token is requested
-    :param str permission: The requested permission on the repository, '*' or 'pull'
+    :param str permission: The requested permission on the repository
+    :param bool verify_user_permissions: Specifies whether to verify the allowed permissions in the access token.
+    This is set to True when the --repository flag is used with the check-health command.
     """
     token_params = _handle_challenge_phase(
         login_server, repository, artifact_repository, permission, True, is_diagnostics_context
@@ -243,7 +296,8 @@ def _get_aad_token(cli_ctx,
                                           artifact_repository,
                                           permission,
                                           is_diagnostics_context,
-                                          use_acr_audience)
+                                          use_acr_audience,
+                                          verify_user_permissions)
 
 
 def _get_token_with_username_and_password(login_server,
@@ -299,8 +353,8 @@ def _get_token_with_username_and_password(login_server,
     }
 
     logger.debug(add_timestamp("Sending a HTTP Post request to {}".format(authhost)))
-    response = requests.post(authhost, urlencode(content), headers=headers,
-                             verify=(not should_disable_connection_verify()))
+    response = requests.post(url=authhost, data=urlencode(content), headers=headers,
+                             verify=not should_disable_connection_verify())
 
     if response.status_code != 200:
         from ._errors import CONNECTIVITY_ACCESS_TOKEN_ERROR
@@ -323,7 +377,8 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
                      repository=None,
                      artifact_repository=None,
                      permission=None,
-                     is_login_context=False):
+                     is_login_context=False,
+                     resource_group_name=None):
     """Try to get AAD authorization tokens or admin user credentials.
     :param str registry_name: The name of container registry
     :param str tenant_suffix: The registry login server tenant suffix
@@ -341,7 +396,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     cli_ctx = cmd.cli_ctx
     resource_not_found, registry = None, None
     try:
-        registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name)
+        registry, resource_group_name = get_registry_by_name(cli_ctx, registry_name, resource_group_name)
         login_server = registry.login_server
         if tenant_suffix:
             logger.warning(
@@ -363,7 +418,7 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     url = 'https://' + login_server + '/v2/'
     try:
         logger.debug(add_timestamp("Sending a HTTP Get request to {}".format(url)))
-        challenge = requests.get(url, verify=(not should_disable_connection_verify()))
+        challenge = requests.get(url, verify=not should_disable_connection_verify())
         if challenge.status_code == 403:
             raise CLIError("Looks like you don't have access to registry '{}'. "
                            "To see configured firewall rules, run 'az acr show --query networkRuleSet --name {}'. "
@@ -454,7 +509,8 @@ def get_login_credentials(cmd,
                           registry_name,
                           tenant_suffix=None,
                           username=None,
-                          password=None):
+                          password=None,
+                          resource_group_name=None):
     """Try to get AAD authorization tokens or admin user credentials to log into a registry.
     :param str registry_name: The name of container registry
     :param str username: The username used to log into the container registry
@@ -466,7 +522,8 @@ def get_login_credentials(cmd,
                             username,
                             password,
                             only_refresh_token=True,
-                            is_login_context=True)
+                            is_login_context=True,
+                            resource_group_name=resource_group_name)
 
 
 def get_access_credentials(cmd,
@@ -476,7 +533,8 @@ def get_access_credentials(cmd,
                            password=None,
                            repository=None,
                            artifact_repository=None,
-                           permission=None):
+                           permission=None,
+                           resource_group_name=None):
     """Try to get AAD authorization tokens or admin user credentials to access a registry.
     :param str registry_name: The name of container registry
     :param str username: The username used to log into the container registry
@@ -493,7 +551,8 @@ def get_access_credentials(cmd,
                             only_refresh_token=False,
                             repository=repository,
                             artifact_repository=artifact_repository,
-                            permission=permission)
+                            permission=permission,
+                            resource_group_name=resource_group_name)
 
 
 def log_registry_response(response):
@@ -614,20 +673,20 @@ def request_data_from_registry(http_method,
             log_registry_response(response)
 
             if manifest_headers and raw and response.status_code == 200:
-                return response.content.decode('utf-8'), None
+                return response.content.decode('utf-8'), None, response.status_code
             if response.status_code == 200:
                 result = response.json()[result_index] if result_index else response.json()
                 next_link = response.headers['link'] if 'link' in response.headers else None
-                return result, next_link
+                return result, next_link, response.status_code
             if response.status_code == 201 or response.status_code == 202:
                 result = None
                 try:
                     result = response.json()[result_index] if result_index else response.json()
                 except ValueError as e:
                     logger.debug('Response is empty or is not a valid json. Exception: %s', str(e))
-                return result, None
+                return result, None, response.status_code
             if response.status_code == 204:
-                return None, None
+                return None, None, response.status_code
             if response.status_code == 401:
                 raise RegistryException(
                     parse_error_message('Authentication required.', response),
@@ -644,7 +703,7 @@ def request_data_from_registry(http_method,
                 raise RegistryException(
                     parse_error_message('Failed to request data due to a conflict.', response),
                     response.status_code)
-            raise Exception(parse_error_message('Could not {} the requested data.'.format(http_method), response))
+            raise Exception(parse_error_message('Could not {} the requested data.'.format(http_method), response))  # pylint: disable=broad-exception-raised
         except CLIError:
             raise
         except Exception as e:  # pylint: disable=broad-except
@@ -655,11 +714,43 @@ def request_data_from_registry(http_method,
     raise CLIError(errorMessage)
 
 
+def parse_image_name(image, allow_digest=False, default_latest=True):
+    if allow_digest and '@' in image:
+        # This is probably an image name by manifest digest
+        tokens = image.split('@')
+        if len(tokens) == 2:
+            return tokens[0], None, tokens[1]
+
+    if ':' in image and '@' not in image:
+        # This is probably an image name by tag
+        tokens = image.split(':')
+        if len(tokens) == 2:
+            return tokens[0], tokens[1], None
+
+    if ':' not in image and '@' not in image:
+        # This is probably an image with implicit latest tag
+        if default_latest:
+            return image, 'latest', None
+
+        return image, None, None
+
+    if allow_digest:
+        raise CLIError("The name of the image may include a tag in the format"
+                       " 'name:tag' or digest in the format 'name@digest'.")
+    raise CLIError("The name of the image may include a tag in the format 'name:tag'.")
+
+
 def parse_error_message(error_message, response):
     import json
     try:
-        server_message = json.loads(response.text)['errors'][0]['message']
-        error_message = 'Error: {}'.format(server_message) if server_message else error_message
+        server_error = json.loads(response.text)['errors'][0]
+        if 'message' in server_error:
+            server_message = server_error['message']
+            if 'detail' in server_error and isinstance(server_error['detail'], str):
+                server_details = server_error['detail']
+                error_message = 'Error: {} Detail: {}'.format(server_message, server_details)
+            else:
+                error_message = 'Error: {}'.format(server_message)
     except (ValueError, KeyError, TypeError, IndexError):
         pass
 
@@ -675,7 +766,7 @@ def parse_error_message(error_message, response):
 
 class RegistryException(CLIError):
     def __init__(self, message, status_code):
-        super(RegistryException, self).__init__(message)
+        super().__init__(message)
         self.status_code = status_code
 
 

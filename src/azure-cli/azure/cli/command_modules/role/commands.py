@@ -69,12 +69,13 @@ def load_command_table(self, _):
         g.custom_command('delete', 'delete_role_definition')
         g.custom_command('create', 'create_role_definition')
         g.custom_command('update', 'update_role_definition')
+        g.custom_show_command('show', 'show_role_definition')
 
     with self.command_group('role assignment') as g:
         g.custom_command('delete', 'delete_role_assignments', validator=process_assignment_namespace)
         g.custom_command('list', 'list_role_assignments', validator=process_assignment_namespace, table_transformer=transform_assignment_list)
         g.custom_command('create', 'create_role_assignment', validator=process_assignment_namespace)
-        g.custom_command('update', 'update_role_assignment', min_api='2020-04-01-preview')
+        g.custom_command('update', 'update_role_assignment')
         g.custom_command('list-changelogs', 'list_role_assignment_change_logs')
 
     with self.command_group('ad app', client_factory=get_graph_client, exception_handler=graph_err_handler) as g:

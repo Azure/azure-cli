@@ -96,6 +96,7 @@ def load_command_table(self, _):
 
     with self.command_group('apim api', api_sdk) as g:
         g.custom_command('import', 'apim_api_import', supports_no_wait=True)
+        g.custom_command('export', 'apim_api_export')
         g.custom_command('create', 'apim_api_create', supports_no_wait=True)
         g.custom_show_command('show', 'apim_api_get')
         g.custom_command('list', 'apim_api_list')

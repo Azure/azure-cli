@@ -12,12 +12,13 @@ from datetime import datetime, timedelta
 
 class StorageSASScenario(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
-    @StorageAccountPreparer()
+    @StorageAccountPreparer(allow_blob_public_access=True)
     def test_storage_container_access_policy_scenario(self, resource_group, storage_account):
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         account_info = self.get_account_info(resource_group, storage_account)
-        container = self.create_container(account_info)
+        container = self.create_random_name(prefix='cont', length=24)
+        self.storage_cmd('storage container create -n {} --public-access blob', account_info, container)
         local_file = self.create_temp_file(128, full_random=False)
         blob_name = self.create_random_name('blob', 16)
         policy = self.create_random_name('policy', 16)
@@ -48,8 +49,25 @@ class StorageSASScenario(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheckExists('expiry'),
                                 JMESPathCheck('permission', 'rwdxl'))
         self.storage_cmd('storage container policy delete -c {} -n {} ', account_info, container, policy)
+        self.storage_cmd('storage container show -n {}', account_info, container)\
+            .assert_with_checks(JMESPathCheck('properties.publicAccess', 'blob'))
         self.storage_cmd('storage container policy list -c {} ', account_info, container) \
             .assert_with_checks(NoneCheck())
+
+        # test container policy with empty permissions/expiry
+        self.storage_cmd('storage container policy create -c {} -n {}', account_info, container, policy)
+        self.storage_cmd('storage container policy show -c {} -n {} ', account_info, container, policy)
+        self.storage_cmd('storage container policy list -c {}', account_info, container)\
+            .assert_with_checks(JMESPathCheck(policy, None))
+        self.storage_cmd('storage container policy delete -c {} -n {}', account_info, container, policy)
+        self.storage_cmd('storage container policy list -c {}', account_info, container) \
+            .assert_with_checks(NoneCheck())
+        self.storage_cmd('storage container policy create -c {} -n {}', account_info, container, policy)
+        self.storage_cmd('storage container policy update -c {} -n {} --permissions rwdxl', account_info, container,
+                         policy)
+        self.storage_cmd('storage container policy show -c {} -n {} ', account_info, container, policy).\
+            assert_with_checks(JMESPathCheck('permission', 'rwdxl'))
+
 
 class StorageSASLiveScenario(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()

@@ -20,7 +20,7 @@ class KeyVaultCommandsLoader(AzCommandsLoader):
             client_factory=keyvault_mgmt_client_factory
         )
 
-        super(KeyVaultCommandsLoader, self).__init__(
+        super().__init__(
             cli_ctx=cli_ctx,
             resource_type=ResourceType.MGMT_KEYVAULT,
             operation_group="vaults",

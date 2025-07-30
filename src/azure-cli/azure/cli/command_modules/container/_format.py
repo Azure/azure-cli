@@ -10,7 +10,7 @@ def _get_images(container_group):
     """Get all images of a container group. """
     containers = container_group.get('containers')
     if containers is not None and containers:
-        images = set([])
+        images = set()
         for container in containers:
             images.add(container['image'])
         return ','.join(images)
@@ -79,3 +79,19 @@ def transform_container_group(result):
 def transform_container_group_list(result):
     """Transform a container group list to table output. """
     return [transform_container_group(container_group) for container_group in result]
+
+
+def transform_container_group_profile(result):
+    """Transform a container group profile to table output. """
+    return OrderedDict([('Name', result['name']),
+                        ('ResourceGroup', result['resourceGroup']),
+                        ('Image', _get_images(result)),
+                        ('IP:ports', _format_ip_address(result)),
+                        ('CPU/Memory', _format_cpu_memory(result)),
+                        ('OsType', result.get('osType')),
+                        ('Location', result['location'])])
+
+
+def transform_container_group_profile_list(result):
+    """Transform a container group profile list to table output. """
+    return [transform_container_group_profile(container_group_profile) for container_group_profile in result]

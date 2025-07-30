@@ -1,0 +1,313 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor activity-log alert create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --disable --all-of
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"southcentralus","tags":{"product":"azurecli","cause":"automation","test":"test_monitor_create_update_activity_log_alert_anyof_conditon","date":"2025-05-16T04:16:01Z","module":"monitor"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '407'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 May 2025 04:16:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: B013A1A05BD14CACA6330B15E0F455DC Ref B: TYO201100113017 Ref C: 2025-05-16T04:16:05Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor activity-log alert create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --disable --all-of
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000002?api-version=2020-10-01
+  response:
+    body:
+      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Insights/activityLogAlerts/clialert000002''
+        under resource group ''clitest.rg000001'' was not found. For more details
+        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '239'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 May 2025 04:16:04 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+      x-msedge-ref:
+      - 'Ref A: ABB3036382434D749C660E3695C84833 Ref B: TYO201151004025 Ref C: 2025-05-16T04:16:05Z'
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"location": "Global", "properties": {"actions": {"actionGroups": []},
+      "condition": {"allOf": [{"anyOf": [{"equals": "Informational", "field": "level"}]},
+      {"equals": "ServiceHealth", "field": "category"}]}, "enabled": false, "scopes":
+      ["/subscriptions/00000000-0000-0000-0000-000000000000"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor activity-log alert create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '292'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --disable --all-of
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000002?api-version=2020-10-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000002\",\r\n
+        \ \"name\": \"clialert000002\",\r\n  \"type\": \"Microsoft.Insights/ActivityLogAlerts\",\r\n
+        \ \"location\": \"Global\",\r\n  \"properties\": {\r\n    \"scopes\": [\r\n
+        \     \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n    ],\r\n
+        \   \"condition\": {\r\n      \"allOf\": [\r\n        {\r\n          \"anyOf\":
+        [\r\n            {\r\n              \"field\": \"level\",\r\n              \"equals\":
+        \"Informational\"\r\n            }\r\n          ]\r\n        },\r\n        {\r\n
+        \         \"field\": \"category\",\r\n          \"equals\": \"ServiceHealth\"\r\n
+        \       }\r\n      ]\r\n    },\r\n    \"actions\": {\r\n      \"actionGroups\":
+        []\r\n    },\r\n    \"enabled\": false\r\n  }\r\n}"
+    headers:
+      api-supported-versions:
+      - 2017-03-01-preview, 2017-04-01, 2020-10-01, 2023-01-01-preview
+      arr-disable-session-affinity:
+      - 'true'
+      cache-control:
+      - no-cache
+      content-length:
+      - '759'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 May 2025 04:16:08 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japaneast/a164a323-3ba2-47cf-8cf5-3efb3cf91ccf
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 62629B282D0245CEB9EE71D8E9246CF9 Ref B: TYO201151005060 Ref C: 2025-05-16T04:16:06Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor activity-log alert update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --all-of
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000002?api-version=2020-10-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000002\",\r\n
+        \ \"name\": \"clialert000002\",\r\n  \"type\": \"Microsoft.Insights/ActivityLogAlerts\",\r\n
+        \ \"location\": \"Global\",\r\n  \"properties\": {\r\n    \"scopes\": [\r\n
+        \     \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n    ],\r\n
+        \   \"condition\": {\r\n      \"allOf\": [\r\n        {\r\n          \"anyOf\":
+        [\r\n            {\r\n              \"field\": \"level\",\r\n              \"equals\":
+        \"Informational\"\r\n            }\r\n          ]\r\n        },\r\n        {\r\n
+        \         \"field\": \"category\",\r\n          \"equals\": \"ServiceHealth\"\r\n
+        \       }\r\n      ]\r\n    },\r\n    \"actions\": {\r\n      \"actionGroups\":
+        []\r\n    },\r\n    \"enabled\": false\r\n  }\r\n}"
+    headers:
+      api-supported-versions:
+      - 2017-03-01-preview, 2017-04-01, 2020-10-01, 2023-01-01-preview
+      arr-disable-session-affinity:
+      - 'true'
+      cache-control:
+      - no-cache
+      content-length:
+      - '759'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 May 2025 04:16:11 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-orig-api-version:
+      - '2020-10-01'
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 59A3B09017114931BB03E6BCD44A698E Ref B: TYO201151002025 Ref C: 2025-05-16T04:16:11Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "Global", "properties": {"actions": {"actionGroups": []},
+      "condition": {"allOf": [{"anyOf": [{"equals": "Error", "field": "level"}]},
+      {"equals": "ServiceHealth", "field": "category"}]}, "enabled": false, "scopes":
+      ["/subscriptions/00000000-0000-0000-0000-000000000000"]}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - monitor activity-log alert update
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '284'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --all-of
+      User-Agent:
+      - AZURECLI/2.72.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000002?api-version=2020-10-01
+  response:
+    body:
+      string: "{\r\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Insights/activityLogAlerts/clialert000002\",\r\n
+        \ \"name\": \"clialert000002\",\r\n  \"type\": \"Microsoft.Insights/ActivityLogAlerts\",\r\n
+        \ \"location\": \"Global\",\r\n  \"properties\": {\r\n    \"scopes\": [\r\n
+        \     \"/subscriptions/00000000-0000-0000-0000-000000000000\"\r\n    ],\r\n
+        \   \"condition\": {\r\n      \"allOf\": [\r\n        {\r\n          \"anyOf\":
+        [\r\n            {\r\n              \"field\": \"level\",\r\n              \"equals\":
+        \"Error\"\r\n            }\r\n          ]\r\n        },\r\n        {\r\n          \"field\":
+        \"category\",\r\n          \"equals\": \"ServiceHealth\"\r\n        }\r\n
+        \     ]\r\n    },\r\n    \"actions\": {\r\n      \"actionGroups\": []\r\n
+        \   },\r\n    \"enabled\": false\r\n  }\r\n}"
+    headers:
+      api-supported-versions:
+      - 2017-03-01-preview, 2017-04-01, 2020-10-01, 2023-01-01-preview
+      arr-disable-session-affinity:
+      - 'true'
+      cache-control:
+      - no-cache
+      content-length:
+      - '751'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 16 May 2025 04:16:12 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      vary:
+      - Accept-Encoding
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=54826b22-38d6-4fb2-bad9-b7b93a3e9c5a,objectId=d44a2991-98c6-47c3-b59b-2b30d72cfcc2/japanwest/4390f14b-ac7b-47b2-8bd2-1bed14cc2c6a
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: 92D919D3C38840B9BFA0F235552754D5 Ref B: TYO201151002025 Ref C: 2025-05-16T04:16:12Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

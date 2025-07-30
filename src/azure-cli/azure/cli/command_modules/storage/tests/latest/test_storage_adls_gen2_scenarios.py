@@ -636,6 +636,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sr=d', fs_sas)
         self.assertIn('sdd=2', fs_sas)
 
+
 class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
@@ -740,4 +741,92 @@ class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
         # Download from root directory
         self.cmd('storage fs directory download -f {} -d "{}" --recursive --account-name {} --sas-token {}'
                  .format(filesystem, local_folder, storage_account, sas))
+        self.assertEqual(6, sum(len(d) for r, d, f in os.walk(local_folder)))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True, allow_shared_key_access=False)
+    @StorageTestFilesPreparer()
+    def test_adls_directory_upload_oauth(self, resource_group, storage_account, test_dir):
+        filesystem = 'testfilesystem'
+        directory = 'testdir'
+        self.oauth_cmd('storage fs create -n {} --account-name {}', filesystem, storage_account)
+        self.oauth_cmd('storage fs directory create -n {} -f {} --account-name {}', directory, filesystem,
+                       storage_account)
+
+        # Upload a single file to the fs directory
+        self.oauth_cmd('storage fs directory upload -f {} -d {} -s "{}" --account-name {}', filesystem, directory,
+                       os.path.join(test_dir, 'readme'), storage_account)
+        self.oauth_cmd('storage fs file list -f {} --path {} --account-name {}', filesystem, directory,
+                       storage_account).assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        # Upload a local directory to the fs directory
+        self.oauth_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive --account-name {}'
+                       , filesystem, directory, os.path.join(test_dir, 'apple'), storage_account)
+        self.oauth_cmd('storage fs file list -f {} --path {} --account-name {}',
+                       filesystem, directory, storage_account).assert_with_checks(JMESPathCheck('length(@)', 12))
+
+        # Upload files in a local directory to the fs directory
+        self.oauth_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive --account-name {}'
+                       .format(filesystem, directory, os.path.join(test_dir, 'butter/file_*'), storage_account))
+        self.oauth_cmd('storage fs file list -f {} --path {} --account-name {}'
+                       .format(filesystem, directory, storage_account), checks=[JMESPathCheck('length(@)', 22)])
+
+        # Upload files in a local directory to the fs subdirectory
+        self.oauth_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive --account-name {}'
+                       .format(filesystem, '/'.join([directory, 'subdir']),
+                               os.path.join(test_dir, 'butter/file_*'), storage_account))
+        self.oauth_cmd('storage fs file list -f {} --path {} --account-name {}'
+                       .format(filesystem, '/'.join([directory, 'subdir']), storage_account),
+                       checks=[JMESPathCheck('length(@)', 10)])
+
+        # Upload single file to the fs root directory
+        self.oauth_cmd('storage fs directory upload -f {} -s "{}" --account-name {}', filesystem,
+                       os.path.join(test_dir, 'readme'), storage_account)
+        self.oauth_cmd('storage fs file exists -f {} --path {} --account-name {}', filesystem,
+                       'readme', storage_account).assert_with_checks(JMESPathCheck('exists', True))
+
+        # Upload files to the fs root directory
+        self.oauth_cmd('storage fs directory upload -f {} -s "{}" -r --account-name {}', filesystem,
+                       os.path.join(test_dir, 'duff'), storage_account)
+        self.oauth_cmd('storage fs file exists -f {} --path {} --account-name {}', filesystem, 'duff/edward',
+                       storage_account).assert_with_checks(JMESPathCheck('exists', True))
+
+        # Argument validation: Fail when destination path is file name
+        self.oauth_cmd('storage fs directory upload -f {} -d {} -s {} --account-name {}'.format(
+            filesystem, '/'.join([directory, 'readme']), test_dir, storage_account), expect_failure=True)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2", hns=True, allow_shared_key_access=False)
+    @StorageTestFilesPreparer()
+    def test_adls_directory_download_oauth(self, resource_group, storage_account, test_dir):
+        filesystem = 'testfilesystem'
+        directory = 'testdir'
+        self.oauth_cmd('storage fs create -n {} --account-name {}', filesystem, storage_account)
+        self.oauth_cmd('storage fs directory create -n {} -f {} --account-name {}', directory, filesystem,
+                       storage_account)
+        self.oauth_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive --account-name {}', filesystem,
+                       directory, os.path.join(test_dir, 'readme'), storage_account)
+        self.oauth_cmd('storage fs directory upload -f {} -d {} -s "{}" --recursive --account-name {}', filesystem,
+                       directory, os.path.join(test_dir, 'apple'), storage_account)
+
+        local_folder = self.create_temp_dir()
+        # Download a single file
+        self.oauth_cmd('storage fs directory download -f {} -s "{}" -d "{}" --recursive --account-name {}', filesystem,
+                       '/'.join([directory, 'readme']), local_folder, storage_account)
+        self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Download entire directory
+        self.oauth_cmd('storage fs directory download -f {} -s {} -d "{}" --recursive --account-name {}',
+                       filesystem, directory, local_folder, storage_account)
+        self.assertEqual(2, sum(len(d) for r, d, f in os.walk(local_folder)))
+        self.assertEqual(12, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # Download an entire subdirectory of a storage blob directory.
+        self.oauth_cmd('storage fs directory download -f {} -s {} -d "{}" --recursive --account-name {}'
+                       .format(filesystem, '/'.join([directory, 'apple']), local_folder, storage_account))
+        self.assertEqual(3, sum(len(d) for r, d, f in os.walk(local_folder)))
+
+        # Download from root directory
+        self.oauth_cmd('storage fs directory download -f {} -d "{}" --recursive --account-name {}'
+                       .format(filesystem, local_folder, storage_account))
         self.assertEqual(6, sum(len(d) for r, d, f in os.walk(local_folder)))

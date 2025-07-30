@@ -220,5 +220,5 @@ def write_to_file(kql_script, path):
             query = kql_script.properties.content.query
         with open(path, 'w') as f:
             f.write(query)
-    except IOError:
+    except OSError:
         raise CLIError('Unable to export to file: {}'.format(path))

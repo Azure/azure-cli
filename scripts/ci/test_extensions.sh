@@ -18,13 +18,30 @@ export AZURE_CLI_DIAGNOSTICS_TELEMETRY=
 output=$(az extension list-available --query [].name -otsv)
 exit_code=0
 
-# azure-cli-ml: https://github.com/Azure/azure-cli-extensions/issues/826
-ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s'
+# Disable azure-cli-ml: https://github.com/Azure/azure-cli-extensions/issues/826
+# Disable fzf: https://github.com/Azure/azure-cli/pull/17979
+# Disable arcappliance arcdata connectedk8s: https://github.com/Azure/azure-cli/pull/20436
+# Disable k8s-extension temporarily: https://github.com/Azure/azure-cli-extensions/pull/6702
+# Disable alias temporarily: https://github.com/Azure/azure-cli/pull/27717
+# hybridaks is going to be deprecated: https://github.com/Azure/azure-cli/pull/29838
+# db-up is going to be deprecated: https://github.com/Azure/azure-cli/pull/29887
+ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias hybridaks db-up'
+
+# Does not exit if az extension add fails until all extensions have been tested
+set +e
 
 for ext in $output; do
     echo
-    # Use regex to detect if $ext is in $ignore_list
-    if [[ $ignore_list =~ $ext ]]; then
+    # Exact string matching against each item in the ignore list
+    ignore_match=0
+    for item in $ignore_list; do
+        if [ "$ext" = "$item" ]; then
+            ignore_match=1
+            break
+        fi
+    done
+    
+    if [ $ignore_match -eq 1 ]; then
         echo "Ignore extension: $ext"
         continue
     fi

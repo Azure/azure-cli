@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor diagnostic-settings create",
 )
 class Create(AAZCommand):
-    """Create diagnostic settings for the specified resource. For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings.
+    """Create diagnostic settings for the specified resource. For more information, visit: https://learn.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings.
 
     :example: Create diagnostic settings, retention here only applies when the target is a storage account.
         az monitor diagnostic-settings create --resource {ID} -n {name} --storage-account {storageAccount} --logs "[{category:WorkflowRuntime,enabled:true,retention-policy:{enabled:false,days:0}}]" --metrics "[{category:WorkflowRuntime,enabled:true,retention-policy:{enabled:false,days:0}}]"
@@ -59,11 +59,11 @@ class Create(AAZCommand):
         )
         _args_schema.log_analytics_destination_type = AAZStrArg(
             options=["--log-analytics-destination-type"],
-            help="A string indicating whether the export to Log Analytics should use the default destination type, i.e. AzureDiagnostics, or use a destination type constructed as follows: <normalized service identity>_<normalized category name>. Possible values are: Dedicated and null (null is default.)",
+            help="A string indicating whether the export to Log Analytics should use the default destination type, i.e. AzureDiagnostics, or use a destination type constructed as follows: `<normalized service identity>_<normalized category name>`. Possible values are: Dedicated and null (null is default.)",
         )
         _args_schema.logs = AAZListArg(
             options=["--logs"],
-            help="JSON encoded list of logs settings. Use '@{file}' to load from a file.For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings.",
+            help="JSON encoded list of logs settings. Use '@{file}' to load from a file.For more information, visit: https://learn.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings.",
         )
         _args_schema.marketplace_partner_id = AAZStrArg(
             options=["--marketplace-partner-id"],

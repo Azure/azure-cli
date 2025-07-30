@@ -12,7 +12,7 @@ import glob
 import filecmp
 import logging
 import unittest
-from pkg_resources import working_set
+from importlib.metadata import distributions
 
 import automation.utilities.path as automation_path
 from automation.utilities.const import COMMAND_MODULE_PREFIX
@@ -24,7 +24,7 @@ logger = logging.getLogger('azdev.verify.package')
 # It also ensures all the items were ran and errors are collected.
 class PackageVerifyTests(unittest.TestCase):
     def __init__(self, method_name, **kwargs):
-        super(PackageVerifyTests, self).__init__(method_name)
+        super().__init__(method_name)
         self.test_data = kwargs
 
     def test_azure_cli_module_manifest_and_azure_bdist(self):
@@ -48,7 +48,7 @@ class PackageVerifyTests(unittest.TestCase):
     def test_azure_cli_module_installation(self):
         expected_modules = set([n for n, _ in automation_path.get_command_modules_paths(include_prefix=True)])
 
-        installed_command_modules = [dist.key for dist in list(working_set) if dist.key.startswith(COMMAND_MODULE_PREFIX)]
+        installed_command_modules = [dist.metadata['Name'] for dist in distributions() if dist.metadata['Name'].startswith(COMMAND_MODULE_PREFIX)]
 
         logger.info('Installed command modules %s', installed_command_modules)
 

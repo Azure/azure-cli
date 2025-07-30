@@ -57,7 +57,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
                      self.check('sku.capacity', '{unit_count}'),
                      self.check('tags.{}'.format(tags_key), tags_val),
                      self.check('features[0].value', '{service_mode}'),
-                     self.check('features[1].value', '{enable_message_logs_check}'),
+                     self.check('features[2].value', '{enable_message_logs_check}'),
                      self.check('cors.allowedOrigins', allowed_origins),
                      self.exists('hostName'),
                      self.exists('publicPort'),
@@ -73,13 +73,29 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             self.check('sku.name', '{sku}'),
             self.check('sku.capacity', '{unit_count}'),
             self.check('features[0].value', '{service_mode}'),
-            self.check('features[1].value', '{enable_message_logs_check}'),
+            self.check('features[2].value', '{enable_message_logs_check}'),
             self.check('cors.allowedOrigins', allowed_origins),
             self.exists('hostName'),
             self.exists('publicPort'),
             self.exists('serverPort'),
             self.exists('externalIp'),
             self.check('networkAcLs.defaultAction', '{default_action}')
+        ])
+
+        # Test start
+        self.cmd('az signalr start -n {signalr_name} -g {rg}', checks=[
+            self.check('name', '{signalr_name}'),
+            self.check('location', '{location}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('resourceStopped', 'false')
+        ])
+
+        # Test stop
+        self.cmd('az signalr stop -n {signalr_name} -g {rg}', checks=[
+            self.check('name', '{signalr_name}'),
+            self.check('location', '{location}'),
+            self.check('provisioningState', 'Succeeded'),
+            self.check('resourceStopped', 'true')
         ])
 
         # Test list
@@ -90,7 +106,7 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
             self.check('[0].sku.name', '{sku}'),
             self.check('[0].sku.capacity', '{unit_count}'),
             self.check('[0].features[0].value', '{service_mode}'),
-            self.check('[0].features[1].value', '{enable_message_logs_check}'),
+            self.check('[0].features[2].value', '{enable_message_logs_check}'),
             self.check('[0].cors.allowedOrigins', allowed_origins),
             self.exists('[0].hostName'),
             self.exists('[0].publicPort'),
@@ -108,12 +124,17 @@ class AzureSignalRServiceScenarioTest(ScenarioTest):
                      self.check('sku.name', '{updated_sku}'),
                      self.check('tags.{}'.format(tags_key), updated_tags_val),
                      self.check('features[0].value', '{update_service_mode}'),
-                     self.check('features[1].value', '{update_enable_message_logs_check}'),
+                     self.check('features[2].value', '{update_enable_message_logs_check}'),
                      self.check('cors.allowedOrigins', allowed_origins),
                      self.exists('hostName'),
                      self.exists('publicPort'),
                      self.exists('serverPort')
                  ])
+
+        # Test update with client certificate enabled
+        self.cmd('az signalr update -n {signalr_name} -g {rg} --client-cert-enabled True --disable-local-auth True', checks=[
+            self.check('disableLocalAuth', True),
+        ])
 
         # Test CORS operations
         self.cmd('az signalr cors remove -n {signalr_name} -g {rg} --allowed-origins {allowed_origins}', checks=[

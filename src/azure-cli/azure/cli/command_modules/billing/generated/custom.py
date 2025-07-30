@@ -12,6 +12,7 @@
 # pylint: disable=no-else-return
 
 from azure.cli.core.util import sdk_no_wait
+from ..aaz.latest.billing.invoice import ListByAccount, ListByProfile, ListBySubscription
 
 
 def billing_account_list(client,
@@ -372,22 +373,30 @@ def billing_product_validate_move(client,
                                 parameters=parameters)
 
 
-def billing_invoice_list(client,
+def billing_invoice_list(cmd,
                          period_start_date,
                          period_end_date,
                          account_name=None,
                          profile_name=None):
     if account_name is not None and profile_name is not None and period_start_date is not None and period_end_date is not None:
-        return client.list_by_billing_profile(billing_account_name=account_name,
-                                              billing_profile_name=profile_name,
-                                              period_start_date=period_start_date,
-                                              period_end_date=period_end_date)
+        return ListByProfile(cli_ctx=cmd.cli_ctx)(command_args={
+            "billing_account_name": account_name,
+            "billing_profile_name": profile_name,
+            "period_start_date": period_start_date,
+            "period_end_date": period_end_date,
+        })
+
     elif account_name is not None and period_start_date is not None and period_end_date is not None:
-        return client.list_by_billing_account(billing_account_name=account_name,
-                                              period_start_date=period_start_date,
-                                              period_end_date=period_end_date)
-    return client.list_by_billing_subscription(period_start_date=period_start_date,
-                                               period_end_date=period_end_date)
+        return ListByAccount(cli_ctx=cmd.cli_ctx)(command_args={
+            "billing_account_name": account_name,
+            "period_start_date": period_start_date,
+            "period_end_date": period_end_date,
+        })
+
+    return ListBySubscription(cli_ctx=cmd.cli_ctx)(command_args={
+        "period_start_date": period_start_date,
+        "period_end_date": period_end_date,
+    })
 
 
 def billing_invoice_show(client,

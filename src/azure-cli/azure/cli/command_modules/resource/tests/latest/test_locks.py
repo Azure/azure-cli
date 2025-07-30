@@ -263,6 +263,17 @@ class ResourceLockTests(ScenarioTest):
         my_locks = self.cmd("az lock list -g {} -ojson".format(resource_group)).get_output_in_json()
         self.assertFalse(my_locks)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_lock_with_namespace')
+    def test_lock_with_namespace(self, resource_group):
+        self.kwargs.update({
+            'storage': self.create_random_name('storage', 15).lower()
+        })
+        self.cmd('storage account create -n {storage} -g {rg}')
+        self.cmd('lock create -n storagelock -g {rg} --resource {storage} --resource-type storageAccounts --namespace microsoft.storage --lock-type CanNotDelete')
+        self.cmd('lock delete -n storagelock -g {rg} --resource {storage} --resource-type storageAccounts --namespace Microsoft.Storage')
+        self.cmd('lock create -n storagelock -g {rg} --resource {storage} --resource-type storageAccounts --namespace MICROSOFT.STORAGE --lock-type CanNotDelete')
+        self.cmd('lock delete -n storagelock -g {rg} --resource {storage} --resource-type storageAccounts --namespace microsoft.storage')
+
     @ResourceGroupPreparer(name_prefix='cli_test_lock_with_resource_id')
     def test_lock_with_resource_id(self, resource_group):
         vnet_name = self.create_random_name('cli-lock-vnet', 30)

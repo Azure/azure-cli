@@ -62,7 +62,7 @@ def remove_network_rule_set_ip_rule(cmd, resource_group_name, namespace_name, ip
         ip_rule_list.append(ip_rule_dict)
 
     for i in ip_rule:
-        for j in ip_rule_list:
+        for j in ip_rule_list[:]:
             if i['ip-address'] == j["ip_mask"]:
                 ip_rule_list.remove(j)
     command_args_dict = {
@@ -121,7 +121,7 @@ def remove_virtual_network_rule(cmd, resource_group_name, namespace_name, subnet
         virtual_network_rule_list.append(subnet_dict)
 
     for i in subnet:
-        for j in virtual_network_rule_list:
+        for j in virtual_network_rule_list[:]:
             if i['id'].lower() == j['subnet'].lower():
                 virtual_network_rule_list.remove(j)
     command_args_dict = {

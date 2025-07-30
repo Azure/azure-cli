@@ -4,6 +4,9 @@ set -ev
 
 REPO_ROOT="$(dirname ${BASH_SOURCE[0]})/../.."
 
+# Upgrade pip to the latest version
+python -m pip install --upgrade pip
+
 # Uninstall any cruft that can poison the rest of the checks in this script.
 pip freeze > baseline_deps.txt
 pip uninstall -y -r baseline_deps.txt || true

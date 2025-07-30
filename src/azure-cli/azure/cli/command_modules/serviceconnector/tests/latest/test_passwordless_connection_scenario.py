@@ -21,7 +21,7 @@ from ._test_utils import CredentialReplacer
 class PasswordlessConnectionScenarioTest(ScenarioTest):
 
     def __init__(self, method_name):
-        super(PasswordlessConnectionScenarioTest, self).__init__(
+        super().__init__(
             method_name,
             recording_processors=[CredentialReplacer()]
         )

@@ -27,12 +27,12 @@ logger = get_logger(__name__)
 
 class TunnelWebSocket(WebSocket):
     def recv_frame(self):
-        frame = super(TunnelWebSocket, self).recv_frame()
+        frame = super().recv_frame()
         logger.info('Received frame: %s', frame)
         return frame
 
     def recv(self):
-        data = super(TunnelWebSocket, self).recv()
+        data = super().recv()
         logger.info('Received websocket data: %s', data)
         return data
 
@@ -75,13 +75,6 @@ class TunnelServer:
 
     def is_webapp_up(self):
         import urllib3
-
-        try:
-            import urllib3.contrib.pyopenssl
-            urllib3.contrib.pyopenssl.inject_into_urllib3()
-        except ImportError:
-            pass
-
         headers = urllib3.util.make_headers()
         headers["authorization"] = self.auth_string
         url = 'https://{}{}'.format(self.remote_addr, '/AppServiceTunnel/Tunnel.ashx?GetStatus&GetStatusAPIVer=2')

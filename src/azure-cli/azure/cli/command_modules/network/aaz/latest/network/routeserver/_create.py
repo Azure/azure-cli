@@ -66,9 +66,22 @@ class Create(AAZCommand):
             options=["--sku"],
             help="SKU of the route server.",
         )
+        _args_schema.auto_scale_config = AAZObjectArg(
+            options=["--auto-scale-config"],
+            help="The VirtualHub Router autoscale configuration.",
+        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             help="Space-separated tags: key[=value] [key[=value] ...].",
+        )
+
+        auto_scale_config = cls._args_schema.auto_scale_config
+        auto_scale_config.min_capacity = AAZIntArg(
+            options=["min-capacity"],
+            help="The minimum number of scale units for VirtualHub Router.",
+            fmt=AAZIntArgFormat(
+                minimum=0,
+            ),
         )
 
         tags = cls._args_schema.tags
@@ -211,6 +224,11 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("hubRoutingPreference", AAZStrType, ".hub_routing_preference")
                 properties.set_prop("sku", AAZStrType, ".sku")
+                properties.set_prop("virtualRouterAutoScaleConfiguration", AAZObjectType, ".auto_scale_config")
+
+            virtual_router_auto_scale_configuration = _builder.get(".properties.virtualRouterAutoScaleConfiguration")
+            if virtual_router_auto_scale_configuration is not None:
+                virtual_router_auto_scale_configuration.set_prop("minCapacity", AAZIntType, ".min_capacity")
 
             tags = _builder.get(".tags")
             if tags is not None:

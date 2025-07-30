@@ -1,0 +1,61 @@
+name: GH Check CLI Linter
+on:
+  pull_request_target:
+    types: [opened, labeled, unlabeled, synchronize]
+    branches:
+      - dev
+
+permissions: {}
+
+jobs:
+  azdev-linter:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+      contents: read
+    steps:
+      - name: Checkout CLI repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: |
+            .github
+      - name: Azdev Env Setup
+        uses: ./.github/actions/env-setup
+      - name: Get Base Branch
+        env:
+          bash_sha: ${{ github.event.pull_request.base.sha }}
+          base_branch: ${{ github.event.pull_request.base.ref }}
+          base_repo: ${{ github.event.pull_request.base.repo.clone_url }}
+          base_branch_pre: "upstream"
+          diff_sha: ${{ github.event.pull_request.head.sha }}
+          diff_branch: ${{ github.event.pull_request.head.ref }}
+          repo_full_name: ${{ github.event.pull_request.head.repo.full_name }}
+        run: |
+          set -x
+          git --version
+          git log --oneline | head -n 10
+          git branch -a
+          git fetch "$base_repo" "$base_branch":"$base_branch_pre"/"$base_branch"
+          git checkout "$base_branch_pre"/"$base_branch"
+      - name: Run Azdev Style
+        env:
+          pr_label_list: ${{ toJson(github.event.pull_request.labels.*.name) }}
+          pr_user: ${{ github.event.pull_request.user.login }}
+          base_branch: ${{ github.event.pull_request.base.ref }}
+          base_branch_pre: "upstream"
+          diff_branch: ${{ github.event.pull_request.head.ref }}
+        run: |
+          chmod +x env/bin/activate
+          source ./env/bin/activate
+          set -ev
+
+          git checkout -f "$diff_branch"
+          # always use the latest scripts from base branch
+          git checkout "$base_branch_pre"/"$base_branch" -- scripts
+          git checkout "$base_branch_pre"/"$base_branch" -- .github
+          
+          python scripts/ci/service_name.py
+          merge_base=$(git merge-base HEAD "$base_branch_pre"/"$base_branch")
+          echo merge_base: "$merge_base"
+          azdev linter --ci-exclusions --min-severity medium --repo ./ --src "$diff_branch" --tgt "$merge_base"

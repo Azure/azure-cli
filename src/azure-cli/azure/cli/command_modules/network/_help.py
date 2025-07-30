@@ -15,7 +15,7 @@ short-summary: Manage Azure Network resources.
 helps['network application-gateway'] = """
 type: group
 short-summary: Manage application-level routing and load balancing services.
-long-summary: To learn more about Application Gateway, visit https://docs.microsoft.com/azure/application-gateway/application-gateway-create-gateway-cli
+long-summary: To learn more about Application Gateway, visit https://learn.microsoft.com/azure/application-gateway/application-gateway-create-gateway-cli
 """
 
 helps['network application-gateway address-pool'] = """
@@ -914,7 +914,7 @@ helps['network application-gateway rule'] = """
 type: group
 short-summary: Evaluate probe information and define http/https routing rules.
 long-summary: >
-    For more information, visit, https://docs.microsoft.com/azure/application-gateway/application-gateway-customize-waf-rules-cli
+    For more information, visit, https://learn.microsoft.com/azure/application-gateway/application-gateway-customize-waf-rules-cli
 """
 
 helps['network application-gateway rule create'] = """
@@ -1042,7 +1042,7 @@ examples:
 helps['network application-gateway ssl-cert'] = """
 type: group
 short-summary: Manage SSL certificates of an application gateway.
-long-summary: For more information visit https://docs.microsoft.com/azure/application-gateway/application-gateway-ssl-cli
+long-summary: For more information visit https://learn.microsoft.com/azure/application-gateway/application-gateway-ssl-cli
 """
 
 helps['network application-gateway ssl-cert create'] = """
@@ -1235,7 +1235,7 @@ short-summary: Create a URL path map.
 long-summary: >
     The map must be created with at least one rule. This command requires the creation of the
     first rule at the time the map is created. To learn more
-    visit https://docs.microsoft.com/azure/application-gateway/application-gateway-create-url-route-cli
+    visit https://learn.microsoft.com/azure/application-gateway/application-gateway-create-url-route-cli
 examples:
   - name: Create a URL path map with a rule.
     text: |
@@ -1313,7 +1313,7 @@ type: group
 short-summary: Configure the settings of a web application firewall.
 long-summary: >
     These commands are only applicable to application gateways with an SKU type of WAF. To learn
-    more, visit https://docs.microsoft.com/azure/application-gateway/application-gateway-web-application-firewall-cli
+    more, visit https://learn.microsoft.com/azure/application-gateway/application-gateway-web-application-firewall-cli
 """
 
 helps['network application-gateway waf-config list-rule-sets'] = """
@@ -1518,7 +1518,7 @@ helps['network application-gateway waf-policy managed-rule'] = """
 type: group
 short-summary: >
     Manage managed rules of a waf-policy.
-    Visit: https://docs.microsoft.com/azure/web-application-firewall/afds/afds-overview
+    Visit: https://learn.microsoft.com/azure/web-application-firewall/afds/afds-overview
 """
 
 helps['network application-gateway waf-policy managed-rule rule-set'] = """
@@ -1530,12 +1530,13 @@ helps['network application-gateway waf-policy managed-rule rule-set add'] = """
 type: command
 short-summary: >
   Add managed rule set to the WAF policy managed rules. For rule set and rules, please visit:
-  https://docs.microsoft.com/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+  https://learn.microsoft.com/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 parameters:
   - name: --rule
     short-summary: The rule that will be disabled. If none specified, all rules in the group will be disabled. If provided, --group-name must be provided too.
     long-summary: |
-        Usage: --rule rule-id=MyID state=MyState action=MyAction
+        Usage: --rule rule-id=MyID state=MyState action=MyAction sensitivity=MySensitivity
+        Allowed values for sensitivity: High, Medium, Low, None
         Multiple rules can be specified by using more than one `--rule` argument.
 examples:
   - name: Disable an attack protection rule
@@ -1552,12 +1553,13 @@ type: command
 short-summary: >
   Manage rules of a WAF policy.
   If --group-name and --rules are provided, override existing rules. If --group-name is provided, clear all rules under a certain rule group. If neither of them are provided, update rule set and clear all rules under itself.
-  For rule set and rules, please visit: https://docs.microsoft.com/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
+  For rule set and rules, please visit: https://learn.microsoft.com/azure/web-application-firewall/ag/application-gateway-crs-rulegroups-rules
 parameters:
   - name: --rule
     short-summary: The rule that will be disabled. If none specified, all rules in the group will be disabled. If provided, --group-name must be provided too.
     long-summary: |
-        Usage: --rule rule-id=MyID state=MyState action=MyAction
+        Usage: --rule rule-id=MyID state=MyState action=MyAction sensitivity=MySensitivity
+        Allowed values for sensitivity: High, Medium, Low, None
         Multiple rules can be specified by using more than one `--rule` argument.
 examples:
   - name: Override rules under rule group EQUEST-921-PROTOCOL-ATTACK
@@ -1586,6 +1588,21 @@ examples:
     text: |
         az network application-gateway waf-policy managed-rule rule-set list --policy-name MyPolicy --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['network application-gateway waf-policy managed-rule exception'] = """
+type: group
+short-summary: Manage exceptions to allow a request to skip the managed rules when the condition is satisfied.
+"""
+
+helps['network application-gateway waf-policy managed-rule exception remove'] = """
+type: command
+short-summary: Remove all managed rule exceptions that are applied on a WAF policy managed rules.
+"""
+
+helps['network application-gateway waf-policy managed-rule exception list'] = """
+type: command
+short-summary: List all managed rule exceptions that are applied on a WAF policy managed rules.
 """
 
 helps['network application-gateway waf-policy managed-rule exclusion'] = """
@@ -1814,6 +1831,9 @@ examples:
 helps['network dns record-set a delete'] = """
 type: command
 short-summary: Delete an A record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete an A record set and all associated records.
     text: az network dns record-set a delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -1888,6 +1908,9 @@ examples:
 helps['network dns record-set aaaa delete'] = """
 type: command
 short-summary: Delete an AAAA record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete an AAAA record set and all associated records.
     text: az network dns record-set aaaa delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -1966,6 +1989,9 @@ examples:
 helps['network dns record-set caa delete'] = """
 type: command
 short-summary: Delete a CAA record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a CAA record set and all associated records.
     text: az network dns record-set caa delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2034,6 +2060,9 @@ examples:
 helps['network dns record-set cname delete'] = """
 type: command
 short-summary: Delete a CNAME record set and its associated record.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a CNAME record set and its associated record.
     text: az network dns record-set cname delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2078,6 +2107,87 @@ examples:
     text: az network dns record-set cname show -g MyResourceGroup -z www.mysite.com -n MyRecordSet
 """
 
+helps['network dns record-set ds'] = """
+type: group
+short-summary: Manage DNS DS records.
+"""
+
+helps['network dns record-set ds add-record'] = """
+type: command
+short-summary: Add a DS record.
+examples:
+  - name: Add a DS record.
+    text: |
+        az network dns record-set ds add-record -g MyResourceGroup -z www.mysite.com \\
+            -n MyRecordSet --algorithm 3 --digest "49FD46E6C4B45C55D4AC" --digest-type 1 --key-tag 12345
+"""
+
+helps['network dns record-set ds create'] = """
+type: command
+short-summary: Create an empty DS record set.
+examples:
+  - name: Create an empty DS record set.
+    text: az network dns record-set ds create -g MyResourceGroup -z www.mysite.com -n MyRecordSet
+  - name: Create an empty DS record set. (autogenerated)
+    text: |
+        az network dns record-set ds create --name MyRecordSet --resource-group MyResourceGroup --ttl 30 --zone-name www.mysite.com
+    crafted: true
+"""
+
+helps['network dns record-set ds delete'] = """
+type: command
+short-summary: Delete a DS record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
+examples:
+  - name: Delete a DS record set and all associated records.
+    text: az network dns record-set ds delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
+"""
+
+helps['network dns record-set ds list'] = """
+type: command
+short-summary: List all DS record sets in a zone.
+examples:
+  - name: List all DS record sets in a zone.
+    text: az network dns record-set ds list -g MyResourceGroup -z www.mysite.com
+"""
+
+helps['network dns record-set ds remove-record'] = """
+type: command
+short-summary: Remove a DS record from its record set.
+long-summary: >
+    By default, if the last record in a set is removed, the record set is deleted.
+    To retain the empty record set, include --keep-empty-record-set.
+examples:
+  - name: Remove an DS record from its record set.
+    text: |
+        az network dns record-set ds remove-record -g MyResourceGroup -z www.mysite.com \\
+            -n MyRecordSet --algorithm 3 --digest "49FD46E6C4B45C55D4AC" --digest-type 1 --key-tag 12345
+"""
+
+helps['network dns record-set ds show'] = """
+type: command
+short-summary: Get the details of a DS record set.
+examples:
+  - name: Get the details of a DS record set.
+    text: az network dns record-set ds show -g MyResourceGroup -n MyRecordSet -z www.mysite.com
+"""
+
+helps['network dns record-set ds update'] = """
+type: command
+short-summary: Update a DS record set.
+examples:
+  - name: Update a DS record set.
+    text: |
+        az network dns record-set ds update -g MyResourceGroup -n MyRecordSet \\
+            -z www.mysite.com --metadata owner=WebTeam
+  - name: Update a DS record set. (autogenerated)
+    text: |
+        az network dns record-set ds update --name MyRecordSet --resource-group MyResourceGroup --set tags.CostCenter=MyBusinessGroup --zone-name www.mysite.com
+    crafted: true
+"""
+
 helps['network dns record-set list'] = """
 type: command
 short-summary: List all record sets within a DNS zone.
@@ -2116,6 +2226,9 @@ examples:
 helps['network dns record-set mx delete'] = """
 type: command
 short-summary: Delete an MX record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete an MX record set and all associated records.
     text: az network dns record-set mx delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2168,6 +2281,84 @@ examples:
     crafted: true
 """
 
+helps['network dns record-set naptr'] = """
+type: group
+short-summary: Manage DNS NAPTR records.
+"""
+
+helps['network dns record-set naptr add-record'] = """
+type: command
+short-summary: Add a NAPTR record.
+examples:
+  - name: Add a NAPTR record.
+    text: |
+        az network dns record-set naptr add-record -g MyResourceGroup -z www.mysite.com \\
+            -n MyRecordSet --flags "U" --order 10 --preference 20 --services "E2U+sip" --regexp "!^.*$!sip:customer-service@example.com!" --replacement .
+"""
+
+helps['network dns record-set naptr create'] = """
+type: command
+short-summary: Create an empty NAPTR record set.
+examples:
+  - name: Create an empty NAPTR record set.
+    text: az network dns record-set naptr create -g MyResourceGroup -z www.mysite.com -n MyRecordSet
+  - name: Create an empty NAPTR record set. (autogenerated)
+    text: |
+        az network dns record-set naptr create --name MyRecordSet --resource-group MyResourceGroup --ttl 30 --zone-name www.mysite.com
+    crafted: true
+"""
+
+helps['network dns record-set naptr delete'] = """
+type: command
+short-summary: Delete a NAPTR record set and all associated records.
+examples:
+  - name: Delete a NAPTR record set and all associated records.
+    text: az network dns record-set naptr delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
+"""
+
+helps['network dns record-set naptr list'] = """
+type: command
+short-summary: List all NAPTR record sets in a zone.
+examples:
+  - name: List all NAPTR record sets in a zone.
+    text: az network dns record-set naptr list -g MyResourceGroup -z www.mysite.com
+"""
+
+helps['network dns record-set naptr remove-record'] = """
+type: command
+short-summary: Remove a NAPTR record from its record set.
+long-summary: >
+    By default, if the last record in a set is removed, the record set is deleted.
+    To retain the empty record set, include --keep-empty-record-set.
+examples:
+  - name: Remove an NAPTR record from its record set.
+    text: |
+        az network dns record-set naptr remove-record -g MyResourceGroup -z www.mysite.com \\
+            -n MyRecordSet --flags "U" --order 10 --preference 20 --services "E2U+sip" --regexp "!^.*$!sip:customer-service@example.com!" --replacement .
+"""
+
+helps['network dns record-set naptr show'] = """
+type: command
+short-summary: Get the details of a NAPTR record set.
+examples:
+  - name: Get the details of a NAPTR record set.
+    text: az network dns record-set naptr show -g MyResourceGroup -n MyRecordSet -z www.mysite.com
+"""
+
+helps['network dns record-set naptr update'] = """
+type: command
+short-summary: Update a NAPTR record set.
+examples:
+  - name: Update a NAPTR record set.
+    text: |
+        az network dns record-set naptr update -g MyResourceGroup -n MyRecordSet \\
+            -z www.mysite.com --metadata owner=WebTeam
+  - name: Update a NAPTR record set. (autogenerated)
+    text: |
+        az network dns record-set naptr update --name MyRecordSet --resource-group MyResourceGroup --set tags.CostCenter=MyBusinessGroup --zone-name www.mysite.com
+    crafted: true
+"""
+
 helps['network dns record-set ns'] = """
 type: group
 short-summary: Manage DNS NS records.
@@ -2198,6 +2389,9 @@ examples:
 helps['network dns record-set ns delete'] = """
 type: command
 short-summary: Delete an NS record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete an NS record set and all associated records.
     text: az network dns record-set ns delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2284,6 +2478,9 @@ examples:
 helps['network dns record-set ptr delete'] = """
 type: command
 short-summary: Delete a PTR record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a PTR record set and all associated records.
     text: az network dns record-set ptr delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2399,6 +2596,9 @@ examples:
 helps['network dns record-set srv delete'] = """
 type: command
 short-summary: Delete an SRV record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete an SRV record set and all associated records.
     text: az network dns record-set srv delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2443,6 +2643,89 @@ examples:
             -n MyRecordSet --metadata owner=WebTeam
 """
 
+helps['network dns record-set tlsa'] = """
+type: group
+short-summary: Manage DNS TLSA records.
+"""
+
+helps['network dns record-set tlsa add-record'] = """
+type: command
+short-summary: Add a TLSA record.
+examples:
+  - name: Add a TLSA record.
+    text: |
+        az network dns record-set tlsa add-record -g MyResourceGroup -z www.mysite.com \\
+            -n MyRecordSet --certificate-usage 3 --selector 1 --matching-type 1 \\
+            --certificate-data 0C72AC70B745AC19998811B131D662C9AC69DBDBE7CB23E5B514B56664C5D3D6
+"""
+
+helps['network dns record-set tlsa create'] = """
+type: command
+short-summary: Create an empty TLSA record set.
+examples:
+  - name: Create an empty TLSA record set.
+    text: az network dns record-set tlsa create -g MyResourceGroup -z www.mysite.com -n MyRecordSet
+  - name: Create an empty TLSA record set. (autogenerated)
+    text: |
+        az network dns record-set tlsa create --name MyRecordSet --resource-group MyResourceGroup --ttl 30 --zone-name www.mysite.com
+    crafted: true
+"""
+
+helps['network dns record-set tlsa delete'] = """
+type: command
+short-summary: Delete a TLSA record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
+examples:
+  - name: Delete a TLSA record set and all associated records.
+    text: az network dns record-set tlsa delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
+"""
+
+helps['network dns record-set tlsa list'] = """
+type: command
+short-summary: List all TLSA record sets in a zone.
+examples:
+  - name: List all TLSA record sets in a zone.
+    text: az network dns record-set tlsa list -g MyResourceGroup -z www.mysite.com
+"""
+
+helps['network dns record-set tlsa remove-record'] = """
+type: command
+short-summary: Remove a TLSA record from its record set.
+long-summary: >
+    By default, if the last record in a set is removed, the record set is deleted.
+    To retain the empty record set, include --keep-empty-record-set.
+examples:
+  - name: Remove an TLSA record from its record set.
+    text: |
+        az network dns record-set tlsa remove-record -g MyResourceGroup -z www.mysite.com \\
+            -n MyRecordSet --certificate-usage 3 --selector 1 --matching-type 1 \\
+            --certificate-data 0C72AC70B745AC19998811B131D662C9AC69DBDBE7CB23E5B514B56664C5D3D6
+"""
+
+helps['network dns record-set tlsa show'] = """
+type: command
+short-summary: Get the details of a TLSA record set.
+examples:
+  - name: Get the details of a TLSA record set.
+    text: az network dns record-set tlsa show -g MyResourceGroup -n MyRecordSet -z www.mysite.com
+"""
+
+helps['network dns record-set tlsa update'] = """
+type: command
+short-summary: Update a TLSA record set.
+examples:
+  - name: Update a TLSA record set.
+    text: |
+        az network dns record-set tlsa update -g MyResourceGroup -n MyRecordSet \\
+            -z www.mysite.com --metadata owner=WebTeam
+  - name: Update a TLSA record set. (autogenerated)
+    text: |
+        az network dns record-set tlsa update --name MyRecordSet --resource-group MyResourceGroup --set tags.CostCenter=MyBusinessGroup --zone-name www.mysite.com
+    crafted: true
+"""
+
 helps['network dns record-set txt'] = """
 type: group
 short-summary: Manage DNS TXT records.
@@ -2473,6 +2756,9 @@ examples:
 helps['network dns record-set txt delete'] = """
 type: command
 short-summary: Delete a TXT record set and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a TXT record set and all associated records.
     text: az network dns record-set txt delete -g MyResourceGroup -z www.mysite.com -n MyRecordSet
@@ -2551,6 +2837,9 @@ examples:
 helps['network dns zone delete'] = """
 type: command
 short-summary: Delete a DNS zone and all associated records.
+parameters:
+  - name: --if-match
+    short-summary: Delete only if the resource with the same ETAG exists.
 examples:
   - name: Delete a DNS zone using a fully qualified domain name.
     text: >
@@ -2614,7 +2903,7 @@ type: group
 short-summary: Manage dedicated private network fiber connections to Azure.
 long-summary: >
     To learn more about ExpressRoute circuits visit
-    https://docs.microsoft.com/azure/expressroute/howto-circuit-cli
+    https://learn.microsoft.com/azure/expressroute/howto-circuit-cli
 """
 
 helps['network express-route auth'] = """
@@ -2622,7 +2911,7 @@ type: group
 short-summary: Manage authentication of an ExpressRoute circuit.
 long-summary: >
     To learn more about ExpressRoute circuit authentication visit
-    https://docs.microsoft.com/azure/expressroute/howto-linkvnet-cli#connect-a-virtual-network-in-a-different-subscription-to-a-circuit
+    https://learn.microsoft.com/azure/expressroute/howto-linkvnet-cli#connect-a-virtual-network-in-a-different-subscription-to-a-circuit
 """
 
 helps['network express-route auth create'] = """
@@ -3436,7 +3725,7 @@ helps['network lb'] = """
 type: group
 short-summary: Manage and configure load balancers.
 long-summary: |
-  To learn more about Azure Load Balancer visit https://docs.microsoft.com/azure/load-balancer/load-balancer-get-started-internet-arm-cli
+  To learn more about Azure Load Balancer visit https://learn.microsoft.com/azure/load-balancer/load-balancer-get-started-internet-arm-cli
 """
 
 helps['network lb wait'] = """
@@ -3451,48 +3740,6 @@ examples:
 helps['network lb address-pool'] = """
 type: group
 short-summary: Manage address pools of a load balancer.
-"""
-
-helps['network lb address-pool create'] = """
-type: command
-short-summary: Create an address pool.
-examples:
-  - name: Create an address pool.
-    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool
-  - name: Create an address pool with several backend addresses using key-value arguments.
-    text: az network lb address-pool create -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
-"""
-
-helps['network lb address-pool update'] = """
-type: command
-short-summary: Update an address pool.
-examples:
-  - name: Update an address pool with several backend addresses using key-value arguments.
-    text: az network lb address-pool update -g MyResourceGroup --lb-name MyLb -n MyAddressPool --vnet {VnetResourceId} --backend-address name=addr1 ip-address=10.0.0.1 --backend-address name=addr2 ip-address=10.0.0.3
-"""
-
-helps['network lb address-pool delete'] = """
-type: command
-short-summary: Delete an address pool.
-examples:
-  - name: Delete an address pool.
-    text: az network lb address-pool delete -g MyResourceGroup --lb-name MyLb -n MyAddressPool
-"""
-
-helps['network lb address-pool list'] = """
-type: command
-short-summary: List address pools.
-examples:
-  - name: List address pools.
-    text: az network lb address-pool list -g MyResourceGroup --lb-name MyLb -o table
-"""
-
-helps['network lb address-pool show'] = """
-type: command
-short-summary: Get the details of an address pool.
-examples:
-  - name: Get the details of an address pool.
-    text: az network lb address-pool show -g MyResourceGroup --lb-name MyLb -n MyAddressPool
 """
 
 helps['network lb address-pool address'] = """
@@ -3984,7 +4231,7 @@ helps['network nic'] = """
 type: group
 short-summary: Manage network interfaces.
 long-summary: >
-    To learn more about network interfaces in Azure visit https://docs.microsoft.com/azure/virtual-network/virtual-network-network-interface
+    To learn more about network interfaces in Azure visit https://learn.microsoft.com/azure/virtual-network/virtual-network-network-interface
 """
 
 helps['network nic create'] = """
@@ -4030,7 +4277,7 @@ helps['network nic ip-config address-pool add'] = """
 type: command
 short-summary: Add an address pool to an IP configuration.
 examples:
-  - name: Add an address pool to an IP configuration.
+  - name: Add an address pool to an IP configuration. Specify the full backend pool ID of a load balancer when in a different resource group than the specified NIC.
     text: |
         az network nic ip-config address-pool add -g MyResourceGroup --nic-name MyNic \\
             -n MyIpConfig --address-pool MyAddressPool
@@ -4160,7 +4407,7 @@ helps['network nic list-effective-nsg'] = """
 type: command
 short-summary: List all effective network security groups applied to a network interface.
 long-summary: >
-    To learn more about troubleshooting using effective security rules visit https://docs.microsoft.com/azure/virtual-network/virtual-network-nsg-troubleshoot-portal
+    To learn more about troubleshooting using effective security rules visit https://learn.microsoft.com/azure/virtual-network/virtual-network-nsg-troubleshoot-portal
 examples:
   - name: List the effective security groups associated with a NIC.
     text: az network nic list-effective-nsg -g MyResourceGroup -n MyNic
@@ -4179,7 +4426,7 @@ type: command
 short-summary: Show the effective route table applied to a network interface.
 long-summary: >
     To learn more about troubleshooting using the effective route tables visit
-    https://docs.microsoft.com/azure/virtual-network/virtual-network-routes-troubleshoot-portal#using-effective-routes-to-troubleshoot-vm-traffic-flow
+    https://learn.microsoft.com/azure/virtual-network/virtual-network-routes-troubleshoot-portal#using-effective-routes-to-troubleshoot-vm-traffic-flow
 examples:
   - name: Show the effective routes applied to a network interface.
     text: az network nic show-effective-route-table -g MyResourceGroup -n MyNic
@@ -4603,7 +4850,7 @@ helps['network public-ip'] = """
 type: group
 short-summary: Manage public IP addresses.
 long-summary: >
-    To learn more about public IP addresses visit https://docs.microsoft.com/azure/virtual-network/virtual-network-public-ip-address
+    To learn more about public IP addresses visit https://learn.microsoft.com/azure/virtual-network/virtual-network-public-ip-address
 """
 
 helps['network public-ip create'] = """
@@ -4772,7 +5019,7 @@ type: command
 short-summary: Create a virtual network.
 long-summary: >
     You may also create a subnet at the same time by specifying a subnet name and (optionally) an address prefix.
-    To learn about how to create a virtual network visit https://docs.microsoft.com/azure/virtual-network/manage-virtual-network#create-a-virtual-network
+    To learn about how to create a virtual network visit https://learn.microsoft.com/azure/virtual-network/manage-virtual-network#create-a-virtual-network
 examples:
   - name: Create a virtual network.
     text: az network vnet create -g MyResourceGroup -n MyVnet
@@ -4902,7 +5149,7 @@ helps['network vnet-gateway'] = """
 type: group
 short-summary: Use an Azure Virtual Network Gateway to establish secure, cross-premises connectivity.
 long-summary: >
-    To learn more about Azure Virtual Network Gateways, visit https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli
+    To learn more about Azure Virtual Network Gateways, visit https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli
 """
 
 helps['network vnet-gateway create'] = """
@@ -4937,7 +5184,7 @@ long-summary: >
     In order to delete a Virtual Network Gateway, you must first delete ALL Connection objects in Azure that are
      connected to the Gateway. After deleting the Gateway, proceed to delete other resources now not in use.
      For more information, follow the order of instructions on this page:
-     https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-delete-vnet-gateway-portal
+     https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-delete-vnet-gateway-portal
 examples:
   - name: Delete a virtual network gateway.
     text: az network vnet-gateway delete -g MyResourceGroup -n MyVnetGateway
@@ -5289,8 +5536,8 @@ type: group
 short-summary: Manage VPN connections.
 long-summary: >
     For more information on site-to-site connections,
-    visit https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli.
-    For more information on Vnet-to-Vnet connections, visit https://docs.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-vnet-vnet-cli
+    visit https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-site-to-site-resource-manager-cli.
+    For more information on Vnet-to-Vnet connections, visit https://learn.microsoft.com/azure/vpn-gateway/vpn-gateway-howto-vnet-vnet-cli
 """
 
 helps['network vpn-connection create'] = """
@@ -5488,6 +5735,12 @@ examples:
 helps['network routeserver create'] = """
 type: command
 short-summary: Create a route server.
+parameters:
+  - name: --auto-scale-config
+    short-summary: VirtualHub Router autoscale configuration. Use space-separated property=value [property=value ...].
+    long-summary: |
+      Supported properties:
+      min-capacity: The minimum number of scale units for VirtualHub Router.
 examples:
   - name: Create a route server.
     text: |
@@ -5503,7 +5756,7 @@ helps['network watcher'] = """
 type: group
 short-summary: Manage the Azure Network Watcher.
 long-summary: >
-    Network Watcher assists with monitoring and diagnosing conditions at a network scenario level. To learn more visit https://docs.microsoft.com/azure/network-watcher/
+    Network Watcher assists with monitoring and diagnosing conditions at a network scenario level. To learn more visit https://learn.microsoft.com/azure/network-watcher/
 """
 
 helps['network watcher configure'] = """
@@ -5528,7 +5781,7 @@ helps['network watcher flow-log'] = """
 type: group
 short-summary: Manage network security group flow logging.
 long-summary: >
-    For more information about configuring flow logs visit https://docs.microsoft.com/azure/network-watcher/network-watcher-nsg-flow-logging-cli
+    For more information about configuring flow logs visit https://learn.microsoft.com/azure/network-watcher/network-watcher-nsg-flow-logging-cli
 """
 
 helps['network watcher flow-log create'] = """
@@ -5710,7 +5963,7 @@ type: group
 short-summary: Manage packet capture sessions on VMs.
 long-summary: >
     These commands require that both Azure Network Watcher is enabled for the VMs region and that AzureNetworkWatcherExtension is enabled on the VM.
-    For more information visit https://docs.microsoft.com/azure/network-watcher/network-watcher-packet-capture-manage-cli
+    For more information visit https://learn.microsoft.com/azure/network-watcher/network-watcher-packet-capture-manage-cli
 """
 
 helps['network watcher packet-capture create'] = """
@@ -5869,7 +6122,7 @@ type: command
 short-summary: Get information on the 'next hop' of a VM.
 long-summary: >
     Requires that Network Watcher is enabled for the region in which the VM is located.
-    For more information about show-next-hop visit https://docs.microsoft.com/azure/network-watcher/network-watcher-check-next-hop-cli
+    For more information about show-next-hop visit https://learn.microsoft.com/azure/network-watcher/network-watcher-check-next-hop-cli
 examples:
   - name: Get the next hop from a VMs assigned IP address to a destination at 10.1.0.4.
     text: az network watcher show-next-hop -g MyResourceGroup --vm MyVm --source-ip 10.0.0.4 --dest-ip 10.1.0.4
@@ -5879,7 +6132,7 @@ helps['network watcher show-security-group-view'] = """
 type: command
 short-summary: Get detailed security information on a VM for the currently configured network security group.
 long-summary: >
-    For more information on using security group view visit https://docs.microsoft.com/azure/network-watcher/network-watcher-security-group-view-cli
+    For more information on using security group view visit https://learn.microsoft.com/azure/network-watcher/network-watcher-security-group-view-cli
 examples:
   - name: Get the network security group information for the specified VM.
     text: az network watcher show-security-group-view -g MyResourceGroup --vm MyVm
@@ -5888,7 +6141,7 @@ examples:
 helps['network watcher show-topology'] = """
 type: command
 short-summary: Get the network topology of a resource group, virtual network or subnet.
-long-summary: For more information about using network topology visit https://docs.microsoft.com/azure/network-watcher/network-watcher-topology-cli
+long-summary: For more information about using network topology visit https://learn.microsoft.com/azure/network-watcher/network-watcher-topology-cli
 parameters:
   - name: --resource-group -g
     short-summary: The name of the target resource group to perform topology on.
@@ -5907,7 +6160,7 @@ type: command
 short-summary: Test if a connection can be established between a Virtual Machine and a given endpoint.
 long-summary: >
     To check connectivity between two VMs in different regions, use the VM ids instead of the VM names for the source and destination resource arguments.
-    To register for this feature or see additional examples visit https://docs.microsoft.com/azure/network-watcher/network-watcher-connectivity-cli
+    To register for this feature or see additional examples visit https://learn.microsoft.com/azure/network-watcher/network-watcher-connectivity-cli
 parameters:
   - name: --source-resource
     short-summary: Name or ID of the resource from which to originate traffic.
@@ -5933,7 +6186,7 @@ type: command
 short-summary: Test IP flow to/from a VM given the currently configured network security group rules.
 long-summary: >
     Requires that Network Watcher is enabled for the region in which the VM is located.
-    For more information visit https://docs.microsoft.com/azure/network-watcher/network-watcher-check-ip-flow-verify-cli
+    For more information visit https://learn.microsoft.com/azure/network-watcher/network-watcher-check-ip-flow-verify-cli
 parameters:
   - name: --local
     short-summary: >
@@ -5958,7 +6211,7 @@ helps['network watcher troubleshooting'] = """
 type: group
 short-summary: Manage Network Watcher troubleshooting sessions.
 long-summary: >
-    For more information on configuring troubleshooting visit https://docs.microsoft.com/azure/network-watcher/network-watcher-troubleshoot-manage-cli
+    For more information on configuring troubleshooting visit https://learn.microsoft.com/azure/network-watcher/network-watcher-troubleshoot-manage-cli
 """
 
 helps['network watcher troubleshooting show'] = """

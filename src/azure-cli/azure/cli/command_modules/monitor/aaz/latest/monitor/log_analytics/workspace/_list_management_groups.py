@@ -64,11 +64,11 @@ class ListManagementGroups(AAZCommand):
         self.ManagementGroupsList(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -184,6 +184,10 @@ class ListManagementGroups(AAZCommand):
             properties.version = AAZStrType()
 
             return cls._schema_on_200
+
+
+class _ListManagementGroupsHelper:
+    """Helper class for ListManagementGroups"""
 
 
 __all__ = ["ListManagementGroups"]

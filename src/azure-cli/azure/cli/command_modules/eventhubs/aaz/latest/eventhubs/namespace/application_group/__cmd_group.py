@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "eventhubs namespace application-group",
 )
 class __CMDGroup(AAZCommandGroup):
-    """eventhubs namespace application-group
+    """Manages Application Groups for premium eventhubs namespace.
     """
     pass
 

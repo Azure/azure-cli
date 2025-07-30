@@ -12,7 +12,7 @@ from azure.cli.core.extension._index import (get_index, get_index_extensions, DE
                                              ERR_UNABLE_TO_GET_EXTENSIONS)
 
 
-class MockResponse(object):
+class MockResponse:
     def __init__(self, status_code, data):
         self.status_code = status_code
         self.data = data

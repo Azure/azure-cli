@@ -30,14 +30,14 @@ class TestOrder(ScenarioTest):
 
         order = self.cmd('az databoxedge order create '
                  '--device-name {name} --company-name Microsoft '
-                 '--contact-person JohnMcclane --email-list john@microsoft.com '
+                 '--contact-person JohnMcclane --email-list aaa@foo.com '
                  '--phone 426-9400 --address-line1 MicrosoftCorporation '
                  '--city WA --country "United States" --postal-code 98052 '
                  '--state WA --resource-group {rg} --status Untracked', checks=[
             self.check('name', 'default'),
             self.check('contactInformation.companyName', 'Microsoft'),
             self.check('contactInformation.contactPerson', 'JohnMcclane'),
-            self.check('contactInformation.emailList', ['john@microsoft.com']),
+            self.check('contactInformation.emailList', ['aaa@foo.com']),
             self.check('contactInformation.phone', '426-9400'),
             self.check('currentStatus.status', 'Untracked'),
             self.check('resourceGroup', '{rg}'),
@@ -50,14 +50,14 @@ class TestOrder(ScenarioTest):
 
         self.cmd('az databoxedge order update '
                  '--device-name {name} --company-name Microsoft '
-                 '--contact-person JohnMcclane --email-list john@microsoft.com '
+                 '--contact-person JohnMcclane --email-list aaa@foo.com '
                  '--phone 426-9400 --address-line1 MicrosoftCorporation '
                  '--city WA --country "United States" --postal-code 98052 '
                  '--state WA --resource-group {rg} --status Untracked', checks=[
             self.check('name', 'default'),
             self.check('contactInformation.companyName', 'Microsoft'),
             self.check('contactInformation.contactPerson', 'JohnMcclane'),
-            self.check('contactInformation.emailList', ['john@microsoft.com']),
+            self.check('contactInformation.emailList', ['aaa@foo.com']),
             self.check('contactInformation.phone', '426-9400'),
             self.check('currentStatus.status', 'Untracked'),
             self.check('resourceGroup', '{rg}'),
@@ -75,7 +75,7 @@ class TestOrder(ScenarioTest):
             self.check('[0].name', 'default'),
             self.check('[0].contactInformation.companyName', 'Microsoft'),
             self.check('[0].contactInformation.contactPerson', 'JohnMcclane'),
-            self.check('[0].contactInformation.emailList', ['john@microsoft.com']),
+            self.check('[0].contactInformation.emailList', ['aaa@foo.com']),
             self.check('[0].contactInformation.phone', '426-9400'),
             self.check('[0].currentStatus.status', 'Untracked'),
             self.check('[0].resourceGroup', '{rg}'),
@@ -90,7 +90,7 @@ class TestOrder(ScenarioTest):
             self.check('name', 'default'),
             self.check('contactInformation.companyName', 'Microsoft'),
             self.check('contactInformation.contactPerson', 'JohnMcclane'),
-            self.check('contactInformation.emailList', ['john@microsoft.com']),
+            self.check('contactInformation.emailList', ['aaa@foo.com']),
             self.check('contactInformation.phone', '426-9400'),
             self.check('currentStatus.status', 'Untracked'),
             self.check('resourceGroup', '{rg}'),

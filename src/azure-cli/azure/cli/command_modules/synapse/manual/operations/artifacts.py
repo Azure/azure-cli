@@ -349,7 +349,7 @@ def write_to_file(notebook, path):
         notebook_result['cells'] = notebook_properties['cells']
         with open(path, 'w') as f:
             json.dump(notebook_result, f, indent=4)
-    except IOError:
+    except OSError:
         raise CLIError('Unable to export to file: {}'.format(path))
 
 

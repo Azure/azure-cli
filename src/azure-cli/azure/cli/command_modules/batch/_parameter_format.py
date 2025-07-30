@@ -18,7 +18,9 @@ BASIC_TYPES = {
     'rfc-1123',
     'date',
     'decimal',
-    'unix-time'
+    'unix-time',
+    'datetime.datetime',
+    'datetime.timedelta'
 }
 
 # Parameters that we want to be present in the namespace, but not exposed to the user as arguments
@@ -67,33 +69,37 @@ IGNORE_PARAMETERS = [
     'job_release_task',
     'auto_pool_specification',
     'on_task_failure',
-    'job.on_all_tasks_complete',
+    # 'job.on_all_tasks_complete',
     'job_manager_task.kill_job_on_completion',
     'job_manager_task.run_exclusive',
     'job_manager_task.constraints',
     'job_manager_task.allow_low_priority_node',
-    'job.job_manager_task.application_package_references',
+    # 'job.job_manager_task.application_package_references',
     'virtual_machine_configuration.windows_configuration',
-    'virtual_machine_configuration.os_disk',
     'virtual_machine_configuration.container_configuration',
     'virtual_machine_configuration.license_type',
     'task_scheduling_policy',
     'container_settings',
     'user_identity',
-    'network_configuration',
+    'network_configuration.dynamic_vnet_assignment_scope',
+    'network_configuration.dynamic_v_net_assignment_scope',
+    'network_configuration.public_ip_address_configuration',
+    'network_configuration.subnet_id',
     'enable_auto_scale',
     'cloud_service_configuration.target_os_version',
     'pool.auto_scale_evaluation_interval',
-    'pool.start_task.environment_settings',
-    'pool.start_task.max_task_retry_count',
+    # 'pool.start_task.environment_settings',
+    # 'pool.start_task.max_task_retry_count',
     'job_schedule_patch_parameter.job_specification.constraints',
     'job_schedule_update_parameter.job_specification.constraints',
-    'job_schedule.job_specification.metadata',
-    'job_schedule.job_specification.job_manager_task.application_package_references',
-    'job_schedule.job_specification.job_manager_task.environment_settings',
+    # 'job_schedule.job_specification.metadata',
+    # 'job_schedule.job_specification.job_manager_task.application_package_references',
+    # 'job_schedule.job_specification.job_manager_task.environment_settings',
     'resource_file.storage_container_url',
     'resource_file.blob_prefix',
-    'resource_file.auto_storage_container_name'
+    'resource_file.auto_storage_container_name',
+    'virtual_machine_configuration.service_artifact_reference',
+
 ]
 
 # Options to be flattened into multiple arguments.

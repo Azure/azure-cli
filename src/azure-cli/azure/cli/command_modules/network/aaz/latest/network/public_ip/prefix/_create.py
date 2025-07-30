@@ -77,6 +77,11 @@ class Create(AAZCommand):
             default="IPv4",
             enum={"IPv4": "IPv4", "IPv6": "IPv6"},
         )
+        _args_schema.tier = AAZStrArg(
+            options=["--tier"],
+            help="Tier of a public IP prefix SKU.",
+            enum={"Global": "Global", "Regional": "Regional"},
+        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             help="Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.",
@@ -104,26 +109,6 @@ class Create(AAZCommand):
 
         # define Arg Group "Parameters"
 
-        _args_schema = cls._args_schema
-        _args_schema.sku = AAZObjectArg(
-            options=["--sku"],
-            arg_group="Parameters",
-            help="The public IP prefix SKU.",
-        )
-
-        sku = cls._args_schema.sku
-        sku.name = AAZStrArg(
-            options=["name"],
-            help="Name of a public IP prefix SKU.",
-            default="Standard",
-            enum={"Standard": "Standard"},
-        )
-        sku.tier = AAZStrArg(
-            options=["tier"],
-            help="Tier of a public IP prefix SKU.",
-            enum={"Global": "Global", "Regional": "Regional"},
-        )
-
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
@@ -144,6 +129,17 @@ class Create(AAZCommand):
         _element.tag = AAZStrArg(
             options=["tag"],
             help="The value of the IP tag associated with the public IP. Example: SQL.",
+        )
+
+        # define Arg Group "Sku"
+
+        _args_schema = cls._args_schema
+        _args_schema.sku = AAZStrArg(
+            options=["--sku"],
+            arg_group="Sku",
+            help="Name of a public IP prefix SKU.",
+            default="Standard",
+            enum={"Standard": "Standard"},
         )
         return cls._args_schema
 
@@ -274,7 +270,7 @@ class Create(AAZCommand):
             _builder.set_prop("extendedLocation", AAZObjectType)
             _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("sku", AAZObjectType, ".sku")
+            _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
             _builder.set_prop("zones", AAZListType, ".zone")
 
@@ -305,7 +301,7 @@ class Create(AAZCommand):
 
             sku = _builder.get(".sku")
             if sku is not None:
-                sku.set_prop("name", AAZStrType, ".name")
+                sku.set_prop("name", AAZStrType, ".sku")
                 sku.set_prop("tier", AAZStrType, ".tier")
 
             tags = _builder.get(".tags")

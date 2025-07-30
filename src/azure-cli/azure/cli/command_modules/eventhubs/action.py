@@ -15,7 +15,7 @@ import argparse
 class AlertAddEncryption(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AlertAddEncryption, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         from azure.cli.core import CLIError
@@ -54,7 +54,7 @@ class AlertAddEncryption(argparse._AppendAction):
 class AlertAddVirtualNetwork(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AlertAddVirtualNetwork, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         from azure.cli.core import CLIError
@@ -80,7 +80,7 @@ class AlertAddVirtualNetwork(argparse._AppendAction):
 class AlertAddIpRule(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(AlertAddIpRule, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         from azure.cli.core import CLIError
@@ -106,7 +106,7 @@ class AlertAddIpRule(argparse._AppendAction):
 class ConstructPolicy(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(ConstructPolicy, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         from azure.cli.core.azclierror import RequiredArgumentMissingError
@@ -158,7 +158,7 @@ class ConstructPolicy(argparse._AppendAction):
 class ConstructPolicyName(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         action = self.get_action(values, option_string)
-        super(ConstructPolicyName, self).__call__(parser, namespace, action, option_string)
+        super().__call__(parser, namespace, action, option_string)
 
     def get_action(self, values, option_string):  # pylint: disable=no-self-use
         from azure.cli.core.azclierror import RequiredArgumentMissingError
@@ -174,3 +174,33 @@ class ConstructPolicyName(argparse._AppendAction):
             raise RequiredArgumentMissingError('Throttling policies is missing the parameters: name')
 
         return policy
+
+
+class AlertAddlocation(argparse._AppendAction):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        super().__call__(parser, namespace, action, option_string)
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        from azure.cli.core import CLIError
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        LocationObject = {}
+        for (k, v) in (x.split('=', 1) for x in values):
+            if k == 'location-name':
+                LocationObject["location_name"] = v
+            elif k == 'role-type':
+                LocationObject["role_type"] = v
+            elif k == 'cluster-arm-id':
+                LocationObject["cluster_arm_id"] = v
+            else:
+                raise InvalidArgumentValueError(
+                    "Invalid Argument for:'{}' Only allowed arguments are 'location-name, role-type and cluster-arm-id'".format(
+                        option_string))
+
+        if (LocationObject["location_name"] is None) or (LocationObject["role_type"] is None):
+            raise CLIError('location-name and role-type are mandatory properties')
+
+        if "cluster_arm_id" not in LocationObject:
+            LocationObject["cluster_arm_id"] = ''
+
+        return LocationObject

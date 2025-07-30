@@ -1,19 +1,39 @@
 {
   "id": "xplatCreatedPool",
-  "vmSize": "small",
-  "cloudServiceConfiguration": {
-    "osFamily": "4",
-    "targetOSVersion": "*" 
+  "vmSize": "STANDARD_D2S_V3",
+  "virtualMachineConfiguration": {
+    "imageReference": {
+      "publisher": "microsoftwindowsserver",
+      "offer": "windowsserver",
+      "sku": "2022-datacenter",
+      "version": "latest",
+      "virtualMachineImageId": null,
+      "exactVersion": "latest"
+    },
+    "nodeAgentSKUId": "batch.node.windows amd64",
+    "nodePlacementConfiguration": {
+      "policy": "regional"
+    },
+    "osDisk": {
+      "caching": "none",
+      "managedDisk": {
+        "storageAccountType": "premium_lrs"
+      },
+      "diskSizeGB": null,
+      "writeAcceleratorEnabled": null
+    }
   },
   "targetDedicatedNodes": 0,
   "startTask": {
     "commandLine": "cmd /c echo test",
-    "waitForSuccess": true,
     "userIdentity": {
+      "username": null,
       "autoUser": {
         "scope": "task",
         "elevationLevel": "admin"
       }
-    }
+    },
+    "maxTaskRetryCount": 0,
+    "waitForSuccess": true
   }
 }

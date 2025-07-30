@@ -3,7 +3,7 @@ interactions:
     body: '{"location": "eastus", "identity": {"type": "SystemAssigned"}, "properties":
       {"defaultDataLakeStorage": {"accountUrl": "https://adlsgen2000002.dfs.core.windows.net",
       "filesystem": "testfilesystem"}, "sqlAdministratorLoginPassword": "Pswd1000008",
-      "sqlAdministratorLogin": "cliuser1"}}'
+      "sqlAdministratorLogin": "cliuser1", "trustedServiceBypassEnabled": false}}'
     headers:
       Accept:
       - application/json
@@ -14,22 +14,22 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '284'
+      - '322'
       Content-Type:
       - application/json
       ParameterSetName:
       - --name --resource-group --storage-account --file-system --sql-admin-login-user
         --sql-admin-login-password --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007?api-version=2021-06-01
   response:
     body:
-      string: '{"properties":{"defaultDataLakeStorage":{"createManagedPrivateEndpoint":false,"accountUrl":"https://adlsgen2000002.dfs.core.windows.net","filesystem":"testfilesystem"},"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Provisioning","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2fa386d5ea-ea90-441a-8263-d816368c84a1%2fresourceGroups%2fsynapse-cli000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fclitest000007","dev":"https://clitest000007.dev.azuresynapse.net","sqlOnDemand":"clitest000007-ondemand.sql.azuresynapse.net","sql":"clitest000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-8032a4e9-c8ba-46c1-8f2c-64155ec151df","privateEndpointConnections":[],"workspaceUID":"30e616cf-e702-465c-a58a-00fb9f340faa","extraProperties":{"WorkspaceType":"Normal"},"publicNetworkAccess":"Enabled","cspWorkspaceAdminProperties":{"initialWorkspaceAdminObjectId":"0417ddc2-87dc-4923-8865-84f5bd13acce"},"trustedServiceBypassEnabled":false},"type":"Microsoft.Synapse/workspaces","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007","location":"eastus","name":"clitest000007","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"c6fabeb5-6ec3-4e69-aa84-a3d853f3f6f5"}}'
+      string: '{"properties":{"defaultDataLakeStorage":{"createManagedPrivateEndpoint":false,"accountUrl":"https://adlsgen2000002.dfs.core.windows.net","filesystem":"testfilesystem"},"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Provisioning","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2fa386d5ea-ea90-441a-8263-d816368c84a1%2fresourceGroups%2fsynapse-cli000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fclitest000007","dev":"https://clitest000007.dev.azuresynapse.net","sqlOnDemand":"clitest000007-ondemand.sql.azuresynapse.net","sql":"clitest000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-a62a2ec3-dc5e-419b-a049-4e6a36396639","privateEndpointConnections":[],"workspaceUID":"7dfb2424-d448-453f-a6c9-640f439cb819","extraProperties":{"WorkspaceType":"Normal"},"publicNetworkAccess":"Enabled","cspWorkspaceAdminProperties":{"initialWorkspaceAdminObjectId":"0417ddc2-87dc-4923-8865-84f5bd13acce"},"trustedServiceBypassEnabled":false},"type":"Microsoft.Synapse/workspaces","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007","location":"eastus","name":"clitest000007","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"a80f3ee3-00c2-407f-8152-f9c66b4bc260"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/decd8ae9-fe78-4a63-a452-6b9db8686bd8?api-version=2021-06-01
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/d4d4af9d-19ff-4301-895b-623ff17bfe8c?api-version=2021-06-01
       cache-control:
       - no-cache
       content-length:
@@ -37,19 +37,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:43:22 GMT
+      - Fri, 06 Oct 2023 19:04:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-msedge-ref:
+      - 'Ref A: C18850D45AD947CD8279329832C4F14C Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:04:30Z'
     status:
       code: 201
       message: Created
@@ -68,9 +70,9 @@ interactions:
       - --name --resource-group --storage-account --file-system --sql-admin-login-user
         --sql-admin-login-password --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/decd8ae9-fe78-4a63-a452-6b9db8686bd8?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/d4d4af9d-19ff-4301-895b-623ff17bfe8c?api-version=2021-06-01
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -82,21 +84,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:43:23 GMT
+      - Fri, 06 Oct 2023 19:04:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 3857B2DD84BE426A9CF405BEA6F979D2 Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:04:34Z'
     status:
       code: 200
       message: OK
@@ -115,9 +115,9 @@ interactions:
       - --name --resource-group --storage-account --file-system --sql-admin-login-user
         --sql-admin-login-password --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/decd8ae9-fe78-4a63-a452-6b9db8686bd8?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/d4d4af9d-19ff-4301-895b-623ff17bfe8c?api-version=2021-06-01
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -129,21 +129,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:43:53 GMT
+      - Fri, 06 Oct 2023 19:05:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 1C377795DB724AB9B41511D89D39506E Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:05:04Z'
     status:
       code: 200
       message: OK
@@ -162,9 +160,9 @@ interactions:
       - --name --resource-group --storage-account --file-system --sql-admin-login-user
         --sql-admin-login-password --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/decd8ae9-fe78-4a63-a452-6b9db8686bd8?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/d4d4af9d-19ff-4301-895b-623ff17bfe8c?api-version=2021-06-01
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -176,21 +174,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:44:23 GMT
+      - Fri, 06 Oct 2023 19:05:34 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 31F1BCDA16774462B09A5F5B6E3FDFAF Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:05:34Z'
     status:
       code: 200
       message: OK
@@ -209,9 +205,9 @@ interactions:
       - --name --resource-group --storage-account --file-system --sql-admin-login-user
         --sql-admin-login-password --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/decd8ae9-fe78-4a63-a452-6b9db8686bd8?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/d4d4af9d-19ff-4301-895b-623ff17bfe8c?api-version=2021-06-01
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -223,21 +219,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:44:53 GMT
+      - Fri, 06 Oct 2023 19:06:04 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: B862DE01CBB348978E3B470E14E03872 Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:06:05Z'
     status:
       code: 200
       message: OK
@@ -256,9 +250,9 @@ interactions:
       - --name --resource-group --storage-account --file-system --sql-admin-login-user
         --sql-admin-login-password --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/decd8ae9-fe78-4a63-a452-6b9db8686bd8?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/d4d4af9d-19ff-4301-895b-623ff17bfe8c?api-version=2021-06-01
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -270,21 +264,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:45:23 GMT
+      - Fri, 06 Oct 2023 19:06:34 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 83D372E88A5640228724394593DC3E46 Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:06:35Z'
     status:
       code: 200
       message: OK
@@ -303,9 +295,9 @@ interactions:
       - --name --resource-group --storage-account --file-system --sql-admin-login-user
         --sql-admin-login-password --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/decd8ae9-fe78-4a63-a452-6b9db8686bd8?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/d4d4af9d-19ff-4301-895b-623ff17bfe8c?api-version=2021-06-01
   response:
     body:
       string: '{"status":"InProgress"}'
@@ -317,21 +309,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:45:53 GMT
+      - Fri, 06 Oct 2023 19:07:05 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: AB657959A30940D782C13291C06BD6F6 Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:07:05Z'
     status:
       code: 200
       message: OK
@@ -350,9 +340,99 @@ interactions:
       - --name --resource-group --storage-account --file-system --sql-admin-login-user
         --sql-admin-login-password --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/decd8ae9-fe78-4a63-a452-6b9db8686bd8?api-version=2021-06-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/d4d4af9d-19ff-4301-895b-623ff17bfe8c?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 06 Oct 2023 19:07:35 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: E02B6ACCCAFF4BA5B52DC9E709BA8E69 Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:07:35Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --location
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/d4d4af9d-19ff-4301-895b-623ff17bfe8c?api-version=2021-06-01
+  response:
+    body:
+      string: '{"status":"InProgress"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '23'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 06 Oct 2023 19:08:05 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-msedge-ref:
+      - 'Ref A: 10AE142B8D3B47A18D1D0A97A7569EEC Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:08:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - synapse workspace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --resource-group --storage-account --file-system --sql-admin-login-user
+        --sql-admin-login-password --location
+      User-Agent:
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/operationStatuses/d4d4af9d-19ff-4301-895b-623ff17bfe8c?api-version=2021-06-01
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -364,21 +444,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:46:23 GMT
+      - Fri, 06 Oct 2023 19:08:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 20CF3F6613AB4718888C1493B8036416 Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:08:36Z'
     status:
       code: 200
       message: OK
@@ -397,12 +475,12 @@ interactions:
       - --name --resource-group --storage-account --file-system --sql-admin-login-user
         --sql-admin-login-password --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007?api-version=2021-06-01
   response:
     body:
-      string: '{"properties":{"defaultDataLakeStorage":{"createManagedPrivateEndpoint":false,"accountUrl":"https://adlsgen2000002.dfs.core.windows.net","filesystem":"testfilesystem"},"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Succeeded","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2fa386d5ea-ea90-441a-8263-d816368c84a1%2fresourceGroups%2fsynapse-cli000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fclitest000007","dev":"https://clitest000007.dev.azuresynapse.net","sqlOnDemand":"clitest000007-ondemand.sql.azuresynapse.net","sql":"clitest000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-8032a4e9-c8ba-46c1-8f2c-64155ec151df","sqlAdministratorLogin":"cliuser1","privateEndpointConnections":[],"workspaceUID":"30e616cf-e702-465c-a58a-00fb9f340faa","extraProperties":{"WorkspaceType":"Normal","IsScopeEnabled":false},"publicNetworkAccess":"Enabled","cspWorkspaceAdminProperties":{"initialWorkspaceAdminObjectId":"0417ddc2-87dc-4923-8865-84f5bd13acce"},"trustedServiceBypassEnabled":false},"type":"Microsoft.Synapse/workspaces","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007","location":"eastus","name":"clitest000007","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"c6fabeb5-6ec3-4e69-aa84-a3d853f3f6f5"}}'
+      string: '{"properties":{"defaultDataLakeStorage":{"createManagedPrivateEndpoint":false,"accountUrl":"https://adlsgen2000002.dfs.core.windows.net","filesystem":"testfilesystem"},"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Succeeded","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2fa386d5ea-ea90-441a-8263-d816368c84a1%2fresourceGroups%2fsynapse-cli000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fclitest000007","dev":"https://clitest000007.dev.azuresynapse.net","sqlOnDemand":"clitest000007-ondemand.sql.azuresynapse.net","sql":"clitest000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-a62a2ec3-dc5e-419b-a049-4e6a36396639","sqlAdministratorLogin":"cliuser1","privateEndpointConnections":[],"workspaceUID":"7dfb2424-d448-453f-a6c9-640f439cb819","extraProperties":{"WorkspaceType":"Normal","IsScopeEnabled":false},"publicNetworkAccess":"Enabled","cspWorkspaceAdminProperties":{"initialWorkspaceAdminObjectId":"0417ddc2-87dc-4923-8865-84f5bd13acce"},"trustedServiceBypassEnabled":false},"type":"Microsoft.Synapse/workspaces","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007","location":"eastus","name":"clitest000007","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"a80f3ee3-00c2-407f-8152-f9c66b4bc260"}}'
     headers:
       cache-control:
       - no-cache
@@ -411,21 +489,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:46:24 GMT
+      - Fri, 06 Oct 2023 19:08:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 4A5B035CF7B7467D8235BA2D5EF9C75F Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:08:36Z'
     status:
       code: 200
       message: OK
@@ -447,7 +523,7 @@ interactions:
       ParameterSetName:
       - --name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/checkNameAvailability?api-version=2021-06-01
   response:
@@ -461,23 +537,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:46:27 GMT
+      - Fri, 06 Oct 2023 19:08:37 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-msedge-ref:
+      - 'Ref A: 474C37BC42AF4A05B914F99471342D98 Ref B: CO6AA3150217011 Ref C: 2023-10-06T19:08:37Z'
     status:
       code: 200
       message: OK
@@ -496,12 +570,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007?api-version=2021-06-01
   response:
     body:
-      string: '{"properties":{"defaultDataLakeStorage":{"createManagedPrivateEndpoint":false,"accountUrl":"https://adlsgen2000002.dfs.core.windows.net","filesystem":"testfilesystem"},"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Succeeded","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2fa386d5ea-ea90-441a-8263-d816368c84a1%2fresourceGroups%2fsynapse-cli000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fclitest000007","dev":"https://clitest000007.dev.azuresynapse.net","sqlOnDemand":"clitest000007-ondemand.sql.azuresynapse.net","sql":"clitest000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-8032a4e9-c8ba-46c1-8f2c-64155ec151df","sqlAdministratorLogin":"cliuser1","privateEndpointConnections":[],"workspaceUID":"30e616cf-e702-465c-a58a-00fb9f340faa","extraProperties":{"WorkspaceType":"Normal","IsScopeEnabled":false},"publicNetworkAccess":"Enabled","cspWorkspaceAdminProperties":{"initialWorkspaceAdminObjectId":"0417ddc2-87dc-4923-8865-84f5bd13acce"},"trustedServiceBypassEnabled":false},"type":"Microsoft.Synapse/workspaces","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007","location":"eastus","name":"clitest000007","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"c6fabeb5-6ec3-4e69-aa84-a3d853f3f6f5"}}'
+      string: '{"properties":{"defaultDataLakeStorage":{"createManagedPrivateEndpoint":false,"accountUrl":"https://adlsgen2000002.dfs.core.windows.net","filesystem":"testfilesystem"},"encryption":{"doubleEncryptionEnabled":false},"provisioningState":"Succeeded","connectivityEndpoints":{"web":"https://web.azuresynapse.net?workspace=%2fsubscriptions%2fa386d5ea-ea90-441a-8263-d816368c84a1%2fresourceGroups%2fsynapse-cli000001%2fproviders%2fMicrosoft.Synapse%2fworkspaces%2fclitest000007","dev":"https://clitest000007.dev.azuresynapse.net","sqlOnDemand":"clitest000007-ondemand.sql.azuresynapse.net","sql":"clitest000007.sql.azuresynapse.net"},"managedResourceGroupName":"synapseworkspace-managedrg-a62a2ec3-dc5e-419b-a049-4e6a36396639","sqlAdministratorLogin":"cliuser1","privateEndpointConnections":[],"workspaceUID":"7dfb2424-d448-453f-a6c9-640f439cb819","extraProperties":{"WorkspaceType":"Normal","IsScopeEnabled":false},"publicNetworkAccess":"Enabled","cspWorkspaceAdminProperties":{"initialWorkspaceAdminObjectId":"0417ddc2-87dc-4923-8865-84f5bd13acce"},"trustedServiceBypassEnabled":false},"type":"Microsoft.Synapse/workspaces","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007","location":"eastus","name":"clitest000007","identity":{"type":"SystemAssigned","tenantId":"72f988bf-86f1-41af-91ab-2d7cd011db47","principalId":"a80f3ee3-00c2-407f-8152-f9c66b4bc260"}}'
     headers:
       cache-control:
       - no-cache
@@ -510,28 +584,26 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:46:28 GMT
+      - Fri, 06 Oct 2023 19:08:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 04175FFF2966467E9334D8422F0F9174 Ref B: CO6AA3150218045 Ref C: 2023-10-06T19:08:38Z'
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "eastus", "sku": {"name": "Storage optimized", "capacity":
       2, "size": "Medium"}, "properties": {"enableStreamingIngest": true, "enablePurge":
-      true, "workspaceUID": "30e616cf-e702-465c-a58a-00fb9f340faa"}}'
+      true, "workspaceUID": "7dfb2424-d448-453f-a6c9-640f439cb819"}}'
     headers:
       Accept:
       - application/json
@@ -549,16 +621,16 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003?api-version=2021-06-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003","name":"clitest000007/testkstpool000003","type":"Microsoft.Synapse/workspaces/kustoPools","etag":"\"\"","location":"eastus","sku":{"name":"Storage
-        optimized","size":"Medium","capacity":2},"properties":{"state":"Creating","enableStreamingIngest":true,"enablePurge":true,"workspaceUID":"30e616cf-e702-465c-a58a-00fb9f340faa","provisioningState":"Creating"}}'
+        optimized","size":"Medium","capacity":2},"properties":{"state":"Creating","enableStreamingIngest":true,"enablePurge":true,"workspaceUID":"7dfb2424-d448-453f-a6c9-640f439cb819","provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -566,21 +638,23 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:46:31 GMT
+      - Fri, 06 Oct 2023 19:08:40 GMT
       etag:
       - '""'
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '1198'
+      x-msedge-ref:
+      - 'Ref A: 9CA9A6A4ACC94179AB6251ABE087730B Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:08:39Z'
     status:
       code: 201
       message: Created
@@ -599,12 +673,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:46:31.7729183Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:08:40.1820614Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -613,21 +687,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:46:31 GMT
+      - Fri, 06 Oct 2023 19:08:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 7DE3F15E9DAC43639B00A1526F118F52 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:08:40Z'
     status:
       code: 200
       message: OK
@@ -646,12 +718,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:46:31.7729183Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:08:40.1820614Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -660,21 +732,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:47:02 GMT
+      - Fri, 06 Oct 2023 19:09:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 220B3A0B6FC540F595ECDCCD01DAFB86 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:09:10Z'
     status:
       code: 200
       message: OK
@@ -693,12 +763,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:46:31.7729183Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:08:40.1820614Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -707,21 +777,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:47:32 GMT
+      - Fri, 06 Oct 2023 19:09:41 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: BC5D68A42DE74D59B6027695D9C928A6 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:09:41Z'
     status:
       code: 200
       message: OK
@@ -740,12 +808,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:46:31.7729183Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:08:40.1820614Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -754,21 +822,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:48:02 GMT
+      - Fri, 06 Oct 2023 19:10:11 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 771C7107203B47E08D20F35AB5301099 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:10:11Z'
     status:
       code: 200
       message: OK
@@ -787,12 +853,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:46:31.7729183Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:08:40.1820614Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -801,21 +867,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:48:32 GMT
+      - Fri, 06 Oct 2023 19:10:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: E2D850BE500D4B719979E8E041F351B3 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:10:42Z'
     status:
       code: 200
       message: OK
@@ -834,12 +898,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:08:40.1820614Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -848,21 +912,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:49:02 GMT
+      - Fri, 06 Oct 2023 19:11:12 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 749CCAEC710648B08DE2DC7458EAAF80 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:11:12Z'
     status:
       code: 200
       message: OK
@@ -881,12 +943,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -895,21 +957,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:49:33 GMT
+      - Fri, 06 Oct 2023 19:11:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: D063854F295C47BA8C5FC98BAF0E7210 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:11:43Z'
     status:
       code: 200
       message: OK
@@ -928,12 +988,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -942,21 +1002,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:50:03 GMT
+      - Fri, 06 Oct 2023 19:12:13 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 6AA1C51FD7BE4B668FE3AEC5E0A92F98 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:12:13Z'
     status:
       code: 200
       message: OK
@@ -975,12 +1033,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -989,21 +1047,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:50:33 GMT
+      - Fri, 06 Oct 2023 19:12:43 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 13E151A8E1DB4739BE543624D9AA6042 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:12:43Z'
     status:
       code: 200
       message: OK
@@ -1022,12 +1078,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1036,21 +1092,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:51:03 GMT
+      - Fri, 06 Oct 2023 19:13:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: E428F615D06F4F9497501BF72CC9E56E Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:13:14Z'
     status:
       code: 200
       message: OK
@@ -1069,12 +1123,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1083,21 +1137,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:51:33 GMT
+      - Fri, 06 Oct 2023 19:13:44 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: AE8DC4D47F7241C186CB570266A9E2BE Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:13:44Z'
     status:
       code: 200
       message: OK
@@ -1116,12 +1168,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1130,21 +1182,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:52:04 GMT
+      - Fri, 06 Oct 2023 19:14:14 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 7EFF68F8579D48968ABD74B91152BE1C Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:14:15Z'
     status:
       code: 200
       message: OK
@@ -1163,12 +1213,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1177,21 +1227,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:52:34 GMT
+      - Fri, 06 Oct 2023 19:14:45 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 715C37F811A04B7E848F138BEC247191 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:14:45Z'
     status:
       code: 200
       message: OK
@@ -1210,12 +1258,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1224,21 +1272,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:53:04 GMT
+      - Fri, 06 Oct 2023 19:15:15 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: EC865933AC6940D5AB905CA7C6F84EEC Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:15:15Z'
     status:
       code: 200
       message: OK
@@ -1257,12 +1303,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1271,21 +1317,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:53:34 GMT
+      - Fri, 06 Oct 2023 19:15:45 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: F59DF29FBFFE4F5AA9AA0CB11446BCCB Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:15:46Z'
     status:
       code: 200
       message: OK
@@ -1304,12 +1348,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1318,21 +1362,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:54:04 GMT
+      - Fri, 06 Oct 2023 19:16:16 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 492AF4BAE8F64F00943F3F88D1D44800 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:16:16Z'
     status:
       code: 200
       message: OK
@@ -1351,12 +1393,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1365,21 +1407,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:54:34 GMT
+      - Fri, 06 Oct 2023 19:16:46 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 3BF084956C9A4BAFAC322DF0282AD718 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:16:47Z'
     status:
       code: 200
       message: OK
@@ -1398,12 +1438,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1412,21 +1452,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:55:04 GMT
+      - Fri, 06 Oct 2023 19:17:16 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 6544AB3EEAE34951B57F51D36E627B15 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:17:17Z'
     status:
       code: 200
       message: OK
@@ -1445,12 +1483,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1459,21 +1497,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:55:34 GMT
+      - Fri, 06 Oct 2023 19:17:47 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 6AA1919CF3104F4E8FCB57C4ABF05DBF Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:17:47Z'
     status:
       code: 200
       message: OK
@@ -1492,12 +1528,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1506,21 +1542,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:56:04 GMT
+      - Fri, 06 Oct 2023 19:18:17 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 9380AA67338A4047A481168B7EF67E59 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:18:18Z'
     status:
       code: 200
       message: OK
@@ -1539,12 +1573,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1553,21 +1587,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:56:35 GMT
+      - Fri, 06 Oct 2023 19:18:47 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 3DD37F3AC9B9440ABFF5117E0BC92EFA Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:18:48Z'
     status:
       code: 200
       message: OK
@@ -1586,12 +1618,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1600,21 +1632,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:57:05 GMT
+      - Fri, 06 Oct 2023 19:19:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: D9250ABD2A36499495D8B0783CBCAF74 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:19:18Z'
     status:
       code: 200
       message: OK
@@ -1633,12 +1663,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1647,21 +1677,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:57:35 GMT
+      - Fri, 06 Oct 2023 19:19:49 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 37F29668D80748438219683C9782BD10 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:19:49Z'
     status:
       code: 200
       message: OK
@@ -1680,12 +1708,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Running","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:11:31.7855697Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -1694,21 +1722,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 00:58:05 GMT
+      - Fri, 06 Oct 2023 19:20:19 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: E14561AFB6ED4FD98A7E36EF46FB364F Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:20:19Z'
     status:
       code: 200
       message: OK
@@ -1727,200 +1753,12 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '509'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 20 Oct 2022 00:58:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse kusto pool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
-        --workspace-name
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '509'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 20 Oct 2022 00:59:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse kusto pool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
-        --workspace-name
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '509'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 20 Oct 2022 00:59:36 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse kusto pool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
-        --workspace-name
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Running","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T00:48:42.4275506Z","percentComplete":0.5,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Running","OperationState":"InProgress"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '509'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 20 Oct 2022 01:00:06 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse kusto pool create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
-        --workspace-name
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3?api-version=2021-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/5b9d9f6d-0822-481a-8e26-1248ff4301d3","name":"5b9d9f6d-0822-481a-8e26-1248ff4301d3","status":"Succeeded","startTime":"2022-10-20T00:46:31.7729183Z","endTime":"2022-10-20T01:00:11.3720928Z","percentComplete":1.0,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"4dd1c6c1-2a39-4831-9a3d-cc8b255f5647","provisioningState":"Succeeded","OperationState":"Completed"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/a4ec53ba-5bf9-4276-a3f6-f43bccf42354","name":"a4ec53ba-5bf9-4276-a3f6-f43bccf42354","status":"Succeeded","startTime":"2023-10-06T19:08:40.1820614Z","endTime":"2023-10-06T19:20:30.5074182Z","percentComplete":1.0,"properties":{"OperationKind":"ClusterCreateSynapse","RootActivityId":"73393894-9387-4573-8577-09995c2a18d1","provisioningState":"Succeeded","OperationState":"Completed"}}'
     headers:
       cache-control:
       - no-cache
@@ -1929,21 +1767,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:00:36 GMT
+      - Fri, 06 Oct 2023 19:20:50 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: A4CA1E6F48F4459DA921CD2400FA3309 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:20:50Z'
     status:
       code: 200
       message: OK
@@ -1962,38 +1798,36 @@ interactions:
       - --name --location --enable-purge --enable-streaming-ingest --sku --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003","name":"clitest000007/testkstpool000003","type":"Microsoft.Synapse/workspaces/kustoPools","etag":"\"2022-10-20T01:00:09.8095059Z\"","location":"East
-        US","sku":{"name":"Storage optimized","size":"Medium","capacity":2},"tags":{},"properties":{"state":"Running","stateReason":null,"uri":"https://testkstpool000003.clitest000007.kusto.azuresynapse.net","dataIngestionUri":"https://ingest-testkstpool000003.clitest000007.kusto.azuresynapse.net","optimizedAutoscale":null,"enableStreamingIngest":true,"languageExtensions":{"value":[]},"enablePurge":true,"workspaceUID":"30e616cf-e702-465c-a58a-00fb9f340faa","provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003","name":"clitest000007/testkstpool000003","type":"Microsoft.Synapse/workspaces/kustoPools","etag":"\"2023-10-06T19:20:31.8980623Z\"","location":"East
+        US","sku":{"name":"Storage optimized","size":"Medium","capacity":2},"tags":{},"properties":{"state":"Running","stateReason":"","uri":"https://testkstpool000003.clitest000007.kusto.azuresynapse.net","dataIngestionUri":"https://ingest-testkstpool000003.clitest000007.kusto.azuresynapse.net","optimizedAutoscale":null,"enableStreamingIngest":true,"languageExtensions":{"value":[]},"enablePurge":true,"migrationCluster":null,"workspaceUID":"7dfb2424-d448-453f-a6c9-640f439cb819","provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '810'
+      - '832'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:00:37 GMT
+      - Fri, 06 Oct 2023 19:20:50 GMT
       etag:
-      - '"2022-10-20T01:00:09.8095059Z"'
+      - '"2023-10-06T19:20:31.8980623Z"'
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 0A717FA605B745E39F8EB973AE07489B Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:20:50Z'
     status:
       code: 200
       message: OK
@@ -2016,7 +1850,7 @@ interactions:
       ParameterSetName:
       - --database-name --kusto-pool-name --read-write-database --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/databases/testdtabase000004?api-version=2021-06-01-preview
   response:
@@ -2024,7 +1858,7 @@ interactions:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/Databases/testdtabase000004","name":"clitest000007/testkstpool000003/testdtabase000004","type":"Microsoft.Synapse/workspaces/kustoPools/Databases","location":"eastus","kind":"ReadWrite","properties":{"softDeletePeriod":"P1D","provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/95b86acb-0a58-4323-9bc6-5932488090f5?api-version=2021-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/4d6bc258-d082-48b0-afba-07cd8b92c2a4?api-version=2021-06-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2032,19 +1866,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:00:40 GMT
+      - Fri, 06 Oct 2023 19:20:52 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-msedge-ref:
+      - 'Ref A: 76840745486B453AAB129D0115D6DCFF Ref B: CO6AA3150219051 Ref C: 2023-10-06T19:20:51Z'
     status:
       code: 201
       message: Created
@@ -2062,12 +1898,12 @@ interactions:
       ParameterSetName:
       - --database-name --kusto-pool-name --read-write-database --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/95b86acb-0a58-4323-9bc6-5932488090f5?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/4d6bc258-d082-48b0-afba-07cd8b92c2a4?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/95b86acb-0a58-4323-9bc6-5932488090f5","name":"95b86acb-0a58-4323-9bc6-5932488090f5","status":"Running","startTime":"2022-10-20T01:00:39.9505379Z","endTime":"2022-10-20T01:00:39.9505379Z","percentComplete":0.5,"properties":{"OperationKind":"DatabaseCreate","RootActivityId":"65f86e8f-941f-41cb-a9e9-db721852b614","provisioningState":"Running","OperationState":"InProgress"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/4d6bc258-d082-48b0-afba-07cd8b92c2a4","name":"4d6bc258-d082-48b0-afba-07cd8b92c2a4","status":"Running","startTime":"2023-10-06T19:20:52.8044306Z","endTime":"2023-10-06T19:20:52.8044306Z","percentComplete":0.5,"properties":{"OperationKind":"DatabaseCreate","RootActivityId":"7992af0e-abe4-43c2-92e4-4537cbcb2a2e","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -2076,21 +1912,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:00:40 GMT
+      - Fri, 06 Oct 2023 19:20:52 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: A14B92D5C32248A599A381218C1032D2 Ref B: CO6AA3150219051 Ref C: 2023-10-06T19:20:52Z'
     status:
       code: 200
       message: OK
@@ -2108,12 +1942,12 @@ interactions:
       ParameterSetName:
       - --database-name --kusto-pool-name --read-write-database --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/95b86acb-0a58-4323-9bc6-5932488090f5?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/4d6bc258-d082-48b0-afba-07cd8b92c2a4?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/95b86acb-0a58-4323-9bc6-5932488090f5","name":"95b86acb-0a58-4323-9bc6-5932488090f5","status":"Succeeded","startTime":"2022-10-20T01:00:39.9505379Z","endTime":"2022-10-20T01:00:41.8099369Z","percentComplete":1.0,"properties":{"OperationKind":"DatabaseCreate","RootActivityId":"65f86e8f-941f-41cb-a9e9-db721852b614","provisioningState":"Succeeded","OperationState":"Completed"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/4d6bc258-d082-48b0-afba-07cd8b92c2a4","name":"4d6bc258-d082-48b0-afba-07cd8b92c2a4","status":"Succeeded","startTime":"2023-10-06T19:20:52.8044306Z","endTime":"2023-10-06T19:20:55.1169494Z","percentComplete":1.0,"properties":{"OperationKind":"DatabaseCreate","RootActivityId":"7992af0e-abe4-43c2-92e4-4537cbcb2a2e","provisioningState":"Succeeded","OperationState":"Completed"}}'
     headers:
       cache-control:
       - no-cache
@@ -2122,21 +1956,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:01:10 GMT
+      - Fri, 06 Oct 2023 19:21:22 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: E7B5389B4FCE425BA3D164F285B6FCF3 Ref B: CO6AA3150219051 Ref C: 2023-10-06T19:21:23Z'
     status:
       code: 200
       message: OK
@@ -2154,7 +1986,7 @@ interactions:
       ParameterSetName:
       - --database-name --kusto-pool-name --read-write-database --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/databases/testdtabase000004?api-version=2021-06-01-preview
   response:
@@ -2169,21 +2001,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:01:10 GMT
+      - Fri, 06 Oct 2023 19:21:23 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 07CFA5DA2A9140A79E47017F72D8F5D7 Ref B: CO6AA3150219051 Ref C: 2023-10-06T19:21:23Z'
     status:
       code: 200
       message: OK
@@ -2212,35 +2042,37 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-iothub/2.3.0 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-iothub/3.0.0 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Devices/IotHubs/testiothub000006?api-version=2022-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Devices/IotHubs/testiothub000006?api-version=2023-06-30-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Devices/IotHubs/testiothub000006","name":"testiothub000006","type":"Microsoft.Devices/IotHubs","location":"eastus","tags":{},"subscriptionid":"a386d5ea-ea90-441a-8263-d816368c84a1","resourcegroup":"synapse-cli000001","properties":{"state":"Activating","provisioningState":"Accepted","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4},"operationsMonitoringEvents":{"retentionTimeInDays":1,"partitionCount":4}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None","allowedFqdnList":[]},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Devices/IotHubs/testiothub000006","name":"testiothub000006","type":"Microsoft.Devices/IotHubs","location":"eastus","tags":{},"subscriptionid":"a386d5ea-ea90-441a-8263-d816368c84a1","resourcegroup":"synapse-cli000001","properties":{"provisioningState":"Accepted","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None","allowedFqdnList":[]},"sku":{"name":"S1","tier":"Standard","capacity":1}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNGI0YzdkZTYtYjUwOS00MTM5LThjNzUtZTdmOGNmZGE1OTAzO3JlZ2lvbj1lYXN0dXM=?api-version=2022-04-30-preview&operationSource=other&asyncinfo
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNjUwZWEwMzEtNTc5Zi00ZWM5LTkxZjEtZmUxZDFiNjUwZDExO3JlZ2lvbj1lYXN0dXM=?api-version=2023-06-30-preview&operationSource=other&asyncinfo
       cache-control:
       - no-cache
       content-length:
-      - '1051'
+      - '956'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:01:14 GMT
+      - Fri, 06 Oct 2023 19:21:27 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '4999'
+      x-msedge-ref:
+      - 'Ref A: 659421A8B54E42AFBB312082377BF6DD Ref B: CO6AA3150220037 Ref C: 2023-10-06T19:21:24Z'
     status:
       code: 201
       message: Created
@@ -2258,9 +2090,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-iothub/2.3.0 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-iothub/3.0.0 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNGI0YzdkZTYtYjUwOS00MTM5LThjNzUtZTdmOGNmZGE1OTAzO3JlZ2lvbj1lYXN0dXM=?api-version=2022-04-30-preview&operationSource=other&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNjUwZWEwMzEtNTc5Zi00ZWM5LTkxZjEtZmUxZDFiNjUwZDExO3JlZ2lvbj1lYXN0dXM=?api-version=2023-06-30-preview&operationSource=other&asyncinfo
   response:
     body:
       string: '{"status":"Running"}'
@@ -2272,21 +2104,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:01:14 GMT
+      - Fri, 06 Oct 2023 19:21:27 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: FC6F2860EA114A2E931CC3DFEB4CD67A Ref B: CO6AA3150220037 Ref C: 2023-10-06T19:21:27Z'
     status:
       code: 200
       message: OK
@@ -2304,9 +2134,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-iothub/2.3.0 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-iothub/3.0.0 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNGI0YzdkZTYtYjUwOS00MTM5LThjNzUtZTdmOGNmZGE1OTAzO3JlZ2lvbj1lYXN0dXM=?api-version=2022-04-30-preview&operationSource=other&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNjUwZWEwMzEtNTc5Zi00ZWM5LTkxZjEtZmUxZDFiNjUwZDExO3JlZ2lvbj1lYXN0dXM=?api-version=2023-06-30-preview&operationSource=other&asyncinfo
   response:
     body:
       string: '{"status":"Running"}'
@@ -2318,21 +2148,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:01:43 GMT
+      - Fri, 06 Oct 2023 19:21:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: E8E6B3893C3140998625C21F55812965 Ref B: CO6AA3150220037 Ref C: 2023-10-06T19:21:58Z'
     status:
       code: 200
       message: OK
@@ -2350,9 +2178,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-iothub/2.3.0 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-iothub/3.0.0 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNGI0YzdkZTYtYjUwOS00MTM5LThjNzUtZTdmOGNmZGE1OTAzO3JlZ2lvbj1lYXN0dXM=?api-version=2022-04-30-preview&operationSource=other&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNjUwZWEwMzEtNTc5Zi00ZWM5LTkxZjEtZmUxZDFiNjUwZDExO3JlZ2lvbj1lYXN0dXM=?api-version=2023-06-30-preview&operationSource=other&asyncinfo
   response:
     body:
       string: '{"status":"Running"}'
@@ -2364,21 +2192,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:02:14 GMT
+      - Fri, 06 Oct 2023 19:22:28 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 6BF30D2E4CB243689FA259627FE78AC3 Ref B: CO6AA3150220037 Ref C: 2023-10-06T19:22:28Z'
     status:
       code: 200
       message: OK
@@ -2396,9 +2222,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-iothub/2.3.0 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-iothub/3.0.0 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNGI0YzdkZTYtYjUwOS00MTM5LThjNzUtZTdmOGNmZGE1OTAzO3JlZ2lvbj1lYXN0dXM=?api-version=2022-04-30-preview&operationSource=other&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNjUwZWEwMzEtNTc5Zi00ZWM5LTkxZjEtZmUxZDFiNjUwZDExO3JlZ2lvbj1lYXN0dXM=?api-version=2023-06-30-preview&operationSource=other&asyncinfo
   response:
     body:
       string: '{"status":"Running"}'
@@ -2410,21 +2236,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:02:44 GMT
+      - Fri, 06 Oct 2023 19:22:58 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 12790677E9C7493AA195C8B1C37AE2B8 Ref B: CO6AA3150220037 Ref C: 2023-10-06T19:22:59Z'
     status:
       code: 200
       message: OK
@@ -2442,9 +2266,9 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-iothub/2.3.0 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-iothub/3.0.0 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNGI0YzdkZTYtYjUwOS00MTM5LThjNzUtZTdmOGNmZGE1OTAzO3JlZ2lvbj1lYXN0dXM=?api-version=2022-04-30-preview&operationSource=other&asyncinfo
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Devices/locations/eastus/operationResults/aWQ9b3NfaWhfNjUwZWEwMzEtNTc5Zi00ZWM5LTkxZjEtZmUxZDFiNjUwZDExO3JlZ2lvbj1lYXN0dXM=?api-version=2023-06-30-preview&operationSource=other&asyncinfo
   response:
     body:
       string: '{"status":"Succeeded"}'
@@ -2456,21 +2280,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:03:14 GMT
+      - Fri, 06 Oct 2023 19:23:29 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: D831EF87AB374777A6701732B508A0DB Ref B: CO6AA3150220037 Ref C: 2023-10-06T19:23:29Z'
     status:
       code: 200
       message: OK
@@ -2488,36 +2310,34 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-azure-mgmt-iothub/2.3.0 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-iothub/3.0.0 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Devices/IotHubs/testiothub000006?api-version=2022-04-30-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Devices/IotHubs/testiothub000006?api-version=2023-06-30-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Devices/IotHubs/testiothub000006","name":"testiothub000006","type":"Microsoft.Devices/IotHubs","location":"eastus","tags":{},"subscriptionid":"a386d5ea-ea90-441a-8263-d816368c84a1","resourcegroup":"synapse-cli000001","etag":"AAAADHPVZ9I=","properties":{"locations":[{"location":"East
-        US","role":"primary"},{"location":"West US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"testiothub000006.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"testiothub000006","endpoint":"sb://iothub-ns-testiothub-22352583-d82b86c3e7.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[],"cosmosDBSqlCollections":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"None","allowedFqdnList":[]},"sku":{"name":"S1","tier":"Standard","capacity":1},"identity":{"type":"None"},"systemData":{"createdAt":"2022-10-20T01:01:14.1333333Z"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Devices/IotHubs/testiothub000006","name":"testiothub000006","type":"Microsoft.Devices/IotHubs","location":"eastus","tags":{},"subscriptionid":"a386d5ea-ea90-441a-8263-d816368c84a1","resourcegroup":"synapse-cli000001","etag":"AAAADH9j4rg=","properties":{"locations":[{"location":"East
+        US","role":"primary"},{"location":"West US","role":"secondary"}],"state":"Active","provisioningState":"Succeeded","ipFilterRules":[],"hostName":"testiothub000006.azure-devices.net","eventHubEndpoints":{"events":{"retentionTimeInDays":1,"partitionCount":4,"partitionIds":["0","1","2","3"],"path":"testiothub000006","endpoint":"sb://iothub-ns-testiothub-25285923-1b6142c414.servicebus.windows.net/"}},"routing":{"endpoints":{"serviceBusQueues":[],"serviceBusTopics":[],"eventHubs":[],"storageContainers":[],"cosmosDBSqlContainers":[]},"routes":[],"fallbackRoute":{"name":"$fallback","source":"DeviceMessages","condition":"true","endpointNames":["events"],"isEnabled":true}},"storageEndpoints":{"$default":{"sasTtlAsIso8601":"PT1H","connectionString":"","containerName":""}},"messagingEndpoints":{"fileNotifications":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"enableFileUploadNotifications":false,"cloudToDevice":{"maxDeliveryCount":10,"defaultTtlAsIso8601":"PT1H","feedback":{"lockDurationAsIso8601":"PT5S","ttlAsIso8601":"PT1H","maxDeliveryCount":10}},"features":"RootCertificateV2","allowedFqdnList":[],"rootCertificate":{"enableRootCertificateV2":true,"lastUpdatedTimeUtc":"2023-10-06T19:21:26.6586453Z"}},"sku":{"name":"S1","tier":"Standard","capacity":1},"identity":{"type":"None"},"systemData":{"createdAt":"2023-10-06T19:21:27.3Z"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1660'
+      - '1769'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:03:15 GMT
+      - Fri, 06 Oct 2023 19:23:29 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: BA62A7B215E249D79E5BF5CDC78C7068 Ref B: CO6AA3150220037 Ref C: 2023-10-06T19:23:29Z'
     status:
       code: 200
       message: OK
@@ -2542,7 +2362,7 @@ interactions:
       - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
         --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/databases/testdtabase000004/dataConnections/dataConName000005?api-version=2021-06-01-preview
   response:
@@ -2550,7 +2370,7 @@ interactions:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/Databases/testdtabase000004/DataConnections/dataConName000005","name":"clitest000007/testkstpool000003/testdtabase000004/dataConName000005","type":"Microsoft.Synapse/workspaces/kustoPools/Databases/DataConnections","location":"eastus","kind":"IotHub","properties":{"iotHubResourceId":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Devices/IotHubs/testiothub000006","consumerGroup":"$Default","sharedAccessPolicyName":"registryRead","provisioningState":"Creating"}}'
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143?api-version=2021-06-01-preview
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/87bb7e71-92cf-4e4d-ae73-6fee1299e125?api-version=2021-06-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -2558,19 +2378,21 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:03:18 GMT
+      - Fri, 06 Oct 2023 19:23:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-msedge-ref:
+      - 'Ref A: 38EB6DD56ABC4A9899C105CB418793B2 Ref B: CO6AA3150217049 Ref C: 2023-10-06T19:23:31Z'
     status:
       code: 201
       message: Created
@@ -2589,12 +2411,12 @@ interactions:
       - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
         --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/87bb7e71-92cf-4e4d-ae73-6fee1299e125?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143","name":"f4d69a19-9f03-4b48-912e-fe9993ace143","status":"Running","startTime":"2022-10-20T01:03:18.9732303Z","endTime":"2022-10-20T01:03:18.9732303Z","percentComplete":0.5,"properties":{}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/87bb7e71-92cf-4e4d-ae73-6fee1299e125","name":"87bb7e71-92cf-4e4d-ae73-6fee1299e125","status":"Running","startTime":"2023-10-06T19:23:33.3146278Z","endTime":"2023-10-06T19:23:33.3146278Z","percentComplete":0.5,"properties":{}}'
     headers:
       cache-control:
       - no-cache
@@ -2603,21 +2425,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:03:18 GMT
+      - Fri, 06 Oct 2023 19:23:33 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 57890857BF5D4671BCD9D296AC0D10D3 Ref B: CO6AA3150217049 Ref C: 2023-10-06T19:23:33Z'
     status:
       code: 200
       message: OK
@@ -2636,12 +2456,12 @@ interactions:
       - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
         --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/87bb7e71-92cf-4e4d-ae73-6fee1299e125?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143","name":"f4d69a19-9f03-4b48-912e-fe9993ace143","status":"Running","startTime":"2022-10-20T01:03:18.9732303Z","endTime":"2022-10-20T01:03:18.9732303Z","percentComplete":0.5,"properties":{}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/87bb7e71-92cf-4e4d-ae73-6fee1299e125","name":"87bb7e71-92cf-4e4d-ae73-6fee1299e125","status":"Running","startTime":"2023-10-06T19:23:33.3146278Z","endTime":"2023-10-06T19:23:33.3146278Z","percentComplete":0.5,"properties":{}}'
     headers:
       cache-control:
       - no-cache
@@ -2650,21 +2470,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:03:48 GMT
+      - Fri, 06 Oct 2023 19:24:03 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 4F9280FDD9924A99928EEF44BE892699 Ref B: CO6AA3150217049 Ref C: 2023-10-06T19:24:03Z'
     status:
       code: 200
       message: OK
@@ -2683,153 +2501,12 @@ interactions:
       - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
         --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/87bb7e71-92cf-4e4d-ae73-6fee1299e125?api-version=2021-06-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143","name":"f4d69a19-9f03-4b48-912e-fe9993ace143","status":"Running","startTime":"2022-10-20T01:03:18.9732303Z","endTime":"2022-10-20T01:03:18.9732303Z","percentComplete":0.5,"properties":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '355'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 20 Oct 2022 01:04:19 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse kusto data-connection iot-hub create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
-        --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143?api-version=2021-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143","name":"f4d69a19-9f03-4b48-912e-fe9993ace143","status":"Running","startTime":"2022-10-20T01:03:18.9732303Z","endTime":"2022-10-20T01:03:18.9732303Z","percentComplete":0.5,"properties":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '355'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 20 Oct 2022 01:04:49 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse kusto data-connection iot-hub create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
-        --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143?api-version=2021-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143","name":"f4d69a19-9f03-4b48-912e-fe9993ace143","status":"Running","startTime":"2022-10-20T01:03:18.9732303Z","endTime":"2022-10-20T01:03:18.9732303Z","percentComplete":0.5,"properties":{}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '355'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Thu, 20 Oct 2022 01:05:19 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
-      x-content-type-options:
-      - nosniff
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - synapse kusto data-connection iot-hub create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
-        --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
-      User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143?api-version=2021-06-01-preview
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/f4d69a19-9f03-4b48-912e-fe9993ace143","name":"f4d69a19-9f03-4b48-912e-fe9993ace143","status":"Succeeded","startTime":"2022-10-20T01:03:18.9732303Z","endTime":"2022-10-20T01:05:24.0552074Z","percentComplete":1.0,"properties":{}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/eastus/kustoPoolOperationResults/87bb7e71-92cf-4e4d-ae73-6fee1299e125","name":"87bb7e71-92cf-4e4d-ae73-6fee1299e125","status":"Succeeded","startTime":"2023-10-06T19:23:33.3146278Z","endTime":"2023-10-06T19:24:06.8053274Z","percentComplete":1.0,"properties":{}}'
     headers:
       cache-control:
       - no-cache
@@ -2838,21 +2515,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:05:49 GMT
+      - Fri, 06 Oct 2023 19:24:34 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 22207799C75D4D7D9EE8593F0B154780 Ref B: CO6AA3150217049 Ref C: 2023-10-06T19:24:34Z'
     status:
       code: 200
       message: OK
@@ -2871,7 +2546,7 @@ interactions:
       - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
         --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/databases/testdtabase000004/dataConnections/dataConName000005?api-version=2021-06-01-preview
   response:
@@ -2886,21 +2561,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:05:50 GMT
+      - Fri, 06 Oct 2023 19:24:35 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 83FE7DE33FCE4D01A2EC39EB21D1F01F Ref B: CO6AA3150217049 Ref C: 2023-10-06T19:24:34Z'
     status:
       code: 200
       message: OK
@@ -2919,7 +2592,7 @@ interactions:
       - --data-connection-name --database-name --kusto-pool-name --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/databases/testdtabase000004/dataConnections/dataConName000005?api-version=2021-06-01-preview
   response:
@@ -2934,21 +2607,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:05:52 GMT
+      - Fri, 06 Oct 2023 19:24:36 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 730384EC59AC40918865A702B8717D71 Ref B: CO6AA3150217035 Ref C: 2023-10-06T19:24:35Z'
     status:
       code: 200
       message: OK
@@ -2966,7 +2637,7 @@ interactions:
       ParameterSetName:
       - --database-name --kusto-pool-name --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/databases/testdtabase000004/dataConnections?api-version=2021-06-01-preview
   response:
@@ -2981,21 +2652,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:05:52 GMT
+      - Fri, 06 Oct 2023 19:24:36 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 1503DB45F9BA4903802171B4E659C925 Ref B: CO6AA3150219045 Ref C: 2023-10-06T19:24:36Z'
     status:
       code: 200
       message: OK
@@ -3020,7 +2689,7 @@ interactions:
       - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
         --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: PATCH
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/databases/testdtabase000004/dataConnections/dataConName000005?api-version=2021-06-01-preview
   response:
@@ -3030,7 +2699,7 @@ interactions:
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East
-        US/kustoPoolOperationResults/f6968052-bf94-4e75-80fc-2ceb2ff3ce3d?api-version=2021-06-01-preview
+        US/kustoPoolOperationResults/928964f1-8542-4ad5-9727-0d15a280e21f?api-version=2021-06-01-preview
       cache-control:
       - no-cache
       content-length:
@@ -3038,21 +2707,23 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:05:55 GMT
+      - Fri, 06 Oct 2023 19:24:37 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/f6968052-bf94-4e75-80fc-2ceb2ff3ce3d?api-version=2021-06-01-preview&operationResultResponseType=Location
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/928964f1-8542-4ad5-9727-0d15a280e21f?api-version=2021-06-01-preview&operationResultResponseType=Location
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-writes:
       - '1199'
+      x-msedge-ref:
+      - 'Ref A: 7FF93C74BC734566A717F8BBE060247D Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:24:37Z'
     status:
       code: 202
       message: Accepted
@@ -3071,13 +2742,13 @@ interactions:
       - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
         --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/f6968052-bf94-4e75-80fc-2ceb2ff3ce3d?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/928964f1-8542-4ad5-9727-0d15a280e21f?api-version=2021-06-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East
-        US/kustoPoolOperationResults/f6968052-bf94-4e75-80fc-2ceb2ff3ce3d","name":"f6968052-bf94-4e75-80fc-2ceb2ff3ce3d","status":"Running","startTime":"2022-10-20T01:05:55.4462413Z","endTime":"2022-10-20T01:05:55.4462413Z","percentComplete":0.5,"properties":{}}'
+        US/kustoPoolOperationResults/928964f1-8542-4ad5-9727-0d15a280e21f","name":"928964f1-8542-4ad5-9727-0d15a280e21f","status":"Running","startTime":"2023-10-06T19:24:38.1055333Z","endTime":"2023-10-06T19:24:38.1055333Z","percentComplete":0.5,"properties":{}}'
     headers:
       cache-control:
       - no-cache
@@ -3086,21 +2757,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:05:55 GMT
+      - Fri, 06 Oct 2023 19:24:38 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 2889CAF75997492CBFA2962F25687423 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:24:38Z'
     status:
       code: 200
       message: OK
@@ -3119,13 +2788,13 @@ interactions:
       - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
         --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/f6968052-bf94-4e75-80fc-2ceb2ff3ce3d?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/928964f1-8542-4ad5-9727-0d15a280e21f?api-version=2021-06-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East
-        US/kustoPoolOperationResults/f6968052-bf94-4e75-80fc-2ceb2ff3ce3d","name":"f6968052-bf94-4e75-80fc-2ceb2ff3ce3d","status":"Succeeded","startTime":"2022-10-20T01:05:55.4462413Z","endTime":"2022-10-20T01:05:57.0578152Z","percentComplete":1.0,"properties":{}}'
+        US/kustoPoolOperationResults/928964f1-8542-4ad5-9727-0d15a280e21f","name":"928964f1-8542-4ad5-9727-0d15a280e21f","status":"Succeeded","startTime":"2023-10-06T19:24:38.1055333Z","endTime":"2023-10-06T19:24:39.5899298Z","percentComplete":1.0,"properties":{}}'
     headers:
       cache-control:
       - no-cache
@@ -3134,21 +2803,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:06:25 GMT
+      - Fri, 06 Oct 2023 19:25:08 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: E323859CC1D74218AEEE684F40639133 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:25:08Z'
     status:
       code: 200
       message: OK
@@ -3167,7 +2834,7 @@ interactions:
       - --data-connection-name --database-name --kusto-pool-name --location --consumer-group
         --iot-hub-resource-id --shared-access-policy-name --resource-group --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/databases/testdtabase000004/dataConnections/dataConName000005?api-version=2021-06-01-preview
   response:
@@ -3182,21 +2849,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:06:26 GMT
+      - Fri, 06 Oct 2023 19:25:09 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: DC66467F46EA40D1B1BA758377467954 Ref B: CO6AA3150219029 Ref C: 2023-10-06T19:25:08Z'
     status:
       code: 200
       message: OK
@@ -3217,7 +2882,7 @@ interactions:
       - -y --data-connection-name --database-name --kusto-pool-name --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/databases/testdtabase000004/dataConnections/dataConName000005?api-version=2021-06-01-preview
   response:
@@ -3226,27 +2891,29 @@ interactions:
     headers:
       azure-asyncoperation:
       - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East
-        US/kustoPoolOperationResults/c711c9e3-a09a-480c-8955-d25869b5f23b?api-version=2021-06-01-preview
+        US/kustoPoolOperationResults/5d5d0818-12c6-43a9-8679-6a34e08879cd?api-version=2021-06-01-preview
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 20 Oct 2022 01:06:29 GMT
+      - Fri, 06 Oct 2023 19:25:09 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/c711c9e3-a09a-480c-8955-d25869b5f23b?api-version=2021-06-01-preview&operationResultResponseType=Location
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/5d5d0818-12c6-43a9-8679-6a34e08879cd?api-version=2021-06-01-preview&operationResultResponseType=Location
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
       x-ms-ratelimit-remaining-subscription-deletes:
       - '14999'
+      x-msedge-ref:
+      - 'Ref A: F517BA58C4754855AF740E496A4067F5 Ref B: CO6AA3150220025 Ref C: 2023-10-06T19:25:09Z'
     status:
       code: 202
       message: Accepted
@@ -3265,13 +2932,13 @@ interactions:
       - -y --data-connection-name --database-name --kusto-pool-name --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/c711c9e3-a09a-480c-8955-d25869b5f23b?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/5d5d0818-12c6-43a9-8679-6a34e08879cd?api-version=2021-06-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East
-        US/kustoPoolOperationResults/c711c9e3-a09a-480c-8955-d25869b5f23b","name":"c711c9e3-a09a-480c-8955-d25869b5f23b","status":"Running","startTime":"2022-10-20T01:06:29.1831175Z","endTime":"2022-10-20T01:06:29.1831175Z","percentComplete":0.5,"properties":{"OperationKind":"DmServiceDataObtainerDrop","RootActivityId":"bd59c099-0650-4151-8e65-31e270a2872b","provisioningState":"Running","OperationState":"InProgress"}}'
+        US/kustoPoolOperationResults/5d5d0818-12c6-43a9-8679-6a34e08879cd","name":"5d5d0818-12c6-43a9-8679-6a34e08879cd","status":"Running","startTime":"2023-10-06T19:25:10.8005387Z","endTime":"2023-10-06T19:25:10.8005387Z","percentComplete":0.5,"properties":{"OperationKind":"DmServiceDataObtainerDrop","RootActivityId":"1c93bab4-9366-4b69-9636-da9dfaca147c","provisioningState":"Running","OperationState":"InProgress"}}'
     headers:
       cache-control:
       - no-cache
@@ -3280,21 +2947,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:06:29 GMT
+      - Fri, 06 Oct 2023 19:25:10 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 021BE0AF540B48A3B7C5E5BEEA3A9BD3 Ref B: CO6AA3150220025 Ref C: 2023-10-06T19:25:10Z'
     status:
       code: 200
       message: OK
@@ -3313,36 +2978,34 @@ interactions:
       - -y --data-connection-name --database-name --kusto-pool-name --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/c711c9e3-a09a-480c-8955-d25869b5f23b?api-version=2021-06-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East%20US/kustoPoolOperationResults/5d5d0818-12c6-43a9-8679-6a34e08879cd?api-version=2021-06-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Synapse/locations/East
-        US/kustoPoolOperationResults/c711c9e3-a09a-480c-8955-d25869b5f23b","name":"c711c9e3-a09a-480c-8955-d25869b5f23b","status":"Succeeded","startTime":"2022-10-20T01:06:29.1831175Z","endTime":"2022-10-20T01:06:29.714371Z","percentComplete":1.0,"properties":{"OperationKind":"DmServiceDataObtainerDrop","RootActivityId":"bd59c099-0650-4151-8e65-31e270a2872b","provisioningState":"Succeeded","OperationState":"Completed"}}'
+        US/kustoPoolOperationResults/5d5d0818-12c6-43a9-8679-6a34e08879cd","name":"5d5d0818-12c6-43a9-8679-6a34e08879cd","status":"Succeeded","startTime":"2023-10-06T19:25:10.8005387Z","endTime":"2023-10-06T19:25:16.8474553Z","percentComplete":1.0,"properties":{"OperationKind":"DmServiceDataObtainerDrop","RootActivityId":"1c93bab4-9366-4b69-9636-da9dfaca147c","provisioningState":"Succeeded","OperationState":"Completed"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '517'
+      - '518'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:06:59 GMT
+      - Fri, 06 Oct 2023 19:25:40 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
-      transfer-encoding:
-      - chunked
-      vary:
-      - Accept-Encoding
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 720C81B1BA0147B18BDF2E0CB2D8E9B0 Ref B: CO6AA3150220025 Ref C: 2023-10-06T19:25:41Z'
     status:
       code: 200
       message: OK
@@ -3361,7 +3024,7 @@ interactions:
       - --data-connection-name --database-name --kusto-pool-name --resource-group
         --workspace-name
       User-Agent:
-      - AZURECLI/2.41.0 azsdk-python-mgmt-synapse/2.1.0b2 Python/3.9.6 (Windows-10-10.0.22621-SP0)
+      - AZURECLI/2.53.0 azsdk-python-mgmt-synapse/2.1.0b5 Python/3.8.3 (Windows-10-10.0.22621-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/synapse-cli000001/providers/Microsoft.Synapse/workspaces/clitest000007/kustoPools/testkstpool000003/databases/testdtabase000004/dataConnections/dataConName000005?api-version=2021-06-01-preview
   response:
@@ -3377,17 +3040,19 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 20 Oct 2022 01:07:00 GMT
+      - Fri, 06 Oct 2023 19:25:42 GMT
       expires:
       - '-1'
       pragma:
       - no-cache
-      server:
-      - Microsoft-HTTPAPI/2.0
       strict-transport-security:
       - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-msedge-ref:
+      - 'Ref A: 6AB86244E56C4753B8DDBAB575C306AE Ref B: CO6AA3150219023 Ref C: 2023-10-06T19:25:42Z'
     status:
       code: 404
       message: Not Found

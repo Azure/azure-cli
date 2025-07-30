@@ -125,9 +125,9 @@ class SBNetworkCURDScenarioTest(ScenarioTest):
             'servicebus namespace network-rule-set virtual-network-rule add --resource-group {rg} --name {namespacename} '
             '--subnet id={id3} ignore-missing-endpoint=True ').get_output_in_json()
         self.assertEqual(len(networkRule['virtualNetworkRules']), 3)
-        self.assertEqual(networkRule['virtualNetworkRules'][0]['subnet']['id'].lower(), created_subnet2['id'].lower())
+        self.assertEqual(networkRule['virtualNetworkRules'][0]['subnet']['id'].lower(), created_subnet1['id'].lower())
         self.assertEqual(networkRule['virtualNetworkRules'][0]['ignoreMissingVnetServiceEndpoint'], True)
-        self.assertEqual(networkRule['virtualNetworkRules'][1]['subnet']['id'].lower(), created_subnet1['id'].lower())
+        self.assertEqual(networkRule['virtualNetworkRules'][1]['subnet']['id'].lower(), created_subnet2['id'].lower())
         self.assertEqual(networkRule['virtualNetworkRules'][1]['ignoreMissingVnetServiceEndpoint'], True)
         self.assertEqual(networkRule['virtualNetworkRules'][2]['subnet']['id'].lower(), created_subnet3['id'].lower())
         self.assertEqual(networkRule['virtualNetworkRules'][2]['ignoreMissingVnetServiceEndpoint'], True)

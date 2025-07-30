@@ -22,7 +22,11 @@ from azure.datalake.store.multithread import (ADLUploader, ADLDownloader)
 from azure.cli.command_modules.dls._client_factory import (cf_dls_filesystem)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
-
+from azure.mgmt.datalake.store.models import (
+    CreateOrUpdateFirewallRuleParameters,
+    UpdateFirewallRuleParameters,
+    CreateOrUpdateTrustedIdProviderParameters,
+    UpdateTrustedIdProviderParameters)
 
 logger = get_logger(__name__)
 
@@ -78,8 +82,7 @@ def create_adls_account(cmd, client, resource_group_name, account_name, location
         create_params.encryption_state = EncryptionState.disabled
         create_params.identity = None
         create_params.encryption_config = None
-
-    return client.create(resource_group_name, account_name, create_params).result()
+    return client.begin_create(resource_group_name, account_name, create_params)
 
 
 def update_adls_account(client, account_name, resource_group_name, tags=None, default_group=None, firewall_state=None,
@@ -97,7 +100,7 @@ def update_adls_account(client, account_name, resource_group_name, tags=None, de
         update_params.encryption_config = UpdateEncryptionConfig(
             key_vault_meta_info=UpdateKeyVaultMetaInfo(encryption_key_version=key_version))
 
-    return client.update(resource_group_name, account_name, update_params).result()
+    return client.begin_update(resource_group_name, account_name, update_params)
 # endregion
 
 
@@ -111,21 +114,49 @@ def add_adls_firewall_rule(client,
     return client.create_or_update(resource_group_name,
                                    account_name,
                                    firewall_rule_name,
-                                   start_ip_address,
-                                   end_ip_address)
+                                   CreateOrUpdateFirewallRuleParameters(
+                                       start_ip_address=start_ip_address,
+                                       end_ip_address=end_ip_address))
+
+
+def update_adls_firewall_rule(client,
+                              account_name,
+                              firewall_rule_name,
+                              resource_group_name,
+                              start_ip_address=None,
+                              end_ip_address=None):
+    return client.update(resource_group_name,
+                         account_name,
+                         firewall_rule_name,
+                         UpdateFirewallRuleParameters(
+                             start_ip_address=start_ip_address,
+                             end_ip_address=end_ip_address))
+
 # endregion
 
 
-# region virtual network
-def add_adls_virtual_network_rule(client,
-                                  account_name,
-                                  virtual_network_rule_name,
-                                  subnet,
-                                  resource_group_name):
-    return client.create_or_update(resource_group_name,
-                                   account_name,
-                                   virtual_network_rule_name,
-                                   subnet)
+# region trusted provider
+def add_trusted_provider_rule(client,
+                              account_name,
+                              trusted_id_provider_name,
+                              id_provider,
+                              resource_group_name):
+    return client.create_or_update(resource_group_name=resource_group_name,
+                                   account_name=account_name,
+                                   trusted_id_provider_name=trusted_id_provider_name,
+                                   parameters=CreateOrUpdateTrustedIdProviderParameters(id_provider=id_provider))
+
+
+def update_trusted_provider_rule(client,
+                                 account_name,
+                                 resource_group_name,
+                                 trusted_id_provider_name,
+                                 id_provider=None):
+    return client.update(resource_group_name=resource_group_name,
+                         account_name=account_name,
+                         trusted_id_provider_name=trusted_id_provider_name,
+                         parameters=UpdateTrustedIdProviderParameters(
+                             id_provider=id_provider))
 # endregion
 
 
@@ -216,16 +247,10 @@ def test_adls_item(cmd, account_name, path):
 def preview_adls_item(cmd, account_name, path, length=None, offset=0, force=False):
     client = cf_dls_filesystem(cmd.cli_ctx, account_name)
     if length:
-        try:
-            length = long(length)
-        except NameError:
-            length = int(length)
+        length = int(length)
 
     if offset:
-        try:
-            offset = long(offset)
-        except NameError:
-            offset = int(offset)
+        offset = int(offset)
 
     if not length or length <= 0:
         length = client.info(path)['length'] - offset
@@ -258,10 +283,7 @@ def set_adls_item_expiry(cmd, account_name, path, expiration_time):
         raise CLIError('The specified path does not exist or is not a file. Please ensure the path points to a file and it exists. Path supplied: {}'.format(path))
 
     expiration_time = float(expiration_time)
-    try:
-        expiration_time = long(expiration_time)
-    except NameError:
-        expiration_time = int(expiration_time)
+    expiration_time = int(expiration_time)
     client.set_expiry(path, ExpiryOptionType.absolute.value, expiration_time)
 
 

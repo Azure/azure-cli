@@ -6,7 +6,7 @@
 # pylint: disable=unused-argument
 
 AG_VERSION = "2022-05-01"
-LB_VERSION = "2022-05-01"
+LB_VERSION = "2023-04-01"
 IP_VERSION = "2022-05-01"
 
 

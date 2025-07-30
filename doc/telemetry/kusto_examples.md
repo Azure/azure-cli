@@ -30,7 +30,7 @@ RawEventsAzCli
 | take 10
 ```
 
-## Query for specific command with specific cli version
+## Query for specific command with specific CLI version
 e.g. `az account show` command with CLI version `2.35.0`
 
 ```
@@ -41,7 +41,7 @@ RawEventsAzCli
 | take 10
 ```
 
-## Query for specific command with specific cli extension version
+## Query for specific command with specific CLI extension version
 e.g. `az connectedk8s connect` command with version `1.2.8` of extension `connectedk8s`
 
 ```

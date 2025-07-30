@@ -11,7 +11,8 @@ def load_arguments(self, _):
 
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
-    from azure.mgmt.resource.policy.models import (ExemptionCategory, EnforcementMode)
+    from azure.mgmt.resource.policy.models import EnforcementMode
+    from azure.mgmt.resource.deploymentstacks.models import DenySettingsMode
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
     from azure.cli.core.api import get_subscription_id_list
@@ -28,9 +29,11 @@ def load_arguments(self, _):
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
         validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction)
-    from azure.cli.command_modules.resource.parameters import TagUpdateOperation
+    from azure.cli.command_modules.resource.parameters import TagUpdateOperation, StacksActionOnUnmanage
 
-    DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
+    ExemptionCategory = self.get_models('ExemptionCategory', resource_type=ResourceType.MGMT_RESOURCE_POLICY,
+                                        operation_group='policy_exemptions')
+    DeploymentMode, WhatIfResultFormat, ChangeType, ValidationLevel = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType', 'ValidationLevel')
 
     # BASIC PARAMETER CONFIGURATION
 
@@ -55,9 +58,16 @@ def load_arguments(self, _):
     deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], min_api='2019-06-01', help="The template spec resource id.")
     deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
+    deployment_validation_level_type = CLIArgumentType(options_list=['--validation-level'], arg_type=get_enum_type(ValidationLevel, None),
+                                                       help='The deployment validation level. May be set to "Provider" (the default), "Template", or '
+                                                       '"ProviderNoRbac". With a validation level of "provider", ARM will perform full validation and check that'
+                                                       ' you have sufficient permission to deploy all resources in the template. With a validation level of '
+                                                       '"providerNoRbac", ARM will perform full validation but only check for read permissions on each resource.'
+                                                       ' With a validation level of "template", only static validation will be performed: preflight and '
+                                                       'permissions checks will be skipped.')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
-                                       'To get more information, please visit https://docs.microsoft.com/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
+                                       'To get more information, please visit https://learn.microsoft.com/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
     no_prompt = CLIArgumentType(arg_type=get_three_state_flag(), help='The option to disable the prompt of missing parameters for ARM template. '
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
@@ -97,19 +107,35 @@ def load_arguments(self, _):
     ui_form_definition_file_type = CLIArgumentType(options_list=['--ui-form-definition'], completer=FilesCompleter(), type=file_type,
                                                    help="A path to a uiFormDefinition file in the file system")
 
+    stacks_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The name of the deployment stack.')
+    stacks_description_type = CLIArgumentType(options_list=['--description'], help='The description of deployment stack.')
+    stacks_stack_type = CLIArgumentType(help='The deployment stack resource id.')
+    stacks_stack_name_type = CLIArgumentType(help='The deployment stack name')
+    stacks_stack_deployment_resource_group = CLIArgumentType(options_list=['--deployment-resource-group', '--dr'], help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
+    stacks_stack_deployment_subscription = CLIArgumentType(options_list=['--deployment-subscription', '--ds'], help='The scope at which the initial deployment should be created. If a scope is not specified, it will default to the scope of the deployment stack.')
+    stacks_action_on_unmanage_type = CLIArgumentType(arg_type=get_enum_type(StacksActionOnUnmanage), options_list=['--action-on-unmanage', '--aou'], help='Defines what happens to resources that are no longer managed after the stack is updated or deleted.')
+    stacks_deny_settings_mode = CLIArgumentType(arg_type=get_enum_type(DenySettingsMode), options_list=['--deny-settings-mode', '--dm'], help='Define which operations are denied on resources managed by the stack.')
+    stacks_excluded_principals = CLIArgumentType(options_list=['--deny-settings-excluded-principals', '--ep'], help='List of AAD principal IDs excluded from the lock. Up to 5 principals are permitted.')
+    stacks_excluded_actions = CLIArgumentType(options_list=['--deny-settings-excluded-actions', '--ea'], help="List of role-based management operations that are excluded from the denySettings. Up to 200 actions are permitted.")
+    stacks_apply_to_child_scopes = CLIArgumentType(options_list=['--deny-settings-apply-to-child-scopes', '--cs'], help='DenySettings will be applied to child scopes.')
+    stacks_bypass_stack_out_of_sync_error_type = CLIArgumentType(
+        arg_type=get_three_state_flag(), options_list=['--bypass-stack-out-of-sync-error', '--bse'],
+        help='Flag to bypass service errors that indicate the stack resource list is not correctly synchronized.')
+
     bicep_file_type = CLIArgumentType(options_list=['--file', '-f'], completer=FilesCompleter(), type=file_type)
     bicep_force_type = CLIArgumentType(options_list=['--force'], action='store_true')
     bicep_no_restore_type = CLIArgumentType(options_list=['--no-restore'], action='store_true')
     bicep_outdir_type = CLIArgumentType(options_list=['--outdir'], completer=DirectoriesCompleter(), help="When set, saves the output at the specified directory.")
     bicep_outfile_type = CLIArgumentType(options_list=['--outfile'], completer=FilesCompleter(), help="When set, saves the output as the specified file path.")
     bicep_stdout_type = CLIArgumentType(options_list=['--stdout'], action='store_true', help="When set, prints all output to stdout instead of corresponding files.")
-    bicep_indentkind_type = CLIArgumentType(options_list=['--indent-kind'], help="Set indentation kind. Valid values are ( Space | Tab ).")
-    bicep_indentsize_type = CLIArgumentType(options_list=['--indent-size'], help="Number of spaces to indent with (Only valid with --indent-kind set to Space).")
-    bicep_insertfinalnewline_type = CLIArgumentType(options_list=['--insert-final-newline'], action='store_true', help="Insert a final newline.")
+    bicep_indent_kind_type = CLIArgumentType(options_list=['--indent-kind'], arg_type=get_enum_type(["Space", "Tab"]), help="Set indentation kind.")
+    bicep_indent_size_type = CLIArgumentType(options_list=['--indent-size'], help="Number of spaces to indent with (Only valid with --indent-kind set to Space).")
+    bicep_insert_final_newline_type = CLIArgumentType(options_list=['--insert-final-newline'], action='store_true', help="Insert a final newline.")
     bicep_newline_type = CLIArgumentType(options_list=['--newline'], help="Set newline char. Valid values are ( Auto | LF | CRLF | CR ).")
+    bicep_newline_kind_type = CLIArgumentType(options_list=['--newline-kind'], arg_type=get_enum_type(["LF", "CRLF", "CR"]), help="Set line ending characters.")
     bicep_target_platform_type = CLIArgumentType(options_list=['--target-platform', '-t'],
                                                  arg_type=get_enum_type(
-                                                     ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64", "linux-arm64", "osx-arm64"]),
+                                                     ["win-x64", "linux-musl-x64", "linux-x64", "osx-x64", "linux-arm64", "osx-arm64", "win-arm64"]),
                                                  help="The platform the Bicep CLI will be running on. Set this to skip automatic platform detection if it does not work properly.")
 
     _PROVIDER_HELP_TEXT = 'the resource namespace, aka \'provider\''
@@ -347,12 +373,14 @@ def load_arguments(self, _):
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment operation') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
@@ -376,6 +404,7 @@ def load_arguments(self, _):
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment sub what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -383,12 +412,14 @@ def load_arguments(self, _):
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
         c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment sub validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment sub list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -417,6 +448,7 @@ def load_arguments(self, _):
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment group what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -427,12 +459,14 @@ def load_arguments(self, _):
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
         c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
         c.ignore("rollback_on_error")
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment group validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment group list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -456,6 +490,7 @@ def load_arguments(self, _):
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='The mode that is used to deploy resources. This value can be either Incremental or Complete. In Incremental mode, resources are deployed without deleting existing resources that are not included in the template. In Complete mode, resources are deployed and existing resources in the resource group that are not included in the template are deleted. Be careful when using Complete mode as you may unintentionally delete resources.')
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment mg what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -463,12 +498,14 @@ def load_arguments(self, _):
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
         c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment mg validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment mg list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -493,6 +530,7 @@ def load_arguments(self, _):
                    min_api="2019-10-01")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment tenant what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -500,12 +538,14 @@ def load_arguments(self, _):
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
         c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment tenant validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment tenant list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -516,6 +556,8 @@ def load_arguments(self, _):
         c.argument('skip_resource_name_params', action='store_true')
         c.argument('skip_all_params', action='store_true')
         c.argument('resource_ids', nargs='+', options_list='--resource-ids')
+        c.argument('export_format', arg_type=get_enum_type(['json', 'arm', 'bicep'], default='json'),
+                   help="The format of the exported template.")
 
     with self.argument_context('group create') as c:
         c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'],
@@ -527,7 +569,9 @@ def load_arguments(self, _):
     with self.argument_context('group delete') as c:
         c.argument('resource_group_name', resource_group_name_type,
                    options_list=['--name', '-n', '--resource-group', '-g'], local_context_attribute=None)
-        c.argument('force_deletion_types', options_list=['--force-deletion-types', '-f'], arg_type=get_enum_type(['Microsoft.Compute/virtualMachines', 'Microsoft.Compute/virtualMachineScaleSets']), min_api='2021-04-01', help='The resource types you want to force delete.')
+        c.argument('force_deletion_types', options_list=['--force-deletion-types', '-f'], min_api='2021-04-01',
+                   arg_type=get_enum_type(['Microsoft.Compute/virtualMachines', 'Microsoft.Compute/virtualMachineScaleSets', 'Microsoft.Databricks/workspaces']),
+                   help='The resource types you want to force delete.')
 
     with self.argument_context('tag') as c:
         c.argument('tag_name', tag_name_type)
@@ -665,6 +709,93 @@ def load_arguments(self, _):
     with self.argument_context('ts list') as c:
         c.argument('resource_group', arg_type=resource_group_name_type)
 
+    with self.argument_context('stack mg') as c:
+        c.argument('management_group_id', arg_type=management_group_id_type, help='The management group id to create stack at.')
+
+    for scope in ['stack mg show', 'stack mg export']:
+        with self.argument_context(scope) as c:
+            c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
+            c.argument('id', arg_type=stacks_stack_type)
+            c.argument('subscription', arg_type=subscription_type)
+
+    with self.argument_context('stack mg delete') as c:
+        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
+        c.argument('id', arg_type=stacks_stack_type)
+        c.argument('subscription', arg_type=subscription_type)
+        c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
+        c.argument('yes', help='Do not prompt for confirmation')
+
+    with self.argument_context('stack mg list') as c:
+        c.argument('subscription', arg_type=subscription_type)
+
+    for scope in ['stack sub show', 'stack sub export']:
+        with self.argument_context(scope) as c:
+            c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
+            c.argument('id', arg_type=stacks_stack_type)
+            c.argument('subscription', arg_type=subscription_type)
+
+    with self.argument_context('stack sub delete') as c:
+        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
+        c.argument('id', arg_type=stacks_stack_type)
+        c.argument('subscription', arg_type=subscription_type)
+        c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
+        c.argument('yes', help='Do not prompt for confirmation')
+
+    for scope in ['group', 'sub', 'mg']:
+        for action in ['create', 'validate']:
+            with self.argument_context(f'stack {scope} {action}') as c:
+                c.argument('name', arg_type=stacks_name_type)
+
+                if scope == 'group':
+                    c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack will be created.')
+                elif scope == 'sub':
+                    c.argument('deployment_resource_group', arg_type=stacks_stack_deployment_resource_group)
+                elif scope == 'mg':
+                    c.argument('deployment_subscription', arg_type=stacks_stack_deployment_subscription)
+
+                if scope != 'group':
+                    c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location to store deployment stack.')
+
+                c.argument('template_file', arg_type=deployment_template_file_type)
+                c.argument('template_spec', arg_type=deployment_template_spec_type)
+                c.argument('template_uri', arg_type=deployment_template_uri_type)
+                c.argument('query_string', arg_type=deployment_query_string_type)
+                c.argument('parameters', arg_type=deployment_parameters_type, help='Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.')
+                c.argument('description', arg_type=stacks_description_type)
+                c.argument('subscription', arg_type=subscription_type)
+                c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+                c.argument('deny_settings_mode', arg_type=stacks_deny_settings_mode)
+                c.argument('deny_settings_excluded_principals', arg_type=stacks_excluded_principals)
+                c.argument('deny_settings_excluded_actions', arg_type=stacks_excluded_actions)
+                c.argument('deny_settings_apply_to_child_scopes', arg_type=stacks_apply_to_child_scopes)
+                c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
+                c.argument('tags', tags_type)
+
+                if action == 'create':
+                    c.argument('yes', help='Do not prompt for confirmation')
+
+    for scope in ['stack group show', 'stack group export']:
+        with self.argument_context(scope) as c:
+            c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
+            c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
+            c.argument('id', arg_type=stacks_stack_type)
+            c.argument('subscription', arg_type=subscription_type)
+
+    with self.argument_context('stack group list') as c:
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
+        c.argument('subscription', arg_type=subscription_type)
+
+    with self.argument_context('stack group delete') as c:
+        c.argument('name', options_list=['--name', '-n'], arg_type=stacks_stack_name_type)
+        c.argument('resource_group', arg_type=resource_group_name_type, help='The resource group where the deployment stack exists')
+        c.argument('id', arg_type=stacks_stack_type)
+        c.argument('subscription', arg_type=subscription_type)
+        c.argument('action_on_unmanage', arg_type=stacks_action_on_unmanage_type)
+        c.argument('bypass_stack_out_of_sync_error', arg_type=stacks_bypass_stack_out_of_sync_error_type)
+        c.argument('yes', help='Do not prompt for confirmation')
+
     with self.argument_context('bicep build') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to build in the file system.")
         c.argument('outdir', arg_type=bicep_outdir_type)
@@ -672,18 +803,34 @@ def load_arguments(self, _):
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, builds the bicep file without restoring external modules.")
 
+    with self.argument_context('bicep build-params') as c:
+        c.argument('file', arg_type=bicep_file_type, help="The path to the .bicepparam file to build in the file system.")
+        c.argument('outdir', arg_type=bicep_outdir_type)
+        c.argument('outfile', arg_type=bicep_outfile_type)
+        c.argument('stdout', arg_type=bicep_stdout_type)
+        c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, builds the .bicepparam file without restoring external modules.")
+
     with self.argument_context('bicep format') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep file to format in the file system.")
         c.argument('outdir', arg_type=bicep_outdir_type)
         c.argument('outfile', arg_type=bicep_outfile_type)
         c.argument('stdout', arg_type=bicep_stdout_type)
-        c.argument('indent_kind', arg_type=bicep_indentkind_type)
-        c.argument('indent_size', arg_type=bicep_indentsize_type)
-        c.argument('insert_final_newline', arg_type=bicep_insertfinalnewline_type)
-        c.argument('newline', arg_type=bicep_newline_type)
+        c.argument('indent_kind', arg_type=bicep_indent_kind_type)
+        c.argument('indent_size', arg_type=bicep_indent_size_type)
+        c.argument('insert_final_newline', arg_type=bicep_insert_final_newline_type)
+        c.argument('newline', arg_type=bicep_newline_type, deprecate_info=c.deprecate(target='--newline', redirect='--newline-kind'))
+        c.argument('newline_kind', arg_type=bicep_newline_kind_type)
 
     with self.argument_context('bicep decompile') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the ARM template to decompile in the file system.")
+        c.argument('force', arg_type=bicep_force_type, help="Allows overwriting the output file if it exists.")
+
+    with self.argument_context('bicep decompile-params') as c:
+        c.argument('file', arg_type=bicep_file_type, help="The path to the parameters file to build in the file system.")
+        c.argument('bicep_file', completer=FilesCompleter(), type=file_type, help="Path to the bicep template file (relative to the .bicepparam file) that will be referenced in the using declaration.")
+        c.argument('outdir', arg_type=bicep_outdir_type)
+        c.argument('outfile', arg_type=bicep_outfile_type)
+        c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('force', arg_type=bicep_force_type, help="Allows overwriting the output file if it exists.")
 
     with self.argument_context('bicep restore') as c:
@@ -692,10 +839,10 @@ def load_arguments(self, _):
 
     with self.argument_context('bicep publish') as c:
         c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to publish in the file system.")
-        c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'],
-                                                      help="The target location where the Bicep module will be published."))
-        c.argument('documentationUri', arg_type=CLIArgumentType(options_list=['--documentationUri', '-d'],
-                                                                help="The documentation uri of the Bicep module."))
+        c.argument('target', arg_type=CLIArgumentType(options_list=['--target', '-t'], help="The target location where the Bicep module will be published."))
+        c.argument('documentationUri', arg_type=CLIArgumentType(options_list=['--documentationUri'], help="The documentation uri of the Bicep module."), deprecate_info=c.deprecate(target='--documentationUri', redirect='--documentation-uri'))
+        c.argument('documentation_uri', arg_type=CLIArgumentType(options_list=['--documentation-uri', '-d'], help="The documentation uri of the Bicep module."))
+        c.argument('with_source', options_list=['--with-source'], action='store_true', help="Publish source code with the module.")
         c.argument('force', arg_type=bicep_force_type, help="Allow overwriting an existing Bicep module version.")
 
     with self.argument_context('bicep install') as c:
@@ -711,6 +858,13 @@ def load_arguments(self, _):
         c.argument('outfile', arg_type=bicep_outfile_type)
         c.argument('stdout', arg_type=bicep_stdout_type)
         c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
+        c.argument('output_format', help="Set output format. Valid values are ( json | bicepparam ).")
+        c.argument('include_params', help="Set include params. Valid values are ( all | RequiredOnly ).")
+
+    with self.argument_context('bicep lint') as c:
+        c.argument('file', arg_type=bicep_file_type, help="The path to the Bicep module file to lint in the file system.")
+        c.argument('no_restore', arg_type=bicep_no_restore_type, help="When set, generates the parameters file without restoring external modules.")
+        c.argument('diagnostics_format', arg_type=get_enum_type(['default', 'sarif']), help="Set diagnostics format.")
 
     with self.argument_context('resourcemanagement private-link create') as c:
         c.argument('resource_group', arg_type=resource_group_name_type,

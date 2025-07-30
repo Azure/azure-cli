@@ -16,4 +16,3 @@ from ._exists import *
 from ._fail_over import *
 from ._list import *
 from ._show import *
-from ._update import *

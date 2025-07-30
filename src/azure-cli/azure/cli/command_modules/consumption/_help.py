@@ -20,6 +20,9 @@ short-summary: Manage budgets for an Azure subscription.
 helps['consumption budget create'] = """
 type: command
 short-summary: Create a budget for an Azure subscription.
+examples:
+  - name: Create a cost-based monthly budget with a specified amount, start date, and end date.
+    text: az consumption budget create --budget-name "costbudget" --category "cost" --amount 100.0 -s "xxx" -e "xxx" --time-grain "monthly"
 """
 
 helps['consumption budget delete'] = """
