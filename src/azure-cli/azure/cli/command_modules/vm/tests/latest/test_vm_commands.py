@@ -1544,6 +1544,64 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-rp-size 5 '
                      '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer('cli_test_vm_disk_attach_from_copy_and_restore', location='eastus2euap')
+    def test_vm_disk_attach_from_copy_and_restore(self):
+        self.kwargs.update({
+            'vm_name': self.create_random_name('vm_', length=15),
+            'collection_name': self.create_random_name('collection_', length=20),
+            'point_name': self.create_random_name('point_', length=15),
+            'disk_name1': self.create_random_name('disk_', length=15),
+            'disk_name2': self.create_random_name('disk_', length=15),
+            'disk_name3': self.create_random_name('disk_', length=15),
+            'disk_name4': self.create_random_name('disk_', length=15),
+            'disk_name5': self.create_random_name('disk_', length=15),
+            'subnet': self.create_random_name('subnet', length=15),
+            'vnet': self.create_random_name('vnet', length=15)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1 --sku Standard_LRS')
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --attach-data-disks {disk_name1} '
+                      '--admin-username rp_disk_test --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.kwargs.update({
+            'vm_id': vm['id']
+        })
+        self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}')
+        self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}')
+        disk_restore_point = self.cmd('restore-point show --resource-group {rg} --collection-name {collection_name} --name {point_name}').get_output_in_json()
+        self.kwargs['disk_restore_point_id'] = disk_restore_point['sourceMetadata']['storageProfile']['dataDisks'][0]['diskRestorePoint']['id']
+
+        self.cmd('disk create --resource-group {rg} --name {disk_name2} --sku Standard_LRS --size-gb 5 --source {disk_restore_point_id}').get_output_in_json()
+        self.cmd('disk create --resource-group {rg} --name {disk_name3} --sku Standard_LRS --size-gb 5')
+        copy_disk = self.cmd('disk create --resource-group {rg} --name {disk_name4} --source {disk_name3} --sku Standard_LRS --size-gb 5').get_output_in_json()
+        copy_snapshot = self.cmd('snapshot create --resource-group {rg} --name {disk_name5} --source {disk_name3} --sku Standard_LRS --size-gb 5').get_output_in_json()
+
+        self.kwargs.update({
+            'copy_resource1_id': copy_disk['id'],
+            'copy_resource2_id': copy_snapshot['id']
+        })
+        self.cmd('vm disk attach -g {rg} --size 20 --sku Standard_LRS --vm-name {vm_name} --source-resource {copy_resource1_id} {copy_resource2_id} '
+                 ' --source-disk-rp {disk_restore_point_id}')
+        self.cmd('vm show -g {rg} -n {vm_name}', checks=[
+            self.check('storageProfile.dataDisks[1].sourceResource.id', '{copy_resource1_id}'),
+            self.check('storageProfile.dataDisks[1].createOption', 'Copy'),
+            self.check('storageProfile.dataDisks[1].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[2].sourceResource.id', '{copy_resource2_id}'),
+            self.check('storageProfile.dataDisks[2].createOption', 'Copy'),
+            self.check('storageProfile.dataDisks[2].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[3].sourceResource.id', '{disk_restore_point_id}'),
+            self.check('storageProfile.dataDisks[3].createOption', 'Restore'),
+            self.check('storageProfile.dataDisks[3].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'Standard_LRS')
+        ])
+
+
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
     def test_vm_disk_upload(self, resource_group):
         self.kwargs.update({
@@ -3807,7 +3865,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use at least one of --name, --disks and --disk-ids'):
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use at least one of --name, --disks, --disk-ids, --source-snapshots-or-disks and --source-disk-restore-point'):
             self.cmd('vm disk attach -g {rg} --vm-name {vm} --new --size-gb 1 ')
 
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 'You can only specify one of --name and --disks'):
@@ -10877,6 +10935,36 @@ class VMSSAutomaticRepairsScenarioTest(ScenarioTest):
                      self.check('automaticRepairsPolicy.gracePeriod', 'PT30M')
                  ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_disbale_automatic_repairs_of_zone_balancing', location='eastus2')
+    def test_vmss_create_disbale_automatic_repairs_of_zone_balancing(self, resource_group):
+        self.kwargs.update({
+            'vmss1': self.create_random_name('vmss', 10),
+            'vmss2': self.create_random_name('vmss', 10),
+            'image': 'MicrosoftWindowsServer:WindowsServer:2016-Datacenter:latest',
+            'nsg': self.create_random_name('nsg', 10),
+            'lb1': self.create_random_name('lb', 10),
+            'probe1': self.create_random_name('probe', 10),
+            'rule1': self.create_random_name('rule', 10)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network lb create -g {rg} -n {lb1}')
+        self.cmd('network lb probe create -g {rg} --lb-name {lb1} -n {probe1} --protocol http --port 80 --path /')
+        self.cmd('network lb rule create -g {rg} --lb-name {lb1} -n {rule1} --probe-name {probe1} --protocol tcp --frontend-port 80 --backend-port 80')
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image {image} --enable-automatic-repairs false --vm-sku Standard_D1_v2 --load-balancer {lb1} --health-probe {probe1} --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --zones 1 2 3 '
+            '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2')
+        self.cmd('vmss show -g {rg} -n {vmss1}', checks=[
+            self.check('automaticRepairsPolicy.enabled', False),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.enabled', True),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceStrategy', 'Recreate'),
+            self.check('resiliencyPolicy.automaticZoneRebalancingPolicy.rebalanceBehavior', 'CreateBeforeDelete')
+        ])
+        message = 'usage error: --enable-automatic-repairs cannot be false when --automatic-repairs-action or --automatic-repairs-grace-period are used'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss create -g {rg} -n {vmss2} --image {image} --enable-automatic-repairs false --automatic-repairs-grace-period 30 --vm-sku Standard_D1_v2 --load-balancer {lb1} --health-probe {probe1} --orchestration-mode Uniform --admin-username vmtest --admin-password Test123456789# --nsg {nsg} --zones 1 2 3 '
+            '--enable-automatic-zone-balancing True --automatic-zone-balancing-strategy Recreate --automatic-zone-balancing-behavior CreateBeforeDelete --location eastus2')
+
+
 class SkuProfileTest(ScenarioTest):
         
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_create_sku_profile', location='eastus2')
@@ -12193,16 +12281,18 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus2euap')
     def test_vm_vmss_proxy_agent(self, resource_group):
+        from azure.core.exceptions import HttpResponseError
         self.kwargs.update({
-            'nsg': self.create_random_name('nsg', 10),
+            'nsg1': self.create_random_name('nsg', 10),
+            'nsg2': self.create_random_name('nsg', 10),
             'vm1': self.create_random_name('vm', 10),
             'vm2': self.create_random_name('vm', 10),
             'vmss1': self.create_random_name('vmss', 10),
             'vmss2': self.create_random_name('vmss', 10),
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15)
         })
-        self.cmd('network nsg create -g {rg} -n {nsg}')
+        self.cmd('network nsg create -g {rg} -n {nsg1}')
         self.cmd('vm create -g {rg} -n {vm1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
 
         # Disable default outbound access
@@ -12214,6 +12304,9 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
             self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
         ])
+        with self.assertRaises(HttpResponseError):
+            self.cmd('vm update -g {rg} -n {vm1} --wire-server-profile-id profileid')
+
         self.cmd('vm update -g {rg} -n {vm1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 2', checks=[
             self.check('securityProfile.proxyAgentSettings.enabled', False),
             self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
@@ -12229,21 +12322,44 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
             self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
         ])
+        self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent False')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', False),
+            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
+        ])
+        self.cmd('vm update -g {rg} -n {vm2} --key-incarnation-id 2')
+        self.cmd('vm show -g {rg} -n {vm2}', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', False),
+            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 2)
+        ])
 
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg} --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg1} --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
         ])
+        with self.assertRaises(HttpResponseError):
+            self.cmd('vmss update -g {rg} -n {vmss1} --wire-server-profile-id profileid')
+
         self.cmd('vmss update -g {rg} -n {vmss1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Enforce')
         ])
 
-        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --nsg {nsg} --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!')
+        self.cmd('network nsg create -g {rg} -n {nsg2}')
+        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --nsg {nsg2} --admin-password Password001!')
         self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --wire-server-mode Audit --imds-mode Audit', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent False', checks=[
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit')
         ])

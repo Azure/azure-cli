@@ -27,7 +27,8 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemRe
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
     BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType, \
-    UnlockDeleteRequest, ResourceGuardProxyBase, ResourceGuardProxyBaseResource, TargetDiskNetworkAccessSettings
+    UnlockDeleteRequest, ResourceGuardProxyBase, ResourceGuardProxyBaseResource, TargetDiskNetworkAccessSettings, \
+    SecuredVMDetails
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
 
 import azure.cli.command_modules.backup._validators as validators
@@ -1405,7 +1406,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
                   target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None,
-                  tenant_id=None, disk_access_option=None, target_disk_access_id=None):
+                  tenant_id=None, disk_access_option=None, target_disk_access_id=None, cvm_os_des_id=None):
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
     vault_identity = vault.identity
@@ -1539,6 +1540,11 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
         trigger_restore_request.properties.resource_guard_operation_requests = [
             cust_help.get_resource_guard_operation_request(
                 cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore")]
+
+    if cvm_os_des_id is not None:
+        trigger_restore_request.properties.secured_vm_details = SecuredVMDetails(
+            secured_vmos_disk_encryption_set_id=cvm_os_des_id
+        )
 
     # Trigger restore
     result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,

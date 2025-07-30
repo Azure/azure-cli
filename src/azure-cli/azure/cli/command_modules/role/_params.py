@@ -340,9 +340,9 @@ def load_arguments(self, _):
                         "the logged-in account has no permission or the machine has no network access to query "
                         "Microsoft Graph.")
         c.argument('ids', nargs='+', help='space-separated role assignment ids')
-        c.argument('description', is_preview=True, min_api='2020-04-01-preview', help='Description of role assignment.')
-        c.argument('condition', is_preview=True, min_api='2020-04-01-preview', help='Condition under which the user can be granted permission.')
-        c.argument('condition_version', is_preview=True, min_api='2020-04-01-preview', help='Version of the condition syntax. If --condition is specified without --condition-version, default to 2.0.')
+        c.argument('description', is_preview=True, help='Description of role assignment.')
+        c.argument('condition', is_preview=True, help='Condition under which the user can be granted permission.')
+        c.argument('condition_version', is_preview=True, help='Version of the condition syntax. If --condition is specified without --condition-version, default to 2.0.')
         c.argument('assignment_name', name_arg_type,
                    help='A GUID for the role assignment. It must be unique and different for each role assignment. If omitted, a new GUID is generated.')
 
@@ -379,7 +379,7 @@ def load_arguments(self, _):
             service_principal = "ServicePrincipal"
             foreign_group = "ForeignGroup"
 
-        c.argument('assignee_principal_type', min_api='2018-09-01-preview', arg_type=get_enum_type(PrincipalType),
+        c.argument('assignee_principal_type', arg_type=get_enum_type(PrincipalType),
                    help='use with --assignee-object-id to avoid errors caused by propagation latency in Microsoft Graph')
 
     with self.argument_context('role assignment update') as c:
