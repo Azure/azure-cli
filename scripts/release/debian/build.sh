@@ -43,8 +43,10 @@ export PATH=$PATH:$WORKDIR/python_env/bin
 
 find ${WORKDIR}/src/ -name setup.py -type f | xargs -I {} dirname {} | grep -v azure-cli-testsdk | xargs pip3 install --no-deps
 pip3 install -r ${WORKDIR}/src/azure-cli/requirements.py3.$(uname).txt
-# Only install pymsalruntime for debian build, as it does not support other Linux distributions
-pip install pymsalruntime==0.18.1 || true
+# Only install pymsalruntime for Ubuntu, as it does not fully support other Linux distributions
+if [[ "$(lsb_release --id --short)" == "Ubuntu" && "$(dpkg --print-architecture)" == "amd64" ]]; then
+    pip3 install pymsalruntime==0.20.2
+fi
 $WORKDIR/python_env/bin/python3 ${WORKDIR}/scripts/trim_sdk.py
 
 # Create create directory for debian build
