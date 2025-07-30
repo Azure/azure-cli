@@ -280,20 +280,24 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
             # Prepare to collect tier types
             rp_tier_types = []
 
-            # Safely grab additional_properties
-            additional_props = getattr(rp.properties, 'additional_properties', {})
-            if not isinstance(additional_props, dict):
-                continue
-
-            # Get details list
-            tier_details_list = additional_props.get("recoveryPointTierDetails", [])
+            # Get recovery point tier details directly from properties
+            tier_details_list = getattr(rp.properties, 'recovery_point_tier_details', None)
+            
+            # If not found, check for the alternate property name
+            if tier_details_list is None:
+                tier_details_list = getattr(rp.properties, 'recoveryPointTierDetails', [])
+            
             if not isinstance(tier_details_list, list):
                 continue
 
             for detail in tier_details_list:
-                if not isinstance(detail, dict):
+                if hasattr(detail, 'type'):
+                    rp_type = detail.type
+                elif isinstance(detail, dict):
+                    rp_type = detail.get("type")
+                else:
                     continue
-                rp_type = detail.get("type")
+
                 if rp_type:
                     rp_tier_types.append(rp_type)
 
@@ -320,7 +324,6 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
         return filtered_recovery_points
 
     return paged_recovery_points
-
 
 def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id=None,
                            is_critical_operation=False, yes=False):
