@@ -1307,8 +1307,8 @@ def _deploy_arm_template_core(cmd,
     deployment = Deployment(properties=properties)
 
     if validate_only:
-        deploy_poll = sdk_no_wait(no_wait, client.deployments.begin_validate, resource_group_name, deployment_name,
-                                    deployment)
+        deploy_poll = sdk_no_wait(no_wait, client.deployments.begin_validate, resource_group_name,
+                                  deployment_name, deployment)
         return LongRunningOperation(cmd.cli_ctx)(deploy_poll)
 
     deploy_poll = sdk_no_wait(no_wait, client.deployments.begin_create_or_update, resource_group_name, deployment_name,

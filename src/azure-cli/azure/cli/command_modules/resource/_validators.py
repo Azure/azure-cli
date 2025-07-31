@@ -247,12 +247,6 @@ def validate_msi(cmd, namespace, from_identity_command=False):
         identities = [namespace.mi_user_assigned]
 
     if identities is not None:
-        user_assigned_identities = [x for x in identities if x != MSI_LOCAL_ID]
-        if user_assigned_identities and not cmd.supported_api_version(min_api='2021-06-01'):
-            raise ArgumentUsageError(
-                'User assigned identity is only available under profile '
-                'with minimum Authorization API version of 2021-06-01')
-
         if not namespace.identity_scope and getattr(namespace.identity_role, 'is_default', None) is None:
             raise ArgumentUsageError(
                 "'--role {}' is not applicable as the '--identity-scope' is not provided"

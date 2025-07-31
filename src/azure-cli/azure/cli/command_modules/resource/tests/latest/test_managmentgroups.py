@@ -2,6 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import unittest
 
 from azure.cli.testsdk import ScenarioTest, record_only, live_only
 import pytest
@@ -410,6 +411,7 @@ class AzureManagementGroupsScenarioTest(ScenarioTest):
             managementgroup_update["type"],
             "Microsoft.Management/managementGroups")
 
+    @unittest.skip('Permission to write on resources of type Microsoft.Management/managementGroups is required on the management group or its ancestors.')
     def test_create_delete_group_managementgroup(self):
         self.cmd('account management-group create --name testcligroup')
         self.cmd('account management-group delete --name testcligroup')
