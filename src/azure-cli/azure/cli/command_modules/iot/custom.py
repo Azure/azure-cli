@@ -1210,15 +1210,6 @@ def iot_message_enrichment_list(cmd, client, hub_name, resource_group_name=None)
     return hub.properties.routing.enrichments
 
 
-def iot_hub_devicestream_show(cmd, client, hub_name, resource_group_name=None):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
-    # DeviceStreams property is still in preview, so until GA we need to use a preview API-version
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_IOTHUB, api_version='2019-07-01-preview')
-    hub = client.iot_hub_resource.get(resource_group_name, hub_name)
-    return hub.properties.device_streams
-
-
 def iot_hub_manual_failover(cmd, client, hub_name, resource_group_name=None, no_wait=False):
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     resource_group_name = hub.additional_properties['resourcegroup']
