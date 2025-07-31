@@ -412,7 +412,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -439,7 +439,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -555,7 +555,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -585,7 +585,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -623,7 +623,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -733,7 +733,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -765,7 +765,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -820,7 +820,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -932,7 +932,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -964,7 +964,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1001,7 +1001,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1109,7 +1109,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1139,7 +1139,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1174,7 +1174,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1388,7 +1388,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
 examples:
   - name: Create a deployment from a remote template file, using parameters from a local JSON file.
     text: >
@@ -1427,7 +1427,7 @@ parameters:
     long-summary: |
         Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
 
-        Extension configurations can be supplied with parameters files, inlined as a JSON string, or as `<KEY=VALUE>` pairs. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
 examples:
   - name: Validate whether a template is syntactically correct. (autogenerated)
     text: |
