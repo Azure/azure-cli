@@ -124,7 +124,7 @@ def _resolve_type_from_path(current_ref, segments, definitions):
     return current
 
 
-def _try_parse_key_value_object(parameters, extension_configs, template_obj, value):
+def _try_parse_key_value_object(parameters, extension_configs, template_obj, value, allow_extension_config):
     # support situation where empty JSON "{}" is provided
     if value == '{}' and not parameters:
         return True
@@ -135,7 +135,7 @@ def _try_parse_key_value_object(parameters, extension_configs, template_obj, val
         return False
 
     # Check if it's for extension configs.
-    if key.startswith('extensionConfigs.'):
+    if allow_extension_config and key.startswith('extensionConfigs.'):
         keys = key.split('.')
 
         if len(keys) < 3 or len(keys) > 4:
@@ -230,7 +230,7 @@ def _process_parameters_and_ext_configs(template_obj, parameter_lists):  # pylin
                 parameters.update(param_obj)
             if ext_configs_obj is not None:
                 result_ext_configs.update(ext_configs_obj)
-            if not handled and not _try_parse_key_value_object(parameters, result_ext_configs, template_obj, item):
+            if not handled and not _try_parse_key_value_object(parameters, result_ext_configs, template_obj, item, True):
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
     return parameters, result_ext_configs or None
@@ -1074,7 +1074,7 @@ def _parse_bicepparam_inline_params(parameters, template_obj):
             if is_bicepparam_file(parameter_item):
                 continue
 
-            if not _try_parse_key_value_object(parsed_inline_params, parsed_inline_ext_configs, template_obj, parameter_item):
+            if not _try_parse_key_value_object(parsed_inline_params, parsed_inline_ext_configs, template_obj, parameter_item, False):
                 raise InvalidArgumentValueError(f"Unable to parse parameter: {parameter_item}. Only correctly formatted in-line parameters are allowed with a .bicepparam file")
 
     name_value_obj = {}
@@ -1084,7 +1084,7 @@ def _parse_bicepparam_inline_params(parameters, template_obj):
     return name_value_obj, parsed_inline_ext_configs or None
 
 
-def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_params=None, inline_ext_configs=None):
+def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_params=None):
     custom_env = os.environ.copy()
     if inline_params:
         custom_env["BICEP_PARAMETERS_OVERRIDES"] = json.dumps(inline_params)
@@ -1103,13 +1103,6 @@ def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_param
     if "templateSpecId" in build_bicepparam_output_json:
         template_spec_id = build_bicepparam_output_json["templateSpecId"]
     parameters_content = build_bicepparam_output_json["parametersJson"]
-
-    if inline_ext_configs:  # There's currently not a way to inject inlined values into the build command, so inlined will be shallowly merged below at the config property level.
-        parameters_content["extensionConfigs"] = parameters_content.get("extensionConfigs", {})
-
-        for ext_alias, inline_ext_config in inline_ext_configs.items():
-            ext_config = parameters_content["extensionConfigs"][ext_alias] = parameters_content["extensionConfigs"].get(ext_alias, {})
-            ext_config.update(inline_ext_config)
 
     return template_content, template_spec_id, parameters_content
 
@@ -1139,10 +1132,10 @@ def _parse_bicepparam_file(cmd, template_file, parameters):
         else:
             template_obj = _remove_comments_from_json(template_content)
 
-        inline_params, inline_ext_configs = _parse_bicepparam_inline_params(parameters, template_obj)
+        inline_params = _parse_bicepparam_inline_params(parameters, template_obj)
 
         # re-invoke build-params to process inline parameters
-        template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file, inline_params, inline_ext_configs)
+        template_content, template_spec_id, parameters_content = _build_bicepparam_file(cmd.cli_ctx, bicepparam_file, template_file, inline_params)
 
     return template_content, template_spec_id, parameters_content
 
