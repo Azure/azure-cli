@@ -2263,7 +2263,9 @@ def get_template_spec(cmd, resource_group_name=None, name=None, version=None, te
         version = id_parts.get('resource_name')
         if version == name:
             version = None
-    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx, subscription_id=id_parts.get('subscription') if template_spec else None)
+        rcf = _resource_templatespecs_client_factory(cmd.cli_ctx, subscription_id=id_parts.get('subscription'))
+    else:
+        rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     if version:
         return rcf.template_spec_versions.get(resource_group_name, name, version)
     retrieved_template = rcf.template_specs.get(resource_group_name, name, expand="versions")
@@ -2342,7 +2344,9 @@ def update_template_spec(cmd, resource_group_name=None, name=None, template_spec
         version = id_parts.get('resource_name')
         if version == name:
             version = None
-    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx, subscription_id=id_parts.get('subscription') if template_spec else None)
+        rcf = _resource_templatespecs_client_factory(cmd.cli_ctx, subscription_id=id_parts.get('subscription'))
+    else:
+        rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
 
     existing_template, artifacts, input_ui_form_definition = None, None, None
     if template_file:
@@ -2405,7 +2409,9 @@ def export_template_spec(cmd, output_folder, resource_group_name=None, name=None
         version = id_parts.get('resource_name')
         if version == name:
             version = None
-    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx, subscription_id=id_parts.get('subscription') if template_spec else None)
+        rcf = _resource_templatespecs_client_factory(cmd.cli_ctx, subscription_id=id_parts.get('subscription'))
+    else:
+        rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     if not version:
         raise IncorrectUsageError('Please specify the template spec version for export')
     exported_template = rcf.template_spec_versions.get(resource_group_name, name, version)
@@ -2421,7 +2427,9 @@ def delete_template_spec(cmd, resource_group_name=None, name=None, version=None,
         version = id_parts.get('resource_name')
         if version == name:
             version = None
-    rcf = _resource_templatespecs_client_factory(cmd.cli_ctx, subscription_id=id_parts.get('subscription') if template_spec else None)
+        rcf = _resource_templatespecs_client_factory(cmd.cli_ctx, subscription_id=id_parts.get('subscription'))
+    else:
+        rcf = _resource_templatespecs_client_factory(cmd.cli_ctx)
     if version:
         return rcf.template_spec_versions.delete(resource_group_name=resource_group_name, template_spec_name=name, template_spec_version=version)
     return rcf.template_specs.delete(resource_group_name=resource_group_name, template_spec_name=name)
