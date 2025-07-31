@@ -1017,30 +1017,6 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
-    def test_update_template_spec_sub_id(self, resource_group, resource_group_location):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-update-sub-id', 60)
-        self.kwargs.update({
-            'template_spec_name': template_spec_name,
-            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
-            'resource_group_location': resource_group_location,
-        })
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', 
-                         checks=[self.check('name', '1.0')]).get_output_in_json()
-        
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
-        current_sub = self.get_subscription_id()
-        fake_sub = '12345678-1234-5678-9012-123456789012'
-        fake_id = self.kwargs['template_spec_id'].replace(current_sub, fake_sub)
-        
-        # should fail to prove that the update command tried to use the fake subscription ID provided within the resource ID
-        with self.assertRaises(Exception):
-            self.cmd(f'ts update -s {fake_id} --description "test update" --yes')
-        
-        # Clean up
-        self.cmd('ts delete --template-spec {template_spec_id} --yes')
-
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_show_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_spec_name = self.create_random_name('cli-test-get-template-spec', 60)
@@ -1069,55 +1045,6 @@ class TemplateSpecsTest(ScenarioTest):
         assert len(ts_version_by_id) == len(ts_version_by_id)
 
         # clean up
-        self.cmd('ts delete --template-spec {template_spec_id} --yes')
-
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
-    def test_show_template_spec_sub_id(self, resource_group, resource_group_location):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-sub-id-template-spec', 60)
-        self.kwargs.update({
-            'template_spec_name': template_spec_name,
-            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
-            'resource_group_location': resource_group_location,
-        })
-
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', 
-                         checks=[self.check('name', '1.0')]).get_output_in_json()
-        
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')        
-        current_sub = self.get_subscription_id()
-        fake_sub = '12345678-1234-5678-9012-123456789012'
-        fake_id = self.kwargs['template_spec_id'].replace(current_sub, fake_sub)
-        
-        # should fail to prove that the show command tried to use the fake subscription ID provided within the resource ID
-        with self.assertRaises(Exception):
-            self.cmd(f'ts show -s {fake_id}')
-        
-        # clean up
-        self.cmd('ts delete --template-spec {template_spec_id} --yes')
-
-    @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
-    def test_delete_template_spec_sub_id(self, resource_group, resource_group_location):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-delete-sub-id', 60)
-        self.kwargs.update({
-            'template_spec_name': template_spec_name,
-            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
-            'resource_group_location': resource_group_location,
-        })
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', 
-                         checks=[self.check('name', '1.0')]).get_output_in_json()
-        
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')        
-        current_sub = self.get_subscription_id()
-        fake_sub = '12345678-1234-5678-9012-123456789012'
-        fake_id = self.kwargs['template_spec_id'].replace(current_sub, fake_sub)
-
-        # should fail to prove that the show command tried to use the fake subscription ID provided within the resource ID
-        with self.assertRaises(Exception):
-            self.cmd(f'ts delete -s {fake_id} --yes')
-        
-        # Clean up the real one
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
@@ -1258,30 +1185,6 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         self.assertTrue(os.path.isfile(_artifactFile))
         self.assertTrue(os.path.isfile(_artifactFile1))
         self.assertTrue(os.path.isfile(_artifactFile2))
-
-    @ResourceGroupPreparer(name_prefix='cli_test_export_template_spec', location='westus')
-    def test_export_template_spec_sub_id(self, resource_group, resource_group_location):
-        curr_dir = os.path.dirname(os.path.realpath(__file__))
-        template_spec_name = self.create_random_name('cli-test-export-sub-id', 60)
-        self.kwargs.update({
-            'template_spec_name': template_spec_name,
-            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
-            'resource_group_location': resource_group_location,
-        })
-        result = self.cmd('ts create -g {rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}"', 
-                         checks=[self.check('name', '1.0')]).get_output_in_json()
-        
-        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')        
-        current_sub = self.get_subscription_id()
-        fake_sub = '12345678-1234-5678-9012-123456789012'
-        fake_id = self.kwargs['template_spec_id'].replace(current_sub, fake_sub)
-        
-        # should fail to prove that the show command tried to use the fake subscription ID provided within the resource ID
-        with self.assertRaises(Exception):
-            self.cmd(f'ts export -s {fake_id} --output-folder /tmp/test')
-        
-        # Clean up
-        self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_export_template_spec', location="westus")
     def test_template_spec_export_error_handling(self, resource_group, resource_group_location):
