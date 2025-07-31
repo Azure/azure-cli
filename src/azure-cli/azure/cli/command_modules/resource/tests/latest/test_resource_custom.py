@@ -16,7 +16,7 @@ from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
 from azure.cli.command_modules.resource.custom import (
     _get_missing_parameters,
     _extract_lock_params,
-    _process_parameters,
+    _process_parameters_and_ext_configs,
     _find_missing_parameters,
     _prompt_for_parameters,
     _is_bicepparam_file_provided,
@@ -250,7 +250,6 @@ class TestCustom(unittest.TestCase):
             _get_missing_parameters(parameters, template, prompt_function)
 
     def test_deployment_parameters(self):
-
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
         parameters_path = os.path.join(curr_dir, 'param-validation-params.json').replace('\\', '\\\\')
@@ -295,7 +294,7 @@ class TestCustom(unittest.TestCase):
 
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
-            result_parameters = _process_parameters(template, parameter_list)
+            result_parameters, _ = _process_parameters_and_ext_configs(template, parameter_list)
             self.assertEqual(result_parameters, test['expected'], i)
 
     def test_deployment_parameters_with_type_references(self):
@@ -348,8 +347,9 @@ class TestCustom(unittest.TestCase):
 
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
-            result_parameters = _process_parameters(template, parameter_list)
+            result_parameters, result_ext_configs = _process_parameters_and_ext_configs(template, parameter_list)
             self.assertEqual(result_parameters, test['expected'], i)
+            self.assertEqual(result_ext_configs, {}, i)
 
     def test_deployment_missing_values(self):
 
@@ -362,7 +362,7 @@ class TestCustom(unittest.TestCase):
         template_param_defs = template.get('parameters', {})
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template, parameter_list)
+        result_parameters, _ = _process_parameters_and_ext_configs(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         # ensure that parameters with default values are not considered missing
@@ -384,7 +384,7 @@ class TestCustom(unittest.TestCase):
         template = get_file_json(template_path, preserve_order=True)
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template, parameter_list)
+        result_parameters, _ = _process_parameters_and_ext_configs(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         param_file_order = ["['secureParam', 'boolParam', 'enumParam', 'arrayParam', 'objectParam']"]
@@ -402,7 +402,7 @@ class TestCustom(unittest.TestCase):
         template = get_file_json(template_path, preserve_order=False)
 
         parameter_list = [[parameters_path], [parameters_with_reference_path]]
-        result_parameters = _process_parameters(template, parameter_list)
+        result_parameters, _ = _process_parameters_and_ext_configs(template, parameter_list)
         missing_parameters = _find_missing_parameters(result_parameters, template)
 
         param_alpha_order = ["['arrayParam', 'boolParam', 'enumParam', 'objectParam', 'secureParam']"]
@@ -415,6 +415,72 @@ class TestCustom(unittest.TestCase):
         self.assertEqual(_is_bicepparam_file_provided([['test.json']]), False)
         self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam']]), True)
         self.assertEqual(_is_bicepparam_file_provided([['test.bicepparam'], ['test.json'],  ['{ \"foo\": { \"value\": \"bar\" } }']]), True)
+
+    def test_deployment_extension_configs(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_path = os.path.join(curr_dir, 'param-validation-template.json').replace('\\', '\\\\')
+        parameters_path = os.path.join(curr_dir, 'param-validation-ext-configs.json').replace('\\', '\\\\')
+        parameters_path_2 = os.path.join(curr_dir, 'param-validation-ext-configs-2.json').replace('\\', '\\\\')
+        only_params_path = os.path.join(curr_dir, 'simple_deploy_parameters.json').replace('\\', '\\\\')
+
+        template = get_file_json(template_path, preserve_order=True)
+
+        # test different ways of passing in parameters
+        tests = [
+            {  # empty JSON works
+                "parameter_list": [["{}"]],
+                "expected": None,
+            },
+            {  # empty parameters works
+                "parameter_list": [],
+                "expected": None,
+            },
+            {  # empty JSON works with root properties
+                "parameter_list": [['{\"parameters\":{},\"extensionConfigs\":{}}']],
+                "expected": None,
+            },
+            {  # only parameters
+                "parameter_list": [[only_params_path]],
+                "expected": None
+            },
+            {  # only extension configs
+                "parameter_list": [['{\"parameters\":{},\"extensionConfigs\":{\"k8s\":{\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\"},\"secretName\":\"myKubeconfig\"}},\"namespace\":{\"value\":\"ns\"}}}}']],
+                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
+            },
+            {  # loading from file
+                "parameter_list": [[parameters_path]],
+                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
+            },
+            {  # raw JSON
+                "parameter_list": [['{\"parameters\":{\"stringParam\":{\"value\" \"foo\"}},\"extensionConfigs\":{\"k8s\":{\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\"},\"secretName\":\"myKubeconfig\"}},\"namespace\":{\"value\":\"ns\"}}}}']],
+                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
+            },
+            {  # Last wins at the extension level (extensionConfigs.k8s). At the extensionConfigs level, objects are merged.
+                "parameter_list": [[parameters_path], [parameters_path_2]],
+                "expected": {"k8s":{"namespace":{"value":"ns2"}},"otherExt":{"stringProp":{"value":"stringPropValue"}}},
+            },
+            {  # Inlined is shallow merged with parameters file.
+                "parameter_list": [[parameters_path], ['{\"parameters\":{},\"extensionConfigs\":{\"k8s\":{\"namespace\":{\"value\":\"ns2\"}},\"otherExt\":{\"stringProp\":{\"value\":\"stringPropVal\"}}}}']], # 'parameters' must be present otherwise 'extensionConfigs' is treated as a parameter.
+                "expected": {"k8s":{"namespace":{"value":"ns2"}},"otherExt":{"stringProp":{"value":"stringPropVal"}}},
+            },
+            {  # Key-value pair
+                "parameter_list": [['extensionConfigs.extAlias.propertyName="propertyValue"']],
+                "expected": {"extAlias":{"propertyName":{"value":"propertyValue"}}},
+            },
+            {  # Key-value pair merges with existing config
+                "parameter_list": [[parameters_path], ['extensionConfigs.k8s.namespace="kvpValue"']],
+                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"kvpValue"}}},
+            },
+            {  # Key vault reference can be set
+                "parameter_list": [['extensionConfigs.extAlias.propertyName.keyVaultReference={\"keyVault\":{\"id\":\"idHere\"},\"secretName\":\"mySecret\"}']],
+                "expected": {"extAlias":{"propertyName":{"keyVaultReference":{"keyVault":{"id":"idHere"},"secretName":"mySecret"}}}}
+            }
+        ]
+
+        for i, test in enumerate(tests):
+            parameter_list = test['parameter_list']
+            result_parameters, result_ext_configs = _process_parameters_and_ext_configs(template, parameter_list)
+            self.assertEqual(result_ext_configs, test['expected'], i)
 
     @live_only()
     def test_bicep_generate_params_defaults(self):

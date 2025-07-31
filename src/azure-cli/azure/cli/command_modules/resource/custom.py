@@ -124,7 +124,7 @@ def _resolve_type_from_path(current_ref, segments, definitions):
     return current
 
 
-def _try_parse_key_value_object(parameters, template_obj, value):
+def _try_parse_key_value_object(parameters, extension_configs, template_obj, value, allow_extension_config):
     # support situation where empty JSON "{}" is provided
     if value == '{}' and not parameters:
         return True
@@ -134,6 +134,26 @@ def _try_parse_key_value_object(parameters, template_obj, value):
     except ValueError:
         return False
 
+    # Check if it's for extension configs.
+    if allow_extension_config and key.startswith('extensionConfigs.'):
+        keys = key.split('.')
+
+        if len(keys) < 3 or len(keys) > 4:
+            raise CLIError(f"Unable to parse extension configs key '{key}'. Expected format is: 'extensionConfigs.extAlias.propertyName=JSONToken'. Example: 'extensionConfigs.extAlias.propertyName=\"aStringValue\"'")
+
+        ext_alias, ext_config_property, ext_config_prop_value_inner_prop = keys[1], keys[2], keys[3] if len(keys) == 4 else None
+        extension_configs[ext_alias] = extension_configs.get(ext_alias, {})
+
+        if ext_config_prop_value_inner_prop:
+            extension_configs[ext_alias][ext_config_property] = {
+                f'{ext_config_prop_value_inner_prop}': shell_safe_json_parse(value)
+            }
+        else:
+            extension_configs[ext_alias][ext_config_property] = {'value': shell_safe_json_parse(value)}
+
+        return True
+
+    # Otherwise treat as a parameter.
     param = template_obj.get('parameters', {}).get(key, None)
     if param is None:
         raise CLIError("unrecognized template parameter '{}'. Allowed parameters: {}"
@@ -159,55 +179,61 @@ def _try_parse_key_value_object(parameters, template_obj, value):
     return True
 
 
-def _process_parameters(template_obj, parameter_lists):  # pylint: disable=too-many-statements
-
-    def _try_parse_json_object(value):
+def _process_parameters_and_ext_configs(template_obj, parameter_lists):  # pylint: disable=too-many-statements
+    # NOTE(kylealbert): The historical `parsed.get('parameters', parsed)` calls use the object itself as a fallback for parameters if the
+    # `parameters` key is not found. Now that parameters and extension configs are in the same expected root object for param files, similar
+    # logic for extension configs would conflict, so extensionConfigs can only be extracted if `parameters` is present.
+    def _try_parse_parameters_json_object(value):
         try:
             parsed = _remove_comments_from_json(value, False)
-            return parsed.get('parameters', parsed)
+            return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else None, True
         except Exception:  # pylint: disable=broad-except
-            return None
+            return None, None, False
 
     def _try_load_file_object(file_path):
         try:
             is_file = os.path.isfile(file_path)
         except ValueError:
-            return None
+            return None, None, False
         if is_file is True:
             try:
                 content = read_file_content(file_path)
                 if not content:
-                    return None
+                    return None, None, True
                 parsed = _remove_comments_from_json(content, False, file_path)
-                return parsed.get('parameters', parsed)
+                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else None, True
             except Exception as ex:
                 raise CLIError("Failed to parse {} with exception:\n    {}".format(file_path, ex))
-        return None
+        return None, None, False
 
     def _try_load_uri(uri):
         if "://" in uri:
             try:
                 value = _urlretrieve(uri).decode('utf-8')
                 parsed = _remove_comments_from_json(value, False)
-                return parsed.get('parameters', parsed)
+                return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else None, True
             except Exception:  # pylint: disable=broad-except
                 pass
-        return None
+        return None, None, False
 
     parameters = {}
+    result_ext_configs = {}
+
     for params in parameter_lists or []:
         for item in params:
-            param_obj = _try_load_file_object(item)
-            if param_obj is None:
-                param_obj = _try_parse_json_object(item)
-            if param_obj is None:
-                param_obj = _try_load_uri(item)
+            param_obj, ext_configs_obj, handled = _try_load_file_object(item)
+            if not handled:
+                param_obj, ext_configs_obj, handled = _try_parse_parameters_json_object(item)
+                if not handled:
+                    param_obj, ext_configs_obj, handled = _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
-            elif not _try_parse_key_value_object(parameters, template_obj, item):
+            if ext_configs_obj is not None:
+                result_ext_configs.update(ext_configs_obj)
+            if not handled and not _try_parse_key_value_object(parameters, result_ext_configs, template_obj, item, True):
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
-    return parameters
+    return parameters, result_ext_configs or None
 
 
 # pylint: disable=redefined-outer-name
@@ -401,13 +427,15 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
         on_error_deployment = OnErrorDeployment(type='SpecificDeployment', deployment_name=rollback_on_error)
 
     template_obj['resources'] = template_obj.get('resources', [])
-    parameters = _process_parameters(template_obj, parameters) or {}
+    parameters, ext_configs = _process_parameters_and_ext_configs(template_obj, parameters)
+    parameters = parameters or {}
     parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
 
     parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
-                                      parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
+                                      parameters=parameters, extension_configs=ext_configs, mode=mode,
+                                      on_error_deployment=on_error_deployment)
 
     smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS,
                                   aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
@@ -1039,20 +1067,21 @@ def _get_bicepparam_file_path(parameters):
 
 def _parse_bicepparam_inline_params(parameters, template_obj):
     parsed_inline_params = {}
+    parsed_inline_ext_configs = {}
 
     for parameter_list in parameters:
         for parameter_item in parameter_list:
             if is_bicepparam_file(parameter_item):
                 continue
 
-            if not _try_parse_key_value_object(parsed_inline_params, template_obj, parameter_item):
+            if not _try_parse_key_value_object(parsed_inline_params, parsed_inline_ext_configs, template_obj, parameter_item, False):
                 raise InvalidArgumentValueError(f"Unable to parse parameter: {parameter_item}. Only correctly formatted in-line parameters are allowed with a .bicepparam file")
 
     name_value_obj = {}
     for k, v in parsed_inline_params.items():
         name_value_obj[k] = v['value']
 
-    return name_value_obj
+    return name_value_obj, parsed_inline_ext_configs or None
 
 
 def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_params=None):
@@ -1187,14 +1216,18 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
     template_obj['resources'] = template_obj.get('resources', [])
 
     if _is_bicepparam_file_provided(parameters):
-        parameters = json.loads(bicepparam_json_content).get('parameters', {})  # pylint: disable=used-before-assignment
+        params_file_json = json.loads(bicepparam_json_content)  # pylint: disable=used-before-assignment
+        parameters = params_file_json.get('parameters', {})
+        ext_configs = params_file_json.get('extensionConfigs', None)
     else:
-        parameters = _process_parameters(template_obj, parameters) or {}
+        parameters, ext_configs = _process_parameters_and_ext_configs(template_obj, parameters)
+        parameters = parameters or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
         parameters = json.loads(json.dumps(parameters))
 
     properties = DeploymentProperties(template=template_content, template_link=template_link,
-                                      parameters=parameters, mode=mode, on_error_deployment=on_error_deployment,
+                                      parameters=parameters, extension_configs=ext_configs, mode=mode,
+                                      on_error_deployment=on_error_deployment,
                                       validation_level=validation_level)
     return properties
 
@@ -1210,7 +1243,9 @@ def _prepare_deployment_what_if_properties(cmd, deployment_scope, template_file,
                                                                       parameters=parameters, mode=mode, no_prompt=no_prompt, template_spec=template_spec,
                                                                       query_string=query_string, validation_level=validation_level)
     deployment_what_if_properties = DeploymentWhatIfProperties(template=deployment_properties.template, template_link=deployment_properties.template_link,
-                                                               parameters=deployment_properties.parameters, mode=deployment_properties.mode,
+                                                               parameters=deployment_properties.parameters,
+                                                               extension_configs=deployment_properties.extension_configs,
+                                                               mode=deployment_properties.mode,
                                                                what_if_settings=DeploymentWhatIfSettings(result_format=result_format),
                                                                validation_level=validation_level)
 
@@ -1395,13 +1430,17 @@ def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deploym
     template_obj['resources'] = template_obj.get('resources', [])
 
     if _is_bicepparam_file_provided(parameters):
-        parameters = json.loads(bicepparam_json_content).get('parameters', {})  # pylint: disable=used-before-assignment
+        bicepparam_json_content = json.loads(bicepparam_json_content)  # pylint: disable=used-before-assignment
+        parameters = bicepparam_json_content.get('parameters', {})
+        # ext_configs = bicepparam_json_content.get('extensionConfigs', None)
     else:
-        parameters = _process_parameters(template_obj, parameters) or {}
+        parameters, _ = _process_parameters_and_ext_configs(template_obj, parameters)
+        parameters = parameters or {}
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, False)
         parameters = json.loads(json.dumps(parameters))
 
     deployment_stack_model.parameters = parameters
+    # TODO: assign extension configs when stacks SDK is updated
 
     return deployment_stack_model
 

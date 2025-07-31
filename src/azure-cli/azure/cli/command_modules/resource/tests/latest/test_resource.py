@@ -1382,10 +1382,6 @@ class DeploymentTestsWithValidationLevel(ScenarioTest):
 
 
 class DeploymentTestAtSubscriptionScope(ScenarioTest):
-    def tearDown(self):
-        self.cmd('policy assignment delete -n location-lock')
-        self.cmd('policy definition delete -n policy2')
-        self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
 
     @AllowLargeResponse(4096)
     def test_subscription_level_deployment(self):
@@ -1455,6 +1451,62 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
             self.check('properties.provisioningState', 'Canceled')
         ])
 
+        self.cmd('policy assignment delete -n location-lock')
+        self.cmd('policy definition delete -n policy2')
+        self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
+
+    @AllowLargeResponse(4096)
+    def test_sub_extensibility_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update(
+            {
+                'location': 'WestUS',
+                'tf': os.path.join(curr_dir, 'simple_extensibility_deploy.json').replace('\\', '\\\\'),
+                'params': os.path.join(curr_dir, 'simple_extensibility_deploy_params.json').replace('\\', '\\\\'),
+                'params_invalid': os.path.join(curr_dir, 'simple_extensibility_deploy_params_invalid.json').replace('\\', '\\\\'),
+                'dn': self.create_random_name('azure-cli-sub-extensibility-deployment', 60),
+                'dn2': self.create_random_name('azure-cli-sub-extensibility-deployment', 60),
+                'inlineExtConfigs': '{"parameters":{},"extensionConfigs":{"contoso":{"configOne":{"value":"cliParamValue"}}}}'.replace('"', '\\"'),
+            })
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'deployment sub validate -n {dn} --location {location} --template-file "{tf}" --parameters @"{params_invalid}" --no-prompt true')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'deployment sub create -n {dn} --location {location} --template-file "{tf}" --parameters @"{params_invalid}"')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
+        self.cmd(
+            'deployment sub validate -n {dn} --location {location} --template-file "{tf}" --parameters @"{params}"', checks=[
+                self.check('properties.provisioningState', 'Succeeded')
+            ])
+
+        self.cmd(
+            'deployment sub validate -n {dn2} --location {location} --template-file "{tf}" --parameters @"{params}" --parameters "{inlineExtConfigs}"',
+            checks=[
+                self.check('properties.provisioningState', 'Succeeded')
+            ])
+
+        # Enable this when what-if extensibility is fully supported.
+        # self.cmd(
+        #     'deployment sub what-if -n {dn} --location {location} --template-file "{tf}" --parameters @"{params}"', checks=[
+        #         self.check('properties.provisioningState', 'Succeeded')
+        #     ])
+
+        self.cmd(
+            'deployment sub create -n {dn} --location {location} --template-file "{tf}" --parameters @"{params}"', checks=[
+                self.check('properties.provisioningState', 'Succeeded'),
+            ])
+
+        self.cmd(
+            'deployment sub create -n {dn2} --location {location} --template-file "{tf}" --parameters @"{params}" --parameters "{inlineExtConfigs}"',
+            checks=[
+                self.check('properties.provisioningState', 'Succeeded'),
+            ])
+
     @AllowLargeResponse(4096)
     def test_subscription_level_deployment_old_command(self):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -1506,6 +1558,10 @@ class DeploymentTestAtSubscriptionScope(ScenarioTest):
         self.cmd('deployment show -n {dn2}', checks=[
             self.check('properties.provisioningState', 'Canceled')
         ])
+
+        self.cmd('policy assignment delete -n location-lock')
+        self.cmd('policy definition delete -n policy2')
+        self.cmd('group delete -n cli_test_subscription_level_deployment --yes')
 
 
 class DeploymentTestAtResourceGroup(ScenarioTest):
@@ -1624,6 +1680,56 @@ class DeploymentTestAtResourceGroup(ScenarioTest):
             self.check('properties.provisioningState', 'Canceled')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_resource_group_deployment_extensibility')
+    def test_resource_group_extensibility_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update(
+            {
+                'tf': os.path.join(curr_dir, 'simple_extensibility_deploy.json').replace('\\', '\\\\'),
+                'params': os.path.join(curr_dir, 'simple_extensibility_deploy_params.json').replace('\\', '\\\\'),
+                'params_invalid': os.path.join(curr_dir, 'simple_extensibility_deploy_params_invalid.json').replace('\\', '\\\\'),
+                'dn': self.create_random_name('azure-cli-rg-extensibility-deployment', 60),
+                'dn2': self.create_random_name('azure-cli-rg-extensibility-deployment', 60),
+                'inlineExtConfigs': '{"parameters":{},"extensionConfigs":{"contoso":{"configOne":{"value":"cliParamValue"}}}}'.replace('"', '\\"')
+            })
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'deployment group validate --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params_invalid}" --no-prompt true')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'deployment group create --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params_invalid}"')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
+        self.cmd(
+            'deployment group validate --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params}"', checks=[
+                self.check('properties.provisioningState', 'Succeeded')
+            ])
+
+        self.cmd(
+            'deployment group validate --resource-group {rg} -n {dn2} --template-file "{tf}" --parameters @"{params}" --parameters "{inlineExtConfigs}"',
+            checks=[
+                self.check('properties.provisioningState', 'Succeeded')
+            ])
+
+        # Enable this when what-if extensibility is fully supported
+        # self.cmd(
+        #     'deployment group what-if --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params}"', checks=[
+        #         self.check('properties.provisioningState', 'Succeeded')
+        #     ])
+
+        self.cmd(
+            'deployment group create --resource-group {rg} -n {dn} --template-file "{tf}" --parameters @"{params}"', checks=[
+                self.check('properties.provisioningState', 'Succeeded'),
+            ])
+
+        self.cmd(
+            'deployment group create --resource-group {rg} -n {dn2} --template-file "{tf}" --parameters @"{params}" --parameters "{inlineExtConfigs}"', checks=[
+                self.check('properties.provisioningState', 'Succeeded'),
+            ])
+
 
 class DeploymentTestAtManagementGroup(ScenarioTest):
 
@@ -1719,6 +1825,59 @@ class DeploymentTestAtManagementGroup(ScenarioTest):
         ])
 
         self.cmd('account management-group delete -n {mg}')
+
+    def test_mg_extensibility_deployment(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        self.kwargs.update(
+            {
+                'mg': 'AzBlueprintAssignTest',
+                'location': 'WestUS',
+                'tf': os.path.join(curr_dir, 'simple_extensibility_deploy.json').replace('\\', '\\\\'),
+                'params': os.path.join(curr_dir, 'simple_extensibility_deploy_params.json').replace('\\', '\\\\'),
+                'params_invalid': os.path.join(curr_dir, 'simple_extensibility_deploy_params_invalid.json').replace('\\', '\\\\'),
+                'dn': self.create_random_name('azure-cli-mg-extensibility-deployment', 60),
+                'dn2': self.create_random_name('azure-cli-mg-extensibility-deployment', 60),
+                'inlineExtConfigs': '{"parameters":{},"extensionConfigs":{"contoso":{"configOne":{"value":"cliParamValue"}}}}'.replace('"', '\\"'),
+            })
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'deployment mg validate -n {dn} --management-group-id {mg} --location {location} --template-file "{tf}" --parameters @"{params_invalid}" --no-prompt true')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
+        with self.assertRaises(CLIError) as err:
+            self.cmd(
+                'deployment mg create -n {dn} --management-group-id {mg} --location {location} --template-file "{tf}" --parameters @"{params_invalid}"')
+            self.assertTrue("Deployment template validation failed" in str(err.exception))
+
+        self.cmd(
+            'deployment mg validate -n {dn} --management-group-id {mg} --location {location} --template-file "{tf}" --parameters @"{params}"', checks=[
+                self.check('properties.provisioningState', 'Succeeded')
+            ])
+
+        self.cmd(
+            'deployment mg validate -n {dn2} --management-group-id {mg} --location {location} --template-file "{tf}" --parameters @"{params}" --parameters "{inlineExtConfigs}"',
+            checks=[
+                self.check('properties.provisioningState', 'Succeeded')
+            ])
+
+        # Enable this when what-if extensibility is fully supported.
+        # self.cmd(
+        #     'deployment mg what-if -n {dn} --management-group-id {mg} --location {location} --template-file "{tf}" --parameters @"{params}"',
+        #     checks=[
+        #         self.check('properties.provisioningState', 'Succeeded')
+        #     ])
+
+        self.cmd(
+            'deployment mg create -n {dn} --management-group-id {mg} --location {location} --template-file "{tf}" --parameters @"{params}"', checks=[
+                self.check('properties.provisioningState', 'Succeeded'),
+            ])
+
+        self.cmd(
+            'deployment mg create -n {dn2} --management-group-id {mg} --location {location} --template-file "{tf}" --parameters @"{params}" --parameters "{inlineExtConfigs}"',
+            checks=[
+                self.check('properties.provisioningState', 'Succeeded'),
+            ])
 
 
 class DeploymentTestAtTenantScope(ScenarioTest):

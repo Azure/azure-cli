@@ -408,10 +408,11 @@ short-summary: Validate whether a template is valid at subscription scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -434,10 +435,11 @@ short-summary: Start a deployment at subscription scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -549,10 +551,11 @@ short-summary: Validate whether a template is valid at subscription scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -578,10 +581,11 @@ short-summary: Start a deployment at subscription scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -615,10 +619,11 @@ short-summary: Execute a deployment What-If operation at subscription scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -724,10 +729,11 @@ short-summary: Validate whether a template is valid at resource group.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -755,10 +761,11 @@ short-summary: Start a deployment at resource group.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax. Also note if you are providing a bicepparam file then you can use this argument only once.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -809,10 +816,11 @@ short-summary: Execute a deployment What-If operation at resource group scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -920,10 +928,11 @@ short-summary: Validate whether a template is valid at management group.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -951,10 +960,11 @@ short-summary: Execute a deployment What-If operation at management group scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -987,10 +997,11 @@ short-summary: Start a deployment at management group.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1093,10 +1104,12 @@ short-summary: Validate whether a template is valid at tenant scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+  - name: --parameters -p
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1122,10 +1135,11 @@ short-summary: Execute a deployment What-If operation at tenant scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1156,10 +1170,11 @@ short-summary: Start a deployment at tenant scope.
 long-summary: Please specify only one of --template-file FILE | --template-uri URI | --template-spec to input the ARM template.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
   - name: --template-file -f
     short-summary: The path to the template file or Bicep file.
   - name: --template-uri -u
@@ -1369,10 +1384,11 @@ type: command
 short-summary: Start a deployment.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
 examples:
   - name: Create a deployment from a remote template file, using parameters from a local JSON file.
     text: >
@@ -1407,10 +1423,11 @@ type: command
 short-summary: Validate whether a template is syntactically correct.
 parameters:
   - name: --parameters -p
-    short-summary: Supply deployment parameter values.
-    long-summary: >
-        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used.
-        It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+    short-summary: Supply deployment parameter values and extension configurations.
+    long-summary: |
+        Parameters may be supplied from a file using the `@{path}` syntax, a JSON string, or as `<KEY=VALUE>` pairs. Parameters are evaluated in order, so when a value is assigned twice, the latter value will be used. It is recommended that you supply your parameters file first, and then override selectively using KEY=VALUE syntax.
+
+        Extension configurations can be supplied with parameters files. They can also be inlined as a JSON string or as `<KEY=VALUE>` pairs but only when a bicepparam file is not used. Inlining extension configs as a JSON string minimally requires a root JSON object with an empty "parameters" object and an "extensionConfigs" object containing the configs. Inlining as key value pairs requires the entry to use the following format: `extensionConfigs.<extensionAlias>.<configProperty>=<JSON element>`
 examples:
   - name: Validate whether a template is syntactically correct. (autogenerated)
     text: |
