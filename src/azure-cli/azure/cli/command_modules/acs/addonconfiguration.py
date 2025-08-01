@@ -435,21 +435,21 @@ def ensure_container_insights_for_monitoring(
         ingestionDataCollectionEndpointName = f"MSCI-ingest-{location}-{cluster_name}"
         # Max length of the DCE name is 44 chars
         ingestionDataCollectionEndpointName = _trim_suffix_if_needed(ingestionDataCollectionEndpointName[0:43])
-        ingestion_dce_resource_id = None
+        ingestion_scoped_resource_id = None
 
         # config DCE MUST be in cluster region
         configDataCollectionEndpointName = f"MSCI-config-{cluster_region}-{cluster_name}"
         # Max length of the DCE name is 44 chars
         configDataCollectionEndpointName = _trim_suffix_if_needed(configDataCollectionEndpointName[0:43])
-        config_dce_resource_id = None
+        config_scoped_resource_id = None
 
         # create ingestion DCE if high log scale mode enabled
         if enable_high_log_scale_mode:
-            ingestion_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, is_use_ampls)
+            ingestion_scoped_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, is_use_ampls)
 
         # create config DCE if AMPLS resource specified
         if is_use_ampls:
-            config_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, cluster_region, configDataCollectionEndpointName, is_use_ampls)
+            config_scoped_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, cluster_region, configDataCollectionEndpointName, is_use_ampls)
 
         if create_dcr:
             # first get the association between region display names and region IDs (because for some reason
@@ -534,7 +534,7 @@ def ensure_container_insights_for_monitoring(
                                 }
                             ]
                         },
-                        "dataCollectionEndpointId": ingestion_dce_resource_id
+                        "dataCollectionEndpointId": ingestion_scoped_resource_id
                     },
                 }
             )
@@ -615,7 +615,7 @@ def ensure_container_insights_for_monitoring(
                                 }
                             ]
                         },
-                        "dataCollectionEndpointId": ingestion_dce_resource_id
+                        "dataCollectionEndpointId": ingestion_scoped_resource_id
                     },
                 }
             )
@@ -647,22 +647,22 @@ def ensure_container_insights_for_monitoring(
             create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, dcr_resource_id)
             if is_use_ampls:
                 # associate config DCE to the cluster
-                create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_resource_id)
+                create_dce_association(cmd, cluster_region, cluster_resource_id, config_scoped_resource_id)
                 # link config DCE to AMPLS
-                create_ampls_scope(cmd, ampls_resource_id, configDataCollectionEndpointName, config_dce_resource_id)
+                create_ampls_scope(cmd, ampls_resource_id, configDataCollectionEndpointName, config_scoped_resource_id)
                 # link workspace to AMPLS
                 create_ampls_scope(cmd, ampls_resource_id, workspace_name, workspace_resource_id)
                 # link ingest DCE to AMPLS
                 if enable_high_log_scale_mode:
-                    create_ampls_scope(cmd, ampls_resource_id, ingestionDataCollectionEndpointName, ingestion_dce_resource_id)
+                    create_ampls_scope(cmd, ampls_resource_id, ingestionDataCollectionEndpointName, ingestion_scoped_resource_id)
 
 
-def create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_resource_id):
+def create_dce_association(cmd, cluster_region, cluster_resource_id, config_scoped_resource_id):
     association_body = json.dumps(
         {
             "location": cluster_region,
             "properties": {
-                "dataCollectionEndpointId": config_dce_resource_id,
+                "dataCollectionEndpointId": config_scoped_resource_id,
                 "description": "associates config dataCollectionEndpoint to AKS cluster resource",
             },
         }
@@ -716,34 +716,97 @@ def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, clu
     else:
         raise error
 
+def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
+    """
+    Check if the specified resource is already scoped (linked) to the AMPLS by iterating through all scoped resources.
+    
+    Args:
+        cmd: Command context
+        ampls_resource_id: Full resource ID of the AMPLS
+        scoped_resource_id: Full resource ID of the resource to be linked
+        
+    Returns:
+        bool: True if the resource is already scoped to the AMPLS, False otherwise
+    """
+    print(f"DEBUG: Checking if resource is already scoped to AMPLS")
+    print(f"DEBUG: AMPLS Resource ID: {ampls_resource_id}")
+    print(f"DEBUG: Target Resource ID: {scoped_resource_id}")
+    
+    try:
+        # Get all scoped resources for this AMPLS
+        ampls_scoped_resources_url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{ampls_resource_id}/scopedresources?api-version=2021-07-01-preview"
+        print(f"DEBUG: AMPLS scoped resources URL: {ampls_scoped_resources_url}")
+        
+        response = send_raw_request(cmd.cli_ctx, "GET", ampls_scoped_resources_url)
+        scoped_resources_data = json.loads(response.text)
+        
+        print(f"DEBUG: Found {len(scoped_resources_data.get('value', []))} scoped resources")
+        
+        # Check if any scoped resource has the same linkedResourceId
+        for i, scoped_resource in enumerate(scoped_resources_data.get('value', [])):
+            properties = scoped_resource.get('properties', {})
+            linked_resource_id = properties.get('linkedResourceId', '')
+            scoped_resource_name = scoped_resource.get('name', 'unknown')
+            
+            print(f"DEBUG: Scoped resource {i+1}: name={scoped_resource_name}")
+            print(f"DEBUG: Scoped resource {i+1}: linkedResourceId={linked_resource_id}")
+            
+            # Compare case-insensitively since Azure resource IDs can have case variations
+            if linked_resource_id.lower() == scoped_resource_id.lower():
+                print(f"DEBUG: MATCH FOUND! Resource already scoped.")
+                logger.info("Resource already scoped in AMPLS. Scoped resource name: %s, LinkedResourceId: %s", 
+                           scoped_resource_name, linked_resource_id)
+                return True
+        
+        print(f"DEBUG: No matching linkedResourceId found. Resource is not yet scoped.")
+        return False
+        
+    except Exception as e:
+        print(f"DEBUG: Error checking AMPLS scoped resources: {str(e)}")
+        logger.warning("Error checking AMPLS scoped resources: %s", str(e))
+        return False
 
-def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_id):
-    link_dce_ampls_body = json.dumps(
+def create_ampls_scope(cmd, ampls_resource_id, scoped_resource_name, scoped_resource_id):
+    print(f"DEBUG: create_ampls_scope called with:")
+    print(f"DEBUG: ampls_resource_id: {ampls_resource_id}")
+    print(f"DEBUG: scoped_resource_name: {scoped_resource_name}")
+    print(f"DEBUG: scoped_resource_id: {scoped_resource_id}")
+    
+    # Check if the resource is already scoped to the AMPLS
+    if is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
+        print(f"DEBUG: Resource is already scoped, skipping creation")
+        logger.info("Resource %s is already scoped to AMPLS, skipping creation", scoped_resource_id)
+        return
+    
+    print(f"DEBUG: Resource not scoped yet, proceeding with creation")
+    
+    scoped_resource_ampls_body = json.dumps(
         {
             "properties": {
-                "linkedResourceId": dce_resource_id,
+                "linkedResourceId": scoped_resource_id,
             },
         }
     )
     resources = get_resources_client(cmd.cli_ctx, cmd.cli_ctx.data.get('subscription_id'))
-    ampls_scope_id = f"{ampls_resource_id}/scopedresources/{dce_endpoint_name}-connection"
+    ampls_scope_id = f"{ampls_resource_id}/scopedresources/{scoped_resource_name}-connection"
+    
+    print(f"DEBUG: Creating AMPLS scope with ID: {ampls_scope_id}")
+    
     for _ in range(3):
         try:
             resources.begin_create_or_update_by_id(
                 ampls_scope_id,
                 "2021-07-01-preview",
-                json.loads(link_dce_ampls_body)
+                json.loads(scoped_resource_ampls_body)
             )
             error = None
+            print(f"DEBUG: AMPLS scope created successfully")
             break
         except CLIError as e:
-            error = e
-        except HttpResponseError as e:
-            if e.status_code == 409 and "Scoped resource with same linked resource id already exists" in str(e):
-                logger.info("Scoped resource with same linked resource id already exists, skipping")
-                return
+            print(f"DEBUG: CLIError: {e}")
             error = e
     else:
+        print(f"DEBUG: All retries failed, raising error")
         raise error
 
 
