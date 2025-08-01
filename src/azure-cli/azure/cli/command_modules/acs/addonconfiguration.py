@@ -716,6 +716,7 @@ def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, clu
     else:
         raise error
 
+
 def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
     """
     Check if the specified resource is already scoped (linked) to the AMPLS by iterating through all scoped resources.
@@ -728,56 +729,33 @@ def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
     Returns:
         bool: True if the resource is already scoped to the AMPLS, False otherwise
     """
-    print(f"DEBUG: Checking if resource is already scoped to AMPLS")
-    print(f"DEBUG: AMPLS Resource ID: {ampls_resource_id}")
-    print(f"DEBUG: Target Resource ID: {scoped_resource_id}")
-    
     try:
         # Get all scoped resources for this AMPLS
         ampls_scoped_resources_url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{ampls_resource_id}/scopedresources?api-version=2021-07-01-preview"
-        print(f"DEBUG: AMPLS scoped resources URL: {ampls_scoped_resources_url}")
-        
         response = send_raw_request(cmd.cli_ctx, "GET", ampls_scoped_resources_url)
         scoped_resources_data = json.loads(response.text)
-        
-        print(f"DEBUG: Found {len(scoped_resources_data.get('value', []))} scoped resources")
-        
+                
         # Check if any scoped resource has the same linkedResourceId
         for i, scoped_resource in enumerate(scoped_resources_data.get('value', [])):
             properties = scoped_resource.get('properties', {})
             linked_resource_id = properties.get('linkedResourceId', '')
             scoped_resource_name = scoped_resource.get('name', 'unknown')
-            
-            print(f"DEBUG: Scoped resource {i+1}: name={scoped_resource_name}")
-            print(f"DEBUG: Scoped resource {i+1}: linkedResourceId={linked_resource_id}")
-            
             # Compare case-insensitively since Azure resource IDs can have case variations
             if linked_resource_id.lower() == scoped_resource_id.lower():
-                print(f"DEBUG: MATCH FOUND! Resource already scoped.")
-                print("Resource already scoped in AMPLS. Scoped resource name: %s, LinkedResourceId: %s", scoped_resource_name, linked_resource_id)
+                logger.info("Resource already scoped in AMPLS. Scoped resource name: %s, LinkedResourceId: %s", scoped_resource_name, linked_resource_id)
                 return True
-        
-        print(f"DEBUG: No matching linkedResourceId found. Resource is not yet scoped.")
+
+        logger.info("No matching linkedResourceId found. Resource is not yet scoped.")
         return False
         
     except Exception as e:
-        print(f"DEBUG: Error checking AMPLS scoped resources: {str(e)}")
         logger.warning("Error checking AMPLS scoped resources: %s", str(e))
         return False
 
 def create_ampls_scope(cmd, ampls_resource_id, scoped_resource_name, scoped_resource_id):
-    print(f"DEBUG: create_ampls_scope called with:")
-    print(f"DEBUG: ampls_resource_id: {ampls_resource_id}")
-    print(f"DEBUG: scoped_resource_name: {scoped_resource_name}")
-    print(f"DEBUG: scoped_resource_id: {scoped_resource_id}")
-    
     # Check if the resource is already scoped to the AMPLS
     if is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
-        print(f"DEBUG: Resource is already scoped, skipping creation")
-        logger.info("Resource %s is already scoped to AMPLS, skipping creation", scoped_resource_id)
         return
-    
-    print(f"DEBUG: Resource not scoped yet, proceeding with creation")
     
     scoped_resource_ampls_body = json.dumps(
         {
@@ -786,11 +764,10 @@ def create_ampls_scope(cmd, ampls_resource_id, scoped_resource_name, scoped_reso
             },
         }
     )
+
     resources = get_resources_client(cmd.cli_ctx, cmd.cli_ctx.data.get('subscription_id'))
     ampls_scope_id = f"{ampls_resource_id}/scopedresources/{scoped_resource_name}-connection"
-    
-    print(f"DEBUG: Creating AMPLS scope with ID: {ampls_scope_id}")
-    
+
     for _ in range(3):
         try:
             resources.begin_create_or_update_by_id(
@@ -799,13 +776,10 @@ def create_ampls_scope(cmd, ampls_resource_id, scoped_resource_name, scoped_reso
                 json.loads(scoped_resource_ampls_body)
             )
             error = None
-            print(f"DEBUG: AMPLS scope created successfully")
             break
         except CLIError as e:
-            print(f"DEBUG: CLIError: {e}")
             error = e
     else:
-        print(f"DEBUG: All retries failed, raising error")
         raise error
 
 
