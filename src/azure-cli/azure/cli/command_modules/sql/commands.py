@@ -348,6 +348,10 @@ def load_command_table(self, _):
         g.show_command('show', 'get')
         g.custom_command('list', 'list_long_term_retention_backups')
         g.command('delete', 'begin_delete', confirmation=True)
+        g.custom_command('disable-time-based-immutability', 'remove_time_based_immutability')
+        g.custom_command('lock-time-based-immutability', 'lock_time_based_immutability')
+        g.custom_command('set_legal_hold_immutability', 'set_legal_hold_immutability')
+        g.custom_command('remove_legal_hold_immutability', 'remove_legal_hold_immutability')
 
     with self.command_group('sql db ltr-backup',
                             database_operations,

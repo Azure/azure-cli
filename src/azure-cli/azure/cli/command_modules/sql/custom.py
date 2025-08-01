@@ -7,6 +7,7 @@
 from enum import Enum
 import calendar
 from datetime import datetime
+from warnings import catch_warnings
 from dateutil.parser import parse
 
 from azure.cli.core.util import (
@@ -3104,7 +3105,9 @@ def update_long_term_retention(
         monthly_retention=None,
         yearly_retention=None,
         week_of_year=None,
-        make_backups_immutable=None,
+        time_based_immutability=None,
+        time_based_immutability_mode=None,
+
         **kwargs):
     '''
     Updates long term retention for managed database
@@ -3115,12 +3118,20 @@ def update_long_term_retention(
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')
 
-    if make_backups_immutable:
+    if time_based_immutability:
         confirmation = prompt_y_n("""Immutable LTR backups can't be changed or deleted.
          You'll be charged for LTR backups for the full retention period.
          Do you want to proceed?""")
         if not confirmation:
             return
+
+    if time_based_immutability_mode:
+        if not time_based_immutability:
+            raise CLIError('Time-based immutability mode can only be set if time-based immutability is enabled.')
+        if time_based_immutability_mode.lower() not in ['unlocked', 'locked']:
+            raise CLIError('Invalid value for time-based immutability mode. '
+                           'Valid values are "unlocked" or "locked".')
+  
 
     kwargs['weekly_retention'] = weekly_retention
 
@@ -3130,7 +3141,7 @@ def update_long_term_retention(
 
     kwargs['week_of_year'] = week_of_year
 
-    kwargs['make_backups_immutable'] = make_backups_immutable
+    kwargs['time_based_immutability'] = time_based_immutability
 
     policy = client.begin_create_or_update(
         database_name=database_name,
@@ -3325,6 +3336,133 @@ def list_long_term_retention_backups(
 
     return backups
 
+
+def remove_time_based_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        **kwargs):
+    '''
+    Removes time-based immutability for long term retention backups.
+    '''
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+    try:
+        client.begin_remove_time_based_immutability(
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+    except Exception as ex:
+        raise ex
+
+    return client.get(
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+
+
+def lock_time_based_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        **kwargs):
+    '''
+    Locks time-based immutability for long term retention backups.
+    '''
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+    try:
+        client.begin_lock_time_based_immutability(
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+    except Exception as ex:
+        raise ex
+
+    return client.get(
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+
+
+def set_legal_hold_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        **kwargs):
+    '''
+    Sets legal hold immutability for long term retention backups.
+    '''
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+    try:
+        client.begin_set_legal_hold_immutability(
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+    except Exception as ex:
+        raise ex
+
+    return client.get(
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+
+
+def remove_legal_hold_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        **kwargs):
+    '''
+    Removes legal hold immutability for long term retention backups.
+    '''
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+    try:
+        client.begin_remove_legal_hold_immutability(
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+    except Exception as ex:
+        raise ex
+
+    return client.get(
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
 
 def restore_long_term_retention_backup(
         cmd,
