@@ -754,8 +754,7 @@ def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
             # Compare case-insensitively since Azure resource IDs can have case variations
             if linked_resource_id.lower() == scoped_resource_id.lower():
                 print(f"DEBUG: MATCH FOUND! Resource already scoped.")
-                logger.info("Resource already scoped in AMPLS. Scoped resource name: %s, LinkedResourceId: %s", 
-                           scoped_resource_name, linked_resource_id)
+                print("Resource already scoped in AMPLS. Scoped resource name: %s, LinkedResourceId: %s", scoped_resource_name, linked_resource_id)
                 return True
         
         print(f"DEBUG: No matching linkedResourceId found. Resource is not yet scoped.")
