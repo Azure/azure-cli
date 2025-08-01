@@ -226,6 +226,7 @@ def process_assignment_create_namespace(cmd, namespace):
     validate_msi(cmd, namespace)
 
 
+# pylint: disable=unused-argument
 def validate_msi(cmd, namespace, from_identity_command=False):
     identities = None
     if from_identity_command:

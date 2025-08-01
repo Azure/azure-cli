@@ -854,7 +854,7 @@ class SubscriptionFinder:
         return all_subscriptions
 
     def _create_subscription_client(self, credential):
-        from azure.cli.core.profiles import ResourceType, get_api_version
+        from azure.cli.core.profiles import ResourceType
         from azure.cli.core.profiles._shared import get_client_class
         from azure.cli.core.commands.client_factory import _prepare_mgmt_client_kwargs_track2
 
