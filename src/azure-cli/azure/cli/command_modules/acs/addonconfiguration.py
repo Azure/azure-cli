@@ -435,21 +435,21 @@ def ensure_container_insights_for_monitoring(
         ingestionDataCollectionEndpointName = f"MSCI-ingest-{location}-{cluster_name}"
         # Max length of the DCE name is 44 chars
         ingestionDataCollectionEndpointName = _trim_suffix_if_needed(ingestionDataCollectionEndpointName[0:43])
-        ingestion_scoped_resource_id = None
+        ingestion_dce_resource_id = None
 
         # config DCE MUST be in cluster region
         configDataCollectionEndpointName = f"MSCI-config-{cluster_region}-{cluster_name}"
         # Max length of the DCE name is 44 chars
         configDataCollectionEndpointName = _trim_suffix_if_needed(configDataCollectionEndpointName[0:43])
-        config_scoped_resource_id = None
+        config_dce_resource_id = None
 
         # create ingestion DCE if high log scale mode enabled
         if enable_high_log_scale_mode:
-            ingestion_scoped_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, is_use_ampls)
+            ingestion_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, location, ingestionDataCollectionEndpointName, is_use_ampls)
 
         # create config DCE if AMPLS resource specified
         if is_use_ampls:
-            config_scoped_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, cluster_region, configDataCollectionEndpointName, is_use_ampls)
+            config_dce_resource_id = create_data_collection_endpoint(cmd, cluster_subscription, cluster_resource_group_name, cluster_region, configDataCollectionEndpointName, is_use_ampls)
 
         if create_dcr:
             # first get the association between region display names and region IDs (because for some reason
@@ -534,7 +534,7 @@ def ensure_container_insights_for_monitoring(
                                 }
                             ]
                         },
-                        "dataCollectionEndpointId": ingestion_scoped_resource_id
+                        "dataCollectionEndpointId": ingestion_dce_resource_id
                     },
                 }
             )
@@ -615,7 +615,7 @@ def ensure_container_insights_for_monitoring(
                                 }
                             ]
                         },
-                        "dataCollectionEndpointId": ingestion_scoped_resource_id
+                        "dataCollectionEndpointId": ingestion_dce_resource_id
                     },
                 }
             )
@@ -647,22 +647,22 @@ def ensure_container_insights_for_monitoring(
             create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, cluster_resource_id, dcr_resource_id)
             if is_use_ampls:
                 # associate config DCE to the cluster
-                create_dce_association(cmd, cluster_region, cluster_resource_id, config_scoped_resource_id)
+                create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_resource_id)
                 # link config DCE to AMPLS
-                create_ampls_scope(cmd, ampls_resource_id, configDataCollectionEndpointName, config_scoped_resource_id)
+                create_ampls_scope(cmd, ampls_resource_id, configDataCollectionEndpointName, config_dce_resource_id)
                 # link workspace to AMPLS
                 create_ampls_scope(cmd, ampls_resource_id, workspace_name, workspace_resource_id)
                 # link ingest DCE to AMPLS
                 if enable_high_log_scale_mode:
-                    create_ampls_scope(cmd, ampls_resource_id, ingestionDataCollectionEndpointName, ingestion_scoped_resource_id)
+                    create_ampls_scope(cmd, ampls_resource_id, ingestionDataCollectionEndpointName, ingestion_dce_resource_id)
 
 
-def create_dce_association(cmd, cluster_region, cluster_resource_id, config_scoped_resource_id):
+def create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_resource_id):
     association_body = json.dumps(
         {
             "location": cluster_region,
             "properties": {
-                "dataCollectionEndpointId": config_scoped_resource_id,
+                "dataCollectionEndpointId": config_dce_resource_id,
                 "description": "associates config dataCollectionEndpoint to AKS cluster resource",
             },
         }
