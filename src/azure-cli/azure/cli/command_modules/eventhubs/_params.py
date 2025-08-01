@@ -65,7 +65,7 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs eventhub') as c:
         c.argument('event_hub_name', arg_type=name_type, id_part='child_name_1', completer=get_eventhubs_command_completion_list, help='Name of Eventhub')
 
-    for scope in ['eventhubs eventhub create']:
+    for scope in ['eventhubs eventhub create', 'eventhubs eventhub update']:
         with self.argument_context(scope) as c:
             c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub. By default, allowed values are 2-32. Lower value of 1 is supported with Kafka enabled namespaces. In presence of a custom quota, the upper limit will match the upper limit of the quota.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled']), help='Status of Eventhub')
@@ -86,6 +86,7 @@ def load_arguments_eh(self, _):
             c.argument('user_metadata', help="Gets and Sets Metadata of User.")
             c.argument('timestamp_type', arg_type=get_enum_type(['Create', 'LogAppend']), help='Denotes the type of timestamp the message will hold.')
             c.argument('min_compaction_lag_in_mins', type=int, arg_group='Retention-Description', options_list=['--min-lag', '--min-compaction-lag-in-mins'], help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.")
+            c.argument('encoding', arg_group='Capture', options_list=['encoding'], help='Enumerates the possible values for the encoding format of capture description. Note: \'AvroDeflate\' will be deprecated in New API Version')
     with self.argument_context('eventhubs eventhub list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 

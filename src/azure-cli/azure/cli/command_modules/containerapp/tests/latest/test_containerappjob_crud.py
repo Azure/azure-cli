@@ -127,6 +127,28 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northcentralus")
+    # test for CRUD operations on Container App Job resource with trigger type as manual
+    def test_containerappjob_list(self, resource_group):
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+
+        for i in range(30):
+            job = self.create_random_name(prefix=f'job{i}', length=24)
+            self.cmd(
+                "az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 2 --trigger-type manual --parallelism 1 --replica-completion-count 1 --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.25' --memory '0.5Gi' --no-wait".format(
+                    resource_group, job, env_id))
+
+        # get list of Container App Jobs
+        jobs_list = self.cmd("az containerapp job list --resource-group {}".format(resource_group)).get_output_in_json()
+        self.assertTrue(len(jobs_list) == 30)
+
+        for job_item in jobs_list:
+            # delete the Container App Job resource
+            self.cmd("az containerapp job delete --resource-group {} --name {} --yes --no-wait".format(resource_group, job_item['name']))
+
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="westeurope")
     def test_containerapp_manualjob_private_registry_port(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))

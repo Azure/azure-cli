@@ -187,10 +187,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
         ResourceType.MGMT_KEYVAULT: None,
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
-            'role_definitions': '2022-05-01-preview',
-            'provider_operations_metadata': '2018-01-01-preview'
-        }),
+        ResourceType.MGMT_AUTHORIZATION: None,
         ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2025-03-01-preview', {
             'agent_pools': '2025-03-01-preview',
             'tasks': '2025-03-01-preview',
@@ -220,7 +217,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_EVENTHUB: None,
         ResourceType.MGMT_MONITOR: None,
         ResourceType.MGMT_MSI: '2023-01-31',
-        ResourceType.MGMT_APPSERVICE: '2023-01-01',
+        ResourceType.MGMT_APPSERVICE: '2024-11-01',
         ResourceType.MGMT_IOTHUB: '2023-06-30-preview',
         ResourceType.MGMT_IOTDPS: '2021-10-15',
         ResourceType.MGMT_IOTCENTRAL: '2021-11-01-preview',
@@ -255,10 +252,6 @@ AD_HOC_API_VERSIONS = {
         'VERSION_2024_11_01_PREVIEW': "2024-11-01-preview",
         'VERSION_2025_03_01_PREVIEW': "2025-03-01-preview",
         'VERSION_2025_04_01': "2025-04-01"
-    },
-    ResourceType.MGMT_CONTAINERSERVICE: {
-        # src/azure-cli/azure/cli/command_modules/acs/tests/latest/test_custom.py:50
-        'ManagedClusterAddonProfile': '2020-03-01',
     },
     ResourceType.MGMT_MSI: {
         'user_assigned_identities': '2022-01-31-preview',

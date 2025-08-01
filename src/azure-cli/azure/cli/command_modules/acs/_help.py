@@ -454,6 +454,9 @@ parameters:
     type: string
     short-summary: Path to a file containing up to 10 blank line separated certificates. Only valid for Linux nodes.
     long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
+  - name: --disable-run-command
+    type: bool
+    short-summary: Disable Run command feature for the cluster.
   - name: --enable-defender
     type: bool
     short-summary: Enable Microsoft Defender security profile.
@@ -590,12 +593,26 @@ parameters:
     short-summary: Configure artifact source when bootstraping the cluster.
     long-summary: |
         The artifacts include the addon image. Use "Direct" to download artifacts from MCR, "Cache" to downalod artifacts from Azure Container Registry.
+  - name: --enable-ai-toolchain-operator
+    type: bool
+    short-summary: Enable AI toolchain operator to the cluster.
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
   - name: --enable-static-egress-gateway
     type: bool
     short-summary: Enable Static Egress Gateway addon to the cluster.
+  - name: --node-provisioning-mode
+    type: string
+    short-summary: Set the node provisioning mode of the cluster. Valid values are "Auto" and "Manual". For more information on "Auto" mode see aka.ms/aks/nap.
+  - name: --node-provisioning-default-pools
+    type: string
+    short-summary: The set of default Karpenter NodePools configured for node provisioning. Valid values are "Auto" and "None".
+    long-summary: |-
+        The set of default Karpenter NodePools configured for node provisioning. Valid values are "Auto" and "None".
+        Auto: A standard set of Karpenter NodePools are provisioned.
+        None: No Karpenter NodePools are provisioned.
+        WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted by that action.
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -675,6 +692,10 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku Ubuntu --max-pods MaxPodsPerNode --network-plugin azure --vnet-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/NodeSubnet --pod-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/PodSubnet --pod-ip-allocation-mode StaticBlock
   - name: Create a kubernetes cluster with VirtualMachines vm set type.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
+  - name: Create a kubernetes cluster with auto node provisioning.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto
+  - name: Create a kubernetes cluster with auto node provisioning and no default pools.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
 """
 
 helps['aks update'] = """
@@ -757,6 +778,10 @@ parameters:
     type: string
     short-summary: Load balancer backend pool type.
     long-summary: Define the LoadBalancer backend pool type of managed inbound backend pool. The nodeIP means the VMs will be attached to the LoadBalancer by adding its private IP address to the backend pool. The nodeIPConfiguration means the VMs will be attached to the LoadBalancer by referencing the backend pool ID in the VM's NIC.
+  - name: --load-balancer-sku
+    type: string
+    short-summary: Azure Load Balancer SKU selection for your cluster. only standard is accepted.
+    long-summary: Upgrade to Standard Azure Load Balancer SKU for your AKS cluster.
   - name: --nat-gateway-managed-outbound-ip-count
     type: int
     short-summary: NAT gateway managed outbound IP count.
@@ -897,6 +922,12 @@ parameters:
     type: string
     short-summary: Path to a file containing up to 10 blank line separated certificates. Only valid for Linux nodes.
     long-summary: These certificates are used by Custom CA Trust feature and will be added to trust stores of nodes.
+  - name: --enable-run-command
+    type: bool
+    short-summary: Enable Run command feature for the cluster.
+  - name: --disable-run-command
+    type: bool
+    short-summary: Disable Run command feature for the cluster.
   - name: --defender-config
     type: string
     short-summary: Path to JSON file containing Microsoft Defender profile configurations.
@@ -1048,6 +1079,12 @@ parameters:
     short-summary: Configure artifact source when bootstraping the cluster.
     long-summary: |
         The artifacts include the addon image. Use "Direct" to download artifacts from MCR, "Cache" to downalod artifacts from Azure Container Registry.
+  - name: --enable-ai-toolchain-operator
+    type: bool
+    short-summary: Enable AI toolchain operator to the cluster
+  - name: --disable-ai-toolchain-operator
+    type: bool
+    short-summary: Disable AI toolchain operator.
   - name: --bootstrap-container-registry-resource-id
     type: string
     short-summary: Configure container registry resource ID. Must use "Cache" as bootstrap artifact source.
@@ -1057,6 +1094,20 @@ parameters:
   - name: --disable-static-egress-gateway
     type: bool
     short-summary: Disable Static Egress Gateway addon to the cluster.
+  - name: --migrate-vmas-to-vms
+    type: bool
+    short-summary: Migrate cluster with VMAS node pool to VMS node pool.
+  - name: --node-provisioning-mode
+    type: string
+    short-summary: Set the node provisioning mode of the cluster. Valid values are "Auto" and "Manual". For more information on "Auto" mode see aka.ms/aks/nap.
+  - name: --node-provisioning-default-pools
+    type: string
+    short-summary: The set of default Karpenter NodePools configured for node provisioning. Valid values are "Auto" and "None".
+    long-summary: |-
+        The set of default Karpenter NodePools configured for node provisioning. Valid values are "Auto" and "None".
+        Auto: A standard set of Karpenter NodePools are provisioned.
+        None: No Karpenter NodePools are provisioned.
+        WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted by that action.
 examples:
   - name: Reconcile the cluster back to its current state.
     text: az aks update -g MyResourceGroup -n MyManagedCluster
@@ -1116,6 +1167,12 @@ examples:
     text: az aks update -g MyResourceGroup -n MyManagedCLuster --enable-vpa
   - name: Disable VPA(Vertical Pod Autoscaler) for an existing kubernetes cluster.
     text: az aks update -g MyResourceGroup -n MyManagedCLuster --disable-vpa
+  - name: Update a kubernetes cluster to use auto node provisioning.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto
+  - name: Update a kubernetes cluster to use auto node provisioning mode with no default pools.
+    text: az aks update -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
+  - name: Upgrade load balancer sku to standard
+    text: az aks update --load-balancer-sku standard -g MyResourceGroup -n MyManagedCluster
 """
 
 helps['aks delete'] = """
