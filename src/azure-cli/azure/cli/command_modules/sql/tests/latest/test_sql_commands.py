@@ -1263,6 +1263,65 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
                 self.check('diffBackupIntervalInHours', '{diffbackup_hours_v2}')])
 
 
+class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
+    @live_only()
+    def test_sql_db_long_term_retention(
+            self):
+        self.kwargs.update({
+            'rg': 'lichrg',
+            'loc': 'eastus2euap',
+            'server_name': 'lichcanaryus2',
+            'database_name': 'db4',
+            'weekly_retention': 'P1W',
+            'time_based_mmutability': 'True'
+        })
+
+        # test update long term retention on live database
+        self.cmd(
+            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
+            ' --weekly-retention {weekly_retention}'
+            ' --time-based-immutability {time_based_immutability}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
+
+        # test get long term retention policy on live database
+        self.cmd(
+            'sql db ltr-policy show -g {rg} -s {server_name} -n {database_name}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
+
+        # test list long term retention backups for location
+        # with resource group
+        self.cmd(
+            'sql db ltr-backup list -l {loc} -g {rg}',
+            checks=[
+                self.greater_than('length(@)', 0)])
+        # without resource group
+   
+        # setup for test show long term retention backup
+        backup = self.cmd(
+            'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} --latest True').get_output_in_json()
+
+        self.kwargs.update({
+            'backup_name': backup[0]['name'],
+            'backup_id': backup[0]['id']
+        })
+
+        # test show long term retention backup
+        self.cmd(
+            'sql db ltr-backup show -l {loc} -s {server_name} -d {database_name} -n {backup_name}',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('serverName', '{server_name}'),
+                self.check('databaseName', '{database_name}'),
+                self.check('name', '{backup_name}'),
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
+
+        
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     @live_only()
     def test_sql_db_long_term_retention(
@@ -1276,7 +1335,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
             'week_of_year': 12,
-            'make_backups_immutable': 'False',
+            'time_based_mmutability': 'False',
             'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
             'keys' : '"https://test123343strehan.vault.azure.net/keys/k2/66f51a6e70f04067af8eaf77805e88b1" "https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
             'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
@@ -1287,13 +1346,13 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
             ' --weekly-retention {weekly_retention} --monthly-retention {monthly_retention}'
             ' --yearly-retention {yearly_retention} --week-of-year {week_of_year}'
-            ' --make-backups-immutable {make_backups_immutable}',
+            ' --time-based-immutability {time_based_immutability}',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
                 self.check('yearlyRetention', '{yearly_retention}'),
-                self.check('makeBackupsImmutable', '{make_backups_immutable}')])
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
 
         # test get long term retention policy on live database
         self.cmd(
@@ -1303,7 +1362,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
                 self.check('yearlyRetention', '{yearly_retention}'),
-                self.check('makeBackupsImmutable', '{make_backups_immutable}')])
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
 
         # test list long term retention backups for location
         # with resource group
@@ -1359,8 +1418,9 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
                 self.check('resourceGroup', '{rg}'),
                 self.check('serverName', '{server_name}'),
                 self.check('databaseName', '{database_name}'),
-                self.check('name', '{backup_name}')])
-
+                self.check('name', '{backup_name}'),
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
+        
         # test restore managed database from LTR backup
         self.kwargs.update({
             'dest_database_name': 'cli-restore-ltr3'
@@ -1380,6 +1440,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-backup delete -l {loc} -s {server_name} -d {database_name} -n \'{backup_name}\' --yes',
             checks=[NoneCheck()])
+
+
 
 
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
