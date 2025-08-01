@@ -736,7 +736,10 @@ def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_i
             )
             error = None
             break
-        except CLIError as e:
+        except Exception as e:
+            if "Scoped resource with same linked resource id already exists" in str(e):
+                logger.info("Scoped resource with same linked resource id already exists, skipping")
+                return
             error = e
     else:
         raise error
