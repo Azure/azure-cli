@@ -771,14 +771,22 @@ def __read_kv_from_kubernetes_configmap(
     Returns:
         list: List of KeyValue objects
     """
-    try:
-        key_values = []
-        from azure.cli.command_modules.acs.custom import aks_runcommand
-        from azure.cli.command_modules.acs._client_factory import cf_managed_clusters
+    key_values = []
+    from azure.cli.command_modules.acs.custom import aks_runcommand
+    from azure.cli.command_modules.acs._client_factory import cf_managed_clusters
 
-        # Get the AKS client from the factory
+    # Preserve only the necessary CLI context data
+    original_subscription = cmd.cli_ctx.data.get('subscription_id')
+    original_safe_params = cmd.cli_ctx.data.get('safe_params', [])
+
+    try:
+        # Temporarily modify the CLI context
         cmd.cli_ctx.data['subscription_id'] = aks_cluster["subscription"]
-        cmd.cli_ctx.data['safe_params'] = None
+        params_to_keep = ["--debug", "--verbose"]
+        cmd.cli_ctx.data['safe_params'] = [p for p in original_safe_params if p in params_to_keep]
+        # It must be set to return the result.
+        cmd.cli_ctx.data['safe_params'].append("--output")
+        # Get the AKS client from the factory
         aks_client = cf_managed_clusters(cmd.cli_ctx)
 
         # Command to get the ConfigMap and output it as JSON
@@ -787,24 +795,22 @@ def __read_kv_from_kubernetes_configmap(
         # Execute the command on the cluster
         result = aks_runcommand(cmd, aks_client, aks_cluster["resource_group"], aks_cluster["name"], command_string=command)
 
-        logger.warning(result)
-
         if hasattr(result, 'logs') and result.logs:
-            if not hasattr(result, 'exit_code') or result.exit_code != 0:
+            if not hasattr(result, 'exit_code') or result.exit_code == 0:
+                try:
+                    configmap_data = json.loads(result.logs)
+
+                    # Extract the data section which contains the key-value pairs
+                    kvs = __extract_kv_from_configmap_data(
+                        configmap_data, content_type, prefix_to_add, format_, depth, separator)
+
+                    key_values.extend(kvs)
+                except json.JSONDecodeError:
+                    raise ValueError(
+                        f"The result from ConfigMap {configmap_name} could not be parsed. {result.logs.strip()}"
+                    )
+            else:
                 raise AzureResponseError(f"{result.logs.strip()}")
-
-            try:
-                configmap_data = json.loads(result.logs)
-
-                # Extract the data section which contains the key-value pairs
-                kvs = __extract_kv_from_configmap_data(
-                    configmap_data, content_type, prefix_to_add, format_, depth, separator)
-
-                key_values.extend(kvs)
-            except json.JSONDecodeError:
-                raise ValueError(
-                    f"The result from ConfigMap {configmap_name} could not be parsed as valid JSON."
-                )
         else:
             raise AzureResponseError("Unable to get the ConfigMap.")
 
@@ -813,6 +819,10 @@ def __read_kv_from_kubernetes_configmap(
         raise AzureInternalError(
             f"Failed to read key-values from ConfigMap '{configmap_name}' in namespace '{namespace}'.\n{str(exception)}"
         )
+    finally:
+        # Restore original CLI context data
+        cmd.cli_ctx.data['subscription_id'] = original_subscription
+        cmd.cli_ctx.data['safe_params'] = original_safe_params
 
 
 def __extract_kv_from_configmap_data(configmap_data, content_type, prefix_to_add="", format_=None, depth=None, separator=None):
