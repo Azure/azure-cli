@@ -154,6 +154,8 @@ def load_arguments(self, _):
             c.argument('network_access_policy', min_api='2020-05-01', help='Policy for accessing the disk via network.', arg_type=get_enum_type(self.get_models('NetworkAccessPolicy', operation_group=operation_group)))
             c.argument('disk_access', min_api='2020-05-01', help='Name or ID of the disk access resource for using private endpoints on disks.')
             c.argument('enable_bursting', arg_type=get_three_state_flag(), help='Enable on-demand bursting beyond the provisioned performance target of the disk. On-demand bursting is disabled by default, and it does not apply to Ultra disks.')
+            c.argument('enable_bursting1', arg_type=get_three_state_flag(), help='Enables on-demand bursting beyond the provisioned performance target of the disk. On-demand bursting is disabled by default, and it does not apply to Ultra disks.')
+            c.argument('enable_bursting2', arg_type=get_three_state_flag(), help='Enabled on-demand bursting beyond the provisioned performance target of the disk. On-demand bursting is disabled by default, and it does not apply to Ultra disks.')
             c.argument('public_network_access', arg_type=get_enum_type(['Disabled', 'Enabled']), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to control the export policy on the disk.')
             c.argument('accelerated_network', arg_type=get_three_state_flag(), min_api='2021-04-01', is_preview=True, help='Customers can set on Managed Disks or Snapshots to enable the accelerated networking if the OS disk image support.')
 
@@ -389,7 +391,7 @@ def load_arguments(self, _):
 
     with self.argument_context('vm availability-set create') as c:
         c.argument('availability_set_name', name_arg_type, validator=get_default_location_from_resource_group, help='Name of the availability set')
-        c.argument('platform_update_domain_count', type=int, help='Update Domain count. If unspecified, the server will pick the most optimal number like 5.')
+        c.argument('platform_update_domain_count', type=int, help='Updated Domain count. If unspecified, the server will pick the most optimal number like 5.')
         c.argument('platform_fault_domain_count', type=int, help='Fault Domain count.')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('unmanaged', action='store_true', min_api='2016-04-30-preview', help='contained VMs should use unmanaged disks')
@@ -413,8 +415,8 @@ def load_arguments(self, _):
     with self.argument_context('vm update') as c:
         c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to")
         c.argument('write_accelerator', nargs='*', min_api='2017-12-01',
-                   help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
-        c.argument('disk_caching', nargs='*', help="Use singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
+                   help="Enable/Disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
+        c.argument('disk_caching', nargs='*', help="The singular value to apply across, or specify individual disks, e.g. 'os=ReadWrite 0=None 1=ReadOnly' should enable update os disk and 2 data disks")
         c.argument('ultra_ssd_enabled', ultra_ssd_enabled_type)
         c.argument('enable_secure_boot', enable_secure_boot_type)
         c.argument('enable_vtpm', enable_vtpm_type)
