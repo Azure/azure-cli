@@ -57,10 +57,6 @@ def _prepare_msal_kwargs(options=None):
     # Both get_token's kwargs and get_token_info's options are accepted as their schema is the same (at least for now).
     msal_kwargs = {}
     if options:
-        # For VM SSH. 'data' support is a CLI-specific extension.
-        # SDK doesn't support 'data': https://github.com/Azure/azure-sdk-for-python/pull/16397
-        if 'data' in options:
-            msal_kwargs['data'] = options['data']
         # For CAE
         if 'claims' in options:
             msal_kwargs['claims_challenge'] = options['claims']
