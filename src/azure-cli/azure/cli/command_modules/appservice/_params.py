@@ -438,6 +438,13 @@ subscription than the app service environment, please use the resource ID for --
                        help="config file for multicontainer apps")
             c.argument('show_multicontainer_config', action='store_true',
                        help='shows decoded config if a multicontainer config is set')
+            c.argument('assign_identities', nargs='*', options_list=['--assign-identity'],
+                       help='accept system or user assigned identities separated by spaces. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples')
+            c.argument('scope', help="The scope the managed identity has access to")
+            c.argument('role', help="Role name or id the managed identity will be assigned")
+            c.argument('acr_use_identity', help="Enable or disable pull image from acr use managed identity", arg_type=get_three_state_flag(return_label=True))
+            c.argument('acr_identity', help='Accept system or user assigned identity which will be set for acr image pull. '
+                       'Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
 
         with self.argument_context(scope + ' deployment container config') as c:
             c.argument('enable', options_list=['--enable-cd', '-e'], help='enable/disable continuous deployment',
