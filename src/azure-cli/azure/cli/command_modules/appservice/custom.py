@@ -4836,6 +4836,13 @@ class _FlexFunctionAppStackRuntimeHelper:
                          'api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}'
         if runtime == "dotnet-isolated":
             runtime = "dotnet"
+            
+        if location == "northcentralus(stage)" or location == "northcentralusstage" or location == "eastus2euap":
+            location = "eastus2"  # workaround for the API not supporting these locations
+        if location in ("northcentralus(stage)", "northcentralusstage", "eastus2euap", 
+                        "East US 2 EUAP", "North Central US (Stage)"):
+            location = "eastus2"  # workaround for the API not supporting these locations
+            
         request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime)
         response = send_raw_request(cmd.cli_ctx, "GET", request_url)
         return response.json()['value']
