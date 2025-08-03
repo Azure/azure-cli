@@ -1,0 +1,34 @@
+name: Publish Azure CLI Test SDK
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup Python
+      uses: actions/setup-python@v2.2.2
+      with:
+        python-version: 3.7
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools wheel twine virtualenv pip-tools
+        
+        cd src/azure-cli-testsdk
+        python setup.py sdist bdist_wheel
+
+    - name: Publish package to https://pypi.org
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_PASSWORD }}
+        packages_dir: src/azure-cli-testsdk/dist
+
+    - name: Validate Package Installation from PyPi
+      run: |
+        pip install --upgrade azure-cli-testsdk
