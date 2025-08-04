@@ -39,7 +39,7 @@ register_argument_deprecate(
     hide=True)
 register_argument_deprecate(
     "az sf managed-application update",
-    "--instance-close-duration', '--close-duration",
+    "--instance-close-duration",
     hide=True)
 register_argument_deprecate(
     "az sf managed-application update",
