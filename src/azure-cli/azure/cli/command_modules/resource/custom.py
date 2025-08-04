@@ -29,7 +29,7 @@ from azure.cli.core.util import get_file_json, read_file_content, shell_safe_jso
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import raise_subdivision_deployment_error
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZURE_API_PROFILES
+from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_policy_client_factory, _resource_lock_client_factory,
@@ -4587,7 +4587,8 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         parts = parse_resource_id(resource_id)
 
         if len(parts) == 2 and parts['subscription'] is not None and parts['resource_group'] is not None:
-            return AZURE_API_PROFILES['latest'][ResourceType.MGMT_RESOURCE_RESOURCES]
+            return _ResourceUtils.resolve_api_version(rcf, 'Microsoft.Resources', None, 'resourceGroups',
+                                                      latest_include_preview=latest_include_preview)
 
         if 'namespace' not in parts:
             raise CLIError('The type of value entered by --ids parameter is not supported.')
