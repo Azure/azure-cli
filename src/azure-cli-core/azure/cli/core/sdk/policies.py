@@ -109,7 +109,8 @@ class RecordTelemetryUserAgentPolicy(UserAgentPolicy):
 def get_custom_hook_policy(cli_ctx):
     def _acquire_policy_token_request_hook(request):
         http_request = request.http_request
-        if getattr(http_request, 'method', '') not in ['PUT', 'PATCH', 'DELETE']:
+        if getattr(http_request, 'method', '') == 'GET':
+            _LOGGER.warning("Acquiring policy token will be ignored for GET operations")
             return
         ACQUIRE_POLICY_TOKEN_URL = '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/acquirePolicyToken?api-version=2025-03-01'
         policy_token = None
@@ -137,7 +138,8 @@ def get_custom_hook_policy(cli_ctx):
             }
             acquire_policy_token_response = send_raw_request(cli_ctx, 'POST',
                                                              ACQUIRE_POLICY_TOKEN_URL,
-                                                             headers=['Content-Type=application/json'],
+                                                             headers=['Content-Type=application/json',
+                                                                      'x-ms-force-sync=true'],
                                                              body=json.dumps(acquire_policy_token_body))
             if acquire_policy_token_response.status_code == 200 and acquire_policy_token_response.content:
                 response_content = json.loads(acquire_policy_token_response.content)

@@ -210,9 +210,6 @@ def register_global_policy_argument(cli_ctx):
                 cmd.cli_ctx.data['_acquire_policy_token'] = True
 
         for command in command_table.values():
-            if command.name.split()[-1] in ['show', 'list', 'wait']:
-                continue
-
             change_reference_kwargs = {
                 'help': 'The related change reference ID for this resource operation',
                 'arg_group': 'Global Policy',
@@ -227,8 +224,10 @@ def register_global_policy_argument(cli_ctx):
             command.add_argument('_change_reference', '--change-reference', **change_reference_kwargs)
             command.add_argument('_acquire_policy_token', '--acquire-policy-token', **acquire_policy_token_kwargs)
 
-    from knack import events
-    cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_global_policy_argument)
+    policy_token_feature_enabled = cli_ctx.config.getboolean('core', 'enable_policy_token', False)
+    if policy_token_feature_enabled:
+        from knack import events
+        cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_global_policy_argument)
 
 
 # pylint: disable=too-many-statements
