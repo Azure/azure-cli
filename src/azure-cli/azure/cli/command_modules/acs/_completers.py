@@ -39,16 +39,6 @@ def get_k8s_versions(cli_ctx, location):
     return search("values[*].patchVersions.keys(@)[]", results)
 
 
-@Completer
-def get_vm_size_completion_list(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
-    """Return the intersection of the VM sizes allowed by the ACS SDK with those returned by the Compute Service."""
-    from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
-
-    location = _get_location(cmd.cli_ctx, namespace)
-    result = get_vm_sizes(cmd.cli_ctx, location)
-    return set(r.name for r in result) & set(c.value for c in ContainerServiceVMSizeTypes)
-
-
 def get_vm_sizes(cli_ctx, location):
     from azure.cli.command_modules.acs._client_factory import get_compute_client
 
