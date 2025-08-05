@@ -1590,6 +1590,21 @@ examples:
     crafted: true
 """
 
+helps['network application-gateway waf-policy managed-rule exception'] = """
+type: group
+short-summary: Manage exceptions to allow a request to skip the managed rules when the condition is satisfied.
+"""
+
+helps['network application-gateway waf-policy managed-rule exception remove'] = """
+type: command
+short-summary: Remove all managed rule exceptions that are applied on a WAF policy managed rules.
+"""
+
+helps['network application-gateway waf-policy managed-rule exception list'] = """
+type: command
+short-summary: List all managed rule exceptions that are applied on a WAF policy managed rules.
+"""
+
 helps['network application-gateway waf-policy managed-rule exclusion'] = """
 type: group
 short-summary: Manage OWASP CRS exclusions that are applied on a WAF policy managed rules.

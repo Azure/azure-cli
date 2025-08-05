@@ -1393,9 +1393,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['key2_id'] = key2_json['key']['kid']
 
         # Uncomment during live runs
-        role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/e147488a-f6f5-4113-8e2d-b22465e65bf6'.format(subscription)
+        # role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/e147488a-f6f5-4113-8e2d-b22465e65bf6'.format(subscription)
         # rbac1_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
-        # self.assertEqual(rbac1_json['roleDefinitionId'], role_id)
+        # self.assertEqual(rbac1_json['roleDefinitionId'], role_id) 
 
         # rbac2_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
         # self.assertEqual(rbac2_json['roleDefinitionId'], role_id)
@@ -1535,3 +1535,35 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # try deleting resource guard mapping
         self.cmd('backup vault resource-guard-mapping delete -n {vault} -g {rg} -y')
+
+    def test_cvm_os_des_id(self):
+        self.kwargs.update({
+            'vault': "PSTestingVault",
+            'vm': "PSCVMRestoreTestingVM",
+            'target_rg': "sgholapPSCLITestingrg",
+            'rg': "sgholap-rg",
+            'sa': "/subscriptions/5288acd1-ba79-4377-9205-9f220331a44a/resourceGroups/sgholap-rg/providers/Microsoft.Storage/storageAccounts/sgholapecysa3",
+            'vm_id': "VM;iaasvmcontainerv2;" + "sgholap-rg" + ";" + "PSCVMRestoreTestingVM",
+            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + "sgholap-rg" + ";" + "PSCVMRestoreTestingVM",
+            'vnet_name': "PSCLItestingvnet",
+            'subnet_name': "default",
+            'target_vm_name': "CLITestingVM",
+            'cvm_os_des': '/subscriptions/5288acd1-ba79-4377-9205-9f220331a44a/resourceGroups/sgholap-rg/providers/Microsoft.Compute/diskEncryptionSets/CVMPSRestoreDES'
+            })
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
+
+        trigger_restore_job5_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {target_rg} --storage-account {sa} --target-vm-name {target_vm_name} --target-vnet-name {vnet_name} --target-subnet-name {subnet_name} --target-vnet-resource-group {target_rg} --cvm-os-des-id {cvm_os_des}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job'] = trigger_restore_job5_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])

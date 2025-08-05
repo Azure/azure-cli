@@ -2622,6 +2622,12 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         self.cmd('network application-gateway waf-policy custom-rule match-condition add -g {rg} '
                  '--policy-name {waf} -n {rule3} --negate true '
                  '--match-variables RemoteAddr --operator IPMatch --values "192.168.1.0/24" "10.0.0.0/24"')
+        
+        self.cmd('network application-gateway waf-policy custom-rule create -g {rg} '
+                 '--policy-name {waf} --name ClientIPRateLimitRule '
+                 '--action Block  --priority 90 --rule-type RateLimitRule --rate-limit-threshold 100 '
+                 '--group-by-user-session [{{group-by-variables:[{{variable-name:"ClientAddrXffHeader"}}]}}] '
+                 '--match-conditions [{{"variables":[{{"variable_name":"RequestHeaders"}}],"operator":"IPMatch","values":["198.51.100.0/24"]}}]')
 
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_setting_')
     def test_network_app_gateway_waf_policy_setting(self, resource_group):
@@ -2988,6 +2994,30 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                 self.check("exclusions[0].exclusionManagedRuleSets[0].ruleGroups[0].rules[0].ruleId", "920340"),
             ]
         )
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_exception_', location='eastus2')
+    def test_network_app_gateway_waf_policy_exception(self, resource_group):
+        self.kwargs.update({
+            'waf': 'agp1',
+            'ip': 'pip1',
+            'ag': 'ag1',
+            'rg': resource_group
+        })
+
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf}')
+
+        self.cmd('network application-gateway waf-policy managed-rule exception add -g {rg} --policy-name {waf} '
+                 '--match-variable "RequestURI" --value-match-operator "Contains" --values "health" "account/images" "default.aspx" '
+                 '--rule-sets [0].rule-set-type=OWASP [0].rule-set-version=3.2')
+        self.cmd('network application-gateway waf-policy managed-rule exception list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.check('exceptions | length(@)', 1)
+                 ])
+        self.cmd('network application-gateway waf-policy managed-rule exception remove -g {rg} --policy-name {waf}')
+        self.cmd('network application-gateway waf-policy managed-rule exception list -g {rg} --policy-name {waf}',
+                 checks=[
+                     self.not_exists('exceptions')
+                 ])
 
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
@@ -4983,14 +5013,15 @@ class NetworkVNetScenarioTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_vnet_with_ipam_pool_test', location='westus')
     @AllowLargeResponse(size_kb=99999)
-    def test_network_vnet_with_ipam_pool(self, resource_group, resource_group_location):
+    def test_network_vnet_subnet_with_ipam_pool(self, resource_group, resource_group_location):
 
         self.kwargs.update({
             'rg': resource_group,
             'location': resource_group_location,
             'manager': 'manager1',
             'pool': 'pool1',
-            'vnet': 'vnet1'
+            'vnet': 'vnet1',
+            'subnet': 'subnet1'
         })
         self.cmd('extension add -n virtual-network-manager')
         self.kwargs['sub_id'] = self.get_subscription_id()
@@ -5001,6 +5032,12 @@ class NetworkVNetScenarioTest(ScenarioTest):
             self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].id', '{pool_id}'),
             self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].numberOfIpAddresses', 10),
             self.check('newVNet.addressSpace.ipamPoolPrefixAllocations[0].resourceGroup', '{rg}')
+        ])
+
+        self.cmd('network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet} --ipam-allocations [0].id={pool_id} [0].number-of-ip-addresses=5', checks=[
+            self.check('ipamPoolPrefixAllocations[0].id', '{pool_id}'),
+            self.check('ipamPoolPrefixAllocations[0].numberOfIpAddresses', 5),
+            self.check('ipamPoolPrefixAllocations[0].resourceGroup', '{rg}')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_vnet_with_subnet_nsg_test')

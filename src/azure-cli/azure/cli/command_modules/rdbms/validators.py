@@ -514,10 +514,14 @@ def _pg_version_validator(version, versions):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
-        if version == '12':
-            raise CLIError("Support for PostgreSQL 12 has officially ended. "
-                           "We recommend selecting PostgreSQL 13 or a later version for "
-                           "all future operations.")
+        if version in ('11', '12'):
+            logger.warning("Support for PostgreSQL %s has officially ended. "
+                           "We recommend selecting PostgreSQL 14 or a later version for "
+                           "all future operations.", str(version))
+        if version == '13':
+            logger.warning("PostgreSQL version 13 will reach end-of-life (EOL) soon. "
+                           "Upgrade to PostgreSQL 14 or later as soon as possible to "
+                           "maintain security, performance, and supportability.")
 
 
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):

@@ -26,6 +26,7 @@ LINUX_ASP_LOCATION_FUNCTIONAPP = 'ukwest'
 
 
 class WebAppAccessRestrictionScenarioTest(ScenarioTest):
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_show(self, resource_group):
         self.kwargs.update({
@@ -51,6 +52,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
         ])
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_set_simple(self, resource_group):
         self.kwargs.update({
@@ -82,6 +84,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', 'Deny')
         ])
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_set_complex(self, resource_group):
         self.kwargs.update({
@@ -102,6 +105,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('scmIpSecurityRestrictionsUseMain', False)
         ])
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_add(self, resource_group):
         self.kwargs.update({
@@ -122,6 +126,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_add_ip_address_validation(self, resource_group):
         self.kwargs.update({
@@ -256,6 +261,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('length([0].headers.\"x-forwarded-host\")', 1)
         ])
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_add_service_endpoint(self, resource_group):
         self.kwargs.update({
@@ -281,6 +287,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_remove(self, resource_group):
         self.kwargs.update({
@@ -368,6 +375,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[0].action', 'Allow')
         ])
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_add_scm(self, resource_group):
         self.kwargs.update({
@@ -388,6 +396,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[1].action', 'Deny')
         ])
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_remove_scm(self, resource_group):
         self.kwargs.update({
@@ -414,6 +423,7 @@ class WebAppAccessRestrictionScenarioTest(ScenarioTest):
             JMESPathCheck('[0].action', 'Allow')
         ])
 
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_access_restriction_slot(self, resource_group):
         self.kwargs.update({

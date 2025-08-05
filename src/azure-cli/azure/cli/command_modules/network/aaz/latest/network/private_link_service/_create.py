@@ -110,20 +110,13 @@ class Create(AAZCommand):
             enum={"EdgeZone": "EdgeZone"},
         )
 
-        # define Arg Group "Parameters"
-
-        # define Arg Group "Properties"
+        # define Arg Group "IP Configuration"
 
         _args_schema = cls._args_schema
         _args_schema.ip_configurations = AAZListArg(
             options=["--ip-configurations"],
-            arg_group="Properties",
+            arg_group="IP Configuration",
             help="An array of private link service IP configurations.",
-        )
-        _args_schema.load_balancer_frontend_ip_configurations = AAZListArg(
-            options=["--load-balancer-frontend-ip-configurations"],
-            arg_group="Properties",
-            help="An array of references to the load balancer IP configurations.",
         )
 
         ip_configurations = cls._args_schema.ip_configurations
@@ -577,6 +570,17 @@ class Create(AAZCommand):
 
         locations = cls._args_schema.ip_configurations.Element.subnet.service_endpoints.Element.locations
         locations.Element = AAZStrArg()
+
+        # define Arg Group "Parameters"
+
+        # define Arg Group "Properties"
+
+        _args_schema = cls._args_schema
+        _args_schema.load_balancer_frontend_ip_configurations = AAZListArg(
+            options=["--load-balancer-frontend-ip-configurations"],
+            arg_group="Properties",
+            help="An array of references to the load balancer IP configurations.",
+        )
 
         load_balancer_frontend_ip_configurations = cls._args_schema.load_balancer_frontend_ip_configurations
         load_balancer_frontend_ip_configurations.Element = AAZObjectArg()
@@ -3042,7 +3046,7 @@ class _CreateHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
-        _element.identity = AAZObjectType()
+        _element.identity = AAZIdentityObjectType()
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},

@@ -2192,6 +2192,21 @@ def list_waf_managed_rules(cmd, resource_group_name, policy_name):
 # endregion
 
 
+# region ApplicationGatewayWAFPolicy ManagedRule Exception
+def remove_waf_managed_rule_exception(cmd, resource_group_name, policy_name):
+    from .aaz.latest.network.application_gateway.waf_policy import Update
+
+    class WAFExceptionRemove(Update):
+        def pre_instance_update(self, instance):
+            instance.properties.managed_rules.exceptions = []
+
+    return WAFExceptionRemove(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": policy_name,
+        "resource_group": resource_group_name,
+    })
+# endregion
+
+
 # region ApplicationGatewayWAFPolicy ManagedRule OwaspCrsExclusionEntry
 # pylint: disable=too-many-nested-blocks
 def remove_waf_managed_rule_exclusion(cmd, resource_group_name, policy_name):
@@ -3892,7 +3907,6 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
             options=['--subnet'],
             arg_group="IP Configuration",
             help="Name or ID of subnet to use. If name provided, also supply `--vnet-name`.",
-            required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}"
             )
@@ -3910,20 +3924,21 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
             )
         )
 
-        args_schema.ip_configurations._registered = False
         args_schema.load_balancer_frontend_ip_configurations._registered = False
         args_schema.edge_zone_type._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.ip_configurations = [{
-            'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
-            'private_ip_address': args.private_ip_address,
-            'private_ip_allocation_method': args.private_ip_allocation_method,
-            'private_ip_address_version': args.private_ip_address_version,
-            'subnet': {'id': args.subnet}
-        }]
+
+        if not has_value(args.ip_configurations):
+            args.ip_configurations = [{
+                'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
+                'private_ip_address': args.private_ip_address,
+                'private_ip_allocation_method': args.private_ip_allocation_method,
+                'private_ip_address_version': args.private_ip_address_version,
+                'subnet': {'id': args.subnet}
+            }]
 
         args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
             args.load_balancer_frontend_ip_configurations,
@@ -5314,12 +5329,14 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
         )
         args_schema.ip_tags.Element = AAZStrArg()
         args_schema.type._registered = False
+        args_schema.sku._registered = False
         args_schema.ip_tags_list._registered = False
 
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
+        args.sku = 'Standard'
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
         if has_value(args.ip_tags):
@@ -5685,6 +5702,9 @@ class VNetSubnetCreate(_VNetSubnetCreate):
             logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
 
+        if has_value(args.ipam_pool_prefix_allocations):
+            args.address_prefixes = []
+
 
 class VNetSubnetUpdate(_VNetSubnetUpdate):
     @classmethod
@@ -5800,6 +5820,9 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         if has_value(args.disable_private_link_service_network_policies):
             logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+
+        if args.ipam_pool_prefix_allocations.to_serialized_data():
+            args.address_prefixes = []
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.network_security_group.id):

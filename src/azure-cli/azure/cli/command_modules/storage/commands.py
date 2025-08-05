@@ -714,12 +714,12 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('copy start-batch', 'storage_file_copy_batch', client_factory=cf_share_client)
         g.storage_custom_command_oauth('upload', 'storage_file_upload',
                                        exception_handler=file_related_exception_handler)
-        g.storage_custom_command('upload-batch', 'storage_file_upload_batch',
-                                 custom_command_type=get_custom_sdk('file', client_factory=cf_share_client))
+        g.storage_custom_command_oauth('upload-batch', 'storage_file_upload_batch',
+                                       custom_command_type=get_custom_sdk('file', client_factory=cf_share_client))
         g.storage_custom_command_oauth('download', 'download_file',
                                        exception_handler=file_related_exception_handler,
                                        transform=transform_file_show_result)
-        g.storage_custom_command('download-batch', 'storage_file_download_batch', client_factory=cf_share_client)
+        g.storage_custom_command_oauth('download-batch', 'storage_file_download_batch', client_factory=cf_share_client)
         g.storage_command_oauth('hard-link create', 'create_hardlink')
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:

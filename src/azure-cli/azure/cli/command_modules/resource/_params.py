@@ -33,7 +33,7 @@ def load_arguments(self, _):
 
     ExemptionCategory = self.get_models('ExemptionCategory', resource_type=ResourceType.MGMT_RESOURCE_POLICY,
                                         operation_group='policy_exemptions')
-    DeploymentMode, WhatIfResultFormat, ChangeType = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType')
+    DeploymentMode, WhatIfResultFormat, ChangeType, ValidationLevel = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType', 'ValidationLevel')
 
     # BASIC PARAMETER CONFIGURATION
 
@@ -58,6 +58,13 @@ def load_arguments(self, _):
     deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], min_api='2019-06-01', help="The template spec resource id.")
     deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
+    deployment_validation_level_type = CLIArgumentType(options_list=['--validation-level'], arg_type=get_enum_type(ValidationLevel, None),
+                                                       help='The deployment validation level. May be set to "Provider" (the default), "Template", or '
+                                                       '"ProviderNoRbac". With a validation level of "provider", ARM will perform full validation and check that'
+                                                       ' you have sufficient permission to deploy all resources in the template. With a validation level of '
+                                                       '"providerNoRbac", ARM will perform full validation but only check for read permissions on each resource.'
+                                                       ' With a validation level of "template", only static validation will be performed: preflight and '
+                                                       'permissions checks will be skipped.')
     filter_type = CLIArgumentType(options_list=['--filter'], is_preview=True,
                                   help='Filter expression using OData notation. You can use --filter "provisioningState eq \'{state}\'" to filter provisioningState. '
                                        'To get more information, please visit https://learn.microsoft.com/rest/api/resources/deployments/listatsubscriptionscope#uri-parameters')
@@ -366,12 +373,14 @@ def load_arguments(self, _):
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment operation') as c:
         c.argument('operation_ids', nargs='+', help='A list of operation ids to show')
@@ -395,6 +404,7 @@ def load_arguments(self, _):
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment sub what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -402,12 +412,14 @@ def load_arguments(self, _):
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
         c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment sub validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment sub list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -436,6 +448,7 @@ def load_arguments(self, _):
                    help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment group what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -446,12 +459,14 @@ def load_arguments(self, _):
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
         c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
         c.ignore("rollback_on_error")
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment group validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment group list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -475,6 +490,7 @@ def load_arguments(self, _):
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='The mode that is used to deploy resources. This value can be either Incremental or Complete. In Incremental mode, resources are deployed without deleting existing resources that are not included in the template. In Complete mode, resources are deployed and existing resources in the resource group that are not included in the template are deleted. Be careful when using Complete mode as you may unintentionally delete resources.')
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment mg what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -482,12 +498,14 @@ def load_arguments(self, _):
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
         c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment mg validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment mg list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -512,6 +530,7 @@ def load_arguments(self, _):
                    min_api="2019-10-01")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment tenant what-if') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
@@ -519,12 +538,14 @@ def load_arguments(self, _):
         c.argument('result_format', arg_type=deployment_what_if_result_format_type)
         c.argument('no_pretty_print', arg_type=deployment_what_if_no_pretty_print_type)
         c.argument('exclude_change_types', arg_type=deployment_what_if_exclude_change_types_type)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment tenant validate') as c:
         c.argument('deployment_name', arg_type=deployment_create_name_type)
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
+        c.argument('validation_level', arg_type=deployment_validation_level_type)
 
     with self.argument_context('deployment tenant list') as c:
         c.argument('filter_string', arg_type=filter_type)
@@ -535,6 +556,8 @@ def load_arguments(self, _):
         c.argument('skip_resource_name_params', action='store_true')
         c.argument('skip_all_params', action='store_true')
         c.argument('resource_ids', nargs='+', options_list='--resource-ids')
+        c.argument('export_format', arg_type=get_enum_type(['json', 'arm', 'bicep'], default='json'),
+                   help="The format of the exported template.")
 
     with self.argument_context('group create') as c:
         c.argument('rg_name', options_list=['--name', '--resource-group', '-n', '-g'],

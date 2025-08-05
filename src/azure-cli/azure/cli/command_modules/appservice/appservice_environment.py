@@ -9,7 +9,8 @@ from azure.mgmt.resource import ResourceManagementClient
 from azure.mgmt.privatedns import PrivateDnsManagementClient
 
 # Models
-from azure.mgmt.resource.resources.models import (DeploymentProperties, Deployment, SubResource)
+from azure.mgmt.resource.deployments.models import (DeploymentProperties, Deployment)
+from azure.mgmt.resource.resources.models import SubResource
 from azure.mgmt.privatedns.models import (PrivateZone, VirtualNetworkLink, RecordSet, ARecord)
 
 # Utils

@@ -88,6 +88,7 @@ class Create(AAZCommand):
             options=["--audiences"],
             arg_group="Properties",
             help="The aud value in the token sent to Azure for getting the user-assigned managed identity token. The value configured in the federated credential and the one in the incoming token must exactly match for Azure to issue the access token.",
+            default=["api://AzureADTokenExchange"],
         )
         _args_schema.issuer = AAZStrArg(
             options=["--issuer"],

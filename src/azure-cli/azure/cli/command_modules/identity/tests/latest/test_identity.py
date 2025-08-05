@@ -36,9 +36,11 @@ class TestIdentity(ScenarioTest):
             'fic1': 'fic1',
             'fic2': 'fic2',
             'fic3': 'fic3',
+            'fic4': 'fic4',
             'subject1': 'system:serviceaccount:ns:svcaccount1',
             'subject2': 'system:serviceaccount:ns:svcaccount2',
             'subject3': 'system:serviceaccount:ns:svcaccount3',
+            'subject4': 'system:serviceaccount:ns:svcaccount4',
             'issuer': 'https://token.actions.githubusercontent.com',
             'audience': 'api://AzureADTokenExchange',
             'cme_version': '1',
@@ -155,15 +157,27 @@ class TestIdentity(ScenarioTest):
                      self.check('[1].claimsMatchingExpression.value', "{new_cme_value}")
                  ])
 
+        # test default audiences value
+        self.cmd('identity federated-credential create --name {fic4} --identity-name {identity} --resource-group {rg} '
+                 '--subject {subject4} --issuer {issuer}',
+                 checks=[
+                     self.check('length(audiences)', 1),
+                     self.check('audiences[0]', 'api://AzureADTokenExchange'),
+                     self.check('issuer', '{issuer}'),
+                     self.check('subject', '{subject4}')
+                 ])
+        
         # delete remaining federated identity credentials
         self.cmd('identity federated-credential delete --name {fic2}'
                  ' --identity-name {identity} --resource-group {rg} --yes')
         self.cmd('identity federated-credential delete --name {fic3}'
                  ' --identity-name {identity} --resource-group {rg} --yes')
+        self.cmd('identity federated-credential delete --name {fic4}'
+                 ' --identity-name {identity} --resource-group {rg} --yes')
         
-        # verify all are deleted
         self.cmd('identity federated-credential list --identity-name {identity} --resource-group {rg}',
                  checks=[
                      self.check('type(@)', 'array'),
                      self.check('length(@)', 0)
                  ])
+        

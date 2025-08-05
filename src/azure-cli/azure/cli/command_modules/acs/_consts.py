@@ -25,6 +25,7 @@ CONST_OS_DISK_TYPE_EPHEMERAL = "Ephemeral"
 # mode
 CONST_NODEPOOL_MODE_SYSTEM = "System"
 CONST_NODEPOOL_MODE_USER = "User"
+CONST_NODEPOOL_MODE_GATEWAY = "Gateway"
 
 # os type
 CONST_DEFAULT_NODE_OS_TYPE = "Linux"
@@ -41,10 +42,14 @@ CONST_OS_SKU_UBUNTU2204 = "Ubuntu2204"
 # vm set type
 CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
 CONST_AVAILABILITY_SET = "AvailabilitySet"
+CONST_VIRTUAL_MACHINES = "VirtualMachines"
 
 # vm size
 CONST_DEFAULT_NODE_VM_SIZE = ""
 CONST_DEFAULT_WINDOWS_NODE_VM_SIZE = ""
+
+CONST_DEFAULT_VMS_VM_SIZE = "Standard_DS2_v2"
+CONST_DEFAULT_WINDOWS_VMS_VM_SIZE = "Standard_D2s_v3"
 
 # gpu instance
 CONST_GPU_INSTANCE_PROFILE_MIG1_G = "MIG1g"
@@ -123,6 +128,10 @@ CONST_NETWORK_POLICY_AZURE = "azure"
 CONST_NETWORK_POLICY_CILIUM = "cilium"
 CONST_NETWORK_POLICY_CALICO = "calico"
 CONST_NETWORK_POLICY_NONE = "none"
+
+# network pod ip allocation mode
+CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL = "DynamicIndividual"
+CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK = "StaticBlock"
 
 # consts for addons
 # http application routing
@@ -223,6 +232,14 @@ CONST_DNS_ZONE_CONTRIBUTOR_ROLE = "DNS Zone Contributor"
 # consts for network isolated cluster
 CONST_ARTIFACT_SOURCE_DIRECT = "Direct"
 CONST_ARTIFACT_SOURCE_CACHE = "Cache"
+
+# node provisioning mode
+CONST_NODE_PROVISIONING_MODE_MANUAL = "Manual"
+CONST_NODE_PROVISIONING_MODE_AUTO = "Auto"
+
+# node provisioning default pools
+CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE = "None"
+CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO = "Auto"
 
 
 # consts for decorator pattern

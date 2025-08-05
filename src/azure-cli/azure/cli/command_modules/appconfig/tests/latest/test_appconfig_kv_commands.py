@@ -11,7 +11,7 @@ import time
 
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, KeyVaultPreparer, live_only)
 from azure.cli.command_modules.appconfig._constants import KeyVaultConstants
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, MutuallyExclusiveArgumentError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
@@ -201,6 +201,112 @@ class AppConfigKVScenarioTest(ScenarioTest):
         list_keys = self.cmd(
             'appconfig kv list --connection-string {connection_string} --label "{multi_labels}"').get_output_in_json()
         assert len(list_keys) == 3
+    
+        # # Filter by tags test
+
+        # Set key-value with 5 tags
+        key_with_tags = "KeyWithTags"
+        label_with_tags = "labelWithTags"
+        tags = {
+            "tag1": "value1",
+            "tag2": "value2",
+            "tag3": "value3",
+            "tag4": "value4",
+            "tag5": "value5"
+        }
+        tags_str = ' '.join([f"{k}={v}" for k, v in tags.items()])
+
+        self.kwargs.update({
+            'key': key_with_tags,
+            'label': label_with_tags,
+            'tags': tags_str
+        })
+
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --label {label} --tags {tags} -y',
+             checks=[self.check('key', key_with_tags),
+             self.check('label', label_with_tags),
+            self.check('tags', tags)])
+
+        # List key-values with 5 tags
+        list_keys = self.cmd('appconfig kv list --connection-string {connection_string} --key {key} --tags {tags}').get_output_in_json()
+        assert(list_keys[0]['key'] == key_with_tags)
+        assert(list_keys[0]['label'] == label_with_tags)
+        assert(list_keys[0]['tags'] == tags)
+        assert len(list_keys) == 1
+
+        # Set key-value with tag1 only
+        tag1_dict = {"tag1": "value1"}
+        tag1 = ' '.join([f"{k}={v}" for k, v in tag1_dict.items()])
+        label_with_tag1 = "labelWithTag1"
+        self.kwargs.update({
+            'label': label_with_tag1,
+            'tag1': tag1
+        })
+
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --label {label} --tags {tag1} -y',
+             checks=[self.check('key', key_with_tags),
+                 self.check('label', label_with_tag1),
+                 self.check('tags', tag1_dict)])
+
+        # List key-values with tag1
+        list_keys = self.cmd('appconfig kv list --connection-string {connection_string} --key {key} --tags {tag1}').get_output_in_json()
+        assert len(list_keys) == 2
+
+        # Set key-value with empty tag value
+        empty_tag_value_dict = {"tag1": ""}
+        tag_with_empty_value = ' '.join([f"{k}={v}" for k, v in empty_tag_value_dict.items()])
+        label_with_empty_tag_value = "labelWithEmptyTagValue"
+        self.kwargs.update({
+            'label': label_with_empty_tag_value,
+            'tag_with_empty_value': tag_with_empty_value
+        })
+
+        self.cmd('appconfig kv set --connection-string {connection_string} --key {key} --label {label} --tags {tag_with_empty_value} -y',
+             checks=[self.check('key', key_with_tags),
+                 self.check('label', label_with_empty_tag_value),
+                 self.check('tags', empty_tag_value_dict)])
+
+        # List key-values with tag with empty value
+        list_keys = self.cmd('appconfig kv list --connection-string {connection_string} --key {key} --tags {tag_with_empty_value}').get_output_in_json()
+        assert len(list_keys) == 1
+
+        # Get all key-values with all tags
+        list_keys = self.cmd('appconfig kv list --connection-string {connection_string} --key {key}').get_output_in_json()
+        assert len(list_keys) == 3
+
+        # Delete key-values with tags tag1=value1
+        self.kwargs.update({
+            'label': '*'
+        })
+
+        deleted_kvs = self.cmd('appconfig kv delete --connection-string {connection_string} --key {key} --label {label} --tags {tag1} -y',
+             checks=[self.check('[0].key', key_with_tags),
+                    self.check('[0].label', label_with_tag1),
+                    self.check('[0].tags', tag1_dict)]).get_output_in_json()
+        assert(len(deleted_kvs) == 2)
+
+        # Error if more than 5 tags are provided
+        too_many_tags = {
+            "tag1": "value1",
+            "tag2": "value2",
+            "tag3": "value3",
+            "tag4": "value4",
+            "tag5": "value5",
+            "tag6": "value6"
+        }
+        too_many_tags_str = ' '.join([f"{k}={v}" for k, v in too_many_tags.items()])
+
+        self.kwargs.update({
+            'too_many_tags': too_many_tags_str
+        })
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, "Too many tag filters provided. Maximum allowed is 5."):
+            self.cmd('appconfig kv list --connection-string {connection_string} --tags {too_many_tags}')
+
+        # Dry run and yes argument should not be used together
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "The '--dry-run' and '--yes' options cannot be specified together."):
+            self.cmd('appconfig kv restore --datetime "2019-05-01T11:24:12Z" --connection-string {connection_string} --key {key} --label {label} --dry-run -y')
+
 
     @AllowLargeResponse()
     @ResourceGroupPreparer()
@@ -335,3 +441,67 @@ class AppConfigKVScenarioTest(ScenarioTest):
         assert 'locked' not in revisions[1]
         assert 'tags' not in revisions[0]
         assert 'tags' not in revisions[1]
+
+        # Filter by tags test
+        key_with_tags = "KeyWithTags"
+        label_with_tags = "labelWithTags"
+        tags = {
+            "tag1": "value1",
+            "tag2": "value2",
+            "tag3": "value3",
+            "tag4": "value4",
+            "tag5": "value5"
+        }
+        tags_str = ' '.join([f"{k}={v}" for k, v in tags.items()])
+
+        self.kwargs.update({
+            'key': key_with_tags,
+            'label': label_with_tags,
+            'tags': tags_str
+        })
+
+        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} --tags {tags} -y',
+             checks=[self.check('key', key_with_tags),
+                 self.check('label', label_with_tags),
+                 self.check('tags', tags)])
+
+        # List revisions with 5 tags
+        list_keys = self.cmd('appconfig revision list -n {config_store_name} --key {key} --tags {tags}').get_output_in_json()
+        assert len(list_keys) == 1
+
+        # Set key-value with tag1 only
+        tag1_dict = {"tag1": "value1"}
+        tag1 = ' '.join([f"{k}={v}" for k, v in tag1_dict.items()])
+        label_with_tag1 = "labelWithTag1"
+        self.kwargs.update({
+            'label': label_with_tag1,
+            'tag1': tag1
+        })
+
+        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} --tags {tag1} -y',
+             checks=[self.check('key', key_with_tags),
+                 self.check('label', label_with_tag1),
+                    self.check('tags', tag1_dict)])
+
+        # List revisions with tag1 = value1
+        list_keys = self.cmd('appconfig revision list -n {config_store_name} --key {key} --tags {tag1}').get_output_in_json()
+        assert len(list_keys) == 2
+
+        # Set key-value with empty tag value
+        empty_tag_value_dict = {"tag1": ""}
+        tag_with_empty_value = ' '.join([f"{k}={v}" for k, v in empty_tag_value_dict.items()])
+        self.kwargs.update({
+            'tag_with_empty_value': tag_with_empty_value
+        })
+
+        self.cmd('appconfig kv set -n {config_store_name} --key {key} --label {label} --tags {tag_with_empty_value} -y',
+             checks=[self.check('key', key_with_tags),
+                    self.check('tags', empty_tag_value_dict)])
+
+        # List revisions with tag with empty value
+        list_keys = self.cmd('appconfig revision list -n {config_store_name} --key {key} --tags {tag_with_empty_value}').get_output_in_json()
+        assert len(list_keys) == 1
+
+        # Get all key-value revisions for key with all tags
+        revisions = self.cmd('appconfig revision list -n {config_store_name} --key {key} --label *').get_output_in_json()
+        assert len(revisions) == 3

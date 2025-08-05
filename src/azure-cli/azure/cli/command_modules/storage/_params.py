@@ -199,6 +199,15 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         help='Expiration period of the SAS Policy assigned to the storage account, DD.HH:MM:SS.'
     )
 
+    t_expiration_action_type = self.get_models('ExpirationAction', resource_type=ResourceType.MGMT_STORAGE)
+    sas_expiration_action_type = CLIArgumentType(
+        arg_type=get_enum_type(t_expiration_action_type),
+        options_list=['--sas-expiration-action', '--sas-exp-action'],
+        help="The action to be performed when --sas-expiration-period is violated. The 'Log' action can be used "
+             "for audit purposes and the 'Block' action can be used to block and deny the usage of SAS tokens that "
+             "do not adhere to the sas policy expiration period. The default action is 'Log'."
+    )
+
     key_expiration_period_in_days_type = CLIArgumentType(
         options_list=['--key-expiration-period-in-days', '--key-exp-days'], type=int,
         help='Expiration period in days of the Key Policy assigned to the storage account'
@@ -389,7 +398,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The key is the ARM resource identifier of the identity. Only 1 User Assigned identity is '
                    'permitted here.')
         c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
-        c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
+        c.argument('sas_expiration_period', sas_expiration_period_type)
+        c.argument('sas_expiration_action', sas_expiration_action_type)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('enable_nfs_v3', arg_type=get_three_state_flag(),
@@ -492,7 +502,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The key is the ARM resource identifier of the identity. Only 1 User Assigned identity is '
                    'permitted here.')
         c.argument('key_expiration_period_in_days', key_expiration_period_in_days_type, is_preview=True)
-        c.argument('sas_expiration_period', sas_expiration_period_type, is_preview=True)
+        c.argument('sas_expiration_period', sas_expiration_period_type)
+        c.argument('sas_expiration_action', sas_expiration_action_type)
         c.argument('allow_cross_tenant_replication', allow_cross_tenant_replication_type)
         c.argument('default_share_permission', default_share_permission_type)
         c.argument('immutability_period_since_creation_in_days',

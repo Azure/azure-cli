@@ -6,7 +6,7 @@
 from knack.log import get_logger
 
 from azure.cli.core.aaz import AAZStrType
-from ..aaz.latest.vm import Show as _VMShow, ListSizes as _VMListSizes, Update as _VMUpdate
+from ..aaz.latest.vm import Show as _VMShow, ListSizes as _VMListSizes, Update as _VMUpdate, Capture as _VMCapture
 
 logger = get_logger(__name__)
 
@@ -72,3 +72,10 @@ class VMListSizes(_VMListSizes):
         args_schema.location._id_part = None
 
         return args_schema
+
+
+class VMCapture(_VMCapture):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = result.get('output', None) or result.get('resources', [None])[0]
+        return result

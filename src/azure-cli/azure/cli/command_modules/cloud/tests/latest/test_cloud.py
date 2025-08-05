@@ -102,6 +102,11 @@ class CloudTests(ScenarioTest):
         assert result['endpoints']['activeDirectory'] == 'https://login.myendpoint.com/'
         assert result['endpoints']['management'] == 'https://management.myendpoint.com/'
 
+        # Skip cloud discovery
+        self.cmd('cloud update --name {name} --endpoint-resource-manager https://foo.example.com --skip-endpoint-discovery')
+        result = self.cmd('cloud show --name {name}').get_output_in_json()
+        assert result['endpoints']['resourceManager'] == 'https://foo.example.com'
+
         # TODO: Test all arguments of `az cloud update`
 
         self.cmd('cloud set --name {name} --profile latest')

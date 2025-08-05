@@ -355,7 +355,7 @@ def acr_login(cmd,
     _, stderr = p.communicate()
     return_code = p.returncode
 
-    if stderr:
+    if stderr or return_code != 0:  # when docker command process returns non-zero
         if b'error storing credentials' in stderr and b'stub received bad data' in stderr \
            and _check_wincred(login_server):
             # Retry once after disabling wincred

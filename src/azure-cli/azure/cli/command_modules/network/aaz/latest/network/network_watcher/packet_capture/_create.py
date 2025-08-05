@@ -114,7 +114,6 @@ class Create(AAZCommand):
             options=["--time-limit-in-seconds"],
             arg_group="Properties",
             help="Maximum duration of the capture session in seconds.",
-            default=18000,
             fmt=AAZIntArgFormat(
                 maximum=18000,
                 minimum=0,
@@ -124,7 +123,6 @@ class Create(AAZCommand):
             options=["--total-bytes", "--total-bytes-per-session"],
             arg_group="Properties",
             help="Maximum size of the capture output.",
-            default=1073741824,
             fmt=AAZIntArgFormat(
                 maximum=4294967295,
                 minimum=0,

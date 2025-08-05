@@ -603,13 +603,24 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
 
 def b64encode(s):
     """
-    Encodes a string to base64 on 2.x and 3.x
+    Encodes a string to a base64 string.
     :param str s: latin_1 encoded string
     :return: base64 encoded string
     :rtype: str
     """
     encoded = base64.b64encode(s.encode("latin-1"))
-    return encoded if encoded is str else encoded.decode('latin-1')
+    return encoded.decode('latin-1')
+
+
+def b64decode(s):
+    """
+    Decodes a base64 string to a string.
+    :param str s: latin_1 encoded base64 string
+    :return: decoded string
+    :rtype: str
+    """
+    encoded = base64.b64decode(s.encode("latin-1"))
+    return encoded.decode('latin-1')
 
 
 def b64_to_hex(s):
@@ -633,6 +644,7 @@ def todict(obj, post_processor=None):
     """
     from datetime import date, time, datetime, timedelta
     from enum import Enum
+    from azure.core.serialization import attribute_list
     if isinstance(obj, dict):
         result = {k: todict(v, post_processor) for (k, v) in obj.items()}
         return post_processor(obj, result) if post_processor else result
@@ -646,9 +658,12 @@ def todict(obj, post_processor=None):
         return str(obj)
     # This is the only difference with knack.util.todict because for typespec generated SDKs
     # The base model stores data in obj.__dict__['_data'] instead of in obj.__dict__
-    # We need to call obj.as_dict() to extract data for this kind of model
-    if hasattr(obj, 'as_dict') and not hasattr(obj, '_attribute_map'):
-        result = {to_camel_case(k): todict(v, post_processor) for k, v in obj.as_dict().items()}
+    # The way to detect if it's a typespec generated model is to check the private `_is_model` attribute
+    # azure-core provided new function `attribute_list` to list all attribute names
+    # so that we don't need to use raw __dict__ directly
+    if getattr(obj, "_is_model", False):
+        result = {to_camel_case(attr): todict(getattr(obj, attr), post_processor)
+                  for attr in attribute_list(obj) if hasattr(obj, attr)}
         return post_processor(obj, result) if post_processor else result
     if hasattr(obj, '_asdict'):
         return todict(obj._asdict(), post_processor)

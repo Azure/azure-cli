@@ -1277,7 +1277,6 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'yearly_retention': 'P2M',
             'week_of_year': 12,
             'make_backups_immutable': 'False',
-            'backup_storage_access_tier': 'Archive',
             'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
             'keys' : '"https://test123343strehan.vault.azure.net/keys/k2/66f51a6e70f04067af8eaf77805e88b1" "https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
             'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
@@ -1289,14 +1288,12 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             ' --weekly-retention {weekly_retention} --monthly-retention {monthly_retention}'
             ' --yearly-retention {yearly_retention} --week-of-year {week_of_year}'
             ' --make-backups-immutable {make_backups_immutable}',
-            ' --access-tier {backup_storage_access_tier}',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
                 self.check('yearlyRetention', '{yearly_retention}'),
-                self.check('makeBackupsImmutable', '{make_backups_immutable}'),
-                self.check('backupStorageAccessTier', '{backup_storage_access_tier}')])
+                self.check('makeBackupsImmutable', '{make_backups_immutable}')])
 
         # test get long term retention policy on live database
         self.cmd(
@@ -1306,8 +1303,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
                 self.check('yearlyRetention', '{yearly_retention}'),
-                self.check('makeBackupsImmutable', '{make_backups_immutable}'),
-                self.check('backupStorageAccessTier', '{backup_storage_access_tier}')])
+                self.check('makeBackupsImmutable', '{make_backups_immutable}')])
 
         # test list long term retention backups for location
         # with resource group
@@ -2946,19 +2942,19 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1",
-                           location='westeurope')
+                           location='westus3')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
                            parameter_name_for_location="resource_group_location_2",
-                           location='westeurope')
+                           location='westus3')
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='westus3')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='westus3')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2",
-                       location='westeurope')
+                       location='westus3')
     @AllowLargeResponse()
     def test_sql_db_replica_mgmt(self,
                                  resource_group_1, resource_group_location_1,
@@ -2969,7 +2965,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         target_database_name = "cliautomationdb02"
         hs_database_name = "cliautomationhs03"
         hs_target_database_name = "cliautomationnr04"
-        service_objective = 'GP_Gen5_8'
+        service_objective = 'S7'
         hs_service_objective = 'HS_Gen5_8'
 
         # helper class so that it's clear which servers are in which groups
@@ -3142,6 +3138,90 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheck('role', 'Primary'),
                      JMESPathCheck('partnerRole', 'Secondary')])
+
+    @ResourceGroupPreparer(parameter_name="resource_group_1",
+                           parameter_name_for_location="resource_group_location_1",
+                           location='westus2')
+    @SqlServerPreparer(parameter_name="server_name_1",
+                       resource_group_parameter_name="resource_group_1",
+                       location='westus2')
+    @AllowLargeResponse()
+    def test_sql_db_replica_mgmt_cross_subscription(self,
+                                 resource_group_1, resource_group_location_1,
+                                 server_name_1):
+                
+        database_name = "cliautomationdb011"
+        target_database_name = "cliautomationdb02"
+        service_objective = 'GP_Gen5_8'
+
+        self.kwargs.update({
+            "server_name_2" : "cli-automated-tests1",
+            "server_name_3" : "cli-automated-tests2",
+            "resource_group_2" : "CLI-Automated-Tests",
+            "resource_group_location_2" : "southcentralus",
+            "resource_group_location_3" : "westus3",
+            "partner_subscription" : "00000000-0000-0000-0000-000000000000"
+            })
+
+        # helper class so that it's clear which servers are in which groups
+        class ServerInfo:  # pylint: disable=too-few-public-methods
+            def __init__(self, name, group, location, subscription=None):
+                self.name = name
+                self.group = group
+                self.location = location
+                self.subscription = subscription
+
+        s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
+        s2 = ServerInfo(self.kwargs["server_name_2"], self.kwargs["resource_group_2"], self.kwargs["resource_group_location_2"], self.kwargs["partner_subscription"])
+        s3 = ServerInfo(self.kwargs["server_name_3"], self.kwargs["resource_group_2"], self.kwargs["resource_group_location_3"], self.kwargs["partner_subscription"])
+
+        # create db in first server
+        self.cmd('sql db create -g {} -s {} -n {} --yes'
+                 .format(s1.group, s1.name, database_name),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s1.group)])
+
+        # create replica in second server with min params
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-sub-id {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, s2.group, s2.subscription),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group)])
+
+        # create replica in second server with backup storage redundancy
+        backup_storage_redundancy = "zone"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-sub-id {} --backup-storage-redundancy {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, s2.group, s2.subscription, backup_storage_redundancy),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group),
+                     JMESPathCheck('requestedBackupStorageRedundancy', 'Zone')])
+
+        secondary_type = "Geo"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}  --partner-resource-group {} --partner-sub-id {}'
+                 ' --service-objective {} --partner-database {} --secondary-type {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, s2.group, s2.subscription, service_objective, target_database_name, secondary_type),
+                 checks=[
+                     JMESPathCheck('name', target_database_name),
+                     JMESPathCheck('resourceGroup', s2.group),
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
+                     JMESPathCheck('secondaryType', secondary_type)])
+
+        # Create replica in pool in third server with max params (except service objective)
+        pool_name = 'cli-automated-tests-pool'
+
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
+                 ' --partner-resource-group {} --partner-sub-id {} --elastic-pool {}'
+                 .format(s1.group, s1.name, database_name,
+                         s3.name, s3.group, s3.subscription, pool_name),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s3.group),
+                     JMESPathCheck('elasticPoolName', pool_name)])
 
 class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
     def __init__(self, method_name):
@@ -6716,6 +6796,247 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
 
         self.cmd('sql failover-group list -g {} -s {}'
                  .format(s2.group, s2.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)
+                 ])
+
+    # create 2 servers in the same resource group, and 1 server in a different resource group
+    @ResourceGroupPreparer(parameter_name="resource_group_1",
+                           parameter_name_for_location="resource_group_location_1")
+    @ResourceGroupPreparer(parameter_name="resource_group_2",
+                           parameter_name_for_location="resource_group_location_2")
+    @SqlServerPreparer(parameter_name="server_name_1",
+                       resource_group_parameter_name="resource_group_1",
+                       location='northeurope')
+    @SqlServerPreparer(parameter_name="server_name_2",
+                       resource_group_parameter_name="resource_group_1", 
+                       location='uksouth')
+    @SqlServerPreparer(parameter_name="server_name_3",
+                       resource_group_parameter_name="resource_group_2", 
+                       location='swedencentral')
+    def test_sql_failover_group_mgmt_multiple_partners(self,
+                                     resource_group_1, resource_group_location_1,
+                                     resource_group_2, resource_group_location_2,
+                                     server_name_1, server_name_2, server_name_3):
+        # helper class so that it's clear which servers are in which groups
+        class ServerInfo:  # pylint disable=too-few-public-methods
+            def __init__(self, name, group, location):
+                self.name = name
+                self.group = group
+                self.location = location
+
+        from azure.cli.core.commands.client_factory import get_subscription_id
+
+        s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
+        s2 = ServerInfo(server_name_2, resource_group_1, resource_group_location_1)
+        s3 = ServerInfo(server_name_3, resource_group_2, resource_group_location_2)
+
+        failover_group_name = "fgclitest-multiplepartner123789"
+
+        database_name = "db1"
+
+        server2_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}".format(
+            get_subscription_id(self.cli_ctx),
+            resource_group_1,
+            server_name_2)
+
+        server3_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}".format(
+            get_subscription_id(self.cli_ctx),
+            resource_group_2,
+            server_name_3)
+
+        # Create database on primary server
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(s1.group, s1.name, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', s1.group),
+                     JMESPathCheck('name', database_name)
+                 ])
+
+        # Create Failover Group
+        self.cmd(
+            'sql failover-group create -n {} -g {} -s {} --partner-resource-group {} --partner-server {} --failover-policy Automatic --grace-period 2 --partner-server-ids {} {} --ro-failover-policy Enabled'
+                .format(failover_group_name, s1.group, s1.name, s2.group, s2.name, server2_id, server3_id),
+            checks=[
+                JMESPathCheck('name', failover_group_name),
+                JMESPathCheck('resourceGroup', s1.group),
+                JMESPathCheck('length(partnerServers)', 2),
+                JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Enabled'),
+                JMESPathCheck('readOnlyEndpoint.targetServer', server2_id),
+                JMESPathCheck('length(databases)', 0)
+            ])
+
+        # List of all failover groups on the primary server
+        self.cmd('sql failover-group list -g {} -s {}'
+                 .format(s1.group, s1.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', failover_group_name),
+                     JMESPathCheck('[0].replicationRole', 'Primary')
+                 ])
+
+        # Get Failover Group on a partner server and check if role is secondary
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Enabled'),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 0)
+                 ])
+
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                .format(s3.group, s3.name, failover_group_name),
+                checks=[
+                    JMESPathCheck('name', failover_group_name),
+                    JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                    JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                    JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Enabled'),
+                    JMESPathCheck('replicationRole', 'Secondary'),
+                    JMESPathCheck('length(databases)', 0)
+                ])
+
+        if self.in_recording:
+            time.sleep(60)
+
+        # Update Failover Group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {} --ro-endpoint-target {} --ro-failover-policy Disabled'
+                 .format(s1.group, s1.name, failover_group_name, database_name, server3_id),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('readOnlyEndpoint.targetServer', server3_id),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        # Check if properties got propagated to secondary server
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('readOnlyEndpoint.targetServer', server3_id),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s3.group, s3.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('readOnlyEndpoint.targetServer', server3_id),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        # Check if database is created on partner side
+        self.cmd('sql db list -g {} -s {}'
+                 .format(s2.group, s2.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 2)
+                 ])
+
+        self.cmd('sql db list -g {} -s {}'
+                 .format(s3.group, s3.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 2)
+                 ])
+
+        if self.in_recording:
+            time.sleep(60)
+
+        # Update Failover Group failover policy to Manual
+        self.cmd('sql failover-group update -g {} -s {} -n {} --failover-policy Manual'
+                 .format(s1.group, s1.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Manual'),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        # Failover failover group from secondary server and then fail back
+        self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.planned)
+
+        self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.forced)
+
+        self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.hybrid)
+
+        self._test_failover_group_failover(s1, s3, failover_group_name, self.FailoverType.planned)
+
+        self._test_failover_group_failover(s1, s3, failover_group_name, self.FailoverType.forced)
+
+        self._test_failover_group_failover(s1, s3, failover_group_name, self.FailoverType.hybrid)
+
+        # Failover failover group from primary server (No-op)
+        self._test_failover_group_failover_from_primary(s1, s2, failover_group_name, self.FailoverType.planned)
+
+        self._test_failover_group_failover_from_primary(s1, s2, failover_group_name, self.FailoverType.forced)
+
+        self._test_failover_group_failover_from_primary(s1, s2, failover_group_name, self.FailoverType.hybrid)
+
+        # Remove database from failover group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --remove-db {}'
+                 .format(s1.group, s1.name, failover_group_name, database_name),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Manual'),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 0)
+                 ])
+
+        # Check if database got removed
+        self.cmd('sql db show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, database_name),
+                 checks=[
+                     JMESPathCheck('[0].failoverGroupId', 'None')
+                 ])
+
+        self.cmd('sql db show -g {} -s {} -n {}'
+                 .format(s3.group, s3.name, database_name),
+                 checks=[
+                     JMESPathCheck('[0].failoverGroupId', 'None')
+                 ])
+
+        # Remove partner server from failover group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --partner-server-ids {}'
+                 .format(s1.group, s1.name, failover_group_name, server3_id),
+                 checks=[
+                     JMESPathCheck('partnerServers[0].id', server3_id),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Manual'),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('readOnlyEndpoint.targetServer', server3_id),
+                     JMESPathCheck('length(databases)', 0)
+                 ])
+
+        # Check partner server was removed
+        self.cmd('sql failover-group list -g {} -s {}'
+                 .format(s2.group, s2.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)
+                 ])
+
+        # Drop failover group
+        self.cmd('sql failover-group delete -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, failover_group_name))
+
+        # Check if failover group really got dropped
+        self.cmd('sql failover-group list -g {} -s {}'
+                 .format(s1.group, s1.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)
+                 ])
+
+        self.cmd('sql failover-group list -g {} -s {}'
+                 .format(s3.group, s3.name),
                  checks=[
                      JMESPathCheck('length(@)', 0)
                  ])

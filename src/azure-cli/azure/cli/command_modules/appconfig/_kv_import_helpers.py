@@ -457,6 +457,7 @@ def __import_kvset_from_file(
     path,
     strict,
     yes,
+    dry_run=False,
     import_mode=ImportMode.IGNORE_MATCH,
     correlation_request_id=None,
 ):
@@ -498,7 +499,7 @@ def __import_kvset_from_file(
         show_update_diff=False,
     )
 
-    if not changes_detected:
+    if not changes_detected or dry_run:
         return
 
     if not yes:
