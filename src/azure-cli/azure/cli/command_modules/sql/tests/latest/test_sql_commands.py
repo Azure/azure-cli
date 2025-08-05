@@ -85,11 +85,6 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     subnet_name = 'ManagedInstance'
     subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
 
-    # Azure AD Entra ID admin configuration for managed instance creation
-    external_admin_name = 'msdata-Database Systems-8313371e-0879-428e-b1da-6353575a9192'
-    external_admin_sid = '05159003-af0d-4d45-8309-1992b1774dd9'
-    external_admin_principal_type = 'Application'
-
     # For cross-subnet update SLO, we need a target subnet to move managed instance to.
     target_vnet_name = 'vnet-mi-tooling'
     target_subnet_name = 'ManagedInstance2'
@@ -115,7 +110,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
-                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4, enable_ad_only_auth = True):
+                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4):
         super().__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
         self.admin_user = admin_user
@@ -131,7 +126,6 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.is_geo_secondary = is_geo_secondary
         self.subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.subscription_id, self.group, vnet_name, self.subnet_name)
         self.v_core = v_core
-        self.enable_ad_only_auth = enable_ad_only_auth
 
 
     def create_resource(self, name, **kwargs):
@@ -142,9 +136,6 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         template = 'az sql mi create -g {} -n {} -l {} -u {} -p {} --subnet {} --license-type {}' \
                    ' --collation {} --capacity {} --storage {} --edition {} --family {} --tags {}' \
                    ' --proxy-override {} --bsr Geo'
-
-        if self.enable_ad_only_auth:
-            template += f" --enable-ad-only-auth --external-admin-name '{self.external_admin_name}' --external-admin-sid '{self.external_admin_sid}' --external-admin-principal-type '{self.external_admin_principal_type}'"
 
         if self.public:
             template += ' --public-data-endpoint-enabled'
@@ -157,7 +148,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
 
         if self.identityType == ResourceIdType.system_assigned.value:
             template += f" --assign-identity"
-            
+
         if self.otherParams:
             template += f" {self.otherParams}"
 
@@ -284,39 +275,6 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         # delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group_1, server_name_3), checks=NoneCheck())
-
-    @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
-    def test_sql_server_create_with_tags(self, resource_group, resource_group_location):
-        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
-        admin_login = 'admin123'
-        admin_password = 'SecretPassword123'
-
-        # test create sql server with tags
-        server = self.cmd('sql server create -g {} --name {} '
-                         '--admin-user {} --admin-password {} '
-                         '--tags env=test purpose=demo'
-                         .format(resource_group, server_name, admin_login, admin_password),
-                         checks=[
-                             JMESPathCheck('name', server_name),
-                             JMESPathCheck('location', resource_group_location),
-                             JMESPathCheck('resourceGroup', resource_group),
-                             JMESPathCheck('administratorLogin', admin_login),
-                             JMESPathCheck('tags.env', 'test'),
-                             JMESPathCheck('tags.purpose', 'demo')]).get_output_in_json()
-
-        # test show sql server to verify tags are preserved
-        self.cmd('sql server show -g {} --name {}'
-                 .format(resource_group, server_name),
-                 checks=[
-                     JMESPathCheck('name', server_name),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('administratorLogin', admin_login),
-                     JMESPathCheck('tags.env', 'test'),
-                     JMESPathCheck('tags.purpose', 'demo')])
-
-        # cleanup
-        self.cmd('sql server delete -g {} --name {} --yes'
-                 .format(resource_group, server_name), checks=NoneCheck())
 
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     def test_sql_server_public_network_access_create_mgmt(self, resource_group_1, resource_group_location):
@@ -625,8 +583,8 @@ class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus2')
-    @SqlServerPreparer(location='westus2')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     @live_only()
     def test_sql_outbound_firewall_mgmt(self, resource_group, resource_group_location, server):
         outbound_firewall_rule_allowed_fqdn_1 = 'testOBFR1'
@@ -934,7 +892,6 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
-    @unittest.skip('Cannot record as hard-coded resources does not exist anymore. ADO Bug-4599812.')
     def test_sql_per_db_cmk(self):
         server = "pstestsvr"
         resource_group = "pstest"
@@ -1306,112 +1263,6 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
                 self.check('diffBackupIntervalInHours', '{diffbackup_hours_v2}')])
 
 
-class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
-    @live_only()
-    def test_sql_db_long_term_retention_immutability(
-            self):
-        self.kwargs.update({
-            'rg': 'cli_test_donnotdelete',
-            'loc': 'eastus2euap',
-            'server_name': 'clitestserverdonotdeletecanaryeast',
-            'database_name': 'cli_test_donnotdelete1',
-            'weekly_retention': 'P4W',
-            'time_based_immutability': 'Enabled'
-        })
-
-        self.cmd(
-            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
-            ' --weekly-retention {weekly_retention}'
-            ' --time-based-immutability {time_based_immutability} --yes',
-            checks=[
-                self.check('resourceGroup', '{rg}'),
-                self.check('weeklyRetention', '{weekly_retention}'),
-                self.check('timeBasedImmutability', '{time_based_immutability}')])
-           # setup for test show long term retention backup
- 
-        backup = self.cmd(
-        'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} --latest True').get_output_in_json()
-
-        self.kwargs.update({
-            'backup_name': backup[0]['name'],
-        })
-
-         # set-legal-hold-immutability test
-        self.cmd(
-             'sql db ltr-backup set-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
-              checks=[
-                 self.check('resourceGroup', '{rg}'),
-                 self.check('serverName', '{server_name}'),
-                 self.check('databaseName', '{database_name}'),
-                 self.check('name', '{backup_name}'),
-                 self.check('legalHoldImmutability', 'Enabled')])
-
-         # remove-legal-hold-immutability test
-        self.cmd(
-             'sql db ltr-backup remove-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
-              checks=[
-                 self.check('resourceGroup', '{rg}'),
-                 self.check('serverName', '{server_name}'),
-                 self.check('databaseName', '{database_name}'),
-                 self.check('name', '{backup_name}'),
-                 self.check('legalHoldImmutability', 'Disabled')])
-
-         # remove-time-based-immutability test
-        self.cmd(
-             'sql db ltr-backup remove-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
-              checks=[
-                 self.check('resourceGroup', '{rg}'),
-                 self.check('serverName', '{server_name}'),
-                 self.check('databaseName', '{database_name}'),
-                 self.check('name', '{backup_name}'),
-                 self.check('timeBasedImmutability', 'Disabled'),
-                 self.check('legalHoldImmutability', 'Disabled')])
-
-
-          # setup for test lock long term retention backup
-        self.kwargs.update({
-              'database_name': 'cli_test_donnotdelete2',
-          })
-
-        backup = self.cmd(
-              'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} --latest True').get_output_in_json()
-
-        self.kwargs.update({
-              'backup_name': backup[0]['name'],
-          })
-
-        # lock-time-based-immutability
-        self.cmd(
-              'sql db ltr-backup lock-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
-               checks=[
-                  self.check('resourceGroup', '{rg}'),
-                  self.check('serverName', '{server_name}'),
-                  self.check('databaseName', '{database_name}'),
-                  self.check('name', '{backup_name}'),
-                  self.check('timeBasedImmutability', 'Enabled'),
-                  self.check('legalHoldImmutability', 'Disabled'),
-                  self.check('timeBasedImmutabilityMode', 'Locked')])
-
-        # setup for test lock long term retention backup
-        self.kwargs.update({
-              'time_based_immutability': 'Enabled',
-              'database_name': 'cli_test_donnotdelete3',
-              'time_based_immutability_mode': 'Locked'
-          })
-
-        # test update long term retention plicy to time based immutability locked mode on live database
-        self.cmd(
-            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
-            ' --weekly-retention {weekly_retention}'
-            ' --time-based-immutability {time_based_immutability}' 
-            ' --time-based-immutability-mode {time_based_immutability_mode} --yes',
-            checks=[
-                self.check('resourceGroup', '{rg}'),
-                self.check('weeklyRetention', '{weekly_retention}'),
-                self.check('timeBasedImmutability', '{time_based_immutability}'),
-                self.check('timeBasedImmutabilityMode', '{time_based_immutability_mode}')])
-      
-
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     @live_only()
     def test_sql_db_long_term_retention(
@@ -1425,7 +1276,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
             'week_of_year': 12,
-            'time_based_mmutability': 'False',
+            'make_backups_immutable': 'False',
             'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
             'keys' : '"https://test123343strehan.vault.azure.net/keys/k2/66f51a6e70f04067af8eaf77805e88b1" "https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
             'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
@@ -1436,13 +1287,13 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
             ' --weekly-retention {weekly_retention} --monthly-retention {monthly_retention}'
             ' --yearly-retention {yearly_retention} --week-of-year {week_of_year}'
-            ' --time-based-immutability {time_based_immutability}',
+            ' --make-backups-immutable {make_backups_immutable}',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
                 self.check('yearlyRetention', '{yearly_retention}'),
-                self.check('timeBasedImmutability', '{time_based_immutability}')])
+                self.check('makeBackupsImmutable', '{make_backups_immutable}')])
 
         # test get long term retention policy on live database
         self.cmd(
@@ -1452,7 +1303,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
                 self.check('yearlyRetention', '{yearly_retention}'),
-                self.check('timeBasedImmutability', '{time_based_immutability}')])
+                self.check('makeBackupsImmutable', '{make_backups_immutable}')])
 
         # test list long term retention backups for location
         # with resource group
@@ -1508,9 +1359,8 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
                 self.check('resourceGroup', '{rg}'),
                 self.check('serverName', '{server_name}'),
                 self.check('databaseName', '{database_name}'),
-                self.check('name', '{backup_name}'),
-                self.check('timeBasedImmutability', '{time_based_immutability}')])
-        
+                self.check('name', '{backup_name}')])
+
         # test restore managed database from LTR backup
         self.kwargs.update({
             'dest_database_name': 'cli-restore-ltr3'
@@ -1530,8 +1380,6 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-backup delete -l {loc} -s {server_name} -d {database_name} -n \'{backup_name}\' --yes',
             checks=[NoneCheck()])
-
-
 
 
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
@@ -1601,7 +1449,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
             self.cmd('sql mi op list -g {} --mi {}'
                      .format(resource_group, managed_instance_name),
                      checks=[
-                         JMESPathCheck('length(@)', 2),
+                         JMESPathCheck('length(@)', 3),
                          JMESPathCheck('[0].resourceGroup', resource_group),
                          JMESPathCheck('[0].managedInstanceName', managed_instance_name)
                      ])
@@ -1611,7 +1459,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
         # Cancel operation
         self.cmd('sql mi op cancel -g {} --mi {} -n {}'
-                 .format(resource_group, managed_instance_name, ops[1]['name']))
+                 .format(resource_group, managed_instance_name, ops[2]['name']))
 
 
 class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
@@ -1776,9 +1624,9 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
     @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1',
-                       location='eastus2euap')
+                       location='eastus')
     @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2',
-                       location='eastus2euap')
+                       location='eastus')
     @AllowLargeResponse()
     def test_sql_db_copy_with_perdb_cmk(self, resource_group_1, resource_group_2,
                          resource_group_location,
@@ -1788,13 +1636,13 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         service_objective = 'GP_Gen5_8'
 
         # copy db with per db cmk Enabled
-        encryption_protector = "https://pstestkv3.vault.azure.net/keys/testkey3/90bfc038075241518bf00ba4bb00ce1d"
-        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+        encryption_protector = "https://pstestkv2.vault.azure.net/keys/testkey4/3d4947c13419445e9bf97500c8ddde37"
+        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
 
         # create db with db level encryption protector and umi
 
         # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
-        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
+        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
         self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --yes'
                  .format(resource_group_1, server1, database_name, encryption_protector, umi),
                  checks=[
@@ -3312,7 +3160,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
             "resource_group_2" : "CLI-Automated-Tests",
             "resource_group_location_2" : "southcentralus",
             "resource_group_location_3" : "westus3",
-            "partner_subscription" : "00000000-0000-0000-0000-000000000000"  # replace with actual subscription id for record mode
+            "partner_subscription" : "00000000-0000-0000-0000-000000000000"
             })
 
         # helper class so that it's clear which servers are in which groups
@@ -3361,8 +3209,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', target_database_name),
                      JMESPathCheck('resourceGroup', s2.group),
                      JMESPathCheck('requestedServiceObjectiveName', service_objective),
-                    # JMESPathCheck('secondaryType', secondary_type) #Remove this check as secondaryType is returned as null in cross subscription scenario
-                ])
+                     JMESPathCheck('secondaryType', secondary_type)])
 
         # Create replica in pool in third server with max params (except service objective)
         pool_name = 'cli-automated-tests-pool'
@@ -5390,11 +5237,7 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
             'maintenance_id': self._get_full_maintenance_id(self.MMI1),
             'intance_pool_name': '',
             'database_format': 'AlwaysUpToDate',
-            'pricing_model': 'Regular',
-            'enable_ad_only_auth': '--enable-ad-only-auth',
-            'external_admin_name': ManagedInstancePreparer.external_admin_name,
-            'external_admin_sid': ManagedInstancePreparer.external_admin_sid,
-            'external_admin_principal_type': ManagedInstancePreparer.external_admin_principal_type
+            'pricing_model': 'Regular'
         })
 
         # test create sql managed_instance with FMW
@@ -5402,9 +5245,7 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
                                     '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" '
-                                    '--instance-pool-name "{intance_pool_name}" --database-format "{database_format}" --pricing-model "{pricing_model}" '
-                                    '{enable_ad_only_auth} --external-admin-name "{external_admin_name}" '
-                                    '--external-admin-sid {external_admin_sid} --external-admin-principal-type {external_admin_principal_type} ',
+                                    '--instance-pool-name "{intance_pool_name}" --database-format "{database_format}" --pricing-model "{pricing_model}"',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -5496,27 +5337,25 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         time.sleep(120)
 
         # test update sql managed_instance 1
-        # Test removed: admin password updates not allowed with Azure AD-only auth enabled
-        # self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
-        #          .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
-        #          checks=[
-        #              JMESPathCheck('name', managed_instance_name_1),
-        #              JMESPathCheck('resourceGroup', resource_group_1),
-        #              # remove this check since there is an issue and the fix is being deployed currently
-        #              # JMESPathCheck('identity.type', 'SystemAssigned')
-        #              JMESPathCheck('administratorLogin', user)])
+        self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
+                 .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     # remove this check since there is an issue and the fix is being deployed currently
+                     # JMESPathCheck('identity.type', 'SystemAssigned')
+                     JMESPathCheck('administratorLogin', user)])
 
         # test update without identity parameter, validate identity still exists
         # also use --ids instead of -g/-n
-        # Test removed: admin password updates not allowed with Azure AD-only auth enabled
-        # self.cmd('sql mi update --ids {} --admin-password {}'
-        #          .format(managed_instance_1['id'], admin_passwords[0]),
-        #          checks=[
-        #              JMESPathCheck('name', managed_instance_name_1),
-        #              JMESPathCheck('resourceGroup', resource_group_1),
-        #              # remove this check since there is an issue and the fix is being deployed currently
-        #              # JMESPathCheck('identity.type', 'SystemAssigned')
-        #              JMESPathCheck('administratorLogin', user)])
+        self.cmd('sql mi update --ids {} --admin-password {}'
+                 .format(managed_instance_1['id'], admin_passwords[0]),
+                 checks=[
+                     JMESPathCheck('name', managed_instance_name_1),
+                     JMESPathCheck('resourceGroup', resource_group_1),
+                     # remove this check since there is an issue and the fix is being deployed currently
+                     # JMESPathCheck('identity.type', 'SystemAssigned')
+                     JMESPathCheck('administratorLogin', user)])
 
         # test update proxyOverride and publicDataEndpointEnabled
         # test is currently removed due to long execution time due to waiting for SqlAliasStateMachine completion to complete
@@ -6796,8 +6635,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                        resource_group_parameter_name="resource_group_1",
                        location='northeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
-                       resource_group_parameter_name="resource_group_2",
-                       location='uksouth')
+                       resource_group_parameter_name="resource_group_2", location='eastus')
     def test_sql_failover_group_mgmt(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,
@@ -8439,9 +8277,9 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.kwargs.update({
             'recoverable_db': recoverable_db['id']
         })
-        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db5 -r {recoverable_db}',
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db4 -r {recoverable_db}',
                 checks=[
-                    JMESPathCheck('name', "recovered_db5")])
+                    JMESPathCheck('name', "recovered_db4")])
 
 
 class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
