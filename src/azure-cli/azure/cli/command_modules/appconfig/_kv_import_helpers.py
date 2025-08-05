@@ -825,12 +825,12 @@ def __read_kv_from_kubernetes_configmap(
         cmd.cli_ctx.data['safe_params'] = original_safe_params
 
 
-def __extract_kv_from_configmap_data(configmap_data, content_type, prefix_to_add="", format_=None, depth=None, separator=None):
+def __extract_kv_from_configmap_data(configmap, content_type, prefix_to_add="", format_=None, depth=None, separator=None):
     """
     Helper function to extract key-value pairs from ConfigMap data.
 
     Args:
-        configmap_data (dict): The ConfigMap data as a dictionary
+        configmap (dict): The ConfigMap data as a dictionary
         prefix_to_add (str): Prefix to add to each key
         content_type (str): Content type to apply to the key-values
         format_ (str): Format of the data in the ConfigMap (e.g., "json", "yaml")
@@ -842,11 +842,11 @@ def __extract_kv_from_configmap_data(configmap_data, content_type, prefix_to_add
     """
     key_values = []
 
-    if 'data' not in configmap_data:
+    if not configmap.get('data', None):
         logger.warning("ConfigMap exists but has no data")
         return key_values
 
-    for key, value in configmap_data['data'].items():
+    for key, value in configmap['data'].items():
         if format_ in ("json", "yaml", "properties"):
             if format_ == "json":
                 try:
