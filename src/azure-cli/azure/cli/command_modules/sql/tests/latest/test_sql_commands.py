@@ -1293,9 +1293,9 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
             'backup_name': backup[0]['name'],
         })
 
-         # set_legal_hold_immutability test
+         # set-legal-hold-immutability test
         self.cmd(
-             'sql db ltr-backup set_legal_hold_immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
+             'sql db ltr-backup set-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
               checks=[
                  self.check('resourceGroup', '{rg}'),
                  self.check('serverName', '{server_name}'),
@@ -1303,9 +1303,9 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
                  self.check('name', '{backup_name}'),
                  self.check('legalHoldImmutability', 'Enabled')])
 
-         # remove_legal_hold_immutability test
+         # remove-legal-hold-immutability test
         self.cmd(
-             'sql db ltr-backup remove_legal_hold_immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
+             'sql db ltr-backup remove-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
               checks=[
                  self.check('resourceGroup', '{rg}'),
                  self.check('serverName', '{server_name}'),
