@@ -527,6 +527,11 @@ def load_command_table(self, _):
         self.command_table['sig gallery-application version create'] = SigGalleryApplicationVersionCreate(loader=self)
         self.command_table['sig gallery-application version update'] = SiggalleryApplicationversionUpdate(loader=self)
 
+    with self.command_group('sig in-vm-access-control-profile-version'):
+        from .operations.sig_in_vm_access_control_profile_version import SigInVMAccessControlProfileVersionCreate, SigInVMAccessControlProfileVersionUpdate
+        self.command_table['sig in-vm-access-control-profile-version create'] = SigInVMAccessControlProfileVersionCreate(loader=self)
+        self.command_table['sig in-vm-access-control-profile-version update'] = SigInVMAccessControlProfileVersionUpdate(loader=self)
+
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         from .operations.ppg import PPGCreate, PPGUpdate
         self.command_table['ppg create'] = PPGCreate(loader=self)
@@ -556,9 +561,9 @@ def load_command_table(self, _):
 
     with self.command_group('capacity reservation', capacity_reservations_sdk, min_api='2021-04-01',
                             client_factory=cf_capacity_reservations) as g:
-        g.custom_command('create', 'create_capacity_reservation', supports_no_wait=True)
-        g.custom_command('update', 'update_capacity_reservation', supports_no_wait=True)
-        g.custom_show_command('show', 'show_capacity_reservation')
+        from .operations.capacity_reservation import CapacityReservationUpdate, CapacityReservationShow
+        self.command_table['capacity reservation update'] = CapacityReservationUpdate(loader=self)
+        self.command_table['capacity reservation show'] = CapacityReservationShow(loader=self)
 
     with self.command_group('restore-point', restore_point, client_factory=cf_restore_point, min_api='2021-03-01') as g:
         g.custom_show_command('show', 'restore_point_show')

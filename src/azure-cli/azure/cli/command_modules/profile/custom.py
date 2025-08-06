@@ -122,6 +122,7 @@ def account_clear(cmd):
 
 # pylint: disable=too-many-branches, too-many-locals
 def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
+          claims_challenge=None,
           # Device code flow
           use_device_code=False,
           # Service principal
@@ -147,6 +148,10 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
             logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_AZURE_CLOUD)
         else:
             logger.warning(USERNAME_PASSWORD_DEPRECATION_WARNING_OTHER_CLOUD)
+
+    if claims_challenge:
+        from azure.cli.core.util import b64decode
+        claims_challenge = b64decode(claims_challenge)
 
     interactive = False
 
@@ -194,7 +199,9 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
         use_cert_sn_issuer=use_cert_sn_issuer,
-        show_progress=select_subscription)
+        show_progress=select_subscription,
+        claims_challenge=claims_challenge
+    )
 
     # Launch interactive account selection. No JSON output.
     if select_subscription:

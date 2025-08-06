@@ -20,7 +20,7 @@ PASSWORD_CERTIFICATE_WARNING = (
     "To pass a service principal certificate, use --certificate instead.")
 
 
-def aad_error_handler(error, **kwargs):
+def aad_error_handler(error, tenant=None, scopes=None, claims_challenge=None):
     """ Handle the error from AAD server returned by ADAL or MSAL. """
 
     # https://learn.microsoft.com/en-us/azure/active-directory/develop/reference-aadsts-error-codes
@@ -28,6 +28,8 @@ def aad_error_handler(error, **kwargs):
 
     # To trigger this function for testing, simply provide an invalid scope:
     # az account get-access-token --scope https://my-invalid-scope
+
+    logger.debug('MSAL error: %r', error)
 
     from azure.cli.core.util import in_cloud_console
     if in_cloud_console():
@@ -39,33 +41,52 @@ def aad_error_handler(error, **kwargs):
     error_codes = error.get('error_codes')
 
     # Build recommendation message
+    recommendation = None
     if error_codes and 7000215 in error_codes:
         recommendation = PASSWORD_CERTIFICATE_WARNING
     else:
-        login_command = _generate_login_command(**kwargs)
-        recommendation = (
-            # Cloud Shell uses IMDS-like interface for implicit login. If getting token/cert failed,
-            # we let the user explicitly log in to AAD with MSAL.
-            "Please explicitly log in with:\n{}" if error.get('error') == 'broker_error'
-            else "Interactive authentication is needed. Please run:\n{}").format(login_command)
+        login_command = _generate_login_command(tenant=tenant, scopes=scopes, claims_challenge=claims_challenge)
+        login_message = ('Run the command below to authenticate interactively; '
+                         'additional arguments may be added as needed:\n'
+                         f'{login_command}')
+
+        # During a challenge, the exception will caught by azure-mgmt-core, so we show a warning now
+        if claims_challenge:
+            logger.info('Failed to acquire token silently. Error detail: %s', error_description)
+            logger.warning(login_message)
+        else:
+            recommendation = login_message
 
     from azure.cli.core.azclierror import AuthenticationError
     raise AuthenticationError(error_description, msal_error=error, recommendation=recommendation)
 
 
-def _generate_login_command(scopes=None, claims_challenge=None):
+def _generate_login_command(tenant=None, scopes=None, claims_challenge=None):
     login_command = ['az login']
 
-    # Rejected by Conditional Access policy, like MFA
+    # Rejected by Conditional Access policy, like MFA.
+    # MFA status is not shared between tenants. Specifying tenant triggers the MFA process for that tenant.
+    # Double quotes are not necessary, but we add them following the best practice to avoid shell interpretation.
+    if tenant:
+        login_command.extend(['--tenant', f'"{tenant}"'])
+
+    # Some scopes (such as Graph) may require MFA while ARM may not.
+    # Specifying scope triggers the MFA process for that scope.
     if scopes:
-        login_command.append('--scope {}'.format(' '.join(scopes)))
+        login_command.append('--scope')
+        for s in scopes:
+            login_command.append(f'"{s}"')
 
     # Rejected by CAE
     if claims_challenge:
-        # Explicit logout is needed: https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/335
-        return 'az logout\n' + ' '.join(login_command)
+        from azure.cli.core.util import b64encode
+        # Base64 encode the claims_challenge to avoid shell interpretation
+        claims_challenge_encoded = b64encode(claims_challenge)
+        login_command.extend(['--claims-challenge', f'"{claims_challenge_encoded}"'])
 
-    return ' '.join(login_command)
+    # Explicit logout is preferred, making sure MSAL cache is purged:
+    # https://github.com/AzureAD/microsoft-authentication-library-for-python/issues/335
+    return 'az logout\n' + ' '.join(login_command)
 
 
 def resource_to_scopes(resource):
@@ -106,7 +127,7 @@ def scopes_to_resource(scopes):
     return scope
 
 
-def check_result(result, **kwargs):
+def check_result(result, tenant=None, scopes=None, claims_challenge=None):
     """Parse the result returned by MSAL:
 
     1. Check if the MSAL result contains a valid access token.
@@ -125,7 +146,7 @@ def check_result(result, **kwargs):
         set_msal_telemetry(result['msal_telemetry'])
 
     if 'error' in result:
-        aad_error_handler(result, **kwargs)
+        aad_error_handler(result, tenant=tenant, scopes=scopes, claims_challenge=claims_challenge)
 
     # For user authentication
     if 'id_token_claims' in result:

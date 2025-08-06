@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-04-15",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2025-04-15", "identity"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}", "2025-06-01", "identity"],
         ]
     }
 
@@ -131,7 +131,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-15",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -235,7 +235,9 @@ class _ShowHelper:
         )
 
         user_assigned_identities = _schema_profile_read.identity.user_assigned_identities
-        user_assigned_identities.Element = AAZObjectType()
+        user_assigned_identities.Element = AAZObjectType(
+            nullable=True,
+        )
 
         _element = _schema_profile_read.identity.user_assigned_identities.Element
         _element.client_id = AAZStrType(

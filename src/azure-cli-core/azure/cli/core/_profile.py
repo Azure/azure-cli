@@ -152,7 +152,7 @@ class Profile:
               allow_no_subscriptions=False,
               use_cert_sn_issuer=None,
               show_progress=False,
-              **kwargs):
+              claims_challenge=None):
         """
         For service principal, `password` is a dict returned by ServicePrincipalAuth.build_credential
         """
@@ -172,12 +172,12 @@ class Profile:
                 use_device_code = True
 
             if use_device_code:
-                user_identity = identity.login_with_device_code(scopes=scopes, **kwargs)
+                user_identity = identity.login_with_device_code(scopes=scopes)
             else:
-                user_identity = identity.login_with_auth_code(scopes=scopes, **kwargs)
+                user_identity = identity.login_with_auth_code(scopes=scopes, claims_challenge=claims_challenge)
         else:
             if not is_service_principal:
-                user_identity = identity.login_with_username_password(username, password, scopes=scopes, **kwargs)
+                user_identity = identity.login_with_username_password(username, password, scopes=scopes)
             else:
                 identity.login_with_service_principal(username, password, scopes=scopes)
 

@@ -544,6 +544,8 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('ids', deprecate_info=c.deprecate(target='--ids', redirect='--disks', hide=True))
         c.argument('disk_ids', nargs='+', min_api='2024-03-01', help='The disk IDs of the managed disk (space-delimited).')
+        c.argument('source_snapshots_or_disks', options_list=['--source-snapshots-or-disks', '--source-resource'], nargs='+', min_api='2024-11-01', help='Create a data disk from a snapshot or another disk. Can use the ID of a disk or snapshot.')
+        c.argument('source_disk_restore_point', options_list=['--source-disk-restore-point', '--source-disk-rp'], nargs='+', min_api='2024-11-01', help='create a data disk from a disk restore point. Can use the ID of a disk restore point.')
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
@@ -740,6 +742,7 @@ def load_arguments(self, _):
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In Uniform mode, you define a virtual machine model and Azure will generate identical instances based on that model.',
                    arg_type=get_enum_type(['Uniform']), default='Uniform', max_api='2020-09-30')
         c.argument('scale_in_policy', scale_in_policy_type)
+        c.argument('enable_automatic_repairs', options_list=['--enable-automatic-repairs', '--enable-auto-repairs'], min_api='2021-11-01', arg_type=get_three_state_flag(), help='Enable automatic repairs')
         c.argument('automatic_repairs_grace_period', min_api='2018-10-01',
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
         c.argument('automatic_repairs_action', arg_type=get_enum_type(['Replace', 'Restart', 'Reimage']), min_api='2021-11-01', help='Type of repair action that will be used for repairing unhealthy virtual machines in the scale set.')
@@ -1243,7 +1246,7 @@ def load_arguments(self, _):
             c.argument('v_cpus_available', type=int, min_api='2021-11-01', help='Specify the number of vCPUs available')
             c.argument('v_cpus_per_core', type=int, min_api='2021-11-01', help='Specify the ratio of vCPU to physical core. Setting this property to 1 also means that hyper-threading is disabled.')
             c.argument('disk_controller_type', disk_controller_type)
-            c.argument('enable_proxy_agent', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Specify whether proxy agent feature should be enabled on the virtual machine or virtual machine scale set.')
+            c.argument('enable_proxy_agent', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Specify whether metadata security protoco (proxy agent) feature should be enabled on the virtual machine or virtual machine scale set.')
             c.argument('proxy_agent_mode', deprecate_info=c.deprecate(target='--proxy-agent-mode', redirect='--wire-server-mode'), arg_type=get_enum_type(self.get_models('Mode')), min_api='2023-09-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
             c.argument('wire_server_mode', arg_type=get_enum_type(self.get_models('Mode')), min_api='2024-11-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
             c.argument('wire_server_access_control_profile_reference_id', options_list=['--wire-server-access-control-profile-reference-id', '--wire-server-profile-id'], min_api='2024-11-01', help='Specify the access control profile version resource id of wire server.')
@@ -1476,22 +1479,6 @@ def load_arguments(self, _):
 
     with self.argument_context('capacity reservation group show') as c:
         c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve the list of instance views of the capacity reservations under the capacity reservation group which is a snapshot of the runtime properties of a capacity reservation that is managed by the platform and can change outside of control plane operations.')
-
-    with self.argument_context('capacity reservation') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), validator=get_default_location_from_resource_group)
-        c.argument('capacity_reservation_group_name', options_list=['--capacity-reservation-group', '-c'],
-                   help='The name of the capacity reservation group.')
-        c.argument('capacity_reservation_name', options_list=['--capacity-reservation-name', '-n'],
-                   help='The name of the capacity reservation.')
-        c.argument('capacity', type=int, help='Specify the number of virtual machines in the scale set.')
-        c.argument('tags', tags_type)
-
-    with self.argument_context('capacity reservation create') as c:
-        c.argument('zone', zone_type, help='Availability Zone to use for this capacity reservation. The zone has to be single value and also should be part for the list of zones specified during the capacity reservation group creation. If not provided, the reservation supports only non-zonal deployments. If provided, enforces VM/VMSS using this capacity reservation to be in same zone.')
-        c.argument('sku_name', options_list=['--sku', '-s'], required=True, help='The SKU of the resource for which capacity needs be reserved. Currently VM Skus with the capability called "CapacityReservationSupported" set to true are supported. Refer to List Microsoft.Compute SKUs in a region (https://learn.microsoft.com/rest/api/compute/resourceskus/list) for supported values.')
-
-    with self.argument_context('capacity reservation show') as c:
-        c.argument('instance_view', action='store_true', options_list=['--instance-view', '-i'], help='Retrieve a snapshot of the runtime properties of the capacity reservation that is managed by the platform and can change outside of control plane operations.')
     # endRegion
 
     # region Restore point
