@@ -1319,7 +1319,6 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
             'time_based_immutability': 'Enabled'
         })
 
-        # test update long term retention on live database
         self.cmd(
             'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
             ' --weekly-retention {weekly_retention}'
@@ -1345,7 +1344,6 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
                  self.check('serverName', '{server_name}'),
                  self.check('databaseName', '{database_name}'),
                  self.check('name', '{backup_name}'),
-            #     self.check('timeBasedImmutability', '{time_based_immutability}'),
                  self.check('legalHoldImmutability', 'Enabled')])
 
          # remove_legal_hold_immutability test
@@ -1356,7 +1354,6 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
                  self.check('serverName', '{server_name}'),
                  self.check('databaseName', '{database_name}'),
                  self.check('name', '{backup_name}'),
-              #   self.check('timeBasedImmutability', '{time_based_immutability}'),
                  self.check('legalHoldImmutability', 'Disabled')])
 
          # disable-time-based-immutability test
@@ -1383,7 +1380,7 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
               'backup_name': backup[0]['name'],
           })
 
-          # disable-time-based-immutability
+        # lock-time-based-immutability
         self.cmd(
               'sql db ltr-backup lock-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
                checks=[
@@ -1394,6 +1391,26 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
                   self.check('timeBasedImmutability', 'Enabled'),
                   self.check('legalHoldImmutability', 'Disabled'),
                   self.check('timeBasedImmutabilityMode', 'Locked')])
+
+        # setup for test lock long term retention backup
+        self.kwargs.update({
+              'time_based_immutability': 'Enabled',
+              'database_name': 'cli_test_donnotdelete3',
+              'time_based_immutability_mode': 'Locked'
+          })
+
+        # test update long term retention plicy to time based immutability locked mode on live database
+        self.cmd(
+            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
+            ' --weekly-retention {weekly_retention}'
+            ' --time-based-immutability {time_based_immutability}' 
+            ' --time-based-immutability-mode {time_based_immutability_mode} --yes y',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('timeBasedImmutability', '{time_based_immutability}'),
+                self.check('timeBasedImmutabilityMode', '{time_based_immutability_mode}')])
+      
 
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     @live_only()

@@ -3144,6 +3144,7 @@ def update_long_term_retention(
     kwargs['week_of_year'] = week_of_year
 
     kwargs['time_based_immutability'] = time_based_immutability
+    kwargs['time_based_immutability_mode'] = time_based_immutability_mode
 
     policy = client.begin_create_or_update(
         database_name=database_name,
