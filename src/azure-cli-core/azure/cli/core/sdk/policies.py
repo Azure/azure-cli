@@ -105,37 +105,53 @@ class RecordTelemetryUserAgentPolicy(UserAgentPolicy):
         set_user_agent(request.http_request.headers[self._USERAGENT])
 
 
+# pylint: disable=line-too-long
 def get_custom_hook_policy(cli_ctx):
     def _acquire_policy_token_request_hook(request):
         http_request = request.http_request
-        if getattr(http_request, 'method', '') not in ['PUT', 'PATCH', 'DELETE']:
+        if getattr(http_request, 'method', '') == 'GET':
+            _LOGGER.warning("Acquiring policy token will be ignored for GET operations")
             return
         ACQUIRE_POLICY_TOKEN_URL = '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/acquirePolicyToken?api-version=2025-03-01'
         policy_token = None
+
+        from azure.cli.core.azclierror import ServiceError
         try:
             import json
             from azure.cli.core.util import send_raw_request
+            uri = getattr(http_request, 'url')
+            method = getattr(http_request, 'method')
+            content = getattr(http_request, 'content') if hasattr(http_request, 'content') else getattr(http_request, 'body')
+            if content and isinstance(content, str):
+                try:
+                    content = json.loads(content)
+                except json.decoder.JSONDecodeError:
+                    pass
 
             acquire_policy_token_body = {
                 "operation": {
-                    "uri": getattr(http_request, 'url'),
-                    "httpMethod": getattr(http_request, 'method'),
-                    "content": getattr(http_request, 'content') if hasattr(http_request, 'content') else getattr(http_request, 'body')
+                    "uri": uri,
+                    "httpMethod": method,
+                    "content": content
                 },
                 "changeReference": cli_ctx.data.get('_change_reference', None)
             }
             acquire_policy_token_response = send_raw_request(cli_ctx, 'POST',
                                                              ACQUIRE_POLICY_TOKEN_URL,
-                                                             headers=['Content-Type=application/json'],
+                                                             headers=['Content-Type=application/json',
+                                                                      'x-ms-force-sync=true'],
                                                              body=json.dumps(acquire_policy_token_body))
             if acquire_policy_token_response.status_code == 200 and acquire_policy_token_response.content:
                 response_content = json.loads(acquire_policy_token_response.content)
                 policy_token = response_content.get('token', None)
+                if not policy_token:
+                    raise ServiceError(f"No token returned. Response:{acquire_policy_token_response.content}")
             elif acquire_policy_token_response.status_code == 202:
                 # TODO: Handle async token acquisition after Service is ready
-                raise NotImplementedError("Asynchronous policy token acquisition is not supported in current Azure CLI. Please upgrade and retry.")
+                raise NotImplementedError("Asynchronous policy token acquisition is not supported in current Azure CLI."
+                                          " Please upgrade and retry.")
         except Exception as ex:
-            raise CLIError(f"Failed to acquire policy token, exception: {ex}")
+            raise ServiceError(f"Failed to acquire policy token, exception: {ex}")
         if policy_token:
             request.http_request.headers['x-ms-policy-external-evaluations'] = policy_token
 
