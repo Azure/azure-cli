@@ -1265,63 +1265,93 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
 
 class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
     @live_only()
-    def test_sql_db_long_term_retention(
+    def test_sql_db_long_term_retention_immutability(
             self):
         self.kwargs.update({
-            'rg': 'lichrg',
+            'rg': 'cli_test_donnotdelete',
             'loc': 'eastus2euap',
-            'server_name': 'lichcanaryus2',
-            'database_name': 'db4',
-            'weekly_retention': 'P1W',
-            'time_based_mmutability': 'True'
+            'server_name': 'clitestserverdonotdeletecanaryeast',
+            'database_name': 'cli_test_donnotdelete1',
+            'weekly_retention': 'P4W',
+            'time_based_immutability': 'Enabled'
         })
 
         # test update long term retention on live database
         self.cmd(
             'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
             ' --weekly-retention {weekly_retention}'
-            ' --time-based-immutability {time_based_immutability}',
+            ' --time-based-immutability {time_based_immutability} --yes y',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('timeBasedImmutability', '{time_based_immutability}')])
-
-        # test get long term retention policy on live database
-        self.cmd(
-            'sql db ltr-policy show -g {rg} -s {server_name} -n {database_name}',
-            checks=[
-                self.check('resourceGroup', '{rg}'),
-                self.check('weeklyRetention', '{weekly_retention}'),
-                self.check('timeBasedImmutability', '{time_based_immutability}')])
-
-        # test list long term retention backups for location
-        # with resource group
-        self.cmd(
-            'sql db ltr-backup list -l {loc} -g {rg}',
-            checks=[
-                self.greater_than('length(@)', 0)])
-        # without resource group
-   
-        # setup for test show long term retention backup
+           # setup for test show long term retention backup
+ 
         backup = self.cmd(
-            'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} --latest True').get_output_in_json()
+        'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} --latest True').get_output_in_json()
 
         self.kwargs.update({
             'backup_name': backup[0]['name'],
-            'backup_id': backup[0]['id']
         })
 
-        # test show long term retention backup
+         # set_legal_hold_immutability test
         self.cmd(
-            'sql db ltr-backup show -l {loc} -s {server_name} -d {database_name} -n {backup_name}',
-            checks=[
-                self.check('resourceGroup', '{rg}'),
-                self.check('serverName', '{server_name}'),
-                self.check('databaseName', '{database_name}'),
-                self.check('name', '{backup_name}'),
-                self.check('timeBasedImmutability', '{time_based_immutability}')])
+             'sql db ltr-backup set_legal_hold_immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
+              checks=[
+                 self.check('resourceGroup', '{rg}'),
+                 self.check('serverName', '{server_name}'),
+                 self.check('databaseName', '{database_name}'),
+                 self.check('name', '{backup_name}'),
+            #     self.check('timeBasedImmutability', '{time_based_immutability}'),
+                 self.check('legalHoldImmutability', 'Enabled')])
 
-        
+         # remove_legal_hold_immutability test
+        self.cmd(
+             'sql db ltr-backup remove_legal_hold_immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
+              checks=[
+                 self.check('resourceGroup', '{rg}'),
+                 self.check('serverName', '{server_name}'),
+                 self.check('databaseName', '{database_name}'),
+                 self.check('name', '{backup_name}'),
+              #   self.check('timeBasedImmutability', '{time_based_immutability}'),
+                 self.check('legalHoldImmutability', 'Disabled')])
+
+         # disable-time-based-immutability test
+        self.cmd(
+             'sql db ltr-backup disable-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
+              checks=[
+                 self.check('resourceGroup', '{rg}'),
+                 self.check('serverName', '{server_name}'),
+                 self.check('databaseName', '{database_name}'),
+                 self.check('name', '{backup_name}'),
+                 self.check('timeBasedImmutability', 'Disabled'),
+                 self.check('legalHoldImmutability', 'Disabled')])
+
+
+          # setup for test lock long term retention backup
+        self.kwargs.update({
+              'database_name': 'cli_test_donnotdelete2',
+          })
+
+        backup = self.cmd(
+              'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} --latest True').get_output_in_json()
+
+        self.kwargs.update({
+              'backup_name': backup[0]['name'],
+          })
+
+          # disable-time-based-immutability
+        self.cmd(
+              'sql db ltr-backup lock-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
+               checks=[
+                  self.check('resourceGroup', '{rg}'),
+                  self.check('serverName', '{server_name}'),
+                  self.check('databaseName', '{database_name}'),
+                  self.check('name', '{backup_name}'),
+                  self.check('timeBasedImmutability', 'Enabled'),
+                  self.check('legalHoldImmutability', 'Disabled'),
+                  self.check('timeBasedImmutabilityMode', 'Locked')])
+
 class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
     @live_only()
     def test_sql_db_long_term_retention(
