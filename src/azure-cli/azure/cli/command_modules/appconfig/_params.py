@@ -16,7 +16,8 @@ from azure.cli.core.commands.validators import \
     get_default_location_from_resource_group
 from ._constants import ImportExportProfiles, ImportMode, FeatureFlagConstants, ARMAuthenticationMode
 
-from ._validators import (validate_appservice_name_or_id, validate_sku, validate_snapshot_query_fields,
+from ._validators import (validate_appservice_name_or_id, validate_aks_cluster_name_or_id,
+                          validate_sku, validate_snapshot_query_fields,
                           validate_connection_string, validate_datetime,
                           validate_export, validate_import,
                           validate_import_depth, validate_query_fields,
@@ -232,7 +233,7 @@ def load_arguments(self, _):
         c.argument('label', help="Imported KVs and feature flags will be assigned with this label. If no label specified, will assign null label.")
         c.argument('tags', nargs="*", help="Imported KVs and feature flags will be assigned with these tags. If no tags are specified, imported KVs and feature flags will retain existing tags. Support space-separated tags: key[=value] [key[=value] ...]. Use "" to clear existing tags.")
         c.argument('prefix', help="This prefix will be appended to the front of imported keys. Prefix will be ignored for feature flags.")
-        c.argument('source', options_list=['--source', '-s'], arg_type=get_enum_type(['file', 'appconfig', 'appservice']), validator=validate_import, help="The source of importing. Note that importing feature flags from appservice is not supported.")
+        c.argument('source', options_list=['--source', '-s'], arg_type=get_enum_type(['file', 'appconfig', 'appservice', 'aks']), validator=validate_import, help="The source of importing. Note that importing feature flags from appservice is not supported.")
         c.argument('yes', help="Do not prompt for preview.")
         c.argument('skip_features', help="Import only key values and exclude all feature flags. By default, all feature flags will be imported from file or appconfig. Not applicable for appservice.", arg_type=get_three_state_flag())
         c.argument('content_type', help='Content type of all imported items.')
@@ -263,6 +264,11 @@ def load_arguments(self, _):
 
     with self.argument_context('appconfig kv import', arg_group='AppService') as c:
         c.argument('appservice_account', validator=validate_appservice_name_or_id, help='ARM ID for AppService OR the name of the AppService, assuming it is in the same subscription and resource group as the App Configuration store. Required for AppService arguments')
+
+    with self.argument_context('appconfig kv import', arg_group='AKS') as c:
+        c.argument('aks_cluster', validator=validate_aks_cluster_name_or_id, help='ARM ID for AKS OR the name of the AKS, assuming it is in the same subscription and resource group as the App Configuration store. Required for AKS arguments')
+        c.argument('configmap_name', help='Name of the ConfigMap. Required for AKS arguments.')
+        c.argument('configmap_namespace', help='Namespace of the ConfigMap. default to "default" namespace if not specified.')
 
     with self.argument_context('appconfig kv export') as c:
         c.argument('label', help="Only keys and feature flags with this label will be exported. If no label specified, export keys and feature flags with null label by default. When export destination is appconfig, or when export destination is file with `appconfig/kvset` profile, this argument supports asterisk and comma signs for label filtering, for instance, * means all labels, abc* means labels with abc as prefix, and abc,xyz means labels with abc or xyz.")

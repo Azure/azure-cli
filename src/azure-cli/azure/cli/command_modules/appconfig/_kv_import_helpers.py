@@ -22,6 +22,7 @@ from azure.appconfiguration import ConfigurationSetting, ResourceReadOnlyError
 from azure.cli.core.util import user_confirmation
 from azure.cli.core.azclierror import (
     AzureInternalError,
+    AzureResponseError,
     FileOperationError,
     InvalidArgumentValueError,
     RequiredArgumentMissingError,
@@ -550,7 +551,40 @@ def __read_kv_from_file(
     except OSError:
         raise FileOperationError("File is not available.")
 
+    flattened_data = __flatten_config_data(
+        config_data=config_data,
+        format_=format_,
+        content_type=content_type,
+        prefix_to_add=prefix_to_add,
+        depth=depth,
+        separator=separator
+    )
+
+    # convert to KeyValue list
+    key_values = []
+    for k, v in flattened_data.items():
+        if validate_import_key(key=k):
+            key_values.append(KeyValue(key=k, value=v))
+    return key_values
+
+
+def __flatten_config_data(config_data, format_, content_type, prefix_to_add="", depth=None, separator=None):
+    """
+    Flatten configuration data into a dictionary of key-value pairs.
+
+    Args:
+        config_data: The configuration data to flatten (dict or list)
+        format_ (str): The format of the configuration data ('json', 'yaml', 'properties')
+        content_type (str): Content type for JSON validation
+        prefix_to_add (str): Prefix to add to each key
+        depth (int): Maximum depth for flattening hierarchical data
+        separator (str): Separator for hierarchical keys
+
+    Returns:
+        dict: Flattened key-value pairs
+    """
     flattened_data = {}
+
     if format_ == "json" and content_type and is_json_content_type(content_type):
         for key in config_data:
             __flatten_json_key_value(
@@ -582,13 +616,7 @@ def __read_kv_from_file(
                     separator=separator,
                 )
 
-    # convert to KeyValue list
-    key_values = []
-    for k, v in flattened_data.items():
-        if validate_import_key(key=k):
-            key_values.append(KeyValue(key=k, value=v))
-    return key_values
-
+    return flattened_data
 
 # App Service <-> List of KeyValue object
 
@@ -713,6 +741,170 @@ def __read_kv_from_app_service(
         return key_values
     except Exception as exception:
         raise CLIError("Failed to read key-values from appservice.\n" + str(exception))
+
+
+def __read_kv_from_kubernetes_configmap(
+    cmd,
+    aks_cluster,
+    configmap_name,
+    format_,
+    namespace="default",
+    prefix_to_add="",
+    content_type=None,
+    depth=None,
+    separator=None
+):
+    """
+    Read key-value pairs from a Kubernetes ConfigMap using aks_runcommand.
+
+    Args:
+        cmd: The command context object
+        aks_cluster (str): Name of the AKS cluster
+        configmap_name (str): Name of the ConfigMap to read from
+        format_ (str): Format of the data in the ConfigMap (e.g., "json", "yaml")
+        namespace (str): Kubernetes namespace where the ConfigMap resides (default: "default")
+        prefix_to_add (str): Prefix to add to each key in the ConfigMap
+        content_type (str): Content type to apply to the key-values
+        depth (int): Maximum depth for flattening hierarchical data
+        separator (str): Separator for hierarchical keys
+
+    Returns:
+        list: List of KeyValue objects
+    """
+    key_values = []
+    from azure.cli.command_modules.acs.custom import aks_runcommand
+    from azure.cli.command_modules.acs._client_factory import cf_managed_clusters
+
+    # Preserve only the necessary CLI context data
+    original_subscription = cmd.cli_ctx.data.get('subscription_id')
+    original_safe_params = cmd.cli_ctx.data.get('safe_params', [])
+
+    try:
+        # Temporarily modify the CLI context
+        cmd.cli_ctx.data['subscription_id'] = aks_cluster["subscription"]
+        params_to_keep = ["--debug", "--verbose"]
+        cmd.cli_ctx.data['safe_params'] = [p for p in original_safe_params if p in params_to_keep]
+        # It must be set to return the result.
+        cmd.cli_ctx.data['safe_params'].append("--output")
+        # Get the AKS client from the factory
+        aks_client = cf_managed_clusters(cmd.cli_ctx)
+
+        # Command to get the ConfigMap and output it as JSON
+        command = f"kubectl get configmap {configmap_name} -n {namespace} -o json"
+
+        # Execute the command on the cluster
+        result = aks_runcommand(cmd, aks_client, aks_cluster["resource_group"], aks_cluster["name"], command_string=command)
+
+        if hasattr(result, 'logs') and result.logs:
+            if not hasattr(result, 'exit_code') or result.exit_code == 0:
+                try:
+                    configmap_data = json.loads(result.logs)
+
+                    # Extract the data section which contains the key-value pairs
+                    kvs = __extract_kv_from_configmap_data(
+                        configmap_data, content_type, prefix_to_add, format_, depth, separator)
+
+                    key_values.extend(kvs)
+                except json.JSONDecodeError:
+                    raise ValueError(
+                        f"The result from ConfigMap {configmap_name} could not be parsed. {result.logs.strip()}"
+                    )
+            else:
+                raise AzureResponseError(f"{result.logs.strip()}")
+        else:
+            raise AzureResponseError("Unable to get the ConfigMap.")
+
+        return key_values
+    except Exception as exception:
+        raise AzureInternalError(
+            f"Failed to read key-values from ConfigMap '{configmap_name}' in namespace '{namespace}'.\n{str(exception)}"
+        )
+    finally:
+        # Restore original CLI context data
+        cmd.cli_ctx.data['subscription_id'] = original_subscription
+        cmd.cli_ctx.data['safe_params'] = original_safe_params
+
+
+def __extract_kv_from_configmap_data(configmap, content_type, prefix_to_add="", format_=None, depth=None, separator=None):
+    """
+    Helper function to extract key-value pairs from ConfigMap data.
+
+    Args:
+        configmap (dict): The ConfigMap data as a dictionary
+        prefix_to_add (str): Prefix to add to each key
+        content_type (str): Content type to apply to the key-values
+        format_ (str): Format of the data in the ConfigMap (e.g., "json", "yaml")
+        depth (int): Maximum depth for flattening hierarchical data
+        separator (str): Separator for hierarchical keys
+
+    Returns:
+        list: List of KeyValue objects
+    """
+    key_values = []
+
+    if not configmap.get('data', None):
+        logger.warning("ConfigMap exists but has no data")
+        return key_values
+
+    for key, value in configmap['data'].items():
+        if format_ in ("json", "yaml", "properties"):
+            if format_ == "json":
+                try:
+                    value = json.loads(value)
+                except json.JSONDecodeError:
+                    logger.warning(
+                        'Value "%s" for key "%s" is not a well formatted JSON data.',
+                        value, key
+                    )
+                    continue
+            elif format_ == "yaml":
+                try:
+                    value = yaml.safe_load(value)
+                except yaml.YAMLError:
+                    logger.warning(
+                        'Value "%s" for key "%s" is not a well formatted YAML data.',
+                        value, key
+                    )
+                    continue
+            else:
+                try:
+                    value = javaproperties.load(io.StringIO(value))
+                except javaproperties.InvalidUEscapeError:
+                    logger.warning(
+                        'Value "%s" for key "%s" is not a well formatted properties data.',
+                        value, key
+                    )
+                    continue
+
+            flattened_data = __flatten_config_data(
+                config_data=value,
+                format_=format_,
+                content_type=content_type,
+                prefix_to_add=prefix_to_add,
+                depth=depth,
+                separator=separator
+            )
+
+            for k, v in flattened_data.items():
+                if validate_import_key(key=k):
+                    key_values.append(KeyValue(key=k, value=v))
+
+        elif validate_import_key(key):
+            # If content_type is JSON, validate the value
+            if content_type and is_json_content_type(content_type):
+                try:
+                    json.loads(value)
+                except json.JSONDecodeError:
+                    logger.warning(
+                        'Value "%s" for key "%s" is not a valid JSON object, which conflicts with the provided content type "%s".',
+                        value, key, content_type
+                    )
+                    continue
+
+            kv = KeyValue(key=prefix_to_add + key, value=value)
+            key_values.append(kv)
+
+    return key_values
 
 
 def __validate_import_keyvault_ref(kv):
