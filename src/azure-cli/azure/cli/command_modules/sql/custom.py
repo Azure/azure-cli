@@ -6,6 +6,7 @@
 # pylint: disable=C0302
 from enum import Enum
 import calendar
+import argparse
 from datetime import datetime
 from warnings import catch_warnings
 from dateutil.parser import parse
@@ -3107,7 +3108,7 @@ def update_long_term_retention(
         week_of_year=None,
         time_based_immutability=None,
         time_based_immutability_mode=None,
-
+        yes=None,
         **kwargs):
     '''
     Updates long term retention for managed database
@@ -3119,11 +3120,12 @@ def update_long_term_retention(
         raise CLIError('Please specify week of year for yearly retention.')
 
     if time_based_immutability:
-        confirmation = prompt_y_n("""Immutable LTR backups can't be changed or deleted.
-         You'll be charged for LTR backups for the full retention period.
-         Do you want to proceed?""")
-        if not confirmation:
-            return
+        if not yes:
+            confirmation = prompt_y_n("""Immutable LTR backups can't be changed or deleted.
+            You'll be charged for LTR backups for the full retention period.
+            Do you want to proceed?""")
+            if not confirmation:
+                return
 
     if time_based_immutability_mode:
         if not time_based_immutability:
@@ -3343,10 +3345,16 @@ def remove_time_based_immutability(
         long_term_retention_server_name: str,
         long_term_retention_database_name: str,
         backup_name: str,
+        yes=None,
         **kwargs):
     '''
     Removes time-based immutability for long term retention backups.
     '''
+    if not yes:
+        confirmation = prompt_y_n("Are you sure you want to remove time-based immutability for long term retention backups?")
+        if not confirmation:
+            return
+
     if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
         raise CLIError('Please specify all required parameters: '
                        'location_name, long_term_retention_server_name, '
@@ -3357,7 +3365,7 @@ def remove_time_based_immutability(
             long_term_retention_server_name,
             long_term_retention_database_name,
             backup_name,
-            **kwargs)
+            **kwargs).wait()
     except Exception as ex:
         raise ex
 
@@ -3375,10 +3383,17 @@ def lock_time_based_immutability(
         long_term_retention_server_name: str,
         long_term_retention_database_name: str,
         backup_name: str,
+        yes=None,
         **kwargs):
     '''
     Locks time-based immutability for long term retention backups.
     '''
+
+    if not yes:
+        confirmation = prompt_y_n("Are you sure you want to lock time-based immutability for long term retention backups?")
+        if not confirmation:
+            return
+
     if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
         raise CLIError('Please specify all required parameters: '
                        'location_name, long_term_retention_server_name, '
@@ -3389,7 +3404,7 @@ def lock_time_based_immutability(
             long_term_retention_server_name,
             long_term_retention_database_name,
             backup_name,
-            **kwargs)
+            **kwargs).wait()
     except Exception as ex:
         raise ex
 
@@ -3407,10 +3422,16 @@ def set_legal_hold_immutability(
         long_term_retention_server_name: str,
         long_term_retention_database_name: str,
         backup_name: str,
+        yes=None,
         **kwargs):
     '''
     Sets legal hold immutability for long term retention backups.
     '''
+    if not yes:
+        confirmation = prompt_y_n("Are you sure you want to set legal hold immutability?")
+        if not confirmation:
+            return
+
     if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
         raise CLIError('Please specify all required parameters: '
                        'location_name, long_term_retention_server_name, '
@@ -3421,7 +3442,7 @@ def set_legal_hold_immutability(
             long_term_retention_server_name,
             long_term_retention_database_name,
             backup_name,
-            **kwargs)
+            **kwargs).wait()
     except Exception as ex:
         raise ex
 
@@ -3439,10 +3460,17 @@ def remove_legal_hold_immutability(
         long_term_retention_server_name: str,
         long_term_retention_database_name: str,
         backup_name: str,
+        yes=None,
         **kwargs):
     '''
     Removes legal hold immutability for long term retention backups.
     '''
+    
+    if not yes:
+        confirmation = prompt_y_n("Are you sure you want to remove legal hold immutability?")
+        if not confirmation:
+            return
+
     if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
         raise CLIError('Please specify all required parameters: '
                        'location_name, long_term_retention_server_name, '
@@ -3453,7 +3481,7 @@ def remove_legal_hold_immutability(
             long_term_retention_server_name,
             long_term_retention_database_name,
             backup_name,
-            **kwargs)
+            **kwargs).wait()
     except Exception as ex:
         raise ex
 
