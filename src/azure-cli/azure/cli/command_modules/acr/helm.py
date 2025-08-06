@@ -10,7 +10,7 @@ from urllib.request import urlopen
 from knack.util import CLIError
 from knack.log import get_logger
 
-from azure.cli.core.util import in_cloud_console, user_confirmation
+from azure.cli.core.util import user_confirmation
 
 from ._docker_utils import (
     get_access_credentials,
@@ -366,15 +366,7 @@ def _get_helm_package_name(client_version):
 
 
 def _ssl_context():
-    import sys
     import ssl
-
-    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
-        try:
-            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
-        except AttributeError:
-            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
     return ssl.create_default_context()
 
 
