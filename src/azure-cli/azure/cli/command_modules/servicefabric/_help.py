@@ -40,7 +40,7 @@ examples:
     text: >
         az sf application update -g testRG -c testCluster --application-name testApp --application-type-version v2 \\
           --application-parameters key0=value0 --health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 \\
-            --upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --upgrade-replica-set-check-timeout 300 --force-restart
+            --upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --replica-check-timeout 300 --force-restart
   - name: Update application minimum and maximum nodes.
     text: >
         az sf application update -g testRG -c testCluster --application-name testApp --minimum-nodes 1 --maximum-nodes 3
@@ -680,7 +680,7 @@ examples:
     text: >
         az sf managed-application update -g testRG -c testCluster --application-name testApp --application-type-version v2 \\
           --application-parameters key0=value0 --health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 \\
-            --upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --upgrade-replica-set-check-timeout 300 --force-restart
+            --upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --replica-check-timeout 300 --force-restart
   - name: Update managed application service type health policy map.
     text: >
         az sf managed-application update -g testRG -c testCluster --application-name testApp --service-type-health-policy-map  \"ServiceTypeName01\"=\"5,10,5\" \"ServiceTypeName02\"=\"5,5,5\"
