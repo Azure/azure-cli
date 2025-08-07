@@ -41,7 +41,8 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
                                    source_account_info[1], snapshot, target_container).get_output_in_json()['id']
         from azure.core.exceptions import ResourceExistsError
         with self.assertRaisesRegex(ResourceExistsError, "There is currently no pending copy operation"):
-            self.storage_cmd('storage blob incremental-copy cancel --container-name {} --name {} --copy-id {}',
+            self.storage_cmd('storage blob incremental-copy cancel --container-name {} --name {} --copy-id {} '
+                             '--lease-id abcdabcd-abcd-abcd-abcd-abcdabcdabcd',
                              target_account_info, target_container, "backup", copy_id)
 
     def test_storage_blob_no_credentials_scenario(self):
