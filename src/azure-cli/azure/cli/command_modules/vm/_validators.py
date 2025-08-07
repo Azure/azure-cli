@@ -824,7 +824,8 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
         from azure.cli.command_modules.network.aaz.latest.network.vnet import Show as VirtualNetworkShow
         api_version = VirtualNetworkShow._aaz_info['version']
         subnet_exists = \
-            check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets', vnet, 'virtualNetworks', api_version=api_version)
+            check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets',
+                            vnet, 'virtualNetworks', api_version=api_version)
 
         if subnet_is_id and not subnet_exists:
             raise CLIError("Subnet '{}' does not exist.".format(subnet))
