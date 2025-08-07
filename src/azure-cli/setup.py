@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.75.0"
+VERSION = "2.76.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -57,9 +57,9 @@ DEPENDENCIES = [
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
     'azure-datalake-store~=1.0.1',
-    'azure-keyvault-administration==4.4.0b2',
+    'azure-keyvault-administration==4.4.0',
     'azure-keyvault-certificates==4.7.0',
-    'azure-keyvault-keys==4.11.0b1',
+    'azure-keyvault-keys==4.11.0',
     'azure-keyvault-secrets==4.7.0',
     'azure-keyvault-securitydomain==1.0.0b1',
     'azure-mgmt-advisor==9.0.0',
@@ -67,7 +67,7 @@ DEPENDENCIES = [
     'azure-mgmt-appconfiguration==5.0.0',
     'azure-mgmt-appcontainers==2.0.0',
     'azure-mgmt-applicationinsights~=1.0.0',
-    'azure-mgmt-authorization~=4.0.0',
+    'azure-mgmt-authorization==5.0.0b1',
     'azure-mgmt-batchai==7.0.0b1',
     'azure-mgmt-batch~=17.3.0',
     'azure-mgmt-billing==6.0.0',
@@ -77,9 +77,8 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==14.1.0b1',
-    'azure-mgmt-containerservice~=38.0.0',
+    'azure-mgmt-containerservice~=39.0.0',
     'azure-mgmt-cosmosdb==9.8.0',
-    'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
     'azure-mgmt-eventgrid==10.2.0b2',

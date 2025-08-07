@@ -91,7 +91,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
         result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-resource-name-params --query "parameters"')
 
         self.assertEqual('{}\n', result.output)
-    
+
     @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
     def test_resource_group_export_output_format_bicep(self, resource_group):
         self.kwargs.update({
@@ -101,7 +101,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.kwargs['vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
         result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --export-format bicep').get_output_in_json()
-        
+
         # Check for Bicep-specific syntax
         bicep_text = str(result)
         self.assertFalse(bicep_text.strip().startswith('{'))  # Bicep files do not start with '{'
@@ -902,7 +902,7 @@ class TemplateSpecsTest(ScenarioTest):
                                variables('locations')[parameters('location')],
                                parameters('group'),
                                parameters('service'),
-                               if(equals(parameters('kind'), ''), 
+                               if(equals(parameters('kind'), ''),
                                   variables('resources')[variables('provider')][variables('resourceType')],
                                   variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]"""),
             self.check('mainTemplate.variables.removeOptionalsFromHyphenedName', "[replace(variables('hyphenedName'), '--', '-')]"),
@@ -1016,6 +1016,29 @@ class TemplateSpecsTest(ScenarioTest):
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_update_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_update_template_spec_with_aux_subscription(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-ts-aux-update', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'description': '"Updated description"',
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l eastus2 -f "{tf}" --subscription {aux_subscription}').get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        ts_result = self.cmd('ts update --template-spec {template_spec_id} --description {description} --yes').get_output_in_json()
+        self.assertIn(AUX_SUBSCRIPTION, ts_result['id'])
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes --subscription {aux_subscription}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_show_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -1047,6 +1070,46 @@ class TemplateSpecsTest(ScenarioTest):
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_show_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_template_spec_show_with_aux_subscription(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-ts-aux-show', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'resource_group_location': resource_group_location,
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --subscription {aux_subscription}',
+                          checks=[
+                              self.check('name', '1.0'),
+                              self.check('type', 'Microsoft.Resources/templateSpecs/versions')
+                          ]).get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        ts_result = self.cmd('ts show --template-spec {template_spec_id}',
+                            checks=[
+                                self.check('name', '{template_spec_name}'),
+                                self.check('type', 'Microsoft.Resources/templateSpecs')
+                            ]).get_output_in_json()
+        self.assertIn(AUX_SUBSCRIPTION, ts_result['id'])
+        self.assertEqual(ts_result['name'], template_spec_name)
+
+        ts_version_result = self.cmd('ts show --template-spec {template_spec_version_id}',
+                                    checks=[
+                                        self.check('name', '1.0'),
+                                        self.check('type', 'Microsoft.Resources/templateSpecs/versions')
+                                    ]).get_output_in_json()
+        self.assertIn(AUX_SUBSCRIPTION, ts_version_result['id'])
+        self.assertEqual(ts_version_result['name'], '1.0')
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes --subscription {aux_subscription}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_delete_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -1075,6 +1138,25 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
         self.cmd('ts list -g {rg}',
                  checks=self.check("length([?id=='{template_spec_id}'])", 0))
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_delete_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_delete_template_spec_with_aux_subscription(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-ts-aux-delete', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l eastus2 -f "{tf}" --subscription {aux_subscription}').get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_template_spec_create_and_update_with_tags(self, resource_group, resource_group_location):
@@ -1197,6 +1279,32 @@ class TemplateSpecsExportTest(LiveScenarioTest):
             self.cmd('ts export -g {rg} --name {template_spec_name} --output-folder {output_folder}')
             self.assertTrue('Please specify the template spec version for export' in str(err.exception))
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_export_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_template_spec_export_with_aux_subscription(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        dir_name = self.create_random_name('TemplateSpecExportAux', 30)
+        template_spec_name = self.create_random_name('cli-test-ts-aux-export', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'output_folder': os.path.join(curr_dir, dir_name).replace('\\', '\\\\'),
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l eastus2 -f "{tf}" --subscription {aux_subscription}').get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        os.makedirs(self.kwargs['output_folder'])
+        output_path = self.cmd('ts export --template-spec {template_spec_version_id} --output-folder {output_folder}').get_output_in_json()
+        template_file = os.path.join(output_path, (self.kwargs['template_spec_name'] + '.json'))
+        self.assertTrue(os.path.isfile(template_file))
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes --subscription {aux_subscription}')
+
 
 class DeploymentTestsWithQueryString(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_query_str_rg', location='eastus')
@@ -1287,6 +1395,96 @@ class DeploymentTestsWithQueryString(LiveScenarioTest):
         ])
 
         self.cmd('deployment sub create -l {resource_group_location} --template-uri {blob_url} --query-string "{sas_token}" --parameters keyVaultName="{key_vault}" rgName="{resource_group}" rgLocation="{resource_group_location}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+class DeploymentTestsWithValidationLevel(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_validation_level_rg', location='eastus')
+    def test_rg_deployment_with_validation_level(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_rg.json')
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'tf': tf,
+        })
+
+        self.cmd('deployment group validate -g {resource_group} --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if -g {resource_group} --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create -g {resource_group} --template-file "{tf}" --validation-level provider', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+    def test_sub_deployment_with_validation_level(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_sub.json')
+
+        self.kwargs.update({
+            'tf': tf,
+        })
+
+        self.cmd('deployment sub validate -l eastus --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment sub what-if -l eastus --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment sub create -l eastus --template-file "{tf}" --validation-level provider', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+    def test_mg_deployment_with_validation_level(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_mg.json')
+
+        self.kwargs.update({
+            'tf': tf,
+            'mg': self.create_random_name('azure-cli-management', 30),
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment mg validate --management-group-id {mg} -l eastus --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment mg what-if --management-group-id {mg} -l eastus --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment mg create --management-group-id {mg} -l eastus --template-file "{tf}" --validation-level provider', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+    def test_tenant_deployment_with_validation_level(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_tenant.json')
+
+        self.kwargs.update({
+            'tf': tf,
+        })
+
+        self.cmd('deployment tenant validate -l eastus --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment tenant what-if -l eastus --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment tenant create -l eastus --template-file "{tf}" --validation-level provider', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -2325,7 +2523,7 @@ class DeploymentStacksTest(ScenarioTest):
         # update stack with resource2 set to detach
         self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-two}" "rgLocation={location}" --deny-settings-mode "none" --action-on-unmanage detachAll --yes', checks=self.check('provisioningState', 'succeeded'))
 
-        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding. 
+        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding.
         #        See https://github.com/Azure/azure-cli/issues/31719 for more information. Temporarily commenting this portion of the test out to unblock
         #        merging https://github.com/Azure/azure-cli/pull/31684.
         #
@@ -2695,7 +2893,7 @@ class DeploymentStacksTest(ScenarioTest):
         # check template spec exists in Azure
         self.cmd('resource list -g {resource-group-two} --name "{template-spec-name}"', checks=self.check("length(@)", 1))
 
-        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding. 
+        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding.
         #        See https://github.com/Azure/azure-cli/issues/31719 for more information. Temporarily commenting this portion of the test out to unblock
         #        merging https://github.com/Azure/azure-cli/pull/31684.
         #

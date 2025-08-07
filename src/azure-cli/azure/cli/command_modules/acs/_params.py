@@ -8,8 +8,7 @@ import platform
 
 from argcomplete.completers import FilesCompleter
 from azure.cli.command_modules.acs._completers import (
-    get_k8s_upgrades_completion_list, get_k8s_versions_completion_list,
-    get_vm_size_completion_list)
+    get_k8s_upgrades_completion_list, get_k8s_versions_completion_list)
 from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PRIVATE,
     CONST_AZURE_KEYVAULT_NETWORK_ACCESS_PUBLIC,
@@ -460,7 +459,7 @@ def load_arguments(self, _):
         # nodepool paramerters
         c.argument('nodepool_name', default='nodepool1',
                    help='Node pool name, up to 12 alphanumeric characters', validator=validate_nodepool_name)
-        c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+        c.argument('node_vm_size', options_list=['--node-vm-size', '-s'])
         c.argument('vm_sizes')
         c.argument('os_sku', arg_type=get_enum_type(node_os_skus_create), validator=validate_os_sku)
         c.argument('snapshot_id', validator=validate_snapshot_id)
@@ -584,6 +583,7 @@ def load_arguments(self, _):
         c.argument('load_balancer_outbound_ports', type=int, validator=validate_load_balancer_outbound_ports)
         c.argument('load_balancer_idle_timeout', type=int, validator=validate_load_balancer_idle_timeout)
         c.argument('load_balancer_backend_pool_type', arg_type=get_enum_type(backend_pool_types))
+        c.argument("load_balancer_sku", arg_type=get_enum_type([CONST_LOAD_BALANCER_SKU_STANDARD]), validator=validate_load_balancer_sku)
         c.argument('nrg_lockdown_restriction_level', arg_type=get_enum_type(nrg_lockdown_restriction_levels))
         c.argument('nat_gateway_managed_outbound_ip_count', type=int, validator=validate_nat_gateway_managed_outbound_ip_count)
         c.argument('nat_gateway_idle_timeout', type=int, validator=validate_nat_gateway_idle_timeout)
@@ -891,7 +891,7 @@ def load_arguments(self, _):
         c.argument('agent_pool_name', options_list=['--nodepool-name', '--name', '-n', c.deprecate(target='--agent-pool-name', redirect='--nodepool-name', hide=True)], validator=validate_agent_pool_name, help='The node pool name.')
 
     with self.argument_context('aks nodepool add') as c:
-        c.argument('node_vm_size', options_list=['--node-vm-size', '-s'], completer=get_vm_size_completion_list)
+        c.argument('node_vm_size', options_list=['--node-vm-size', '-s'])
         c.argument('vm_sizes')
         c.argument('vm_set_type', validator=validate_vm_set_type)
         c.argument('os_type')
