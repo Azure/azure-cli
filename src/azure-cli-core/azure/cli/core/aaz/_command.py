@@ -329,7 +329,9 @@ def register_command_group(
         if is_preview:
             cls.AZ_PREVIEW_INFO = staticmethod(partial(PreviewItem, target=f'az {name}', object_type='command group'))
         if is_experimental:
-            cls.AZ_EXPERIMENTAL_INFO = staticmethod(partial(ExperimentalItem, target=f'az {name}', object_type='command group'))
+            cls.AZ_EXPERIMENTAL_INFO = staticmethod(
+                partial(ExperimentalItem, target=f'az {name}', object_type='command group')
+            )
         if deprecated_info:
             cls.AZ_DEPRECATE_INFO = staticmethod(
                 partial(
@@ -377,7 +379,9 @@ def register_command(
         if is_preview:
             cls.AZ_PREVIEW_INFO = staticmethod(partial(PreviewItem, target=f'az {name}', object_type='command'))
         if is_experimental:
-            cls.AZ_EXPERIMENTAL_INFO = staticmethod(partial(ExperimentalItem, target=f'az {name}', object_type='command'))
+            cls.AZ_EXPERIMENTAL_INFO = staticmethod(
+                partial(ExperimentalItem, target=f'az {name}', object_type='command')
+            )
         if deprecated_info:
             cls.AZ_DEPRECATE_INFO = staticmethod(
                 partial(
