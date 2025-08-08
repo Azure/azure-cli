@@ -191,11 +191,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('update', 'iot_hub_route_update', transform=RouteUpdateResultTransform(self.cli_ctx))
         g.custom_command('test', 'iot_hub_route_test')
 
-    # iot hub device stream commands
-    with self.command_group('iot hub devicestream', client_factory=iot_hub_service_factory,
-                            min_api="2019-07-01-preview", is_preview=True) as g:
-        g.custom_show_command('show', 'iot_hub_devicestream_show')
-
     # iot central commands
     with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory) as g:
         g.custom_command('create', 'iot_central_app_create', supports_no_wait=True)

@@ -388,9 +388,6 @@ class IoTHubTest(ScenarioTest):
                          self.check('length(serviceBusTopics[*])', 0),
                          self.check('length(storageContainers[*])', 1)])
 
-        # Test 'az iot hub devicestream show'
-        self.cmd('iot hub devicestream show -n {0} -g {1}'.format(hub, rg), checks=self.is_empty())
-
         # Test 'az iot hub message-enrichment create'
         real_endpoints = 'events'
         fake_endpoints = 'events fake_endpoint'
@@ -768,17 +765,16 @@ class IoTHubTest(ScenarioTest):
 
         # File upload - add connection string and containername - keybased
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --fc {2} --fcs {3}'
-                 .format(hub, rg, containerName, storageConnectionString)).get_output_in_json()
+                               .format(hub, rg, containerName, storageConnectionString)).get_output_in_json()
         assert not updated_hub['properties']['storageEndpoints']['$default']['authenticationType']
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
 
         updated_hub = self.cmd('iot hub update -n {0} -g {1} --fsa {2}'
-                 .format(hub, rg, key_based_auth)).get_output_in_json()
+                               .format(hub, rg, key_based_auth)).get_output_in_json()
         assert updated_hub['properties']['storageEndpoints']['$default']['authenticationType'] == key_based_auth
         assert storage_cs_pattern in updated_hub['properties']['storageEndpoints']['$default']['connectionString']
         assert updated_hub['properties']['storageEndpoints']['$default']['containerName'] == containerName
-
 
         # Change to identity-based (with no identity) - fail
         self.cmd('iot hub update -n {0} -g {1} --fsa identitybased'.format(hub, rg), expect_failure=True)
