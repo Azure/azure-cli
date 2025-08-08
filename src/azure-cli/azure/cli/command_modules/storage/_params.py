@@ -560,6 +560,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
             c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
             c.argument('action', action_type)
 
+    with self.argument_context('storage account show', resource_type=ResourceType.MGMT_STORAGE) as c:
+        c.argument('expand', help="Expand the properties within account's properties. By default, data is not "
+                   "included when fetching properties. Currently we only support geoReplicationStats and "
+                   "blobRestoreStatus. You also can use --include-geo-replication-status and "
+                   "--include-blob-restore-status to include properties.")
+        c.argument('include_geo_replication_status', options_list=['-r', '--include-geo-replication-status'],
+                   action='store_true', is_preview=True, min_api='2018-07-01',
+                   help='Include geo replication status in storage account properties.')
+        c.argument('include_blob_restore_status', options_list=['-b', '--include-blob-restore-status'],
+                   action='store_true', is_preview=True, min_api='2019-06-01',
+                   help='Include blob restore status in storage account properties.')
+
     with self.argument_context('storage account show-connection-string') as c:
         from ._validators import validate_key_name
         c.argument('protocol', help='The default endpoint protocol.', arg_type=get_enum_type(['http', 'https']))
