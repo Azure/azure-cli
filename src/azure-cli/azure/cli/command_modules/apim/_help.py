@@ -28,6 +28,11 @@ type: group
 short-summary: Manage Azure API Management API's.
 """
 
+helps['apim policy'] = """
+type: group
+short-summary: Manage Azure API Management API Policies.
+"""
+
 helps['apim product api'] = """
 type: group
 short-summary: Manage Azure API Management Product's APIs.
@@ -250,6 +255,76 @@ examples:
   - name: Export an API Management API to a file or returns a response containing a link of the export.
     text: |-
         az apim api export -g MyResourceGroup --service-name MyApim --api-id MyApi --export-format OpenApiJson --file-path path
+"""
+
+helps['apim policy set'] = """
+type: command
+short-summary: Create or update policy for the given scope.
+examples:
+  - name: Create or update policy for API Operation
+    text: |-
+        az apim policy set -g MyResourceGroup -n MyApim --api-id MyApi --operation-id MyOp --specification-path PathToXmlFile
+  - name: Create or update policy for API
+    text: |-
+        az apim policy set -g MyResourceGroup -n MyApim --api-id MyApi --specification-path PathToXmlFile
+  - name: Create or update global policy
+    text: |-
+        az apim policy set -g MyResourceGroup -n MyApim --specification-path PathToXmlFile
+"""
+
+helps['apim policy show'] = """
+type: command
+short-summary: Get policy for the given scope.
+examples:
+  - name: Get policy for API Operation
+    text: |-
+        az apim policy show -g MyResourceGroup -n MyApim --api-id MyApi --operation-id MyOp
+  - name: Get policy for API
+    text: |-
+        az apim policy show -g MyResourceGroup -n MyApim --api-id MyApi
+  - name: Get global policy
+    text: |-
+        az apim policy show -g MyResourceGroup -n MyApim
+"""
+
+helps['apim policy delete'] = """
+type: command
+short-summary: Delete policy for the given scope.
+examples:
+  - name: Delete policy for API Operation
+    text: |-
+        az apim policy delete -g MyResourceGroup -n MyApim --api-id MyApi --operation-id MyOp
+  - name: Delete policy for API
+    text: |-
+        az apim policy delete -g MyResourceGroup -n MyApim --api-id MyApi
+  - name: Delete global policy
+    text: |-
+        az apim policy delete -g MyResourceGroup -n MyApim
+"""
+
+helps['apim policy list'] = """
+type: command
+short-summary: List policies for the given scope.
+examples:
+  - name: List policies for API Operation
+    text: |-
+        az apim policy list -g MyResourceGroup -n MyApim --api-id MyApi --operation-id MyOp
+  - name: List policies for API
+    text: |-
+        az apim policy list -g MyResourceGroup -n MyApim --api-id MyApi
+  - name: List global policies
+    text: |-
+        az apim policy list -g MyResourceGroup -n MyApim
+"""
+
+helps['apim policy wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until a condition of an apim api is met.
+examples:
+  - name: Place the CLI in a waiting state until a condition of a apim api is met.
+    text: |
+        az apim policy wait --created --api-id MyApi --policy-id MyPolicy --name MyApim --resource-group MyResourceGroup
+    crafted: true
 """
 
 helps['apim product api list'] = """

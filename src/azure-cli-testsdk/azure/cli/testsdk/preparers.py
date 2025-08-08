@@ -90,9 +90,9 @@ class ResourceGroupPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
                 'module': module}
         if 'ENV_JOB_NAME' in os.environ:
             tags['job'] = os.environ['ENV_JOB_NAME']
-        tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
         if self.additional_tags is not None:
-            tags = tags.join(['{}={}'.format(key, value) for key, value in self.additional_tags.items()])
+            tags.update(self.additional_tags)
+        tags = ' '.join(['{}={}'.format(key, value) for key, value in tags.items()])
         template = 'az group create --location {} --name {} --tag ' + tags
         if self.subscription:
             template += ' --subscription {} '.format(self.subscription)

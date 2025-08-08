@@ -44,6 +44,13 @@ class ExportFormat(Enum):
     WsdlUrl = "WsdlUrl"
 
 
+class PolicyImportFormat(Enum):
+    RawXml = "rawxml"
+    RawXmlLink = "rawxml-link"
+    Xml = "xml"
+    XmlLink = "xml-link"
+
+
 def load_arguments(self, _):
 
     # REUSABLE ARGUMENT DEFINITIONS
@@ -313,6 +320,19 @@ def load_arguments(self, _):
                    help='Specify the format of the exporting API.')
         c.argument('file_path', options_list=['--file-path', '-f'],
                    help='File path specified to export the API.')
+
+    with self.argument_context('apim policy') as c:
+        c.argument('api_id', arg_type=api_id)
+        c.argument('operation_id', help='Operation identifier within an API. Must be unique in the current API Management service instance.')
+        c.argument('specification_path', help='Contents of the Policy as defined by the format.')
+        c.argument('policy_format', arg_type=get_enum_type(PolicyImportFormat), help='Format of the policy content.')
+        c.argument('policy_id', help='Policy identifier within an API. Must be unique in the current API context.')
+
+    with self.argument_context('apim policy show') as c:
+        c.argument('file_path', help='Path to the file where the policy content will be saved. If not specified, the policy content will be printed to the standard output.')
+
+    with self.argument_context('apim policy delete') as c:
+        c.argument('if_match', help='ETag of the Entity.')
 
     with self.argument_context('apim product api list') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
