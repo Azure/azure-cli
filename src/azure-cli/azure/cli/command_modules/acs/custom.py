@@ -2218,13 +2218,6 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
 
 
 def _ssl_context():
-    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
-        try:
-            # added in python 2.7.13 and 3.6
-            return ssl.SSLContext(ssl.PROTOCOL_TLS)
-        except AttributeError:
-            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
     return ssl.create_default_context()
 
 
