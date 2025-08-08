@@ -624,7 +624,7 @@ parameters:
     short-summary: Set the workload runtime.
     long-summary: |
         Azure provides a different workload-runtime to enable Kata supported workloads in your nodepools. The following values can be specified:
-          - "KataMshvVmIsolation" for Kata.
+          - "KataVmIsolation" for Kata.
 
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
@@ -711,6 +711,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
   - name: Create a kubernetes cluster with KataMshvVmIsolation enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataMshvVmIsolation --node-count 1
+  - name: Create a kubernetes cluster with KataVmIsolation enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
 """
 
 helps["aks update"] = """
@@ -1820,7 +1822,7 @@ parameters:
     short-summary: Set the workload runtime.
     long-summary: |
         Azure provides a different workload-runtime to enable Kata supported workloads in your nodepools. The following values can be specified:
-          - "KataMshvVmIsolation" for Kata.
+          - "KataVmIsolation" for Kata.
 
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
@@ -1845,6 +1847,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
   - name: Create a kubernetes cluster with KataMshvVmIsolation enabled.
     text: az aks nodepool add -g MyResourceGroup -n MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataMshvVmIsolation --node-count 1
+  - name: Create a kubernetes cluster with KataVmIsolation enabled.
+    text: az aks nodepool add -g MyResourceGroup -n MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
 """
 
 helps["aks nodepool delete"] = """

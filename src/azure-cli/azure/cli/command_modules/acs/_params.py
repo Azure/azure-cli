@@ -329,7 +329,7 @@ app_routing_nginx_configs = [
 ]
 
 workload_runtime_types = [
-    CONST_KATA_MSHV_VM_ISOLATION,
+    CONST_KATA_VM_ISOLATION,
 ]
 
 
