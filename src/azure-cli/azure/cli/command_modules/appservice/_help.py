@@ -982,6 +982,33 @@ type: command
 short-summary: List available built-in stacks which can be used for function apps on the Flex Consumption plan.
 """
 
+helps['functionapp flex-migration'] = """
+type: group
+short-summary: Manage migration of Linux Consumption function apps to the Flex Consumption plan.
+"""
+
+helps['functionapp flex-migration start'] = """
+type: command
+short-summary: Create a Flex Consumption app with the same settings as the provided Linux Consumption function app.
+examples:
+  - name: Migrate a Linux Consumption function app to the Flex Consumption plan.
+    text: >
+        az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --name MyFunctionApp --resource-group MyResourceGroup --storage-account MyStorageAccount
+
+  - name: Migrate a Linux Consumption function app to the Flex Consumption plan without migrating managed identity configurations.
+    text: >
+        az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --name MyFunctionApp --resource-group MyResourceGroup --storage-account MyStorageAccount --skip-managed-identities
+"""
+
+helps['functionapp flex-migration list'] = """
+type: command
+short-summary: List all Linux Consumption function apps that are eligible for migration to the Flex Consumption plan.
+examples:
+  - name: List all Linux Consumption function apps that are eligible for migration to the Flex Consumption plan.
+    text: >
+        az functionapp flex-migration list
+"""
+
 helps['functionapp plan'] = """
 type: group
 short-summary: Manage App Service Plans for an Azure Function
