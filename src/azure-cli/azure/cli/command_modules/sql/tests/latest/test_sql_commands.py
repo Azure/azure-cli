@@ -389,7 +389,7 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
 
 class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_firewall_mgmt(self, resource_group, resource_group_location, server):
         firewall_rule_1 = 'rule1'
         start_ip_address_1 = '0.0.0.0'
@@ -501,7 +501,7 @@ class SqlServerFirewallMgmtScenarioTest(ScenarioTest):
 
 class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_ipv6_firewall_mgmt(self, resource_group, resource_group_location, server):
         ipv6_firewall_rule_1 = 'rule1'
         start_ipv6_address_1 = '0229:e3a4:e0d7:36d3:d228:73fa:12fc:ae30'
@@ -583,8 +583,8 @@ class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     @live_only()
     def test_sql_outbound_firewall_mgmt(self, resource_group, resource_group_location, server):
         outbound_firewall_rule_allowed_fqdn_1 = 'testOBFR1'
@@ -852,8 +852,8 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('readScale', 'Enabled'),
                      JMESPathCheck('highAvailabilityReplicaCount', '2')])
 
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_db_ledger(self, resource_group, resource_group_location, server):
         database_name_one = "cliautomationdb01"
         database_name_two = "cliautomationdb02"
@@ -1464,7 +1464,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
 class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_server_connection_policy(self, resource_group, resource_group_location, server):
         # Show
         self.cmd('sql server conn-policy show -g {} -s {}'
@@ -1624,9 +1624,9 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
     @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1',
-                       location='eastus2euap')
+                       location='eastus')
     @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2',
-                       location='eastus2euap')
+                       location='eastus')
     @AllowLargeResponse()
     def test_sql_db_copy_with_perdb_cmk(self, resource_group_1, resource_group_2,
                          resource_group_location,
@@ -2819,19 +2819,19 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1",
-                           location='westus')
+                           location='eastus')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
                            parameter_name_for_location="resource_group_location_2",
-                           location='westus')
+                           location='eastus')
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westus')
+                       location='eastus')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1",
-                       location='westus')
+                       location='eastus')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2",
-                       location='westus')
+                       location='eastus')
     def test_sql_server_dns_alias_mgmt(self,
                                        resource_group_1, resource_group_location_1,
                                        resource_group_2, resource_group_location_2,
@@ -4014,12 +4014,12 @@ class SqlServerCapabilityScenarioTest(ScenarioTest):
 
 
 class SqlServerImportExportMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
-    @StorageAccountPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
+    @StorageAccountPreparer(location='eastus')
     @AllowLargeResponse()
     def test_sql_db_import_export_mgmt(self, resource_group, resource_group_location, server, storage_account):
-        location_long_name = 'westus'
+        location_long_name = 'eastus'
         admin_login = 'admin123'
         admin_password = 'SecretPassword123'
         db_name = 'cliautomationdb01'
@@ -4234,7 +4234,7 @@ class SqlServerConnectionStringScenarioTest(ScenarioTest):
 
 class SqlTransparentDataEncryptionScenarioTest(ScenarioTest):
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_tde(self, resource_group, server):
         sn = server
         db_name = self.create_random_name("sqltdedb", 20)
@@ -4424,8 +4424,8 @@ class SqlServerIdentityTest(ScenarioTest):
 
 
 class SqlServerVnetMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus')
-    @SqlServerPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_vnet_mgmt(self, resource_group, resource_group_location, server):
         vnet_rule_1 = 'rule1'
         vnet_rule_2 = 'rule2'
@@ -6635,7 +6635,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                        resource_group_parameter_name="resource_group_1",
                        location='northeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
-                       resource_group_parameter_name="resource_group_2", location='westus')
+                       resource_group_parameter_name="resource_group_2", location='eastus')
     def test_sql_failover_group_mgmt(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,
@@ -7375,13 +7375,13 @@ class SqlDbSensitivityClassificationsScenarioTest(ScenarioTest):
 
 
 class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='westus')
+    @ResourceGroupPreparer(location='eastus')
     def test_sql_server_minimal_tls_version(self, resource_group):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
         server_name_2 = self.create_random_name(server_name_prefix, server_name_max_length)
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
-        resource_group_location = "westus"
+        resource_group_location = "eastus"
         tls1_2 = "1.2"
         tls1_3 = "1.3"
 
@@ -7511,7 +7511,7 @@ class SqlLedgerDigestUploadsScenarioTest(ScenarioTest):
                         .format(resource_group, storage_account)).get_output_in_json()
 
     @ResourceGroupPreparer()
-    @SqlServerPreparer(location='westus')
+    @SqlServerPreparer(location='eastus')
     def test_sql_ledger(self, resource_group, server):
         db_name = self.create_random_name("sqlledgerdb", 20)
         endpoint = "https://test.confidential-ledger.azure.com"
