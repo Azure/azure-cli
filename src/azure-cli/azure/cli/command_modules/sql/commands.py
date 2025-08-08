@@ -18,6 +18,7 @@ from ._format import (
     instance_pool_table_format,
     ipv6_firewall_rule_table_format,
     outbound_firewall_rule_table_format,
+    retention_days_table_format,
     server_table_format,
     usage_table_format,
     LongRunningOperationResultTransform
@@ -566,6 +567,9 @@ def load_command_table(self, _):
                             client_factory=get_sql_servers_operations) as g:
 
         g.custom_command('create', 'server_create',
+                         table_transformer=server_table_format,
+                         supports_no_wait=True)
+        g.custom_command('restore', 'server_restore',
                          table_transformer=server_table_format,
                          supports_no_wait=True)
         g.command('delete', 'begin_delete',
