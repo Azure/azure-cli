@@ -131,9 +131,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
@@ -146,9 +146,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -161,9 +161,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
 
   - task: BatchScript@1
     inputs:
@@ -178,9 +178,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -433,9 +433,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
 
   - task: PipAuthenticate@1
     condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
@@ -468,10 +468,10 @@ jobs:
   displayName: Test Python Wheels
   strategy:
     matrix:
-      Python39:
-        python.version: '3.9'
       Python312:
         python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
@@ -508,10 +508,10 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python39:
-        python.version: '3.9'
       Python312:
         python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -525,10 +525,10 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python39:
-        python.version: '3.9'
       Python312:
         python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -545,10 +545,10 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python39:
-        python.version: '3.9'
       Python312:
         python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -568,8 +568,8 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python312:
-        python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -1039,9 +1039,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1055,9 +1055,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1070,10 +1070,10 @@ jobs:
   displayName: "PerformanceCheck"
   strategy:
     matrix:
-      Python39:
-        python.version: '3.9'
       Python312:
         python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
@@ -1101,9 +1101,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1124,9 +1124,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.12'
+      displayName: 'Use Python 3.13'
       inputs:
-        versionSpec: 3.12
+        versionSpec: 3.13
     - template: .azure-pipelines/templates/azdev_setup.yml
     - bash: |
         set -ev
