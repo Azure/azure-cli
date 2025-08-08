@@ -33,11 +33,10 @@ class GraphClient:
 
     def __init__(self, cli_ctx):
         self._cli_ctx = cli_ctx
-        self._scopes = resource_to_scopes(cli_ctx.cloud.endpoints.microsoft_graph_resource_id)
 
-        # https://graph.microsoft.com/ (AzureCloud)
-        # https://microsoftgraph.chinacloudapi.cn (AzureChinaCloud)
-        self._resource = cli_ctx.cloud.endpoints.microsoft_graph_resource_id
+        # https://graph.microsoft.com//.default (AzureCloud)
+        # https://microsoftgraph.chinacloudapi.cn/.default (AzureChinaCloud)
+        self._scopes = resource_to_scopes(cli_ctx.cloud.endpoints.microsoft_graph_resource_id)
 
         # https://graph.microsoft.com
         # https://microsoftgraph.chinacloudapi.cn
@@ -54,7 +53,7 @@ class GraphClient:
 
         while True:
             try:
-                r = send_raw_request(self._cli_ctx, method, url, resource=self._resource, uri_parameters=param,
+                r = send_raw_request(self._cli_ctx, method, url, scopes=self._scopes, uri_parameters=param,
                                      body=body)
             except HTTPError as ex:
                 raise GraphError(ex.response.json()['error']['message'], ex.response) from ex
