@@ -19,9 +19,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-10-02",
+        "version": "2025-01-02",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/snapshots/{}", "2023-10-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/snapshots/{}", "2025-01-02"],
         ]
     }
 
@@ -179,6 +179,13 @@ class Create(AAZCommand):
             help="Disk source information for PIR or user images.",
         )
         cls._build_args_image_disk_reference_create(creation_data.image_reference)
+        creation_data.instant_access_duration_minutes = AAZIntArg(
+            options=["instant-access-duration-minutes"],
+            help="For snapshots created from Premium SSD v2 or Ultra disk, this property determines the time in minutes the snapshot is retained for instant access to enable faster restore.",
+            fmt=AAZIntArgFormat(
+                minimum=1,
+            ),
+        )
         creation_data.logical_sector_size = AAZIntArg(
             options=["logical-sector-size"],
             help="Logical sector size in bytes for Ultra disks. Supported values are 512 ad 4096. 4096 is the default.",
@@ -195,6 +202,10 @@ class Create(AAZCommand):
         creation_data.security_data_uri = AAZStrArg(
             options=["security-data-uri"],
             help="If createOption is ImportSecure, this is the URI of a blob to be imported into VM guest state.",
+        )
+        creation_data.security_metadata_uri = AAZStrArg(
+            options=["security-metadata-uri"],
+            help="If createOption is ImportSecure, this is the URI of a blob to be imported into VM metadata for Confidential VM.",
         )
         creation_data.source_resource_id = AAZStrArg(
             options=["source-resource-id"],
@@ -323,6 +334,11 @@ class Create(AAZCommand):
         supported_capabilities.disk_controller_types = AAZStrArg(
             options=["disk-controller-types"],
             help="The disk controllers that an OS disk supports. If set it can be SCSI or SCSI, NVME or NVME, SCSI.",
+        )
+        supported_capabilities.supported_security_option = AAZStrArg(
+            options=["supported-security-option"],
+            help="Refers to the security capability of the disk supported to create a Trusted launch or Confidential VM",
+            enum={"TrustedLaunchAndConfidentialVMSupported": "TrustedLaunchAndConfidentialVMSupported", "TrustedLaunchSupported": "TrustedLaunchSupported"},
         )
 
         # define Arg Group "Snapshot"
@@ -457,7 +473,7 @@ class Create(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -466,7 +482,7 @@ class Create(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -485,7 +501,7 @@ class Create(AAZCommand):
 
         @property
         def error_format(self):
-            return "MgmtErrorFormat"
+            return "ODataV4Format"
 
         @property
         def url_parameters(self):
@@ -509,7 +525,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-10-02",
+                    "api-version", "2025-01-02",
                     required=True,
                 ),
             }
@@ -576,10 +592,12 @@ class Create(AAZCommand):
                 creation_data.set_prop("elasticSanResourceId", AAZStrType, ".elastic_san_resource_id")
                 _CreateHelper._build_schema_image_disk_reference_create(creation_data.set_prop("galleryImageReference", AAZObjectType, ".gallery_image_reference"))
                 _CreateHelper._build_schema_image_disk_reference_create(creation_data.set_prop("imageReference", AAZObjectType, ".image_reference"))
+                creation_data.set_prop("instantAccessDurationMinutes", AAZIntType, ".instant_access_duration_minutes")
                 creation_data.set_prop("logicalSectorSize", AAZIntType, ".logical_sector_size")
                 creation_data.set_prop("performancePlus", AAZBoolType, ".performance_plus")
                 creation_data.set_prop("provisionedBandwidthCopySpeed", AAZStrType, ".provisioned_bandwidth_copy_speed")
                 creation_data.set_prop("securityDataUri", AAZStrType, ".security_data_uri")
+                creation_data.set_prop("securityMetadataUri", AAZStrType, ".security_metadata_uri")
                 creation_data.set_prop("sourceResourceId", AAZStrType, ".source_resource_id")
                 creation_data.set_prop("sourceUri", AAZStrType, ".source_uri")
                 creation_data.set_prop("storageAccountId", AAZStrType, ".storage_account_id")
@@ -632,6 +650,7 @@ class Create(AAZCommand):
                 supported_capabilities.set_prop("acceleratedNetwork", AAZBoolType, ".accelerated_network")
                 supported_capabilities.set_prop("architecture", AAZStrType, ".architecture")
                 supported_capabilities.set_prop("diskControllerTypes", AAZStrType, ".disk_controller_types")
+                supported_capabilities.set_prop("supportedSecurityOption", AAZStrType, ".supported_security_option")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -722,6 +741,7 @@ class _CreateHelper:
             _schema.name = cls._schema_snapshot_read.name
             _schema.properties = cls._schema_snapshot_read.properties
             _schema.sku = cls._schema_snapshot_read.sku
+            _schema.system_data = cls._schema_snapshot_read.system_data
             _schema.tags = cls._schema_snapshot_read.tags
             _schema.type = cls._schema_snapshot_read.type
             return
@@ -749,6 +769,10 @@ class _CreateHelper:
             flags={"client_flatten": True},
         )
         snapshot_read.sku = AAZObjectType()
+        snapshot_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
         snapshot_read.tags = AAZDictType()
         snapshot_read.type = AAZStrType(
             flags={"read_only": True},
@@ -817,6 +841,10 @@ class _CreateHelper:
         properties.security_profile = AAZObjectType(
             serialized_name="securityProfile",
         )
+        properties.snapshot_access_state = AAZStrType(
+            serialized_name="snapshotAccessState",
+            flags={"read_only": True},
+        )
         properties.supported_capabilities = AAZObjectType(
             serialized_name="supportedCapabilities",
         )
@@ -858,6 +886,9 @@ class _CreateHelper:
             serialized_name="imageReference",
         )
         cls._build_schema_image_disk_reference_read(creation_data.image_reference)
+        creation_data.instant_access_duration_minutes = AAZIntType(
+            serialized_name="instantAccessDurationMinutes",
+        )
         creation_data.logical_sector_size = AAZIntType(
             serialized_name="logicalSectorSize",
         )
@@ -869,6 +900,9 @@ class _CreateHelper:
         )
         creation_data.security_data_uri = AAZStrType(
             serialized_name="securityDataUri",
+        )
+        creation_data.security_metadata_uri = AAZStrType(
+            serialized_name="securityMetadataUri",
         )
         creation_data.source_resource_id = AAZStrType(
             serialized_name="sourceResourceId",
@@ -967,11 +1001,34 @@ class _CreateHelper:
         supported_capabilities.disk_controller_types = AAZStrType(
             serialized_name="diskControllerTypes",
         )
+        supported_capabilities.supported_security_option = AAZStrType(
+            serialized_name="supportedSecurityOption",
+        )
 
         sku = _schema_snapshot_read.sku
         sku.name = AAZStrType()
         sku.tier = AAZStrType(
             flags={"read_only": True},
+        )
+
+        system_data = _schema_snapshot_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
         )
 
         tags = _schema_snapshot_read.tags
@@ -984,6 +1041,7 @@ class _CreateHelper:
         _schema.name = cls._schema_snapshot_read.name
         _schema.properties = cls._schema_snapshot_read.properties
         _schema.sku = cls._schema_snapshot_read.sku
+        _schema.system_data = cls._schema_snapshot_read.system_data
         _schema.tags = cls._schema_snapshot_read.tags
         _schema.type = cls._schema_snapshot_read.type
 
