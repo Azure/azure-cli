@@ -3802,24 +3802,6 @@ def _build_identities_info(identities):
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
 
 
-def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, hibernate=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    # This is a walkaround because the REST service of `VirtualMachineScaleSetVMs#begin_deallocate`
-    # does not accept `hibernate` at present
-    if instance_ids and len(instance_ids) == 1 and hibernate is None:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, instance_ids[0])
-
-    VirtualMachineScaleSetVMInstanceIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceIDs')
-    vm_instance_i_ds = VirtualMachineScaleSetVMInstanceIDs(instance_ids=instance_ids)
-    if hibernate is not None:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, vm_instance_i_ds, hibernate=hibernate)
-    else:
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
-                           resource_group_name, vm_scale_set_name, vm_instance_i_ds)
-
-
 def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
