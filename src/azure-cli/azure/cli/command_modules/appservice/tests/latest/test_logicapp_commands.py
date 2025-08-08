@@ -278,7 +278,7 @@ class LogicAppDeployTest(LiveScenarioTest):
 
 class LogicAppPlanTest(ScenarioTest):
     def _create_app_service_plan(self, sku, resource_group, plan_name=None, expect_failure=False):
-        if plan_name == None:
+        if plan_name is None:
             plan = self.create_random_name('plan', 24)
         else:
             plan = plan_name
