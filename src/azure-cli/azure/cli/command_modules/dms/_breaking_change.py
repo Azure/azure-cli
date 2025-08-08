@@ -4,4 +4,3 @@
 # --------------------------------------------------------------------------------------------
 from azure.cli.core.breaking_change import register_argument_deprecate
 
-register_argument_deprecate('dms project create', argument='location')
