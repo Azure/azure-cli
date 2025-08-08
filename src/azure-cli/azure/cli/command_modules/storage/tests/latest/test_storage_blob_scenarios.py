@@ -22,7 +22,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='source_account')
     @StorageAccountPreparer(parameter_name='target_account')
     def test_storage_blob_incremental_copy(self, resource_group, source_account, target_account):
-        source_file = self.create_temp_file(16)
+        source_file = self.create_temp_file(16*1000) # 16MB for a longer copying period
         source_account_info = self.get_account_info(resource_group, source_account)
         source_container = self.create_container(source_account_info)
         self.storage_cmd('storage blob upload -c {} -n src -f "{}" -t page', source_account_info,
@@ -33,12 +33,17 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         target_account_info = self.get_account_info(resource_group, target_account)
         target_container = self.create_container(target_account_info)
-        self.storage_cmd('storage blob incremental-copy start --source-container {} --source-blob '
-                         'src --source-account-name {} --source-account-key {} --source-snapshot '
-                         '{} --destination-container {} --destination-blob backup '
-                         '--destination-if-modified-since "2020-06-29T06:32Z" ',
-                         target_account_info, source_container, source_account,
-                         source_account_info[1], snapshot, target_container)
+        copy_id = self.storage_cmd('storage blob incremental-copy start --source-container {} --source-blob '
+                                   'src --source-account-name {} --source-account-key {} --source-snapshot '
+                                   '{} --destination-container {} --destination-blob backup '
+                                   '--destination-if-modified-since "2020-06-29T06:32Z" ',
+                                   target_account_info, source_container, source_account,
+                                   source_account_info[1], snapshot, target_container).get_output_in_json()['id']
+        from azure.core.exceptions import ResourceExistsError
+        with self.assertRaisesRegex(ResourceExistsError, "There is currently no pending copy operation"):
+            self.storage_cmd('storage blob incremental-copy cancel --container-name {} --name {} --copy-id {} '
+                             '--lease-id abcdabcd-abcd-abcd-abcd-abcdabcdabcd',
+                             target_account_info, target_container, "backup", copy_id)
 
     def test_storage_blob_no_credentials_scenario(self):
         source_file = self.create_temp_file(1)

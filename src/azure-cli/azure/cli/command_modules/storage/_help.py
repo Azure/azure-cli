@@ -1042,6 +1042,11 @@ examples:
     crafted: true
 """
 
+helps['storage blob incremental-copy cancel'] = """
+type: command
+short-summary: Aborts a pending copy_blob operation, and leaves a destination blob with zero length and full metadata.
+"""
+
 helps['storage blob lease'] = """
 type: group
 short-summary: Manage storage blob leases.

@@ -12,12 +12,12 @@ from knack import CLI
 
 from azure.cli.core._config import GLOBAL_CONFIG_DIR, ENV_VAR_PREFIX
 from azure.cli.core.cloud import get_active_cloud
-from azure.cli.core.profiles import get_sdk, ResourceType, supported_api_version
+from azure.cli.core.profiles import get_sdk, ResourceType
 
 from azure.cli.command_modules.storage._validators import (get_permission_validator, get_datetime_type,
-                                                           ipv4_range_type, resource_type_type, services_type,
+                                                           ipv4_range_type, resource_type_type_v2, services_type_v2,
                                                            process_blob_source_uri, get_char_options_validator,
-                                                           get_source_file_or_blob_service_client,
+                                                           get_source_file_or_blob_service_client_track2,
                                                            validate_encryption_source, validate_source_uri,
                                                            validate_encryption_services, as_user_validator,
                                                            get_not_none_validator)
@@ -38,8 +38,7 @@ class MockLoader:
 
     def get_models(self, *attr_args, **_):
         from azure.cli.core.profiles import get_sdk
-        return get_sdk(self.ctx, ResourceType.DATA_STORAGE, *attr_args, mod='models')
-
+        return get_sdk(self.ctx, ResourceType.DATA_STORAGE_BLOB, *attr_args, mod='models')
 
 class MockCmd:
     def __init__(self, ctx, arguments={}):
@@ -49,7 +48,8 @@ class MockCmd:
         self.command_kwargs = {}
 
     def get_models(self, *attr_args, **kwargs):
-        return get_sdk(self.cli_ctx, ResourceType.DATA_STORAGE, *attr_args, **kwargs)
+        resource_type = kwargs.get('resource_type', self.command_kwargs.get('resource_type', None))
+        return get_sdk(self.cli_ctx, resource_type, *attr_args)
 
 
 class TestCmdModuleStorageValidators(unittest.TestCase):
@@ -62,7 +62,7 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
         self.io.close()
 
     def test_permission_validator(self):
-        t_container_permissions = get_sdk(self.cli, ResourceType.DATA_STORAGE, 'blob.models#ContainerPermissions')
+        t_container_permissions = get_sdk(self.cli, ResourceType.DATA_STORAGE_BLOB, '_models#ContainerSasPermissions')
 
         ns1 = Namespace(permission='rwdl')
         ns2 = Namespace(permission='abc')
@@ -114,27 +114,23 @@ class TestCmdModuleStorageValidators(unittest.TestCase):
 
     def test_resource_types_type(self):
         input = "sso"
-        actual = str(resource_type_type(self.loader)(input))
+        actual = str(resource_type_type_v2(self.loader)(input))
         expected = "so"
         self.assertEqual(actual, expected)
 
         input = "blob"
         with self.assertRaises(ValueError):
-            actual = resource_type_type(self.loader)(input)
+            actual = resource_type_type_v2(self.loader)(input)
 
     def test_services_type(self):
         input = "ttfqbqtf"
-        actual = str(services_type(self.loader)(input))
-        if supported_api_version(self.cli, ResourceType.DATA_STORAGE, max_api='2016-05-31') or \
-           supported_api_version(self.cli, ResourceType.DATA_STORAGE, min_api='2017-07-29'):
-            expected = "bqtf"
-        else:
-            expected = "bqf"
-        self.assertEqual(actual, expected)
+        actual = str(services_type_v2()(input))
+        expected = "bqtf"
+        self.assertEqual(set(actual), set(expected))
 
         input = "everything"
         with self.assertRaises(ValueError):
-            services_type(self.loader)(input)
+            services_type_v2()(input)
 
     def test_storage_process_blob_source_uri_redundent_parameter(self):
         with self.assertRaises(ValueError):
@@ -232,23 +228,26 @@ class TestGetSourceClientValidator(unittest.TestCase):
     def test_validate_with_container_name_blob(self):
         # source container name given, validator does not change namespace aside from ensuring source-client none
         ns = self._create_namespace(source_container='container2', destination_container='container1')
-        get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
+        get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
         self.assertIsNone(ns.source_client)
+        self.assertEqual(ns.source_container, 'container2')
+        self.assertEqual(ns.destination_container, 'container1')
 
     def test_validate_with_source_uri_blob(self):
         # source given in form of uri, source_container parsed from uri, source and dest account are the same
         ns = self._create_namespace(source_uri='https://storage_name.blob.core.windows.net/container2',
                                     destination_container='container1')
         with mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value="fake_key"):
-            get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
+            get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_container, 'container2')
-        self.assertIsNone(ns.source_client)
+        self.assertIsNotNone(ns.source_client)
+        self.assertEqual(ns.destination_container, 'container1')
 
     def test_validate_with_different_source_uri_sas_blob(self):
         # source given in form of uri, source_container parsed from uri, source and dest account are different
         ns = self._create_namespace(source_uri='https://other_name.blob.core.windows.net/container2?some_sas_token',
                                     destination_container='container1')
-        get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
+        get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_container, 'container2')
         self.assertIsNotNone(ns.source_client)
         self.assertEqual(ns.source_client.account_name, 'other_name')
@@ -256,23 +255,25 @@ class TestGetSourceClientValidator(unittest.TestCase):
     def test_validate_with_share_name_file(self):
         # source share name given, validator does not change namespace aside from ensuring source-client none
         ns = self._create_namespace(source_share='share2', destination_share='share1')
-        get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
+        get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
         self.assertIsNone(ns.source_client)
+        self.assertEqual(ns.source_share, 'share2')
+        self.assertEqual(ns.destination_share, 'share1')
 
     def test_validate_with_source_uri_file(self):
         # source given in form of uri, source_share parsed from uri, source and dest account are the same
         ns = self._create_namespace(source_uri='https://storage_name.file.core.windows.net/share2',
                                     destination_share='share1')
         with mock.patch('azure.cli.command_modules.storage._validators._query_account_key', return_value="fake_key"):
-            get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
+            get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_share, 'share2')
-        self.assertIsNone(ns.source_client)
+        self.assertIsNotNone(ns.source_client)
 
     def test_validate_with_different_source_uri_sas_file(self):
         # source given in form of uri, source_share parsed from uri, source and dest account are different
         ns = self._create_namespace(source_uri='https://other_name.file.core.windows.net/share2?some_sas_token',
                                     destination_share='share1')
-        get_source_file_or_blob_service_client(MockCmd(self.cli), ns)
+        get_source_file_or_blob_service_client_track2(MockCmd(self.cli), ns)
         self.assertEqual(ns.source_share, 'share2')
         self.assertIsNotNone(ns.source_client)
         self.assertEqual(ns.source_client.account_name, 'other_name')
@@ -280,16 +281,16 @@ class TestGetSourceClientValidator(unittest.TestCase):
     def test_validate_negatives(self):
         # bad argument combinations
         with self.assertRaises(ValueError):
-            get_source_file_or_blob_service_client(
+            get_source_file_or_blob_service_client_track2(
                 MockCmd(self.cli),
                 self._create_namespace(source_uri='https://storage_name.file.core.windows.net/share2',
                                        source_account_name='some_name'))
 
         with self.assertRaises(ValueError):
-            get_source_file_or_blob_service_client(MockCmd(self.cli), self._create_namespace(source_uri='faulty_uri'))
+            get_source_file_or_blob_service_client_track2(MockCmd(self.cli), self._create_namespace(source_uri='faulty_uri'))
 
         with self.assertRaises(ValueError):
-            get_source_file_or_blob_service_client(
+            get_source_file_or_blob_service_client_track2(
                 MockCmd(self.cli),
                 self._create_namespace(source_container='container_name', source_share='share_name'))
 
