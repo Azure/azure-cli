@@ -246,7 +246,7 @@ def _add_starting_dot(suffix):
 def _get_arm_endpoint(arm_dict, is_suffix=False):
     def _get_processed_arm_endpoint(name, add_dot=False, fallback_value=None):
         if is_suffix:
-            return (_add_starting_dot(arm_dict['suffixes'][name]) if add_dot else arm_dict['suffixes'][name]) if name in arm_dict['suffixes'] else fallback_value
+            return (_add_starting_dot(arm_dict['suffixes'][name]) if add_dot else arm_dict['suffixes'][name]) if name in arm_dict.get('suffixes', {}) else fallback_value
         return arm_dict[name] if name in arm_dict else fallback_value
     return _get_processed_arm_endpoint
 
