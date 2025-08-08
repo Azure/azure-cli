@@ -857,7 +857,7 @@ class SubscriptionFinder:
         return all_subscriptions
 
     def _create_subscription_client(self, credential):
-        from azure.cli.core.profiles import ResourceType, get_api_version
+        from azure.cli.core.profiles import ResourceType
         from azure.cli.core.profiles._shared import get_client_class
         from azure.cli.core.commands.client_factory import _prepare_mgmt_client_kwargs_track2
 
@@ -866,11 +866,10 @@ class SubscriptionFinder:
             from azure.cli.core.azclierror import CLIInternalError
             raise CLIInternalError("Unable to get '{}' in profile '{}'"
                                    .format(ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS, self.cli_ctx.cloud.profile))
-        api_version = get_api_version(self.cli_ctx, ResourceType.MGMT_RESOURCE_SUBSCRIPTIONS)
 
         sdk_cred = CredentialAdaptor(credential)
         client_kwargs = _prepare_mgmt_client_kwargs_track2(self.cli_ctx, sdk_cred)
-        client = client_type(sdk_cred, api_version=api_version,
+        client = client_type(sdk_cred,
                              base_url=self.cli_ctx.cloud.endpoints.resource_manager,
                              **client_kwargs)
         return client

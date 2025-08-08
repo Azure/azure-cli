@@ -83,7 +83,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         self.assertEqual(len(result), 2)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._resource_deployments_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment.Subnet.Show', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_create(self, ase_client_factory_mock, subnet_show_mock,
@@ -177,7 +177,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         ase_client.begin_delete.assert_called_once_with(name=ase_name, resource_group_name=rg_name)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._resource_deployments_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment.Subnet.Show', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_v3_create(self, ase_client_factory_mock, subnet_show_mock,
@@ -219,7 +219,7 @@ class AppServiceEnvironmentScenarioMockTest(unittest.TestCase):
         self.assertEqual(call_args[0][1], deployment_name)
 
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_unique_deployment_name', autospec=True)
-    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_resource_client_factory', autospec=True)
+    @mock.patch('azure.cli.command_modules.appservice.appservice_environment._resource_deployments_client_factory', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment.Subnet.Show', autospec=True)
     @mock.patch('azure.cli.command_modules.appservice.appservice_environment._get_ase_client_factory', autospec=True)
     def test_app_service_environment_v3_zone_create(self, ase_client_factory_mock, subnet_show_mock,

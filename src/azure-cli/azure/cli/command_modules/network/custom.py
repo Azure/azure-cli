@@ -243,7 +243,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
     from azure.cli.command_modules.network._template_builder import (
         build_application_gateway_resource, build_public_ip_resource, build_vnet_resource)
 
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
 
     tags = tags or {}
     sku_tier = sku.split('_', 1)[0] if not _is_v2_sku(sku) else sku
@@ -322,19 +322,16 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
 
     # deploy ARM template
     deployment_name = 'ag_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
     deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            from azure.cli.core.commands import LongRunningOperation
-            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-
-        return client.validate(resource_group_name, deployment_name, deployment)
+        from azure.cli.core.commands import LongRunningOperation
+        validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+        return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
@@ -4014,7 +4011,7 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
     from azure.cli.command_modules.network._template_builder import (
         build_load_balancer_resource, build_public_ip_resource, build_vnet_resource)
 
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
     aux_subscriptions = _get_lb_create_aux_subscriptions(public_ip_address, subnet)
 
     if public_ip_address is None:
@@ -4080,19 +4077,16 @@ def create_load_balancer(cmd, load_balancer_name, resource_group_name, location=
 
     # deploy ARM template
     deployment_name = 'lb_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS, aux_subscriptions=aux_subscriptions).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
     deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            from azure.cli.core.commands import LongRunningOperation
-            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-
-        return client.validate(resource_group_name, deployment_name, deployment)
+        from azure.cli.core.commands import LongRunningOperation
+        validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+        return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
@@ -4159,7 +4153,7 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
     from azure.cli.command_modules.network._template_builder import (
         build_load_balancer_resource, build_public_ip_resource)
 
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
 
     sku = 'standard'
     tier = 'Global'
@@ -4201,19 +4195,16 @@ def create_cross_region_load_balancer(cmd, load_balancer_name, resource_group_na
 
     # deploy ARM template
     deployment_name = 'lb_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS).deployments
     properties = DeploymentProperties(template=template, parameters={}, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
     deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            from azure.cli.core.commands import LongRunningOperation
-            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-
-        return client.validate(resource_group_name, deployment_name, deployment)
+        from azure.cli.core.commands import LongRunningOperation
+        validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+        return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 # endregion
@@ -6243,7 +6234,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import build_vpn_connection_resource
 
-    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    DeploymentProperties = cmd.get_models('DeploymentProperties', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
     tags = tags or {}
 
     # Build up the ARM template
@@ -6267,19 +6258,16 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
 
     # deploy ARM template
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS, aux_subscriptions=aux_subscriptions).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
-    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+    Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
     deployment = Deployment(properties=properties)
 
     if validate:
         _log_pprint_template(template)
-        if cmd.supported_api_version(min_api='2019-10-01', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES):
-            from azure.cli.core.commands import LongRunningOperation
-            validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
-            return LongRunningOperation(cmd.cli_ctx)(validation_poller)
-
-        return client.validate(resource_group_name, deployment_name, deployment)
+        from azure.cli.core.commands import LongRunningOperation
+        validation_poller = client.begin_validate(resource_group_name, deployment_name, deployment)
+        return LongRunningOperation(cmd.cli_ctx)(validation_poller)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 

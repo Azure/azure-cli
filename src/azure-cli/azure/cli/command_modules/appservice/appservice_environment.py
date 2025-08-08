@@ -75,7 +75,7 @@ def create_appserviceenvironment_arm(cmd, resource_group_name, name, subnet, kin
                                                                  virtual_ip_type=virtual_ip_type,
                                                                  zone_redundant=zone_redundant)
     logger.info('Create App Service Environment...')
-    deployment_client = _get_resource_client_factory(cmd.cli_ctx).deployments
+    deployment_client = _resource_deployments_client_factory(cmd.cli_ctx).deployments
     return sdk_no_wait(no_wait, deployment_client.begin_create_or_update,
                        resource_group_name, deployment_name, ase_deployment_properties)
 
@@ -211,6 +211,11 @@ def _get_resource_client_factory(cli_ctx, api_version=None):
     else:
         client.api_version = VERSION_2019_10_01
     return client
+
+
+def _resource_deployments_client_factory(cli_ctx, **_):
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
 
 
 def _get_private_dns_client_factory(cli_ctx):
