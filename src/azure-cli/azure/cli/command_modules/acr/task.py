@@ -114,7 +114,7 @@ def acr_task_create(cmd,  # pylint: disable=too-many-locals
             raise CLIError(e)
 
     if not context_path:
-        raise CLIError("If the task is not a System Task, --context-path must be provided.")
+        raise CLIError("If the task is not a System Task, --context must be provided.")
 
     if context_path.lower() == ACR_NULL_CONTEXT:
         context_path = None
