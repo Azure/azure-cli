@@ -5,6 +5,7 @@
 # pylint: disable=protected-access
 from ._base import AAZBaseValue, AAZValuePatch, AAZUndefined
 import abc
+import os
 
 
 class AAZSimpleValue(AAZBaseValue):
@@ -57,6 +58,21 @@ class AAZSimpleValue(AAZBaseValue):
 class AAZAnyValue(AAZSimpleValue):  # pylint: disable=too-few-public-methods
     # TODO: may need to override the __getitem__, __setitem__, __delitem__, __getattr__, __setattr__, __delattr__,
     pass
+
+
+class AAZFileUploadValue(AAZSimpleValue):  # pylint: disable=too-few-public-methods
+
+    def to_serialized_data(self, processor=None, **kwargs):
+        _file_size = os.path.getsize(self._data)
+        _content = None
+        _file_handle = open(self._data, "rb")
+        if _file_size < 5 * 1024 * 1024:  # 5MB
+            _content = _file_handle.read()
+            _file_handle.close()
+            _file_handle = None
+            return _content, _file_handle, _file_size
+
+        return _content, _file_handle, _file_size
 
 
 class AAZObject(AAZBaseValue):
