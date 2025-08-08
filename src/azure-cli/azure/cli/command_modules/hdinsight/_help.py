@@ -168,6 +168,12 @@ examples:
         --ssh-password "sshPassword1234!" \\
         --storage-account MyStorageAccount \\
         --entra-user-identity "objectId1","objectId2","upn3"
+  - name: Create a entra user cluster with Entra User By ObjectId Or Upn (comma-separated, use short name)
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        --ssh-password "sshPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --entra-uid "objectId1","objectId2","upn3"
   - name: Create a entra user cluster with Entra User By ObjectId Or Upn (space-separated)
     text: |-
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
@@ -180,6 +186,12 @@ examples:
         --ssh-password "sshPassword1234!" \\
         --storage-account MyStorageAccount \\
         --entra-user-full-info '[{\"objectID\": \"00000000-0000-0000-0000-000000000000\",\"displayName\": \"displayName\",\"upn\": \"user@contoso.com\"}]'
+  - name: Create a entra user cluster with Entra User By a JSON string (use short name)
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        --ssh-password "sshPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --entra-info '[{\"objectID\": \"00000000-0000-0000-0000-000000000000\",\"displayName\": \"displayName\",\"upn\": \"user@contoso.com\"}]'
   - name: Create a entra user cluster with Entra User By a JSON file
     text: |-
         az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
@@ -473,6 +485,10 @@ examples:
     text: |-
         az hdinsight credentials update --name MyCluster --resource-group rg \\
         --entra-user-identity "objectId1","objectId2","upn3"
+  - name: Update Entra ID users by object ID or UPN (comma-separated, use short name)
+    text: |-
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-uid "objectId1","objectId2","upn3"
   - name: Update Entra ID users by object ID or UPN (space-separated)
     text: |-
         az hdinsight credentials update --name MyCluster --resource-group rg \\
@@ -481,6 +497,10 @@ examples:
     text: |-
         az hdinsight credentials update --name MyCluster --resource-group rg \\
         --entra-user-full-info '[{\"objectID\": \"00000000-0000-0000-0000-000000000000\",\"displayName\": \"displayName\",\"upn\": \"user@contoso.com\"}]'
+  - name: Update Entra ID users using a JSON string (use short name)
+    text: |-
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-info '[{\"objectID\": \"00000000-0000-0000-0000-000000000000\",\"displayName\": \"displayName\",\"upn\": \"user@contoso.com\"}]'
   - name: Update Entra ID users using a JSON file
     text: |-
         az hdinsight credentials update --name MyCluster --resource-group rg \\

@@ -682,7 +682,7 @@ class HDInsightClusterTests(ScenarioTest):
         self.kwargs.update({
             'config_path': os.path.join(TEST_DIR, 'entrauserconfig.json')
         })
-        self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} -E @"{config_path}" --yes')
+        self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} --entra-info @"{config_path}" --yes')
         self.cmd('az hdinsight credentials show -n {cluster} --resource-group {rg}')
     
 
@@ -761,9 +761,9 @@ class HDInsightClusterTests(ScenarioTest):
     @staticmethod
     def _entra_arguments(entra_user = None,entra_full_info = None):
         if entra_user:
-            return '-e {}'.format(entra_user)
+            return '--entra-uid {}'.format(entra_user)
         else :
-            return '-E {}'.format(entra_full_info)
+            return '--entra-info {}'.format(entra_full_info)
 
     @staticmethod
     def _with_cluster_config():
