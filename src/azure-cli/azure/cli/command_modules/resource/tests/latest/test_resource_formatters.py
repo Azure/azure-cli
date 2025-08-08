@@ -15,11 +15,11 @@ from azure.cli.command_modules.resource._formatters import format_json, format_w
 
 
 cli_ctx = DummyCli()
-loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
-cmd = AzCliCommand(loader, "test", None, resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
+loader = AzCommandsLoader(cli_ctx, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
+cmd = AzCliCommand(loader, "test", None, resource_type=ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
 
-WhatIfOperationResult, WhatIfChange, WhatIfPropertyChange, ChangeType, PropertyChangeType = cmd.get_models(
-    "WhatIfOperationResult", "WhatIfChange", "WhatIfPropertyChange", "ChangeType", "PropertyChangeType",
+WhatIfOperationResult, WhatIfChange, WhatIfPropertyChange, ChangeType, PropertyChangeType, DeploymentDiagnosticsDefinition, Level = cmd.get_models(
+    "WhatIfOperationResult", "WhatIfChange", "WhatIfPropertyChange", "ChangeType", "PropertyChangeType", "DeploymentDiagnosticsDefinition", "Level"
 )
 
 
@@ -182,6 +182,7 @@ class TestFormatWhatIfOperationResult(unittest.TestCase):
 
         expected = "\nResource changes: 1 to delete, 2 to create, 1 to modify, 1 to ignore."
         result = format_what_if_operation_result(WhatIfOperationResult(changes=changes))
+        print(result)  # For debugging purposes
 
         self.assertTrue(result.endswith(expected))
 
@@ -572,3 +573,25 @@ Scope: /subscriptions/00000000-0000-0000-0000-000000000004/resourceGroups/rg4
         result = format_what_if_operation_result(WhatIfOperationResult(changes=changes), False)
 
         self.assertIn(expected, result)
+
+    def test_diagnostics(self):
+        changes = [
+            WhatIfChange(
+                resource_id='''[format('/subscriptions/00000000-0000-0000-0000-000000000000/providers/{0}', concat('Microsoft.Authorization/policyDefinitions/', format('{0}_{1}', 'policy-for-what-if-test', if(greater(int(utcNow('%f')), 4), '2', '3'))))]''',
+                change_type=ChangeType.unsupported,
+                unsupported_reason="Changes to the resource declared at 'properties.template.resources[1]' on line 1 and column 698 cannot be analyzed because its resource ID or API version cannot be calculated until the deployment is under way. Please see https://aka.ms/WhatIfUnidentifiableResource for more guidance.",
+            ),
+        ]
+        operation_result = WhatIfOperationResult(changes=changes)
+        diagnostic = DeploymentDiagnosticsDefinition()
+        diagnostic.code = "NestedDeploymentShortCircuited"
+        diagnostic.message = "The nested deployment '/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/nestedDeployment' at line '1' and column '1020' could not be expanded because it uses outer-mode evaluation and its template contains expressions that could not be evaluated. Please see https://aka.ms/WhatIfEvalStopped for more guidance."
+        diagnostic.level = Level.WARNING
+        diagnostic.target = '/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/nestedDeployment'
+        operation_result.diagnostics = [diagnostic]
+
+        result = format_what_if_operation_result(operation_result, True)
+
+        self.assertIn('''[format('/subscriptions/00000000-0000-0000-0000-000000000000/providers/{0}', concat('Microsoft.Authorization/policyDefinitions/', format('{0}_{1}', 'policy-for-what-if-test', if(greater(int(utcNow('%f')), 4), '2', '3'))))] (Unsupported) Changes to the resource declared at 'properties.template.resources[1]' on line 1 and column 698 cannot be analyzed because its resource ID or API version cannot be calculated until the deployment is under way. Please see https://aka.ms/WhatIfUnidentifiableResource for more guidance.''', result)
+
+        self.assertIn('''/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/nestedDeployment (NestedDeploymentShortCircuited) The nested deployment '/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Resources/deployments/nestedDeployment' at line '1' and column '1020' could not be expanded because it uses outer-mode evaluation and its template contains expressions that could not be evaluated. Please see https://aka.ms/WhatIfEvalStopped for more guidance.''', result)

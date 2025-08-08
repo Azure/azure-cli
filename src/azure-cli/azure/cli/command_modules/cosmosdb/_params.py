@@ -45,6 +45,9 @@ SQL_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consistent\\", \
 SQL_VECTOR_EMBEDDING_POLICY_EXAMPLE = """--vector-embeddings "{\\"vectorEmbeddings\\": [{\\"path\\": \\"/vector1\\", \\"dataType\\": \\"float32\\", \\"dimensions\\": 2, \\"distanceFunction\\": \\"dotproduct\\" }]}"
 """
 
+SQL_FULL_TEXT_SEARCH_POLICY_EXAMPLE = """--full-text-policy "{\\"fullTextPaths\\": [{\\"path\\": \\"/ftPath1\\", \\"language\\": \\"en-US\\" }]}"
+"""
+
 SQL_UNIQUE_KEY_POLICY_EXAMPLE = """--unique-key-policy "{\\"uniqueKeys\\": [{\\"paths\\": [\\"/path/to/key1\\"]}, {\\"paths\\": [\\"/path/to/key2\\"]}]}"
 """
 
@@ -167,6 +170,7 @@ def load_arguments(self, _):
         c.argument('partition_key_path', help='Partition Key Path, e.g., \'/properties/name\'')
         c.argument('client_encryption_policy', options_list=['--cep'], type=shell_safe_json_parse, completer=FilesCompleter(), validator=validate_client_encryption_policy, help='Client Encryption Policy, you can enter it as a string or as a file, e.g., --cep @policy-file.json or ' + SQL_CLIENT_ENCRYPTION_POLICY_EXAMPLE)
         c.argument('vector_embedding_policy', options_list=['--vector-embeddings'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Vector Embedding Policy, you can enter it as a string or as a file, e.g., --vector-embeddings @policy-file.json or ' + SQL_VECTOR_EMBEDDING_POLICY_EXAMPLE)
+        c.argument('full_text_policy', options_list=['--full-text-policy'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Full Text Policy, you can enter it as a string or as a file, e.g., --full-text-policy @policy-file.json or ' + SQL_FULL_TEXT_SEARCH_POLICY_EXAMPLE)
         c.argument('indexing_policy', type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --indexing-policy @policy-file.json)')
         c.argument('default_ttl', type=int, help='Default TTL. Provide 0 to disable.')
 
@@ -222,6 +226,7 @@ def load_arguments(self, _):
         c.argument('indexing_policy', options_list=['--idx'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Indexing Policy, you can enter it as a string or as a file, e.g., --idx @policy-file.json or ' + SQL_INDEXING_POLICY_EXAMPLE)
         c.argument('client_encryption_policy', options_list=['--cep'], type=shell_safe_json_parse, completer=FilesCompleter(), validator=validate_client_encryption_policy, help='Client Encryption Policy, you can enter it as a string or as a file, e.g., --cep @policy-file.json or ' + SQL_CLIENT_ENCRYPTION_POLICY_EXAMPLE)
         c.argument('vector_embedding_policy', options_list=['--vector-embeddings'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Vector Embedding Policy, you can enter it as a string or as a file, e.g., --vector-embeddings @policy-file.json or ' + SQL_VECTOR_EMBEDDING_POLICY_EXAMPLE)
+        c.argument('full_text_policy', options_list=['--full-text-policy'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Full Text Policy, you can enter it as a string or as a file, e.g., --full-text-policy @policy-file.json or ' + SQL_FULL_TEXT_SEARCH_POLICY_EXAMPLE)
         c.argument('unique_key_policy', options_list=['--unique-key-policy', '-u'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Unique Key Policy, you can enter it as a string or as a file, e.g., --unique-key-policy @policy-file.json or ' + SQL_UNIQUE_KEY_POLICY_EXAMPLE)
         c.argument('conflict_resolution_policy', options_list=['--conflict-resolution-policy', '-c'], type=shell_safe_json_parse, completer=FilesCompleter(), help='Conflict Resolution Policy, you can enter it as a string or as a file, e.g., --conflict-resolution-policy @policy-file.json or ' + SQL_GREMLIN_CONFLICT_RESOLUTION_POLICY_EXAMPLE)
         c.argument('max_throughput', max_throughput_type)

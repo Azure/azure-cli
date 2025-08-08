@@ -23,11 +23,15 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
                      'SQLDataBase': 'SQLDataBase',
                      'SAPHanaDatabase': 'SAPHanaDatabase',
+                     'SAPHanaDBInstance': 'SAPHanaDBInstance',
+                     'SAPAseDatabase': 'SAPAseDatabase',
                      'VM': 'VM',
                      'AzureFileShare': 'AzureFileShare'}
 
 workload_bmt_map = {'SQLDataBase': 'AzureWorkload',
                     'SAPHanaDatabase': 'AzureWorkload',
+                    'SAPHanaDBInstance': 'AzureWorkload',
+                    'SAPAseDatabase': 'AzureWorkload',
                     'VM': 'AzureIaasVM',
                     'AzureFileShare': 'AzureStorage'}
 

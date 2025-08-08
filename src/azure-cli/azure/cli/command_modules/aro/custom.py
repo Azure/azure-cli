@@ -507,8 +507,11 @@ def get_cluster_network_resources(cli_ctx, oc, fail):
 
     # Ensure that worker_profiles_status exists
     # it will not be returned if the cluster resources do not exist
+
+    # We filter nonexistent subnets here as we only propagate subnet values for
+    # worker profiles/machinesets considered valid.
     if oc.worker_profiles_status is not None:
-        worker_subnets |= {w.subnet_id for w in oc.worker_profiles_status}
+        worker_subnets |= {w.subnet_id for w in oc.worker_profiles_status if w.subnet_id is not None}
 
     master_parts = parse_resource_id(master_subnet)
     vnet = resource_id(

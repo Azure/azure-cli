@@ -34,7 +34,7 @@ examples:
 
 helps['sf application update'] = """
 type: command
-short-summary: Update a Azure Service Fabric application. This allows updating the application parameters and/or upgrade the application type version which will trigger an application upgrade.
+short-summary: Update an Azure Service Fabric application. This allows updating the application parameters and/or upgrade the application type version which will trigger an application upgrade.
 examples:
   - name: Update application parameters and upgrade policy values and app type version to v2.
     text: >
@@ -90,11 +90,6 @@ examples:
 helps['sf application-type'] = """
 type: group
 short-summary: Manage applications types and its versions running on an Azure Service Fabric cluster. Only support ARM deployed application types.
-"""
-
-helps['sf application-type'] = """
-type: group
-short-summary: Manage application types on an Azure Service Fabric cluster.
 """
 
 helps['sf application-type create'] = """
@@ -352,7 +347,9 @@ examples:
   - name: Remove the `MaxFileOperationTimeout` setting from a cluster.
     text: >
         az sf cluster setting remove -g group-name -c cluster1 --section 'NamingService' --parameter 'MaxFileOperationTimeout'
-
+  - name: Remove the `MaxFileOperationTimeout` setting from a cluster using settings file.
+    text: >
+        az sf cluster setting remove -g group-name -c cluster1 --settings-section '@settings-section.json'
 """
 
 helps['sf cluster setting set'] = """
@@ -362,7 +359,9 @@ examples:
   - name: Set the `MaxFileOperationTimeout` setting for a cluster to 5 seconds.
     text: >
         az sf cluster setting set -g group-name -c cluster1 --section 'NamingService' --parameter 'MaxFileOperationTimeout' --value 5000
-
+  - name: Set the `MaxFileOperationTimeout` setting for a cluster to 5 seconds using settings file.
+    text: >
+        az sf cluster setting set -g group-name -c cluster1 --settings-section '@settings-section.json'
 """
 
 helps['sf cluster upgrade-type'] = """
@@ -372,7 +371,7 @@ short-summary: Manage the upgrade type of a cluster.
 
 helps['sf cluster upgrade-type set'] = """
 type: command
-short-summary: Change the  upgrade type for a cluster.
+short-summary: Change the upgrade type for a cluster.
 examples:
   - name: Set a cluster to use the 'Automatic' upgrade mode.
     text: >
@@ -407,7 +406,7 @@ examples:
 
 helps['sf managed-cluster create'] = """
 type: command
-short-summary: Delete a managed cluster.
+short-summary: Create a managed cluster.
 examples:
   - name: Create cluster with standard sku and client cert by thumbprint.
     text: >
@@ -437,7 +436,7 @@ examples:
 
 helps['sf managed-cluster client-certificate'] = """
 type: group
-short-summary: Manage client certificates of a manged cluster.
+short-summary: Manage client certificates of a managed cluster.
 """
 
 helps['sf managed-cluster client-certificate add'] = """
@@ -466,17 +465,22 @@ examples:
 
 helps['sf managed-cluster network-security-rule'] = """
 type: group
-short-summary: network security rule of a managed cluster.
+short-summary: Manage network security rules of a managed cluster.
 """
 
 helps['sf managed-cluster network-security-rule add'] = """
 type: command
 short-summary: Add a network security rule to a managed cluster.
 examples:
-  - name: Add network security rule.
+  - name: Add network security rule with multiple source and destination address prefixes.
     text: >
         az sf managed-cluster network-security-rule add -g testRG -c testCluster --name 'network security rule name' --access allow --description 'network security rule description' --direction inbound --protocol tcp --priority 1200 \
           --source-port-ranges 1-1000 --dest-port-ranges 1-65535 --source-addr-prefixes 167.220.242.0/27 167.220.0.0/23 131.107.132.16/28 167.220.81.128/26 --dest-addr-prefixes 194.69.104.0/25 194.69.119.64/26 167.220.249.128/26 255.255.255.255/32
+
+  - name: Add network security rule with single source and destination address prefix.
+    text: >
+        az sf managed-cluster network-security-rule add -g testRG -c testCluster --name 'network security rule name' --access deny --description 'network security rule description' --direction inbound --protocol any --priority 1300 \
+          --source-port-range * --dest-port-ranges 19000 19080 --source-addr-prefix Internet --dest-addr-prefix *
 """
 
 helps['sf managed-cluster network-security-rule update'] = """
@@ -500,16 +504,16 @@ examples:
 
 helps['sf managed-cluster network-security-rule list'] = """
 type: command
-short-summary: list of network security rules in a cluster.
+short-summary: List network security rules in a cluster.
 examples:
-  - name: list network security rules.
+  - name: List network security rules.
     text: >
         az sf managed-cluster network-security-rule list -g testRG -c testCluster
 """
 
 helps['sf managed-cluster network-security-rule delete'] = """
 type: command
-short-summary: Delete a network security rule to a managed cluster.
+short-summary: Delete a network security rule from a managed cluster.
 examples:
   - name: Delete network security rule.
     text: >
@@ -546,7 +550,7 @@ examples:
   - name: Create primary node type with 5 nodes.
     text: >
         az sf managed-node-type create -g testRG -c testCluster -n pnt --instance-count 5 --primary
-  - name: Create non primary node type with placement properities, capacities and ports.
+  - name: Create non primary node type with placement properties, capacities and ports.
     text: >
         az sf managed-node-type create -g testRG -c testCluster -n snt --instance-count 5 --placement-property NodeColor=Green SomeProperty=5 --capacity ClientConnections=65536 --app-start-port 20575 --app-end-port 20605 --ephemeral-start-port 20606 --ephemeral-end-port 20861
 """
@@ -561,6 +565,12 @@ examples:
   - name: Update placement properties of the node type. This will overwrite older placement properties if any.
     text: >
         az sf managed-node-type update -g testRG -c testCluster -n snt --placement-property NodeColor=Red SomeProperty=6
+  - name: Update vm size of the node type. This will initiate an in-place swap of the vm size.
+    text: >
+        az sf managed-node-type update -g testRG -c testCluster -n snt --vm-size Standard_DS2_v2
+  - name: Update the node type tags.
+    text: >
+        az sf managed-node-type update -g testRG -c testCluster -n snt --tags key1=value1 key2=value2
 """
 
 helps['sf managed-node-type delete'] = """
@@ -620,7 +630,7 @@ examples:
 
 helps['sf managed-node-type vm-extension delete'] = """
 type: command
-short-summary: Delete an extension to the node type.
+short-summary: Delete an extension from the node type.
 examples:
   - name: Delete extension by name.
     text: >
@@ -663,10 +673,10 @@ examples:
 
 helps['sf managed-application update'] = """
 type: command
-short-summary: Update a Azure Service Fabric managed application.
-long-summary: This allows for updating the tags, the application parameters, value is the application UpgradePolicy and/or upgrade the application type version which will trigger an application upgrade.
+short-summary: Update an Azure Service Fabric managed application.
+long-summary: This allows for updating the tags, the application parameters, the application UpgradePolicy, and/or upgrading the application type version, which will trigger an application upgrade.
 examples:
-  - name: Update application parameters and upgreade policy values and app type version to v2.
+  - name: Update application parameters and upgrade policy values and app type version to v2.
     text: >
         az sf managed-application update -g testRG -c testCluster --application-name testApp --application-type-version v2 \\
           --application-parameters key0=value0 --health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 \\
@@ -708,11 +718,6 @@ type: group
 short-summary: Manage applications types and its versions running on an Azure Service Fabric managed cluster. Only support ARM deployed application types.
 """
 
-helps['sf managed-application-type'] = """
-type: group
-short-summary: Manage application types on an Azure Service Fabric cluster.
-"""
-
 helps['sf managed-application-type create'] = """
 type: command
 short-summary: Create a new managed application type on an Azure Service Fabric managed cluster.
@@ -742,7 +747,7 @@ examples:
 
 helps['sf managed-application-type update'] = """
 type: command
-short-summary: Update an managed application type.
+short-summary: Update a managed application type.
 long-summary: This allows for updating of application type tags.
 examples:
   - name: Update application type tags.

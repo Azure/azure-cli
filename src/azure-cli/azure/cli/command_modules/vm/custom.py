@@ -256,6 +256,16 @@ def _is_linux_os(vm):
     return False
 
 
+# separated for aaz implementation
+def _is_linux_os_aaz(vm):
+    if os_type := vm.get('storageProfile', {}).get('osDisk', {}).get('osType', None):
+        return os_type.lower() == 'linux'
+    # the os_type could be None for VM scaleset, let us check out os configurations
+    if linux_config := vm.get('osProfile', {}).get('linuxConfiguration', ''):
+        return bool(linux_config)
+    return False
+
+
 def _merge_secrets(secrets):
     """
     Merge a list of secrets. Each secret should be a dict fitting the following JSON structure:
@@ -1200,8 +1210,9 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         if assign_identity is not None:
             if enable_local_identity and not identity_scope:
                 _show_missing_access_warning(resource_group_name, vm_name2, 'vm')
-            setattr(vm, 'identity', _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
-                                                             vm.identity.user_assigned_identities))
+            vm['identity'] = _construct_identity_info(identity_scope, identity_role,
+                                                      vm.get('identity', {}).get('principalId', None),
+                                                      vm.get('identity', {}).get('userAssignedIdentities', None))
         vms.append(vm)
 
     if workspace is not None:
@@ -1260,10 +1271,17 @@ def auto_shutdown_vm(cmd, resource_group_name, vm_name, off=None, email=None, we
 
 
 def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False):
+    from .operations.vm import VMShow
     expand = 'instanceView'
     if include_user_data:
         expand = expand + ',userData'
-    return get_vm(cmd, resource_group_name, vm_name, expand)
+
+    result = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "vm_name": vm_name,
+        "expand": expand,
+    })
+    return result
 
 
 def get_vm(cmd, resource_group_name, vm_name, expand=None):
@@ -1291,8 +1309,8 @@ def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
     private_ips = []
     mac_addresses = []
     # pylint: disable=line-too-long,no-member
-    for nic_ref in result.network_profile.network_interfaces:
-        nic_parts = parse_resource_id(nic_ref.id)
+    for nic_ref in result.get('networkProfile', {}).get('networkInterfaces', []):
+        nic_parts = parse_resource_id(nic_ref['id'])
         nic = NicShow(cli_ctx=cmd.cli_ctx)(command_args={
             "name": nic_parts['name'],
             'resource_group': nic_parts['resource_group']
@@ -1313,13 +1331,14 @@ def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
                 if 'dnsSettings' in public_ip_info:
                     fqdns.append(public_ip_info['dnsSettings']['fqdn'])
 
-    setattr(result, 'power_state',
-            ','.join([s.display_status for s in result.instance_view.statuses if s.code.startswith('PowerState/')]))
-    setattr(result, 'public_ips', ','.join(public_ips))
-    setattr(result, 'fqdns', ','.join(fqdns))
-    setattr(result, 'private_ips', ','.join(private_ips))
-    setattr(result, 'mac_addresses', ','.join(mac_addresses))
-    del result.instance_view  # we don't need other instance_view info as people won't care
+    result['powerState'] = ','.join([s['displayStatus'] for s in result.get('instanceView', {}).get('statuses', [])
+                                     if s['code'].startswith('PowerState/')])
+    result['publicIps'] = ','.join(public_ips)
+    result['fqdns'] = ','.join(fqdns)
+    result['privateIps'] = ','.join(private_ips)
+    result['macAddresses'] = ','.join(mac_addresses)
+
+    del result['instanceView']  # we don't need other instanceView info as people won't care
     return result
 
 
@@ -1346,7 +1365,7 @@ def list_skus(cmd, location=None, size=None, zone=None, show_all=None, resource_
 def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
-    ccf = _compute_client_factory(cmd.cli_ctx)
+    from .aaz.latest.vm import List as VMList
     if vmss is not None:
         if is_valid_resource_id(vmss):
             filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss)
@@ -1359,12 +1378,19 @@ def list_vm(cmd, resource_group_name=None, show_details=False, vmss=None):
             vmss_id = resource_id(subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
                                   namespace='Microsoft.Compute', type='virtualMachineScaleSets', name=vmss)
             filter = "'virtualMachineScaleSet/id' eq '{}'".format(vmss_id)
-        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name, filter=filter)
+
+        vm_list = VMList(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            "filter": filter
+        })
     else:
-        vm_list = ccf.virtual_machines.list(resource_group_name=resource_group_name) \
-            if resource_group_name else ccf.virtual_machines.list_all()
+        from .aaz.latest.vm import ListAll as VMListAll
+        vm_list = VMList(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name
+        }) if resource_group_name else VMListAll(cli_ctx=cmd.cli_ctx)(command_args={})
+
     if show_details:
-        return [get_vm_details(cmd, _parse_rg_name(v.id)[0], v.name) for v in vm_list]
+        return [get_vm_details(cmd, _parse_rg_name(v['id'])[0], v['name']) for v in vm_list]
 
     return list(vm_list)
 
@@ -1731,28 +1757,31 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if any(parameter is not None for parameter in proxy_agent_parameters):
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
         HostEndpointSettings = cmd.get_models('HostEndpointSettings')
-        wire_server = HostEndpointSettings(
-            mode=wire_server_mode,
-            in_vm_access_control_profile_reference_id=wire_server_access_control_profile_reference_id
-        )
-        imds = HostEndpointSettings(
-            mode=imds_mode,
-            in_vm_access_control_profile_reference_id=imds_access_control_profile_reference_id
-        )
+        wire_server = HostEndpointSettings()
+        imds = HostEndpointSettings()
         if vm.security_profile is None:
             vm.security_profile = SecurityProfile()
-            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, key_incarnation_id=key_incarnation_id, wire_server=wire_server, imds=imds)
+            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(wire_server=wire_server, imds=imds)
         elif vm.security_profile.proxy_agent_settings is None:
-            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, key_incarnation_id=key_incarnation_id, wire_server=wire_server, imds=imds)
+            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(wire_server=wire_server, imds=imds)
         else:
+            if vm.security_profile.proxy_agent_settings.wire_server is None:
+                vm.security_profile.proxy_agent_settings.wire_server = wire_server
+            if vm.security_profile.proxy_agent_settings.imds is None:
+                vm.security_profile.proxy_agent_settings.imds = imds
+
+        if enable_proxy_agent is not None:
             vm.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
+        if key_incarnation_id is not None:
             vm.security_profile.proxy_agent_settings.key_incarnation_id = key_incarnation_id
+        if wire_server_mode is not None:
             vm.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
+        if wire_server_access_control_profile_reference_id is not None:
             vm.security_profile.proxy_agent_settings.wire_server.in_vm_access_control_profile_reference_id = \
                 wire_server_access_control_profile_reference_id
+        if imds_mode is not None:
             vm.security_profile.proxy_agent_settings.imds.mode = imds_mode
+        if imds_access_control_profile_reference_id is not None:
             vm.security_profile.proxy_agent_settings.imds.in_vm_access_control_profile_reference_id = \
                 imds_access_control_profile_reference_id
 
@@ -2066,7 +2095,8 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 
 # region VirtualMachines Disks (Managed)
 def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=None, disks=None, new=False, sku=None,
-                             size_gb=None, lun=None, caching=None, enable_write_accelerator=False, disk_ids=None):
+                             size_gb=None, lun=None, caching=None, enable_write_accelerator=False, disk_ids=None,
+                             source_snapshots_or_disks=None, source_disk_restore_point=None):
     # attach multiple managed disks using disk attach API
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
     if not new and not sku and not size_gb and disk_ids is not None:
@@ -2097,7 +2127,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
         DataDisk, ManagedDiskParameters, DiskCreateOption = cmd.get_models(
             'DataDisk', 'ManagedDiskParameters', 'DiskCreateOptionTypes')
         if size_gb is None:
-            size_gb = 1023
+            default_size_gb = 1023
 
         if disk_ids is not None:
             disks = disk_ids
@@ -2111,7 +2141,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
             if new:
                 data_disk = DataDisk(lun=disk_lun, create_option=DiskCreateOption.empty,
                                      name=parse_resource_id(disk_item)['name'],
-                                     disk_size_gb=size_gb, caching=caching,
+                                     disk_size_gb=size_gb if size_gb else default_size_gb, caching=caching,
                                      managed_disk=ManagedDiskParameters(storage_account_type=sku))
             else:
                 params = ManagedDiskParameters(id=disk_item, storage_account_type=sku)
@@ -2122,6 +2152,53 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 data_disk.write_accelerator_enabled = enable_write_accelerator
 
             vm.storage_profile.data_disks.append(data_disk)
+        disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
+        if source_snapshots_or_disks is not None:
+            for disk_item in source_snapshots_or_disks:
+                disk = {
+                    'create_option': 'Copy',
+                    'caching': caching,
+                    'lun': disk_lun,
+                    'writeAcceleratorEnabled': enable_write_accelerator,
+                    "sourceResource": {
+                        "id": disk_item
+                    }
+                }
+                if size_gb is not None:
+                    disk.update({
+                        'diskSizeGb': size_gb
+                    })
+                if sku is not None:
+                    disk.update({
+                        "managedDisk": {
+                            "storageAccountType": sku
+                        }
+                    })
+                disk_lun += 1
+                vm.storage_profile.data_disks.append(disk)
+        if source_disk_restore_point is not None:
+            for disk_item in source_disk_restore_point:
+                disk = {
+                    'create_option': 'Restore',
+                    'caching': caching,
+                    'lun': disk_lun,
+                    'writeAcceleratorEnabled': enable_write_accelerator,
+                    "sourceResource": {
+                        "id": disk_item
+                    }
+                }
+                if size_gb is not None:
+                    disk.update({
+                        'diskSizeGb': size_gb
+                    })
+                if sku is not None:
+                    disk.update({
+                        "managedDisk": {
+                            "storageAccountType": sku
+                        }
+                    })
+                disk_lun += 1
+                vm.storage_profile.data_disks.append(disk)
 
         set_vm(cmd, vm)
 
@@ -3252,7 +3329,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
                 imds_mode=None, wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
-                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None):
+                automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
+                enable_automatic_repairs=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
@@ -3574,7 +3652,8 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
             enable_automatic_zone_balancing=enable_automatic_zone_balancing,
             automatic_zone_balancing_strategy=automatic_zone_balancing_strategy,
-            automatic_zone_balancing_behavior=automatic_zone_balancing_behavior)
+            automatic_zone_balancing_behavior=automatic_zone_balancing_behavior,
+            enable_automatic_repairs=enable_automatic_repairs)
 
         vmss_resource['dependsOn'] = vmss_dependencies
 
@@ -4196,27 +4275,31 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         SecurityProfile = cmd.get_models('SecurityProfile')
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
         HostEndpointSettings = cmd.get_models('HostEndpointSettings')
-        wire_server = HostEndpointSettings(
-            mode=wire_server_mode,
-            in_vm_access_control_profile_reference_id=wire_server_access_control_profile_reference_id
-        )
-        imds = HostEndpointSettings(
-            mode=imds_mode,
-            in_vm_access_control_profile_reference_id=imds_access_control_profile_reference_id
-        )
+        wire_server = HostEndpointSettings()
+        imds = HostEndpointSettings()
         if vmss.virtual_machine_profile.security_profile is None:
             vmss.virtual_machine_profile.security_profile = SecurityProfile()
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, wire_server=wire_server, imds=imds)
+                wire_server=wire_server, imds=imds)
         elif vmss.virtual_machine_profile.security_profile.proxy_agent_settings is None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                enabled=enable_proxy_agent, wire_server=wire_server, imds=imds)
+                wire_server=wire_server, imds=imds)
         else:
+            if vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server is None:
+                vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server = wire_server
+            if vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds is None:
+                vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds = imds
+
+        if enable_proxy_agent is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
+        if wire_server_mode is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
+        if wire_server_access_control_profile_reference_id is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server. \
                 in_vm_access_control_profile_reference_id = wire_server_access_control_profile_reference_id
+        if imds_mode is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds.mode = imds_mode
+        if imds_access_control_profile_reference_id is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds. \
                 in_vm_access_control_profile_reference_id = imds_access_control_profile_reference_id
 
@@ -5541,50 +5624,6 @@ def show_capacity_reservation_group(client, resource_group_name, capacity_reserv
     return client.get(resource_group_name=resource_group_name,
                       capacity_reservation_group_name=capacity_reservation_group_name,
                       expand=expand)
-
-
-def create_capacity_reservation(cmd, client, resource_group_name, capacity_reservation_group_name,
-                                capacity_reservation_name, location=None, sku_name=None, capacity=None,
-                                zone=None, tags=None):
-    Sku = cmd.get_models('Sku')
-    sku = Sku(name=sku_name, capacity=capacity)
-    CapacityReservation = cmd.get_models('CapacityReservation')
-    capacity_reservation = CapacityReservation(location=location, sku=sku, zones=zone, tags=tags)
-    return client.begin_create_or_update(resource_group_name=resource_group_name,
-                                         capacity_reservation_group_name=capacity_reservation_group_name,
-                                         capacity_reservation_name=capacity_reservation_name,
-                                         parameters=capacity_reservation)
-
-
-def update_capacity_reservation(cmd, client, resource_group_name, capacity_reservation_group_name,
-                                capacity_reservation_name, capacity=None, tags=None):
-    Sku = cmd.get_models('Sku')
-    sku = Sku(capacity=capacity)
-
-    # If only the data of SKU capacity is updated, the original tags will be cleared.
-    # Therefore, before the service fixes this issue, we add this temporary logic
-    if tags is None:
-        capacity_reservation = client.get(resource_group_name=resource_group_name,
-                                          capacity_reservation_group_name=capacity_reservation_group_name,
-                                          capacity_reservation_name=capacity_reservation_name)
-        tags = capacity_reservation.tags
-
-    CapacityReservationUpdate = cmd.get_models('CapacityReservationUpdate')
-    capacity_reservation_update = CapacityReservationUpdate(sku=sku, tags=tags)
-    return client.begin_update(resource_group_name=resource_group_name,
-                               capacity_reservation_group_name=capacity_reservation_group_name,
-                               capacity_reservation_name=capacity_reservation_name,
-                               parameters=capacity_reservation_update)
-
-
-def show_capacity_reservation(client, resource_group_name, capacity_reservation_group_name, capacity_reservation_name,
-                              instance_view=None):
-    expand = None
-    if instance_view:
-        expand = 'instanceView'
-    return client.get(resource_group_name=resource_group_name,
-                      capacity_reservation_group_name=capacity_reservation_group_name,
-                      capacity_reservation_name=capacity_reservation_name, expand=expand)
 
 
 def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):

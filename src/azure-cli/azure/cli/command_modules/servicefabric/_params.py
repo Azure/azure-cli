@@ -288,8 +288,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('protocol', arg_type=get_enum_type(['tcp', 'https', 'http', 'udp', 'icmp', 'ah', 'esp', 'any']), help='Network protocol')
         c.argument('source_port_ranges', nargs='+', help='A single or space separated list of source port ranges')
         c.argument('dest_port_ranges', nargs='+', help='A single or space separated list of destination port ranges')
+        c.argument('source_port_range', help='The source port or range. Integer or range between 0 and 65535. Asterisk \'*\' can also be used to match all ports.')
+        c.argument('dest_port_range', help='The destination port or range. Integer or range between 0 and 65535. Asterisk \'*\' can also be used to match all ports.')
         c.argument('source_addr_prefixes', nargs='+', help='The CIDR or source IP ranges. A single or space separated list of source address prefixes')
         c.argument('dest_addr_prefixes', nargs='+', help='CIDR or destination IP ranges. A single or space separated list of destination address prefixes')
+        c.argument('source_addr_prefix', help='The CIDR or source IP range. Asterisk \'*\' can also be used to match all source IPs. Default tags such as \'VirtualNetwork\', \'AzureLoadBalancer\' and \'Internet\' can also be used. If this is an ingress rule, specifies where network traffic originates from.')
+        c.argument('dest_addr_prefix', help='The destination address prefix. CIDR or destination IP range. Asterisk \'*\' can also be used to match all source IPs. Default tags such as \'VirtualNetwork\', \'AzureLoadBalancer\' and \'Internet\' can also be used.')
 
     # managed node type
     capacity = CLIArgumentType(
@@ -308,7 +312,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
 
     with self.argument_context('sf managed-node-type') as c:
         c.argument('node_type_name', options_list=['-n', '--name', '--node-type-name'], help='node type name.')
-        c.argument('instance_count', help='essage = "The number of nodes in the node type.')
+
+    with self.argument_context('sf managed-node-type create') as c:
+        c.argument('instance_count', help='"The number of nodes in the node type.')
         c.argument('primary', arg_type=get_three_state_flag(), help='Specify if the node type is primary. On this node type will run system services. Only one node type should be marked as primary. Primary node type cannot be deleted or changed for existing clusters.')
         c.argument('disk_size', type=int, options_list=['--disk-size', '--data-disk-size'], help='Disk size for each vm in the node type in GBs.', default=100)
         c.argument('disk_type', arg_type=get_enum_type(DiskType), options_list=['--disk-type', '--data-disk-type'],
@@ -330,6 +336,18 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
         c.argument('is_stateless', arg_type=get_three_state_flag(), help='Indicates if the node type can only host Stateless workloads.', default=False)
         c.argument('multiple_placement_groups', options_list=['--multiple-placement-groups', '--multi-place-groups'], arg_type=get_three_state_flag(),
                    help='Indicates if scale set associated with the node type can be composed of multiple placement groups.', default=False)
+        c.argument('tags', arg_type=tags_type)
+
+    with self.argument_context('sf managed-node-type update') as c:
+        c.argument('instance_count', help='"The number of nodes in the node type.')
+        c.argument('application_start_port', options_list=['--application-start-port', '--app-start-port'], help='Application start port of a range of ports.')
+        c.argument('application_end_port', options_list=['--application-end-port', '--app-end-port'], help='Application End port of a range of ports.')
+        c.argument('ephemeral_start_port', help='Ephemeral start port of a range of ports.')
+        c.argument('ephemeral_end_port', help='Ephemeral end port of a range of ports.')
+        c.argument('vm_size', help='The size of virtual machines in the pool. All virtual machines in a pool are the same size.')
+        c.argument('capacity', arg_type=capacity)
+        c.argument('placement_property', arg_type=placement_property)
+        c.argument('tags', arg_type=tags_type)
 
     with self.argument_context('sf managed-node-type node') as c:
         c.argument('node_name', nargs='+', help='list of target nodes to perform the operation.')

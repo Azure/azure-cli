@@ -1058,33 +1058,6 @@ examples:
         az vm boot-diagnostics get-boot-log-uris -g MyResourceGroup -n MyVirtualMachine
 """
 
-helps['vm capture'] = """
-type: command
-short-summary: Capture information for a stopped VM.
-long-summary: 'For an end-to-end tutorial, see https://learn.microsoft.com/azure/virtual-machines/linux/capture-image'
-parameters:
-  - name: --vhd-name-prefix
-    type: string
-    short-summary: The VHD name prefix specify for the VM disks.
-  - name: --storage-container
-    short-summary: The storage account container name in which to save the disks.
-  - name: --overwrite
-    short-summary: Overwrite the existing disk file.
-examples:
-  - name: Deallocate, generalize, and capture a stopped virtual machine.
-    text: |
-        az vm deallocate -g MyResourceGroup -n MyVm
-        az vm generalize -g MyResourceGroup -n MyVm
-        az vm capture -g MyResourceGroup -n MyVm --vhd-name-prefix MyPrefix
-  - name: Deallocate, generalize, and capture multiple stopped virtual machines.
-    text: |
-        vms_ids=$(az vm list -g MyResourceGroup --query "[].id" -o tsv)
-        az vm deallocate --ids {vms_ids}
-        az vm generalize --ids {vms_ids}
-        az vm capture --ids {vms_ids} --vhd-name-prefix MyPrefix
-
-"""
-
 helps['vm create'] = """
 type: command
 short-summary: Create an Azure Virtual Machine.
@@ -1186,22 +1159,6 @@ examples:
   - name: Create a VM from community gallery image
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
-"""
-
-helps['vm delete'] = """
-type: command
-short-summary: Delete a VM.
-parameters:
-  - name: --force-deletion
-    short-summary: Optional parameter to force delete virtual machines. Default value is None.
-examples:
-  - name: Delete a VM without a prompt for confirmation.
-    text: >
-        az vm delete -g MyResourceGroup -n MyVm --yes
-  - name: Delete all VMs in a resource group.
-    text: >
-        az vm delete --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
-
 """
 
 helps['vm diagnostics'] = """
@@ -3003,11 +2960,6 @@ examples:
     crafted: true
 """
 
-helps['capacity reservation'] = """
-type: group
-short-summary: Manage capacity.
-"""
-
 helps['capacity reservation group create'] = """
 type: command
 short-summary: Create capacity reservation group.
@@ -3036,56 +2988,6 @@ examples:
     text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup
   - name: Get a capacity reservation group containing the instance views of the capacity reservations under the capacity reservation group
     text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup --instance-view
-"""
-
-
-helps['capacity reservation create'] = """
-type: command
-short-summary: Create capacity reservation.
-examples:
-  - name: Create a capacity reservation.
-    text: |
-        az capacity reservation create -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --sku Standard_A0
-  - name: Create a capacity reservation with specific capacity and zones.
-    text: |
-        az capacity reservation create -c ReservationGroupName -n ReservationName -l centraluseuap \\
-            -g MyResourceGroup  --sku Standard_A1_v2 --capacity 5 \\
-                --zone 1 --tags key=val
-"""
-
-helps['capacity reservation update'] = """
-type: command
-short-summary: Update capacity reservation.
-examples:
-  - name: Update a capacity reservation.
-    text: |
-        az capacity reservation update -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --capacity 5 --tags key=val
-"""
-
-helps['capacity reservation show'] = """
-type: command
-short-summary: Show capacity reservation.
-examples:
-  - name: Get a capacity reservation.
-    text: az capacity reservation show -c ReservationGroupName -n ReservationName -g MyResourceGroup
-  - name: Get a capacity reservation containing the instance views.
-    text: |
-        az capacity reservation show -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --instance-view
-"""
-
-helps['capacity reservation show'] = """
-type: command
-short-summary: Show capacity reservation.
-examples:
-  - name: Get a capacity reservation.
-    text: az capacity reservation show -c ReservationGroupName -n ReservationName -g MyResourceGroup
-  - name: Get a capacity reservation containing the instance views.
-    text: |
-        az capacity reservation show -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --instance-view
 """
 
 helps['restore-point'] = """

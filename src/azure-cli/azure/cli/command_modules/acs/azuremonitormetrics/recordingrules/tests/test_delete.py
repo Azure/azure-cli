@@ -19,7 +19,7 @@ class TestDeleteRuleFunctions(unittest.TestCase):
         delete_rules(cmd, cluster_subscription, cluster_resource_group_name, cluster_name)
 
         # Assertions
-        self.assertEqual(mock_delete_rule.call_count, 4)  # Ensure delete_rule is called 4 times with different arguments
+        self.assertEqual(mock_delete_rule.call_count, 6)  # Ensure delete_rule is called 6 times with different arguments
 
 
 if __name__ == '__main__':

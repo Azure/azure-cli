@@ -373,7 +373,7 @@ def __export_keyvalue(key_segments, value, constructed_data):
 
 
 # Helper functions
-def __export_kvset_to_file(file_path, keyvalues, yes):
+def __export_kvset_to_file(file_path, keyvalues, yes, dry_run=False):
     if len(keyvalues) == 0:
         logger.warning("\nSource configuration is empty. Nothing to export.")
         return
@@ -386,6 +386,9 @@ def __export_kvset_to_file(file_path, keyvalues, yes):
     print_preview(
         updates, level="kvset", yes=yes, title="KVSet", indent=2, show_update_diff=False
     )
+
+    if dry_run:
+        return
 
     if not yes:
         user_confirmation("Do you want to continue? \n")

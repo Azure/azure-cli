@@ -65,3 +65,8 @@ class DiskEncryptionSetUpdate(_DiskEncryptionSetUpdate):
         if has_value(args.source_vault):
             vault = args.source_vault.to_serialized_data()
             args.source_vault = vault if is_valid_resource_id(vault) else KV_RID_TEMPLATE.format(self.ctx.subscription_id, args.resource_group, vault)
+
+    def pre_instance_update(self, instance):
+        args = self.ctx.args
+        if not has_value(args.source_vault):
+            instance.properties.active_key.source_vault = None

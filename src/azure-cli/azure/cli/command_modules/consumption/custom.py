@@ -95,10 +95,8 @@ def transform_usage_output(result):
     usageStart = result.get('usageStart', None)
     usageEnd = result.get('usageEnd', None)
     if usageStart or usageEnd:
-        usageStart = parser.parse(usageStart).strftime("%Y-%m-%dT%H:%M:%SZ") if usageStart else 'None'
-        usageEnd = parser.parse(usageEnd).strftime("%Y-%m-%dT%H:%M:%SZ") if usageEnd else 'None'
-    else:
-        return None
+        usageStart = parser.parse(usageStart).strftime("%Y-%m-%dT%H:%M:%SZ") if usageStart else None
+        usageEnd = parser.parse(usageEnd).strftime("%Y-%m-%dT%H:%M:%SZ") if usageEnd else None
     result['usageStart'] = usageStart
     result['usageEnd'] = usageEnd
     result['usageQuantity'] = str(result.get('usageQuantity', None))

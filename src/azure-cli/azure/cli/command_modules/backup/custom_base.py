@@ -420,7 +420,8 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
                   target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None,
-                  tenant_id=None, disk_access_option=None, target_disk_access_id=None):
+                  tenant_id=None, disk_access_option=None, target_disk_access_id=None,
+                  cvm_os_des_id=None):
 
     if rehydration_duration < 10 or rehydration_duration > 30:
         raise InvalidArgumentValueError('--rehydration-duration must have a value between 10 and 30 (both inclusive).')
@@ -438,7 +439,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                                 mi_system_assigned, mi_user_assigned, target_zone, restore_mode, target_vm_name,
                                 target_vnet_name, target_vnet_resource_group, target_subnet_name,
                                 target_subscription_id, storage_account_resource_group, restore_to_edge_zone,
-                                tenant_id, disk_access_option, target_disk_access_id)
+                                tenant_id, disk_access_option, target_disk_access_id, cvm_os_des_id)
 
 
 def enable_for_azurefileshare(cmd, client, resource_group_name, vault_name, policy_name, storage_account,
@@ -524,7 +525,8 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
                          rp_name=None, target_item_name=None, log_point_in_time=None, target_server_type=None,
                          target_server_name=None, workload_type=None, backup_management_type="AzureWorkload",
                          from_full_rp_name=None, filepath=None, target_container_name=None, target_resource_group=None,
-                         target_vault_name=None, target_subscription_id=None, target_instance_name=None):
+                         target_vault_name=None, target_subscription_id=None, target_instance_name=None,
+                         attach_and_mount=None, identity_arm_id=None, snapshot_instance_resource_group=None):
     target_subscription = get_subscription_id(cmd.cli_ctx)
     if target_subscription_id is not None:
         vault_csr_state = custom.get_vault_csr_state(vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name))
@@ -563,7 +565,9 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     return custom_wl.show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name,
                                           item_name, rp_name, target_item, target_item_name, log_point_in_time,
                                           from_full_rp_name, filepath, target_container, target_resource_group,
-                                          target_vault_name, target_subscription)
+                                          target_vault_name, target_subscription, workload_type=workload_type,
+                                          attach_and_mount=attach_and_mount, identity_arm_id=identity_arm_id,
+                                          snapshot_instance_resource_group=snapshot_instance_resource_group)
 
 
 def undelete_protection(cmd, client, resource_group_name, vault_name, container_name, item_name,

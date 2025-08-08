@@ -162,6 +162,10 @@ def load_command_table(self, _):
         from .custom import WAFCustomRuleMatchConditionAdd
         self.command_table["network application-gateway waf-policy custom-rule match-condition add"] = WAFCustomRuleMatchConditionAdd(loader=self)
 
+    with self.command_group("network application-gateway waf-policy managed-rule exception") as g:
+        g.custom_command("remove", "remove_waf_managed_rule_exception")
+        g.custom_command("list", "list_waf_managed_rules")
+
     with self.command_group("network application-gateway waf-policy managed-rule exclusion") as g:
         g.custom_command("remove", "remove_waf_managed_rule_exclusion")
         g.custom_command("list", "list_waf_managed_rules")
@@ -670,6 +674,14 @@ def load_command_table(self, _):
         self.command_table['network vnet-gateway list-bgp-peer-status'] = ListBgpPeerStatus(loader=self, table_transformer=transform_vnet_gateway_bgp_peer_table)
         self.command_table['network vnet-gateway list-advertised-routes'] = ListAdvertisedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
         self.command_table['network vnet-gateway list-learned-routes'] = ListLearnedRoutes(loader=self, table_transformer=transform_vnet_gateway_routes_table)
+
+    with self.command_group('network vnet-gateway migration') as g:
+        from .operations.vnet_gateway_migration import VNetGatewayMigrationAbort, VNetGatewayMigrationExecute, \
+            VNetGatewayMigrationCommit, VNetGatewayMigrationPrepare
+        self.command_table['network vnet-gateway migration abort'] = VNetGatewayMigrationAbort(loader=self)
+        self.command_table['network vnet-gateway migration execute'] = VNetGatewayMigrationExecute(loader=self)
+        self.command_table['network vnet-gateway migration commit'] = VNetGatewayMigrationCommit(loader=self)
+        self.command_table['network vnet-gateway migration prepare'] = VNetGatewayMigrationPrepare(loader=self)
 
     with self.command_group('network vnet-gateway packet-capture'):
         from .aaz.latest.network.vnet_gateway import Wait
