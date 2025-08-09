@@ -486,7 +486,7 @@ def get_rg_location(ctx, resource_group_name, subscription_id=None):
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     rg = groups.get(resource_group_name)
     if rg is None:
-        raise CLIError(f"Resource group {resource_group_name} not found.")
+        raise CLIError('Resource group {} not found.'.format(resource_group_name))
     return rg.location
 
 
@@ -495,7 +495,7 @@ def get_dms_location(ctx, resource_group_name, dms_name):
     # Just do the get, we don't need the result, it will error out if the group doesn't exist.
     service = services.get(group_name=resource_group_name, service_name=dms_name)
     if service is None:
-        raise CLIError(f"Service {dms_name} not found.")
+        raise CLIError('Service {} not found.'.format(dms_name))
     return service.location
 
 
