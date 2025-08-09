@@ -320,6 +320,8 @@ parameters:
                 // Optional setting that configures the delay between updates of result objects in Azure Table Storage.
                 "DelayProgressUpdatesInStorageInterval": "00:00:30",
             },
+            // Optional setting to migrate the full server.
+            "migrate_full_server": "true|false",
             // Optional setting to set the source server read only.
             "make_source_server_read_only": "true|false",
             // Optional setting to enable consistent backup. True by default for the sync migration, unless lockless is enabled.
