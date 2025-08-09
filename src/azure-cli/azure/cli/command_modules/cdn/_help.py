@@ -168,7 +168,7 @@ examples:
   - name: Purge pre-loaded Javascript and CSS content.
     text: >
         az cdn endpoint purge -g group -n endpoint --profile-name profile-name --content-paths
-        '/scripts/app.js' '/styles/*'
+        './scripts/app.js' './styles/*'
 """
 
 helps['cdn endpoint validate-custom-domain'] = """
