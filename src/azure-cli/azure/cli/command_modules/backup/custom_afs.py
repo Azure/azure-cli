@@ -207,7 +207,8 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
             afs_restore_request.source_resource_id = source_resource_id
         else:
             raise CLIError(
-                "Unable to retrieve source resource ID. The storage account might have been deleted and no fallback source resource ID is available.")
+                "Unable to retrieve source resource ID. The storage account might have been deleted "
+                "and no fallback source resource ID is available.") from e
 
     afs_restore_request.restore_request_type = restore_request_type
 
@@ -431,7 +432,7 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
         storage_account = resources_client.get(storage_account_rg, classic_storage_resource_namespace,
                                                parent_resource_path, resource_type, storage_account_name,
                                                classic_api_version)
-    except BaseException:  # pylint: disable=bare-except
+    except:  # pylint: disable=bare-except
         storage_account = resources_client.get(storage_account_rg, storage_resource_namespace, parent_resource_path,
                                                resource_type, storage_account_name, api_version)
     return storage_account.id
