@@ -199,12 +199,15 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
         if not afs_restore_request.source_resource_id:
             raise CLIError("Source resource ID is null or empty after retrieval from storage account.")
     except (CLIError) as e:
-        logger.warning("Failed to get storage account ID: %s. Falling back to source resource ID from protected item.", str(e))
+        logger.warning(
+            "Failed to get storage account ID: %s. Falling back to source resource ID from protected item.",
+            str(e))
         source_resource_id = _get_source_resource_id_from_item(item)
         if source_resource_id:
             afs_restore_request.source_resource_id = source_resource_id
         else:
-            raise CLIError("Unable to retrieve source resource ID. The storage account might have been deleted and no fallback source resource ID is available.")
+            raise CLIError(
+                "Unable to retrieve source resource ID. The storage account might have been deleted and no fallback source resource ID is available.")
 
     afs_restore_request.restore_request_type = restore_request_type
 
@@ -428,10 +431,11 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
         storage_account = resources_client.get(storage_account_rg, classic_storage_resource_namespace,
                                                parent_resource_path, resource_type, storage_account_name,
                                                classic_api_version)
-    except:  # pylint: disable=bare-except
+    except BaseException:  # pylint: disable=bare-except
         storage_account = resources_client.get(storage_account_rg, storage_resource_namespace, parent_resource_path,
                                                resource_type, storage_account_name, api_version)
     return storage_account.id
+
 
 def _get_source_resource_id_from_item(item):
     """
@@ -441,6 +445,7 @@ def _get_source_resource_id_from_item(item):
     if item and hasattr(item, 'properties') and hasattr(item.properties, 'source_resource_id'):
         return item.properties.source_resource_id
     return None
+
 
 def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name, tenant_id=None,
                is_critical_operation=False, yes=False):
