@@ -432,7 +432,7 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
         storage_account = resources_client.get(storage_account_rg, classic_storage_resource_namespace,
                                                parent_resource_path, resource_type, storage_account_name,
                                                classic_api_version)
-    except:  # pylint: disable=bare-except
+    except BaseException:  # pylint: disable=bare-except
         storage_account = resources_client.get(storage_account_rg, storage_resource_namespace, parent_resource_path,
                                                resource_type, storage_account_name, api_version)
     return storage_account.id
