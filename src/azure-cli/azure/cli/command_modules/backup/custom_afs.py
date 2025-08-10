@@ -198,7 +198,7 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
         # Check if source_resource_id is null or empty after assignment
         if not afs_restore_request.source_resource_id:
             raise CLIError("Source resource ID is null or empty after retrieval from storage account.")
-    except Exception as e:
+    except (CLIError) as e:
         logger.warning("Failed to get storage account ID: %s. Falling back to source resource ID from protected item.", str(e))
         source_resource_id = _get_source_resource_id_from_item(item)
         if source_resource_id:
