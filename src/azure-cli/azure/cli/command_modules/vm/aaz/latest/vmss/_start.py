@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "vmss start",
 )
 class Start(AAZCommand):
-    """Start VMs within a VMSS
+    """Start VMs within a VMSS.
 
     :example: Start VMs within a VMSS.
         az vmss start --instance-ids 1 --name MyScaleSet --resource-group MyResourceGroup
