@@ -119,7 +119,7 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
 
     selected_databases = database_options_json.get('selected_databases')
 
-    if (selected_databases is not None):
+    if selected_databases is not None:
         for database in selected_databases:
             if not isinstance(database, dict):
                 raise ValidationError('Format of the selected database file is wrong')
@@ -129,7 +129,8 @@ def get_migrate_mysql_to_azuredbformysql_input(database_options_json,
                 raise ValidationError('Selected database should have a target_database_name')
             if 'table_map' in database and (not isinstance(database.get('table_map'), dict) or
                                             len(database.get('table_map')) == 0):
-                raise ValidationError('table_map should be dictionary and non empty, to select all tables remove table_map')
+                raise ValidationError(
+                    'table_map should be dictionary and non empty, to select all tables remove table_map')
 
             db_input = create_db_input(database, has_schema_migration_options)
             database_options.append(db_input)
