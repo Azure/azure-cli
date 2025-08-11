@@ -64,10 +64,11 @@ def _resource_managementgroups_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ManagementGroupsAPI, subscription_bound=False)
 
 
-def _resource_templatespecs_client_factory(cli_ctx, **_):
+def _resource_templatespecs_client_factory(cli_ctx, subscription_id=None, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
+    kwargs = {'subscription_id': subscription_id} if subscription_id is not None else {}
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, **kwargs)
 
 
 def _resource_deploymentstacks_client_factory(cli_ctx, **_):
