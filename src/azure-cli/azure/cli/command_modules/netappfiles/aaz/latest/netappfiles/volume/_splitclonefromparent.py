@@ -12,16 +12,17 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "netappfiles volume replication finalize-external-replication",
+    "netappfiles volume splitclonefromparent",
+    is_preview=True,
 )
-class FinalizeExternalReplication(AAZCommand):
-    """Finalizes the migration of an external volume by releasing the replication and breaking the external cluster peering if no other migration is active.
+class Splitclonefromparent(AAZCommand):
+    """Split operation to convert clone volume to an independent volume.
     """
 
     _aaz_info = {
         "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/finalizeexternalreplication", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/splitclonefromparent", "2025-06-01"],
         ]
     }
 
@@ -80,7 +81,7 @@ class FinalizeExternalReplication(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.VolumesFinalizeExternalReplication(ctx=self.ctx)()
+        yield self.VolumesSplitCloneFromParent(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -91,7 +92,7 @@ class FinalizeExternalReplication(AAZCommand):
     def post_operations(self):
         pass
 
-    class VolumesFinalizeExternalReplication(AAZHttpOperation):
+    class VolumesSplitCloneFromParent(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -112,7 +113,7 @@ class FinalizeExternalReplication(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/finalizeExternalReplication",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.NetApp/netAppAccounts/{accountName}/capacityPools/{poolName}/volumes/{volumeName}/splitCloneFromParent",
                 **self.url_parameters
             )
 
@@ -161,8 +162,8 @@ class FinalizeExternalReplication(AAZCommand):
             return parameters
 
 
-class _FinalizeExternalReplicationHelper:
-    """Helper class for FinalizeExternalReplication"""
+class _SplitclonefromparentHelper:
+    """Helper class for Splitclonefromparent"""
 
 
-__all__ = ["FinalizeExternalReplication"]
+__all__ = ["Splitclonefromparent"]
