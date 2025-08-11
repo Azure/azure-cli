@@ -12014,7 +12014,8 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
         self.cmd('disk grant-access -n {disk} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
             self.exists('accessSAS'),
-            self.exists('securityDataAccessSAS')
+            self.exists('securityDataAccessSAS'),
+            self.exists('securityMetadataAccessSAS'),
         ])
 
         self.cmd('disk create -n {disk1} -g {rg} --os-type Windows --hyper-v-generation v2 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
@@ -12023,7 +12024,8 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
         self.cmd('disk grant-access -n {disk1} -g {rg} --access-level Write --duration-in-seconds 86400 --secure-vm-guest-state-sas', checks=[
             self.exists('accessSAS'),
-            self.exists('securityDataAccessSAS')
+            self.exists('securityDataAccessSAS'),
+            self.exists('securityMetadataAccessSAS'),
         ])
 
         self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v2 --upload-type Upload --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
