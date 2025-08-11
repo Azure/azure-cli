@@ -7696,6 +7696,7 @@ def _build_onedeploy_url(params, instance_id=None):
         return _build_onedeploy_arm_url(params, instance_id)
     return _build_onedeploy_scm_url(params)
 
+
 def _build_kudu_warmup_url(params, instance_id=None):
     if params.src_url:
         return _build_kudu_warmup_arm_url(params, instance_id)
