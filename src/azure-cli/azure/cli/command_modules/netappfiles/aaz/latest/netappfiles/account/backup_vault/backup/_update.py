@@ -13,15 +13,16 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles account backup-vault backup update",
+    is_preview=True,
 )
 class Update(AAZCommand):
     """Update a backup under the Backup Vault
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2022-11-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups/{}", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups/{}", "2022-11-01-preview"],
         ]
     }
 
@@ -54,16 +55,16 @@ class Update(AAZCommand):
             ),
         )
         _args_schema.backup_name = AAZStrArg(
-            options=["-b", "-n", "--name", "--backup-name"],
+            options=["-n", "--name", "--backup-name"],
             help="The name of the backup",
             required=True,
             id_part="child_name_2",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_.]{0,255}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,255}$",
             ),
         )
         _args_schema.backup_vault_name = AAZStrArg(
-            options=["-v", "--backup-vault-name"],
+            options=["--backup-vault-name"],
             help="The name of the Backup Vault",
             required=True,
             id_part="child_name_1",
@@ -82,6 +83,12 @@ class Update(AAZCommand):
             options=["--label"],
             arg_group="Properties",
             help="Label for backup",
+            nullable=True,
+        )
+        _args_schema.use_existing_snapshot = AAZBoolArg(
+            options=["--use-existing-snapshot"],
+            arg_group="Properties",
+            help="Manual backup an already existing snapshot. This will always be false for scheduled backups and true/false for manual backups",
             nullable=True,
         )
         return cls._args_schema
@@ -172,7 +179,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2022-11-01-preview",
                     required=True,
                 ),
             }
@@ -279,7 +286,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2022-11-01-preview",
                     required=True,
                 ),
             }
@@ -342,6 +349,7 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("label", AAZStrType, ".label")
+                properties.set_prop("useExistingSnapshot", AAZBoolType, ".use_existing_snapshot")
 
             return _instance_value
 
@@ -394,17 +402,8 @@ class _UpdateHelper:
             serialized_name="backupId",
             flags={"read_only": True},
         )
-        properties.backup_policy_resource_id = AAZStrType(
-            serialized_name="backupPolicyResourceId",
-            flags={"read_only": True},
-        )
         properties.backup_type = AAZStrType(
             serialized_name="backupType",
-            flags={"read_only": True},
-        )
-        properties.completion_date = AAZStrType(
-            serialized_name="completionDate",
-            nullable=True,
             flags={"read_only": True},
         )
         properties.creation_date = AAZStrType(
@@ -415,21 +414,12 @@ class _UpdateHelper:
             serialized_name="failureReason",
             flags={"read_only": True},
         )
-        properties.is_large_volume = AAZBoolType(
-            serialized_name="isLargeVolume",
-            flags={"read_only": True},
-        )
         properties.label = AAZStrType()
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
         properties.size = AAZIntType(
-            flags={"read_only": True},
-        )
-        properties.snapshot_creation_date = AAZStrType(
-            serialized_name="snapshotCreationDate",
-            nullable=True,
             flags={"read_only": True},
         )
         properties.snapshot_name = AAZStrType(

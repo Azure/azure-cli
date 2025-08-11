@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2023-05-01"],
         ]
     }
 
@@ -119,7 +119,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }
@@ -194,9 +194,7 @@ class Wait(AAZWaitCommand):
             )
 
             user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType(
-                nullable=True,
-            )
+            user_assigned_identities.Element = AAZObjectType()
 
             _element = cls._schema_on_200.identity.user_assigned_identities.Element
             _element.client_id = AAZStrType(
@@ -218,14 +216,6 @@ class Wait(AAZWaitCommand):
                 flags={"read_only": True},
             )
             properties.encryption = AAZObjectType()
-            properties.multi_ad_status = AAZStrType(
-                serialized_name="multiAdStatus",
-                flags={"read_only": True},
-            )
-            properties.nfs_v4_id_domain = AAZStrType(
-                serialized_name="nfsV4IDDomain",
-                nullable=True,
-            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -328,9 +318,6 @@ class Wait(AAZWaitCommand):
             )
 
             identity = cls._schema_on_200.properties.encryption.identity
-            identity.federated_client_id = AAZStrType(
-                serialized_name="federatedClientId",
-            )
             identity.principal_id = AAZStrType(
                 serialized_name="principalId",
                 flags={"read_only": True},
@@ -350,6 +337,7 @@ class Wait(AAZWaitCommand):
             )
             key_vault_properties.key_vault_resource_id = AAZStrType(
                 serialized_name="keyVaultResourceId",
+                flags={"required": True},
             )
             key_vault_properties.key_vault_uri = AAZStrType(
                 serialized_name="keyVaultUri",

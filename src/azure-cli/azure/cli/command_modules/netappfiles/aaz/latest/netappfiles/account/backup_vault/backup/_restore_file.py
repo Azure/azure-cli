@@ -13,15 +13,16 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles account backup-vault backup restore-file",
+    is_preview=True,
 )
 class RestoreFile(AAZCommand):
     """Restore the specified files from the specified backup to the active filesystem
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2022-11-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups/{}/restorefiles", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups/{}/restorefiles", "2022-11-01-preview"],
         ]
     }
 
@@ -52,16 +53,16 @@ class RestoreFile(AAZCommand):
             ),
         )
         _args_schema.backup_name = AAZStrArg(
-            options=["-b", "--backup-name"],
+            options=["--backup-name"],
             help="The name of the backup",
             required=True,
             id_part="child_name_2",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_.]{0,255}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,255}$",
             ),
         )
         _args_schema.backup_vault_name = AAZStrArg(
-            options=["-v", "--backup-vault-name"],
+            options=["--backup-vault-name"],
             help="The name of the Backup Vault",
             required=True,
             id_part="child_name_1",
@@ -87,10 +88,6 @@ class RestoreFile(AAZCommand):
             arg_group="Body",
             help="List of files to be restored",
             required=True,
-            fmt=AAZListArgFormat(
-                max_length=8,
-                min_length=1,
-            ),
         )
         _args_schema.restore_file_path = AAZStrArg(
             options=["--restore-file-path"],
@@ -134,6 +131,15 @@ class RestoreFile(AAZCommand):
                     self.ctx.args.no_wait,
                     session,
                     None,
+                    self.on_error,
+                    lro_options={"final-state-via": "location"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [204]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_204,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -186,7 +192,7 @@ class RestoreFile(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2022-11-01-preview",
                     required=True,
                 ),
             }
@@ -217,6 +223,9 @@ class RestoreFile(AAZCommand):
                 file_list.set_elements(AAZStrType, ".")
 
             return self.serialize_content(_content_value)
+
+        def on_204(self, session):
+            pass
 
 
 class _RestoreFileHelper:

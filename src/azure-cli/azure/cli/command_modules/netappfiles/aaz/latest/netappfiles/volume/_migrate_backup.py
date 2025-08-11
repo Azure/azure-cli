@@ -13,15 +13,16 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles volume migrate-backup",
+    is_preview=True,
 )
 class MigrateBackup(AAZCommand):
     """Migrate the backups under volume to backup vault
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2022-11-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/migratebackups", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/migratebackups", "2022-11-01-preview"],
         ]
     }
 
@@ -66,7 +67,7 @@ class MigrateBackup(AAZCommand):
             required=True,
         )
         _args_schema.volume_name = AAZStrArg(
-            options=["-v", "--volume-name"],
+            options=["--volume-name"],
             help="The name of the volume",
             required=True,
             id_part="child_name_2",
@@ -80,7 +81,7 @@ class MigrateBackup(AAZCommand):
         # define Arg Group "Body"
 
         _args_schema = cls._args_schema
-        _args_schema.backup_vault_id = AAZResourceIdArg(
+        _args_schema.backup_vault_id = AAZStrArg(
             options=["--backup-vault-id"],
             arg_group="Body",
             help="The ResourceId of the Backup Vault",
@@ -112,6 +113,15 @@ class MigrateBackup(AAZCommand):
                     self.ctx.args.no_wait,
                     session,
                     None,
+                    self.on_error,
+                    lro_options={"final-state-via": "location"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [204]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_204,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -164,7 +174,7 @@ class MigrateBackup(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2022-11-01-preview",
                     required=True,
                 ),
             }
@@ -189,6 +199,9 @@ class MigrateBackup(AAZCommand):
             _builder.set_prop("backupVaultId", AAZStrType, ".backup_vault_id", typ_kwargs={"flags": {"required": True}})
 
             return self.serialize_content(_content_value)
+
+        def on_204(self, session):
+            pass
 
 
 class _MigrateBackupHelper:

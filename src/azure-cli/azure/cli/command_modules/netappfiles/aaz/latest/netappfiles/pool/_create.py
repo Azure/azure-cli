@@ -24,9 +24,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}", "2023-05-01"],
         ]
     }
 
@@ -98,12 +98,6 @@ class Create(AAZCommand):
             help="If enabled (true) the pool can contain cool Access enabled volumes.",
             default=False,
         )
-        _args_schema.custom_throughput_mibps = AAZFloatArg(
-            options=["--custom-throughput-mibps"],
-            arg_group="Properties",
-            help="Maximum throughput in MiB/s that can be achieved by this pool and this will be accepted as input only for manual qosType pool with Flexible service level",
-            nullable=True,
-        )
         _args_schema.encryption_type = AAZStrArg(
             options=["--encryption-type"],
             arg_group="Properties",
@@ -125,12 +119,12 @@ class Create(AAZCommand):
             help="serviceLevel",
             required=True,
             default="Premium",
-            enum={"Flexible": "Flexible", "Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
+            enum={"Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
         )
         _args_schema.size = AAZIntArg(
             options=["--size"],
             arg_group="Properties",
-            help="Provisioned size of the pool. Must be an integer number of tebibytes in multiples of 4",
+            help="Provisioned size of the pool (in bytes). Allowed values are in 1TiB chunks (value must be multiply of 4398046511104).",
             required=True,
             default=4398046511104,
         )
@@ -221,7 +215,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }
@@ -253,7 +247,6 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("coolAccess", AAZBoolType, ".cool_access")
-                properties.set_prop("customThroughputMibps", AAZFloatType, ".custom_throughput_mibps", typ_kwargs={"nullable": True})
                 properties.set_prop("encryptionType", AAZStrType, ".encryption_type", typ_kwargs={"nullable": True})
                 properties.set_prop("qosType", AAZStrType, ".qos_type")
                 properties.set_prop("serviceLevel", AAZStrType, ".service_level", typ_kwargs={"flags": {"required": True}})
@@ -310,10 +303,6 @@ class Create(AAZCommand):
             properties = cls._schema_on_200_201.properties
             properties.cool_access = AAZBoolType(
                 serialized_name="coolAccess",
-            )
-            properties.custom_throughput_mibps = AAZFloatType(
-                serialized_name="customThroughputMibps",
-                nullable=True,
             )
             properties.encryption_type = AAZStrType(
                 serialized_name="encryptionType",

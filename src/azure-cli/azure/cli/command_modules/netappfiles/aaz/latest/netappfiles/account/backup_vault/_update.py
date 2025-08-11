@@ -13,15 +13,16 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles account backup-vault update",
+    is_preview=True,
 )
 class Update(AAZCommand):
     """Update the specified Backup Vault in the NetApp account
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2022-11-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}", "2022-11-01-preview"],
         ]
     }
 
@@ -54,7 +55,7 @@ class Update(AAZCommand):
             ),
         )
         _args_schema.backup_vault_name = AAZStrArg(
-            options=["-n", "-v", "--name", "--backup-vault-name"],
+            options=["-n", "--name", "--backup-vault-name"],
             help="The name of the Backup Vault",
             required=True,
             id_part="child_name_1",
@@ -164,7 +165,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2022-11-01-preview",
                     required=True,
                 ),
             }
@@ -267,7 +268,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2022-11-01-preview",
                     required=True,
                 ),
             }

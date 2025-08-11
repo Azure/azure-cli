@@ -22,9 +22,9 @@ class Add(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2023-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-06-01", "properties.activeDirectories[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2023-05-01", "properties.activeDirectories[]"],
         ]
     }
 
@@ -62,13 +62,6 @@ class Add(AAZCommand):
             help="Id of the Active Directory",
             required=True,
             nullable=True,
-        )
-        _args_schema.kdc_ip = AAZStrArg(
-            options=["--kdc-ip"],
-            help="kdc server IP address for the active directory machine. This optional parameter is used only while creating kerberos volume.",
-            fmt=AAZStrArgFormat(
-                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
-            ),
         )
 
         # define Arg Group "Body.properties.activeDirectories[]"
@@ -120,6 +113,14 @@ class Add(AAZCommand):
             options=["--encrypt-dc-conn", "--encrypt-dc-connections"],
             arg_group="Body.properties.activeDirectories[]",
             help="If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted.",
+        )
+        _args_schema.kdc_ip = AAZStrArg(
+            options=["--kdc-ip"],
+            arg_group="Body.properties.activeDirectories[]",
+            help="kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume.",
+            fmt=AAZStrArgFormat(
+                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
+            ),
         )
         _args_schema.ldap_over_tls = AAZBoolArg(
             options=["--ldap-over-tls"],
@@ -339,7 +340,7 @@ class Add(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }
@@ -438,7 +439,7 @@ class Add(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2023-05-01",
                     required=True,
                 ),
             }
@@ -602,9 +603,7 @@ class _AddHelper:
         )
 
         user_assigned_identities = _schema_net_app_account_read.identity.user_assigned_identities
-        user_assigned_identities.Element = AAZObjectType(
-            nullable=True,
-        )
+        user_assigned_identities.Element = AAZObjectType()
 
         _element = _schema_net_app_account_read.identity.user_assigned_identities.Element
         _element.client_id = AAZStrType(
@@ -626,14 +625,6 @@ class _AddHelper:
             flags={"read_only": True},
         )
         properties.encryption = AAZObjectType()
-        properties.multi_ad_status = AAZStrType(
-            serialized_name="multiAdStatus",
-            flags={"read_only": True},
-        )
-        properties.nfs_v4_id_domain = AAZStrType(
-            serialized_name="nfsV4IDDomain",
-            nullable=True,
-        )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
@@ -736,9 +727,6 @@ class _AddHelper:
         )
 
         identity = _schema_net_app_account_read.properties.encryption.identity
-        identity.federated_client_id = AAZStrType(
-            serialized_name="federatedClientId",
-        )
         identity.principal_id = AAZStrType(
             serialized_name="principalId",
             flags={"read_only": True},
@@ -758,6 +746,7 @@ class _AddHelper:
         )
         key_vault_properties.key_vault_resource_id = AAZStrType(
             serialized_name="keyVaultResourceId",
+            flags={"required": True},
         )
         key_vault_properties.key_vault_uri = AAZStrType(
             serialized_name="keyVaultUri",

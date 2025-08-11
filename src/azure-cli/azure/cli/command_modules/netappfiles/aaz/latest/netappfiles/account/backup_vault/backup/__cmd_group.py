@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "netappfiles account backup-vault backup",
+    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Manage Azure NetApp Files (ANF) Backup Resources.

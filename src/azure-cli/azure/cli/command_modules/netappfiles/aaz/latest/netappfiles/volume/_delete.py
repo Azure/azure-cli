@@ -13,19 +13,17 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles volume delete",
+    is_preview=True,
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
     """Delete the specified volume
-
-    :example: Delete an ANF volume
-        az netappfiles volume delete -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2022-11-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2022-11-01-preview"],
         ]
     }
 
@@ -81,7 +79,7 @@ class Delete(AAZCommand):
             ),
         )
         _args_schema.force_delete = AAZBoolArg(
-            options=["--force", "--force-delete"],
+            options=["--force-delete"],
             help="An option to force delete the volume. Will cleanup resources connected to the particular volume",
         )
         return cls._args_schema
@@ -109,7 +107,7 @@ class Delete(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    None,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -119,15 +117,6 @@ class Delete(AAZCommand):
                     self.ctx.args.no_wait,
                     session,
                     self.on_204,
-                    self.on_error,
-                    lro_options={"final-state-via": "location"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200, 201]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200_201,
                     self.on_error,
                     lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
@@ -183,16 +172,13 @@ class Delete(AAZCommand):
                     "forceDelete", self.ctx.args.force_delete,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2022-11-01-preview",
                     required=True,
                 ),
             }
             return parameters
 
         def on_204(self, session):
-            pass
-
-        def on_200_201(self, session):
             pass
 
 

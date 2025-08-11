@@ -19,9 +19,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2023-07-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/latestrestorestatus/current", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/latestrestorestatus/current", "2023-07-01-preview"],
         ]
     }
 
@@ -42,7 +42,7 @@ class Show(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.account_name = AAZStrArg(
-            options=["-a", "--account-name"],
+            options=["--account-name"],
             help="The name of the NetApp account",
             required=True,
             id_part="name",
@@ -51,7 +51,7 @@ class Show(AAZCommand):
             ),
         )
         _args_schema.pool_name = AAZStrArg(
-            options=["-p", "--pool-name"],
+            options=["--pool-name"],
             help="The name of the capacity pool",
             required=True,
             id_part="child_name_1",
@@ -91,7 +91,7 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
         return result
 
     class BackupsGetVolumeLatestRestoreStatus(AAZHttpOperation):
@@ -150,7 +150,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2023-07-01-preview",
                     required=True,
                 ),
             }

@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles volume create",
+    is_preview=True,
 )
 class Create(AAZCommand):
     """Create or Update a volume
@@ -20,19 +21,13 @@ class Create(AAZCommand):
     Create the specified volume within the capacity pool
 
     :example: Create an ANF volume
-        az netappfiles volume create -g group --account-name aname --pool-name pname --volume-name vname -l location --service-level "Premium" --usage-threshold 100 --creation-token "unique-token" --protocol-types NFSv3 --vnet myvnet --subnet-id "/subscriptions/mysubsid/resourceGroups/myrg/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/default" --rules '[{"allowed_clients":"0.0.0.0/0","rule_index":"1","unix_read_only":"true","unix_read_write":"false","cifs":"false","nfsv3":"true","nfsv41":"false"}]'
-
-    :example: Create an ANF volume with zones (Availability Zone) specified
-        az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 --zones zone1
-
-    :example: Create an ANF volume with CMK Encryption
-        az netappfiles volume create -g mygroup --account-name myaccname --pool-name mypoolname --name myvolname -l westus2 --service-level premium --usage-threshold 100 --file-path "unique-file-path" --vnet myvnet --subnet mysubnet --protocol-types NFSv3 --network-features Standard --protocol-types NFSv4.1 --rule-index 1 --allowed-clients '10.7.0.0/24' --kerberos-enabled false --encryption-key-source  Microsoft.KeyVault --kv-private-endpoint-id myPrivateEndpointId
+        az netappfiles volume create -g group --account-name aname --pool-name pname --volume-name vname -l location --service-level "Premium" --usage-threshold 107374182400 --creation-token "unique-token" --protocol-types NFSv3 --vnet myvnet --subnet-id "/subscriptions/mysubsid/resourceGroups/myrg/providers/Microsoft.Network/virtualNetworks/myvnet/subnets/default" --rules '[{"allowed_clients":"0.0.0.0/0","rule_index":"1","unix_read_only":"true","unix_read_write":"false","cifs":"false","nfsv3":"true","nfsv41":"false"}]'
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2022-11-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2022-11-01-preview"],
         ]
     }
 
@@ -88,12 +83,17 @@ class Create(AAZCommand):
         # define Arg Group "Backup"
 
         _args_schema = cls._args_schema
-        _args_schema.backup_policy_id = AAZResourceIdArg(
+        _args_schema.backup_enabled = AAZBoolArg(
+            options=["--backup-enabled"],
+            arg_group="Backup",
+            help="Backup Enabled",
+        )
+        _args_schema.backup_policy_id = AAZStrArg(
             options=["--backup-policy-id"],
             arg_group="Backup",
             help="Backup Policy Resource ID",
         )
-        _args_schema.backup_vault_id = AAZResourceIdArg(
+        _args_schema.backup_vault_id = AAZStrArg(
             options=["--backup-vault-id"],
             arg_group="Backup",
             help="Backup Vault Resource ID",
@@ -239,12 +239,6 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrArg(
-            options=["--grow-pool-clone-split", "--accept-grow-capacity-pool-for-short-term-clone-split"],
-            arg_group="Properties",
-            help="While auto splitting the short term clone volume, if the parent pool does not have enough space to accommodate the volume after split, it will be automatically resized, which will lead to increased billing. To accept capacity pool size auto grow and create a short term clone volume, set the property as accepted.",
-            enum={"Accepted": "Accepted", "Declined": "Declined"},
-        )
         _args_schema.avs_data_store = AAZStrArg(
             options=["--avs-data-store"],
             arg_group="Properties",
@@ -252,10 +246,10 @@ class Create(AAZCommand):
             default="Disabled",
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
-        _args_schema.backup_id = AAZResourceIdArg(
+        _args_schema.backup_id = AAZStrArg(
             options=["--backup-id"],
             arg_group="Properties",
-            help="Resource identifier used to identify the Backup.",
+            help="UUID v4 or resource identifier used to identify the Backup.",
             nullable=True,
         )
         _args_schema.capacity_pool_resource_id = AAZStrArg(
@@ -269,25 +263,13 @@ class Create(AAZCommand):
             help="Specifies whether Cool Access(tiering) is enabled for the volume.",
             default=False,
         )
-        _args_schema.cool_access_retrieval_policy = AAZStrArg(
-            options=["--ca-retrieval-policy", "--cool-access-retrieval-policy"],
-            arg_group="Properties",
-            help="coolAccessRetrievalPolicy determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. The possible values for this field are:   Default - Data will be pulled from cool tier to standard storage on random reads. This policy is the default.  OnRead - All client-driven data read is pulled from cool tier to standard storage on both sequential and random reads.  Never - No client-driven data is pulled from cool tier to standard storage.",
-            enum={"Default": "Default", "Never": "Never", "OnRead": "OnRead"},
-        )
-        _args_schema.cool_access_tiering_policy = AAZStrArg(
-            options=["--ca-tiering-policy", "--cool-access-tiering-policy"],
-            arg_group="Properties",
-            help="coolAccessTieringPolicy determines which cold data blocks are moved to cool tier. The possible values for this field are: Auto - Moves cold user data blocks in both the Snapshot copies and the active file system to the cool tier tier. This policy is the default. SnapshotOnly - Moves user data blocks of the Volume Snapshot copies that are not associated with the active file system to the cool tier.",
-            enum={"Auto": "Auto", "SnapshotOnly": "SnapshotOnly"},
-        )
         _args_schema.coolness_period = AAZIntArg(
             options=["--coolness-period"],
             arg_group="Properties",
             help="Specifies the number of days after which data that is not accessed by clients will be tiered.",
             fmt=AAZIntArgFormat(
-                maximum=183,
-                minimum=2,
+                maximum=63,
+                minimum=7,
             ),
         )
         _args_schema.creation_token = AAZStrArg(
@@ -326,7 +308,7 @@ class Create(AAZCommand):
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.is_default_quota_enabled = AAZBoolArg(
-            options=["--is-def-quota-enabled", "--default-quota-enabled", "--is-default-quota-enabled"],
+            options=["--default-quota-enabled", "--is-default-quota-enabled"],
             arg_group="Properties",
             help="Specifies if default quota is enabled for the volume.",
             default=False,
@@ -336,6 +318,11 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Specifies whether volume is a Large Volume or Regular Volume.",
             default=False,
+        )
+        _args_schema.is_restoring = AAZBoolArg(
+            options=["--is-restoring"],
+            arg_group="Properties",
+            help="Restoring",
         )
         _args_schema.kerberos_enabled = AAZBoolArg(
             options=["--kerberos-enabled"],
@@ -354,7 +341,7 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Basic network, or Standard features available to the volume.",
             default="Basic",
-            enum={"Basic": "Basic", "Basic_Standard": "Basic_Standard", "Standard": "Standard", "Standard_Basic": "Standard_Basic"},
+            enum={"Basic": "Basic", "Standard": "Standard"},
         )
         _args_schema.placement_rules = AAZListArg(
             options=["--placement-rules"],
@@ -383,17 +370,16 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="serviceLevel",
             default="Premium",
-            enum={"Flexible": "Flexible", "Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
+            enum={"Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
         )
         _args_schema.smb_access_based_enumeration = AAZStrArg(
             options=["--smb-access-enumeration", "--smb-access-based-enumeration"],
             arg_group="Properties",
             help="Enables access based enumeration share property for SMB Shares. Only applicable for SMB/DualProtocol volume",
-            nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
         _args_schema.smb_continuously_available = AAZBoolArg(
-            options=["--smb-ca", "--smb-continuously-avl", "--smb-continuously-available"],
+            options=["--smb-ca", "--smb-continuously-available"],
             arg_group="Properties",
             help="Enables continuously available share property for smb volume. Only applicable for SMB volume",
             default=False,
@@ -416,10 +402,10 @@ class Create(AAZCommand):
             help="If enabled (true) the volume will contain a read-only snapshot directory which provides access to each of the volume's snapshots (defaults to true).",
             default=True,
         )
-        _args_schema.snapshot_id = AAZResourceIdArg(
+        _args_schema.snapshot_id = AAZStrArg(
             options=["--snapshot-id"],
             arg_group="Properties",
-            help="Resource identifier used to identify the Snapshot.",
+            help="UUID v4 or resource identifier used to identify the Snapshot.",
             nullable=True,
         )
         _args_schema.subnet_id = AAZStrArg(
@@ -427,7 +413,6 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The Azure Resource URI for a delegated subnet. Must have the delegation Microsoft.NetApp/volumes",
             required=True,
-            default="default",
         )
         _args_schema.throughput_mibps = AAZFloatArg(
             options=["--throughput-mibps"],
@@ -439,6 +424,7 @@ class Create(AAZCommand):
             options=["--unix-permissions"],
             arg_group="Properties",
             help="UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file: read (4), write (2) and execute (1). Third selects permissions for other users in the same group. the fourth for other users not in the group. 0755 - gives read/write/execute permissions to owner and read/execute to group and other users.",
+            default="0770",
             nullable=True,
             fmt=AAZStrArgFormat(
                 max_length=4,
@@ -448,12 +434,12 @@ class Create(AAZCommand):
         _args_schema.usage_threshold = AAZIntArg(
             options=["--usage-threshold"],
             arg_group="Properties",
-            help={"short-summary": "Maximum storage quota allowed for a file system in GiB.", "long-summary": "Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. For regular volumes, valid values are in the range 50GiB to 100TiB. For large volumes, valid values are in the range 100TiB to 500TiB, and on an exceptional basis, to 2400TiB."},
+            help={"short-summary": "Maximum storage quota allowed for a file system in bytes.", "long-summary": "This is a soft quota used for alerting only. Minimum size is 100 GiB. \nUpper limit is 100TiB, 500Tib for LargeVolume."},
             required=True,
-            default=100,
+            default=107374182400,
             fmt=AAZIntArgFormat(
-                maximum=2638827906662400,
-                minimum=53687091200,
+                maximum=549755813888000,
+                minimum=107374182400,
             ),
         )
         _args_schema.volume_spec_name = AAZStrArg(
@@ -485,28 +471,15 @@ class Create(AAZCommand):
         protocol_types = cls._args_schema.protocol_types
         protocol_types.Element = AAZStrArg()
 
-        # define Arg Group "RemotePath"
-
-        _args_schema = cls._args_schema
-        _args_schema.external_host_name = AAZStrArg(
-            options=["--external-host-name"],
-            arg_group="RemotePath",
-            help="The Path to a ONTAP Host",
-        )
-        _args_schema.external_server_name = AAZStrArg(
-            options=["--external-server-name"],
-            arg_group="RemotePath",
-            help="The name of a server on the ONTAP Host",
-        )
-        _args_schema.external_volume_name = AAZStrArg(
-            options=["--external-volume-name"],
-            arg_group="RemotePath",
-            help="The name of a volume on the server",
-        )
-
         # define Arg Group "Replication"
 
         _args_schema = cls._args_schema
+        _args_schema.endpoint_type = AAZStrArg(
+            options=["--endpoint-type"],
+            arg_group="Replication",
+            help="Indicates whether the local volume is the source or destination for the Volume Replication",
+            enum={"dst": "dst", "src": "src"},
+        )
         _args_schema.remote_volume_region = AAZStrArg(
             options=["--remote-volume-region"],
             arg_group="Replication",
@@ -516,6 +489,11 @@ class Create(AAZCommand):
             options=["--remote-volume-id", "--remote-volume-resource-id"],
             arg_group="Replication",
             help="The resource ID of the remote volume.",
+        )
+        _args_schema.replication_id = AAZStrArg(
+            options=["--replication-id"],
+            arg_group="Replication",
+            help="Id",
         )
         _args_schema.replication_schedule = AAZStrArg(
             options=["--replication-schedule"],
@@ -632,7 +610,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2022-11-01-preview",
                     required=True,
                 ),
             }
@@ -664,13 +642,10 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("acceptGrowCapacityPoolForShortTermCloneSplit", AAZStrType, ".accept_grow_capacity_pool_for_short_term_clone_split")
                 properties.set_prop("avsDataStore", AAZStrType, ".avs_data_store")
                 properties.set_prop("backupId", AAZStrType, ".backup_id", typ_kwargs={"nullable": True})
                 properties.set_prop("capacityPoolResourceId", AAZStrType, ".capacity_pool_resource_id")
                 properties.set_prop("coolAccess", AAZBoolType, ".cool_access")
-                properties.set_prop("coolAccessRetrievalPolicy", AAZStrType, ".cool_access_retrieval_policy")
-                properties.set_prop("coolAccessTieringPolicy", AAZStrType, ".cool_access_tiering_policy")
                 properties.set_prop("coolnessPeriod", AAZIntType, ".coolness_period")
                 properties.set_prop("creationToken", AAZStrType, ".creation_token", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("dataProtection", AAZObjectType)
@@ -682,6 +657,7 @@ class Create(AAZCommand):
                 properties.set_prop("exportPolicy", AAZObjectType)
                 properties.set_prop("isDefaultQuotaEnabled", AAZBoolType, ".is_default_quota_enabled")
                 properties.set_prop("isLargeVolume", AAZBoolType, ".is_large_volume")
+                properties.set_prop("isRestoring", AAZBoolType, ".is_restoring")
                 properties.set_prop("kerberosEnabled", AAZBoolType, ".kerberos_enabled")
                 properties.set_prop("keyVaultPrivateEndpointResourceId", AAZStrType, ".key_vault_private_endpoint_resource_id")
                 properties.set_prop("ldapEnabled", AAZBoolType, ".ldap_enabled")
@@ -691,7 +667,7 @@ class Create(AAZCommand):
                 properties.set_prop("proximityPlacementGroup", AAZStrType, ".proximity_placement_group")
                 properties.set_prop("securityStyle", AAZStrType, ".security_style")
                 properties.set_prop("serviceLevel", AAZStrType, ".service_level")
-                properties.set_prop("smbAccessBasedEnumeration", AAZStrType, ".smb_access_based_enumeration", typ_kwargs={"nullable": True})
+                properties.set_prop("smbAccessBasedEnumeration", AAZStrType, ".smb_access_based_enumeration")
                 properties.set_prop("smbContinuouslyAvailable", AAZBoolType, ".smb_continuously_available")
                 properties.set_prop("smbEncryption", AAZBoolType, ".smb_encryption")
                 properties.set_prop("smbNonBrowsable", AAZStrType, ".smb_non_browsable")
@@ -713,22 +689,18 @@ class Create(AAZCommand):
 
             backup = _builder.get(".properties.dataProtection.backup")
             if backup is not None:
+                backup.set_prop("backupEnabled", AAZBoolType, ".backup_enabled")
                 backup.set_prop("backupPolicyId", AAZStrType, ".backup_policy_id")
                 backup.set_prop("backupVaultId", AAZStrType, ".backup_vault_id")
                 backup.set_prop("policyEnforced", AAZBoolType, ".policy_enforced")
 
             replication = _builder.get(".properties.dataProtection.replication")
             if replication is not None:
-                replication.set_prop("remotePath", AAZObjectType)
+                replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
-                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id")
+                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id", typ_kwargs={"flags": {"required": True}})
+                replication.set_prop("replicationId", AAZStrType, ".replication_id")
                 replication.set_prop("replicationSchedule", AAZStrType, ".replication_schedule")
-
-            remote_path = _builder.get(".properties.dataProtection.replication.remotePath")
-            if remote_path is not None:
-                remote_path.set_prop("externalHostName", AAZStrType, ".external_host_name", typ_kwargs={"flags": {"required": True}})
-                remote_path.set_prop("serverName", AAZStrType, ".external_server_name", typ_kwargs={"flags": {"required": True}})
-                remote_path.set_prop("volumeName", AAZStrType, ".external_volume_name", typ_kwargs={"flags": {"required": True}})
 
             snapshot = _builder.get(".properties.dataProtection.snapshot")
             if snapshot is not None:
@@ -831,9 +803,6 @@ class Create(AAZCommand):
             _schema_on_200_201.zones = AAZListType()
 
             properties = cls._schema_on_200_201.properties
-            properties.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrType(
-                serialized_name="acceptGrowCapacityPoolForShortTermCloneSplit",
-            )
             properties.actual_throughput_mibps = AAZFloatType(
                 serialized_name="actualThroughputMibps",
                 flags={"read_only": True},
@@ -860,12 +829,6 @@ class Create(AAZCommand):
             properties.cool_access = AAZBoolType(
                 serialized_name="coolAccess",
             )
-            properties.cool_access_retrieval_policy = AAZStrType(
-                serialized_name="coolAccessRetrievalPolicy",
-            )
-            properties.cool_access_tiering_policy = AAZStrType(
-                serialized_name="coolAccessTieringPolicy",
-            )
             properties.coolness_period = AAZIntType(
                 serialized_name="coolnessPeriod",
             )
@@ -889,9 +852,6 @@ class Create(AAZCommand):
             properties.delete_base_snapshot = AAZBoolType(
                 serialized_name="deleteBaseSnapshot",
             )
-            properties.effective_network_features = AAZStrType(
-                serialized_name="effectiveNetworkFeatures",
-            )
             properties.enable_subvolumes = AAZStrType(
                 serialized_name="enableSubvolumes",
             )
@@ -912,11 +872,6 @@ class Create(AAZCommand):
                 serialized_name="fileSystemId",
                 flags={"read_only": True},
             )
-            properties.inherited_size_in_bytes = AAZIntType(
-                serialized_name="inheritedSizeInBytes",
-                nullable=True,
-                flags={"read_only": True},
-            )
             properties.is_default_quota_enabled = AAZBoolType(
                 serialized_name="isDefaultQuotaEnabled",
             )
@@ -925,7 +880,6 @@ class Create(AAZCommand):
             )
             properties.is_restoring = AAZBoolType(
                 serialized_name="isRestoring",
-                flags={"read_only": True},
             )
             properties.kerberos_enabled = AAZBoolType(
                 serialized_name="kerberosEnabled",
@@ -982,7 +936,6 @@ class Create(AAZCommand):
             )
             properties.smb_access_based_enumeration = AAZStrType(
                 serialized_name="smbAccessBasedEnumeration",
-                nullable=True,
             )
             properties.smb_continuously_available = AAZBoolType(
                 serialized_name="smbContinuouslyAvailable",
@@ -1044,6 +997,9 @@ class Create(AAZCommand):
             )
 
             backup = cls._schema_on_200_201.properties.data_protection.backup
+            backup.backup_enabled = AAZBoolType(
+                serialized_name="backupEnabled",
+            )
             backup.backup_policy_id = AAZStrType(
                 serialized_name="backupPolicyId",
             )
@@ -1055,56 +1011,21 @@ class Create(AAZCommand):
             )
 
             replication = cls._schema_on_200_201.properties.data_protection.replication
-            replication.destination_replications = AAZListType(
-                serialized_name="destinationReplications",
-                flags={"read_only": True},
-            )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
-                flags={"read_only": True},
-            )
-            replication.remote_path = AAZObjectType(
-                serialized_name="remotePath",
             )
             replication.remote_volume_region = AAZStrType(
                 serialized_name="remoteVolumeRegion",
             )
             replication.remote_volume_resource_id = AAZStrType(
                 serialized_name="remoteVolumeResourceId",
+                flags={"required": True},
             )
             replication.replication_id = AAZStrType(
                 serialized_name="replicationId",
-                flags={"read_only": True},
             )
             replication.replication_schedule = AAZStrType(
                 serialized_name="replicationSchedule",
-            )
-
-            destination_replications = cls._schema_on_200_201.properties.data_protection.replication.destination_replications
-            destination_replications.Element = AAZObjectType()
-
-            _element = cls._schema_on_200_201.properties.data_protection.replication.destination_replications.Element
-            _element.region = AAZStrType()
-            _element.replication_type = AAZStrType(
-                serialized_name="replicationType",
-            )
-            _element.resource_id = AAZStrType(
-                serialized_name="resourceId",
-            )
-            _element.zone = AAZStrType()
-
-            remote_path = cls._schema_on_200_201.properties.data_protection.replication.remote_path
-            remote_path.external_host_name = AAZStrType(
-                serialized_name="externalHostName",
-                flags={"required": True},
-            )
-            remote_path.server_name = AAZStrType(
-                serialized_name="serverName",
-                flags={"required": True},
-            )
-            remote_path.volume_name = AAZStrType(
-                serialized_name="volumeName",
-                flags={"required": True},
             )
 
             snapshot = cls._schema_on_200_201.properties.data_protection.snapshot

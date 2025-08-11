@@ -13,15 +13,16 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles account backup-vault backup list",
+    is_preview=True,
 )
 class List(AAZCommand):
     """List all backups Under a Backup Vault
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2022-11-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups", "2022-11-01-preview"],
         ]
     }
 
@@ -51,7 +52,7 @@ class List(AAZCommand):
             ),
         )
         _args_schema.backup_vault_name = AAZStrArg(
-            options=["-v", "--backup-vault-name"],
+            options=["--backup-vault-name"],
             help="The name of the Backup Vault",
             required=True,
             fmt=AAZStrArgFormat(
@@ -140,7 +141,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2022-11-01-preview",
                     required=True,
                 ),
             }
@@ -204,17 +205,8 @@ class List(AAZCommand):
                 serialized_name="backupId",
                 flags={"read_only": True},
             )
-            properties.backup_policy_resource_id = AAZStrType(
-                serialized_name="backupPolicyResourceId",
-                flags={"read_only": True},
-            )
             properties.backup_type = AAZStrType(
                 serialized_name="backupType",
-                flags={"read_only": True},
-            )
-            properties.completion_date = AAZStrType(
-                serialized_name="completionDate",
-                nullable=True,
                 flags={"read_only": True},
             )
             properties.creation_date = AAZStrType(
@@ -225,21 +217,12 @@ class List(AAZCommand):
                 serialized_name="failureReason",
                 flags={"read_only": True},
             )
-            properties.is_large_volume = AAZBoolType(
-                serialized_name="isLargeVolume",
-                flags={"read_only": True},
-            )
             properties.label = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
             properties.size = AAZIntType(
-                flags={"read_only": True},
-            )
-            properties.snapshot_creation_date = AAZStrType(
-                serialized_name="snapshotCreationDate",
-                nullable=True,
                 flags={"read_only": True},
             )
             properties.snapshot_name = AAZStrType(
