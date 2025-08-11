@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
-from azure.cli.core.aaz import has_value
+from azure.cli.core.aaz import AAZUndefined, has_value
 from knack.log import get_logger
 from ..aaz.latest.vmss import ListInstances as _VMSSListInstances
 from ..aaz.latest.vmss import Deallocate as _VMSSDeallocate
@@ -13,7 +13,6 @@ logger = get_logger(__name__)
 
 class VMSSListInstances(_VMSSListInstances):
     def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined, has_value
 
         # Resolve flatten conflict
         # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
