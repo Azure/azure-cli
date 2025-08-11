@@ -7,14 +7,13 @@ from knack.log import get_logger
 
 from ..aaz.latest.vmss import ListInstances as _VMSSListInstances
 from ..aaz.latest.vmss import Start as _Start
-
+from azure.cli.core.aaz import AAZUndefined, has_value
 
 logger = get_logger(__name__)
 
 
 class VMSSListInstances(_VMSSListInstances):
     def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined, has_value
 
         # Resolve flatten conflict
         # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
@@ -30,7 +29,6 @@ class VMSSListInstances(_VMSSListInstances):
 
 
 class VMSSStart(_Start):
-    from azure.cli.core.aaz import has_value
 
     def pre_operations(self):
         args = self.ctx.args
