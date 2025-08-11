@@ -29,7 +29,6 @@ class VMSSListInstances(_VMSSListInstances):
 
 
 class VMSSStart(_Start):
-    from azure.cli.core.aaz import has_value
 
     def pre_operations(self):
         args = self.ctx.args
