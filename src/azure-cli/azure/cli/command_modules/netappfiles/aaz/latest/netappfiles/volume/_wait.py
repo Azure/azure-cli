@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2022-11-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-06-01"],
         ]
     }
 
@@ -149,7 +149,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01-preview",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -208,6 +208,9 @@ class Wait(AAZWaitCommand):
             _schema_on_200.zones = AAZListType()
 
             properties = cls._schema_on_200.properties
+            properties.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrType(
+                serialized_name="acceptGrowCapacityPoolForShortTermCloneSplit",
+            )
             properties.actual_throughput_mibps = AAZFloatType(
                 serialized_name="actualThroughputMibps",
                 flags={"read_only": True},
@@ -234,6 +237,12 @@ class Wait(AAZWaitCommand):
             properties.cool_access = AAZBoolType(
                 serialized_name="coolAccess",
             )
+            properties.cool_access_retrieval_policy = AAZStrType(
+                serialized_name="coolAccessRetrievalPolicy",
+            )
+            properties.cool_access_tiering_policy = AAZStrType(
+                serialized_name="coolAccessTieringPolicy",
+            )
             properties.coolness_period = AAZIntType(
                 serialized_name="coolnessPeriod",
             )
@@ -257,6 +266,9 @@ class Wait(AAZWaitCommand):
             properties.delete_base_snapshot = AAZBoolType(
                 serialized_name="deleteBaseSnapshot",
             )
+            properties.effective_network_features = AAZStrType(
+                serialized_name="effectiveNetworkFeatures",
+            )
             properties.enable_subvolumes = AAZStrType(
                 serialized_name="enableSubvolumes",
             )
@@ -277,6 +289,11 @@ class Wait(AAZWaitCommand):
                 serialized_name="fileSystemId",
                 flags={"read_only": True},
             )
+            properties.inherited_size_in_bytes = AAZIntType(
+                serialized_name="inheritedSizeInBytes",
+                nullable=True,
+                flags={"read_only": True},
+            )
             properties.is_default_quota_enabled = AAZBoolType(
                 serialized_name="isDefaultQuotaEnabled",
             )
@@ -285,6 +302,7 @@ class Wait(AAZWaitCommand):
             )
             properties.is_restoring = AAZBoolType(
                 serialized_name="isRestoring",
+                flags={"read_only": True},
             )
             properties.kerberos_enabled = AAZBoolType(
                 serialized_name="kerberosEnabled",
@@ -341,6 +359,7 @@ class Wait(AAZWaitCommand):
             )
             properties.smb_access_based_enumeration = AAZStrType(
                 serialized_name="smbAccessBasedEnumeration",
+                nullable=True,
             )
             properties.smb_continuously_available = AAZBoolType(
                 serialized_name="smbContinuouslyAvailable",
@@ -402,9 +421,6 @@ class Wait(AAZWaitCommand):
             )
 
             backup = cls._schema_on_200.properties.data_protection.backup
-            backup.backup_enabled = AAZBoolType(
-                serialized_name="backupEnabled",
-            )
             backup.backup_policy_id = AAZStrType(
                 serialized_name="backupPolicyId",
             )
@@ -416,21 +432,56 @@ class Wait(AAZWaitCommand):
             )
 
             replication = cls._schema_on_200.properties.data_protection.replication
+            replication.destination_replications = AAZListType(
+                serialized_name="destinationReplications",
+                flags={"read_only": True},
+            )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
+                flags={"read_only": True},
+            )
+            replication.remote_path = AAZObjectType(
+                serialized_name="remotePath",
             )
             replication.remote_volume_region = AAZStrType(
                 serialized_name="remoteVolumeRegion",
             )
             replication.remote_volume_resource_id = AAZStrType(
                 serialized_name="remoteVolumeResourceId",
-                flags={"required": True},
             )
             replication.replication_id = AAZStrType(
                 serialized_name="replicationId",
+                flags={"read_only": True},
             )
             replication.replication_schedule = AAZStrType(
                 serialized_name="replicationSchedule",
+            )
+
+            destination_replications = cls._schema_on_200.properties.data_protection.replication.destination_replications
+            destination_replications.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.properties.data_protection.replication.destination_replications.Element
+            _element.region = AAZStrType()
+            _element.replication_type = AAZStrType(
+                serialized_name="replicationType",
+            )
+            _element.resource_id = AAZStrType(
+                serialized_name="resourceId",
+            )
+            _element.zone = AAZStrType()
+
+            remote_path = cls._schema_on_200.properties.data_protection.replication.remote_path
+            remote_path.external_host_name = AAZStrType(
+                serialized_name="externalHostName",
+                flags={"required": True},
+            )
+            remote_path.server_name = AAZStrType(
+                serialized_name="serverName",
+                flags={"required": True},
+            )
+            remote_path.volume_name = AAZStrType(
+                serialized_name="volumeName",
+                flags={"required": True},
             )
 
             snapshot = cls._schema_on_200.properties.data_protection.snapshot

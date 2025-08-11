@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups/{}", "2022-11-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups/{}", "2025-06-01"],
         ]
     }
 
@@ -50,16 +50,16 @@ class Wait(AAZWaitCommand):
             ),
         )
         _args_schema.backup_name = AAZStrArg(
-            options=["-n", "--name", "--backup-name"],
+            options=["-b", "-n", "--name", "--backup-name"],
             help="The name of the backup",
             required=True,
             id_part="child_name_2",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,255}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_.]{0,255}$",
             ),
         )
         _args_schema.backup_vault_name = AAZStrArg(
-            options=["--backup-vault-name"],
+            options=["-v", "--backup-vault-name"],
             help="The name of the Backup Vault",
             required=True,
             id_part="child_name_1",
@@ -145,7 +145,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01-preview",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -200,8 +200,17 @@ class Wait(AAZWaitCommand):
                 serialized_name="backupId",
                 flags={"read_only": True},
             )
+            properties.backup_policy_resource_id = AAZStrType(
+                serialized_name="backupPolicyResourceId",
+                flags={"read_only": True},
+            )
             properties.backup_type = AAZStrType(
                 serialized_name="backupType",
+                flags={"read_only": True},
+            )
+            properties.completion_date = AAZStrType(
+                serialized_name="completionDate",
+                nullable=True,
                 flags={"read_only": True},
             )
             properties.creation_date = AAZStrType(
@@ -212,12 +221,21 @@ class Wait(AAZWaitCommand):
                 serialized_name="failureReason",
                 flags={"read_only": True},
             )
+            properties.is_large_volume = AAZBoolType(
+                serialized_name="isLargeVolume",
+                flags={"read_only": True},
+            )
             properties.label = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
             properties.size = AAZIntType(
+                flags={"read_only": True},
+            )
+            properties.snapshot_creation_date = AAZStrType(
+                serialized_name="snapshotCreationDate",
+                nullable=True,
                 flags={"read_only": True},
             )
             properties.snapshot_name = AAZStrType(

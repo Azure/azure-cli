@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2023-05-01", "properties.activeDirectories"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-06-01", "properties.activeDirectories"],
         ]
     }
 
@@ -134,7 +134,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -234,7 +234,9 @@ class _ListHelper:
         )
 
         user_assigned_identities = _schema_net_app_account_read.identity.user_assigned_identities
-        user_assigned_identities.Element = AAZObjectType()
+        user_assigned_identities.Element = AAZObjectType(
+            nullable=True,
+        )
 
         _element = _schema_net_app_account_read.identity.user_assigned_identities.Element
         _element.client_id = AAZStrType(
@@ -256,6 +258,14 @@ class _ListHelper:
             flags={"read_only": True},
         )
         properties.encryption = AAZObjectType()
+        properties.multi_ad_status = AAZStrType(
+            serialized_name="multiAdStatus",
+            flags={"read_only": True},
+        )
+        properties.nfs_v4_id_domain = AAZStrType(
+            serialized_name="nfsV4IDDomain",
+            nullable=True,
+        )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
@@ -358,6 +368,9 @@ class _ListHelper:
         )
 
         identity = _schema_net_app_account_read.properties.encryption.identity
+        identity.federated_client_id = AAZStrType(
+            serialized_name="federatedClientId",
+        )
         identity.principal_id = AAZStrType(
             serialized_name="principalId",
             flags={"read_only": True},
@@ -377,7 +390,6 @@ class _ListHelper:
         )
         key_vault_properties.key_vault_resource_id = AAZStrType(
             serialized_name="keyVaultResourceId",
-            flags={"required": True},
         )
         key_vault_properties.key_vault_uri = AAZStrType(
             serialized_name="keyVaultUri",

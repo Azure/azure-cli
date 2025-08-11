@@ -17,12 +17,15 @@ from azure.cli.core.aaz import *
 )
 class Splitclonefromparent(AAZCommand):
     """Split operation to convert clone volume to an independent volume.
+
+    :example: Volumes_SplitClone
+        az netappfiles volume splitclonefromparent --resource-group myRG --account-name account1 --pool-name pool1 --volume-name volume1
     """
 
     _aaz_info = {
-        "version": "2024-03-01-preview",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/splitclonefromparent", "2024-03-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/splitclonefromparent", "2025-06-01"],
         ]
     }
 
@@ -155,7 +158,7 @@ class Splitclonefromparent(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01-preview",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }

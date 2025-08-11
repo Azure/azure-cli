@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/snapshotpolicies/{}", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/snapshotpolicies/{}", "2025-06-01"],
         ]
     }
 
@@ -129,7 +129,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -189,16 +189,13 @@ class Wait(AAZWaitCommand):
             properties = cls._schema_on_200.properties
             properties.daily_schedule = AAZObjectType(
                 serialized_name="dailySchedule",
-                flags={"required": True},
             )
             properties.enabled = AAZBoolType()
             properties.hourly_schedule = AAZObjectType(
                 serialized_name="hourlySchedule",
-                flags={"required": True},
             )
             properties.monthly_schedule = AAZObjectType(
                 serialized_name="monthlySchedule",
-                flags={"required": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -206,7 +203,6 @@ class Wait(AAZWaitCommand):
             )
             properties.weekly_schedule = AAZObjectType(
                 serialized_name="weeklySchedule",
-                flags={"required": True},
             )
 
             daily_schedule = cls._schema_on_200.properties.daily_schedule

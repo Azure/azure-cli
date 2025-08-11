@@ -13,16 +13,15 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles account backup-vault backup create",
-    is_preview=True,
 )
 class Create(AAZCommand):
     """Create a backup under the Backup Vault
     """
 
     _aaz_info = {
-        "version": "2022-11-01-preview",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups/{}", "2022-11-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups/{}", "2025-06-01"],
         ]
     }
 
@@ -52,15 +51,15 @@ class Create(AAZCommand):
             ),
         )
         _args_schema.backup_name = AAZStrArg(
-            options=["-n", "--name", "--backup-name"],
+            options=["-b", "-n", "--name", "--backup-name"],
             help="The name of the backup",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,255}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_.]{0,255}$",
             ),
         )
         _args_schema.backup_vault_name = AAZStrArg(
-            options=["--backup-vault-name"],
+            options=["-v", "--backup-vault-name"],
             help="The name of the Backup Vault",
             required=True,
             fmt=AAZStrArgFormat(
@@ -90,7 +89,7 @@ class Create(AAZCommand):
             help="Manual backup an already existing snapshot. This will always be false for scheduled backups and true/false for manual backups",
             default=False,
         )
-        _args_schema.volume_resource_id = AAZStrArg(
+        _args_schema.volume_resource_id = AAZResourceIdArg(
             options=["--volume-resource-id"],
             arg_group="Properties",
             help="ResourceId used to identify the Volume",
@@ -187,7 +186,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01-preview",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -263,8 +262,17 @@ class Create(AAZCommand):
                 serialized_name="backupId",
                 flags={"read_only": True},
             )
+            properties.backup_policy_resource_id = AAZStrType(
+                serialized_name="backupPolicyResourceId",
+                flags={"read_only": True},
+            )
             properties.backup_type = AAZStrType(
                 serialized_name="backupType",
+                flags={"read_only": True},
+            )
+            properties.completion_date = AAZStrType(
+                serialized_name="completionDate",
+                nullable=True,
                 flags={"read_only": True},
             )
             properties.creation_date = AAZStrType(
@@ -275,12 +283,21 @@ class Create(AAZCommand):
                 serialized_name="failureReason",
                 flags={"read_only": True},
             )
+            properties.is_large_volume = AAZBoolType(
+                serialized_name="isLargeVolume",
+                flags={"read_only": True},
+            )
             properties.label = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
             properties.size = AAZIntType(
+                flags={"read_only": True},
+            )
+            properties.snapshot_creation_date = AAZStrType(
+                serialized_name="snapshotCreationDate",
+                nullable=True,
                 flags={"read_only": True},
             )
             properties.snapshot_name = AAZStrType(

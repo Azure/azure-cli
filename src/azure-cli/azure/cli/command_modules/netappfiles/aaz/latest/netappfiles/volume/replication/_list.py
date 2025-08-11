@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-05-01",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/listreplications", "2023-05-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/listreplications", "2025-06-01"],
         ]
     }
 
@@ -150,7 +150,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-05-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -198,6 +198,10 @@ class List(AAZCommand):
             _element.remote_volume_resource_id = AAZStrType(
                 serialized_name="remoteVolumeResourceId",
                 flags={"required": True},
+            )
+            _element.replication_id = AAZStrType(
+                serialized_name="replicationId",
+                flags={"read_only": True},
             )
             _element.replication_schedule = AAZStrType(
                 serialized_name="replicationSchedule",
