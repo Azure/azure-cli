@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class Show(AAZCommand):
     """Retrieves a policy definition.
 
-    Retrieves and shows the details of the policy definition in the given subscription or management group with the given name.
+    Retrieve and show the details of the policy definition in the given subscription or management group with the given name.
 
     :example: Retrieve a policy definition at management group level
         az policy definition show --management-group MyManagementGroup --name ResourceNaming

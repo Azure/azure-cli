@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment update",
 )
 class Update(AAZCommand):
-    """Updates a policy assignment.
+    """Update a policy assignment.
 
-    Updates the policy assignment with the given name and scope by applying the given property values.
+    Update the policy assignment with the given name and scope by applying the given property values.
 
     :example: Update a resource policy assignment's description
         az policy assignment update --name myPolicy --description 'My policy description'

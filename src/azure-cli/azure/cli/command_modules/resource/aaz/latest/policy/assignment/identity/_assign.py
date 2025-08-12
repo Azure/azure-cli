@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment identity assign",
 )
 class Assign(AAZCommand):
-    """Assigns a managed identity.
+    """Assign a managed identity.
 
-    Assigns the system or user assigned managed identity to the policy assignment matching the given name and scope.
+    Assign the system or user assigned managed identity to the policy assignment matching the given name and scope.
 
     :example: Add a system assigned managed identity to a policy assignment
         az policy assignment identity assign --system-assigned -g MyResourceGroup -n MyPolicyAssignment

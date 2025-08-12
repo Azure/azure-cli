@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment non-compliance-message create",
 )
 class Create(AAZCommand):
-    """Creates a non-compliance message.
+    """Create a non-compliance message.
 
-    Creates a customized message used to report non-compliance by the policy assignment matching the given name and scope.
+    Create a customized message used to report non-compliance by the policy assignment matching the given name and scope.
 
     :example: Add a non-compliance message to a policy assignment
         az policy assignment non-compliance-message create -g MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'

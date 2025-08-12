@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy set-definition create",
 )
 class Create(AAZCommand):
-    """Creates a policy set definition.
+    """Create a policy set definition.
 
-    Creates a policy set definition in the given subscription or management group with the given name and other properties.
+    Create a policy set definition in the given subscription or management group with the given name and other properties.
 
     :example: Create a policy set definition
         az policy set-definition create -n readOnlyStorage --definitions '[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/{policyDefinitionName}' } ]'

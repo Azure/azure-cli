@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment show",
 )
 class Show(AAZCommand):
-    """Retrieves a policy assignment.
+    """Retrieve a policy assignment.
 
-    Retrieves and shows the details of a single policy assignment with the given name and scope.
+    Retrieve and show the details of a single policy assignment with the given name and scope.
 
     :example: Show a resource policy assignment
         az policy assignment show --name MyPolicyAssignment

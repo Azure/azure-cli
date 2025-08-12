@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment identity show",
 )
 class Show(AAZCommand):
-    """Retrieves the managed identity.
+    """Retrieve the managed identity.
 
-    Retrieves and shows the details of the system or user assigned managed identity of the policy assignment matching the given name and scope.
+    Retrieve and show the details of the system or user assigned managed identity of the policy assignment matching the given name and scope.
 
     :example: Show a policy assignment's managed identity
         az policy assignment identity show --name MyPolicyAssignment --scope '/providers/Microsoft.Management/managementGroups/{managementGroupName}'

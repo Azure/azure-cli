@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy exemption update",
 )
 class Update(AAZCommand):
-    """Updates a policy exemption.
+    """Update a policy exemption.
 
-    Updates the policy exemption with the given name and scope by applying the given property values.
+    Update the policy exemption with the given name and scope by applying the given property values.
 
     :example: Update a policy exemption category
         az policy exemption update -n exemptTestVM --exemption-category "Mitigated"

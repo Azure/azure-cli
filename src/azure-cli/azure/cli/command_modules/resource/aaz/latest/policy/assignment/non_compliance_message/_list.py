@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment non-compliance-message list",
 )
 class List(AAZCommand):
-    """Retrieves non-compliance messages.
+    """Retrieve non-compliance messages.
 
-    Retrieves all non-compliance messages from the policy assignment matching the given name and scope.
+    Retrieve all non-compliance messages from the policy assignment matching the given name and scope.
 
     :example: List the non-compliance messages for a policy assignment
         az policy assignment non-compliance-message list -g MyResourceGroup -n MyPolicyAssignment

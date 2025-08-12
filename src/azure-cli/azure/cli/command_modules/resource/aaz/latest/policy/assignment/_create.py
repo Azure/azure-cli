@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment create",
 )
 class Create(AAZCommand):
-    """Creates a policy assignment.
+    """Create a policy assignment.
 
-    Creates a policy assignment with the given scope and name. Policy assignments apply to all resources contained within their scope. For example, when you assign a policy at resource group scope, that policy applies to all resources in the group.
+    Create a policy assignment with the given scope and name. Policy assignments apply to all resources contained within their scope. For example, when you assign a policy at resource group scope, that policy applies to all resources in the group.
 
     :example: Create a resource policy assignment at scope
         az policy assignment create --scope "/providers/Microsoft.Management/managementGroups/{managementGroupName}" --policy {policyName} -p "{ 'allowedLocations': { 'value': [ 'australiaeast', 'eastus', 'japaneast' ] } }"

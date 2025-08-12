@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment identity remove",
 )
 class Remove(AAZCommand):
-    """Removes the managed identity.
+    """Remove the managed identity.
 
-    Removes the system or user assigned managed identity from the policy assignment matching the given name and scope.
+    Remove the system or user assigned managed identity from the policy assignment matching the given name and scope.
 
     :example: Remove user assigned managed identity from a policy assignment
         az policy assignment identity remove --name MyPolicyAssignment --user-assigned

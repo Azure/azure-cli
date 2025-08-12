@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy exemption list",
 )
 class List(AAZCommand):
-    """Retrieves all applicable policy exemptions.
+    """Retrieve all applicable policy exemptions.
 
-    Retrieves the list of all policy assignments applicable to the given subscription or management group.
+    Retrieve the list of all policy assignments applicable to the given subscription or management group.
 
     :example: List policy exemptions that apply to a management group
         az policy exemption list --management-group DevOrg --filter atScopeAndBelow()

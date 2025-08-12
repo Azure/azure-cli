@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy definition list",
 )
 class List(AAZCommand):
-    """Retrieves policy definitions.
+    """Retrieve policy definitions.
 
-    Retrieves the list of all policy definitions in the given subscription or management group.
+    Retrieve the list of all policy definitions in the given subscription or management group.
 
     :example: List built-in policy definitions
         az policy definition list --filter atScopeAndBelow()

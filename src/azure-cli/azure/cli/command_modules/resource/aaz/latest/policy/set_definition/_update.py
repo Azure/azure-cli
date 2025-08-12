@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy set-definition update",
 )
 class Update(AAZCommand):
-    """Updates a policy set definition.
+    """Update a policy set definition.
 
-    Updates the policy set definition in the given subscription or management group with the given name by applying the given properties.
+    Update the policy set definition in the given subscription or management group with the given name by applying the given properties.
 
     :example: Update a policy set definition
         az policy set-definition update --definitions '[ { 'policyDefinitionId': '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/policyDefinitions/storagePolicy' } ]' --name MyPolicySetDefinition

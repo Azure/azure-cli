@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy set-definition show",
 )
 class Show(AAZCommand):
-    """Retrieves a policy set definition.
+    """Retrieve a policy set definition.
 
-    Retrieves and shows the details of the policy set definition in the given subscription or management group with the given name.
+    Retrieve and show the details of the policy set definition in the given subscription or management group with the given name.
 
     :example: Retrieve a policy set definition at management group level
         az policy set-definition show --management-group MyManagementGroup --name CostManagement

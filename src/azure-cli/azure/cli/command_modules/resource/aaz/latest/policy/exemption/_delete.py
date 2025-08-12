@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy exemption delete",
 )
 class Delete(AAZCommand):
-    """Deletes a policy exemption.
+    """Delete a policy exemption.
 
-    Deletes the policy exemption with the given name and scope.
+    Delete the policy exemption with the given name and scope.
 
     :example: Delete a policy exemption
         az policy exemption delete --name MyPolicyExemption --resource-group "myResourceGroup"

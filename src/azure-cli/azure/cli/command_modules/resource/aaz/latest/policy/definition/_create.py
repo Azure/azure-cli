@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy definition create",
 )
 class Create(AAZCommand):
-    """Creates a policy definition.
+    """Create a policy definition.
 
-    Creates a policy definition in the given subscription or management group with the given name and other properties.
+    Create a policy definition in the given subscription or management group with the given name and other properties.
 
     :example: Create a read-only storage policy
         az policy definition create --name readOnlyStorage --rules "{ 'if': { 'field': 'type', 'equals': 'Microsoft.Storage/storageAccounts/write' }, 'then': { 'effect': 'deny' } }"

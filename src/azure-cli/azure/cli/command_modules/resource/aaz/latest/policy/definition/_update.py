@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy definition update",
 )
 class Update(AAZCommand):
-    """Updates a policy definition.
+    """Update a policy definition.
 
-    Updates the policy definition in the given subscription or management group with the given name by applying the given properties.
+    Update the policy definition in the given subscription or management group with the given name by applying the given properties.
 
     :example: Update a policy definition display name
         az policy definition update --name MyPolicyDefinition --display-name "Updated display name goes here"

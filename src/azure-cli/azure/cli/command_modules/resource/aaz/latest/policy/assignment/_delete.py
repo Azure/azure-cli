@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment delete",
 )
 class Delete(AAZCommand):
-    """Deletes a policy assignment.
+    """Delete a policy assignment.
 
-    Deletes the policy assignment with the given name and scope.
+    Delete the policy assignment with the given name and scope.
 
     :example: Delete a policy assignment at scope
         az policy assignment delete --scope subscriptions/{subscriptionId} --name EnforceNaming

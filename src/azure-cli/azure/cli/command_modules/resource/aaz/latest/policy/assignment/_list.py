@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment list",
 )
 class List(AAZCommand):
-    """Retrieves all applicable policy assignments.
+    """Retrieve all applicable policy assignments.
 
-    Retrieves the list of all policy assignments applicable to the given subscription or management group.
+    Retrieve the list of all policy assignments applicable to the given subscription or management group.
 
     :example: List policy assignments that apply to a resource group
         az policy assignment list --resource-group TestResourceGroup --filter atScope() --expand LatestDefinitionVersion, EffectiveDefinitionVersion

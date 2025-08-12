@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment non-compliance-message delete",
 )
 class Delete(AAZCommand):
-    """Deletes a non-compliance message.
+    """Delete a non-compliance message.
 
-    Deletes a non-compliance message from the policy assignment matching the given name and scope.
+    Delete a non-compliance message from the policy assignment matching the given name and scope.
 
     :example: Remove non-compliance messages from a policy assignment that contain a specific message and no policy definition reference ID
         az policy assignment non-compliance-message delete -g MyResourceGroup -n MyPolicyAssignment -m 'Resources must follow naming standards'

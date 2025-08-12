@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy exemption show",
 )
 class Show(AAZCommand):
-    """Retrieves a policy exemption.
+    """Retrieve a policy exemption.
 
-    Retrieves and shows the details of the policy exemption with the given name and scope.
+    Retrieve and show the details of the policy exemption with the given name and scope.
 
     :example: Show a policy exemption
         az policy exemption show --name MyPolicyExemption --resource-group "myResourceGroup"

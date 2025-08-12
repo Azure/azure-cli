@@ -15,9 +15,9 @@ from azure.cli.core.aaz import *
     "policy assignment non-compliance-message show",
 )
 class Show(AAZCommand):
-    """Retrieves a non-compliance message.
+    """Retrieve a non-compliance message.
 
-    Retrieves and shows the details of a non-compliance message belonging to the policy assignment matching the given name and scope.
+    Retrieve and show the details of a non-compliance message belonging to the policy assignment matching the given name and scope.
 
     :example: Show the non-compliance message from a policy assignment that contains a specific message and policy definition reference ID
         az policy assignment non-compliance-message show -g MyResourceGroup -n MyPolicySetAssignment -m 'Resources must use allowed SKUs' --policy-definition-reference-id SkuPolicyRefId
