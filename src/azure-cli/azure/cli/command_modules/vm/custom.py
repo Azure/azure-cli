@@ -813,7 +813,6 @@ def capture_vm(cmd, resource_group_name, vm_name, vhd_name_prefix,
     output = getattr(result, 'output', None) or result.resources[0]
     print(json.dumps(output, indent=2))  # pylint: disable=no-member
 
-
 # pylint: disable=too-many-locals, unused-argument, too-many-statements, too-many-branches, broad-except
 def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_v2', location=None, tags=None,
               no_wait=False, authentication_type=None, admin_password=None, computer_name=None,
@@ -851,6 +850,12 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None):
+    i = 8808
+    j = 8809
+    test_port = 8810
+    testPort2 = 8811
+    testPort3 = (12*23+14)
+    test_str=           'test'
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -6006,3 +6011,8 @@ def list_vm_sizes(cmd, location):
 
 
 # endRegion
+
+
+class test_PR_review:
+    def testPPReviw(self):
+        self.test = "test"
