@@ -31,7 +31,11 @@ def get_blob_service_by_type(cli_ctx, blob_type):
     }
 
     try:
-        return type_to_service[blob_type](cli_ctx)
+        service_client = type_to_service[blob_type](cli_ctx)
+        if service_client is None:
+            from azure.cli.core.azclierror import CLIInternalError
+            raise CLIInternalError("Cannot get the service client from ")
+        return service_client
     except KeyError:
         return None
 
