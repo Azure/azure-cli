@@ -110,7 +110,6 @@ def get_custom_hook_policy(cli_ctx):
     def _acquire_policy_token_request_hook(request):
         http_request = request.http_request
         if getattr(http_request, 'method', '') == 'GET':
-            _LOGGER.warning("Acquiring policy token will be ignored for GET operations")
             return
         ACQUIRE_POLICY_TOKEN_URL = '/subscriptions/{subscriptionId}/providers/Microsoft.Authorization/acquirePolicyToken?api-version=2025-03-01'
         policy_token = None

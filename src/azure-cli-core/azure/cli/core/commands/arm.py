@@ -210,6 +210,9 @@ def register_global_policy_argument(cli_ctx):
                 cmd.cli_ctx.data['_acquire_policy_token'] = True
 
         for command in command_table.values():
+            if command.name.split()[-1] in ['list', 'show']:
+                continue
+
             change_reference_kwargs = {
                 'help': 'The related change reference ID for this resource operation',
                 'arg_group': 'Global Policy',
