@@ -25,13 +25,13 @@ def create_identity(client, resource_group_name, resource_name, location, tags=N
 
 
 def update_identity(instance, tags=None, isolation_scope=None):
-    parameters = {'properties': {}}
+    parameters = {}
     if tags is not None:
         parameters['tags'] = tags
-    if isolation_scope is not None:
-        parameters['isolationScope'] = isolation_scope
-    return parameters
-        
+
+    parameters['isolationScope'] = isolation_scope or instance.isolation_scope
+    
+    return parameters        
 
 def list_identity_resources(cmd, resource_group_name, resource_name):
     from azure.cli.command_modules.identity._client_factory import _msi_list_resources_client
