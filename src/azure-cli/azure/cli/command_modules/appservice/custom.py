@@ -7900,7 +7900,7 @@ def _warmup_kudu_and_get_cookie_internal(params):
                 response = requests.get(kudu_warmup_url, headers=headers, cookies=cookies, timeout=time_out)
             else:  # use ARM endpoint for Kudu warmup
                 kudu_warmup_url = _build_kudu_warmup_arm_url(params, instance_id)
-                response = send_raw_request(params.cmd.cli_ctx, "GET", kudu_warmup_url)
+                response = send_raw_request(params.cmd.cli_ctx, "GET", kudu_warmup_url, timeout=time_out)
 
             if response.status_code in (200, 201, 202):
                 logger.warning("Warmed up Kudu instance successfully.")
