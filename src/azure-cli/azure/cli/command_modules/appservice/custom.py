@@ -7691,12 +7691,6 @@ def _build_onedeploy_url(params, instance_id=None):
     return _build_onedeploy_scm_url(params)
 
 
-def _build_kudu_warmup_url(params, instance_id=None):
-    if params.src_url:
-        return _build_kudu_warmup_arm_url(params, instance_id)
-    return _build_kudu_warmup_scm_url(params)
-
-
 def _build_kudu_warmup_scm_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     return scm_url + '/api/deployments?warmup=true'
@@ -7706,17 +7700,17 @@ def _build_kudu_warmup_arm_url(params, instance_id=None):
     from azure.cli.core.commands.client_factory import get_subscription_id
     client = web_client_factory(params.cmd.cli_ctx)
     sub_id = get_subscription_id(params.cmd.cli_ctx)
-    instances_param = f"/instances/{instance_id}" if instance_id is not None else ""
+    instances_segment = f"/instances/{instance_id}" if instance_id is not None else ""
     if not params.slot:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}{instances_param}/deployments?api-version={client.DEFAULT_API_VERSION}"
+            f"{params.webapp_name}{instances_segment}/deployments?api-version={client.DEFAULT_API_VERSION}"
             f"&warmup=true"
         )
     else:
         base_url = (
             f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
-            f"{params.webapp_name}/slots/{params.slot}{instances_param}/deployments"
+            f"{params.webapp_name}/slots/{params.slot}{instances_segment}/deployments"
             f"?api-version={client.DEFAULT_API_VERSION}&warmup=true"
         )
     return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
@@ -7901,7 +7895,7 @@ def _warmup_kudu_and_get_cookie_internal(params):
     for _ in range(max_retries):
         try:
             if not params.src_url:  # use SCM endpoint for Kudu warmup
-                kudu_warmup_url = _build_kudu_warmup_url(params)
+                kudu_warmup_url = _build_kudu_warmup_scm_url(params)
                 headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name)
                 response = requests.get(kudu_warmup_url, headers=headers, cookies=cookies, timeout=time_out)
             else:  # use ARM endpoint for Kudu warmup
