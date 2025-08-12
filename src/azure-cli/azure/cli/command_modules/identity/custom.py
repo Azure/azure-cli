@@ -29,7 +29,7 @@ def update_identity(instance, tags=None, isolation_scope=None):
     if tags is not None:
         parameters['tags'] = tags
 
-    parameters['isolationScope'] = isolation_scope or instance.isolation_scope    
+    parameters['isolationScope'] = isolation_scope or instance.isolation_scope
     return parameters
 
 
