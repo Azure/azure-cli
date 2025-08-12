@@ -53,7 +53,7 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
 
         volume1 = self.cmd("az netappfiles volume create --resource-group %s --account-name %s --pool-name %s "
                            "--volume-name %s -l %s %s --file-path %s --vnet %s --subnet %s %s %s --rule-index %s "
-                           "--allowed-clients %s" %
+                           "--allowed-clients %s " %
                            (rg, account_name, pool_name, volume_name1, RG_LOCATION, volume_payload, file_path,
                             vnet_name, subnet_name, protocol_types, tag, rule_index, allowed_clients)).get_output_in_json()
 
@@ -698,11 +698,11 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
             'clone_volume_name': clone_volume_name,
             'account_name': account_name,
             'pool_name': pool_name,
-            'vnet': vnet_name,
             'subnet': 'default',
             'snapshot_name': snapshot_name,
             'clone_volume_type' : 'ShortTermClone',
-            'loc': RG_LOCATION
+            'loc': RG_LOCATION,
+            'accept_grow': 'Accepted'
         })
 
         volume = self.create_volume(account_name, pool_name, volume_name, '{rg}')
@@ -714,12 +714,13 @@ class AzureNetAppFilesVolumeServiceScenarioTest(ScenarioTest):
         assert snapshot['created'] is not None
 
         self.kwargs.update({
-            'snapshot_id': snapshot['id']
+            'snapshot_id': snapshot['id'],
+            'subnet_id': volume['subnetId']
         })
 
         snapshot
         # create clone volume from snapshot
-        clone_volume = self.cmd("az netappfiles volume create -g {rg} -a {account_name} -p {pool_name} -v {clone_volume_name} -l {loc} --volume-type {clone_volume_type} --file-path {clone_volume_name} --vnet {vnet} --subnet {subnet} --snapshot-id {snapshot_id}").get_output_in_json()
+        clone_volume = self.cmd("az netappfiles volume create -g {rg} -a {account_name} -p {pool_name} -v {clone_volume_name} -l {loc} --volume-type {clone_volume_type} --file-path {clone_volume_name} --subnet {subnet_id} --snapshot-id {snapshot_id} --grow-pool-clone-split {accept_grow}").get_output_in_json()
 
         assert clone_volume['name'] == account_name + '/' + pool_name + '/' + clone_volume_name
 
