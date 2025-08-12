@@ -7906,6 +7906,9 @@ def _warmup_kudu_and_get_cookie_internal(params):
                 logger.warning("Warmed up Kudu instance successfully.")
                 return cookies
             time_out = 300
+        except requests.exceptions.Timeout as ex:
+            logger.info("Timeout error while warming-up Kudu with instanceid: %s, will retry. ex: %s", instance_id, ex)
+            time_out = 300
         except Exception as ex:  # pylint: disable=broad-except
             logger.info("Error while warming-up Kudu with instanceid: %s, ex: %s", instance_id, ex)
             return None
