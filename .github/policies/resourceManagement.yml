@@ -589,6 +589,19 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: AzureDataTransfer
+        then:
+        - mentionUsers:
+            mentionees:
+            - lasuredd-msft
+            - fzkhan
+            - pkuma-msft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: Batch
         then:
         - mentionUsers:
@@ -2249,6 +2262,19 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Monitor - ScheduledQueryRule
+        then:
+        - mentionUsers:
+            mentionees:
+            - azmonapplicationinsights
+            - asafst
+            - efratbp
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: MySQL
         then:
         - mentionUsers:
@@ -2676,6 +2702,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - jfggdl
+            - damodaravadhani
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2721,6 +2748,17 @@ configuration:
         - mentionUsers:
             mentionees:
             - stephbaron
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: ResourceMover
+        then:
+        - mentionUsers:
+            mentionees:
+            - yashjain4
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
