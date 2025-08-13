@@ -118,9 +118,9 @@ def load_command_table(self, _):
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
         g.custom_command('stop', 'aks_stop',
-                         supports_no_wait=True, min_api='2020-09-01')
+                         supports_no_wait=True)
         g.command('start', 'begin_start',
-                  supports_no_wait=True, min_api='2020-09-01')
+                  supports_no_wait=True)
         g.wait_command('wait')
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces',
                          deprecate_info=g.deprecate())
@@ -188,7 +188,7 @@ def load_command_table(self, _):
                             client_factory=cf_snapshots,
                             deprecate_info=self.deprecate(
                                 redirect='aks nodepool snapshot', hide=True),
-                            min_api='2021-08-01') as g:
+                            ) as g:
         g.custom_command('list', 'aks_nodepool_snapshot_list',
                          deprecate_info=g.deprecate(
                              redirect='aks nodepool snapshot list'),
@@ -207,7 +207,7 @@ def load_command_table(self, _):
     with self.command_group('aks nodepool snapshot',
                             snapshot_sdk,
                             client_factory=cf_snapshots,
-                            min_api='2021-08-01') as g:
+                            ) as g:
         g.custom_command('list', 'aks_nodepool_snapshot_list',
                          table_transformer=aks_list_nodepool_snapshot_table_format)
         g.custom_show_command('show', 'aks_nodepool_snapshot_show',

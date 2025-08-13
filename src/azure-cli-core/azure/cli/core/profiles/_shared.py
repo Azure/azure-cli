@@ -187,10 +187,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS: '2019-07-01',
         ResourceType.MGMT_NETWORK_PRIVATEDNS: None,
         ResourceType.MGMT_KEYVAULT: None,
-        ResourceType.MGMT_AUTHORIZATION: SDKProfile('2022-04-01', {
-            'role_definitions': '2022-05-01-preview',
-            'provider_operations_metadata': '2018-01-01-preview'
-        }),
+        ResourceType.MGMT_AUTHORIZATION: None,
         ResourceType.MGMT_CONTAINERREGISTRY: SDKProfile('2025-03-01-preview', {
             'agent_pools': '2025-03-01-preview',
             'tasks': '2025-03-01-preview',
@@ -227,7 +224,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_ARO: '2023-11-22',
         ResourceType.MGMT_DATABOXEDGE: '2021-02-01-preview',
         ResourceType.MGMT_CUSTOMLOCATION: '2021-03-15-preview',
-        ResourceType.MGMT_CONTAINERSERVICE: SDKProfile('2025-05-01'),
+        ResourceType.MGMT_CONTAINERSERVICE: None,
         ResourceType.MGMT_APPCONTAINERS: '2022-10-01',
     }
 }
@@ -236,10 +233,6 @@ AZURE_API_PROFILES = {
 # We should avoid using ad hoc API versions,
 # use the version in a profile as much as possible.
 AD_HOC_API_VERSIONS = {
-    ResourceType.MGMT_IOTHUB: {
-        # src/azure-cli/azure/cli/command_modules/iot/custom.py#iot_hub_devicestream_show
-        'iot_hub_resource': '2019-07-01-preview',
-    },
     ResourceType.MGMT_APPSERVICE: {
         # src/azure-cli/azure/cli/command_modules/appservice/_constants.py:68
         'app_service_certificate_orders': '2022-09-01'
