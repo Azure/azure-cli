@@ -139,7 +139,6 @@ from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetA
                              RecordSetCAADelete as DNSRecordSetCAADelete, RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
-RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "1.1": "1.1", "2.1": "2.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
                           "Please be aware that Basic option will be removed in the future."
@@ -1948,8 +1947,7 @@ class WAFCreate(_WAFCreate):
             options=["--version"],
             help="Version of the web application firewall rule set type. "
                  "0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet",
-            default="2.1",
-            enum=RULESET_VERSION
+            default="2.1"
         )
         return args_schema
 
