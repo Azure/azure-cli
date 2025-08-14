@@ -88,20 +88,21 @@ def create_cluster(cmd,
             if client_cert_issuer_thumbprint is not None:
                 client_cert_issuer_thumbprint = ','.join(client_cert_issuer_thumbprint)
             client_certs.append(ClientCertificate(is_admin=client_cert_is_admin, common_name=client_cert_common_name, issuer_thumbprint=client_cert_issuer_thumbprint))
-        
-        new_cluster = ManagedCluster(location=location,
-                                     sku=skuObj,
-                                     tags=tags,
-                                     properties=ManagedClusterProperties(
-                                        dns_name=dns_name,
-                                        admin_user_name=admin_user_name,
-                                        admin_password=admin_password,
-                                        client_connection_port=client_connection_port,
-                                        http_gateway_connection_port=gateway_connection_port,
-                                        clients=client_certs,
-                                        cluster_upgrade_mode=upgrade_mode,
-                                        cluster_upgrade_cadence=upgrade_cadence,
-                                        cluster_code_version=code_version))
+
+        new_cluster = ManagedCluster(
+            location=location,
+            sku=skuObj,
+            tags=tags,
+            properties=ManagedClusterProperties(
+                dns_name=dns_name,
+                admin_user_name=admin_user_name,
+                admin_password=admin_password,
+                client_connection_port=client_connection_port,
+                http_gateway_connection_port=gateway_connection_port,
+                clients=client_certs,
+                cluster_upgrade_mode=upgrade_mode,
+                cluster_upgrade_cadence=upgrade_cadence,
+                cluster_code_version=code_version))
 
         logger.info("Creating managed cluster '%s'", cluster_name)
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, new_cluster)

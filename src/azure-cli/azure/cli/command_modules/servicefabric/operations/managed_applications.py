@@ -78,11 +78,12 @@ def create_app(cmd,
                 return app
 
         new_app_type_version = _format_app_version(cmd.cli_ctx, resource_group_name, cluster_name, application_type_name, application_type_version)
-        appResource = ApplicationResource(properties=ApplicationResourceProperties(
-                                            version=new_app_type_version,
-                                            parameters=application_parameters),
-                                          location=location,
-                                          tags=tags)
+        appResource = ApplicationResource(
+            properties=ApplicationResourceProperties(
+                version=new_app_type_version,
+                parameters=application_parameters),
+            location=location,
+            tags=tags)
         appResource.name = application_name
         poller = client.applications.begin_create_or_update(resource_group_name, cluster_name, application_name, appResource)
         return LongRunningOperation(cmd.cli_ctx)(poller)
@@ -130,23 +131,23 @@ def update_app(cmd,
             appResource.tags = tags
 
         appResource.properties.upgrade_policy = _set_upgrade_policy(currentApp.upgrade_policy,
-                                                         force_restart,
-                                                         recreate_application,
-                                                         upgrade_replica_set_check_timeout,
-                                                         instance_close_delay_duration,
-                                                         failure_action,
-                                                         upgrade_mode,
-                                                         health_check_retry_timeout,
-                                                         health_check_wait_duration,
-                                                         health_check_stable_duration,
-                                                         upgrade_domain_timeout,
-                                                         upgrade_timeout,
-                                                         consider_warning_as_error,
-                                                         default_service_type_max_percent_unhealthy_partitions_per_service,
-                                                         default_service_type_max_percent_unhealthy_replicas_per_partition,
-                                                         default_service_type_max_percent_unhealthy_services,
-                                                         max_percent_unhealthy_deployed_applications,
-                                                         service_type_health_policy_map)
+                                                                    force_restart,
+                                                                    recreate_application,
+                                                                    upgrade_replica_set_check_timeout,
+                                                                    instance_close_delay_duration,
+                                                                    failure_action,
+                                                                    upgrade_mode,
+                                                                    health_check_retry_timeout,
+                                                                    health_check_wait_duration,
+                                                                    health_check_stable_duration,
+                                                                    upgrade_domain_timeout,
+                                                                    upgrade_timeout,
+                                                                    consider_warning_as_error,
+                                                                    default_service_type_max_percent_unhealthy_partitions_per_service,
+                                                                    default_service_type_max_percent_unhealthy_replicas_per_partition,
+                                                                    default_service_type_max_percent_unhealthy_services,
+                                                                    max_percent_unhealthy_deployed_applications,
+                                                                    service_type_health_policy_map)
 
         # TODO: change to patch once the fix is supported in the rp
         # client.applications.update(resource_group_name, cluster_name, application_name, appResourceUpdate)
@@ -212,11 +213,10 @@ def create_app_type_version(cmd,
                 logger.error("Application type version '%s' already exists", version)
                 return appTypeVersion
 
-        appTypeVersionResource = ApplicationTypeVersionResource(
-                                    properties=ApplicationTypeVersionResourceProperties(
-                                        app_package_url=package_url), 
-                                    location=location, 
-                                    tags=tags)
+        appTypeVersionResource = ApplicationTypeVersionResource(properties=ApplicationTypeVersionResourceProperties(
+                                                                app_package_url=package_url),
+                                                                location=location,
+                                                                tags=tags)
         logger.info("Creating application type version %s:%s", application_type_name, version)
         poller = client.application_type_versions.begin_create_or_update(resource_group_name,
                                                                          cluster_name,

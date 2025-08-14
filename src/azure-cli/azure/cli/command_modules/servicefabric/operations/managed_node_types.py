@@ -69,29 +69,32 @@ def create_node_type(cmd,
         vm_image_version = "latest"
 
     try:
-        new_node_type = NodeType(properties=NodeTypeProperties(
-                                    is_primary=primary,
-                                    vm_instance_count=int(instance_count),
-                                    data_disk_size_gb=disk_size,
-                                    data_disk_type=disk_type,
-                                    vm_size=vm_size,
-                                    vm_image_publisher=vm_image_publisher,
-                                    vm_image_offer=vm_image_offer,
-                                    vm_image_sku=vm_image_sku,
-                                    vm_image_version=vm_image_version,
-                                    capacities=capacity,
-                                    placement_properties=placement_property,
-                                    is_stateless=is_stateless,
-                                    multiple_placement_groups=multiple_placement_groups),
-                                 tags=tags)
+        new_node_type = NodeType(
+            properties=NodeTypeProperties(
+                is_primary=primary,
+                vm_instance_count=int(instance_count),
+                data_disk_size_gb=disk_size,
+                data_disk_type=disk_type,
+                vm_size=vm_size,
+                vm_image_publisher=vm_image_publisher,
+                vm_image_offer=vm_image_offer,
+                vm_image_sku=vm_image_sku,
+                vm_image_version=vm_image_version,
+                capacities=capacity,
+                placement_properties=placement_property,
+                is_stateless=is_stateless,
+                multiple_placement_groups=multiple_placement_groups),
+            tags=tags)
 
         if application_start_port and application_end_port:
-            new_node_type.properties.application_ports = EndpointRangeDescription(start_port=application_start_port,
-                                                                       end_port=application_end_port)
+            new_node_type.properties.application_ports = EndpointRangeDescription(
+                start_port=application_start_port,
+                end_port=application_end_port)
 
         if ephemeral_start_port and ephemeral_end_port:
-            new_node_type.properties.ephemeral_ports = EndpointRangeDescription(start_port=ephemeral_start_port,
-                                                                     end_port=ephemeral_end_port)
+            new_node_type.properties.ephemeral_ports = EndpointRangeDescription(
+                start_port=ephemeral_start_port,
+                end_port=ephemeral_end_port)
 
         logger.info("Creating node type '%s'", node_type_name)
         poller = client.node_types.begin_create_or_update(resource_group_name, cluster_name, node_type_name, new_node_type)
@@ -123,12 +126,14 @@ def update_node_type(cmd,
             node_type.properties.vm_instance_count = instance_count
 
         if application_start_port and application_end_port:
-            node_type.properties.application_ports = EndpointRangeDescription(start_port=application_start_port,
-                                                                   end_port=application_end_port)
+            node_type.properties.application_ports = EndpointRangeDescription(
+                start_port=application_start_port,
+                end_port=application_end_port)
 
         if ephemeral_start_port and ephemeral_end_port:
-            node_type.properties.ephemeral_ports = EndpointRangeDescription(start_port=ephemeral_start_port,
-                                                                 end_port=ephemeral_end_port)
+            node_type.properties.ephemeral_ports = EndpointRangeDescription(
+                start_port=ephemeral_start_port,
+                end_port=ephemeral_end_port)
 
         if capacity is not None:
             node_type.properties.capacities = capacity
@@ -220,17 +225,18 @@ def add_vm_extension(cmd,
         if node_type.properties.vm_extensions is None:
             node_type.properties.vm_extensions = []
 
-        newExtension = VMSSExtension(name=extension_name,
-                                     properties=VMSSExtensionProperties(
-                                        publisher=publisher,
-                                        type=extension_type,
-                                        type_handler_version=type_handler_version,
-                                        force_update_tag=force_update_tag,
-                                        auto_upgrade_minor_version=auto_upgrade_minor_version,
-                                        settings=setting,
-                                        protected_settings=protected_setting,
-                                        provision_after_extensions=provision_after_extension)
-                                    )
+        newExtension = VMSSExtension(
+            name=extension_name,
+            properties=VMSSExtensionProperties(
+                publisher=publisher,
+                type=extension_type,
+                type_handler_version=type_handler_version,
+                force_update_tag=force_update_tag,
+                auto_upgrade_minor_version=auto_upgrade_minor_version,
+                settings=setting,
+                protected_settings=protected_setting,
+                provision_after_extensions=provision_after_extension)
+        )
 
         node_type.properties.vm_extensions.append(newExtension)
 
