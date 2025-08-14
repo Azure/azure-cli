@@ -124,13 +124,13 @@ def update_app(cmd,
         # appResourceUpdate: ApplicationResourceUpdate = ApplicationResourceUpdate()
 
         if application_type_version:
-            appResource.properties.version = _replace_app_version(appResource.version, application_type_version)
+            appResource.properties.version = _replace_app_version(appResource.properties.version, application_type_version)
         if application_parameters:
             appResource.properties.parameters.update(application_parameters)
         if tags:
             appResource.tags = tags
 
-        appResource.properties.upgrade_policy = _set_upgrade_policy(currentApp.upgrade_policy,
+        appResource.properties.upgrade_policy = _set_upgrade_policy(currentApp.properties.upgrade_policy,
                                                                     force_restart,
                                                                     recreate_application,
                                                                     upgrade_replica_set_check_timeout,
@@ -652,7 +652,7 @@ def _set_upgrade_policy(current_upgrade_policy,
         current_upgrade_policy.application_health_policy.default_service_type_health_policy.max_percent_unhealthy_replicas_per_partition \
             = default_service_type_max_percent_unhealthy_replicas_per_partition
     if default_service_type_max_percent_unhealthy_services is not None:
-        current_upgrade_policy.application_health_policy.default_service_type_health_policy.max_percent_unhealthy_partitions_per_service \
+        current_upgrade_policy.application_health_policy.default_service_type_health_policy.max_percent_unhealthy_services \
             = default_service_type_max_percent_unhealthy_services
 
     if max_percent_unhealthy_deployed_applications is not None:

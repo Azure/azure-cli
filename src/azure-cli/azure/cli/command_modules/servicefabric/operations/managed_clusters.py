@@ -335,7 +335,7 @@ def update_network_security_rule(cmd,
         if not cluster.properties.public_i_pv6_prefix_id:
             cluster.properties.public_i_pv6_prefix_id = None
 
-        update_in_collection(cluster, 'network_security_rules', updated_network_securityRule, 'name')
+        update_in_collection(cluster.properties, 'network_security_rules', updated_network_securityRule, 'name')
 
         poller = client.managed_clusters.begin_create_or_update(resource_group_name, cluster_name, cluster)
         return LongRunningOperation(cmd.cli_ctx)(poller)
