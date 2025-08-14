@@ -22,7 +22,13 @@ jobs:
       inputs:
         versionSpec: '3.12'
         displayName: "Use Python 3.12"
-    - bash: |
+    - task: AzureCLI@2
+      displayName: 'update version'
+      inputs:
+        connectedServiceNameARM: $(azure-cli-live-test-msft-connected-service)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
           set -ev
 
           # git config
@@ -53,7 +59,6 @@ jobs:
           git add .
           git commit -m "update version"
           git push --set-upstream azclibot regression_test_$(Build.BuildId)
-      displayName: 'update version'
 
 - job: RerunTests
   displayName: CLI Regression tests
@@ -86,7 +91,13 @@ jobs:
       inputs:
         versionSpec: '3.12'
         displayName: "Use Python 3.12"
-    - bash: |
+    - task: AzureCLI@2
+      displayName: 'Checkout Target Branch'
+      inputs:
+        connectedServiceNameARM: $(azure-cli-live-test-msft-connected-service)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
           set -ev
           # git config
           if [[ -n "$(CUSTOM_REPO)" && -n "$(CUSTOM_BRANCH)" && -n "$(CUSTOM_GITHUB_TOKEN)" ]]; then
@@ -104,7 +115,6 @@ jobs:
           git fetch ${GITHUB_REPO} ${GITHUB_BRANCH}
 
           git checkout -b ${GITHUB_BRANCH} ${GITHUB_REPO}/${GITHUB_BRANCH}
-      displayName: 'Checkout Target Branch'
     - template: ../../.azure-pipelines/templates/azdev_setup.yml
     - task: AzureCLI@2
       displayName: 'Rerun tests'
@@ -137,7 +147,13 @@ jobs:
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
-    - bash: |
+    - task: AzureCLI@2
+      displayName: 'Create PR'
+      inputs:
+        connectedServiceNameARM: $(azure-cli-live-test-msft-connected-service)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
           set -ev
           # git config
           if [[ -n "$(CUSTOM_REPO)" && -n "$(CUSTOM_BRANCH)" && -n "$(CUSTOM_GITHUB_TOKEN)" ]]; then
