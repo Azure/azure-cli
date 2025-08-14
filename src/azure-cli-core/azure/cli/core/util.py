@@ -919,7 +919,7 @@ def check_connectivity(url='https://azure.microsoft.com', max_retries=5, timeout
 
 def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
                      body=None, skip_authorization_header=False, resource=None, output_file=None,
-                     generated_client_request_id_name='x-ms-client-request-id', timeout=None):
+                     generated_client_request_id_name='x-ms-client-request-id'):
     import uuid
     from requests import Session, Request
     from requests.structures import CaseInsensitiveDict
@@ -1049,8 +1049,6 @@ def send_raw_request(cli_ctx, method, url, headers=None, uri_parameters=None,  #
 
     # Merge environment settings into session
     settings = s.merge_environment_settings(prepped.url, {}, None, not should_disable_connection_verify(), None)
-    if timeout is not None:
-        settings['timeout'] = timeout
     _log_request(prepped)
     r = s.send(prepped, **settings)
     _log_response(r)
