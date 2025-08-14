@@ -96,9 +96,9 @@ class ServiceFabricApplicationTests(ScenarioTest):
             'vm_password': self.create_random_name('Pass@', 9),
             'app_type_name': 'VotingType',
             'v1': '1.0.0',
-            'app_package_v1': 'https://sfrpazclistorage.blob.core.windows.net/sfrpazclicont/Voting.sfpkg?sp=racwdyti&st=2024-01-18T23:07:27Z&se=2024-02-08T07:07:27Z&sv=2022-11-02&sr=b&sig=XYlcb4sW%2B8zbzl0yxt2%2BZGwA5Q9RMLeJO7MU0OJCCb8%3D',
+            'app_package_v1': 'https://sfrpazclistorage.blob.core.windows.net/sfrpazclicont/Voting.sfpkg?sp=racwdyti&st=2024-01-18T23:07:27Z&se=2024-02-08T07:07:27Z&sv=2022-11-02&sr=b&sig=*****',
             'v2': '2.0.0',
-            'app_package_v2': 'https://sfrpazclistorage.blob.core.windows.net/sfrpazclicont/Voting.2.0.0.sfpkg?sp=racwdyti&st=2024-01-18T23:10:57Z&se=2024-02-08T07:10:57Z&sv=2022-11-02&sr=b&sig=HNAFsFsodk9XFU%2FA5lfTRyk45uAAFeOinGL3kgkjrpg%3D',
+            'app_package_v2': 'https://sfrpazclistorage.blob.core.windows.net/sfrpazclicont/Voting.2.0.0.sfpkg?sp=racwdyti&st=2024-01-18T23:10:57Z&se=2024-02-08T07:10:57Z&sv=2022-11-02&sr=b&sig=*****',
             'app_name': self.create_random_name('testApp', 11),
             'service_type': 'VotingWebType'
         })
