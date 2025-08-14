@@ -936,6 +936,7 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
         if iops is not None:
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
 
+
 def pg_restore_validator(compute_tier, **args):
     is_ssdv2_enabled = args.get('storage_type', None) == "PremiumV2_LRS"
 
