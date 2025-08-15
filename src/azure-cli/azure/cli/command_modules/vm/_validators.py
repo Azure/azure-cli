@@ -823,7 +823,7 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
 
         subnet_exists = \
             check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets', vnet, 'virtualNetworks',
-                            api_version="2024-07-01")
+                            api_version="2024-10-01")
 
         if subnet_is_id and not subnet_exists:
             raise CLIError("Subnet '{}' does not exist.".format(subnet))
