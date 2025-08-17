@@ -1452,6 +1452,19 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Data Transfer
+        then:
+        - mentionUsers:
+            mentionees:
+            - fzkhan
+            - lasuredd-msft
+            - pkuma-msft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: DataBox
         then:
         - mentionUsers:
@@ -2208,6 +2221,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - AzMonEssential
+            - LarryZhang19
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
