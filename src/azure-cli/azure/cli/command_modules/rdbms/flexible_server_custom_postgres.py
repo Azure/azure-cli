@@ -43,7 +43,7 @@ from .flexible_server_virtual_network import prepare_private_network, prepare_pr
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
     validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name, \
-    validate_virtual_endpoint_name_availability, validate_database_name, compare_sku_names, is_citus_cluster
+    validate_virtual_endpoint_name_availability, validate_database_name, compare_sku_names, is_citus_cluster, pg_restore_validator
 
 logger = get_logger(__name__)
 DEFAULT_DB_NAME = 'flexibleserverdb'
@@ -274,6 +274,7 @@ def flexible_server_restore(cmd, client,
         cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, source_server_object)
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
+        pg_restore_validator(source_server_object.sku.tier, storage_type=storage_type)
         storage = postgresql_flexibleservers.models.Storage(type=storage_type if source_server_object.storage.type != "PremiumV2_LRS" else None)
 
         parameters = postgresql_flexibleservers.models.Server(
