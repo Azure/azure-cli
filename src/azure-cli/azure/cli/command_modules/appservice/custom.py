@@ -979,8 +979,8 @@ def list_flex_migration_candidates(cmd):
     subscription_id = get_subscription_id(cmd.cli_ctx)
     web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient)
 
-    logger.warning("Searching for function apps under the subscription '%s' that are eligible for Flex "
-                   "Consumption migration...\n", subscription_id)
+    print(f"Searching for function apps under the subscription '{subscription_id}' that are eligible for Flex "
+          "Consumption migration...\n")
 
     all_sites = list(web_client.web_apps.list())
     eligible_sites = []
@@ -1120,7 +1120,7 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
     web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient)
 
     # Validate that the app is eligible for Flex Consumption migration
-    logger.warning("Validating that the app '%s' is eligible for Flex Consumption migration...", source_name)
+    print(f"Validating that the app '{source_name}' is eligible for Flex Consumption migration...")
     flex_regions = [region['name'] for region in list_flexconsumption_locations(cmd)]
     source = web_client.web_apps.get(source_resource_group, source_name)
 
@@ -1132,9 +1132,9 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
     if validate_flex_migration_eligibility_for_linux_consumption_app(cmd, source, flex_regions):
         slots = list_slots(cmd, source_resource_group, source_name)
         if len(slots) > 0:
-            logger.warning("The site '%s' has slots configured. This will not block migration, "
-                           "but please note that slots are not supported in Flex Consumption.", source_name)
-        logger.warning("Source app '%s' is eligible for Flex Consumption migration", source_name)
+            print(f"The site '{source_name}' has slots configured. This will not block migration, "
+                  f"but please note that slots are not supported in Flex Consumption.")
+        print(f"Source app '{source_name}' is eligible for Flex Consumption migration.")
 
     source_site_configs = get_site_configs(cmd, source_resource_group, source_name)
     source_linux_fx_version = getattr(source_site_configs, 'linux_fx_version', None)
@@ -1142,12 +1142,12 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
     source_runtime = source_runtime_info['app_runtime']
     source_runtime_version = source_runtime_info['app_runtime_version']
 
-    logger.warning("\nCreating Flex Consumption function app '%s' in resource group '%s'...", name, resource_group)
+    print(f"\nCreating Flex Consumption function app '{name}' in resource group '{resource_group}'...")
 
     if not storage_account:
         storage_account = get_storage_account_from_functionapp(cmd, source_resource_group, source_name)
         storage_account_name = parse_resource_id(storage_account)['name']
-        logger.warning("Using source app's storage account '%s' for function app '%s'", storage_account_name, name)
+        print(f"Using source app's storage account '{storage_account_name}' for function app '{name}'")
 
     try:
         create_functionapp(cmd, resource_group, name, storage_account, flexconsumption_location=source.location,
@@ -1157,7 +1157,8 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
         logger.error("There was an error creating the Flex Consumption function app. Please address the issue "
                      "and try again.")
         raise
-    logger.warning("Flex Consumption function app '%s' created successfully", name)
+
+    print(f"Flex Consumption function app '{name}' created successfully")
 
     # Migrate app settings, site configs and site properties
     _migrate_app_settings(cmd, source_resource_group, source_name, resource_group, name, storage_account)
@@ -1169,44 +1170,43 @@ def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resourc
     if not skip_cors:
         _migrate_cors_settings(cmd, source_site_configs, source_name, resource_group, name)
     else:
-        logger.warning("\nSkipping CORS settings migration")
+        print("\nSkipping CORS settings migration")
 
     # Custom hostname migration
     if not skip_hostnames:
         _migrate_custom_hostnames(cmd, source_resource_group, source_name, resource_group, name)
     else:
-        logger.warning("\nSkipping custom hostname migration")
+        print("\nSkipping custom hostname migration")
 
     # Storage mount migration
     if not skip_storage_mount:
         _migrate_storage_mounts(cmd, source_resource_group, source_name, resource_group, name)
     else:
-        logger.warning("\nSkipping storage mount migration")
+        print("\nSkipping storage mount migration")
 
     # Access restrictions migration
     if not skip_access_restrictions:
         _migrate_access_restrictions(cmd, source_resource_group, source_name, resource_group, name)
     else:
-        logger.warning("\nSkipping access restrictions migration")
+        print("\nSkipping access restrictions migration")
 
     # Managed identities migration
     if not skip_managed_identities:
         _migrate_managed_identities_and_roles(cmd, source, resource_group, name)
     else:
-        logger.warning("\nSkipping managed identities migration")
+        print("\nSkipping managed identities migration")
 
-    logger.warning("\nInitial migration steps complete. Function app '%s' migrated to Flex Consumption app '%s'. "
-                   "Next: deploy code, test functions, then delete the source app."
-                   "\nFor more details on the migration, please visit: "
-                   "https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex",
-                   source_name, name)
+    print(f"\nInitial migration steps complete. Function app '{source_name}' migrated to Flex Consumption app "
+          f"'{name}'. Next: deploy code, test functions, then delete the source app."
+          f"\nFor more details on the migration, please visit: "
+          f"https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex")
 
     return get_functionapp(cmd, resource_group, name)
 
 
 def _migrate_app_settings(cmd, source_resource_group, source_name, resource_group, name, storage_account):
-    logger.warning("\nMigrating app settings from source function app '%s' to target function app '%s'...",
-                   source_name, name)
+    print(f"\nMigrating app settings from source function app '{source_name}' to target function app '{name}'...")
+
     try:
         source_app_settings = get_app_settings(cmd, source_resource_group, source_name)
 
@@ -1260,18 +1260,17 @@ def _migrate_app_settings(cmd, source_resource_group, source_name, resource_grou
         if migrated_app_settings:
             setting_names = [setting.split('=')[0] for setting in migrated_app_settings]
             update_app_settings(cmd, resource_group, name, migrated_app_settings)
-            logger.warning("Successfully migrated %d app settings: %s",
-                           len(migrated_app_settings), ', '.join(setting_names))
+            print(f"Successfully migrated {len(migrated_app_settings)} app settings: {', '.join(setting_names)}")
         else:
-            logger.warning("No app settings to migrate")
+            print("No app settings to migrate")
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Failed to migrate app settings: %s. This step will be skipped. "
                      "Run 'az functionapp config appsettings set' to add them manually", str(e))
 
 
 def _migrate_site_configs(cmd, source_site_configs, source_name, resource_group, name):
-    logger.warning("\nMigrating site configs from source function app '%s' to target function app '%s'...",
-                   source_name, name)
+    print(f"\nMigrating site configs from source function app '{source_name}' to target function app '{name}'...")
+
     try:
         site_configs = {
             'http20_enabled': str(source_site_configs.http20_enabled).lower(),
@@ -1280,16 +1279,15 @@ def _migrate_site_configs(cmd, source_site_configs, source_name, resource_group,
         }
 
         update_site_configs(cmd, resource_group, name, **site_configs)
-        logger.warning("Successfully migrated the following site configs: %s",
-                       ', '.join(site_configs.keys()))
+        print(f"Successfully migrated the following site configs: {', '.join(site_configs.keys())}")
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Failed to migrate site configs: %s. This step will be skipped. "
                      "Run 'az functionapp config set' to add them manually", str(e))
 
 
 def _migrate_site_properties(cmd, source, resource_group, name):
-    logger.warning("\nMigrating site properties from source function app '%s' to target function app '%s'...",
-                   source.name, name)
+    print(f"\nMigrating site properties from source function app '{source.name}' to target function app '{name}'...")
+
     try:
         functionapp = get_functionapp(cmd, resource_group, name)
         functionapp.https_only = source.https_only
@@ -1300,8 +1298,8 @@ def _migrate_site_properties(cmd, source, resource_group, name):
         poller = set_functionapp(cmd, resource_group, name, parameters=functionapp)
         LongRunningOperation(cmd.cli_ctx)(poller)
 
-        logger.warning("Successfully migrated the following properties: "
-                       "https_only, client_cert_enabled, client_cert_mode, client_cert_exclusion_paths")
+        print("Successfully migrated the following properties: "
+              "https_only, client_cert_enabled, client_cert_mode, client_cert_exclusion_paths")
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Failed to migrate site properties: %s. This step will be skipped. "
                      "Run 'az functionapp update' to configure the site properties manually",
@@ -1309,8 +1307,9 @@ def _migrate_site_properties(cmd, source, resource_group, name):
 
 
 def _migrate_basic_publishing_credentials_policies(cmd, source_resource_group, source_name, resource_group, name):
-    logger.warning("\nMigrating SCM basic authentication setting from source function app '%s' to target "
-                   "function app '%s'...", source_name, name)
+    print(f"\nMigrating SCM basic authentication setting from source function app '{source_name}' to target "
+          f"function app '{name}'...")
+
     try:
         source_scm_basic_auth_enabled = basic_auth_supported(cmd.cli_ctx, source_name, source_resource_group)
 
@@ -1321,11 +1320,11 @@ def _migrate_basic_publishing_credentials_policies(cmd, source_resource_group, s
             _generic_site_operation(cmd.cli_ctx, resource_group, name,
                                     'update_scm_allowed', None, csmPublishingCredentialsPoliciesEntity)
 
-            logger.warning("Successfully enabled SCM basic authentication setting")
+            print("Successfully enabled SCM basic authentication setting")
 
         else:
-            logger.warning("SCM basic authentication is disabled in the source function app. "
-                           "No action needed.")
+            print("SCM basic authentication is disabled in the source function app. "
+                  "No action needed.")
 
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Failed to migrate SCM basic authentication setting: %s. This step will be skipped. "
@@ -1333,8 +1332,8 @@ def _migrate_basic_publishing_credentials_policies(cmd, source_resource_group, s
 
 
 def _migrate_cors_settings(cmd, source_site_configs, source_name, resource_group, name):
-    logger.warning("\nMigrating CORS settings from source function app '%s' to target function app '%s'...",
-                   source_name, name)
+    print(f"\nMigrating CORS settings from source function app '{source_name}' to target function app '{name}'...")
+
     try:
         source_cors_settings = source_site_configs.cors
 
@@ -1342,14 +1341,13 @@ def _migrate_cors_settings(cmd, source_site_configs, source_name, resource_group
             if source_cors_settings.allowed_origins:
                 add_cors(cmd, resource_group, name, source_cors_settings.allowed_origins)
                 cors_allowed_origins = ', '.join(source_cors_settings.allowed_origins)
-                logger.warning("Successfully migrated CORS allowed origins: %s",
-                               cors_allowed_origins)
+                print(f"Successfully migrated CORS allowed origins: {cors_allowed_origins}")
 
             if source_cors_settings.support_credentials:
                 enable_credentials(cmd, resource_group, name, enable=True)
-                logger.warning("Successfully enabled Access-Control-Allow-Credentials setting")
+                print("Successfully enabled Access-Control-Allow-Credentials setting")
         else:
-            logger.warning("No CORS settings found to migrate")
+            print("No CORS settings found to migrate")
 
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Failed to migrate CORS settings: %s. This step will be skipped. "
@@ -1357,8 +1355,8 @@ def _migrate_cors_settings(cmd, source_site_configs, source_name, resource_group
 
 
 def _migrate_custom_hostnames(cmd, source_resource_group, source_name, resource_group, name):
-    logger.warning("\nMigrating custom hostnames from source function app '%s' to target function app '%s'...",
-                   source_name, name)
+    print(f"\nMigrating custom hostnames from source function app '{source_name}' to target function app '{name}'...")
+
     try:
         source_hostnames = list_hostnames(cmd, source_resource_group, source_name)
 
@@ -1369,15 +1367,16 @@ def _migrate_custom_hostnames(cmd, source_resource_group, source_name, resource_
                 custom_hostnames.append(hostname)
 
         if custom_hostnames:
-            logger.warning("Found %d custom domain(s) to migrate:", len(custom_hostnames))
+            print(f"Found {len(custom_hostnames)} custom domain(s) to migrate:")
             for hostname in custom_hostnames:
-                logger.warning(hostname)
+                print(hostname)
 
             for hostname in custom_hostnames:
                 add_hostname(cmd, resource_group, name, hostname)
-                logger.warning("Successfully migrated hostname: %s", hostname)
+                print(f"Successfully migrated hostname: {hostname}")
         else:
-            logger.warning("No custom domains found to migrate")
+            print("No custom domains found to migrate")
+
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Failed to migrate hostnames: %s. This step will be skipped. "
                      "Run 'az functionapp config hostname add' to add them manually",
@@ -1385,13 +1384,13 @@ def _migrate_custom_hostnames(cmd, source_resource_group, source_name, resource_
 
 
 def _migrate_storage_mounts(cmd, source_resource_group, source_name, resource_group, name):
-    logger.warning("\nMigrating storage mounts from source function app '%s' to target function app '%s'...",
-                   source_name, name)
+    print(f"\nMigrating storage mounts from source function app '{source_name}' to target function app '{name}'...")
+
     try:
         source_storage_accounts = get_azure_storage_accounts(cmd, source_resource_group, source_name)
 
         if not source_storage_accounts:
-            logger.warning("No storage mounts found to migrate")
+            print("No storage mounts found to migrate")
             return
 
         for storage_config in source_storage_accounts:
@@ -1412,9 +1411,8 @@ def _migrate_storage_mounts(cmd, source_resource_group, source_name, resource_gr
                     slot=None,
                     slot_setting=False
                 )
-                logger.warning("Successfully migrated storage mount '%s' (Account: %s, Share: %s)",
-                               custom_id, storage_info.account_name,
-                               storage_info.share_name)
+                print(f"Successfully migrated storage mount '{custom_id}' (Account: {storage_info.account_name}, "
+                      f"Share: {storage_info.share_name})")
 
             except Exception as e:  # pylint: disable=broad-except
                 logger.error("Failed to migrate storage mount '%s': %s. This step will be skipped. "
@@ -1427,8 +1425,8 @@ def _migrate_storage_mounts(cmd, source_resource_group, source_name, resource_gr
 
 
 def _migrate_access_restrictions(cmd, source_resource_group, source_name, resource_group, name):
-    logger.warning("\nMigrating access restrictions from source function app '%s' to target function app '%s'...",
-                   source_name, name)
+    print(f"\nMigrating access restrictions from source function app '{source_name}' to target function app "
+          f"'{name}'...")
 
     try:
         from . import access_restrictions
@@ -1438,7 +1436,7 @@ def _migrate_access_restrictions(cmd, source_resource_group, source_name, resour
         )
 
         if not source_restrictions:
-            logger.warning("No access restrictions found to migrate")
+            print("No access restrictions found to migrate")
             return
 
         ip_restrictions = source_restrictions.get('ipSecurityRestrictions', [])
@@ -1455,8 +1453,10 @@ def _migrate_access_restrictions(cmd, source_resource_group, source_name, resour
                     default_action=default_action,
                     scm_default_action=scm_default_action
                 )
-                logger.warning("Successfully set access restriction configurations: scmUseMain=%s, defaultAction=%s, "
-                               "scmDefaultAction=%s", scm_use_main, default_action, scm_default_action)
+
+                print(f"Successfully set access restriction configurations: scmUseMain={scm_use_main}, "
+                      f"defaultAction={default_action}, scmDefaultAction={scm_default_action}")
+
             except Exception as e:  # pylint: disable=broad-except
                 logger.error("Failed to set access restriction configurations: %s. This step will be skipped. "
                              "Run 'az webapp config access-restriction set' to configure them manually", str(e))
@@ -1491,7 +1491,7 @@ def _add_single_access_restriction(cmd, resource_group, name, restriction, scm_s
     headers = restriction.get('headers')
 
     if not ip_address and not subnet_id:
-        logger.warning("Skipping restriction with no valid IP address or subnet: %s", rule_name or 'unnamed')
+        print(f"Skipping restriction with no valid IP address or subnet: {rule_name or 'unnamed'}")
         return
 
     try:
@@ -1509,8 +1509,8 @@ def _add_single_access_restriction(cmd, resource_group, name, restriction, scm_s
                 ignore_missing_vnet_service_endpoint=True,
                 http_headers=_format_headers(headers) if headers else None
             )
-            logger.warning("Successfully migrated %s subnet restriction: %s (Priority: %d)",
-                           "SCM" if scm_site else "main", rule_name or subnet_id, priority)
+            print(f"Successfully migrated {'SCM' if scm_site else 'main'} subnet restriction: "
+                  f"{rule_name or subnet_id} (Priority: {priority})")
 
         elif ip_address:
             if tag == 'ServiceTag':
@@ -1526,8 +1526,9 @@ def _add_single_access_restriction(cmd, resource_group, name, restriction, scm_s
                     scm_site=scm_site,
                     http_headers=_format_headers(headers) if headers else None
                 )
-                logger.warning("Successfully migrated %s service tag restriction: %s (Priority: %d)",
-                               "SCM" if scm_site else "main", rule_name or ip_address, priority)
+                print(f"Successfully migrated {'SCM' if scm_site else 'main'} service tag restriction: "
+                      f"{rule_name or ip_address} (Priority: {priority})")
+
             else:
                 access_restrictions.add_webapp_access_restriction(
                     cmd=cmd,
@@ -1541,8 +1542,8 @@ def _add_single_access_restriction(cmd, resource_group, name, restriction, scm_s
                     scm_site=scm_site,
                     http_headers=_format_headers(headers) if headers else None
                 )
-                logger.warning("Successfully migrated %s IP restriction: %s (Priority: %d)",
-                               "SCM" if scm_site else "main", rule_name or ip_address, priority)
+                print(f"Successfully migrated {'SCM' if scm_site else 'main'} IP restriction: "
+                      f"{rule_name or ip_address} (Priority: {priority})")
 
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Failed to add %s restriction '%s': %s. This step will be skipped. "
@@ -1565,8 +1566,8 @@ def _format_headers(headers_dict):
 
 
 def _migrate_managed_identities_and_roles(cmd, source, resource_group, name):
-    logger.warning("\nMigrating managed identities and role assignments from source function app '%s' "
-                   "to target function app '%s'...", source.name, name)
+    print(f"\nMigrating managed identities and role assignments from source function app '{source.name}' "
+          f"to target function app '{name}'...")
 
     try:
         from azure.cli.command_modules.role.custom import list_role_assignments
@@ -1581,22 +1582,21 @@ def _migrate_managed_identities_and_roles(cmd, source, resource_group, name):
 
                 assign_identity(cmd, resource_group, name, assign_identities=['[system]'])
                 target_identity = show_identity(cmd, resource_group, name)
-                logger.warning("Successfully assigned system-assigned identity with principal ID '%s'",
-                               target_identity.principal_id)
+                print(f"Successfully assigned system-assigned identity with principal ID "
+                      f"'{target_identity.principal_id}'")
                 _migrate_role_assignments(cmd, system_role_assignments, target_identity.principal_id)
 
             if source_identity.user_assigned_identities:
                 user_identity_ids = list(source_identity.user_assigned_identities.keys())
                 assign_identity(cmd, resource_group, name, assign_identities=user_identity_ids)
-                logger.warning("Successfully assigned user-assigned identities: %s",
-                               ', '.join(user_identity_ids))
+                print(f"Successfully assigned user-assigned identities: {', '.join(user_identity_ids)}")
         else:
-            logger.warning("No managed identities found in the source function app. No action needed.")
+            print("No managed identities found in the source function app. No action needed.")
 
     except Exception as e:  # pylint: disable=broad-except
-        logger.warning("Failed to migrate managed identities and role assignments: %s. This step will be skipped. "
-                       "Run 'az functionapp identity assign' and 'az role assignment create' to configure "
-                       "them manually", str(e))
+        logger.error("Failed to migrate managed identities and role assignments: %s. This step will be skipped. "
+                     "Run 'az functionapp identity assign' and 'az role assignment create' to configure "
+                     "them manually", str(e))
 
 
 def _migrate_role_assignments(cmd, source_role_assignments, target_principal_id):
@@ -1616,13 +1616,13 @@ def _migrate_role_assignments(cmd, source_role_assignments, target_principal_id)
                 assignee_principal_type='ServicePrincipal'
             )
 
-            logger.warning("Created role assignment for scope '%s' with role '%s' for principal ID '%s'",
-                           scope, assignment.get('roleDefinitionName', role_name), target_principal_id)
+            print(f"Created role assignment for scope '{scope}' with role "
+                  f"'{assignment.get('roleDefinitionName', role_name)}' for principal ID '{target_principal_id}'")
 
         except Exception as e:  # pylint: disable=broad-except
-            logger.warning("Failed to create role assignment for scope '%s': %s. This step will be skipped. "
-                           "Run 'az role assignment create' to add it manually",
-                           scope, str(e))
+            logger.error("Failed to create role assignment for scope '%s': %s. This step will be skipped. "
+                         "Run 'az role assignment create' to add it manually",
+                         scope, str(e))
             continue
 
 
