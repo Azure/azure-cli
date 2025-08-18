@@ -5587,17 +5587,49 @@ class VMSSVMsScenarioTest(ScenarioTest):
             self.assertTrue(result['statuses'][1]['code'] in args)
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_vms')
+    @AllowLargeResponse(size_kb=99999)
     def test_vmss_vms(self, resource_group):
 
         self.kwargs.update({
             'vmss': self.create_random_name('clitestvmss', 20),
             'flex_vmss': self.create_random_name('clitestflexvms', 20),
             'count': 2,
-            'instance_ids': []
-        })
+            'instance_ids': [],
+            'nsg': 'nsg1',
+            'pubip1': 'pubip1',            
 
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --authentication-type password --lb-sku Standard '
-                 '--admin-username admin123 --admin-password TestTest12#$ --instance-count {count} --orchestration-mode Uniform')
+        })
+    
+        self.cmd('network nsg create -g {rg} -n {nsg}')
+        # Create a public IP resource with service tag
+        
+        # self.cmd("feature register --namespace Microsoft.Network --name AllowBringYourOwnPublicIpAddress")
+        # self.cmd("provider register -n Microsoft.Network")
+
+        self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')    
+
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:ubuntu-24_04-lts:server:latest --authentication-type password --lb-sku Standard '
+                 '--admin-username admin123 --admin-password TestTest12#$ --instance-count {count} --orchestration-mode Uniform --public-ip-address {pubip1} --nsg {nsg}')
+
+
+
+
+        # # Create NSG
+        # self.cmd('network nsg create -g {rg} -n {nsg}')
+
+        # # Add rule to deny high-risk ports (SSH and RDP)
+        # self.cmd('network nsg rule create -g {rg} --nsg-name {nsg} -n DenyHighRiskPorts --priority 101 '
+        #         '--access Deny --protocol Tcp --direction Inbound --source-address-prefix Internet '
+        #         '--source-port-range "*" --destination-address-prefix "*" --destination-port-ranges 22 3389')
+
+        # # Create VMSS with the NSG attached
+        # self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:ubuntu-24_04-lts:server:latest '
+        #         '--authentication-type password --lb-sku Standard '
+        #         '--admin-username admin123 --admin-password TestTest12#$ '
+        #         '--instance-count {count} --orchestration-mode Uniform --nsg {nsg}')
+
+
+
 
         instance_list = self.cmd('vmss list-instances --resource-group {rg} --name {vmss}', checks=[
             self.check('type(@)', 'array'),
