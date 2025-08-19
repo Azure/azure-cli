@@ -1239,12 +1239,8 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
 
 
 
-class AppConfigKubernetesConfigMapImportScenarioTest(ScenarioTest):
+class AppConfigKubernetesConfigMapImportLiveScenarioTest(LiveScenarioTest):
     """Test suite for importing key-values from Kubernetes ConfigMaps using AKS RunCommand."""
-
-    def __init__(self, *args, **kwargs):
-        kwargs["recording_processors"] = kwargs.get("recording_processors", []) + [CredentialResponseSanitizer()]
-        super().__init__(*args, **kwargs)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
