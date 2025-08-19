@@ -7691,6 +7691,31 @@ def _build_onedeploy_url(params, instance_id=None):
     return _build_onedeploy_scm_url(params)
 
 
+def _build_kudu_warmup_scm_url(params):
+    scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    return scm_url + '/api/deployments?warmup=true'
+
+
+def _build_kudu_warmup_arm_url(params, instance_id=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(params.cmd.cli_ctx)
+    sub_id = get_subscription_id(params.cmd.cli_ctx)
+    instances_segment = f"/instances/{instance_id}" if instance_id is not None else ""
+    if not params.slot:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}{instances_segment}/deployments?api-version={client.DEFAULT_API_VERSION}"
+            f"&warmup=true"
+        )
+    else:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/slots/{params.slot}{instances_segment}/deployments"
+            f"?api-version={client.DEFAULT_API_VERSION}&warmup=true"
+        )
+    return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
+
+
 def _build_onedeploy_scm_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     deploy_url = scm_url + '/api/publish?type=' + params.artifact_type
@@ -7856,10 +7881,10 @@ def _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot):
         return None
 
 
-def _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, webapp_name, slot):
+def _warmup_kudu_and_get_cookie_internal(params):
     import requests
-    scm_url = _get_scm_url(cmd, resource_group_name, webapp_name, slot)
-    instance_id = _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot)
+    instance_id = _get_instance_id_internal(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+
     if instance_id is None:
         logger.info("Failed to get a Kudu instance id...")
         return None
@@ -7869,16 +7894,21 @@ def _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, webapp_name, 
 
     for _ in range(max_retries):
         try:
-            headers = get_scm_site_headers(cmd.cli_ctx, webapp_name, resource_group_name)
-            response = requests.get(scm_url + '/api/deployments?warmup=true',
-                                    headers=headers, cookies=cookies, timeout=time_out)
+            if not params.src_url:  # use SCM endpoint for Kudu warmup
+                kudu_warmup_url = _build_kudu_warmup_scm_url(params)
+                headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name)
+                response = requests.get(kudu_warmup_url, headers=headers, cookies=cookies, timeout=time_out)
+            else:  # use ARM endpoint for Kudu warmup
+                kudu_warmup_url = _build_kudu_warmup_arm_url(params, instance_id)
+                response = send_raw_request(params.cmd.cli_ctx, "GET", kudu_warmup_url)
+
             if response.status_code in (200, 201, 202):
                 logger.warning("Warmed up Kudu instance successfully.")
                 return cookies
             time_out = 300
         except Exception as ex:  # pylint: disable=broad-except
             logger.info("Error while warming-up Kudu with instanceid: %s, ex: %s", instance_id, ex)
-            return False
+            time_out = 300
     logger.warning("Failed to warm-up Kudu with instanceid: %s, "
                    "the deployment will proceed without pre-warmup.", instance_id)
     return None
@@ -7905,8 +7935,7 @@ def _make_onedeploy_request(params):
         if params.is_linux_webapp and not params.is_functionapp and params.enable_kudu_warmup:
             try:
                 logger.warning("Warming up Kudu before deployment.")
-                cookies = _warmup_kudu_and_get_cookie_internal(params.cmd, params.resource_group_name,
-                                                               params.webapp_name, params.slot)
+                cookies = _warmup_kudu_and_get_cookie_internal(params)
                 if cookies is None:
                     logger.info("Failed to fetch affinity cookie for Kudu. "
                                 "Deployment will proceed without pre-warming a Kudu instance.")
@@ -7928,8 +7957,7 @@ def _make_onedeploy_request(params):
         if params.is_linux_webapp and not params.is_functionapp and params.enable_kudu_warmup:
             try:
                 logger.warning("Warming up Kudu before deployment.")
-                cookies = _warmup_kudu_and_get_cookie_internal(params.cmd, params.resource_group_name,
-                                                               params.webapp_name, params.slot)
+                cookies = _warmup_kudu_and_get_cookie_internal(params)
                 if cookies is None:
                     logger.info("Failed to fetch affinity cookie for Kudu. "
                                 "Deployment will proceed without pre-warming a Kudu instance.")

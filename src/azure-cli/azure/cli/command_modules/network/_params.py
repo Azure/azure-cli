@@ -35,7 +35,6 @@ from azure.cli.command_modules.network._completers import (
 from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
-from azure.cli.command_modules.network.custom import RULESET_VERSION
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
@@ -230,7 +229,6 @@ def load_arguments(self, _):
                    help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   arg_type=get_enum_type(RULESET_VERSION.values()),
                    help='The version of the web application firewall rule set type. '
                         '0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet.')
 
