@@ -50,7 +50,7 @@ class Start(AAZCommand):
             required=True,
         )
         _args_schema.name = AAZStrArg(
-            options=["--name"],
+            options=["-n", "--name"],
             help="Scale set name. You can configure the default using `az configure --defaults vmss=<name>`",
             required=True,
             id_part="name",
@@ -62,7 +62,7 @@ class Start(AAZCommand):
         _args_schema.instance_ids = AAZListArg(
             options=["--instance-ids"],
             arg_group="VmInstanceIDs",
-            help="The virtual machine scale set instance ids. Omitting the virtual machine scale set instance ids will result in the operation being performed on all virtual machines in the virtual machine scale set.",
+            help="Space-separated list of IDs (ex: 1 2 3 ...) or * for all instances. If not provided, the action will be applied on the scaleset itself.",
         )
 
         instance_ids = cls._args_schema.instance_ids
