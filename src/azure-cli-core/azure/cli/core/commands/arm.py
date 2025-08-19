@@ -219,7 +219,7 @@ def register_global_policy_argument(cli_ctx):
                 'action': ChangeReferenceAction,
             }
             acquire_policy_token_kwargs = {
-                'help': 'Acquiring policy token automatically for this resource operation',
+                'help': 'Acquiring an Azure Policy token automatically for this resource operation',
                 'arg_group': 'Global Policy',
                 'nargs': 0,
                 'action': AcquirePolicyTokenAction,

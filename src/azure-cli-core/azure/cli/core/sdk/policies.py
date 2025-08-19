@@ -145,10 +145,6 @@ def get_custom_hook_policy(cli_ctx):
                 policy_token = response_content.get('token', None)
                 if not policy_token:
                     raise ServiceError(f"No token returned. Response:{acquire_policy_token_response.content}")
-            elif acquire_policy_token_response.status_code == 202:
-                # TODO: Handle async token acquisition after Service is ready
-                raise NotImplementedError("Asynchronous policy token acquisition is not supported in current Azure CLI."
-                                          " Please upgrade and retry.")
         except Exception as ex:
             raise ServiceError(f"Failed to acquire policy token, exception: {ex}")
         if policy_token:
