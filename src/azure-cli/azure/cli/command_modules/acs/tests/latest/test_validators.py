@@ -1131,7 +1131,7 @@ class TestValidateEnableAzureContainerStorageV1(unittest.TestCase):
         err = "Cannot set --storage-pool-sku when --enable-azure-container-storage is ephemeralDisk."
         with self.assertRaises(ArgumentUsageError) as cm:
             acstor_validator.validate_enable_azure_container_storage_v1_params(
-                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, None, None, False,False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                storage_pool_type, storage_pool_name, storage_pool_sku, None, None, None, None, False, False, "", False, False, False, False, None, None, acstor_consts.CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY, acstor_consts.CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
             )
         self.assertEqual(str(cm.exception), err)
 
@@ -1588,7 +1588,7 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
             )
         err = (
             'The latest version of Azure Container Storage only supports ephemeral nvme storage and does not '
-            'require or support a storage-pool-type value for -enable-azure-container-storage parameter. '
+            'require or support a storage-pool-type value for --enable-azure-container-storage parameter. '
             f'Please remove {storage_pool_type} from the command and try again.'
         )
         self.assertEqual(str(cm.exception), err)
@@ -1673,11 +1673,11 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
                 False, True, v1_extension_version, "", "", "", "", "",
             )
         err = (
-            f'Failed to enable Azure Container Storage v2 as Azure Container Storage version {v1_extension_version} '
-            'is already installed on the cluster. Try enabling Azure Container Storage v2 in another cluster. '
-            'You can also enable Azure Container Storage v2 by first disabling the existing installation of '
-            'Azure Container Storage using --disable-azure-container-storage. '
-            'Note that disabling can impact existing workloads that depend on Azure Container Storage'
+            f'Failed to enable the latest version of Azure Container Storage as version {v1_extension_version} '
+            'is already installed on the cluster. Try enabling Azure Container Storage in another cluster. '
+            'You can also enable the latest version by first disabling the existing installation using '
+            '--disable-azure-container-storage. Note that disabling can impact existing workloads '
+            'that depend on Azure Container Storage.'
         )
         self.assertEqual(str(cm.exception), err)
 
