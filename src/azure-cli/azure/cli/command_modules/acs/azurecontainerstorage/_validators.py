@@ -208,7 +208,7 @@ def validate_enable_azure_container_storage_v1_params(  # pylint: disable=too-ma
             'Failed to enable Azure Container Storage version 1 as Azure Container Storage version '
             f'{v2_extension_version} is already installed on the cluster. Try enabling this version on another '
             'cluster. You can also enable this version by first disabling the existing installation of '
-            'Azure Container Storage running --disable-azure-container-storage. '
+            'Azure Container Storage by running --disable-azure-container-storage. '
             'Note that disabling can impact existing workloads that depend on Azure Container Storage.'
         )
 

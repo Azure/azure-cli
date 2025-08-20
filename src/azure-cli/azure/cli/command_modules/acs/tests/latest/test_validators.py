@@ -1099,10 +1099,10 @@ class TestValidateEnableAzureContainerStorageV1(unittest.TestCase):
     def test_enable_when_latest_enabled(self):
         v2_extension_version = "2.0.0"
         err = (
-            f'Failed to enable Azure Container Storage version 1 as Azure Container Storage version {v2_extension_version} '
-            'is already installed on the cluster. Try enabling this version on another cluster. '
-            'You can also enable this version by first disabling the existing installation of '
-            'Azure Container Storage running --disable-azure-container-storage. '
+            'Failed to enable Azure Container Storage version 1 as Azure Container Storage version '
+            f'{v2_extension_version} is already installed on the cluster. Try enabling this version on another '
+            'cluster. You can also enable this version by first disabling the existing installation of '
+            'Azure Container Storage by running --disable-azure-container-storage. '
             'Note that disabling can impact existing workloads that depend on Azure Container Storage.'
         )
         with self.assertRaises(InvalidArgumentValueError) as cm:
