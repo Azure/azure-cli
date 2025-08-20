@@ -148,6 +148,11 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
 
         if self.identityType == ResourceIdType.system_assigned.value:
             template += f" --assign-identity"
+            
+        # Azure AD Entra ID admin configuration for managed instance creation
+        self.external_admin_name = 'msdata-Database Systems-8313371e-0879-428e-b1da-6353575a9192'
+        self.external_admin_sid = '05159003-af0d-4d45-8309-1992b1774dd9'
+        template += f" --enable-ad-only-auth --external-admin-name '{self.external_admin_name}' --external-admin-sid '{self.external_admin_sid}' --external-admin-principal-type Application"
 
         if self.otherParams:
             template += f" {self.otherParams}"
@@ -1439,7 +1444,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
         print('Updating MI...\n')
 
         # Update sql managed_instance
-        self.cmd('sql mi update -g {} -n {} --edition {} --capacity {} --no-wait'
+        self.cmd('sql mi update -g {} -n {} --edition {} --capacity {} --zone-redundant false --no-wait'
                  .format(resource_group, managed_instance_name, edition_updated, v_core_update))
 
         print('Listing all operations...\n')
@@ -1449,7 +1454,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
             self.cmd('sql mi op list -g {} --mi {}'
                      .format(resource_group, managed_instance_name),
                      checks=[
-                         JMESPathCheck('length(@)', 3),
+                         JMESPathCheck('length(@)', 2),
                          JMESPathCheck('[0].resourceGroup', resource_group),
                          JMESPathCheck('[0].managedInstanceName', managed_instance_name)
                      ])
@@ -1459,7 +1464,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
 
         # Cancel operation
         self.cmd('sql mi op cancel -g {} --mi {} -n {}'
-                 .format(resource_group, managed_instance_name, ops[2]['name']))
+                 .format(resource_group, managed_instance_name, ops[1]['name']))
 
 
 class SqlServerConnectionPolicyScenarioTest(ScenarioTest):
@@ -8277,9 +8282,9 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.kwargs.update({
             'recoverable_db': recoverable_db['id']
         })
-        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db4 -r {recoverable_db}',
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db5 -r {recoverable_db}',
                 checks=[
-                    JMESPathCheck('name', "recovered_db4")])
+                    JMESPathCheck('name', "recovered_db5")])
 
 
 class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
