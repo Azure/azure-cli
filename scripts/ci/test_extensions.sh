@@ -25,7 +25,8 @@ exit_code=0
 # Disable alias temporarily: https://github.com/Azure/azure-cli/pull/27717
 # hybridaks is going to be deprecated: https://github.com/Azure/azure-cli/pull/29838
 # db-up is going to be deprecated: https://github.com/Azure/azure-cli/pull/29887
-ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias hybridaks db-up'
+# serviceconnector-passwordless's dependency is not compatible with 3.13 https://github.com/Azure/azure-cli/pull/31895
+ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias hybridaks db-up serviceconnector-passwordless'
 
 # Does not exit if az extension add fails until all extensions have been tested
 set +e
@@ -61,7 +62,7 @@ az self-test --debug
 if [ $? != 0 ]
 then
     exit_code=1
-    echo "Failed to verify:" $ext
+    echo "Failed to verify"
 fi
 
 exit $exit_code
