@@ -231,7 +231,6 @@ def get_enum_type(data, default=None):
         arg_type = CLIArgumentType(choices=CaseInsensitiveList(choices), action=DefaultAction)
     return arg_type
 
-
 # GLOBAL ARGUMENT DEFINITIONS
 
 resource_group_name_type = CLIArgumentType(
