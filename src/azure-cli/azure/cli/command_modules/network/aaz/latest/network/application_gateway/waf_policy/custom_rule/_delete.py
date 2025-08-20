@@ -58,7 +58,7 @@ class Delete(AAZCommand):
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="Name of the WAF policy rule",
+            help="Name of the WAF policy rule.",
             required=True,
             fmt=AAZStrArgFormat(
                 max_length=128,
@@ -2998,6 +2998,9 @@ class _DeleteHelper:
         properties.cookie_based_affinity = AAZStrType(
             serialized_name="cookieBasedAffinity",
         )
+        properties.dedicated_backend_connection = AAZBoolType(
+            serialized_name="dedicatedBackendConnection",
+        )
         properties.host_name = AAZStrType(
             serialized_name="hostName",
         )
@@ -3019,8 +3022,17 @@ class _DeleteHelper:
         properties.request_timeout = AAZIntType(
             serialized_name="requestTimeout",
         )
+        properties.sni_name = AAZStrType(
+            serialized_name="sniName",
+        )
         properties.trusted_root_certificates = AAZListType(
             serialized_name="trustedRootCertificates",
+        )
+        properties.validate_cert_chain_and_expiry = AAZBoolType(
+            serialized_name="validateCertChainAndExpiry",
+        )
+        properties.validate_sni = AAZBoolType(
+            serialized_name="validateSNI",
         )
 
         authentication_certificates = _schema_web_application_firewall_policy_read.properties.application_gateways.Element.properties.backend_http_settings_collection.Element.properties.authentication_certificates
@@ -4161,7 +4173,7 @@ class _DeleteHelper:
         _element.rules = AAZListType()
 
         rules = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets.Element.computed_disabled_rules.Element.rules
-        rules.Element = AAZStrType()
+        rules.Element = AAZAnyType()
 
         rule_group_overrides = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets.Element.rule_group_overrides
         rule_group_overrides.Element = AAZObjectType()

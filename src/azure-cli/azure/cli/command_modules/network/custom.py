@@ -5327,14 +5327,12 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
         )
         args_schema.ip_tags.Element = AAZStrArg()
         args_schema.type._registered = False
-        args_schema.sku._registered = False
         args_schema.ip_tags_list._registered = False
 
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.sku = 'Standard'
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
         if has_value(args.ip_tags):
