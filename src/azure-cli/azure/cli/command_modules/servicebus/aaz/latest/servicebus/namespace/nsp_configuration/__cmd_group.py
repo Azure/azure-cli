@@ -12,10 +12,10 @@ from azure.cli.core.aaz import *
 
 
 @register_command_group(
-    "servicebus namespace",
+    "servicebus namespace nsp-configuration",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Namespace
+    """Manage Network Security Perimeter Configuration
     """
     pass
 
