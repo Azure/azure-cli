@@ -427,6 +427,8 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
     Returns True if current API version for the resource type satisfies min/max range.
     To compare profile versions, set resource type to None.
     Can return a tuple<operation_group, bool> if the resource_type supports SDKProfile.
+    note: if the api_version for the given profile is None (inherrited from the SDK), returns True
+    as there is no easy way to extract the api version.
     note: Currently supports YYYY-MM-DD, YYYY-MM-DD-preview, YYYY-MM-DD-profile
     or YYYY-MM-DD-profile-preview  formatted strings.
     """
@@ -438,6 +440,8 @@ def supported_api_version(api_profile, resource_type, min_api=None, max_api=None
         if isinstance(resource_type, (ResourceType, CustomResourceType)) else api_profile
     if isinstance(api_version_obj, SDKProfile):
         api_version_obj = api_version_obj.profile.get(operation_group or '', api_version_obj.default_api_version)
+    if not api_version_obj:
+        return True
     return _validate_api_version(api_version_obj, min_api, max_api)
 
 

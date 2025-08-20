@@ -133,6 +133,13 @@ class TestAPIProfiles(unittest.TestCase):
         with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
             self.assertTrue(supported_api_version(cli, ResourceType.MGMT_KEYVAULT, min_api='2016-06-04'))
 
+    def test_supported_api_version_min_constraint_none(self):
+        cli = DummyCli()
+        cli.cloud = Cloud('TestCloud', profile='2017-01-01-profile')
+        test_profile = {'2017-01-01-profile': {ResourceType.MGMT_STORAGE: None}}
+        with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
+            self.assertTrue(supported_api_version(cli, ResourceType.MGMT_STORAGE, min_api='2000-01-01'))
+
     def test_supported_api_version_max_constraint(self):
         cli = DummyCli()
         cli.cloud = Cloud('TestCloud', profile='2017-01-01-profile')
@@ -154,6 +161,13 @@ class TestAPIProfiles(unittest.TestCase):
         with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
             self.assertTrue(supported_api_version(cli, ResourceType.MGMT_KEYVAULT, max_api='8.0'))
 
+    def test_supported_api_version_max_constraint_none(self):
+        cli = DummyCli()
+        cli.cloud = Cloud('TestCloud', profile='2017-01-01-profile')
+        test_profile = {'2017-01-01-profile': {ResourceType.MGMT_STORAGE: None}}
+        with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
+            self.assertTrue(supported_api_version(cli, ResourceType.MGMT_STORAGE, max_api='2021-01-01'))
+
     def test_supported_api_version_min_max_constraint(self):
         cli = DummyCli()
         cli.cloud = Cloud('TestCloud', profile='2017-01-01-profile')
@@ -169,6 +183,14 @@ class TestAPIProfiles(unittest.TestCase):
         with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
             self.assertTrue(
                 supported_api_version(cli, ResourceType.MGMT_KEYVAULT, min_api='6.0', max_api='8.0'))
+
+    def test_supported_api_version_min_max_constraint_none(self):
+        cli = DummyCli()
+        cli.cloud = Cloud('TestCloud', profile='2017-01-01-profile')
+        test_profile = {'2017-01-01-profile': {ResourceType.MGMT_STORAGE: None}}
+        with mock.patch('azure.cli.core.profiles._shared.AZURE_API_PROFILES', test_profile):
+            self.assertTrue(
+                supported_api_version(cli, ResourceType.MGMT_STORAGE, min_api='2000-01-01', max_api='2021-01-01'))
 
     def test_supported_api_version_max_constraint_not_supported(self):
         cli = DummyCli()
