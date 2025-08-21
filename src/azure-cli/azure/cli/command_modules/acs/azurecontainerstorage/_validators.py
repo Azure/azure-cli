@@ -446,7 +446,7 @@ def validate_enable_azure_container_storage_params(
             f'Failed to enable the latest version of Azure Container Storage as version {v1_extension_version} '
             'is already installed on the cluster. Try enabling Azure Container Storage in another cluster. '
             'You can also enable the latest version by first disabling the existing installation using '
-            '--disable-azure-container-storage. Note that disabling can impact existing workloads '
+            '--disable-azure-container-storage all. Note that disabling can impact existing workloads '
             'that depend on Azure Container Storage.'
         )
 
