@@ -410,6 +410,16 @@ class VolumeUpdate(_VolumeUpdate):
             help="Name or Resource ID of the vnet. If you want to use a vnet in other resource group or subscription, please provide the Resource ID instead of the name of the vnet.",
             required=False,
         )
+
+        #Removed in API is not needed, added here for backwards compatibility will be removed in breaking change window
+        args_schema.endpoint_type = AAZStrArg(
+            options=["--endpoint-type"],
+            arg_group="Replication",
+            help="Indicates whether the local volume is the source or destination for the Volume Replication",
+            nullable=True,
+            enum={"dst": "dst", "src": "src"},
+        )
+
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
             maximum=2457600,
             minimum=50
