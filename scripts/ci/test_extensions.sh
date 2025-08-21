@@ -26,7 +26,8 @@ exit_code=0
 # hybridaks is going to be deprecated: https://github.com/Azure/azure-cli/pull/29838
 # db-up is going to be deprecated: https://github.com/Azure/azure-cli/pull/29887
 # serviceconnector-passwordless's dependency is not compatible with 3.13 https://github.com/Azure/azure-cli/pull/31895
-ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias hybridaks db-up serviceconnector-passwordless'
+# partnercenter is not compatible with latest pydantic: https://github.com/Azure/azure-cli/pull/31967
+ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias hybridaks db-up serviceconnector-passwordless partnercenter'
 
 # Does not exit if az extension add fails until all extensions have been tested
 set +e

@@ -1650,10 +1650,12 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
     container_name = "function-releases"
     blob_name = "{}-{}.zip".format(datetime.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
-    BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
-    block_blob_service = BlockBlobService(connection_string=storage_connection)
-    if not block_blob_service.exists(container_name):
-        block_blob_service.create_container(container_name)
+    BlobServiceClient = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                '_blob_service_client#BlobServiceClient')
+    blob_service_client = BlobServiceClient.from_connection_string(conn_str=storage_connection)
+    container_client = blob_service_client.get_container_client(container_name)
+    if not container_client.exists():
+        container_client.create_container()
 
     # https://gist.github.com/vladignatyev/06860ec2040cb497f0f3
     def progress_callback(current, total):
@@ -1664,20 +1666,23 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
         progress_message = 'Uploading {} {}%'.format(progress_bar, percents)
         cmd.cli_ctx.get_progress_controller().add(message=progress_message)
 
-    block_blob_service.create_blob_from_path(container_name, blob_name, src, validate_content=True,
-                                             progress_callback=progress_callback)
+    blob_client = container_client.upload_blob(blob_name, src, validate_content=True, progress_hook=progress_callback)
 
     now = datetime.datetime.utcnow()
     blob_start = now - datetime.timedelta(minutes=10)
     blob_end = now + datetime.timedelta(weeks=520)
-    BlobPermissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlobPermissions')
-    blob_token = block_blob_service.generate_blob_shared_access_signature(container_name,
-                                                                          blob_name,
-                                                                          permission=BlobPermissions(read=True),
-                                                                          expiry=blob_end,
-                                                                          start=blob_start)
+    BlobSharedAccessSignature = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                        '_shared_access_signature#BlobSharedAccessSignature')
 
-    blob_uri = block_blob_service.make_blob_url(container_name, blob_name, sas_token=blob_token)
+    BlobSasPermissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_models#BlobSasPermissions')
+    sas_client = BlobSharedAccessSignature(blob_service_client.account_name,
+                                           account_key=blob_service_client.credential.account_key)
+    blob_token = sas_client.generate_blob(container_name, blob_name, permission=BlobSasPermissions(read=True),
+                                          expiry=blob_end, start=blob_start)
+
+    blob_uri = blob_client.url
+    if '?' not in blob_uri:
+        blob_uri += '?' + blob_token
     website_run_from_setting = "WEBSITE_RUN_FROM_PACKAGE={}".format(blob_uri)
     update_app_settings(cmd, resource_group_name, name, settings=[website_run_from_setting], slot=slot)
     client = web_client_factory(cmd.cli_ctx)
