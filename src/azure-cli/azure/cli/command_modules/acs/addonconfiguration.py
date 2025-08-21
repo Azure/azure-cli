@@ -720,7 +720,7 @@ def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, clu
 def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
     """
     Check if the specified resource is already scoped (linked) to the AMPLS by iterating through all scoped resources.
-    
+
     Args:
         cmd: Command context
         ampls_resource_id: Full resource ID of the AMPLS
@@ -734,7 +734,7 @@ def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
         ampls_scoped_resources_url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{ampls_resource_id}/scopedresources?api-version=2021-07-01-preview"
         response = send_raw_request(cmd.cli_ctx, "GET", ampls_scoped_resources_url)
         scoped_resources_data = json.loads(response.text)
-                
+        
         # Check if any scoped resource has the same linkedResourceId
         for scoped_resource in scoped_resources_data.get('value', []):
             properties = scoped_resource.get('properties', {})
@@ -757,7 +757,7 @@ def create_ampls_scope(cmd, ampls_resource_id, scoped_resource_name, scoped_reso
     # Check if the resource is already scoped to the AMPLS
     if is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
         return
-    
+
     scoped_resource_ampls_body = json.dumps(
         {
             "properties": {
