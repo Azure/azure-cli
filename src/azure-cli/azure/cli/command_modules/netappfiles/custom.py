@@ -411,7 +411,7 @@ class VolumeUpdate(_VolumeUpdate):
             required=False,
         )
 
-       # Removed in API is not needed, added here for backwards compatibility will be removed in breaking change window
+        # Removed in API is not needed, added here for backwards compatibility will be removed in breaking change window
         args_schema.endpoint_type = AAZStrArg(
             options=["--endpoint-type"],
             arg_group="Replication",
@@ -1460,3 +1460,4 @@ class OracleVolumeType(Enum):
     LOG_MIRROR = "ora-log-mirror"
 
 # endregion
+
