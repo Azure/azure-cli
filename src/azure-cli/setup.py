@@ -46,6 +46,7 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
     'License :: OSI Approved :: MIT License',
 ]
 
@@ -79,7 +80,6 @@ DEPENDENCIES = [
     'azure-mgmt-containerregistry==14.1.0b1',
     'azure-mgmt-containerservice~=39.0.0',
     'azure-mgmt-cosmosdb==9.8.0',
-    'azure-mgmt-databoxedge~=1.0.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
     'azure-mgmt-eventgrid==10.2.0b2',
@@ -127,7 +127,7 @@ DEPENDENCIES = [
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==9.0.0',
     'azure-monitor-query==1.2.0',
-    'azure-multiapi-storage==1.4.1',
+    'azure-multiapi-storage==1.5.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.20.0',

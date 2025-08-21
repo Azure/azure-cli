@@ -364,3 +364,91 @@ class ContainerAppJobsCRUDOperationsTest(ScenarioTest):
             JMESPathCheck("length(@)", 2),
         ])
         clean_up_test_file(containerappjob_file_name)
+
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location="northcentralus")
+    def test_containerappjob_update_min_max_executions_zero_e2e(self, resource_group):
+        """Test that min_executions and max_executions can be set to 0 in event-triggered jobs"""
+        self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
+
+        env_id = prepare_containerapp_env_for_app_e2e_tests(self)
+        job = self.create_random_name(prefix='eventjob', length=24)
+
+        # Create a Container App Job resource with trigger type as event
+        self.cmd("az containerapp job create --resource-group {} --name {} --environment {} --replica-timeout 200 --replica-retry-limit 2 --trigger-type event --parallelism 1 --replica-completion-count 1 --min-executions 1 --max-executions 5 --polling-interval 30 --scale-rule-name azure-servicebus --scale-rule-type azure-servicebus --scale-rule-metadata topicName=my-topic messageCount=5 --scale-rule-auth secretRef=connection-string-secret --image mcr.microsoft.com/k8se/quickstart-jobs:latest --cpu '0.25' --memory '0.5Gi'".format(resource_group, job, env_id))
+
+        # Verify the initial container app job resource
+        self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[
+            JMESPathCheck('name', job),
+            JMESPathCheck('properties.configuration.replicaTimeout', 200),
+            JMESPathCheck('properties.configuration.replicaRetryLimit', 2),
+            JMESPathCheck('properties.configuration.triggerType', "event", case_sensitive=False),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 1),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 5),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.pollingInterval', 30),
+        ])
+
+        # Test 1: Update min_executions to 0
+        self.cmd("az containerapp job update --resource-group {} --name {} --min-executions 0".format(resource_group, job), checks=[
+            JMESPathCheck('name', job),
+            JMESPathCheck('properties.provisioningState', "Succeeded"),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 5),  # Should remain unchanged
+        ])
+
+        # Verify min_executions is set to 0
+        self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 5),
+        ])
+
+        # Test 2: Update max_executions to 0
+        self.cmd("az containerapp job update --resource-group {} --name {} --max-executions 0".format(resource_group, job), checks=[
+            JMESPathCheck('name', job),
+            JMESPathCheck('properties.provisioningState', "Succeeded"),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),  # Should remain unchanged
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 0),
+        ])
+
+        # Verify max_executions is set to 0
+        self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 0),
+        ])
+
+        # Test 3: Update both min_executions and max_executions to 0 in a single command
+        # First reset to non-zero values
+        self.cmd("az containerapp job update --resource-group {} --name {} --min-executions 2 --max-executions 10".format(resource_group, job), checks=[
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 2),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 10),
+        ])
+
+        # Now set both to 0
+        self.cmd("az containerapp job update --resource-group {} --name {} --min-executions 0 --max-executions 0".format(resource_group, job), checks=[
+            JMESPathCheck('name', job),
+            JMESPathCheck('properties.provisioningState', "Succeeded"),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 0),
+        ])
+
+        # Final verification that both are 0
+        self.cmd("az containerapp job show --resource-group {} --name {}".format(resource_group, job), checks=[
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 0),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 0),
+            JMESPathCheck('properties.configuration.triggerType', "event", case_sensitive=False),
+        ])
+
+        # Test 4: Update back to positive values to ensure the fix doesn't break normal functionality
+        self.cmd("az containerapp job update --resource-group {} --name {} --min-executions 3 --max-executions 8".format(resource_group, job), checks=[
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.minExecutions', 3),
+            JMESPathCheck('properties.configuration.eventTriggerConfig.scale.maxExecutions', 8),
+        ])
+
+        # Cleanup
+        self.cmd("az containerapp job delete --resource-group {} --name {} --yes".format(resource_group, job))
+
+        # Verify the Container App Job resource is deleted
+        jobs_list = self.cmd("az containerapp job list --resource-group {}".format(resource_group)).get_output_in_json()
+        job_names = [job_item['name'] for job_item in jobs_list]
+        self.assertNotIn(job, job_names)
+            

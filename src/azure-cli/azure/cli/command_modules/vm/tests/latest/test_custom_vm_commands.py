@@ -304,7 +304,7 @@ class TestVMBootLog(unittest.TestCase):
             get_boot_log(cmd_mock, 'rg1', 'vm1')
             self.fail("'get_boot_log' didn't exit early")
         except ErrorToExitCommandEarly:
-            get_sdk_mock.assert_called_with(cli_ctx_mock, ResourceType.DATA_STORAGE, 'blob.blockblobservice#BlockBlobService')
+            get_sdk_mock.assert_called_with(cli_ctx_mock, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
 
 
 class FakedVM:  # pylint: disable=too-few-public-methods
