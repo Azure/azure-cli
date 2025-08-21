@@ -103,6 +103,7 @@ class Update(AAZCommand):
             options=["--public-network-access"],
             arg_group="Properties",
             help="Policy for controlling export on the disk.",
+            is_preview=True,
             nullable=True,
             enum={"Disabled": "Disabled", "Enabled": "Enabled"},
         )
@@ -116,6 +117,7 @@ class Update(AAZCommand):
             options=["--accelerated-network"],
             arg_group="SupportedCapabilities",
             help="Customers can set on Managed Disks or Snapshots to enable the accelerated networking if the OS disk image support.",
+            is_preview=True,
             nullable=True,
         )
         _args_schema.architecture = AAZStrArg(
@@ -124,13 +126,6 @@ class Update(AAZCommand):
             help="CPU architecture.",
             nullable=True,
             enum={"Arm64": "Arm64", "x64": "x64"},
-        )
-        _args_schema.supported_security_option = AAZStrArg(
-            options=["--supported-security-option"],
-            arg_group="SupportedCapabilities",
-            help="Refers to the security capability of the disk supported to create a Trusted launch or Confidential VM",
-            nullable=True,
-            enum={"TrustedLaunchAndConfidentialVMSupported": "TrustedLaunchAndConfidentialVMSupported", "TrustedLaunchSupported": "TrustedLaunchSupported"},
         )
         return cls._args_schema
 
@@ -450,7 +445,6 @@ class Update(AAZCommand):
             if supported_capabilities is not None:
                 supported_capabilities.set_prop("acceleratedNetwork", AAZBoolType, ".accelerated_network")
                 supported_capabilities.set_prop("architecture", AAZStrType, ".architecture")
-                supported_capabilities.set_prop("supportedSecurityOption", AAZStrType, ".supported_security_option")
 
             sku = _builder.get(".sku")
             if sku is not None:
