@@ -124,7 +124,7 @@ def _resolve_type_from_path(current_ref, segments, definitions):
     return current
 
 
-def _try_parse_key_value_object(parameters, extension_configs, template_obj, value, allow_extension_config):
+def _try_parse_key_value_object(parameters, template_obj, value):
     # support situation where empty JSON "{}" is provided
     if value == '{}' and not parameters:
         return True
@@ -133,25 +133,6 @@ def _try_parse_key_value_object(parameters, extension_configs, template_obj, val
         key, value = value.split('=', 1)
     except ValueError:
         return False
-
-    # Check if it's for extension configs.
-    if allow_extension_config and key.startswith('extensionConfigs.'):
-        keys = key.split('.')
-
-        if len(keys) < 3 or len(keys) > 4:
-            raise CLIError(f"Unable to parse extension configs key '{key}'. Expected format is: 'extensionConfigs.extAlias.propertyName=JSONToken'. Example: 'extensionConfigs.extAlias.propertyName=\"aStringValue\"'")
-
-        ext_alias, ext_config_property, ext_config_prop_value_inner_prop = keys[1], keys[2], keys[3] if len(keys) == 4 else None
-        extension_configs[ext_alias] = extension_configs.get(ext_alias, {})
-
-        if ext_config_prop_value_inner_prop:
-            extension_configs[ext_alias][ext_config_property] = {
-                f'{ext_config_prop_value_inner_prop}': shell_safe_json_parse(value)
-            }
-        else:
-            extension_configs[ext_alias][ext_config_property] = {'value': shell_safe_json_parse(value)}
-
-        return True
 
     # Otherwise treat as a parameter.
     param = template_obj.get('parameters', {}).get(key, None)
@@ -186,9 +167,9 @@ def _process_parameters_and_ext_configs(template_obj, parameter_lists):  # pylin
     def _try_parse_parameters_json_object(value):
         try:
             parsed = _remove_comments_from_json(value, False)
-            return parsed.get('parameters', parsed), parsed.get('extensionConfigs', {}) if 'parameters' in parsed else None, True
+            return parsed.get('parameters', parsed), True
         except Exception:  # pylint: disable=broad-except
-            return None, None, False
+            return None, False
 
     def _try_load_file_object(file_path):
         try:
@@ -223,14 +204,14 @@ def _process_parameters_and_ext_configs(template_obj, parameter_lists):  # pylin
         for item in params:
             param_obj, ext_configs_obj, handled = _try_load_file_object(item)
             if not handled:
-                param_obj, ext_configs_obj, handled = _try_parse_parameters_json_object(item)
+                param_obj, handled = _try_parse_parameters_json_object(item)
                 if not handled:
                     param_obj, ext_configs_obj, handled = _try_load_uri(item)
             if param_obj is not None:
                 parameters.update(param_obj)
             if ext_configs_obj is not None:
                 result_ext_configs.update(ext_configs_obj)
-            if not handled and not _try_parse_key_value_object(parameters, result_ext_configs, template_obj, item, True):
+            if not handled and not _try_parse_key_value_object(parameters, template_obj, item):
                 raise CLIError('Unable to parse parameter: {}'.format(item))
 
     return parameters, result_ext_configs or None
