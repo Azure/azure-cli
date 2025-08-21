@@ -736,7 +736,7 @@ def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
         scoped_resources_data = json.loads(response.text)
                 
         # Check if any scoped resource has the same linkedResourceId
-        for i, scoped_resource in enumerate(scoped_resources_data.get('value', [])):
+        for scoped_resource in scoped_resources_data.get('value', []):
             properties = scoped_resource.get('properties', {})
             linked_resource_id = properties.get('linkedResourceId', '')
             scoped_resource_name = scoped_resource.get('name', 'unknown')
@@ -747,10 +747,11 @@ def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
 
         logger.info("No matching linkedResourceId found. Resource is not yet scoped.")
         return False
-        
-    except Exception as e:
+
+    except CLIError as e:
         logger.warning("Error checking AMPLS scoped resources: %s", str(e))
         return False
+
 
 def create_ampls_scope(cmd, ampls_resource_id, scoped_resource_name, scoped_resource_id):
     # Check if the resource is already scoped to the AMPLS
