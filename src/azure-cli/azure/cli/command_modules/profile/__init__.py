@@ -50,6 +50,10 @@ class ProfileCommandsLoader(AzCommandsLoader):
                        help='User password or service principal secret. Will prompt if not given.')
             c.argument('tenant', options_list=['--tenant', '-t'], validator=validate_tenant,
                        help='The Microsoft Entra tenant, must be provided when using a service principal.')
+            c.argument('get_subscriptions', nargs='+',
+                       help='Space-separated list of subscriptions to retrieve. '
+                            'This argument must be used together with --tenant. '
+                            'Without this argument, all subscriptions will be retrieved.')
             c.argument('scopes', options_list=['--scope'], nargs='+',
                        help='Used in the /authorize request. It can cover only one static resource.')
             c.argument('allow_no_subscriptions', action='store_true',

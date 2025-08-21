@@ -147,6 +147,7 @@ class Profile:
               password,
               is_service_principal,
               tenant,
+              get_subscriptions=None,
               scopes=None,
               use_device_code=False,
               allow_no_subscriptions=False,
@@ -199,7 +200,8 @@ class Profile:
             credential = identity.get_service_principal_credential(username)
 
         if tenant:
-            subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential)
+            subscriptions = subscription_finder.find_using_specific_tenant(tenant, credential,
+                                                                           get_subscriptions=get_subscriptions)
         else:
             subscriptions = subscription_finder.find_using_common_tenant(username, credential)
 
@@ -841,14 +843,21 @@ class SubscriptionFinder:
                 logger.warning("%s", t.tenant_id_name)
         return all_subscriptions
 
-    def find_using_specific_tenant(self, tenant, credential, tenant_id_description=None):
+    def find_using_specific_tenant(self, tenant, credential, tenant_id_description=None, get_subscriptions=None):
         """List subscriptions that can be accessed from a specific tenant.
         If called from find_using_common_tenant, tenant_id_description is TenantIdDescription retrieved from
         'Tenants - List' REST API. If directly called, tenant_id_description is None.
         """
         client = self._create_subscription_client(credential)
         # https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list
-        subscriptions = client.subscriptions.list()
+
+        subscriptions = []
+        if get_subscriptions:
+            for s in get_subscriptions:
+                subscriptions.append(client.subscriptions.get(s))
+        else:
+            subscriptions = client.subscriptions.list()
+
         all_subscriptions = []
         for s in subscriptions:
             _attach_token_tenant(s, tenant, tenant_id_description=tenant_id_description)

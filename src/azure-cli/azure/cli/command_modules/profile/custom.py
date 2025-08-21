@@ -121,7 +121,9 @@ def account_clear(cmd):
 
 
 # pylint: disable=too-many-branches, too-many-locals
-def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_subscriptions=False,
+def login(cmd, username=None, password=None,
+          tenant=None, get_subscriptions=None,
+          scopes=None, allow_no_subscriptions=False,
           claims_challenge=None,
           # Device code flow
           use_device_code=False,
@@ -132,6 +134,8 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
     """Log in to access Azure subscriptions"""
 
     # quick argument usage check
+    if get_subscriptions and not tenant:
+        raise CLIError("usage error: --get-subscription must be used together with --tenant")
     if any([password, service_principal, tenant]) and identity:
         raise CLIError("usage error: '--identity' is not applicable with other arguments")
     if identity and username:
@@ -195,6 +199,7 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
         password,
         service_principal,
         tenant,
+        get_subscriptions=get_subscriptions,
         scopes=scopes,
         use_device_code=use_device_code,
         allow_no_subscriptions=allow_no_subscriptions,
