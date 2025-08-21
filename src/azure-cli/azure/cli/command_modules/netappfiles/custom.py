@@ -1460,4 +1460,3 @@ class OracleVolumeType(Enum):
     LOG_MIRROR = "ora-log-mirror"
 
 # endregion
-
