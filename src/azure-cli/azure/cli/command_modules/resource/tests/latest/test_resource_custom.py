@@ -295,7 +295,7 @@ class TestCustom(unittest.TestCase):
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
             result_parameters, _ = _process_parameters_and_ext_configs(template, parameter_list)
-            self.assertEqual(result_parameters, test['expected'], i)
+            self.assertEqual(test['expected'], result_parameters, i)
 
     def test_deployment_parameters_with_type_references(self):
 
@@ -348,8 +348,8 @@ class TestCustom(unittest.TestCase):
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
             result_parameters, result_ext_configs = _process_parameters_and_ext_configs(template, parameter_list)
-            self.assertEqual(result_parameters, test['expected'], i)
-            self.assertEqual(result_ext_configs, {}, i)
+            self.assertEqual(test['expected'], result_parameters, i)
+            self.assertEqual(None, result_ext_configs, i)
 
     def test_deployment_missing_values(self):
 
@@ -443,44 +443,24 @@ class TestCustom(unittest.TestCase):
                 "parameter_list": [[only_params_path]],
                 "expected": None
             },
-            {  # only extension configs
-                "parameter_list": [['{\"parameters\":{},\"extensionConfigs\":{\"k8s\":{\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\"},\"secretName\":\"myKubeconfig\"}},\"namespace\":{\"value\":\"ns\"}}}}']],
-                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
-            },
             {  # loading from file
                 "parameter_list": [[parameters_path]],
                 "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
             },
-            {  # raw JSON
+            {  # raw JSON is not supported
                 "parameter_list": [['{\"parameters\":{\"stringParam\":{\"value\" \"foo\"}},\"extensionConfigs\":{\"k8s\":{\"kubeconfig\":{\"keyVaultReference\":{\"keyVault\":{\"id\":\"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault\"},\"secretName\":\"myKubeconfig\"}},\"namespace\":{\"value\":\"ns\"}}}}']],
-                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"ns"}}},
+                "expected": None,
             },
             {  # Last wins at the extension level (extensionConfigs.k8s). At the extensionConfigs level, objects are merged.
                 "parameter_list": [[parameters_path], [parameters_path_2]],
                 "expected": {"k8s":{"namespace":{"value":"ns2"}},"otherExt":{"stringProp":{"value":"stringPropValue"}}},
-            },
-            {  # Inlined is shallow merged with parameters file.
-                "parameter_list": [[parameters_path], ['{\"parameters\":{},\"extensionConfigs\":{\"k8s\":{\"namespace\":{\"value\":\"ns2\"}},\"otherExt\":{\"stringProp\":{\"value\":\"stringPropVal\"}}}}']], # 'parameters' must be present otherwise 'extensionConfigs' is treated as a parameter.
-                "expected": {"k8s":{"namespace":{"value":"ns2"}},"otherExt":{"stringProp":{"value":"stringPropVal"}}},
-            },
-            {  # Key-value pair
-                "parameter_list": [['extensionConfigs.extAlias.propertyName="propertyValue"']],
-                "expected": {"extAlias":{"propertyName":{"value":"propertyValue"}}},
-            },
-            {  # Key-value pair merges with existing config
-                "parameter_list": [[parameters_path], ['extensionConfigs.k8s.namespace="kvpValue"']],
-                "expected": {"k8s":{"kubeconfig":{"keyVaultReference":{"keyVault":{"id":"/subscriptions/00000000-0000-0000-000000000001/resourceGroups/rgName/providers/Microsoft.KeyVault/vaults/myVault"},"secretName":"myKubeconfig"}},"namespace":{"value":"kvpValue"}}},
-            },
-            {  # Key vault reference can be set
-                "parameter_list": [['extensionConfigs.extAlias.propertyName.keyVaultReference={\"keyVault\":{\"id\":\"idHere\"},\"secretName\":\"mySecret\"}']],
-                "expected": {"extAlias":{"propertyName":{"keyVaultReference":{"keyVault":{"id":"idHere"},"secretName":"mySecret"}}}}
             }
         ]
 
         for i, test in enumerate(tests):
             parameter_list = test['parameter_list']
             result_parameters, result_ext_configs = _process_parameters_and_ext_configs(template, parameter_list)
-            self.assertEqual(result_ext_configs, test['expected'], i)
+            self.assertEqual(test['expected'], result_ext_configs, i)
 
     @live_only()
     def test_bicep_generate_params_defaults(self):
