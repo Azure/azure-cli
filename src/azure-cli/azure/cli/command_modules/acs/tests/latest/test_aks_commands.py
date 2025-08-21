@@ -11600,7 +11600,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     # live only due to downloading k8s-extension extension
     @live_only()
-    @AllowLargeResponse(99999)
+    @AllowLargeResponse(999999)
     @AKSCustomResourceGroupPreparer(
         random_name_length=17, name_prefix="clitest", location="westus2"
     )
@@ -11630,7 +11630,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} --location={location} "
             "--ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} "
-            "--node-count 3 --enable-managed-identity --enable-azure-container-storage azureDisk --output=json"
+            "--node-count 3 --enable-managed-identity --container-storage-version 1 --enable-azure-container-storage azureDisk --output=json"
         )
 
         # enabling azurecontainerstorage will not affect any field in the cluster.
@@ -11655,7 +11655,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     # live only due to downloading k8s-extension extension
     @live_only()
-    @AllowLargeResponse(99999)
+    @AllowLargeResponse(999999)
     @AKSCustomResourceGroupPreparer(
         random_name_length=17, name_prefix="clitest", location="westus2"
     )
@@ -11684,7 +11684,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} --location={location} --ssh-key-value={ssh_key_value} --node-vm-size={node_vm_size} "
-            "--node-count 3 --enable-managed-identity --enable-azure-container-storage ephemeralDisk --storage-pool-option NVMe "
+            "--node-count 3 --enable-managed-identity --container-storage-version 1 --enable-azure-container-storage ephemeralDisk --storage-pool-option NVMe "
             "--ephemeral-disk-volume-type EphemeralVolumeOnly --ephemeral-disk-nvme-perf-tier Premium --output=json"
         )
 
@@ -11709,7 +11709,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         )
 
     @live_only()
-    @AllowLargeResponse(99999)
+    @AllowLargeResponse(999999)
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_update_with_azurecontainerstorage_v1(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
@@ -11739,7 +11739,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # update: enable-azure-container-storage
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
-                     '--enable-azure-container-storage azureDisk'
+                     '--container-storage-version 1 --enable-azure-container-storage azureDisk'
         self.cmd(update_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
         ])
@@ -11763,7 +11763,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         ])
 
     @live_only()
-    @AllowLargeResponse(99999)
+    @AllowLargeResponse(999999)
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_update_with_azurecontainerstorage_v1_with_ephemeral_disk_parameters(self, resource_group, resource_group_location):
         aks_name = self.create_random_name('cliakstest', 16)
@@ -11790,7 +11790,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # update: enable-azure-container-storage
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
-                     '--enable-azure-container-storage ephemeralDisk --storage-pool-option NVMe ' \
+                     '--container-storage-version 1 --enable-azure-container-storage ephemeralDisk --storage-pool-option NVMe ' \
                      '--ephemeral-disk-volume-type PersistentVolumeWithAnnotation ' \
                      '--ephemeral-disk-nvme-perf-tier Standard'
 
@@ -11935,7 +11935,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # Sleep for 5 mins before next operation,
         # since update operations take
         # some time to finish.
-        time.sleep(5 * 60)
+        time.sleep(10 * 60)
 
         # update: disable-azure-container-storage
         update_cmd = 'aks update --resource-group={resource_group} --name={name} --yes --output=json ' \
