@@ -3330,6 +3330,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
+    @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap')
     def test_aks_nodepool_add_with_ossku_azurelinux3(self, resource_group, resource_group_location):
         resource_group_location = 'eastus2euap'
