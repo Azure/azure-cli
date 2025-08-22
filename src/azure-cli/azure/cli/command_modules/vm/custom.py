@@ -4043,16 +4043,6 @@ def scale_vmss(cmd, resource_group_name, vm_scale_set_name, new_capacity, no_wai
                        resource_group_name, vm_scale_set_name, vmss_new)
 
 
-def start_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
-    if instance_ids is None:
-        instance_ids = ['*']
-    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_start,
-                       resource_group_name, vm_scale_set_name, vm_instance_i_ds=instance_ids)
-
-
 def stop_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=None, no_wait=False, skip_shutdown=False):
     client = _compute_client_factory(cmd.cli_ctx)
     VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
