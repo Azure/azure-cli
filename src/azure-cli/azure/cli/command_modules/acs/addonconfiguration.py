@@ -725,7 +725,7 @@ def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
         cmd: Command context
         ampls_resource_id: Full resource ID of the AMPLS
         scoped_resource_id: Full resource ID of the resource to be linked
-        
+
     Returns:
         bool: True if the resource is already scoped to the AMPLS, False otherwise
     """
@@ -734,7 +734,7 @@ def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
         ampls_scoped_resources_url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{ampls_resource_id}/scopedresources?api-version=2021-07-01-preview"
         response = send_raw_request(cmd.cli_ctx, "GET", ampls_scoped_resources_url)
         scoped_resources_data = json.loads(response.text)
-        
+
         # Check if any scoped resource has the same linkedResourceId
         for scoped_resource in scoped_resources_data.get('value', []):
             properties = scoped_resource.get('properties', {})
