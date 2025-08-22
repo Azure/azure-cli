@@ -509,7 +509,7 @@ def validate_disable_azure_container_storage_params(
     if storage_pool_type is not None and not isinstance(storage_pool_type, bool):
         raise InvalidArgumentValueError(
             'The latest version of Azure Container Storage only supports ephemeral nvme storage and does not '
-            'require or support a storage-pool-type value for --enable-azure-container-storage parameter. '
+            'require or support a storage-pool-type value for --disable-azure-container-storage parameter. '
             f'Please remove {storage_pool_type} from the command and try again.'
         )
 
