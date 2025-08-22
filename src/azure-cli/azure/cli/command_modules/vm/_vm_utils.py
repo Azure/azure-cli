@@ -73,7 +73,7 @@ def log_pprint_template(template):
 
 
 def check_existence(cli_ctx, value, resource_group, provider_namespace, resource_type,
-                    parent_name=None, parent_type=None):
+                    parent_name=None, parent_type=None, static_version=None):
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.core.exceptions import HttpResponseError
@@ -93,7 +93,10 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         parent_path = ''
         resource_name = id_parts['name']
         resource_type = id_parts.get('type', resource_type)
+
     api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
+    if static_version:  # only for vnet
+        api_version = static_version
 
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)

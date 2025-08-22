@@ -45,6 +45,11 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AVAILABILITY_SET,
     CONST_VIRTUAL_MACHINES,
 )
+from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+    CONST_ACSTOR_EXT_INSTALLATION_NAME,
+    CONST_ACSTOR_V1_EXT_INSTALLATION_NAME,
+    CONST_ACSTOR_VERSION_V1,
+)
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
     check_is_msi_cluster,
@@ -85,8 +90,10 @@ from azure.cli.command_modules.acs.agentpool_decorator import (
     AKSAgentPoolUpdateDecorator,
 )
 from azure.cli.command_modules.acs.azurecontainerstorage.acstor_ops import (
-    perform_disable_azure_container_storage,
+    perform_disable_azure_container_storage_v1,
+    perform_enable_azure_container_storage_v1,
     perform_enable_azure_container_storage,
+    perform_disable_azure_container_storage,
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.azuremonitorprofile import (
     ensure_azure_monitor_profile_prerequisites
@@ -325,6 +332,8 @@ class AKSManagedClusterContext(BaseAKSContext):
             ] = ensure_cluster_identity_permission_on_kubelet_identity
             external_functions["subnet_role_assignment_exists"] = subnet_role_assignment_exists
             # azure container storage functions
+            external_functions["perform_enable_azure_container_storage_v1"] = perform_enable_azure_container_storage_v1
+            external_functions["perform_disable_azure_container_storage_v1"] = perform_disable_azure_container_storage_v1
             external_functions["perform_enable_azure_container_storage"] = perform_enable_azure_container_storage
             external_functions["perform_disable_azure_container_storage"] = perform_disable_azure_container_storage
             self.__external_functions = SimpleNamespace(**external_functions)
@@ -6729,98 +6738,126 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         :return: ManagedCluster
         """
         self._ensure_mc(mc)
-        # read the azure container storage values passed
-        pool_type = self.context.raw_param.get("enable_azure_container_storage")
-        enable_azure_container_storage = pool_type is not None
-        ephemeral_disk_volume_type = self.context.raw_param.get("ephemeral_disk_volume_type")
-        ephemeral_disk_nvme_perf_tier = self.context.raw_param.get("ephemeral_disk_nvme_perf_tier")
-        if (ephemeral_disk_volume_type is not None or ephemeral_disk_nvme_perf_tier is not None) and \
-           not enable_azure_container_storage:
-            params_defined_arr = []
-            if ephemeral_disk_volume_type is not None:
-                params_defined_arr.append('--ephemeral-disk-volume-type')
-            if ephemeral_disk_nvme_perf_tier is not None:
-                params_defined_arr.append('--ephemeral-disk-nvme-perf-tier')
 
-            params_defined = 'and '.join(params_defined_arr)
-            raise RequiredArgumentMissingError(
-                f'Cannot set {params_defined} without the parameter --enable-azure-container-storage.'
-            )
-
-        if enable_azure_container_storage:
-            pool_name = self.context.raw_param.get("storage_pool_name")
-            pool_option = self.context.raw_param.get("storage_pool_option")
-            pool_sku = self.context.raw_param.get("storage_pool_sku")
-            pool_size = self.context.raw_param.get("storage_pool_size")
-            if not mc.agent_pool_profiles:
-                raise UnknownError("Encountered an unexpected error while getting the agent pools from the cluster.")
-            agentpool = mc.agent_pool_profiles[0]
-            agentpool_details = {}
-            pool_details = {}
-            pool_details["vm_size"] = agentpool.vm_size
-            pool_details["count"] = agentpool.count
-            pool_details["os_type"] = agentpool.os_type
-            pool_details["mode"] = agentpool.mode
-            pool_details["node_taints"] = agentpool.node_taints
-            pool_details["zoned"] = agentpool.availability_zones is not None
-            agentpool_details[agentpool.name] = pool_details
-            # Marking the only agentpool name as the valid nodepool for
-            # installing Azure Container Storage during `az aks create`
-            nodepool_list = agentpool.name
-
-            from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
-                validate_enable_azure_container_storage_params
-            )
-            from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
-                CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
-                CONST_ACSTOR_IO_ENGINE_LABEL_VAL,
-                CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
-                CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
-            )
-            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import generate_vm_sku_cache_for_region
-            generate_vm_sku_cache_for_region(self.cmd.cli_ctx, self.context.get_location())
-
-            default_ephemeral_disk_volume_type = CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY
-            default_ephemeral_disk_nvme_perf_tier = CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
-            validate_enable_azure_container_storage_params(
-                pool_type,
-                pool_name,
-                pool_sku,
-                pool_option,
-                pool_size,
-                nodepool_list,
-                agentpool_details,
-                False,
-                False,
-                False,
-                False,
-                False,
-                ephemeral_disk_volume_type,
-                ephemeral_disk_nvme_perf_tier,
-                default_ephemeral_disk_volume_type,
-                default_ephemeral_disk_nvme_perf_tier,
-            )
-
-            # Setup Azure Container Storage labels on the nodepool
-            nodepool_labels = agentpool.node_labels
-            if nodepool_labels is None:
-                nodepool_labels = {}
-            nodepool_labels[CONST_ACSTOR_IO_ENGINE_LABEL_KEY] = CONST_ACSTOR_IO_ENGINE_LABEL_VAL
-            agentpool.node_labels = nodepool_labels
-
-            # set intermediates
+        if self.context.raw_param.get("enable_azure_container_storage") is not None:
             self.context.set_intermediate("enable_azure_container_storage", True, overwrite_exists=True)
-            self.context.set_intermediate("azure_container_storage_nodepools", nodepool_list, overwrite_exists=True)
-            self.context.set_intermediate(
-                "current_ephemeral_nvme_perf_tier",
-                default_ephemeral_disk_nvme_perf_tier,
-                overwrite_exists=True
-            )
-            self.context.set_intermediate(
-                "existing_ephemeral_disk_volume_type",
-                default_ephemeral_disk_volume_type,
-                overwrite_exists=True
-            )
+            container_storage_version = self.context.raw_param.get("container_storage_version")
+            if container_storage_version is not None:
+                if container_storage_version == CONST_ACSTOR_VERSION_V1:
+                    # read the azure container storage values passed
+                    pool_type = self.context.raw_param.get("enable_azure_container_storage")
+                    enable_azure_container_storage = pool_type is not None
+                    ephemeral_disk_volume_type = self.context.raw_param.get("ephemeral_disk_volume_type")
+                    ephemeral_disk_nvme_perf_tier = self.context.raw_param.get("ephemeral_disk_nvme_perf_tier")
+                    if (ephemeral_disk_volume_type is not None or ephemeral_disk_nvme_perf_tier is not None) and \
+                            not enable_azure_container_storage:
+                        params_defined_arr = []
+                        if ephemeral_disk_volume_type is not None:
+                            params_defined_arr.append('--ephemeral-disk-volume-type')
+                        if ephemeral_disk_nvme_perf_tier is not None:
+                            params_defined_arr.append('--ephemeral-disk-nvme-perf-tier')
+
+                        params_defined = 'and '.join(params_defined_arr)
+                        raise RequiredArgumentMissingError(
+                            f'Cannot set {params_defined} without the parameter --enable-azure-container-storage.'
+                        )
+
+                    if enable_azure_container_storage:
+                        pool_name = self.context.raw_param.get("storage_pool_name")
+                        pool_option = self.context.raw_param.get("storage_pool_option")
+                        pool_sku = self.context.raw_param.get("storage_pool_sku")
+                        pool_size = self.context.raw_param.get("storage_pool_size")
+                        if not mc.agent_pool_profiles:
+                            raise UnknownError("Encountered an unexpected error while getting the agent pools from the cluster.")
+                        agentpool = mc.agent_pool_profiles[0]
+                        agentpool_details = {}
+                        pool_details = {}
+                        pool_details["vm_size"] = agentpool.vm_size
+                        pool_details["count"] = agentpool.count
+                        pool_details["os_type"] = agentpool.os_type
+                        pool_details["mode"] = agentpool.mode
+                        pool_details["node_taints"] = agentpool.node_taints
+                        pool_details["zoned"] = agentpool.availability_zones is not None
+                        agentpool_details[agentpool.name] = pool_details
+                        # Marking the only agentpool name as the valid nodepool for
+                        # installing Azure Container Storage during `az aks create`
+                        nodepool_list = agentpool.name
+
+                        from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                            validate_enable_azure_container_storage_v1_params
+                        )
+                        from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+                            CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
+                            CONST_ACSTOR_IO_ENGINE_LABEL_VAL,
+                            CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
+                            CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD,
+                        )
+                        from azure.cli.command_modules.acs.azurecontainerstorage._helpers import generate_vm_sku_cache_for_region
+                        generate_vm_sku_cache_for_region(self.cmd.cli_ctx, self.context.get_location())
+
+                        default_ephemeral_disk_volume_type = CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY
+                        default_ephemeral_disk_nvme_perf_tier = CONST_EPHEMERAL_NVME_PERF_TIER_STANDARD
+                        validate_enable_azure_container_storage_v1_params(
+                            pool_type,
+                            pool_name,
+                            pool_sku,
+                            pool_option,
+                            pool_size,
+                            nodepool_list,
+                            agentpool_details,
+                            False,
+                            False,
+                            "",
+                            False,
+                            False,
+                            False,
+                            False,
+                            ephemeral_disk_volume_type,
+                            ephemeral_disk_nvme_perf_tier,
+                            default_ephemeral_disk_volume_type,
+                            default_ephemeral_disk_nvme_perf_tier,
+                        )
+
+                        # Setup Azure Container Storage labels on the nodepool
+                        nodepool_labels = agentpool.node_labels
+                        if nodepool_labels is None:
+                            nodepool_labels = {}
+                        nodepool_labels[CONST_ACSTOR_IO_ENGINE_LABEL_KEY] = CONST_ACSTOR_IO_ENGINE_LABEL_VAL
+                        agentpool.node_labels = nodepool_labels
+
+                        # set intermediates
+                        self.context.set_intermediate("container_storage_version", container_storage_version, overwrite_exists=True)
+                        self.context.set_intermediate("azure_container_storage_nodepools", nodepool_list, overwrite_exists=True)
+                        self.context.set_intermediate(
+                            "current_ephemeral_nvme_perf_tier",
+                            default_ephemeral_disk_nvme_perf_tier,
+                            overwrite_exists=True
+                        )
+                        self.context.set_intermediate(
+                            "existing_ephemeral_disk_volume_type",
+                            default_ephemeral_disk_volume_type,
+                            overwrite_exists=True
+                        )
+            else:
+                enable_azure_container_storage = self.context.raw_param.get("enable_azure_container_storage")
+                storage_pool_name = self.context.raw_param.get("storage_pool_name")
+                pool_sku = self.context.raw_param.get("storage_pool_sku")
+                pool_option = self.context.raw_param.get("storage_pool_option")
+                pool_size = self.context.raw_param.get("storage_pool_size")
+
+                from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                    validate_enable_azure_container_storage_params,
+                )
+                validate_enable_azure_container_storage_params(
+                    False,
+                    False,
+                    "",
+                    enable_azure_container_storage,
+                    storage_pool_name,
+                    pool_sku,
+                    pool_option,
+                    pool_size,
+                )
 
         return mc
 
@@ -7285,59 +7322,68 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
 
         # enable azure container storage
         enable_azure_container_storage = self.context.get_intermediate("enable_azure_container_storage")
+        container_storage_version = self.context.get_intermediate("container_storage_version")
         if enable_azure_container_storage:
-            if cluster.identity_profile is None or cluster.identity_profile["kubeletidentity"] is None:
-                logger.warning(
-                    "Unexpected error getting kubelet's identity for the cluster. "
-                    "Unable to perform the azure container storage operation."
+            if container_storage_version is not None:
+                if container_storage_version == CONST_ACSTOR_VERSION_V1:
+                    if cluster.identity_profile is None or cluster.identity_profile["kubeletidentity"] is None:
+                        logger.warning(
+                            "Unexpected error getting kubelet's identity for the cluster. "
+                            "Unable to perform the azure container storage operation."
+                        )
+                        return
+
+                    # Get the node_resource_group from the cluster object since
+                    # `mc` in `context` still doesn't have the updated node_resource_group.
+                    if cluster.node_resource_group is None:
+                        logger.warning(
+                            "Unexpected error getting cluster's node resource group. "
+                            "Unable to perform the azure container storage operation."
+                        )
+                        return
+
+                    pool_name = self.context.raw_param.get("storage_pool_name")
+                    pool_type = self.context.raw_param.get("enable_azure_container_storage")
+                    pool_option = self.context.raw_param.get("storage_pool_option")
+                    pool_sku = self.context.raw_param.get("storage_pool_sku")
+                    pool_size = self.context.raw_param.get("storage_pool_size")
+                    ephemeral_disk_volume_type = self.context.raw_param.get("ephemeral_disk_volume_type")
+                    ephemeral_disk_nvme_perf_tier = self.context.raw_param.get("ephemeral_disk_nvme_perf_tier")
+                    existing_ephemeral_disk_volume_type = self.context.get_intermediate("existing_ephemeral_disk_volume_type")
+                    existing_ephemeral_nvme_perf_tier = self.context.get_intermediate("current_ephemeral_nvme_perf_tier")
+                    kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
+                    node_resource_group = cluster.node_resource_group
+                    agent_pool_vm_sizes = []
+                    if len(cluster.agent_pool_profiles) > 0:
+                        # Cluster creation has only 1 agentpool
+                        agentpool_profile = cluster.agent_pool_profiles[0]
+                        agent_pool_vm_sizes.append(agentpool_profile.vm_size)
+
+                    self.context.external_functions.perform_enable_azure_container_storage_v1(
+                        self.cmd,
+                        self.context.get_subscription_id(),
+                        self.context.get_resource_group_name(),
+                        self.context.get_name(),
+                        node_resource_group,
+                        kubelet_identity_object_id,
+                        pool_name,
+                        pool_type,
+                        pool_size,
+                        pool_sku,
+                        pool_option,
+                        agent_pool_vm_sizes,
+                        ephemeral_disk_volume_type,
+                        ephemeral_disk_nvme_perf_tier,
+                        True,
+                        existing_ephemeral_disk_volume_type,
+                        existing_ephemeral_nvme_perf_tier,
+                    )
+            else:
+                self.context.external_functions.perform_enable_azure_container_storage(
+                    self.cmd,
+                    self.context.get_resource_group_name(),
+                    self.context.get_name(),
                 )
-                return
-
-            # Get the node_resource_group from the cluster object since
-            # `mc` in `context` still doesn't have the updated node_resource_group.
-            if cluster.node_resource_group is None:
-                logger.warning(
-                    "Unexpected error getting cluster's node resource group. "
-                    "Unable to perform the azure container storage operation."
-                )
-                return
-
-            pool_name = self.context.raw_param.get("storage_pool_name")
-            pool_type = self.context.raw_param.get("enable_azure_container_storage")
-            pool_option = self.context.raw_param.get("storage_pool_option")
-            pool_sku = self.context.raw_param.get("storage_pool_sku")
-            pool_size = self.context.raw_param.get("storage_pool_size")
-            ephemeral_disk_volume_type = self.context.raw_param.get("ephemeral_disk_volume_type")
-            ephemeral_disk_nvme_perf_tier = self.context.raw_param.get("ephemeral_disk_nvme_perf_tier")
-            existing_ephemeral_disk_volume_type = self.context.get_intermediate("existing_ephemeral_disk_volume_type")
-            existing_ephemeral_nvme_perf_tier = self.context.get_intermediate("current_ephemeral_nvme_perf_tier")
-            kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
-            node_resource_group = cluster.node_resource_group
-            agent_pool_vm_sizes = []
-            if len(cluster.agent_pool_profiles) > 0:
-                # Cluster creation has only 1 agentpool
-                agentpool_profile = cluster.agent_pool_profiles[0]
-                agent_pool_vm_sizes.append(agentpool_profile.vm_size)
-
-            self.context.external_functions.perform_enable_azure_container_storage(
-                self.cmd,
-                self.context.get_subscription_id(),
-                self.context.get_resource_group_name(),
-                self.context.get_name(),
-                node_resource_group,
-                kubelet_identity_object_id,
-                pool_name,
-                pool_type,
-                pool_size,
-                pool_sku,
-                pool_option,
-                agent_pool_vm_sizes,
-                ephemeral_disk_volume_type,
-                ephemeral_disk_nvme_perf_tier,
-                True,
-                existing_ephemeral_disk_volume_type,
-                existing_ephemeral_nvme_perf_tier,
-            )
 
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
         active_cloud = get_active_cloud(self.cmd.cli_ctx)
@@ -8687,237 +8733,359 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         :return: ManagedCluster
         """
         self._ensure_mc(mc)
-        # read the azure container storage values passed
-        enable_pool_type = self.context.raw_param.get("enable_azure_container_storage")
-        disable_pool_type = self.context.raw_param.get("disable_azure_container_storage")
-        enable_azure_container_storage = enable_pool_type is not None
-        disable_azure_container_storage = disable_pool_type is not None
-        nodepool_list = self.context.raw_param.get("azure_container_storage_nodepools")
-        ephemeral_disk_volume_type = self.context.raw_param.get("ephemeral_disk_volume_type")
-        ephemeral_disk_nvme_perf_tier = self.context.raw_param.get("ephemeral_disk_nvme_perf_tier")
-        if enable_azure_container_storage and disable_azure_container_storage:
-            raise MutuallyExclusiveArgumentError(
-                'Conflicting flags. Cannot set --enable-azure-container-storage '
-                'and --disable-azure-container-storage together.'
-            )
 
-        if (ephemeral_disk_volume_type is not None or ephemeral_disk_nvme_perf_tier is not None) and \
-           not enable_azure_container_storage:
-            params_defined_arr = []
-            if ephemeral_disk_volume_type is not None:
-                params_defined_arr.append('--ephemeral-disk-volume-type')
-            if ephemeral_disk_nvme_perf_tier is not None:
-                params_defined_arr.append('--ephemeral-disk-nvme-perf-tier')
+        # check if we are trying to enable container storage v1
+        enable_azure_container_storage_param = self.context.raw_param.get("enable_azure_container_storage")
+        disable_azure_container_storage_param = self.context.raw_param.get("disable_azure_container_storage")
+        if enable_azure_container_storage_param is not None or disable_azure_container_storage_param is not None:
+            container_storage_version = self.context.raw_param.get("container_storage_version")
+            self.context.set_intermediate("container_storage_version", container_storage_version, overwrite_exists=True)
 
-            params_defined = 'and '.join(params_defined_arr)
-            raise RequiredArgumentMissingError(
-                f'Cannot set {params_defined} without the parameter --enable-azure-container-storage.'
-            )
+            enable_azure_container_storage_v1 = enable_azure_container_storage_param is not None and container_storage_version == CONST_ACSTOR_VERSION_V1
 
-        # pylint: disable=too-many-nested-blocks
-        if enable_azure_container_storage or disable_azure_container_storage:
-            # Require the agent pool profiles for azure container storage
-            # operations. Raise exception if not found.
-            if not mc.agent_pool_profiles:
+            # Check if we are trying to disable container storage v1
+            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_extension_installed
+            try:
+                is_container_storage_v1_extension_installed, _ = get_container_storage_extension_installed(
+                    self.cmd,
+                    self.context.get_resource_group_name(),
+                    self.context.get_name(),
+                    CONST_ACSTOR_V1_EXT_INSTALLATION_NAME,
+                )
+            except Exception as ex:
                 raise UnknownError(
-                    "Encounter an unexpected error while getting agent pool profiles from the cluster "
-                    "in the process of updating agentpool profile."
-                )
-            storagepool_name = self.context.raw_param.get("storage_pool_name")
-            pool_option = self.context.raw_param.get("storage_pool_option")
-            pool_sku = self.context.raw_param.get("storage_pool_sku")
-            pool_size = self.context.raw_param.get("storage_pool_size")
-            agentpool_details = {}
-            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_extension_installed_and_cluster_configs
-            (
-                is_extension_installed,
-                is_azureDisk_enabled,
-                is_elasticSan_enabled,
-                is_ephemeralDisk_localssd_enabled,
-                is_ephemeralDisk_nvme_enabled,
-                current_core_value,
-                existing_ephemeral_disk_volume_type,
-                existing_perf_tier,
-            ) = get_extension_installed_and_cluster_configs(
-                self.cmd,
-                self.context.get_resource_group_name(),
-                self.context.get_name(),
-                mc.agent_pool_profiles,
-            )
+                    f"An error occurred while checking the version of Azure Container Storage"
+                    f"extension installed on the cluster: {str(ex)}"
+                ) from ex
 
-            from azure.cli.command_modules.acs.azurecontainerstorage._helpers import generate_vm_sku_cache_for_region
-            generate_vm_sku_cache_for_region(self.cmd.cli_ctx, self.context.get_location())
+            disable_azure_container_storage_v1 = disable_azure_container_storage_param is not None and is_container_storage_v1_extension_installed
+            # pylint: disable=too-many-nested-blocks
+            if enable_azure_container_storage_v1 or disable_azure_container_storage_v1:
 
-            if enable_azure_container_storage:
-                from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
-                    CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
-                    CONST_ACSTOR_IO_ENGINE_LABEL_VAL
-                )
-                labelled_nodepool_arr = []
-                for agentpool in mc.agent_pool_profiles:
-                    pool_details = {}
-                    nodepool_name = agentpool.name
-                    pool_details["vm_size"] = agentpool.vm_size
-                    pool_details["count"] = agentpool.count
-                    pool_details["os_type"] = agentpool.os_type
-                    pool_details["mode"] = agentpool.mode
-                    pool_details["node_taints"] = agentpool.node_taints
-                    pool_details["zoned"] = agentpool.availability_zones is not None
-                    if agentpool.node_labels is not None:
-                        node_labels = agentpool.node_labels
-                        if node_labels is not None and \
-                           node_labels.get(CONST_ACSTOR_IO_ENGINE_LABEL_KEY) is not None and \
-                           nodepool_name is not None:
-                            labelled_nodepool_arr.append(nodepool_name)
-                        pool_details["node_labels"] = node_labels
-                    agentpool_details[nodepool_name] = pool_details
+                # read the azure container storage values passed
+                enable_pool_type = self.context.raw_param.get("enable_azure_container_storage")
+                disable_pool_type = self.context.raw_param.get("disable_azure_container_storage")
+                enable_azure_container_storage = enable_pool_type is not None
+                disable_azure_container_storage = disable_pool_type is not None
+                nodepool_list = self.context.raw_param.get("azure_container_storage_nodepools")
+                ephemeral_disk_volume_type = self.context.raw_param.get("ephemeral_disk_volume_type")
+                ephemeral_disk_nvme_perf_tier = self.context.raw_param.get("ephemeral_disk_nvme_perf_tier")
+                if enable_azure_container_storage and disable_azure_container_storage:
+                    raise MutuallyExclusiveArgumentError(
+                        'Conflicting flags. Cannot set --enable-azure-container-storage '
+                        'and --disable-azure-container-storage together.'
+                    )
 
-                # Incase of a new installation, if the nodepool list is not defined
-                # then check for all the nodepools which are marked with acstor io-engine
-                # labels and include them for installation. If none of the nodepools are
-                # labelled, either pick nodepool1 as default, or if only
-                # one nodepool exists, choose the only nodepool by default.
-                if not is_extension_installed:
-                    if nodepool_list is None:
-                        nodepool_list = ""
-                        if len(labelled_nodepool_arr) > 0:
-                            nodepool_list = ','.join(labelled_nodepool_arr)
-                        elif len(agentpool_details) == 1:
-                            nodepool_list = ','.join(agentpool_details.keys())
+                if (ephemeral_disk_volume_type is not None or ephemeral_disk_nvme_perf_tier is not None) and \
+                        not enable_azure_container_storage:
+                    params_defined_arr = []
+                    if ephemeral_disk_volume_type is not None:
+                        params_defined_arr.append('--ephemeral-disk-volume-type')
+                    if ephemeral_disk_nvme_perf_tier is not None:
+                        params_defined_arr.append('--ephemeral-disk-nvme-perf-tier')
 
-                from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
-                    validate_enable_azure_container_storage_params
-                )
-                validate_enable_azure_container_storage_params(
-                    enable_pool_type,
-                    storagepool_name,
-                    pool_sku,
-                    pool_option,
-                    pool_size,
-                    nodepool_list,
-                    agentpool_details,
+                    params_defined = 'and '.join(params_defined_arr)
+                    raise RequiredArgumentMissingError(
+                        f'Cannot set {params_defined} without the parameter --enable-azure-container-storage.'
+                    )
+
+                # Require the agent pool profiles for azure container storage
+                # operations. Raise exception if not found.
+                if not mc.agent_pool_profiles:
+                    raise UnknownError(
+                        "Encounter an unexpected error while getting agent pool profiles from the cluster "
+                        "in the process of updating agentpool profile."
+                    )
+                storagepool_name = self.context.raw_param.get("storage_pool_name")
+                pool_option = self.context.raw_param.get("storage_pool_option")
+                pool_sku = self.context.raw_param.get("storage_pool_sku")
+                pool_size = self.context.raw_param.get("storage_pool_size")
+                agentpool_details = {}
+                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_extension_installed_and_cluster_configs
+                (
                     is_extension_installed,
                     is_azureDisk_enabled,
                     is_elasticSan_enabled,
                     is_ephemeralDisk_localssd_enabled,
                     is_ephemeralDisk_nvme_enabled,
-                    ephemeral_disk_volume_type,
-                    ephemeral_disk_nvme_perf_tier,
+                    current_core_value,
                     existing_ephemeral_disk_volume_type,
                     existing_perf_tier,
+                ) = get_extension_installed_and_cluster_configs(
+                    self.cmd,
+                    self.context.get_resource_group_name(),
+                    self.context.get_name(),
+                    mc.agent_pool_profiles,
                 )
 
-                if is_ephemeralDisk_nvme_enabled and ephemeral_disk_nvme_perf_tier is not None:
-                    msg = (
-                        "Changing ephemeralDisk NVMe performance tier may result in a temporary "
-                        "interruption to the applications using Azure Container Storage. Do you "
-                        "want to continue with this operation?"
+                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import generate_vm_sku_cache_for_region
+                generate_vm_sku_cache_for_region(self.cmd.cli_ctx, self.context.get_location())
+
+                if enable_azure_container_storage:
+                    from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_extension_installed
+                    try:
+                        is_container_storage_v2_extension_installed, version_v2 = get_container_storage_extension_installed(
+                            self.cmd,
+                            self.context.get_resource_group_name(),
+                            self.context.get_name(),
+                            CONST_ACSTOR_EXT_INSTALLATION_NAME,
+                        )
+                    except Exception as ex:
+                        raise UnknownError(
+                            f"An error occurred while checking if Azure Container Storage"
+                            f"extension is installed on the cluster: {str(ex)}"
+                        ) from ex
+
+                    from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+                        CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
+                        CONST_ACSTOR_IO_ENGINE_LABEL_VAL
                     )
-                    if not (self.context.get_yes() or prompt_y_n(msg, default="n")):
-                        raise DecoratorEarlyExitException()
-                # If the extension is already installed,
-                # we expect that the Azure Container Storage
-                # nodes are already labelled. Use those label
-                # to generate the nodepool_list.
-                if is_extension_installed:
-                    nodepool_list = ','.join(labelled_nodepool_arr)
-                else:
-                    # Set Azure Container Storage labels on the required nodepools.
-                    nodepool_list_arr = nodepool_list.split(',')
+                    labelled_nodepool_arr = []
                     for agentpool in mc.agent_pool_profiles:
-                        labels = agentpool.node_labels
-                        if agentpool.name in nodepool_list_arr:
-                            if labels is None:
-                                labels = {}
-                            labels[CONST_ACSTOR_IO_ENGINE_LABEL_KEY] = CONST_ACSTOR_IO_ENGINE_LABEL_VAL
-                        else:
-                            # Remove residual Azure Container Storage labels
-                            # from any other nodepools where its not intended
-                            if labels is not None:
-                                labels.pop(CONST_ACSTOR_IO_ENGINE_LABEL_KEY, None)
-                        agentpool.node_labels = labels
+                        pool_details = {}
+                        nodepool_name = agentpool.name
+                        pool_details["vm_size"] = agentpool.vm_size
+                        pool_details["count"] = agentpool.count
+                        pool_details["os_type"] = agentpool.os_type
+                        pool_details["mode"] = agentpool.mode
+                        pool_details["node_taints"] = agentpool.node_taints
+                        pool_details["zoned"] = agentpool.availability_zones is not None
+                        if agentpool.node_labels is not None:
+                            node_labels = agentpool.node_labels
+                            if node_labels is not None and \
+                                    node_labels.get(CONST_ACSTOR_IO_ENGINE_LABEL_KEY) is not None and \
+                                    nodepool_name is not None:
+                                labelled_nodepool_arr.append(nodepool_name)
+                            pool_details["node_labels"] = node_labels
+                        agentpool_details[nodepool_name] = pool_details
 
-                # set intermediates
-                self.context.set_intermediate("azure_container_storage_nodepools", nodepool_list, overwrite_exists=True)
-                self.context.set_intermediate("enable_azure_container_storage", True, overwrite_exists=True)
+                    # Incase of a new installation, if the nodepool list is not defined
+                    # then check for all the nodepools which are marked with acstor io-engine
+                    # labels and include them for installation. If none of the nodepools are
+                    # labelled, either pick nodepool1 as default, or if only
+                    # one nodepool exists, choose the only nodepool by default.
+                    if not is_extension_installed:
+                        if nodepool_list is None:
+                            nodepool_list = ""
+                            if len(labelled_nodepool_arr) > 0:
+                                nodepool_list = ','.join(labelled_nodepool_arr)
+                            elif len(agentpool_details) == 1:
+                                nodepool_list = ','.join(agentpool_details.keys())
 
-            if disable_azure_container_storage:
-                from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
-                    validate_disable_azure_container_storage_params
-                )
-                validate_disable_azure_container_storage_params(
-                    disable_pool_type,
-                    storagepool_name,
-                    pool_sku,
-                    pool_option,
-                    pool_size,
-                    nodepool_list,
-                    is_extension_installed,
-                    is_azureDisk_enabled,
-                    is_elasticSan_enabled,
-                    is_ephemeralDisk_localssd_enabled,
-                    is_ephemeralDisk_nvme_enabled,
-                    ephemeral_disk_volume_type,
-                    ephemeral_disk_nvme_perf_tier,
-                )
-                pre_disable_validate = False
-
-                msg = (
-                    "Disabling Azure Container Storage will forcefully delete all the storage pools in the cluster and "
-                    "affect the applications using these storage pools. Forceful deletion of storage pools can also "
-                    "lead to leaking of storage resources which are being consumed. Do you want to validate whether "
-                    "any of the storage pools are being used before disabling Azure Container Storage?"
-                )
-
-                from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
-                    CONST_ACSTOR_ALL,
-                )
-                if disable_pool_type != CONST_ACSTOR_ALL:
-                    msg = (
-                        f"Disabling Azure Container Storage for storage pool type {disable_pool_type} "
-                        "will forcefully delete all the storage pools of the same type and affect the "
-                        "applications using these storage pools. Forceful deletion of storage pools can "
-                        "also lead to leaking of storage resources which are being consumed. Do you want to "
-                        f"validate whether any of the storage pools of type {disable_pool_type} are being used "
-                        "before disabling Azure Container Storage?"
+                    from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                        validate_enable_azure_container_storage_v1_params
                     )
-                if self.context.get_yes() or prompt_y_n(msg, default="y"):
-                    pre_disable_validate = True
+                    validate_enable_azure_container_storage_v1_params(
+                        enable_pool_type,
+                        storagepool_name,
+                        pool_sku,
+                        pool_option,
+                        pool_size,
+                        nodepool_list,
+                        agentpool_details,
+                        is_extension_installed,
+                        is_container_storage_v2_extension_installed,
+                        version_v2,
+                        is_azureDisk_enabled,
+                        is_elasticSan_enabled,
+                        is_ephemeralDisk_localssd_enabled,
+                        is_ephemeralDisk_nvme_enabled,
+                        ephemeral_disk_volume_type,
+                        ephemeral_disk_nvme_perf_tier,
+                        existing_ephemeral_disk_volume_type,
+                        existing_perf_tier,
+                    )
 
-                # set intermediate
-                self.context.set_intermediate("disable_azure_container_storage", True, overwrite_exists=True)
+                    if is_ephemeralDisk_nvme_enabled and ephemeral_disk_nvme_perf_tier is not None:
+                        msg = (
+                            "Changing ephemeralDisk NVMe performance tier may result in a temporary "
+                            "interruption to the applications using Azure Container Storage. Do you "
+                            "want to continue with this operation?"
+                        )
+                        if not (self.context.get_yes() or prompt_y_n(msg, default="n")):
+                            raise DecoratorEarlyExitException()
+                    # If the extension is already installed,
+                    # we expect that the Azure Container Storage
+                    # nodes are already labelled. Use those label
+                    # to generate the nodepool_list.
+                    if is_extension_installed:
+                        nodepool_list = ','.join(labelled_nodepool_arr)
+                    else:
+                        # Set Azure Container Storage labels on the required nodepools.
+                        nodepool_list_arr = nodepool_list.split(',')
+                        for agentpool in mc.agent_pool_profiles:
+                            labels = agentpool.node_labels
+                            if agentpool.name in nodepool_list_arr:
+                                if labels is None:
+                                    labels = {}
+                                labels[CONST_ACSTOR_IO_ENGINE_LABEL_KEY] = CONST_ACSTOR_IO_ENGINE_LABEL_VAL
+                            else:
+                                # Remove residual Azure Container Storage labels
+                                # from any other nodepools where its not intended
+                                if labels is not None:
+                                    labels.pop(CONST_ACSTOR_IO_ENGINE_LABEL_KEY, None)
+                            agentpool.node_labels = labels
+
+                    # set intermediates
+                    self.context.set_intermediate("azure_container_storage_nodepools", nodepool_list, overwrite_exists=True)
+                    self.context.set_intermediate("enable_azure_container_storage", True, overwrite_exists=True)
+
+                if disable_azure_container_storage:
+                    from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                        validate_disable_azure_container_storage_params_v1
+                    )
+                    validate_disable_azure_container_storage_params_v1(
+                        disable_pool_type,
+                        storagepool_name,
+                        pool_sku,
+                        pool_option,
+                        pool_size,
+                        nodepool_list,
+                        is_extension_installed,
+                        is_azureDisk_enabled,
+                        is_elasticSan_enabled,
+                        is_ephemeralDisk_localssd_enabled,
+                        is_ephemeralDisk_nvme_enabled,
+                        ephemeral_disk_volume_type,
+                        ephemeral_disk_nvme_perf_tier,
+                    )
+                    pre_disable_validate = False
+
+                    msg = (
+                        "Disabling Azure Container Storage will forcefully delete all the storage pools in the cluster and "
+                        "affect the applications using these storage pools. Forceful deletion of storage pools can also "
+                        "lead to leaking of storage resources which are being consumed. Do you want to validate whether "
+                        "any of the storage pools are being used before disabling Azure Container Storage?"
+                    )
+
+                    from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
+                        CONST_ACSTOR_ALL,
+                    )
+                    if disable_pool_type != CONST_ACSTOR_ALL:
+                        msg = (
+                            f"Disabling Azure Container Storage for storage pool type {disable_pool_type} "
+                            "will forcefully delete all the storage pools of the same type and affect the "
+                            "applications using these storage pools. Forceful deletion of storage pools can "
+                            "also lead to leaking of storage resources which are being consumed. Do you want to "
+                            f"validate whether any of the storage pools of type {disable_pool_type} are being used "
+                            "before disabling Azure Container Storage?"
+                        )
+                    if self.context.get_yes() or prompt_y_n(msg, default="y"):
+                        pre_disable_validate = True
+
+                    # set intermediate
+                    self.context.set_intermediate("disable_azure_container_storage", True, overwrite_exists=True)
+                    self.context.set_intermediate("container_storage_version", CONST_ACSTOR_VERSION_V1, overwrite_exists=True)
+                    self.context.set_intermediate(
+                        "pre_disable_validate_azure_container_storage",
+                        pre_disable_validate,
+                        overwrite_exists=True
+                    )
+
+                # Set intermediates
+                self.context.set_intermediate("is_extension_installed", is_extension_installed, overwrite_exists=True)
+                self.context.set_intermediate("is_azureDisk_enabled", is_azureDisk_enabled, overwrite_exists=True)
+                self.context.set_intermediate("is_elasticSan_enabled", is_elasticSan_enabled, overwrite_exists=True)
+                self.context.set_intermediate("current_core_value", current_core_value, overwrite_exists=True)
                 self.context.set_intermediate(
-                    "pre_disable_validate_azure_container_storage",
-                    pre_disable_validate,
+                    "current_ephemeral_nvme_perf_tier",
+                    existing_perf_tier,
                     overwrite_exists=True
                 )
+                self.context.set_intermediate(
+                    "existing_ephemeral_disk_volume_type",
+                    existing_ephemeral_disk_volume_type,
+                    overwrite_exists=True
+                )
+                self.context.set_intermediate(
+                    "is_ephemeralDisk_nvme_enabled",
+                    is_ephemeralDisk_nvme_enabled,
+                    overwrite_exists=True
+                )
+                self.context.set_intermediate(
+                    "is_ephemeralDisk_localssd_enabled",
+                    is_ephemeralDisk_localssd_enabled,
+                    overwrite_exists=True
+                )
+                self.context.set_intermediate("current_core_value", current_core_value, overwrite_exists=True)
 
-            # Set intermediates
-            self.context.set_intermediate("is_extension_installed", is_extension_installed, overwrite_exists=True)
-            self.context.set_intermediate("is_azureDisk_enabled", is_azureDisk_enabled, overwrite_exists=True)
-            self.context.set_intermediate("is_elasticSan_enabled", is_elasticSan_enabled, overwrite_exists=True)
-            self.context.set_intermediate("current_core_value", current_core_value, overwrite_exists=True)
-            self.context.set_intermediate(
-                "current_ephemeral_nvme_perf_tier",
-                existing_perf_tier,
-                overwrite_exists=True
-            )
-            self.context.set_intermediate(
-                "existing_ephemeral_disk_volume_type",
-                existing_ephemeral_disk_volume_type,
-                overwrite_exists=True
-            )
-            self.context.set_intermediate(
-                "is_ephemeralDisk_nvme_enabled",
-                is_ephemeralDisk_nvme_enabled,
-                overwrite_exists=True
-            )
-            self.context.set_intermediate(
-                "is_ephemeralDisk_localssd_enabled",
-                is_ephemeralDisk_localssd_enabled,
-                overwrite_exists=True
-            )
-            self.context.set_intermediate("current_core_value", current_core_value, overwrite_exists=True)
+            else:
+                storage_pool_name = self.context.raw_param.get("storage_pool_name")
+                pool_sku = self.context.raw_param.get("storage_pool_sku")
+                pool_option = self.context.raw_param.get("storage_pool_option")
+                pool_size = self.context.raw_param.get("storage_pool_size")
+
+                if enable_azure_container_storage_param and disable_azure_container_storage_param:
+                    raise MutuallyExclusiveArgumentError(
+                        'Conflicting flags. Cannot set --enable-azure-container-storage '
+                        'and --disable-azure-container-storage together.'
+                    )
+
+                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_extension_installed
+                is_extension_installed, _ = get_container_storage_extension_installed(
+                    self.cmd,
+                    self.context.get_resource_group_name(),
+                    self.context.get_name(),
+                    CONST_ACSTOR_EXT_INSTALLATION_NAME,
+                )
+
+                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_extension_installed
+                try:
+                    is_containerstorage_v1_installed, v1_extension_version = get_container_storage_extension_installed(
+                        self.cmd,
+                        self.context.get_resource_group_name(),
+                        self.context.get_name(),
+                        CONST_ACSTOR_V1_EXT_INSTALLATION_NAME,
+                    )
+                except Exception as ex:
+                    raise UnknownError(
+                        f"An error occurred while checking if Azure Container Storage "
+                        f"extension is installed on the cluster: {str(ex)}"
+                    ) from ex
+
+                if enable_azure_container_storage_param:
+                    from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                        validate_enable_azure_container_storage_params,
+                    )
+                    validate_enable_azure_container_storage_params(
+                        is_extension_installed,
+                        is_containerstorage_v1_installed,
+                        v1_extension_version,
+                        enable_azure_container_storage_param,
+                        storage_pool_name,
+                        pool_sku,
+                        pool_option,
+                        pool_size,
+                    )
+
+                if disable_azure_container_storage_param:
+                    msg = (
+                        "Please make sure there are no existing PVs and PVCs that are provisioned by Azure Container Storage "
+                        "before disabling. If Azure Container Storage is disabled with remaining PVs and PVCs, "
+                        "any data associated with those PVs and PVCs will not be erased and the nodes will be left in an unclean state. "
+                        "The PVs and PVCs can only be cleaned up after re-enabling it by running 'az aks update --enable-azure-container-storage'. "
+                        "Would you like to proceed with the disabling?"
+                    )
+                    if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
+                        raise DecoratorEarlyExitException()
+
+                    from azure.cli.command_modules.acs.azurecontainerstorage._validators import (
+                        validate_disable_azure_container_storage_params
+                    )
+                    validate_disable_azure_container_storage_params(
+                        is_extension_installed,
+                        disable_azure_container_storage_param,
+                        storage_pool_name,
+                        pool_sku,
+                        pool_option,
+                        pool_size
+                    )
+
+                if enable_azure_container_storage_param:
+                    self.context.set_intermediate("enable_azure_container_storage", True)
+
+                if disable_azure_container_storage_param:
+                    self.context.set_intermediate("disable_azure_container_storage", True)
 
         return mc
 
@@ -9346,6 +9514,8 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         enable_azure_container_storage = self.context.get_intermediate("enable_azure_container_storage")
         disable_azure_container_storage = self.context.get_intermediate("disable_azure_container_storage")
+        container_storage_version = self.context.get_intermediate("container_storage_version")
+
         is_extension_installed = self.context.get_intermediate("is_extension_installed")
         is_azureDisk_enabled = self.context.get_intermediate("is_azureDisk_enabled")
         is_elasticSan_enabled = self.context.get_intermediate("is_elasticSan_enabled")
@@ -9358,74 +9528,91 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
 
         # enable azure container storage
         if enable_azure_container_storage:
-            if cluster.identity_profile is None or cluster.identity_profile["kubeletidentity"] is None:
-                logger.warning(
-                    "Unexpected error getting kubelet's identity for the cluster."
-                    "Unable to perform azure container storage operation."
-                )
-                return
-            pool_name = self.context.raw_param.get("storage_pool_name")
-            pool_type = self.context.raw_param.get("enable_azure_container_storage")
-            pool_sku = self.context.raw_param.get("storage_pool_sku")
-            pool_size = self.context.raw_param.get("storage_pool_size")
-            nodepool_list = self.context.get_intermediate("azure_container_storage_nodepools")
-            ephemeral_disk_volume_type = self.context.raw_param.get("ephemeral_disk_volume_type")
-            ephemeral_disk_nvme_perf_tier = self.context.raw_param.get("ephemeral_disk_nvme_perf_tier")
-            kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
-            acstor_nodepool_skus = []
-            for agentpool_profile in cluster.agent_pool_profiles:
-                if agentpool_profile.name in nodepool_list:
-                    acstor_nodepool_skus.append(agentpool_profile.vm_size)
+            if container_storage_version is not None and container_storage_version == CONST_ACSTOR_VERSION_V1:
+                if cluster.identity_profile is None or cluster.identity_profile["kubeletidentity"] is None:
+                    logger.warning(
+                        "Unexpected error getting kubelet's identity for the cluster."
+                        "Unable to perform azure container storage operation."
+                    )
+                    return
 
-            self.context.external_functions.perform_enable_azure_container_storage(
-                self.cmd,
-                self.context.get_subscription_id(),
-                self.context.get_resource_group_name(),
-                self.context.get_name(),
-                self.context.get_node_resource_group(),
-                kubelet_identity_object_id,
-                pool_name,
-                pool_type,
-                pool_size,
-                pool_sku,
-                pool_option,
-                acstor_nodepool_skus,
-                ephemeral_disk_volume_type,
-                ephemeral_disk_nvme_perf_tier,
-                False,
-                existing_ephemeral_disk_volume_type,
-                existing_ephemeral_nvme_perf_tier,
-                is_extension_installed,
-                is_azureDisk_enabled,
-                is_elasticSan_enabled,
-                is_ephemeralDisk_localssd_enabled,
-                is_ephemeralDisk_nvme_enabled,
-                current_core_value,
-            )
+                pool_name = self.context.raw_param.get("storage_pool_name")
+                pool_type = self.context.raw_param.get("enable_azure_container_storage")
+                pool_sku = self.context.raw_param.get("storage_pool_sku")
+                pool_size = self.context.raw_param.get("storage_pool_size")
+                nodepool_list = self.context.get_intermediate("azure_container_storage_nodepools")
+                ephemeral_disk_volume_type = self.context.raw_param.get("ephemeral_disk_volume_type")
+                ephemeral_disk_nvme_perf_tier = self.context.raw_param.get("ephemeral_disk_nvme_perf_tier")
+                kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
+                acstor_nodepool_skus = []
+                for agentpool_profile in cluster.agent_pool_profiles:
+                    if agentpool_profile.name in nodepool_list:
+                        acstor_nodepool_skus.append(agentpool_profile.vm_size)
+
+                self.context.external_functions.perform_enable_azure_container_storage_v1(
+                    self.cmd,
+                    self.context.get_subscription_id(),
+                    self.context.get_resource_group_name(),
+                    self.context.get_name(),
+                    self.context.get_node_resource_group(),
+                    kubelet_identity_object_id,
+                    pool_name,
+                    pool_type,
+                    pool_size,
+                    pool_sku,
+                    pool_option,
+                    acstor_nodepool_skus,
+                    ephemeral_disk_volume_type,
+                    ephemeral_disk_nvme_perf_tier,
+                    False,
+                    existing_ephemeral_disk_volume_type,
+                    existing_ephemeral_nvme_perf_tier,
+                    is_extension_installed,
+                    is_azureDisk_enabled,
+                    is_elasticSan_enabled,
+                    is_ephemeralDisk_localssd_enabled,
+                    is_ephemeralDisk_nvme_enabled,
+                    current_core_value,
+                )
+            else:
+                self.context.external_functions.perform_enable_azure_container_storage(
+                    self.cmd,
+                    self.context.get_resource_group_name(),
+                    self.context.get_name(),
+                )
 
         # disable azure container storage
         if disable_azure_container_storage:
-            pool_type = self.context.raw_param.get("disable_azure_container_storage")
-            kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
-            pre_disable_validate = self.context.get_intermediate("pre_disable_validate_azure_container_storage")
-            self.context.external_functions.perform_disable_azure_container_storage(
-                self.cmd,
-                self.context.get_subscription_id(),
-                self.context.get_resource_group_name(),
-                self.context.get_name(),
-                self.context.get_node_resource_group(),
-                kubelet_identity_object_id,
-                pre_disable_validate,
-                pool_type,
-                pool_option,
-                is_elasticSan_enabled,
-                is_azureDisk_enabled,
-                is_ephemeralDisk_localssd_enabled,
-                is_ephemeralDisk_nvme_enabled,
-                current_core_value,
-                existing_ephemeral_disk_volume_type,
-                existing_ephemeral_nvme_perf_tier,
-            )
+            if container_storage_version is not None:
+                if container_storage_version == CONST_ACSTOR_VERSION_V1:
+                    pool_type = self.context.raw_param.get("disable_azure_container_storage")
+                    kubelet_identity_object_id = cluster.identity_profile["kubeletidentity"].object_id
+                    pre_disable_validate = self.context.get_intermediate("pre_disable_validate_azure_container_storage")
+                    self.context.external_functions.perform_disable_azure_container_storage_v1(
+                        self.cmd,
+                        self.context.get_subscription_id(),
+                        self.context.get_resource_group_name(),
+                        self.context.get_name(),
+                        self.context.get_node_resource_group(),
+                        kubelet_identity_object_id,
+                        pre_disable_validate,
+                        pool_type,
+                        pool_option,
+                        is_elasticSan_enabled,
+                        is_azureDisk_enabled,
+                        is_ephemeralDisk_localssd_enabled,
+                        is_ephemeralDisk_nvme_enabled,
+                        current_core_value,
+                        existing_ephemeral_disk_volume_type,
+                        existing_ephemeral_nvme_perf_tier,
+                    )
+
+            else:
+                self.context.external_functions.perform_disable_azure_container_storage(
+                    self.cmd,
+                    self.context.get_resource_group_name(),
+                    self.context.get_name(),
+                )
 
         # attach keyvault to app routing addon
         from azure.cli.command_modules.keyvault.custom import set_policy

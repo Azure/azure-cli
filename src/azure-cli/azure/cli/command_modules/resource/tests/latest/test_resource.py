@@ -1016,6 +1016,29 @@ class TemplateSpecsTest(ScenarioTest):
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_update_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_update_template_spec_with_aux_subscription(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-ts-aux-update', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'description': '"Updated description"',
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l eastus2 -f "{tf}" --subscription {aux_subscription}').get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        ts_result = self.cmd('ts update --template-spec {template_spec_id} --description {description} --yes').get_output_in_json()
+        self.assertIn(AUX_SUBSCRIPTION, ts_result['id'])
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes --subscription {aux_subscription}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_show_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -1047,6 +1070,46 @@ class TemplateSpecsTest(ScenarioTest):
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_show_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_template_spec_show_with_aux_subscription(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-ts-aux-show', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'resource_group_location': resource_group_location,
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --subscription {aux_subscription}',
+                          checks=[
+                              self.check('name', '1.0'),
+                              self.check('type', 'Microsoft.Resources/templateSpecs/versions')
+                          ]).get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        ts_result = self.cmd('ts show --template-spec {template_spec_id}',
+                            checks=[
+                                self.check('name', '{template_spec_name}'),
+                                self.check('type', 'Microsoft.Resources/templateSpecs')
+                            ]).get_output_in_json()
+        self.assertIn(AUX_SUBSCRIPTION, ts_result['id'])
+        self.assertEqual(ts_result['name'], template_spec_name)
+
+        ts_version_result = self.cmd('ts show --template-spec {template_spec_version_id}',
+                                    checks=[
+                                        self.check('name', '1.0'),
+                                        self.check('type', 'Microsoft.Resources/templateSpecs/versions')
+                                    ]).get_output_in_json()
+        self.assertIn(AUX_SUBSCRIPTION, ts_version_result['id'])
+        self.assertEqual(ts_version_result['name'], '1.0')
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes --subscription {aux_subscription}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_delete_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -1075,6 +1138,25 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
         self.cmd('ts list -g {rg}',
                  checks=self.check("length([?id=='{template_spec_id}'])", 0))
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_delete_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_delete_template_spec_with_aux_subscription(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-ts-aux-delete', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l eastus2 -f "{tf}" --subscription {aux_subscription}').get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_template_spec_create_and_update_with_tags(self, resource_group, resource_group_location):
@@ -1196,6 +1278,32 @@ class TemplateSpecsExportTest(LiveScenarioTest):
         with self.assertRaises(AssertionError) as err:
             self.cmd('ts export -g {rg} --name {template_spec_name} --output-folder {output_folder}')
             self.assertTrue('Please specify the template spec version for export' in str(err.exception))
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_export_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_template_spec_export_with_aux_subscription(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        dir_name = self.create_random_name('TemplateSpecExportAux', 30)
+        template_spec_name = self.create_random_name('cli-test-ts-aux-export', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'output_folder': os.path.join(curr_dir, dir_name).replace('\\', '\\\\'),
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l eastus2 -f "{tf}" --subscription {aux_subscription}').get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        os.makedirs(self.kwargs['output_folder'])
+        output_path = self.cmd('ts export --template-spec {template_spec_version_id} --output-folder {output_folder}').get_output_in_json()
+        template_file = os.path.join(output_path, (self.kwargs['template_spec_name'] + '.json'))
+        self.assertTrue(os.path.isfile(template_file))
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes --subscription {aux_subscription}')
 
 
 class DeploymentTestsWithQueryString(LiveScenarioTest):

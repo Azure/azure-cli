@@ -203,10 +203,10 @@ class Update(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.WebApplicationFirewallPoliciesGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.selectors.subresource.required())
+        self.pre_instance_update(self.ctx.selectors.subresource.get())
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.selectors.subresource.required())
+        self.post_instance_update(self.ctx.selectors.subresource.get())
         self.WebApplicationFirewallPoliciesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -227,7 +227,7 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
 
     class SubresourceSelector(AAZJsonSelector):
@@ -436,7 +436,7 @@ class Update(AAZCommand):
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.selectors.subresource.required())
+            self._update_instance(self.ctx.selectors.subresource.get())
 
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
@@ -505,7 +505,7 @@ class Update(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             self._update_instance_by_generic(
-                self.ctx.selectors.subresource.required(),
+                self.ctx.selectors.subresource.get(),
                 self.ctx.generic_update_args
             )
 
@@ -3208,6 +3208,9 @@ class _UpdateHelper:
         properties.cookie_based_affinity = AAZStrType(
             serialized_name="cookieBasedAffinity",
         )
+        properties.dedicated_backend_connection = AAZBoolType(
+            serialized_name="dedicatedBackendConnection",
+        )
         properties.host_name = AAZStrType(
             serialized_name="hostName",
         )
@@ -3229,8 +3232,17 @@ class _UpdateHelper:
         properties.request_timeout = AAZIntType(
             serialized_name="requestTimeout",
         )
+        properties.sni_name = AAZStrType(
+            serialized_name="sniName",
+        )
         properties.trusted_root_certificates = AAZListType(
             serialized_name="trustedRootCertificates",
+        )
+        properties.validate_cert_chain_and_expiry = AAZBoolType(
+            serialized_name="validateCertChainAndExpiry",
+        )
+        properties.validate_sni = AAZBoolType(
+            serialized_name="validateSNI",
         )
 
         authentication_certificates = _schema_web_application_firewall_policy_read.properties.application_gateways.Element.properties.backend_http_settings_collection.Element.properties.authentication_certificates
@@ -4371,7 +4383,7 @@ class _UpdateHelper:
         _element.rules = AAZListType()
 
         rules = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets.Element.computed_disabled_rules.Element.rules
-        rules.Element = AAZStrType()
+        rules.Element = AAZAnyType()
 
         rule_group_overrides = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets.Element.rule_group_overrides
         rule_group_overrides.Element = AAZObjectType()

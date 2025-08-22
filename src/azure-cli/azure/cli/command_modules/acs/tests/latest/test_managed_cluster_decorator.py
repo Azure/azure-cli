@@ -94,11 +94,7 @@ class AKSManagedClusterModelsTestCase(unittest.TestCase):
         models = AKSManagedClusterModels(self.cmd, ResourceType.MGMT_CONTAINERSERVICE)
 
         # load models directly (instead of through the `get_sdk` method provided by the cli component)
-        from azure.cli.core.profiles._shared import AZURE_API_PROFILES
-
-        sdk_profile = AZURE_API_PROFILES["latest"][ResourceType.MGMT_CONTAINERSERVICE]
-        api_version = sdk_profile.default_api_version
-        module_name = "azure.mgmt.containerservice.v{}.models".format(api_version.replace("-", "_"))
+        module_name = "azure.mgmt.containerservice.models"
         module = importlib.import_module(module_name)
 
         # load balancer models

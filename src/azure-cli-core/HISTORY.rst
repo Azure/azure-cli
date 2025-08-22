@@ -6,6 +6,7 @@ Release History
 2.76.0
 ++++++
 * Resolve CVE-2024-47081 (#31708)
+* Provide actionable error recommendation when a command fails because of Multi-Factor Authentication (MFA) policy violation (#31699)
 
 2.75.0
 ++++++
