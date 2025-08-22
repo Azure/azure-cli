@@ -417,7 +417,9 @@ AZURE_CHINA_CLOUD = Cloud(
         log_analytics_resource_id='https://api.loganalytics.azure.cn',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track',
         synapse_analytics_resource_id='https://dev.azuresynapse.azure.cn',
-        app_service_resource_id='https://appservice.azure.cn',
+        # App Service Audience is currently not available in Mooncake, 
+        # Using the management endpoint until the App Service audience is enabled 
+        app_service_resource_id='https://management.core.chinacloudapi.cn/',
         portal='https://portal.azure.cn'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
@@ -449,7 +451,9 @@ AZURE_US_GOV_CLOUD = Cloud(
         log_analytics_resource_id='https://api.loganalytics.us',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.us/v2/track',
         synapse_analytics_resource_id='https://dev.azuresynapse.usgovcloudapi.net',
-        app_service_resource_id='https://appservice.azure.us',
+        # App Service Audience is currently not available in US Government cloud, 
+        # Using the management endpoint until the App Service audience is enabled 
+        app_service_resource_id='https://management.core.usgovcloudapi.net/',
         portal='https://portal.azure.us'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',
