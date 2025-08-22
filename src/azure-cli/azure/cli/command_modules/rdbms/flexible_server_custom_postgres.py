@@ -474,7 +474,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
         if high_availability.lower() != "disabled" and standby_availability_zone:
             high_availability_param.standby_availability_zone = standby_availability_zone
 
-        if high_availability.lower() != "disabled":
+        # PG 11 and 12 will never receive fabric mirroring support. Skip this check for servers of these versions
+        if high_availability.lower() != "disabled" and str(instance.version) not in ["11", "12"]:
             config_client = cf_postgres_flexible_config(cmd.cli_ctx, '_')
             fabric_mirror_status = config_client.get(resource_group_name, server_name, 'azure.fabric_mirror_enabled')
             if (fabric_mirror_status and fabric_mirror_status.value.lower() == 'on'):
