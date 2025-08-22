@@ -49,7 +49,7 @@ class StopSiteFailoverTest(AAZCommand):
             required=True,
         )
         _args_schema.virtual_network_gateway_name = AAZStrArg(
-            options=["--virtual-network-gateway-name"],
+            options=["--virtual-network-gateway-name", "--name"],
             help="The name of the virtual network gateway.",
             required=True,
             id_part="name",
@@ -69,7 +69,7 @@ class StopSiteFailoverTest(AAZCommand):
             help="Peering location of the test",
         )
         _args_schema.was_simulation_successful = AAZBoolArg(
-            options=["--was-simulation-successful"],
+            options=["--was-simulation-successful", "--simulation-success"],
             arg_group="StopParameters",
             help="Whether the failover simulation was successful or not",
         )
