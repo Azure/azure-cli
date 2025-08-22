@@ -49,7 +49,7 @@ class GetResiliencyInformation(AAZCommand):
             required=True,
         )
         _args_schema.virtual_network_gateway_name = AAZStrArg(
-            options=["--virtual-network-gateway-name"],
+            options=["--virtual-network-gateway-name", "--name"],
             help="The name of the virtual network gateway.",
             required=True,
             id_part="name",
