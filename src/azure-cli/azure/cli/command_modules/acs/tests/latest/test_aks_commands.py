@@ -6541,6 +6541,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} --location={location} "
             "--sku automatic "
+            "--aks-custom-header AKSHTTPCustomFeatures=Microsoft.ContainerService/AutomaticSKUPreview "
             "--ssh-key-value={ssh_key_value}"
         )
         self.cmd(
@@ -6601,9 +6602,11 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "aks update --resource-group={resource_group} --name={name} "
             "--aks-custom-header AKSHTTPCustomFeatures=Microsoft.ContainerService/AutomaticSKUPreview,"
             "AKSHTTPCustomFeatures=Microsoft.ContainerService/EnableAPIServerVnetIntegrationPreview,"
+            "AKSHTTPCustomFeatures=Microsoft.ContainerService/SafeguardsPreview,"
             "AKSHTTPCustomFeatures=Microsoft.ContainerService/NRGLockdownPreview,"
             "AKSHTTPCustomFeatures=Microsoft.ContainerService/AKS-PrometheusAddonPreview,"
-            "AKSHTTPCustomFeatures=Microsoft.ContainerService/DisableSSHPreview "
+            "AKSHTTPCustomFeatures=Microsoft.ContainerService/DisableSSHPreview,"
+            "AKSHTTPCustomFeatures=Microsoft.ContainerService/NodeAutoProvisioningPreview "
             "--sku base "
         )
         self.cmd(
