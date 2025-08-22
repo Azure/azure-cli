@@ -315,6 +315,15 @@ class VolumeCreate(_VolumeCreate):
             minimum=50
         )
 
+        # Removed in API is not needed, added here for backwards compatibility will be removed in breaking change window
+        args_schema.endpoint_type = AAZStrArg(
+            options=["--endpoint-type"],
+            arg_group="Replication",
+            help="Indicates whether the local volume is the source or destination for the Volume Replication",
+            nullable=True,
+            enum={"dst": "dst", "src": "src"},
+        )
+
         # The API does only support setting Basic and Standard
         args_schema.network_features.enum = AAZArgEnum({"Basic": "Basic", "Standard": "Standard"}, case_sensitive=False)
 
