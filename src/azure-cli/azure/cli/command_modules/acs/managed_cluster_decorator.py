@@ -2265,7 +2265,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return ip_families
-    
+
     def get_sku_name(self) -> str:
         # read the original value passed by the command
         skuName = self.raw_param.get("sku")
@@ -2322,7 +2322,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         # dynamic completion
         if not read_from_mc and not isBasicSKULb and outbound_type is None:
             outbound_type = CONST_OUTBOUND_TYPE_LOAD_BALANCER
-        
+
         skuName = self.get_sku_name()
         isVnetSubnetIdEmpty = self.get_vnet_subnet_id() in ["", None]
         if skuName is not None and skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC and isVnetSubnetIdEmpty:
@@ -2975,7 +2975,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                     )
                 ) == "true"
             )
-        
+
         sku_name = self.get_sku_name()
         if sku_name == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
             return True
@@ -3996,8 +3996,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                 (
                     enable_apiserver_vnet_integration is None or
                     enable_apiserver_vnet_integration is False
-                )
-                and self.get_sku_name() != CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC
+                ) and
+                self.get_sku_name() != CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC
             ):
                 raise RequiredArgumentMissingError(
                     '"--apiserver-subnet-id" requires "--enable-apiserver-vnet-integration".')
