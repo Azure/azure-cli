@@ -276,6 +276,39 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group_1, server_name_3), checks=NoneCheck())
 
+    @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
+    def test_sql_server_create_with_tags(self, resource_group, resource_group_location):
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+
+        # test create sql server with tags
+        server = self.cmd('sql server create -g {} --name {} '
+                         '--admin-user {} --admin-password {} '
+                         '--tags env=test purpose=demo'
+                         .format(resource_group, server_name, admin_login, admin_password),
+                         checks=[
+                             JMESPathCheck('name', server_name),
+                             JMESPathCheck('location', resource_group_location),
+                             JMESPathCheck('resourceGroup', resource_group),
+                             JMESPathCheck('administratorLogin', admin_login),
+                             JMESPathCheck('tags.env', 'test'),
+                             JMESPathCheck('tags.purpose', 'demo')]).get_output_in_json()
+
+        # test show sql server to verify tags are preserved
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('tags.env', 'test'),
+                     JMESPathCheck('tags.purpose', 'demo')])
+
+        # cleanup
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name), checks=NoneCheck())
+
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     def test_sql_server_public_network_access_create_mgmt(self, resource_group_1, resource_group_location):
         server_name_1 = self.create_random_name(server_name_prefix, server_name_max_length)
