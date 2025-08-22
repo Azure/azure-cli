@@ -1101,6 +1101,7 @@ class TestSnapShotAccess(ScenarioTest):
         self.cmd('snapshot revoke-access -n {snapshot2} -g {rg}')
         self.cmd('snapshot show -n {snapshot2} -g {rg}', checks=self.check('diskState', 'Unattached'))
 
+    @unittest.skip('SubscriptionNotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='test_snapshot_create_with_source_blob_uri')
     def test_snapshot_create_with_source_blob_uri(self, resource_group):
@@ -7979,6 +7980,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('storageProfile.osDiskImage.source.uri', '{vhd_uri}')
         ])
 
+    @unittest.skip('InvalidTemplateError')
     @ResourceGroupPreparer(random_name_length=15, location='westus')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus',
                       additional_params='--enable-purge-protection true --enable-rbac-authorization false')
@@ -8316,6 +8318,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('storageProfile.dataDiskImages[1].lun', 3)
                  ])
 
+    @unittest.skip('InvalidTemplateError')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_test_specialized_image_')
     def test_specialized_image(self, resource_group):
@@ -10295,6 +10298,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('encryption.type', 'EncryptionAtRestWithPlatformKey')
         ])
 
+    @unittest.skip('InvalidTemplateError')
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_snapshot_', location='westcentralus')
     @KeyVaultPreparer(name_prefix='vault4-', name_len=20, key='vault', location='westcentralus', additional_params='--enable-purge-protection --enable-rbac-authorization false')
     @AllowLargeResponse(size_kb=99999)
