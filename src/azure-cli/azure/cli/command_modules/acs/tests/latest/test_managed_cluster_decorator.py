@@ -7405,7 +7405,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             location="test_location", 
             sku = automaticSKU,
             addon_profiles=addon_profiles_5,
-            kind = "Automatic",
         )
         self.assertEqual(dec_mc_5, ground_truth_mc_5)
         self.assertEqual(
@@ -7966,7 +7965,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         expect_mc_3 = self.models.ManagedCluster(
             location="test_location",
             sku=automaticSKU,
-            kind="Automatic",
         )
         self.assertEqual(dec_mc_3, expect_mc_3)
 
@@ -7986,7 +7984,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
         expect_mc_4 = self.models.ManagedCluster(
             location="test_location",
             sku=baseSKU,
-            kind="Base",
         )
         self.assertEqual(dec_mc_4, expect_mc_4)
 
@@ -8141,7 +8138,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             location = "test_location", 
             sku = automaticSKU,
             azure_monitor_profile = azure_monitor_profiles_1,
-            kind = "Automatic",
             identity = self.models.ManagedClusterIdentity(type = "SystemAssigned"),
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
@@ -9507,7 +9503,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         expect_mc_5 = self.models.ManagedCluster(
             location="test_location",
             sku=automaticSKU,
-            kind="Automatic",
         )
         self.assertEqual(dec_mc_5, expect_mc_5)
 
@@ -9527,7 +9522,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         expect_mc_6 = self.models.ManagedCluster(
             location="test_location",
             sku=baseSKU,
-            kind="Base",
         )
         self.assertEqual(dec_mc_6, expect_mc_6)
 
