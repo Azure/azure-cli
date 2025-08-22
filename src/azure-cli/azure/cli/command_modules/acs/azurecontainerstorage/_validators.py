@@ -12,6 +12,7 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_ACSTOR_IO_ENGINE_LABEL_KEY,
     CONST_ACSTOR_IO_ENGINE_LABEL_VAL,
+    CONST_ACSTOR_VERSION_V1,
     CONST_STORAGE_POOL_OPTION_NVME,
     CONST_STORAGE_POOL_OPTION_SSD,
     CONST_STORAGE_POOL_SKU_PREMIUM_LRS,
@@ -42,7 +43,7 @@ elastic_san_supported_skus = [
 logger = get_logger(__name__)
 
 
-def validate_disable_azure_container_storage_params(  # pylint: disable=too-many-branches
+def validate_disable_azure_container_storage_params_v1(  # pylint: disable=too-many-branches
     storage_pool_type,
     storage_pool_name,
     storage_pool_sku,
@@ -61,6 +62,13 @@ def validate_disable_azure_container_storage_params(  # pylint: disable=too-many
         raise InvalidArgumentValueError(
             'Invalid usage of --disable-azure-container-storage. '
             'Azure Container Storage is not enabled in the cluster.'
+        )
+
+    if not isinstance(storage_pool_type, str):
+        raise InvalidArgumentValueError(
+            f'Azure Container Storage has version {CONST_ACSTOR_VERSION_V1} installed. '
+            'A pool type value must be specified when using --disable-azure-container-storage. '
+            " Allowed values are: all, azureDisk, elasticSan, ephemeralDisk"
         )
 
     if storage_pool_name is not None:
@@ -173,7 +181,7 @@ def validate_disable_azure_container_storage_params(  # pylint: disable=too-many
             )
 
 
-def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-locals,too-many-branches
+def validate_enable_azure_container_storage_v1_params(  # pylint: disable=too-many-locals,too-many-branches
     storage_pool_type,
     storage_pool_name,
     storage_pool_sku,
@@ -181,7 +189,9 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
     storage_pool_size,
     nodepool_list,
     agentpool_details,
-    is_extension_installed,
+    is_v1_extension_installed,
+    is_v2_extension_installed,
+    v2_extension_version,
     is_azureDisk_enabled,
     is_elasticSan_enabled,
     is_ephemeralDisk_localssd_enabled,
@@ -191,6 +201,31 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
     existing_ephemeral_disk_volume_type,
     existing_ephemeral_disk_nvme_perf_tier,
 ):
+
+    if is_v2_extension_installed:
+        #  Hardcoding this error message to version 1 because this is only valid for v1
+        raise InvalidArgumentValueError(
+            'Failed to enable Azure Container Storage version 1 as Azure Container Storage version '
+            f'{v2_extension_version} is already installed on the cluster. Try enabling this version on another '
+            'cluster. You can also enable this version by first disabling the existing installation of '
+            'Azure Container Storage by running --disable-azure-container-storage. '
+            'Note that disabling can impact existing workloads that depend on Azure Container Storage.'
+        )
+
+    if storage_pool_type not in [
+        CONST_STORAGE_POOL_TYPE_AZURE_DISK,
+        CONST_STORAGE_POOL_TYPE_ELASTIC_SAN,
+        CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK
+    ]:
+        raise InvalidArgumentValueError(
+            f'Storage pool type value must be specified for --enable-azure-container-storage '
+            'when enabling Azure Container Storage v1. '
+            'Supported values are '
+            f'{CONST_STORAGE_POOL_TYPE_AZURE_DISK}, '
+            f'{CONST_STORAGE_POOL_TYPE_ELASTIC_SAN}, '
+            f'{CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK}.'
+        )
+
     if storage_pool_name is not None:
         pattern = r'[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*'
         is_pool_name_valid = re.fullmatch(pattern, storage_pool_name)
@@ -228,11 +263,11 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
             required_type_installed_for_nvme_perf_tier = False
 
             if ephemeral_disk_volume_type is not None:
-                required_type_installed_for_disk_vol_type = is_extension_installed and \
+                required_type_installed_for_disk_vol_type = is_v1_extension_installed and \
                     (is_ephemeralDisk_localssd_enabled or is_ephemeralDisk_nvme_enabled)
 
             if ephemeral_disk_nvme_perf_tier is not None:
-                required_type_installed_for_nvme_perf_tier = is_extension_installed and \
+                required_type_installed_for_nvme_perf_tier = is_v1_extension_installed and \
                     is_ephemeralDisk_nvme_enabled
 
             if storage_pool_option is None:
@@ -364,10 +399,10 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
         storage_pool_type,
         storage_pool_option,
         storage_pool_sku,
-        is_extension_installed
+        is_v1_extension_installed
     )
 
-    if is_extension_installed:
+    if is_v1_extension_installed:
         if (is_azureDisk_enabled and
            storage_pool_type == CONST_STORAGE_POOL_TYPE_AZURE_DISK) or \
            (is_elasticSan_enabled and
@@ -394,6 +429,117 @@ def validate_enable_azure_container_storage_params(  # pylint: disable=too-many-
                 f'{CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK} and option {ephemeral_disk_type_installed} '
                 'in the cluster.'
             )
+
+
+def validate_enable_azure_container_storage_params(
+    is_extension_installed,
+    is_v1_extension_installed,
+    v1_extension_version,
+    storage_pool_type,
+    storage_pool_name,
+    storage_pool_sku,
+    storage_pool_option,
+    storage_pool_size
+):
+    if is_v1_extension_installed:
+        raise InvalidArgumentValueError(
+            f'Failed to enable the latest version of Azure Container Storage as version {v1_extension_version} '
+            'is already installed on the cluster. Try enabling Azure Container Storage in another cluster. '
+            'You can also enable the latest version by first disabling the existing installation using '
+            '--disable-azure-container-storage all. Note that disabling can impact existing workloads '
+            'that depend on Azure Container Storage.'
+        )
+
+    if is_extension_installed:
+        raise InvalidArgumentValueError(
+            'Cannot enable Azure Container Storage as it is already enabled on the cluster.'
+        )
+
+    # Todo: Remove this for the 2.1.0 release
+    if storage_pool_type is not None and not isinstance(storage_pool_type, bool):
+        raise InvalidArgumentValueError(
+            'The latest version of Azure Container Storage only supports ephemeral nvme storage and does not '
+            'require or support a storage-pool-type value for --enable-azure-container-storage parameter. '
+            f'Please remove {storage_pool_type} from the command and try again.'
+        )
+
+    if storage_pool_name is not None:
+        raise InvalidArgumentValueError(
+            'The latest version of Azure Container Storage does not '
+            'require or support a --storage-pool-name value. '
+            f'Please remove --storage-pool-name {storage_pool_name} from the command and try again.'
+        )
+
+    if storage_pool_sku is not None:
+        raise InvalidArgumentValueError(
+            'The latest version of Azure Container Storage does not '
+            'require or support a --storage-pool-sku value. '
+            f'Please remove --storage-pool-sku {storage_pool_sku} from the command and try again.'
+        )
+
+    if storage_pool_option is not None:
+        raise InvalidArgumentValueError(
+            'The latest version of Azure Container Storage does not '
+            'require or support a --storage-pool-option value. '
+            f'Please remove --storage-pool-option {storage_pool_option} from the command and try again.'
+        )
+
+    if storage_pool_size is not None:
+        raise InvalidArgumentValueError(
+            'The latest version of Azure Container Storage does not '
+            'require or support a --storage-pool-size value. '
+            f'Please remove --storage-pool-size {storage_pool_size} from the command and try again.'
+        )
+
+
+def validate_disable_azure_container_storage_params(
+    is_extension_installed,
+    storage_pool_type,
+    storage_pool_name,
+    storage_pool_sku,
+    storage_pool_option,
+    storage_pool_size
+):
+    if not is_extension_installed:
+        raise InvalidArgumentValueError(
+            'Cannot disable Azure Container Storage as it is not enabled on the cluster.'
+        )
+
+    # Todo: Remove this for the 2.1.0 release
+    if storage_pool_type is not None and not isinstance(storage_pool_type, bool):
+        raise InvalidArgumentValueError(
+            'The latest version of Azure Container Storage only supports ephemeral nvme storage and does not '
+            'require or support a storage-pool-type value for --enable-azure-container-storage parameter. '
+            f'Please remove {storage_pool_type} from the command and try again.'
+        )
+
+    if storage_pool_name is not None:
+        raise InvalidArgumentValueError(
+            'The latest version of Azure Container Storage does not '
+            'require or support a --storage-pool-name value. '
+            f'Please remove --storage-pool-name {storage_pool_name} from the command and try again.'
+        )
+
+    if storage_pool_sku is not None:
+        raise InvalidArgumentValueError(
+            'The latest version of Azure Container Storage does not '
+            'require or support a --storage-pool-sku value. '
+            f'Please remove --storage-pool-sku {storage_pool_sku} from the command and try again.'
+        )
+
+    if storage_pool_option is not None:
+        raise InvalidArgumentValueError(
+            'The latest version of Azure Container Storage does not '
+            'require or support a --storage-pool-option value. '
+            f'Please remove --storage-pool-option {storage_pool_option} from the command and try again.'
+        )
+
+    if storage_pool_size is not None:
+        raise InvalidArgumentValueError(
+            'The latest version of Azure Container Storage does not '
+            'require or support a --storage-pool-size value. '
+            f'Please remove --storage-pool-size {storage_pool_size} from the command and try again.'
+        )
 
 
 # _Validate_storage_pool_size validates that the storage_pool_size is
