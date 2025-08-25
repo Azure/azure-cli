@@ -85,6 +85,11 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     subnet_name = 'ManagedInstance'
     subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
 
+    # Azure AD Entra ID admin configuration for managed instance creation
+    external_admin_name = 'msdata-Database Systems-8313371e-0879-428e-b1da-6353575a9192'
+    external_admin_sid = '05159003-af0d-4d45-8309-1992b1774dd9'
+    external_admin_principal_type = 'Application'
+
     # For cross-subnet update SLO, we need a target subnet to move managed instance to.
     target_vnet_name = 'vnet-mi-tooling'
     target_subnet_name = 'ManagedInstance2'
@@ -110,7 +115,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
-                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4):
+                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4, enable_ad_only_auth = True):
         super().__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
         self.admin_user = admin_user
@@ -126,6 +131,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.is_geo_secondary = is_geo_secondary
         self.subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.subscription_id, self.group, vnet_name, self.subnet_name)
         self.v_core = v_core
+        self.enable_ad_only_auth = enable_ad_only_auth
 
 
     def create_resource(self, name, **kwargs):
@@ -136,6 +142,9 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         template = 'az sql mi create -g {} -n {} -l {} -u {} -p {} --subnet {} --license-type {}' \
                    ' --collation {} --capacity {} --storage {} --edition {} --family {} --tags {}' \
                    ' --proxy-override {} --bsr Geo'
+
+        if self.enable_ad_only_auth:
+            template += f" --enable-ad-only-auth --external-admin-name '{self.external_admin_name}' --external-admin-sid '{self.external_admin_sid}' --external-admin-principal-type '{self.external_admin_principal_type}'"
 
         if self.public:
             template += ' --public-data-endpoint-enabled'
@@ -149,11 +158,6 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         if self.identityType == ResourceIdType.system_assigned.value:
             template += f" --assign-identity"
             
-        # Azure AD Entra ID admin configuration for managed instance creation
-        self.external_admin_name = 'msdata-Database Systems-8313371e-0879-428e-b1da-6353575a9192'
-        self.external_admin_sid = '05159003-af0d-4d45-8309-1992b1774dd9'
-        template += f" --enable-ad-only-auth --external-admin-name '{self.external_admin_name}' --external-admin-sid '{self.external_admin_sid}' --external-admin-principal-type Application"
-
         if self.otherParams:
             template += f" {self.otherParams}"
 
@@ -5244,7 +5248,11 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
             'maintenance_id': self._get_full_maintenance_id(self.MMI1),
             'intance_pool_name': '',
             'database_format': 'AlwaysUpToDate',
-            'pricing_model': 'Regular'
+            'pricing_model': 'Regular',
+            'enable_ad_only_auth': '--enable-ad-only-auth',
+            'external_admin_name': ManagedInstancePreparer.external_admin_name,
+            'external_admin_sid': ManagedInstancePreparer.external_admin_sid,
+            'external_admin_principal_type': ManagedInstancePreparer.external_admin_principal_type
         })
 
         # test create sql managed_instance with FMW
@@ -5252,7 +5260,9 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
                                     '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" '
-                                    '--instance-pool-name "{intance_pool_name}" --database-format "{database_format}" --pricing-model "{pricing_model}"',
+                                    '--instance-pool-name "{intance_pool_name}" --database-format "{database_format}" --pricing-model "{pricing_model}" '
+                                    '{enable_ad_only_auth} --external-admin-name "{external_admin_name}" '
+                                    '--external-admin-sid {external_admin_sid} --external-admin-principal-type {external_admin_principal_type} ',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -5344,25 +5354,27 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         time.sleep(120)
 
         # test update sql managed_instance 1
-        self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
-                 .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
-                 checks=[
-                     JMESPathCheck('name', managed_instance_name_1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     # remove this check since there is an issue and the fix is being deployed currently
-                     # JMESPathCheck('identity.type', 'SystemAssigned')
-                     JMESPathCheck('administratorLogin', user)])
+        # Test removed: admin password updates not allowed with Azure AD-only auth enabled
+        # self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
+        #          .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
+        #          checks=[
+        #              JMESPathCheck('name', managed_instance_name_1),
+        #              JMESPathCheck('resourceGroup', resource_group_1),
+        #              # remove this check since there is an issue and the fix is being deployed currently
+        #              # JMESPathCheck('identity.type', 'SystemAssigned')
+        #              JMESPathCheck('administratorLogin', user)])
 
         # test update without identity parameter, validate identity still exists
         # also use --ids instead of -g/-n
-        self.cmd('sql mi update --ids {} --admin-password {}'
-                 .format(managed_instance_1['id'], admin_passwords[0]),
-                 checks=[
-                     JMESPathCheck('name', managed_instance_name_1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     # remove this check since there is an issue and the fix is being deployed currently
-                     # JMESPathCheck('identity.type', 'SystemAssigned')
-                     JMESPathCheck('administratorLogin', user)])
+        # Test removed: admin password updates not allowed with Azure AD-only auth enabled
+        # self.cmd('sql mi update --ids {} --admin-password {}'
+        #          .format(managed_instance_1['id'], admin_passwords[0]),
+        #          checks=[
+        #              JMESPathCheck('name', managed_instance_name_1),
+        #              JMESPathCheck('resourceGroup', resource_group_1),
+        #              # remove this check since there is an issue and the fix is being deployed currently
+        #              # JMESPathCheck('identity.type', 'SystemAssigned')
+        #              JMESPathCheck('administratorLogin', user)])
 
         # test update proxyOverride and publicDataEndpointEnabled
         # test is currently removed due to long execution time due to waiting for SqlAliasStateMachine completion to complete
