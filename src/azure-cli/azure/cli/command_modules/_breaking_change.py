@@ -62,6 +62,6 @@ register_argument_deprecate(
     "--max-percent-unhealthy-deployed-applications",
     hide=True)
 register_required_flag_breaking_change(
-    "az sf managed-application version update",
+    "az sf managed-application-type version update",
     "--package_url"
 )
