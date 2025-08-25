@@ -2085,7 +2085,7 @@ class CosmosDBTests(ScenarioTest):
 
         import dateutil.parser
         import time
-        from datetime import timedelta
+        from datetime import timedelta, datetime
 
         # This should fail as restore time is before account creation time
         invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) - timedelta(days=30)
@@ -2095,7 +2095,7 @@ class CosmosDBTests(ScenarioTest):
         self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
 
         # This should fail as restore time is in future
-        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) + timedelta(days=30)
+        invalid_restore_time = datetime.now() + timedelta(days=30)
         self.kwargs.update({
             'invalid_restore_time': invalid_restore_time.isoformat()
         })

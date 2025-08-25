@@ -364,7 +364,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         public_network_access=None, accelerated_network=None, architecture=None,
                         data_access_auth_mode=None, gallery_image_reference_type=None, security_data_uri=None,
                         upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None,
-                        optimized_for_frequent_attach=None):
+                        optimized_for_frequent_attach=None, security_metadata_uri=None):
 
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -459,7 +459,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         "upload_size_bytes": upload_size_bytes,
         "logical_sector_size": logical_sector_size,
         "security_data_uri": security_data_uri,
-        "performance_plus": performance_plus
+        "performance_plus": performance_plus,
+        "security_metadata_uri": security_metadata_uri,
     }
 
     if size_gb is None and option == "Empty":
@@ -3809,14 +3810,6 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
     else:
         return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
                            resource_group_name, vm_scale_set_name, vm_instance_i_ds)
-
-
-def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
-    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_delete_instances,
-                       resource_group_name, vm_scale_set_name, instance_ids)
 
 
 def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data=False):

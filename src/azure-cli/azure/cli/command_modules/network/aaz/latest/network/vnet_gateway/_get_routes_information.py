@@ -12,22 +12,19 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "disk grant-access",
+    "network vnet-gateway get-routes-information",
 )
-class GrantAccess(AAZCommand):
-    """Grant a resource access to a managed disk.
+class GetRoutesInformation(AAZCommand):
+    """This operation retrieves the route set information for an Express Route Gateway based on their resiliency
 
-    :example: Grant a resource read access to a managed disk.
-        az disk grant-access --access-level Read --duration-in-seconds 3600 --name MyManagedDisk --resource-group MyResourceGroup
-
-    :example: Grant a resource read access to a disk to generate access SAS and security data access SAS
-        az disk grant-access --access-level Read --duration-in-seconds 3600 --name MyDisk --resource-group MyResourceGroup --secure-vm-guest-state-sas
+    :example: GetVirtualNetworkGatewayRoutesInformation
+        az network vnet-gateway get-routes-information --resource-group rg1 --virtual-network-gateway-name vpngw --attempt-refresh False
     """
 
     _aaz_info = {
-        "version": "2025-01-02",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}/begingetaccess", "2025-01-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}/getroutesinformation", "2024-07-01"],
         ]
     }
 
@@ -48,43 +45,24 @@ class GrantAccess(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.disk_name = AAZStrArg(
-            options=["-n", "--name", "--disk-name"],
-            help="The name of the managed disk that is being created. The name can't be changed after the disk is created. Supported characters for the name are a-z, A-Z, 0-9, _ and -. The maximum name length is 80 characters.",
-            required=True,
-            id_part="name",
-        )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
-
-        # define Arg Group "GrantAccessData"
-
-        _args_schema = cls._args_schema
-        _args_schema.access_level = AAZStrArg(
-            options=["--access", "--access-level"],
-            arg_group="GrantAccessData",
-            help="Access level.",
+        _args_schema.virtual_network_gateway_name = AAZStrArg(
+            options=["--virtual-network-gateway-name", "--name"],
+            help="The name of the virtual network gateway.",
             required=True,
-            default="Read",
-            enum={"None": "None", "Read": "Read", "Write": "Write"},
+            id_part="name",
         )
-        _args_schema.duration_in_seconds = AAZIntArg(
-            options=["--duration-in-seconds"],
-            arg_group="GrantAccessData",
-            help="Time duration in seconds until the SAS access expires.",
-            required=True,
-        )
-        _args_schema.secure_vm_guest_state_sas = AAZBoolArg(
-            options=["-s", "--secure-vm-guest-state-sas"],
-            arg_group="GrantAccessData",
-            help="Get SAS on managed disk with VM guest state. It will be used by default when the create option of disk is 'secureOSUpload'",
+        _args_schema.attempt_refresh = AAZBoolArg(
+            options=["--attempt-refresh"],
+            help="Attempt to recalculate the Route Sets Information for the gateway",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        yield self.DisksGrantAccess(ctx=self.ctx)()
+        yield self.VirtualNetworkGatewaysGetRoutesInformation(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -99,7 +77,7 @@ class GrantAccess(AAZCommand):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class DisksGrantAccess(AAZHttpOperation):
+    class VirtualNetworkGatewaysGetRoutesInformation(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -129,7 +107,7 @@ class GrantAccess(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/disks/{diskName}/beginGetAccess",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}/getRoutesInformation",
                 **self.url_parameters
             )
 
@@ -145,15 +123,15 @@ class GrantAccess(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "diskName", self.ctx.args.disk_name,
-                    required=True,
-                ),
-                **self.serialize_url_param(
                     "resourceGroupName", self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "virtualNetworkGatewayName", self.ctx.args.virtual_network_gateway_name,
                     required=True,
                 ),
             }
@@ -163,7 +141,10 @@ class GrantAccess(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-02",
+                    "attemptRefresh", self.ctx.args.attempt_refresh,
+                ),
+                **self.serialize_query_param(
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -173,26 +154,10 @@ class GrantAccess(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
-                ),
-                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
-
-        @property
-        def content(self):
-            _content_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
-            )
-            _builder.set_prop("access", AAZStrType, ".access_level", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("durationInSeconds", AAZIntType, ".duration_in_seconds", typ_kwargs={"flags": {"required": True}})
-            _builder.set_prop("getSecureVMGuestStateSAS", AAZBoolType, ".secure_vm_guest_state_sas")
-
-            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -212,24 +177,57 @@ class GrantAccess(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.access_sas = AAZStrType(
-                serialized_name="accessSAS",
-                flags={"read_only": True},
+            _schema_on_200.circuits_metadata_map = AAZDictType(
+                serialized_name="circuitsMetadataMap",
             )
-            _schema_on_200.security_data_access_sas = AAZStrType(
-                serialized_name="securityDataAccessSAS",
-                flags={"read_only": True},
+            _schema_on_200.last_computed_time = AAZStrType(
+                serialized_name="lastComputedTime",
             )
-            _schema_on_200.security_metadata_access_sas = AAZStrType(
-                serialized_name="securityMetadataAccessSAS",
-                flags={"read_only": True},
+            _schema_on_200.next_eligible_compute_time = AAZStrType(
+                serialized_name="nextEligibleComputeTime",
             )
+            _schema_on_200.route_set_version = AAZStrType(
+                serialized_name="routeSetVersion",
+            )
+            _schema_on_200.route_sets = AAZListType(
+                serialized_name="routeSets",
+            )
+
+            circuits_metadata_map = cls._schema_on_200.circuits_metadata_map
+            circuits_metadata_map.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.circuits_metadata_map.Element
+            _element.link = AAZStrType()
+            _element.location = AAZStrType()
+            _element.name = AAZStrType()
+
+            route_sets = cls._schema_on_200.route_sets
+            route_sets.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.route_sets.Element
+            _element.details = AAZDictType()
+            _element.locations = AAZListType()
+            _element.name = AAZStrType()
+
+            details = cls._schema_on_200.route_sets.Element.details
+            details.Element = AAZListType()
+
+            _element = cls._schema_on_200.route_sets.Element.details.Element
+            _element.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.route_sets.Element.details.Element.Element
+            _element.circuit = AAZStrType()
+            _element.pri = AAZStrType()
+            _element.sec = AAZStrType()
+
+            locations = cls._schema_on_200.route_sets.Element.locations
+            locations.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _GrantAccessHelper:
-    """Helper class for GrantAccess"""
+class _GetRoutesInformationHelper:
+    """Helper class for GetRoutesInformation"""
 
 
-__all__ = ["GrantAccess"]
+__all__ = ["GetRoutesInformation"]
