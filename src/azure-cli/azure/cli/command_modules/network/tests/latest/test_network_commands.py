@@ -7563,5 +7563,80 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
                  checks=[self.check('length(backendAddressPools)', 1)])
 
 
+class NetworkVnetGatewayRoutesAndResiliencyInfoScenarioTest(ScenarioTest):
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix='test_vnet_gw_routes_resiliency_info', location='eastus2euap')
+    @AllowLargeResponse(size_kb=9999)
+    def test_network_vnet_gateway_get_routes_and_resiliency_information(self, resource_group):
+        from time import sleep
+
+        subscription_id = self.get_subscription_id()
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'gw': self.create_random_name('ergw', 20),
+            'vnet': 'vnet1',
+            'subnet': 'GatewaySubnet',
+            'pip': 'pip1',
+            'subscription': subscription_id
+        })
+
+        # Create Virtual Network with GatewaySubnet
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16 '
+                 '--subnet-name {subnet} --subnet-prefix 10.0.0.0/24', checks=[
+            self.check('newVNet.name', '{vnet}')
+        ])
+
+        # Create Public IP
+        self.cmd('network public-ip create -g {rg} -n {pip} --sku Standard', checks=[
+            self.check('publicIp.name', '{pip}')
+        ])
+
+        # Create ExpressRoute Virtual Network Gateway
+        self.cmd('network vnet-gateway create -g {rg} -n {gw} --vnet {vnet} '
+                 '--public-ip-addresses {pip} --gateway-type ExpressRoute '
+                 '--sku ErGw1AZ --no-wait')
+
+        # Wait until the ExpressRoute gateway is provisioned
+        self.cmd('network vnet-gateway wait -g {rg} -n {gw} --created')
+
+        # Retry loop to verify provisioning state
+        provisioning_state = self.cmd('network vnet-gateway show -g {rg} -n {gw}').get_output_in_json()['provisioningState']
+        retry_count = 0
+        while provisioning_state != 'Succeeded':
+            if retry_count == 20:
+                raise Exception(f"ExpressRoute Gateway provisioning failed. Last known state: {provisioning_state}")
+            retry_count += 1
+            sleep(60)
+            provisioning_state = self.cmd('network vnet-gateway show -g {rg} -n {gw}').get_output_in_json()['provisioningState']
+
+        # ---------------------------
+        # Get Routes Information
+        # ---------------------------
+        self.cmd('network vnet-gateway get-routes-information -g {rg} --name {gw} --attempt-refresh true', checks=[
+            self.check('type(@)', 'object'),
+            self.check('length(lastComputedTime)', 24),  # Format: '8/22/2025 5:57:28 PM UTC' = 24 characters
+            self.check('length(nextEligibleComputeTime)', 24),
+            self.check('length(routeSetVersion)', 36),  # UUIDs are always 36 characters
+            self.check('type(routeSets)', 'array'),
+            self.check('type(circuitsMetadataMap)', 'object')
+        ])
+
+        # ---------------------------
+        # Get Resiliency Information
+        # ---------------------------
+        self.cmd('network vnet-gateway get-resiliency-information -g {rg} --name {gw} --attempt-refresh true', checks=[
+            self.check('type(@)', 'object'),
+            self.check('length(overallScore)', 2),
+            self.check('length(scoreChange)', 3),
+            self.check('length(minScoreFromRecommendations)', 2),
+            self.check('length(maxScoreFromRecommendations)', 3),
+            self.check('length(lastComputedTime)', 24),
+            self.check('length(nextEligibleComputeTime)', 24),
+            self.check('type(components)', 'array')
+        ])
+
+
 if __name__ == '__main__':
     unittest.main()

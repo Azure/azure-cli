@@ -15,9 +15,12 @@ from dateutil.parser import parse
 
 from azure.mgmt.containerservice.models import KubernetesSupportPlan
 
+from azure.cli.command_modules.acs._client_factory import get_graph_client
 from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_BASIC,
     CONST_LOAD_BALANCER_SKU_STANDARD,
+    CONST_MANAGED_CLUSTER_SKU_NAME_BASE,
+    CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC,
     CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
     CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD,
     CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
@@ -71,6 +74,7 @@ from azure.cli.command_modules.acs._natgateway import update_nat_gateway_profile
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
 from azure.cli.command_modules.acs._roleassignments import (
     add_role_assignment,
+    add_role_assignment_executor,
     ensure_aks_acr,
     ensure_cluster_identity_permission_on_kubelet_identity,
     subnet_role_assignment_exists,
@@ -316,6 +320,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             external_functions["get_user_assigned_identity_by_resource_id"] = get_user_assigned_identity_by_resource_id
             external_functions["get_rg_location"] = get_rg_location
             external_functions["add_role_assignment"] = add_role_assignment
+            external_functions["add_role_assignment_executor"] = add_role_assignment_executor
             external_functions["add_ingress_appgw_addon_role_assignment"] = add_ingress_appgw_addon_role_assignment
             external_functions["add_monitoring_role_assignment"] = add_monitoring_role_assignment
             external_functions["add_virtual_node_role_assignment"] = add_virtual_node_role_assignment
@@ -2270,6 +2275,20 @@ class AKSManagedClusterContext(BaseAKSContext):
         # this parameter does not need validation
         return ip_families
 
+    def get_sku_name(self) -> str:
+        # read the original value passed by the command
+        skuName = self.raw_param.get("sku")
+        if skuName is None:
+            if (
+                self.mc and
+                self.mc.sku and
+                getattr(self.mc.sku, 'name', None) is not None
+            ):
+                skuName = vars(self.mc.sku)['name'].lower()
+            else:
+                skuName = CONST_MANAGED_CLUSTER_SKU_NAME_BASE
+        return skuName
+
     def _get_outbound_type(
         self,
         enable_validation: bool = False,
@@ -2312,6 +2331,12 @@ class AKSManagedClusterContext(BaseAKSContext):
         # dynamic completion
         if not read_from_mc and not isBasicSKULb and outbound_type is None:
             outbound_type = CONST_OUTBOUND_TYPE_LOAD_BALANCER
+
+        skuName = self.get_sku_name()
+        isVnetSubnetIdEmpty = self.get_vnet_subnet_id() in ["", None]
+        if skuName is not None and skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC and isVnetSubnetIdEmpty:
+            # outbound_type of Automatic SKU should be ManagedNATGateway if no subnet id provided.
+            outbound_type = CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY
 
         # validation
         # Note: The parameters involved in the validation are not verified in their own getters.
@@ -2781,6 +2806,10 @@ class AKSManagedClusterContext(BaseAKSContext):
         # normalize
         enable_addons = enable_addons.split(',') if enable_addons else []
 
+        sku_name = self.get_sku_name()
+        if sku_name == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+            enable_addons.append("monitoring")
+
         # validation
         if enable_validation:
             # check duplicate addons
@@ -2956,6 +2985,9 @@ class AKSManagedClusterContext(BaseAKSContext):
                 ) == "true"
             )
 
+        sku_name = self.get_sku_name()
+        if sku_name == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+            return True
         # this parameter does not need dynamic completion
         # this parameter does not need validation
         return enable_msi_auth_for_monitoring
@@ -3973,7 +4005,8 @@ class AKSManagedClusterContext(BaseAKSContext):
                 (
                     enable_apiserver_vnet_integration is None or
                     enable_apiserver_vnet_integration is False
-                )
+                ) and
+                self.get_sku_name() != CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC
             ):
                 raise RequiredArgumentMissingError(
                     '"--apiserver-subnet-id" requires "--enable-apiserver-vnet-integration".')
@@ -5191,6 +5224,9 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.mc.disable_local_accounts is not None
             ):
                 disable_local_accounts = self.mc.disable_local_accounts
+            sku_name = self.get_sku_name()
+            if sku_name == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+                disable_local_accounts = True
 
         # this parameter does not need dynamic completion
         # validation
@@ -5369,6 +5405,9 @@ class AKSManagedClusterContext(BaseAKSContext):
                 self.mc.azure_monitor_profile.metrics
             ):
                 enable_azure_monitor_metrics = self.mc.azure_monitor_profile.metrics.enabled
+            skuName = self.get_sku_name()
+            if skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+                enable_azure_monitor_metrics = True
         # This parameter does not need dynamic completion.
         if enable_validation:
             if enable_azure_monitor_metrics and self._get_disable_azure_monitor_metrics(False):
@@ -6868,17 +6907,24 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
-            mc.sku = self.models.ManagedClusterSKU(
-                name="Base",
-                tier="Standard"
-            )
+        mc.sku = self.models.ManagedClusterSKU()
+        skuName = self.context.get_sku_name()
+        tier = self.context.get_tier()
 
-        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
-            mc.sku = self.models.ManagedClusterSKU(
-                name="Base",
-                tier="Premium"
-            )
+        if skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+            mc.sku.name = "Automatic"
+            # default tier for automatic sku is standard
+            mc.sku.tier = "Standard"
+        else:
+            mc.sku.name = "Base"
+
+        if tier == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
+            mc.sku.tier = "Standard"
+        if tier == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
+            mc.sku.tier = "Premium"
+        # backfill the tier to "Free" if it's not set
+        if mc.sku.tier is None:
+            mc.sku.tier = "Free"
         return mc
 
     def set_up_extended_location(self, mc: ManagedCluster) -> ManagedCluster:
@@ -7385,6 +7431,21 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     self.context.get_name(),
                 )
 
+        # Add role assignments for automatic sku
+        if cluster.sku is not None and cluster.sku.name == "Automatic":
+            try:
+                user = get_graph_client(self.cmd.cli_ctx).signed_in_user_get()
+            except Exception as e:  # pylint: disable=broad-except
+                logger.warning("Could not get signed in user: %s", str(e))
+            else:
+                self.context.external_functions.add_role_assignment_executor(  # type: ignore # pylint: disable=protected-access
+                    self.cmd,
+                    "Azure Kubernetes Service RBAC Cluster Admin",
+                    user["id"],
+                    scope=cluster.id,
+                    resolve_assignee=False,
+                )
+
     def put_mc(self, mc: ManagedCluster) -> ManagedCluster:
         active_cloud = get_active_cloud(self.cmd.cli_ctx)
         if active_cloud.profile != "latest":
@@ -7714,24 +7775,26 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
+        # there are existing MCs with nil sku, that is Base/Free
+        if mc.sku is None:
+            mc.sku = self.models.ManagedClusterSKU()
+        skuName = self.context.get_sku_name()
+        tier = self.context.get_tier()
+        if skuName == CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC:
+            mc.sku.name = "Automatic"
+        else:
+            mc.sku.name = "Base"
+
         # Premium without LTS is ok (not vice versa)
-        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
-            mc.sku = self.models.ManagedClusterSKU(
-                name="Base",
-                tier="Premium"
-            )
-
-        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
-            mc.sku = self.models.ManagedClusterSKU(
-                name="Base",
-                tier="Standard"
-            )
-
-        if self.context.get_tier() == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
-            mc.sku = self.models.ManagedClusterSKU(
-                name="Base",
-                tier="Free"
-            )
+        if tier == CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM:
+            mc.sku.tier = "Premium"
+        if tier == CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD:
+            mc.sku.tier = "Standard"
+        if tier == CONST_MANAGED_CLUSTER_SKU_TIER_FREE:
+            mc.sku.tier = "Free"
+        # backfill the tier to "Free" if it's not set
+        if mc.sku.tier is None:
+            mc.sku.tier = "Free"
         return mc
 
     def update_outbound_type_in_network_profile(self, mc: ManagedCluster) -> ManagedCluster:
