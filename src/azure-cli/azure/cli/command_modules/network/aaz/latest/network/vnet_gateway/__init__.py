@@ -14,6 +14,8 @@ from ._delete import *
 from ._disconnect_vpn_connections import *
 from ._get_failover_all_tests_detail import *
 from ._get_failover_single_test_detail import *
+from ._get_resiliency_information import *
+from ._get_routes_information import *
 from ._list import *
 from ._list_advertised_routes import *
 from ._list_bgp_peer_status import *
