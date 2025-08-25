@@ -1048,21 +1048,20 @@ def _get_bicepparam_file_path(parameters):
 
 def _parse_bicepparam_inline_params(parameters, template_obj):
     parsed_inline_params = {}
-    parsed_inline_ext_configs = {}
 
     for parameter_list in parameters:
         for parameter_item in parameter_list:
             if is_bicepparam_file(parameter_item):
                 continue
 
-            if not _try_parse_key_value_object(parsed_inline_params, parsed_inline_ext_configs, template_obj, parameter_item, False):
+            if not _try_parse_key_value_object(parsed_inline_params, template_obj, parameter_item):
                 raise InvalidArgumentValueError(f"Unable to parse parameter: {parameter_item}. Only correctly formatted in-line parameters are allowed with a .bicepparam file")
 
     name_value_obj = {}
     for k, v in parsed_inline_params.items():
         name_value_obj[k] = v['value']
 
-    return name_value_obj, parsed_inline_ext_configs or None
+    return name_value_obj
 
 
 def _build_bicepparam_file(cli_ctx, bicepparam_file, template_file, inline_params=None):
