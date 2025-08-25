@@ -7563,5 +7563,78 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
                  checks=[self.check('length(backendAddressPools)', 1)])
 
 
+class NetworkVnetGatewayFailoverAPIsTest(ScenarioTest):
+
+    @live_only()
+    def test_start_site_failover_test(self): # live_only as the express route is extremely expensive, contact service team for an available ER
+        resource_group = "shubhati_failover"  
+        vnet_gateway_name = "shubhati_failoverGw"
+        peering_location = "London2"
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'vnet_gw': vnet_gateway_name,
+            'peering_loc': peering_location
+        })
+
+        # Run the command
+        result = self.cmd(
+            'network vnet-gateway start-site-failover-test '
+            '-g {rg} --virtual-network-gateway-name {vnet_gw} --peering-location {peering_loc}'
+        ).get_output_in_json()
+
+        # Validate that result is a string (per _schema_on_200 = AAZStrType())
+        self.assertIsInstance(result, dict)
+
+    @live_only()
+    def test_stop_site_failover_test(self): # live_only as the express route is extremely expensive, contact service team for an available ER
+        import time
+
+        time.sleep(2 * 60)  # 120 seconds To wait for sometime before stopping the test failover
+        resource_group = "shubhati_failover"
+        vnet_gateway_name = "shubhati_failoverGw"
+        peering_location = "London2"
+        was_simulation_successful = True
+
+        # Construct failover test connection details
+        failover_details = [
+            {
+                "failover-connection-name": "failoverGR",
+                "failover-location": "Amsterdam",
+                "is-verified": True
+            }
+        ]
+
+        # Convert details list to CLI argument format
+        details_arg = "[" + ",".join(
+            "{{failover-connection-name:{},failover-location:{},is-verified:{}}}".format(
+                d["failover-connection-name"],
+                d["failover-location"],
+                str(d["is-verified"]).lower()
+            ) for d in failover_details
+        ) + "]"
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'vnet_gw': vnet_gateway_name,
+            'peering_loc': peering_location,
+            'was_successful': was_simulation_successful,
+            'details_arg': details_arg
+        })
+
+        # Run the command
+        result = self.cmd(
+            'network vnet-gateway stop-site-failover-test '
+            '-g {rg} --virtual-network-gateway-name {vnet_gw} '
+            '--peering-location {peering_loc} '
+            '--was-simulation-successful {was_successful} '
+            '--details \'{details_arg}\''
+        ).get_output_in_json()
+
+        # Validate
+        self.assertTrue(isinstance(result, (str, dict)))
+
+
+
 if __name__ == '__main__':
     unittest.main()
