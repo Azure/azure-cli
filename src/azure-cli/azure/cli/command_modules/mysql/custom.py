@@ -294,23 +294,30 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
     if instance.sku.tier == 'Burstable':
         raise CLIError("Major version update is not supported for the Burstable pricing tier.")
 
-    current_version = int(instance.version.split('.')[0])
-    if current_version >= int(version):
-        raise CLIError("The version to upgrade to must be greater than the current version.")
-
     replica_operations_client = cf_mysql_flexible_replica(cmd.cli_ctx, '_')
     mysql_version_map = {
         '8': '8.0.21',
+        '8.4': '8.4'
     }
     version_mapped = mysql_version_map[version]
+
+    current_major_version = int(instance.version.split('.')[0])
+    current_minor_version = int(instance.version.split('.')[1])
+
+    target_major_version = int(version_mapped.split('.')[0])
+    target_minor_version = int(version_mapped.split('.')[1])
+
+    if current_major_version > target_major_version or (current_major_version == target_major_version and current_minor_version >= target_minor_version):
+        raise CLIError("The version to upgrade to must be greater than the current version.")
 
     replicas = replica_operations_client.list_by_server(resource_group_name, server_name)
 
     for replica in replicas:
-        current_replica_version = int(replica.version.split('.')[0])
-        if current_replica_version < int(version):
+        current_replica_major_version = int(replica.version.split('.')[0])
+        current_replica_minor_version = int(replica.version.split('.')[1])
+        if current_replica_major_version < target_major_version or (current_replica_major_version == target_major_version and current_replica_minor_version < target_minor_version):
             raise CLIError("Primary server version must not be greater than replica server version. "
-                           "First upgrade {} server version to {} and try again.".format(replica.name, version))
+                           "First upgrade {} server version to {} and try again.".format(replica.name, version_mapped))
 
     parameters = {
         'version': version_mapped
