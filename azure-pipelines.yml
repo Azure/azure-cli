@@ -226,6 +226,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: 'build_scripts/windows/out/'
@@ -271,6 +272,7 @@ jobs:
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
+      condition: eq(variables['Build.Reason'], 'BatchedCI')
       continueOnError: true
       inputs:
         BuildDropPath: 'build_scripts/windows/out/'
@@ -372,6 +374,7 @@ jobs:
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
+      condition: eq(variables['Build.Reason'], 'BatchedCI')
       continueOnError: true
       inputs:
         BuildDropPath: $(Build.ArtifactStagingDirectory)
@@ -454,6 +457,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
@@ -625,6 +629,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
@@ -737,6 +742,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
@@ -834,6 +840,7 @@ jobs:
       filePath: scripts/release/rpm/pipeline.sh
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
@@ -962,6 +969,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
