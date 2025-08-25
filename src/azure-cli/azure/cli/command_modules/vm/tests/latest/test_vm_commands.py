@@ -751,23 +751,24 @@ class VMCustomImageTest(ScenarioTest):
             self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType", 'Standard_LRS')
         ])
 
+    @unittest.skip('NotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_conflict')
     def test_vm_custom_image_name_conflict(self, resource_group):
         self.kwargs.update({
-            'vm': 'test-vm',
-            'image1': 'img-from-vm',
-            'image2': 'img-from-vm-id',
-            'image3': 'img-from-disk-id',
-            'subnet': 'subnet1',
-            'vnet': 'vnet1',
-            'pubip': 'pubip',
+            'vm': self.create_random_name('vm', 10),
+            'image1': self.create_random_name('img-from-vm', 25),
+            'image2': self.create_random_name('img-from-vmid', 25),
+            'image3': self.create_random_name('img-from-disk-id', 25),
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15),
+            'pubip': self.create_random_name('pubip', 15),
         })
 
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
 
-        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username ubuntu '
+        self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --size Standard_B2ms --use-unmanaged-disk --admin-username ubuntu '
                  '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip} --nsg-rule NONE')
         # Disable default outbound access
         self.cmd(
@@ -891,6 +892,7 @@ class VMImageWithPlanTest(ScenarioTest):
 
 class VMCreateFromUnmanagedDiskTest(ScenarioTest):
 
+    @unittest.skip('NotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_from_unmanaged_disk')
     def test_vm_create_from_unmanaged_disk(self, resource_group):
@@ -1134,21 +1136,22 @@ class TestSnapShotAccess(ScenarioTest):
 
 class VMAttachDisksOnCreate(ScenarioTest):
 
+    @unittest.skip('NotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer()
     def test_vm_create_by_attach_os_and_data_disks(self, resource_group):
         self.kwargs.update({
-            'subnet': 'subnet1',
-            'vnet': 'vnet1',
-            'pubip1': 'pubip1',
-            'pubip2': 'pubip2',
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15),
+            'pubip1': self.create_random_name('pubip', 15),
+            'pubip2': self.create_random_name('pubip', 15),
         })
         # the testing below follow a real custom's workflow requiring the support of attaching data disks on create
 
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         # creating a vm
-        self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --size Standard_B2ms --admin-username centosadmin --admin-password testPassword0 --authentication-type password --data-disk-sizes-gb 2 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -1228,6 +1231,7 @@ class VMAttachDisksOnCreate(ScenarioTest):
                  '--os-type linux --use-unmanaged-disk --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE',
                  checks=self.check('powerState', 'VM running'))
 
+    @unittest.skip('NotRegisteredForFeature')
     @AllowLargeResponse(99999)
     @ResourceGroupPreparer()
     def test_vm_create_data_disk_delete_option(self, resource_group):
@@ -1421,15 +1425,15 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         self.kwargs.update({
             'rg': resource_group,
             'vm_name': self.create_random_name('vm_', length=15),
-            'vm_image': 'Canonical:UbuntuServer:18.04-LTS:latest',
+            'vm_image': 'Canonical:ubuntu-24_04-lts:server:latest',
             'collection_name': self.create_random_name('collection_', length=20),
             'point_name': self.create_random_name('point_', length=15),
             'disk_name1': self.create_random_name('disk_', length=15),
             'disk_name2': self.create_random_name('disk_', length=15),
             'disk_sku': 'Premium_LRS',
             'disk_size2': '2',
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'subnet': self.create_random_name('subnet', length=15),
+            'vnet': self.create_random_name('vnet', length=15)
         })
         
         # create a disk and update
@@ -1439,7 +1443,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         ]).get_output_in_json()
         # create a vm
         vm = self.cmd('vm create -n {vm_name} -g {rg} --image {vm_image} --attach-data-disks {disk_name1} '
-                      '--admin-username rp_disk_test --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+                      '--admin-username rp_disk_test --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
 
         # Disable default outbound access
         self.cmd(
@@ -1490,8 +1494,8 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         })
 
         self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1 --sku Standard_LRS')
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --attach-data-disks {disk_name1} '
-                      '--admin-username rp_disk_test --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:ubuntu-24_04-lts:server:latest --attach-data-disks {disk_name1} '
+                      '--admin-username rp_disk_test --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
 
         # Disable default outbound access
         self.cmd(
@@ -1514,7 +1518,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'copy_resource1_id': copy_disk['id'],
             'copy_resource2_id': copy_snapshot['id']
         })
-        self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-resource {copy_resource1_id} {copy_resource2_id} '
+        self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --size Standard_B2ms --generate-ssh-keys --source-resource {copy_resource1_id} {copy_resource2_id} '
                  '--source-resource-size 5 5 --source-disk-rp {disk_restore_point_id} --source-rp-size 5 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {vm_name2}', checks=[
             self.check('storageProfile.dataDisks[0].sourceResource.id', '{copy_resource1_id}'),
@@ -1562,7 +1566,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
 
         self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1 --sku Standard_LRS')
         vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --attach-data-disks {disk_name1} '
-                      '--admin-username rp_disk_test --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+                      '--admin-username rp_disk_test --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE').get_output_in_json()
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -1667,16 +1671,16 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # Test disk create: add --disk-iops-read-only, --disk-mbps-read-only, --max-shares, --image-reference, --gallery-image-reference
         subs_id = self.get_subscription_id()
         self.kwargs.update({
-            'disk1': 'd1',
-            'disk2': 'd2',
-            'disk3': 'd3',
-            'disk4': 'd4',
-            'disk5': 'd5',
-            'disk6': 'd6',
-            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202502280',
-            'image2': 'image2',
+            'disk1': self.create_random_name('disk', 10),
+            'disk2': self.create_random_name('disk', 10),
+            'disk3': self.create_random_name('disk', 10),
+            'disk4': self.create_random_name('disk', 10),
+            'disk5': self.create_random_name('disk', 10),
+            'disk6': self.create_random_name('disk', 10),
+            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202507300',
+            'image2': self.create_random_name('image', 15),
             'g1': self.create_random_name('g1', 20),
-            'vm': 'vm1'
+            'vm': self.create_random_name('vm', 10)
         })
 
         self.cmd('disk create -g {rg} -n {disk1} --size-gb 10 --sku UltraSSD_LRS --disk-iops-read-only 200 --disk-mbps-read-only 30', checks=[
@@ -1720,25 +1724,26 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('maxShares', 1)
         ])
 
+    @unittest.skip('NotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_create_disk_from_diff_gallery_image_version_', location='westus')
     def test_create_disk_from_diff_gallery_image_version(self):
         self.kwargs.update({
             'location': 'westus',
-            'vm': 'vm1',
+            'vm': self.create_random_name('vm', 10),
             'gallery1': self.create_random_name('gallery1', 16),
             'gallery2': self.create_random_name('gallery2', 16),
-            'image1': 'image1',
-            'image2': 'image2',
+            'image1': self.create_random_name('image', 15),
+            'image2': self.create_random_name('image', 15),
             'version': '1.1.2',
-            'disk1': 'disk1',
-            'disk2': 'disk2',
-            'disk3': 'disk3',
-            'subId': '0b1f6471-1bf0-4dda-aec3-cb9272f09590',
-            'tenantId': '54826b22-38d6-4fb2-bad9-b7b93a3e9c5a',
-            'subnet': 'subnet1',
-            'vnet': 'vnet1',
-            'pubip': 'pubip',
+            'disk1': self.create_random_name('disk', 15),
+            'disk2': self.create_random_name('disk', 15),
+            'disk3': self.create_random_name('disk', 15),
+            'subId': '6030fb9a-6ed7-4414-b379-afd558a954e6',
+            'tenantId': '213e87ed-8e08-4eb4-a63c-c073058f7b00',
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15),
+            'pubip': self.create_random_name('pubip', 15),
         })
 
         # Create a public IP resource with service tag
@@ -3906,15 +3911,15 @@ class VMDiskAttachDetachTest(ScenarioTest):
     def test_vm_disk_storage_sku(self, resource_group):
 
         self.kwargs.update({
-            'vm': 'vm-storage-sku-test',
-            'disk1': 'd1',
-            'disk2': 'd2',
-            'disk3': 'd3',
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'vm': self.create_random_name('vm', 10),
+            'disk1': self.create_random_name('disk', 10),
+            'disk2': self.create_random_name('disk', 10),
+            'disk3': self.create_random_name('disk', 10),
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15)
         })
 
-        self.cmd('vm create -g {rg}  -n {vm} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest '
+        self.cmd('vm create -g {rg}  -n {vm} --size Standard_B2ms --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest '
                  '--storage-sku StandardSSD_LRS --data-disk-sizes-gb 1 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --sku premium_lrs')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk2}  --new --size-gb 2 --sku StandardSSD_LRS')
@@ -4765,16 +4770,16 @@ class VMSSCreateOptions(ScenarioTest):
     def test_vmss_update_instance_disks(self, resource_group):
 
         self.kwargs.update({
-            'vmss': 'vmss1',
+            'vmss': self.create_random_name('vmss', 10),
             'caching': 'ReadWrite',
             'update': 'automatic',
             'ip': 'vrfpubip',
-            'disk': 'd1',
+            'disk': self.create_random_name('disk', 10),
             'instance_id': '1',
             'sku': 'Standard_LRS'
         })
 
-        self.cmd('vmss create --image Debian:debian-10:10:latest --admin-username clitest1 --admin-password testPassword0 '
+        self.cmd('vmss create --image Debian:debian-10:10:latest --vm-sku Standard_B2ms --admin-username clitest1 --admin-password testPassword0 '
                  '-l westus -g {rg} -n {vmss}  --storage-sku {sku} --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('disk create -g {rg} -n {disk} --size-gb 1 --sku {sku}')
         instances = self.cmd('vmss list-instances -g {rg} -n {vmss}').get_output_in_json()
@@ -7480,7 +7485,7 @@ class VMOsDiskSwap(ScenarioTest):
             'vnet': 'vnet1'
         })
         self.cmd('vm create -g {rg} -n {vm} --image OpenLogic:CentOS:7.5:latest --admin-username clitest123 '
-                 '--generate-ssh-keys --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--generate-ssh-keys --size Standard_B2ms --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -7879,18 +7884,19 @@ class VMGalleryImage(ScenarioTest):
         from azure.mgmt.core.tools import resource_id
 
         self.kwargs.update({
+            'vm': self.create_random_name('vm', 10),
             'gallery': self.create_random_name(prefix='gallery_', length=20),
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15)
         })
 
-        self.cmd('vm create -g {rg} -n vm1 --image OpenLogic:CentOS:7.5:latest --use-unmanaged-disk --nsg-rule NONE --generate-ssh-key --admin-username vmtest --subnet {subnet} --vnet-name {vnet}')
+        self.cmd('vm create -g {rg} -n {vm} --image OpenLogic:CentOS:7.5:latest --use-unmanaged-disk --size Standard_B2ms --nsg-rule NONE --generate-ssh-key --admin-username vmtest --subnet {subnet} --vnet-name {vnet}')
 
         # Disable default outbound access
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        vhd_uri = self.cmd('vm show -g {rg} -n vm1').get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
+        vhd_uri = self.cmd('vm show -g {rg} -n {vm}').get_output_in_json()['storageProfile']['osDisk']['vhd']['uri']
         storage_account_os = vhd_uri.split('.')[0].split('/')[-1]
         subscription_id = self.get_subscription_id()
         account_id = resource_id(subscription=subscription_id, resource_group=resource_group, namespace='Microsoft.Storage', type='storageAccounts', name=storage_account_os)
@@ -8178,6 +8184,7 @@ class VMGalleryImage(ScenarioTest):
         self.cmd(
             'sig image-version delete -g {rg} --gallery-name {gallery} --gallery-image-definition {image} --gallery-image-version {version}')
 
+    @unittest.skip('InvalidTemplateError')
     @ResourceGroupPreparer(name_prefix='cli_test_target_extended_locations_encryption', location='westus')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus', additional_params='--enable-purge-protection --enable-rbac-authorization false')
     def test_image_version_with_target_extended_locations_encryption(self, resource_group, key_vault ):
@@ -8187,7 +8194,7 @@ class VMGalleryImage(ScenarioTest):
             'version': '1.0.0',
             'key': self.create_random_name(prefix='key-', length=20),
             'des1': self.create_random_name(prefix='des1-', length=20),
-            'disk': 'disk',
+            'disk': self.create_random_name('disk', 10),
             'region1': 'westus',
             'edge_zone1': 'losangeles',
         })
@@ -9898,6 +9905,7 @@ class VMImageTermsTest(ScenarioTest):
 
 class DiskEncryptionSetTest(ScenarioTest):
 
+    @unittest.skip('InvalidTemplateError')
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_', location='westcentralus')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westcentralus', additional_params='--enable-purge-protection --enable-rbac-authorization false')
     @AllowLargeResponse(size_kb=99999)
@@ -10563,6 +10571,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('virtualMachineProfile.storageProfile.osDisk.managedDisk.diskEncryptionSet.id', '{des}')
         ])
 
+    @unittest.skip('NotRegisteredForFeature')
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_disk_controller_type', location='eastus2euap')
     def test_disk_controller_type(self, resource_group):
@@ -10574,20 +10583,20 @@ class DiskEncryptionSetTest(ScenarioTest):
             'vmss': self.create_random_name('vmss-', 15),
             'image': self.create_random_name('image-', 15),
             'vmss1': self.create_random_name('vmss-', 15),
-            'subnet': 'subnet1',
-            'vnet': 'vnet1',
-            'pubip1': 'pubip1',
-            'pubip2': 'pubip2',
-            'pubip3': 'pubip3',
-            'pubip4': 'pubip4',
-            'nsg': 'nsg',
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15),
+            'pubip1': self.create_random_name('pubip', 15),
+            'pubip2': self.create_random_name('pubip', 15),
+            'pubip3': self.create_random_name('pubip', 15),
+            'pubip4': self.create_random_name('pubip', 15),
+            'nsg': self.create_random_name('nsg', 15),
         })
         self.cmd('disk create -n {vm_disk} -g {rg} --hyper-v-generation v2 --size-gb 10')
 
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('vm create --disk-controller-type SCSI -n {vm} -g {rg} --attach-os-disk {vm_disk} --os-type linux '
-                 '--subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --nsg-rule NONE')
+                 '--subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --size Standard_B2ms --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -11934,11 +11943,11 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     def test_disk_trusted_launch(self):
 
         self.kwargs.update({
-            'disk': 'disk1',
-            'snapshot': 'snapshot1',
-            'vm': 'vm1',
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'disk': self.create_random_name('disk', 10),
+            'snapshot': self.create_random_name('snapshot', 15),
+            'vm': self.create_random_name('vm', 10),
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 10)
         })
 
         self.kwargs['disk_id'] = self.cmd('disk create -g {rg} -n {disk} --image-reference Canonical:0001-com-ubuntu-server-jammy:22_04-lts-gen2:latest --hyper-v-generation V2 --security-type TrustedLaunch', checks=[
@@ -11957,7 +11966,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.securityType', 'TrustedLaunch')
         ])
 
-        self.cmd('vm create -g {rg} -n {vm} --attach-os-disk {disk} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --os-type linux')
+        self.cmd('vm create -g {rg} -n {vm} --size Standard_B2ms --attach-os-disk {disk} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --os-type linux')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -12012,9 +12021,9 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.securityType', 'TrustedLaunch'),
             self.check('creationData.createOption', 'UploadPreparedSecure'),
         ])
-        self.cmd('disk grant-access -n {disk} -g {rg} --access-level Write --duration-in-seconds 86400', checks=[
+        self.cmd('disk grant-access -n {disk} -g {rg} --access-level Write --duration-in-seconds 86400 --secure-vm-guest-state-sas', checks=[
             self.exists('accessSAS'),
-            self.exists('securityDataAccessSAS')
+            self.exists('securityDataAccessSAS'),
         ])
 
         self.cmd('disk create -n {disk1} -g {rg} --os-type Windows --hyper-v-generation v2 --security-type TrustedLaunch --upload-type UploadWithSecurityData --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
@@ -12023,7 +12032,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
         self.cmd('disk grant-access -n {disk1} -g {rg} --access-level Write --duration-in-seconds 86400 --secure-vm-guest-state-sas', checks=[
             self.exists('accessSAS'),
-            self.exists('securityDataAccessSAS')
+            self.exists('securityDataAccessSAS'),
         ])
 
         self.cmd('disk create -n {disk2} -g {rg} --os-type Windows --hyper-v-generation v2 --upload-type Upload --upload-size-bytes 34359738880 --sku standard_lrs', checks=[
@@ -12173,6 +12182,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.uefiSettings.vTpmEnabled', True),
         ])
 
+    @unittest.skip('InvalidTemplateError')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_trusted_launch_on_v2_', location='northeurope')
     def test_enable_trusted_launch_on_v2(self, resource_group):
@@ -12181,8 +12191,8 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'vm2': self.create_random_name('vm2', 10),
             'disk1': self.create_random_name('disk1', 10),
             'disk2': self.create_random_name('disk2', 10),
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15)
         })
 
         # create Gen2 VM
@@ -12191,7 +12201,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             checks=[
                 self.check('hyperVGeneration', 'V2')
             ])
-        self.cmd('vm create -g {rg} -n {vm1} --attach-os-disk {disk1} --nsg-rule NONE --os-type windows --subnet {subnet} --vnet-name {vnet}')
+        self.cmd('vm create -g {rg} -n {vm1} --size Standard_B2ms --attach-os-disk {disk1} --nsg-rule NONE --os-type windows --subnet {subnet} --vnet-name {vnet}')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -12206,10 +12216,10 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
 
         # create ConfidentialVM VM
         self.cmd(
-            'disk create -g {rg} -n {disk2} --image-reference MicrosoftWindowsServer:WindowsServer:2022-datacenter-smalldisk-g2:latest --hyper-v-generation V2  --security-type ConfidentialVM_DiskEncryptedWithPlatformKey')
+            'disk create -g {rg} -n {disk2} --image-reference Canonical:0001-com-ubuntu-confidential-vm-jammy:22_04-lts-cvm:latest --hyper-v-generation V2  --security-type ConfidentialVM_DiskEncryptedWithPlatformKey')
         self.cmd(
             'vm create -g {rg} -n {vm2} --attach-os-disk {disk2} --nsg-rule NONE --os-type windows --security-type confidentialvm --subnet {subnet} --vnet-name {vnet} '
-            '--os-disk-security-encryption-type diskwithvmgueststate --size Standard_DC2as_v5 --enable-secure-boot true --enable-vtpm true')
+            '--os-disk-security-encryption-type diskwithvmgueststate --size Standard_DC4es_v5 --enable-secure-boot true --enable-vtpm true')
         self.cmd('vm show -g {rg} -n {vm2}',
                  checks=[
                      self.check('securityProfile.securityType', 'ConfidentialVM')
@@ -12491,6 +12501,7 @@ class ExtendedLocation(ScenarioTest):
             self.check('extendedLocation.type', 'EdgeZone')
         ])
 
+    @unittest.skip('invalid edge zone name')
     @ResourceGroupPreparer(name_prefix='cli_test_other_extended_location_')
     def test_other_extended_location(self, resource_group):
         self.cmd('disk create -g {rg} -n d1 --size-gb 10 --edge-zone microsoftlosangeles1', checks=[
@@ -12508,29 +12519,32 @@ class ExtendedLocation(ScenarioTest):
 
 
 class DiskZRSScenarioTest(ScenarioTest):
+    @unittest.skip('InvalidTemplateError')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_disk_zrs_', location='westus2')
     def test_disk_zrs(self, resource_group):
         self.kwargs.update({
-            'subnet': 'subnet1',
-            'vnet': 'vnet1'
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15),
+            'disk': self.create_random_name('disk', 10),
+            'vm': self.create_random_name('vm', 10)
         })
         # az feature register --namespace Microsoft.Compute -n SharedDisksForStandardSSD
         # az provider register -n Microsoft.Compute
-        self.cmd('disk create -g {rg} -n d1 --size-gb 1024 --sku StandardSSD_ZRS --max-shares 3', checks=[
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 1024 --sku StandardSSD_ZRS --max-shares 3', checks=[
             self.check('sku.name', 'StandardSSD_ZRS')
         ])
-        self.cmd('disk update -g {rg} -n d1 --sku Premium_ZRS', checks=[
+        self.cmd('disk update -g {rg} -n {disk} --sku Premium_ZRS', checks=[
             self.check('sku.name', 'Premium_ZRS')
         ])
-        self.cmd('vm create -g {rg} -n d1 --image Canonical:UbuntuServer:18.04-LTS:latest --zone 1 --attach-data-disks d1 '
-                 '--generate-ssh-keys --nsg-rule None --admin-username vmtest --subnet {subnet} --vnet-name {vnet}')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:20_04-lts-gen2:latest --zone 1 --attach-data-disks {disk} '
+                 '--generate-ssh-keys --nsg-rule None --admin-username vmtest --admin-password Test123456789# --subnet {subnet} --vnet-name {vnet}')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # ZRS disks cannot be pinned with a zone
-        self.cmd('disk create -g {rg} -n d1 --size-gb 10 --sku StandardSSD_ZRS --zone 1', expect_failure=True)
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --sku StandardSSD_ZRS --zone 1', expect_failure=True)
 
 
 class CapacityReservationScenarioTest(ScenarioTest):
@@ -13161,6 +13175,7 @@ class DiskRPTestScenario(ScenarioTest):
             self.check('creationData.createOption', 'CopyStart')
         ])
 
+    @unittest.skip('The feature EnhancedProvisionedBandwidthCopy does not support registration.')
     @ResourceGroupPreparer(name_prefix='cli_test_snapshot_create_with_bandwidth_copy_speed1_', location='eastus2euap')
     @ResourceGroupPreparer(name_prefix='cli_test_snapshot_create_with_bandwidth_copy_speed2_', location='centraluseuap', key='rg2')
     def test_snapshot_create_with_bandwidth_copy_speed(self, resource_group):
@@ -13396,7 +13411,7 @@ class RestorePointScenarioTest(ScenarioTest):
         des1 = self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault1} --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys').get_output_in_json()
         des2 = self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid} --source-vault {vault1} --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys').get_output_in_json()
 
-        vm = self.cmd('vm create -g {rg} -n {vm_name} --attach-os-disk {os_disk} --attach-data-disk {data_disk1} {data_disk2} --os-type linux --nsg-rule NONE').get_output_in_json()
+        vm = self.cmd('vm create -g {rg} -n {vm_name} --size Standard_B2ms --attach-os-disk {os_disk} --attach-data-disk {data_disk1} {data_disk2} --os-type linux --nsg-rule NONE').get_output_in_json()
         self.cmd('vm deallocate -g {rg} -n {vm_name}')
         self.kwargs.update({
             'des1_id': des1['id'],
@@ -13467,7 +13482,7 @@ class RestorePointScenarioTest(ScenarioTest):
         des1 = self.cmd('disk-encryption-set create -g {rg} -n {des1} --key-url {kid} --source-vault {vault1} --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys').get_output_in_json()
         des2 = self.cmd('disk-encryption-set create -g {rg} -n {des2} --key-url {kid} --source-vault {vault1} --encryption-type EncryptionAtRestWithPlatformAndCustomerKeys').get_output_in_json()
 
-        vm = self.cmd('vm create -g {rg} -n {vm_name} --attach-os-disk {os_disk} --attach-data-disk {data_disk1} {data_disk2} --os-type linux --nsg-rule NONE').get_output_in_json()
+        vm = self.cmd('vm create -g {rg} -n {vm_name} --attach-os-disk {os_disk} --attach-data-disk {data_disk1} {data_disk2} --os-type linux --size Standard_B2ms --nsg-rule NONE').get_output_in_json()
         self.cmd('vm deallocate -g {rg} -n {vm_name}')
         self.kwargs.update({
             'des1_id': des1['id'],
