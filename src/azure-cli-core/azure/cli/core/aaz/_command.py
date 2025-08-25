@@ -332,7 +332,7 @@ def register_command_group(
             cls.AZ_EXPERIMENTAL_INFO = staticmethod(partial(ExperimentalItem, target=f'az {name}', object_type='command group'))
         if deprecated_info:
             cls.AZ_DEPRECATE_INFO = staticmethod(partial(Deprecated, target=f'az {name}', object_type='command group',
-                                            **deprecated_info))
+                                                         **deprecated_info))
         return cls
 
     return decorator
