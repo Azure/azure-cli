@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.breaking_change import register_argument_deprecate
+from azure.cli.core.breaking_change import register_argument_deprecate, register_required_flag_breaking_change
 
 register_argument_deprecate(
     "az sf application update",
@@ -61,3 +61,7 @@ register_argument_deprecate(
     "az sf managed-application update",
     "--max-percent-unhealthy-deployed-applications",
     hide=True)
+register_required_flag_breaking_change(
+    "az sf managed-application version update",
+    "--package_url"
+)
