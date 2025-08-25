@@ -205,12 +205,17 @@ def login(cmd, username=None, password=None, tenant=None, scopes=None, allow_no_
 
     # Launch interactive account selection. No JSON output.
     if select_subscription:
-        from ._subscription_selector import SubscriptionSelector
-        from azure.cli.core._profile import _SUBSCRIPTION_ID
-
-        selected = SubscriptionSelector(subscriptions)()
-        profile.set_active_subscription(selected[_SUBSCRIPTION_ID])
-
+        if subscriptions:
+            from ._subscription_selector import SubscriptionSelector
+            from azure.cli.core._profile import _SUBSCRIPTION_ID
+            selected = SubscriptionSelector(subscriptions)()
+            profile.set_active_subscription(selected[_SUBSCRIPTION_ID])
+        else:
+            # By default, if the account has no access to any subscription, CLI will fail earlier in _profile.py.
+            # When --allow-no-subscriptions is specified, and the account
+            #   - has access to tenant, but no subscription, `subscriptions` will be the tenant account
+            #   - has access to no tenant, `subscriptions` will be []. This line will be hit.
+            print("\nNo accessible tenant. Make sure your account has access to at least one tenant.\n")
         print(LOGIN_ANNOUNCEMENT)
         logger.warning(LOGIN_OUTPUT_WARNING)
         return
