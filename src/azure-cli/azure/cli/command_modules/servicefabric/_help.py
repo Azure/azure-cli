@@ -804,7 +804,7 @@ long-summary: This allows for updating of application type version tags and the 
 examples:
   - name: Update managed application type version.
     text: >
-        az sf managed-application-type version update -g testRG -c testCluster --application-type-name CalcServiceApp --version 1.0 --package-url https://exampleurl.com --tags new=tags
+        az sf managed-application-type version update -g testRG -c testCluster --application-type-name CalcServiceApp --version 1.0 --tags new=tags
 """
 
 helps['sf managed-application-type version delete'] = """
