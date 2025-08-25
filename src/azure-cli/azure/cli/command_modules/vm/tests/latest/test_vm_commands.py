@@ -1639,7 +1639,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'snapshot': self.create_random_name('snapshot', 15)
         })
         self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --sku UltraSSD_LRS')
-        self.cmd('snapshot create -g {rg} -n {snapshot} --enable-instant-access 300 --incremental true --source {disk}', checks=[
+        self.cmd('snapshot create -g {rg} -n {snapshot} --ia-duration 300 --incremental true --source {disk}', checks=[
             self.check('incremental', True),
             self.check('creationData.instantAccessDurationMinutes', 300)
         ])
