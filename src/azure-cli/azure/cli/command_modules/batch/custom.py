@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from urllib.parse import urlsplit
 import configparser
 from knack.log import get_logger
 
@@ -375,27 +374,9 @@ def update_application(client,
 
 def _upload_package_blob(ctx, package_file, url):
     """Upload the location file to storage url provided by autostorage"""
-    BlockBlobService = get_sdk(ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
-
-    uri = urlsplit(url)
-    # in uri path, it always start with '/', so container name is at second block
-    pathParts = uri.path.split('/', 2)
-    container_name = pathParts[1]
-    blob_name = pathParts[2]
-    # we need handle the scenario storage account not in public Azure
-    hostParts = uri.netloc.split('.', 2)
-    account_name = hostParts[0]
-    # endpoint suffix needs to ignore the 'blob' part in the host name
-    endpoint_suffix = hostParts[2]
-
-    sas_service = BlockBlobService(account_name=account_name,
-                                   sas_token=uri.query,
-                                   endpoint_suffix=endpoint_suffix)
-    sas_service.create_blob_from_path(
-        container_name=container_name,
-        blob_name=blob_name,
-        file_path=package_file,
-    )
+    BlobClient = get_sdk(ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
+    blob_client = BlobClient.from_blob_url(url)
+    blob_client.upload_blob(package_file)
 
 
 @transfer_doc(ApplicationPackageOperations.create)

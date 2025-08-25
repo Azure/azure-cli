@@ -705,7 +705,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         ])
 
         self.cmd('storage logging update --services b --log r --retention 1 '
-                 '--service b --connection-string {}'.format(connection_string))
+                 '--connection-string {}'.format(connection_string))
 
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('blob.read', True),
@@ -714,7 +714,7 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         ])
 
         self.cmd('storage logging update --services b --log r --retention 0 '
-                 '--service b --connection-string {}'.format(connection_string))
+                 '--connection-string {}'.format(connection_string))
 
         self.cmd('storage logging show --connection-string {}'.format(connection_string), checks=[
             JMESPathCheck('blob.read', True),
