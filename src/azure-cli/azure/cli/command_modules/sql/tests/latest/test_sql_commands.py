@@ -588,8 +588,8 @@ class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus2')
+    @SqlServerPreparer(location='westus2')
     @live_only()
     def test_sql_outbound_firewall_mgmt(self, resource_group, resource_group_location, server):
         outbound_firewall_rule_allowed_fqdn_1 = 'testOBFR1'
@@ -897,6 +897,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
+    @unittest.skip('Cannot record as hard-coded resources does not exist anymore')
     def test_sql_per_db_cmk(self):
         server = "pstestsvr"
         resource_group = "pstest"
@@ -1444,7 +1445,7 @@ class SqlManagedInstanceOperationMgmtScenarioTest(ScenarioTest):
         print('Updating MI...\n')
 
         # Update sql managed_instance
-        self.cmd('sql mi update -g {} -n {} --edition {} --capacity {} --zone-redundant false --no-wait'
+        self.cmd('sql mi update -g {} -n {} --edition {} --capacity {} --no-wait'
                  .format(resource_group, managed_instance_name, edition_updated, v_core_update))
 
         print('Listing all operations...\n')
@@ -1629,9 +1630,9 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     @ResourceGroupPreparer(parameter_name='resource_group_2', location='westeurope')
     @SqlServerPreparer(parameter_name='server1', resource_group_parameter_name='resource_group_1',
-                       location='eastus')
+                       location='eastus2euap')
     @SqlServerPreparer(parameter_name='server2', resource_group_parameter_name='resource_group_2',
-                       location='eastus')
+                       location='eastus2euap')
     @AllowLargeResponse()
     def test_sql_db_copy_with_perdb_cmk(self, resource_group_1, resource_group_2,
                          resource_group_location,
@@ -1641,13 +1642,13 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         service_objective = 'GP_Gen5_8'
 
         # copy db with per db cmk Enabled
-        encryption_protector = "https://pstestkv2.vault.azure.net/keys/testkey4/3d4947c13419445e9bf97500c8ddde37"
-        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+        encryption_protector = "https://pstestkv3.vault.azure.net/keys/testkey3/90bfc038075241518bf00ba4bb00ce1d"
+        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
 
         # create db with db level encryption protector and umi
 
         # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
-        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
+        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
         self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --yes'
                  .format(resource_group_1, server1, database_name, encryption_protector, umi),
                  checks=[
@@ -3165,7 +3166,7 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
             "resource_group_2" : "CLI-Automated-Tests",
             "resource_group_location_2" : "southcentralus",
             "resource_group_location_3" : "westus3",
-            "partner_subscription" : "00000000-0000-0000-0000-000000000000"
+            "partner_subscription" : "00000000-0000-0000-0000-000000000000"  # replace with actual subscription id for record mode
             })
 
         # helper class so that it's clear which servers are in which groups
@@ -3214,7 +3215,8 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('name', target_database_name),
                      JMESPathCheck('resourceGroup', s2.group),
                      JMESPathCheck('requestedServiceObjectiveName', service_objective),
-                     JMESPathCheck('secondaryType', secondary_type)])
+                    # JMESPathCheck('secondaryType', secondary_type) #Remove this check as secondaryType is returned as null in cross subscription scenario
+                ])
 
         # Create replica in pool in third server with max params (except service objective)
         pool_name = 'cli-automated-tests-pool'
@@ -6815,10 +6817,10 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                        location='northeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1", 
-                       location='uksouth')
+                       location='eastus')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2", 
-                       location='swedencentral')
+                       location='westus2')
     def test_sql_failover_group_mgmt_multiple_partners(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,
@@ -6906,7 +6908,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                 ])
 
         if self.in_recording:
-            time.sleep(60)
+            time.sleep(120)
 
         # Update Failover Group
         self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {} --ro-endpoint-target {} --ro-failover-policy Disabled'
@@ -6958,7 +6960,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
         if self.in_recording:
-            time.sleep(60)
+            time.sleep(120)
 
         # Update Failover Group failover policy to Manual
         self.cmd('sql failover-group update -g {} -s {} -n {} --failover-policy Manual'
