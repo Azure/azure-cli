@@ -327,13 +327,13 @@ def register_command_group(
         helps[name] = yaml.safe_dump(cls.AZ_HELP)
 
         if is_preview:
-            cls.AZ_PREVIEW_INFO = staticmethod(partial(PreviewItem, 
+            cls.AZ_PREVIEW_INFO = staticmethod(partial(PreviewItem,
                                                        target=f'az {name}', object_type='command group'))
         if is_experimental:
-            cls.AZ_EXPERIMENTAL_INFO = staticmethod(partial(ExperimentalItem, 
+            cls.AZ_EXPERIMENTAL_INFO = staticmethod(partial(ExperimentalItem,
                                                             target=f'az {name}', object_type='command group'))
         if deprecated_info:
-            cls.AZ_DEPRECATE_INFO = staticmethod(partial(Deprecated, 
+            cls.AZ_DEPRECATE_INFO = staticmethod(partial(Deprecated,
                                                          target=f'az {name}', object_type='command group',
                                                          **deprecated_info))
         return cls
@@ -374,10 +374,10 @@ def register_command(
         if is_preview:
             cls.AZ_PREVIEW_INFO = staticmethod(partial(PreviewItem, target=f'az {name}', object_type='command'))
         if is_experimental:
-            cls.AZ_EXPERIMENTAL_INFO = staticmethod(partial(ExperimentalItem, 
+            cls.AZ_EXPERIMENTAL_INFO = staticmethod(partial(ExperimentalItem,
                                                             target=f'az {name}', object_type='command'))
         if deprecated_info:
-            cls.AZ_DEPRECATE_INFO = staticmethod(partial(Deprecated, target=f'az {name}', 
+            cls.AZ_DEPRECATE_INFO = staticmethod(partial(Deprecated, target=f'az {name}',
                                                          object_type='command', **deprecated_info))
         return cls
 
