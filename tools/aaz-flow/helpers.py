@@ -1,4 +1,5 @@
 import asyncio
+from pathlib import Path
 import sys
 from typing import Literal
 from fastmcp import Context
@@ -6,6 +7,13 @@ import requests
 import os
 import subprocess as sp
 from models import AAZRequest
+
+paths = {
+    "aaz": os.getenv("AAZ_PATH", "/workspaces-src/aaz"),
+    "cli": "/workspaces/azure-cli",
+    "cli_extension": os.getenv("CLI_EXTENSION_PATH", "/workspaces-src/azure-cli-extensions"),
+    "swagger_path": os.getenv("SWAGGER_PATH", "/workspaces-src/azure-rest-api-specs")
+}
 
 async def fetch_available_services():
     """Fetch available services from azure-rest-api-specs repository."""
@@ -22,12 +30,6 @@ async def fetch_available_services():
 
 async def validate_paths(ctx: Context) -> dict:
     """Validate and get correct paths for required directories."""
-    paths = {
-        "aaz": os.getenv("AAZ_PATH", "/workspaces-src/aaz"),
-        "cli": "/workspaces/azure-cli",
-        "cli_extension": os.getenv("CLI_EXTENSION_PATH", "/workspaces-src/azure-cli-extensions"),
-        "swagger_path": os.getenv("SWAGGER_PATH", "/workspaces-src/azure-rest-api-specs")
-    }
 
     await ctx.info("az_cli : Validating local paths...")
     await ctx.report_progress(progress=5, total=100)
@@ -182,7 +184,6 @@ async def browse_specs(ctx: Context, base_path: str):
             return result
 
 async def run_command(ctx: Context, command: str, step_name: str, progress_start: int, progress_end: int):
-    """Run a shell command and report progress."""
     await ctx.info(f"az_cli : Starting: {step_name}")
     process = await asyncio.create_subprocess_shell(
         command,
@@ -197,19 +198,22 @@ async def run_command(ctx: Context, command: str, step_name: str, progress_start
     while True:
         line = await process.stdout.readline()
         if not line:
-            break
+            if process.returncode is not None:
+                break
+            await asyncio.sleep(0.1)
+            continue
         lines_count += 1
         await ctx.info(f"az_cli : {line.decode().rstrip()}")
         progress = progress_start + min(progress_range, int((lines_count / total_lines_estimate) * progress_range))
         await ctx.report_progress(progress, 100)
 
     await process.wait()
+
     if process.returncode != 0:
         raise RuntimeError(f"{step_name} failed: {command}")
 
     await ctx.report_progress(progress_end, 100)
     await ctx.info(f"az_cli : Completed: {step_name}")
-
 
 async def execute_commands(ctx: Context, paths: dict, request: AAZRequest):
     cmd1 = (
@@ -241,3 +245,41 @@ async def execute_commands(ctx: Context, paths: dict, request: AAZRequest):
         return f"Code generation failed: {str(e)}"
 
     return "Azure CLI code generation completed successfully!"
+
+async def generate_tests(ctx: "Context"):
+    await ctx.info("Starting test generation workflow.")
+
+    module_name = getattr(ctx, "generated_module", None)
+    if not module_name:
+        response = await ctx.elicit("Enter the module/extension name to generate tests for:")
+        if not response.action == "accept" or not response.data:
+            return "Test generation cancelled."
+        module_name = response.data
+    else:
+        await ctx.info(f"Detected generated module: {module_name}")
+
+    aaz_path = Path(f"{paths['cli']}/src/azure-cli/azure/cli/command_modules/{module_name}/aaz")
+    if not aaz_path.exists():
+        return f"AAZ path not found for module '{module_name}'"
+
+    commands = []
+    for file in aaz_path.rglob("*.py"):
+        with open(file, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.strip().startswith("def "):
+                    commands.append(line.strip().replace("def ", "").split("(")[0])
+
+    test_dir = Path(f"{paths['cli']}/src/azure-cli/azure/cli/command_modules/{module_name}/tests/latest")
+    test_dir.mkdir(parents=True, exist_ok=True)
+    test_file = test_dir / f"test_{module_name}.py"
+
+    with open(test_file, "w", encoding="utf-8") as f:
+        f.write("import unittest\n")
+        f.write("from azure.cli.testsdk import ScenarioTest\n\n")
+        f.write(f"class {module_name.capitalize()}ScenarioTest(ScenarioTest):\n\n")
+        for cmd in commands:
+            f.write(f"    def test_{cmd}(self):\n")
+            f.write(f"        self.cmd('az {module_name} {cmd} --resource-name test-resource')\n\n")
+
+    await ctx.info(f"Generated test file: {test_file}")
+    return f"Test generation completed for module '{module_name}'."

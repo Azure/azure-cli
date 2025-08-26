@@ -8,5 +8,7 @@ Please note that AAZ Flow is currently in early development. The functionality a
 
 ## Implemetation
 1. Performs elicitation for user input to perform workflow
-2. Generates elicitation questions using llm prompts
+2. Generates content using llm sampling
 3. Executes AAZ Flow commands directly
+4. Generates tests using llm sampling
+5. Uses tool transformation to make the internal tooling more friendly for llms
