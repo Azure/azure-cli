@@ -652,7 +652,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     hyper_v_generation=None, tags=None, no_wait=False, disk_encryption_set=None,
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
                     public_network_access=None, accelerated_network=None, architecture=None,
-                    elastic_san_resource_id=None, bandwidth_copy_speed=None):
+                    elastic_san_resource_id=None, bandwidth_copy_speed=None, instant_access_duration_minutes=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -676,7 +676,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         'storage_account_id': source_storage_account_id,
         'elastic_san_resource_id': elastic_san_resource_id,
         'provisioned_bandwidth_copy_speed': bandwidth_copy_speed,
-
+        'instant_access_duration_minutes': instant_access_duration_minutes
     }
 
     if size_gb is None and option == 'Empty':
@@ -3810,14 +3810,6 @@ def deallocate_vmss(cmd, resource_group_name, vm_scale_set_name, instance_ids=No
     else:
         return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_deallocate,
                            resource_group_name, vm_scale_set_name, vm_instance_i_ds)
-
-
-def delete_vmss_instances(cmd, resource_group_name, vm_scale_set_name, instance_ids, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineScaleSetVMInstanceRequiredIDs = cmd.get_models('VirtualMachineScaleSetVMInstanceRequiredIDs')
-    instance_ids = VirtualMachineScaleSetVMInstanceRequiredIDs(instance_ids=instance_ids)
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_delete_instances,
-                       resource_group_name, vm_scale_set_name, instance_ids)
 
 
 def get_vmss(cmd, resource_group_name, name, instance_id=None, include_user_data=False):

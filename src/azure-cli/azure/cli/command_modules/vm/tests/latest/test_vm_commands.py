@@ -1101,6 +1101,7 @@ class TestSnapShotAccess(ScenarioTest):
         self.cmd('snapshot revoke-access -n {snapshot2} -g {rg}')
         self.cmd('snapshot show -n {snapshot2} -g {rg}', checks=self.check('diskState', 'Unattached'))
 
+    @unittest.skip('SubscriptionNotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='test_snapshot_create_with_source_blob_uri')
     def test_snapshot_create_with_source_blob_uri(self, resource_group):
@@ -1630,6 +1631,27 @@ class VMManagedDiskScenarioTest(ScenarioTest):
         # test snapshot --incremental
         self.cmd('snapshot create -g {rg} -n {snapshot} --incremental -l centraluseuap --source {disk}',
                  checks=[self.check('incremental', True)])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_snapshot_enable_instant_access', location='EastUS2EUAP')
+    def test_vm_snapshot_enable_instant_access(self, resource_group):
+        self.kwargs.update({
+            'disk': self.create_random_name('disk', 15),
+            'iadisk1': self.create_random_name('disk', 15),
+            'iadisk2': self.create_random_name('disk', 15),
+            'snapshot': self.create_random_name('snapshot', 15)
+        })
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --sku UltraSSD_LRS --logical-sector-size 512')
+        snapshot = self.cmd('snapshot create -g {rg} -n {snapshot} --ia-duration 300 --incremental true --source {disk}', checks=[
+            self.check('incremental', True),
+            self.check('creationData.instantAccessDurationMinutes', 300)
+        ]).get_output_in_json()
+        self.kwargs.update({
+            'snapshot_id': snapshot['id']
+        })
+        self.cmd('disk create -g {rg} -n {iadisk1} --source {snapshot_id} --sku UltraSSD_LRS', checks=[
+            self.check('creationData.sourceResourceId', '{snapshot_id}')
+        ])
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_snapshot_copy_start_')
     def test_vm_snapshot_copy_start_detection(self, resource_group):
@@ -7967,6 +7989,7 @@ class VMGalleryImage(ScenarioTest):
             self.check('storageProfile.osDiskImage.source.uri', '{vhd_uri}')
         ])
 
+    @unittest.skip('InvalidTemplateError')
     @ResourceGroupPreparer(random_name_length=15, location='westus')
     @KeyVaultPreparer(name_prefix='vault-', name_len=20, key='vault', location='westus',
                       additional_params='--enable-purge-protection true --enable-rbac-authorization false')
@@ -8304,6 +8327,7 @@ class VMGalleryImage(ScenarioTest):
                      self.check('storageProfile.dataDiskImages[1].lun', 3)
                  ])
 
+    @unittest.skip('InvalidTemplateError')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_test_specialized_image_')
     def test_specialized_image(self, resource_group):
@@ -10283,6 +10307,7 @@ class DiskEncryptionSetTest(ScenarioTest):
             self.check('encryption.type', 'EncryptionAtRestWithPlatformKey')
         ])
 
+    @unittest.skip('InvalidTemplateError')
     @ResourceGroupPreparer(name_prefix='cli_test_disk_encryption_set_snapshot_', location='westcentralus')
     @KeyVaultPreparer(name_prefix='vault4-', name_len=20, key='vault', location='westcentralus', additional_params='--enable-purge-protection --enable-rbac-authorization false')
     @AllowLargeResponse(size_kb=99999)

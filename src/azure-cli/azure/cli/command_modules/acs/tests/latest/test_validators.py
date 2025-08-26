@@ -1588,7 +1588,7 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
             )
         err = (
             'The latest version of Azure Container Storage only supports ephemeral nvme storage and does not '
-            'require or support a storage-pool-type value for --enable-azure-container-storage parameter. '
+            'require or support a storage-pool-type value for --disable-azure-container-storage parameter. '
             f'Please remove {storage_pool_type} from the command and try again.'
         )
         self.assertEqual(str(cm.exception), err)
