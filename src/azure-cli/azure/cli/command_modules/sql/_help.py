@@ -311,7 +311,7 @@ type: command
 short-summary: Add a legal hold on the long term retention backup database.
 examples:
   - name: Add legal hold on a long term retention backup for a database.
-    text: az sql db ltr-backup set-legal-hold-immutability -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql db ltr-backup set-legal-hold-immutability -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000" 
 """
 
 helps['sql db ltr-backup remove-legal-hold-immutability'] = """
@@ -319,7 +319,7 @@ type: command
 short-summary: Remove a legal hold on the long term retention backup database.
 examples:
   - name: remove a legal hold on a long term retention backup for a database.
-    text: az sql db ltr-backup remove-legal-hold-immutability -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql db ltr-backup remove-legal-hold-immutability -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000" 
 """
 
 helps['sql db ltr-backup lock-time-based-immutability'] = """
@@ -327,15 +327,15 @@ type: command
 short-summary: Lock the time based immutability on a long term retention backup to prevent deletion.
 examples:
   - name: lock the long term retention backup for a database.
-    text: az sql db ltr-backup lock-time-based-immutability -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql db ltr-backup lock-time-based-immutability -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000" 
 """
 
-helps['sql db ltr-backup disable-time-based-immutability'] = """
+helps['sql db ltr-backup remove-time-based-immutability'] = """
 type: command
-short-summary: disable the time based immutability on a long term retention backup.
+short-summary: remove the time based immutability on a long term retention backup.
 examples:
-  - name: disable a time based immutability on a long term retention backup for a database.
-    text: az sql db ltr-backup disable-time-based-immutability -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+  - name: remove a time based immutability on a long term retention backup for a database.
+    text: az sql db ltr-backup remove-time-based-immutability -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql db geo-backup'] = """

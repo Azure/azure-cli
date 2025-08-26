@@ -3346,15 +3346,10 @@ def remove_time_based_immutability(
         long_term_retention_server_name: str,
         long_term_retention_database_name: str,
         backup_name: str,
-        yes=None,
         **kwargs):
     '''
     Removes time-based immutability for long term retention backups.
     '''
-    if not yes:
-        confirmation = prompt_y_n("Are you sure you want to remove time-based immutability for long term retention backups?")
-        if not confirmation:
-            return
 
     if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
         raise CLIError('Please specify all required parameters: '
@@ -3384,16 +3379,10 @@ def lock_time_based_immutability(
         long_term_retention_server_name: str,
         long_term_retention_database_name: str,
         backup_name: str,
-        yes=None,
         **kwargs):
     '''
     Locks time-based immutability for long term retention backups.
     '''
-
-    if not yes:
-        confirmation = prompt_y_n("Are you sure you want to lock time-based immutability for long term retention backups?")
-        if not confirmation:
-            return
 
     if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
         raise CLIError('Please specify all required parameters: '
@@ -3423,15 +3412,10 @@ def set_legal_hold_immutability(
         long_term_retention_server_name: str,
         long_term_retention_database_name: str,
         backup_name: str,
-        yes=None,
         **kwargs):
     '''
     Sets legal hold immutability for long term retention backups.
     '''
-    if not yes:
-        confirmation = prompt_y_n("Are you sure you want to set legal hold immutability?")
-        if not confirmation:
-            return
 
     if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
         raise CLIError('Please specify all required parameters: '
@@ -3461,16 +3445,10 @@ def remove_legal_hold_immutability(
         long_term_retention_server_name: str,
         long_term_retention_database_name: str,
         backup_name: str,
-        yes=None,
         **kwargs):
     '''
     Removes legal hold immutability for long term retention backups.
     '''
-    
-    if not yes:
-        confirmation = prompt_y_n("Are you sure you want to remove legal hold immutability?")
-        if not confirmation:
-            return
 
     if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
         raise CLIError('Please specify all required parameters: '

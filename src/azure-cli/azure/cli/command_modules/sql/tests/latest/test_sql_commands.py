@@ -1322,7 +1322,7 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
         self.cmd(
             'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
             ' --weekly-retention {weekly_retention}'
-            ' --time-based-immutability {time_based_immutability} --yes y',
+            ' --time-based-immutability {time_based_immutability} --yes',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
@@ -1338,7 +1338,7 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
 
          # set-legal-hold-immutability test
         self.cmd(
-             'sql db ltr-backup set-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
+             'sql db ltr-backup set-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
               checks=[
                  self.check('resourceGroup', '{rg}'),
                  self.check('serverName', '{server_name}'),
@@ -1348,7 +1348,7 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
 
          # remove-legal-hold-immutability test
         self.cmd(
-             'sql db ltr-backup remove-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
+             'sql db ltr-backup remove-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
               checks=[
                  self.check('resourceGroup', '{rg}'),
                  self.check('serverName', '{server_name}'),
@@ -1356,9 +1356,9 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
                  self.check('name', '{backup_name}'),
                  self.check('legalHoldImmutability', 'Disabled')])
 
-         # disable-time-based-immutability test
+         # remove-time-based-immutability test
         self.cmd(
-             'sql db ltr-backup disable-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
+             'sql db ltr-backup remove-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
               checks=[
                  self.check('resourceGroup', '{rg}'),
                  self.check('serverName', '{server_name}'),
@@ -1382,7 +1382,7 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
 
         # lock-time-based-immutability
         self.cmd(
-              'sql db ltr-backup lock-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes y',
+              'sql db ltr-backup lock-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
                checks=[
                   self.check('resourceGroup', '{rg}'),
                   self.check('serverName', '{server_name}'),
@@ -1404,7 +1404,7 @@ class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
             'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
             ' --weekly-retention {weekly_retention}'
             ' --time-based-immutability {time_based_immutability}' 
-            ' --time-based-immutability-mode {time_based_immutability_mode} --yes y',
+            ' --time-based-immutability-mode {time_based_immutability_mode} --yes',
             checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
