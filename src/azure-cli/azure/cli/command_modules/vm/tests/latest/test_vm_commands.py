@@ -1636,13 +1636,23 @@ class VMManagedDiskScenarioTest(ScenarioTest):
     def test_vm_snapshot_enable_instant_access(self, resource_group):
         self.kwargs.update({
             'disk': self.create_random_name('disk', 15),
+            'iadisk': self.create_random_name('disk', 15),
             'snapshot': self.create_random_name('snapshot', 15)
         })
-        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --sku UltraSSD_LRS')
-        self.cmd('snapshot create -g {rg} -n {snapshot} --ia-duration 300 --incremental true --source {disk}', checks=[
+        self.cmd('disk create -g {rg} -n {disk} --size-gb 10 --sku UltraSSD_LRS --logical-sector-size 512')
+        snapshot = self.cmd('snapshot create -g {rg} -n {snapshot} --ia-duration 300 --incremental true --source {disk}', checks=[
             self.check('incremental', True),
             self.check('creationData.instantAccessDurationMinutes', 300)
+        ]).get_output_in_json()
+        self.kwargs.update({
+            'snapshot_id': snapshot['id']
+        })
+        time.sleep(300)
+        # Need wait completionPercent is 100
+        self.cmd('disk create -g {rg} -n {iadisk} --source {snapshot_id}', checks=[
+            self.check('creationData.sourceResourceId', '{snapshot_id}')
         ])
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_snapshot_copy_start_')
     def test_vm_snapshot_copy_start_detection(self, resource_group):
