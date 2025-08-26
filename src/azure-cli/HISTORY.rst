@@ -26,7 +26,7 @@ Release History
 **App Service**
 
 * `az webapp deploy`: Add `--enable-kudu-warmup` parameter to support warm-up Kudu before making deployment (#31880)
-* `az functionapp flex-migration`: Create commands to migrate CV1 apps to Flex (#31865)
+* `az functionapp flex-migration`: Add commands to support migrating CV1 apps to Flex (#31865)
 
 **ARM**
 
@@ -49,11 +49,11 @@ Release History
 
 **IoT**
 
-* Remove `az iot hub devicestream`. To use this command, please install the latest version of the extension azure-iot. (#31913)
+* `az iot hub devicestream`: Mirgate this command group to `azure-iot` extension (#31913)
 
 **MySQL**
 
-* `az mysql flexible-server upgrade`: Add new version 8.4 (#31998)
+* `az mysql flexible-server upgrade`: Add new option `8.4` for `--version` (#31998)
 
 **Network**
 
@@ -78,7 +78,7 @@ Release History
 **RDBMS**
 
 * `az postgres flexible-server create/update/restore`: Premium SSD V2 is no longer supported with Burstable compute tier (#31948)
-* `az postgres flexible-server update`: BUG FIX, bypass fabric mirroring validation to allow updating high availability status for PG11 and PG12 servers (#31944)
+* `az postgres flexible-server update`: Bypass fabric mirroring validation to allow updating high availability status for PG11 and PG12 servers (#31944)
 
 **Service Fabric**
 
