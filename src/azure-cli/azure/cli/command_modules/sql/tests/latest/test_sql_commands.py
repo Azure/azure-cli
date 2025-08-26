@@ -901,7 +901,7 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
-    @unittest.skip('Cannot record as hard-coded resources does not exist anymore')
+    @unittest.skip('Cannot record as hard-coded resources does not exist anymore. ADO Bug-4599812.')
     def test_sql_per_db_cmk(self):
         server = "pstestsvr"
         resource_group = "pstest"
@@ -6654,7 +6654,8 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                        resource_group_parameter_name="resource_group_1",
                        location='northeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
-                       resource_group_parameter_name="resource_group_2", location='eastus')
+                       resource_group_parameter_name="resource_group_2",
+                       location='uksouth')
     def test_sql_failover_group_mgmt(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,
@@ -6829,10 +6830,10 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                        location='northeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1", 
-                       location='eastus')
+                       location='uksouth')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2", 
-                       location='westus2')
+                       location='swedencentral')
     def test_sql_failover_group_mgmt_multiple_partners(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,
@@ -6920,7 +6921,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                 ])
 
         if self.in_recording:
-            time.sleep(120)
+            time.sleep(60)
 
         # Update Failover Group
         self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {} --ro-endpoint-target {} --ro-failover-policy Disabled'
@@ -6972,7 +6973,7 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                  ])
 
         if self.in_recording:
-            time.sleep(120)
+            time.sleep(60)
 
         # Update Failover Group failover policy to Manual
         self.cmd('sql failover-group update -g {} -s {} -n {} --failover-policy Manual'
