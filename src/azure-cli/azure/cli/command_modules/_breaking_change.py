@@ -63,5 +63,5 @@ register_argument_deprecate(
     hide=True)
 register_required_flag_breaking_change(
     "az sf managed-application-type version update",
-    "--package_url"
+    "--package-url"
 )
