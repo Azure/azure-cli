@@ -1313,7 +1313,8 @@ def load_arguments(self, _):
                 'monthly_retention',
                 'yearly_retention',
                 'week_of_year',
-                'make_backups_immutable'])
+                'make_backups_immutable',
+                'time_based_immutability_mode'])
 
         c.argument('weekly_retention',
                    help='Retention for the weekly backup. '
@@ -1335,7 +1336,18 @@ def load_arguments(self, _):
 
         c.argument('make_backups_immutable',
                    help='Whether to make the LTR backups immutable.',
-                   arg_type=get_three_state_flag())
+                   arg_type=get_three_state_flag(),
+                   is_preview=True)
+
+        c.argument('time-based-immutability-mode',
+                     options_list=['--mode'],
+                     help='The mode of time based immutability to be set on the LTR backups. '
+                     'Possible values are: \'Locked\', \'Unlocked\'.',
+                     is_preview=True)
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql db ltr-backup') as c:
         c.argument('location_name',
@@ -1357,7 +1369,7 @@ def load_arguments(self, _):
                    options_list=['--database', '-d'],
                    help='Name of the Azure SQL Database. '
                    'If specified (along with server name), retrieves all requested backups under this database.')
-
+        
     with self.argument_context('sql db ltr-backup list') as c:
         c.argument('database_state',
                    required=False,
@@ -1408,7 +1420,7 @@ def load_arguments(self, _):
 
         c.argument('federated_client_id',
                    arg_type=database_federated_client_id_param_type)
-
+    
     ###############################################
     #              sql db geo-backup              #
     ###############################################
