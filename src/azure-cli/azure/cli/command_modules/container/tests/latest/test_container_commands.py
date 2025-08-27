@@ -981,6 +981,79 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
     # Test container reuse from standby pool with config maps
     # This test relies on existing container group profile and standby pool profile
     @ResourceGroupPreparer()
+    def test_container_reuse_from_standbypool_outbound(self, resource_group, resource_group_location):
+
+        container_group_name = self.create_random_name('clicontainer', 16)
+        container_group_profile_id = '/subscriptions/da28f5e5-aa45-46fe-90c8-053ca49ab4b5/resourceGroups/azcliresources/providers/Microsoft.ContainerInstance/containerGroupProfiles/testcgp-outbound'
+        container_group_profile_revision = '1'
+        standby_pool_profile_id = '/subscriptions/da28f5e5-aa45-46fe-90c8-053ca49ab4b5/resourceGroups/azcliresources/providers/Microsoft.StandbyPool/standbyContainerGroupPools/testpool-outbound'
+        location = "eastus"
+        config_map = 'KEY1=VALUE1 KEY2=VALUE2'
+        cpu = 1
+        memory = 1
+        os_type = 'Linux'
+        image = 'mcr.microsoft.com/azuredocs/aci-helloworld:latest'
+        
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'location': location,
+            'container_group_profile_id': container_group_profile_id,
+            'container_group_profile_revision': container_group_profile_revision,
+            'standby_pool_profile_id': standby_pool_profile_id,
+            'config_map': config_map,
+            'cpu': cpu,
+            'memory': memory,
+            'os_type': os_type,
+            'image': image
+        })
+
+        # Test create
+        self.cmd('container create -g {rg} -n {container_group_name} --config-map {config_map} '
+                 '--container-group-profile-id {container_group_profile_id} --container-group-profile-revision {container_group_profile_revision} '
+                 '--standby-pool-profile-id {standby_pool_profile_id} --location {location} ',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('isCreatedFromStandbyPool','True'),
+                         self.check('osType', '{os_type}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].configMap'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+        
+        # Test show
+        self.cmd('container show -g {rg} -n {container_group_name}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('isCreatedFromStandbyPool','True'),
+                         self.check('osType', '{os_type}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].configMap'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+        # Test delete
+        self.cmd('container delete -g {rg} -n {container_group_name} -y',
+            checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('isCreatedFromStandbyPool','True'),
+                         self.check('osType', '{os_type}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].configMap'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+    # Test container reuse from standby pool with config maps and public ip address
+    # This test relies on existing container group profile and standby pool profile
+    @ResourceGroupPreparer()
     def test_container_reuse_from_standbypool(self, resource_group, resource_group_location):
 
         container_group_name = self.create_random_name('clicontainer', 16)
@@ -1018,10 +1091,92 @@ class AzureContainerInstanceScenarioTest(ScenarioTest):
                          self.check('osType', '{os_type}'),
                          self.check('containers[0].image', '{image}'),
                          self.exists('containers[0].configMap'),
+                         self.check('ipAddress.type', 'Public'),
+                         self.exists('ipAddress.ip'),
                          self.check(
                              'containers[0].resources.requests.cpu', cpu),
                          self.check(
                              'containers[0].resources.requests.memoryInGb', memory)])
+        
+        # Test show
+        self.cmd('container show -g {rg} -n {container_group_name}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('isCreatedFromStandbyPool','True'),
+                         self.check('osType', '{os_type}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].configMap'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+        # Test delete
+        self.cmd('container delete -g {rg} -n {container_group_name} -y',
+            checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('isCreatedFromStandbyPool','True'),
+                         self.check('osType', '{os_type}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].configMap'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)])
+
+    # Test container reuse from standby pool with delegated subnet 
+    # This test relies on existing container group profile, standby pool profile and virtual network
+    @ResourceGroupPreparer()
+    def test_container_reuse_from_standbypool_vnet(self, resource_group, resource_group_location):
+
+        container_group_name = self.create_random_name('clicontainer', 16)
+        container_group_profile_id = '/subscriptions/da28f5e5-aa45-46fe-90c8-053ca49ab4b5/resourceGroups/azcliresources/providers/Microsoft.ContainerInstance/containerGroupProfiles/testcgpvnet'
+        container_group_profile_revision = '1'
+        standby_pool_profile_id = '/subscriptions/da28f5e5-aa45-46fe-90c8-053ca49ab4b5/resourceGroups/azcliresources/providers/Microsoft.StandbyPool/standbyContainerGroupPools/testvnetpool'
+        location = "eastus"
+        config_map = 'KEY1=VALUE1 KEY2=VALUE2'
+        vnet_name = '/subscriptions/da28f5e5-aa45-46fe-90c8-053ca49ab4b5/resourceGroups/azcliresources/providers/Microsoft.Network/virtualNetworks/testvnet'
+        subnet_name = 'subnet1'
+        cpu = 1
+        memory = 1.5
+        os_type = 'Linux'
+        image = 'mcr.microsoft.com/azuredocs/aci-helloworld:latest'
+        
+        self.kwargs.update({
+            'container_group_name': container_group_name,
+            'location': location,
+            'container_group_profile_id': container_group_profile_id,
+            'container_group_profile_revision': container_group_profile_revision,
+            'standby_pool_profile_id': standby_pool_profile_id,
+            'config_map': config_map,
+            'vnet_name': vnet_name,
+            'subnet_name': subnet_name,
+            'cpu': cpu,
+            'memory': memory,
+            'os_type': os_type,
+            'image': image
+        })
+
+        # Test create
+        self.cmd('container create -g {rg} -n {container_group_name} --config-map {config_map} '
+                 '--container-group-profile-id {container_group_profile_id} --container-group-profile-revision {container_group_profile_revision} '
+                 '--standby-pool-profile-id {standby_pool_profile_id} --vnet {vnet_name} --subnet {subnet_name} --location {location}',
+                 checks=[self.check('name', '{container_group_name}'),
+                         self.check('location', '{location}'),
+                         self.check('provisioningState', 'Succeeded'),
+                         self.check('isCreatedFromStandbyPool','True'),
+                         self.check('osType', '{os_type}'),
+                         self.check('containers[0].image', '{image}'),
+                         self.exists('containers[0].configMap'),
+                         self.check('ipAddress.type', 'Private'),
+                         self.exists('ipAddress.ip'),
+                         self.check(
+                             'containers[0].resources.requests.cpu', cpu),
+                         self.check(
+                             'containers[0].resources.requests.memoryInGb', memory)]),
+
         
         # Test show
         self.cmd('container show -g {rg} -n {container_group_name}',

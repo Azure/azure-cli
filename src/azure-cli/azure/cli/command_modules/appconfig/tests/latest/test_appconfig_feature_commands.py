@@ -9,6 +9,7 @@ from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.checkers import NoneCheck
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants
+from azure.cli.core.azclierror import InvalidArgumentValueError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
@@ -125,7 +126,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                          self.check('state', default_state),
                          self.check('conditions', default_conditions)])
 
-        # show a feature flag with all 8 fields
+        # show a feature flag with all 13 fields
         response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label}',
                                  checks=[self.check('locked', default_locked),
                                          self.check('name', entry_feature),
@@ -138,7 +139,7 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
                                          self.check('allocation', None),
                                          self.check('variants', None),
                                          self.check('telemetry', None)]).get_output_in_json()
-        assert len(response_dict) == 12
+        assert len(response_dict) == 13
 
         # show a feature flag with field filtering
         response_dict = self.cmd('appconfig feature show -n {config_store_name} --feature {feature} --label {label} --fields key label state locked',
@@ -290,6 +291,118 @@ class AppConfigFeatureScenarioTest(ScenarioTest):
 
         with self.assertRaisesRegex(CLIError, "Bad Request"):
             self.cmd('appconfig feature list -n {config_store_name} --feature {feature}')
+
+        # # Filter by tags test
+
+        # Set feature with 5 tags
+        feature_with_tags = "FeatureWithTags"
+        label_with_tags = "labelWithTags"
+        tags = {
+            "tag1": "value1",
+            "tag2": "value2",
+            "tag3": "value3",
+            "tag4": "value4",
+            "tag5": "value5"
+        }
+        tags_str = ' '.join([f"{k}={v}" for k, v in tags.items()])
+
+        self.kwargs.update({
+            'feature': feature_with_tags,
+            'label': label_with_tags,
+            'tags': tags_str
+        })
+
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --tags {tags} -y',
+             checks=[self.check('name', feature_with_tags),
+             self.check('label', label_with_tags),
+            self.check('tags', tags)])
+
+        # List features with 5 tags
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --tags {tags}').get_output_in_json()
+        assert(list_features[0]['name'] == feature_with_tags)
+        assert(list_features[0]['label'] == label_with_tags)
+        assert(list_features[0]['tags'] == tags)
+        assert len(list_features) == 1
+
+        # Set feature with tag1 only
+        tag1_dict = {"tag1": "value1"}
+        tag1 = ' '.join([f"{k}={v}" for k, v in tag1_dict.items()])
+        label_with_tag1 = "labelWithTag1"
+        self.kwargs.update({
+            'label': label_with_tag1,
+            'tag1': tag1
+        })
+
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --tags {tag1} -y',
+             checks=[self.check('name', feature_with_tags),
+                 self.check('label', label_with_tag1),
+                 self.check('tags', tag1_dict)])
+
+        # List features with tag1
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --tags {tag1}').get_output_in_json()
+        assert len(list_features) == 2
+
+        # Set feature with empty tag value
+        empty_tag_value_dict = {"tag1": ""}
+        tag_with_empty_value = ' '.join([f"{k}={v}" for k, v in empty_tag_value_dict.items()])
+        label_with_empty_tag_value = "labelWithEmptyTagValue"
+        self.kwargs.update({
+            'label': label_with_empty_tag_value,
+            'tag_with_empty_value': tag_with_empty_value
+        })
+
+        self.cmd('appconfig feature set -n {config_store_name} --feature {feature} --label {label} --tags {tag_with_empty_value} -y',
+             checks=[self.check('name', feature_with_tags),
+                 self.check('label', label_with_empty_tag_value),
+                 self.check('tags', empty_tag_value_dict)])
+
+        # List features with tag with empty value
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature} --tags {tag_with_empty_value}').get_output_in_json()
+        assert len(list_features) == 1
+
+        # Get all features with all tags
+        list_features = self.cmd('appconfig feature list -n {config_store_name} --feature {feature}').get_output_in_json()
+        assert len(list_features) == 3
+
+        # Delete features with tags tag1=value1
+        self.kwargs.update({
+            'label': '*'
+        })
+
+        deleted_features = self.cmd('appconfig feature delete -n {config_store_name} --feature {feature} --label {label} --tags {tag1} -y',
+             checks=[self.check('[0].name', feature_with_tags),
+                    self.check('[0].label', label_with_tag1),
+                    self.check('[0].tags', tag1_dict)]).get_output_in_json()
+        assert(len(deleted_features) == 2)
+
+        # delete feature with empty tag value
+        self.kwargs.update({
+            'feature': feature_with_tags,
+            'label': label_with_empty_tag_value
+        })
+        deleted_features = self.cmd('appconfig feature delete -n {config_store_name} --feature {feature} --label {label} --tags {tag_with_empty_value} -y',
+                checks=[self.check('[0].name', feature_with_tags),
+                        self.check('[0].label', label_with_empty_tag_value),
+                        self.check('[0].tags', empty_tag_value_dict)]).get_output_in_json()
+        assert(len(deleted_features) == 1)
+
+        # Error if more than 5 tags are provided
+        too_many_tags = {
+            "tag1": "value1",
+            "tag2": "value2",
+            "tag3": "value3",
+            "tag4": "value4",
+            "tag5": "value5",
+            "tag6": "value6"
+        }
+        too_many_tags_str = ' '.join([f"{k}={v}" for k, v in too_many_tags.items()])
+
+        self.kwargs.update({
+            'too_many_tags': too_many_tags_str
+        })
+
+        with self.assertRaisesRegex(InvalidArgumentValueError, "Too many tag filters provided. Maximum allowed is 5."):
+            self.cmd('appconfig feature list -n {config_store_name} --tags {too_many_tags}')
 
         # Delete Beta (label v2) feature flag using connection-string
         self.kwargs.update({

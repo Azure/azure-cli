@@ -208,7 +208,7 @@ def encrypt_vm(cmd, resource_group_name, vm_name,  # pylint: disable=too-many-lo
         'EncryptionOperation': 'EnableEncryption' if not encrypt_format_all else 'EnableEncryptionFormatAll',
         'KeyEncryptionKeyURL': key_encryption_key,
         'KeyEncryptionAlgorithm': key_encryption_algorithm,
-        'SequenceVersion': sequence_version,
+        'SequenceVersion': str(sequence_version),
     }
     if use_new_ade:
         public_config.update({
@@ -334,7 +334,7 @@ def decrypt_vm(cmd, resource_group_name, vm_name, volume_type=None, force=False)
     public_config = {
         'VolumeType': volume_type,
         'EncryptionOperation': 'DisableEncryption',
-        'SequenceVersion': sequence_version,
+        'SequenceVersion': str(sequence_version),
     }
 
     from .operations.vm_extension import VMExtensionCreate

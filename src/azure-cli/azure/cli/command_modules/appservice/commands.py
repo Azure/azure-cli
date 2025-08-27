@@ -150,6 +150,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_webapp_sitecontainers')
         g.custom_command('status', 'get_webapp_sitecontainers_status')
         g.custom_command('log', 'get_webapp_sitecontainer_log')
+        g.custom_command('convert', 'convert_webapp_sitecontainers')
 
     with self.command_group('webapp traffic-routing') as g:
         g.custom_command('set', 'set_traffic_routing')
@@ -343,6 +344,10 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
                                  custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk,
                                  validator=validate_functionapp_on_containerapp_update)
+
+    with self.command_group('functionapp flex-migration') as g:
+        g.custom_command('start', 'migrate_consumption_to_flex', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_flex_migration_candidates', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp deployment config') as g:
         g.custom_command('set', 'update_deployment_configs', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)

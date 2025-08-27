@@ -131,9 +131,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Linux.txt'
@@ -146,9 +146,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
 
   - bash: ./scripts/ci/dependency_check.sh
     displayName: 'Verify src/azure-cli/requirements.py3.Darwin.txt'
@@ -161,9 +161,9 @@ jobs:
 
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
 
   - task: BatchScript@1
     inputs:
@@ -178,9 +178,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -226,6 +226,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: 'build_scripts/windows/out/'
@@ -271,6 +272,7 @@ jobs:
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
+      condition: eq(variables['Build.Reason'], 'BatchedCI')
       continueOnError: true
       inputs:
         BuildDropPath: 'build_scripts/windows/out/'
@@ -372,6 +374,7 @@ jobs:
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
+      condition: eq(variables['Build.Reason'], 'BatchedCI')
       continueOnError: true
       inputs:
         BuildDropPath: $(Build.ArtifactStagingDirectory)
@@ -433,9 +436,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
 
   - task: PipAuthenticate@1
     condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
@@ -454,6 +457,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
@@ -468,10 +472,10 @@ jobs:
   displayName: Test Python Wheels
   strategy:
     matrix:
-      Python39:
-        python.version: '3.9'
       Python312:
         python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   dependsOn: BuildPythonWheel
   condition: succeeded()
   pool:
@@ -508,10 +512,10 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python39:
-        python.version: '3.9'
       Python312:
         python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -525,10 +529,10 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python39:
-        python.version: '3.9'
       Python312:
         python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   steps:
   - template: .azure-pipelines/templates/automation_test.yml
     parameters:
@@ -545,10 +549,10 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python39:
-        python.version: '3.9'
       Python312:
         python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -568,8 +572,8 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   strategy:
     matrix:
-      Python312:
-        python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   steps:
   - task: UsePythonVersion@0
     displayName: 'Use Python $(python.version)'
@@ -625,6 +629,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
@@ -661,7 +666,7 @@ jobs:
       set -ev
       # Force relink python@3.xx in Homebrew to resolve the conflict with pre-installed python 3.xx on macOS-12 image
       # See: https://github.com/Azure/azure-cli/issues/29054
-      python_version=3.12
+      python_version=3.13
       brew unlink python@$python_version && brew link --overwrite python@$python_version
       
       echo == Remove pre-installed azure-cli ==
@@ -737,6 +742,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
@@ -834,6 +840,7 @@ jobs:
       filePath: scripts/release/rpm/pipeline.sh
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
@@ -962,6 +969,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
+    condition: eq(variables['Build.Reason'], 'BatchedCI')
     continueOnError: true
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
@@ -1039,9 +1047,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1055,9 +1063,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1070,10 +1078,10 @@ jobs:
   displayName: "PerformanceCheck"
   strategy:
     matrix:
-      Python39:
-        python.version: '3.9'
       Python312:
         python.version: '3.12'
+      Python313:
+        python.version: '3.13'
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
@@ -1101,9 +1109,9 @@ jobs:
     name: ${{ variables.ubuntu_multi_core_pool }}
   steps:
   - task: UsePythonVersion@0
-    displayName: 'Use Python 3.12'
+    displayName: 'Use Python 3.13'
     inputs:
-      versionSpec: 3.12
+      versionSpec: 3.13
   - template: .azure-pipelines/templates/azdev_setup.yml
   - bash: |
       set -ev
@@ -1124,9 +1132,9 @@ jobs:
     name: ${{ variables.ubuntu_pool }}
   steps:
     - task: UsePythonVersion@0
-      displayName: 'Use Python 3.12'
+      displayName: 'Use Python 3.13'
       inputs:
-        versionSpec: 3.12
+        versionSpec: 3.13
     - template: .azure-pipelines/templates/azdev_setup.yml
     - bash: |
         set -ev

@@ -1174,7 +1174,7 @@ def update_containerappsjob_logic(cmd,
 
     update_map = {}
     update_map['replicaConfigurations'] = replica_timeout or replica_retry_limit
-    update_map['triggerConfigurations'] = replica_completion_count or parallelism or cron_expression or scale_rule_name or scale_rule_type or scale_rule_auth or polling_interval or min_executions or max_executions
+    update_map['triggerConfigurations'] = replica_completion_count or parallelism or cron_expression or scale_rule_name or scale_rule_type or scale_rule_auth or polling_interval or min_executions is not None or max_executions is not None
     update_map['container'] = image or container_name or set_env_vars is not None or remove_env_vars is not None or replace_env_vars is not None or remove_all_env_vars or cpu or memory or startup_command is not None or args is not None
     update_map['registry'] = registry_server or registry_user or registry_pass
 

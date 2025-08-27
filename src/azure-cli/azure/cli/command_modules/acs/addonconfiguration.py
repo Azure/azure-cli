@@ -620,19 +620,24 @@ def ensure_container_insights_for_monitoring(
                 }
             )
 
+            resources = get_resources_client(cmd.cli_ctx, cluster_subscription)
             for _ in range(3):
                 try:
                     if enable_syslog:
-                        send_raw_request(
-                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body_with_syslog
+                        resources.begin_create_or_update_by_id(
+                            dcr_resource_id,
+                            "2022-06-01",
+                            json.loads(dcr_creation_body_with_syslog)
                         )
                     else:
-                        send_raw_request(
-                            cmd.cli_ctx, "PUT", dcr_url, body=dcr_creation_body_without_syslog
+                        resources.begin_create_or_update_by_id(
+                            dcr_resource_id,
+                            "2022-06-01",
+                            json.loads(dcr_creation_body_without_syslog)
                         )
                     error = None
                     break
-                except AzCLIError as e:
+                except CLIError as e:
                     error = e
             else:
                 raise error
@@ -662,19 +667,18 @@ def create_dce_association(cmd, cluster_region, cluster_resource_id, config_dce_
             },
         }
     )
-    association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-        f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint?api-version=2022-06-01"
+    resources = get_resources_client(cmd.cli_ctx, cmd.cli_ctx.data.get('subscription_id'))
+    association_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/configurationAccessEndpoint"
     for _ in range(3):
         try:
-            send_raw_request(
-                cmd.cli_ctx,
-                "PUT",
-                association_url,
-                body=association_body,
+            resources.begin_create_or_update_by_id(
+                association_id,
+                "2022-06-01",
+                json.loads(association_body)
             )
             error = None
             break
-        except AzCLIError as e:
+        except CLIError as e:
             error = e
     else:
         raise error
@@ -690,46 +694,91 @@ def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, clu
             },
         }
     )
-    association_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-        f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension?api-version=2022-06-01"
+    resources = get_resources_client(cmd.cli_ctx, cmd.cli_ctx.data.get('subscription_id'))
+    association_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/ContainerInsightsExtension"
     for _ in range(3):
         try:
-            send_raw_request(
-                cmd.cli_ctx,
-                "PUT" if not remove_monitoring else "DELETE",
-                association_url,
-                body=association_body,
-            )
+            if not remove_monitoring:
+                resources.begin_create_or_update_by_id(
+                    association_id,
+                    "2022-06-01",
+                    json.loads(association_body)
+                )
+            else:
+                resources.begin_delete_by_id(
+                    association_id,
+                    "2022-06-01"
+                )
             error = None
             break
-        except AzCLIError as e:
+        except CLIError as e:
             error = e
     else:
         raise error
 
 
-def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_id):
-    link_dce_ampls_body = json.dumps(
+def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
+    """
+    Check if the specified resource is already scoped (linked) to the AMPLS by iterating through all scoped resources.
+
+    Args:
+        cmd: Command context
+        ampls_resource_id: Full resource ID of the AMPLS
+        scoped_resource_id: Full resource ID of the resource to be linked
+
+    Returns:
+        bool: True if the resource is already scoped to the AMPLS, False otherwise
+    """
+    try:
+        # Get all scoped resources for this AMPLS
+        ampls_scoped_resources_url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{ampls_resource_id}/scopedresources?api-version=2021-07-01-preview"
+        response = send_raw_request(cmd.cli_ctx, "GET", ampls_scoped_resources_url)
+        scoped_resources_data = json.loads(response.text)
+
+        # Check if any scoped resource has the same linkedResourceId
+        for scoped_resource in scoped_resources_data.get('value', []):
+            properties = scoped_resource.get('properties', {})
+            linked_resource_id = properties.get('linkedResourceId', '')
+            scoped_resource_name = scoped_resource.get('name', 'unknown')
+            # Compare case-insensitively since Azure resource IDs can have case variations
+            if linked_resource_id.lower() == scoped_resource_id.lower():
+                logger.info("Resource already scoped in AMPLS. Scoped resource name: %s, LinkedResourceId: %s", scoped_resource_name, linked_resource_id)
+                return True
+
+        logger.info("No matching linkedResourceId found. Resource is not yet scoped.")
+        return False
+
+    except CLIError as e:
+        logger.warning("Error checking AMPLS scoped resources: %s", str(e))
+        return False
+
+
+def create_ampls_scope(cmd, ampls_resource_id, scoped_resource_name, scoped_resource_id):
+    # Check if the resource is already scoped to the AMPLS
+    if is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
+        return
+
+    scoped_resource_ampls_body = json.dumps(
         {
             "properties": {
-                "linkedResourceId": dce_resource_id,
+                "linkedResourceId": scoped_resource_id,
             },
         }
     )
-    link_dce_ampls_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-        f"{ampls_resource_id}/scopedresources/{dce_endpoint_name}-connection?api-version=2021-07-01-preview"
+
+    resources = get_resources_client(cmd.cli_ctx, cmd.cli_ctx.data.get('subscription_id'))
+    ampls_scope_id = f"{ampls_resource_id}/scopedresources/{scoped_resource_name}-connection"
 
     for _ in range(3):
         try:
-            send_raw_request(
-                cmd.cli_ctx,
-                "PUT",
-                link_dce_ampls_url,
-                body=link_dce_ampls_body,
+            resources.begin_create_or_update_by_id(
+                ampls_scope_id,
+                "2021-07-01-preview",
+                json.loads(scoped_resource_ampls_body)
             )
             error = None
             break
-        except AzCLIError as e:
+        except CLIError as e:
             error = e
     else:
         raise error
@@ -740,8 +789,6 @@ def create_data_collection_endpoint(cmd, subscription, resource_group, region, e
         f"/subscriptions/{subscription}/resourceGroups/{resource_group}/"
         f"providers/Microsoft.Insights/dataCollectionEndpoints/{endpoint_name}"
     )
-    dce_url = cmd.cli_ctx.cloud.endpoints.resource_manager + \
-        f"{dce_resource_id}?api-version=2022-06-01"
     # create the DCE
     dce_creation_body_common = {
         "location": region,
@@ -755,12 +802,17 @@ def create_data_collection_endpoint(cmd, subscription, resource_group, region, e
     if is_ampls:
         dce_creation_body_common["properties"]["networkAcls"]["publicNetworkAccess"] = "Disabled"
     dce_creation_body_ = json.dumps(dce_creation_body_common)
+    resources = get_resources_client(cmd.cli_ctx, subscription)
     for _ in range(3):
         try:
-            send_raw_request(cmd.cli_ctx, "PUT", dce_url, body=dce_creation_body_)
+            resources.begin_create_or_update_by_id(
+                dce_resource_id,
+                "2022-06-01",
+                json.loads(dce_creation_body_)
+            )
             error = None
             break
-        except AzCLIError as e:
+        except CLIError as e:
             error = e
     else:
         raise error
