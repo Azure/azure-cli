@@ -3119,7 +3119,7 @@ def update_long_term_retention(
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')
 
-    if time_based_immutability:
+    if time_based_immutability and time_based_immutability.lower() == "enabled":
         if not yes:
             confirmation = prompt_y_n("""Immutable LTR backups can't be changed or deleted.
             You'll be charged for LTR backups for the full retention period.
@@ -3128,7 +3128,7 @@ def update_long_term_retention(
                 return
 
     if time_based_immutability_mode:
-        if not time_based_immutability:
+        if  not time_based_immutability or time_based_immutability.lower() != "enabled":
             raise CLIError('Time-based immutability mode can only be set if time-based immutability is enabled.')
         if time_based_immutability_mode.lower() not in ['unlocked', 'locked']:
             raise CLIError('Invalid value for time-based immutability mode. '
