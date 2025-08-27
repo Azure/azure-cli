@@ -6,9 +6,7 @@
 # pylint: disable=C0302
 from enum import Enum
 import calendar
-import argparse
 from datetime import datetime
-from warnings import catch_warnings
 from dateutil.parser import parse
 
 from azure.cli.core.util import (
@@ -3106,9 +3104,7 @@ def update_long_term_retention(
         monthly_retention=None,
         yearly_retention=None,
         week_of_year=None,
-        time_based_immutability=None,
-        time_based_immutability_mode=None,
-        yes=None,
+        make_backups_immutable=None,
         **kwargs):
     '''
     Updates long term retention for managed database
@@ -3128,7 +3124,7 @@ def update_long_term_retention(
                 return
 
     if time_based_immutability_mode:
-        if not time_based_immutability:
+        if  not time_based_immutability or time_based_immutability.lower() != "enabled":
             raise CLIError('Time-based immutability mode can only be set if time-based immutability is enabled.')
         if time_based_immutability_mode.lower() not in ['unlocked', 'locked']:
             raise CLIError('Invalid value for time-based immutability mode. '
@@ -3143,8 +3139,7 @@ def update_long_term_retention(
 
     kwargs['week_of_year'] = week_of_year
 
-    kwargs['time_based_immutability'] = time_based_immutability
-    kwargs['time_based_immutability_mode'] = time_based_immutability_mode
+    kwargs['make_backups_immutable'] = make_backups_immutable
 
     policy = client.begin_create_or_update(
         database_name=database_name,
@@ -3339,137 +3334,6 @@ def list_long_term_retention_backups(
 
     return backups
 
-
-def remove_time_based_immutability(
-        client,
-        location_name: str,
-        long_term_retention_server_name: str,
-        long_term_retention_database_name: str,
-        backup_name: str,
-        **kwargs):
-    '''
-    Removes time-based immutability for long term retention backups.
-    '''
-
-    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
-        raise CLIError('Please specify all required parameters: '
-                       'location_name, long_term_retention_server_name, '
-                       'long_term_retention_database_name, and backup_name.')
-    try:
-        client.begin_remove_time_based_immutability(
-            location_name,
-            long_term_retention_server_name,
-            long_term_retention_database_name,
-            backup_name,
-            **kwargs).wait()
-    except Exception as ex:
-        raise ex
-
-    return client.get(
-            location_name,
-            long_term_retention_server_name,
-            long_term_retention_database_name,
-            backup_name,
-            **kwargs)
-
-
-def lock_time_based_immutability(
-        client,
-        location_name: str,
-        long_term_retention_server_name: str,
-        long_term_retention_database_name: str,
-        backup_name: str,
-        **kwargs):
-    '''
-    Locks time-based immutability for long term retention backups.
-    '''
-
-    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
-        raise CLIError('Please specify all required parameters: '
-                       'location_name, long_term_retention_server_name, '
-                       'long_term_retention_database_name, and backup_name.')
-    try:
-        client.begin_lock_time_based_immutability(
-            location_name,
-            long_term_retention_server_name,
-            long_term_retention_database_name,
-            backup_name,
-            **kwargs).wait()
-    except Exception as ex:
-        raise ex
-
-    return client.get(
-            location_name,
-            long_term_retention_server_name,
-            long_term_retention_database_name,
-            backup_name,
-            **kwargs)
-
-
-def set_legal_hold_immutability(
-        client,
-        location_name: str,
-        long_term_retention_server_name: str,
-        long_term_retention_database_name: str,
-        backup_name: str,
-        **kwargs):
-    '''
-    Sets legal hold immutability for long term retention backups.
-    '''
-
-    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
-        raise CLIError('Please specify all required parameters: '
-                       'location_name, long_term_retention_server_name, '
-                       'long_term_retention_database_name, and backup_name.')
-    try:
-        client.begin_set_legal_hold_immutability(
-            location_name,
-            long_term_retention_server_name,
-            long_term_retention_database_name,
-            backup_name,
-            **kwargs).wait()
-    except Exception as ex:
-        raise ex
-
-    return client.get(
-            location_name,
-            long_term_retention_server_name,
-            long_term_retention_database_name,
-            backup_name,
-            **kwargs)
-
-
-def remove_legal_hold_immutability(
-        client,
-        location_name: str,
-        long_term_retention_server_name: str,
-        long_term_retention_database_name: str,
-        backup_name: str,
-        **kwargs):
-    '''
-    Removes legal hold immutability for long term retention backups.
-    '''
-
-    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
-        raise CLIError('Please specify all required parameters: '
-                       'location_name, long_term_retention_server_name, '
-                       'long_term_retention_database_name, and backup_name.')
-    try:
-        client.begin_remove_legal_hold_immutability(
-            location_name,
-            long_term_retention_server_name,
-            long_term_retention_database_name,
-            backup_name,
-            **kwargs).wait()
-    except Exception as ex:
-        raise ex
-
-    return client.get(
-            location_name,
-            long_term_retention_server_name,
-            long_term_retention_database_name,
-            backup_name,
-            **kwargs)
 
 def restore_long_term_retention_backup(
         cmd,
