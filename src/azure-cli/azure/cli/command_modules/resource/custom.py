@@ -3976,7 +3976,8 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         parts = parse_resource_id(resource_id)
 
         if len(parts) == 2 and parts['subscription'] is not None and parts['resource_group'] is not None:
-            return AZURE_API_PROFILES['latest'][ResourceType.MGMT_RESOURCE_RESOURCES]
+            return _ResourceUtils.resolve_api_version(rcf, 'Microsoft.Resources', None, 'resourceGroups',
+                                                      latest_include_preview=latest_include_preview)
 
         if 'namespace' not in parts:
             raise CLIError('The type of value entered by --ids parameter is not supported.')
