@@ -1368,7 +1368,7 @@ def load_arguments(self, _):
                    options_list=['--database', '-d'],
                    help='Name of the Azure SQL Database. '
                    'If specified (along with server name), retrieves all requested backups under this database.')
-        
+
     with self.argument_context('sql db ltr-backup list') as c:
         c.argument('database_state',
                    required=False,
@@ -1419,7 +1419,7 @@ def load_arguments(self, _):
 
         c.argument('federated_client_id',
                    arg_type=database_federated_client_id_param_type)
-    
+
     ###############################################
     #              sql db geo-backup              #
     ###############################################

@@ -8,8 +8,6 @@ from enum import Enum
 import calendar
 import argparse
 from datetime import datetime
-import re
-from warnings import catch_warnings
 from dateutil.parser import parse
 
 from azure.cli.core.util import (
@@ -3129,12 +3127,11 @@ def update_long_term_retention(
                 return
 
     if time_based_immutability_mode:
-        if  not time_based_immutability or time_based_immutability.lower() != "enabled":
+        if not time_based_immutability or time_based_immutability.lower() != "enabled":
             raise CLIError('Time-based immutability mode can only be set if time-based immutability is enabled.')
         if time_based_immutability_mode.lower() not in ['unlocked', 'locked']:
             raise CLIError('Invalid value for time-based immutability mode. '
                            'Valid values are "unlocked" or "locked".')
-  
 
     kwargs['weekly_retention'] = weekly_retention
 
@@ -3358,7 +3355,7 @@ def remove_time_based_immutability(
                        'location_name, long_term_retention_server_name, '
                        'long_term_retention_database_name, and backup_name.')
     if resource_group_name:
-         try:
+        try:
             client.begin_remove_time_based_immutability_by_resource_group(
                 resource_group_name,
                 location_name,
@@ -3366,9 +3363,9 @@ def remove_time_based_immutability(
                 long_term_retention_database_name,
                 backup_name,
                 **kwargs).wait()
-         except Exception as ex:
+        except Exception as ex:
             raise ex
-         return client.list_by_resource_group_database(
+        return client.list_by_resource_group_database(
                 resource_group_name,
                 location_name,
                 long_term_retention_server_name,
@@ -3376,17 +3373,17 @@ def remove_time_based_immutability(
                 backup_name,
                 **kwargs)
     else:
-       try:
+        try:
             client.begin_remove_time_based_immutability(
                 location_name,
                 long_term_retention_server_name,
                 long_term_retention_database_name,
                 backup_name,
                 **kwargs).wait()
-       except Exception as ex:
+        except Exception as ex:
             raise ex
 
-       return client.get(
+        return client.get(
             location_name,
             long_term_retention_server_name,
             long_term_retention_database_name,
