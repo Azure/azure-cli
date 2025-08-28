@@ -52,7 +52,6 @@ from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_EXT_INSTALLATION_NAME,
     CONST_ACSTOR_V1_EXT_INSTALLATION_NAME,
     CONST_ACSTOR_VERSION_V1,
-    CONST_SUPPORTED_ACSTOR_VERSIONS,
 )
 from azure.cli.command_modules.acs._helpers import (
     check_is_managed_aad_cluster,
@@ -6782,15 +6781,8 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         if self.context.raw_param.get("enable_azure_container_storage") is not None:
             self.context.set_intermediate("enable_azure_container_storage", True, overwrite_exists=True)
             container_storage_version = self.context.raw_param.get("container_storage_version")
-            has_container_storage_version = container_storage_version is not None
 
-            if has_container_storage_version and container_storage_version not in CONST_SUPPORTED_ACSTOR_VERSIONS:
-                raise InvalidArgumentValueError(
-                    f'Version {container_storage_version} is not supported for enabling Azure Container Storage. '
-                    f'The only supported versions are {", ".join(CONST_SUPPORTED_ACSTOR_VERSIONS)}'
-                )
-
-            if has_container_storage_version and container_storage_version == CONST_ACSTOR_VERSION_V1:
+            if container_storage_version is not None and container_storage_version == CONST_ACSTOR_VERSION_V1:
                 # read the azure container storage values passed
                 pool_type = self.context.raw_param.get("enable_azure_container_storage")
                 enable_azure_container_storage = pool_type is not None
@@ -8814,12 +8806,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             raise InvalidArgumentValueError(
                 'The --container-storage-version parameter is not required when disabling Azure Container Storage.'
                 ' Please remove this parameter and try again.'
-            )
-
-        if container_storage_version is not None and container_storage_version not in CONST_SUPPORTED_ACSTOR_VERSIONS:
-            raise InvalidArgumentValueError(
-                f'Version {container_storage_version} is not supported for enabling Azure Container Storage. '
-                f'The only supported versions are {CONST_SUPPORTED_ACSTOR_VERSIONS}'
             )
 
         if enable_azure_container_storage_param is not None or disable_azure_container_storage_param is not None:
