@@ -3045,7 +3045,6 @@ def list_resources(cmd, resource_group_name=None,
 
 
 def register_provider(cmd, resource_provider_namespace, consent_to_permissions=False, mg=None, wait=False, accept_terms=None):
-    properties = None
     ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models('ProviderRegistrationRequest',
                                                                             'ProviderConsentDefinition')
     properties = ProviderRegistrationRequest(

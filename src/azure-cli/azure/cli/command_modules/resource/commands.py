@@ -10,7 +10,7 @@ from collections import OrderedDict
 from knack.log import get_logger
 
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import ResourceType, PROFILE_TYPE
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
