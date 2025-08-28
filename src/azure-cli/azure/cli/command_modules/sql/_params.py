@@ -1908,7 +1908,8 @@ def load_arguments(self, _):
                 'administrator_login',
                 'administrator_login_password',
                 'location',
-                'minimal_tls_version'
+                'minimal_tls_version',
+                'tags'
             ])
 
         c.argument('administrator_login',
