@@ -118,7 +118,7 @@ def add_role_assignment(cmd, role, service_principal_msi_id, is_service_principa
             )
             break
         except HttpResponseError as ex:
-            if isinstance(ex, ResourceExistsError) or "The role assignment already exists." in ex.message:
+            if isinstance(ex, ResourceExistsError) or ex.error.code == 'RoleAssignmentExists':
                 break
             logger.info(ex.message)
         except Exception as ex:  # pylint: disable=broad-except
