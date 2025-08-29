@@ -6483,7 +6483,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
         self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username clitest1 --admin-password Test12345678!! '
-                 '--generate-ssh-keys --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--generate-ssh-keys --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd(
@@ -6500,7 +6500,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:ubuntu-24_04-lts:server:latest --admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd(
