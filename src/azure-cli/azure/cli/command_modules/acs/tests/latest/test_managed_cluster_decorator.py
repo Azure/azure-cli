@@ -13326,6 +13326,38 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
 
+        # test removing certificates by providing empty file
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "custom_ca_trust_certificates": get_test_data_file_path("certs_empty.txt"),
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # Start with a cluster that has existing certificates
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                custom_ca_trust_certificates=[str.encode(CUSTOM_CA_TEST_CERT_STR) for _ in range(2)]
+            ),
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_3.context.set_intermediate(
+            "subscription_id", "test_subscription_id"
+        )
+
+        dec_mc_3 = dec_3.update_custom_ca_trust_certificates(mc_3)
+
+        # After update with empty file, certificates should be removed (empty list)
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                custom_ca_trust_certificates=[]
+            ),
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
+
     def test_update_run_command(self):
         dec_1 = AKSManagedClusterUpdateDecorator(
             self.cmd,

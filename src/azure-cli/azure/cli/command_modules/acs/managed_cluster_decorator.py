@@ -8710,11 +8710,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        ca_certs = self.context.get_custom_ca_trust_certificates()
-        if ca_certs:
+        # Check if the parameter was explicitly provided
+        if self.context.raw_param.get("custom_ca_trust_certificates") is not None:
+            ca_certs = self.context.get_custom_ca_trust_certificates()
             if mc.security_profile is None:
                 mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
 
+            # Set certificates (this allows setting to empty list to remove certificates)
             mc.security_profile.custom_ca_trust_certificates = ca_certs
 
         return mc
