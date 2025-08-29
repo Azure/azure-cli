@@ -3,6 +3,90 @@
 Release History
 ===============
 
+2.77.0
+++++++
+
+**ACR**
+
+* `az acr task create`: Fix error message when `--context` is not provided (#31897)
+
+**AKS**
+
+* `az aks create`: Change description for `--os-sku` parameter (#31922)
+* `az aks create/update`: Support installing latest version of acstor on the cx cluster by `--enable-azure-container-storage` parameter (#31966)
+* `az aks create/update`: Support specifying installation version of acstor by `--container-storage-version` when setting `--enable-azure-container-storage` (#31966)
+* `az aks update`: Support uninstalling acstor from the cx cluster by `--disable-azure-container-storage` regardless of the installed version (#31966)
+* `az aks create/update`: Add `--sku` parameter to support automatic feature (#31981)
+* `az aks update`: Fix typo on validation error for disabling Azure Container Storage (#31987)
+
+**App Config**
+
+* `az appconfig kv import`: Support importing key-values from AKS ConfigMap (#31861)
+
+**App Service**
+
+* `az webapp deploy`: Add `--enable-kudu-warmup` parameter to support warm-up Kudu before making deployment (#31880)
+* `az functionapp flex-migration`: Add commands to support migrating CV1 apps to Flex (#31865)
+
+**ARM**
+
+* `az ts`: Capture subscription id from template resource id (#31896)
+
+**Backup**
+
+* `az backup restore restore-azurefileshare`: Fix a bug where the source storage account is deleted and the required sourceResourceId property is missing from the restore request payload (#31889)
+
+**Compute**
+
+* Fix #31885: `az vm encryption`: Fix request body serialization (#31894)
+* `az disk create/grant-access`: Support Confidential VM OS Disks (#31934)
+* `az snapshot create`: Add new parameter `--instant-access-duration-minutes` to support creating instant access snapshot for premium SSD v2 and ultra disk (#31891)
+
+**Container app**
+
+* Fix #31762: `az containerapp job list`: Fix bug only 20 items are returned (#31888)
+* `az containerapp job update`: Fix `--min-executions` and `--max-executions` not accepting 0 values (#31906)
+
+**IoT**
+
+* `az iot hub devicestream`: Mirgate this command group to `azure-iot` extension (#31913)
+
+**MySQL**
+
+* `az mysql flexible-server upgrade`: Add new option `8.4` for `--version` (#31998)
+
+**Network**
+
+* `az network nat gateway`: Support Standard V2 SKU and Public IP (Prefixes) V6 (#31908)
+* `az network public-ip`: Support Standard V2 SKU (#31908)
+* `az network public-ip prefix`: Support Standard V2 SKU (#31908)
+* `az network vnet show/list`: Support `defaultPublicNatGateway` output for StandardV2 NAT Gateway (#31908)
+* Fix #31954: `az network application-gateway waf-policy custom-rule`: Deserialization errors within `computedDisabledRules` (#31908)
+* `az network vnet-gateway`: Support VNET Gateway insights (#31984)
+* `az network vnet-gateway`: Support VNET Gateway failover (#31986)
+
+**Packaging**
+
+* Support Python 3.13 (#31895)
+* Bump embedded Python to 3.13.7 (#31928)
+
+**Profile**
+
+* `az account get-access-token`: Specifying `--tenant` with the current tenant is now allowed for Cloud Shell and managed identity account (#31869)
+* `az login`: Support `--claims-challenge` in device code flow (#31856)
+
+**RDBMS**
+
+* `az postgres flexible-server create/update/restore`: Premium SSD V2 is no longer supported with Burstable compute tier (#31948)
+* `az postgres flexible-server update`: Bypass fabric mirroring validation to allow updating high availability status for PG11 and PG12 servers (#31944)
+
+**Service Fabric**
+
+* `az sf managed-application update`: Add breaking change pre-announcement warnings for argument option removal (#31912)
+* `az sf managed-application-type version update`: Add breaking change pre-announcement warnings for required argument `--package-url` (#31912)
+* Fix #5338: `az sf cluster create`: Fix the bug where key-vault not placed in location specifed by `--location` (#31883)
+* Fix #5180: `az sf cluster create`: Change behavior to read cluster_name from parameters file if provided (#31816)
+
 2.76.0
 ++++++
 
