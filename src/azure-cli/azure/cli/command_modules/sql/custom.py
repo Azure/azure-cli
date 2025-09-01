@@ -3366,29 +3366,29 @@ def remove_time_based_immutability(
         except Exception as ex:
             raise ex
         return client.list_by_resource_group_database(
-                resource_group_name,
-                location_name,
-                long_term_retention_server_name,
-                long_term_retention_database_name,
-                backup_name,
-                **kwargs)
-    else:
-        try:
-            client.begin_remove_time_based_immutability(
-                location_name,
-                long_term_retention_server_name,
-                long_term_retention_database_name,
-                backup_name,
-                **kwargs).wait()
-        except Exception as ex:
-            raise ex
-
-        return client.get(
+            resource_group_name,
             location_name,
             long_term_retention_server_name,
             long_term_retention_database_name,
             backup_name,
             **kwargs)
+    
+    try:
+        client.begin_remove_time_based_immutability(
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs).wait()
+    except Exception as ex:
+        raise ex
+
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
 
 
 def lock_time_based_immutability(
@@ -3427,23 +3427,22 @@ def lock_time_based_immutability(
             long_term_retention_database_name,
             backup_name,
             **kwargs)
-    else:
-        try:
-            client.begin_lock_time_based_immutability(
-                location_name,
-                long_term_retention_server_name,
-                long_term_retention_database_name,
-                backup_name,
-                **kwargs).wait()
-        except Exception as ex:
-            raise ex
-
-        return client.get(
+    try:
+        client.begin_lock_time_based_immutability(
             location_name,
             long_term_retention_server_name,
             long_term_retention_database_name,
             backup_name,
-            **kwargs)
+            **kwargs).wait()
+    except Exception as ex:
+        raise ex
+
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
 
 
 def set_legal_hold_immutability(
@@ -3481,23 +3480,22 @@ def set_legal_hold_immutability(
             long_term_retention_database_name,
             backup_name,
             **kwargs)
-    else:
-        try:
-            client.begin_set_legal_hold_immutability(
-                location_name,
-                long_term_retention_server_name,
-                long_term_retention_database_name,
-                backup_name,
-                **kwargs).wait()
-        except Exception as ex:
-            raise ex
-
-        return client.get(
+    try:
+        client.begin_set_legal_hold_immutability(
             location_name,
             long_term_retention_server_name,
             long_term_retention_database_name,
             backup_name,
-            **kwargs)
+            **kwargs).wait()
+    except Exception as ex:
+        raise ex
+
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
 
 
 def remove_legal_hold_immutability(
@@ -3528,29 +3526,28 @@ def remove_legal_hold_immutability(
         except Exception as ex:
             raise ex
         return client.list_by_resource_group_database(
-                resource_group_name,
-                location_name,
-                long_term_retention_server_name,
-                long_term_retention_database_name,
-                backup_name,
-                **kwargs)
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
 
-    else:
-        try:
-            client.begin_remove_legal_hold_immutability(
-                location_name,
-                long_term_retention_server_name,
-                long_term_retention_database_name,
-                backup_name,
-                **kwargs).wait()
-        except Exception as ex:
-            raise ex
-        return client.get(
-                location_name,
-                long_term_retention_server_name,
-                long_term_retention_database_name,
-                backup_name,
-                **kwargs)
+    try:
+        client.begin_remove_legal_hold_immutability(
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs).wait()
+    except Exception as ex:
+        raise ex
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
 
 
 def restore_long_term_retention_backup(
