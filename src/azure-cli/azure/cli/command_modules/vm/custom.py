@@ -2933,20 +2933,6 @@ def vm_run_command_update(cmd,
     return LongRunningOperation(cmd.cli_ctx)(Update(cli_ctx=cmd.cli_ctx)(command_args=args))
 
 
-def vm_run_command_delete(cmd,
-                          resource_group_name,
-                          vm_name,
-                          run_command_name,
-                          no_wait=False):
-    from .aaz.latest.vm.run_command import Delete
-    return LongRunningOperation(cmd.cli_ctx)(Delete(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "vm_name": vm_name,
-        "run_command_name": run_command_name,
-        "no_wait": no_wait
-    }))
-
-
 def vm_run_command_list(cmd,
                         resource_group_name=None,
                         vm_name=None,
