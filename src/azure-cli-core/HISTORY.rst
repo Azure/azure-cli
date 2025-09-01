@@ -3,6 +3,12 @@
 Release History
 ===============
 
+2.66.1
+++++++
+
+* Resolve CVE-2024-50602 (#30567)
+* Resolve CVE-2024-12797 (#30819)
+
 2.66.0
 ++++++
 * `aaz`: Support managed identity (#29953)
