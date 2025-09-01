@@ -1,3 +1,7 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
 import os
 from mcp.server.fastmcp import FastMCP
 
@@ -12,8 +16,7 @@ def generate_code(
         resource_provider: str,
         swagger_tag: str,
 ):
-    """Generate Azure CLI commands based on Swagger specifications.
-    """
+    # Generate Azure CLI commands based on Swagger specifications
     aaz_path = os.getenv("AAZ_PATH", "/workspaces/aaz")
     cli_path = os.getenv("CLI_PATH", "/workspaces/azure-cli")
     cli_extension_path = os.getenv("CLI_EXTENSION_PATH", "/workspaces/azure-cli-extensions")
