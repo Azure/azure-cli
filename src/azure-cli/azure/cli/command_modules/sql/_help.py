@@ -330,12 +330,12 @@ examples:
     text: az sql db ltr-backup lock-time-based-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
-helps['sql db ltr-backup disable-time-based-immutability'] = """
+helps['sql db ltr-backup remove-time-based-immutability'] = """
 type: command
 short-summary: disable the time based immutability on a long term retention backup.
 examples:
   - name: disable a time based immutability on a long term retention backup for a database.
-    text: az sql db ltr-backup disable-time-based-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+    text: az sql db ltr-backup remove-time-based-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql db geo-backup'] = """
