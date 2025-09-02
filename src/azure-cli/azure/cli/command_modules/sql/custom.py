@@ -6,7 +6,6 @@
 # pylint: disable=C0302
 from enum import Enum
 import calendar
-import argparse
 from datetime import datetime
 from dateutil.parser import parse
 
@@ -3372,7 +3371,7 @@ def remove_time_based_immutability(
             long_term_retention_database_name,
             backup_name,
             **kwargs)
-    
+
     try:
         client.begin_remove_time_based_immutability(
             location_name,
