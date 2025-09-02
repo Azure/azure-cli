@@ -87,6 +87,41 @@ def check_migration_prerequisites(cmd):
     
     return prereqs
 
+
+def check_azure_authentication(cmd):
+    """Check Azure authentication status."""
+    try:
+        ps_executor = get_powershell_executor()
+        if not ps_executor:
+            raise CLIError('PowerShell is not available. Cannot check Azure authentication.')
+        
+        # Check if authenticated to Azure
+        auth_result = ps_executor.execute_script(
+            'if (Get-AzContext) { @{IsAuthenticated=$true; AccountId=(Get-AzContext).Account.Id} | ConvertTo-Json } else { @{IsAuthenticated=$false; Error="Not authenticated"} | ConvertTo-Json }'
+        )
+        
+        if auth_result.get('returncode') == 0:
+            try:
+                auth_data = json.loads(auth_result.get('stdout', '{}'))
+                if auth_data.get('IsAuthenticated'):
+                    logger.info(f"Authenticated as: {auth_data.get('AccountId', 'Unknown')}")
+                    return auth_data
+                else:
+                    logger.warning("Not authenticated to Azure")
+                    return auth_data
+            except json.JSONDecodeError:
+                logger.error("Failed to parse authentication status")
+                return {'IsAuthenticated': False, 'Error': 'Failed to parse response'}
+        else:
+            error_msg = auth_result.get('stderr', 'Unknown error')
+            logger.error(f"Authentication check failed: {error_msg}")
+            return {'IsAuthenticated': False, 'Error': error_msg}
+            
+    except Exception as e:
+        logger.error(f"Failed to check authentication: {str(e)}")
+        return {'IsAuthenticated': False, 'Error': str(e)}
+
+
 def setup_migration_environment(cmd, install_powershell=False, check_only=False):
     """Configure the system environment for migration operations."""    
     logger = get_logger(__name__)
@@ -2871,3 +2906,71 @@ def new_azure_local_server_replication_with_mappings(cmd, resource_group_name, p
     except Exception as e:
         logger.error(f"Failed to create Azure Local server replication with mappings: {str(e)}")
         raise CLIError(f"Failed to create Azure Local server replication with mappings: {str(e)}")
+
+
+def get_azure_context(cmd):
+    """
+    Get the current Azure context using PowerShell Get-AzContext.
+    Azure CLI equivalent to Get-AzContext PowerShell cmdlet.
+    """
+    ps_executor = get_powershell_executor()
+    
+    get_context_script = """
+try { 
+    $currentContext = Get-AzContext -ErrorAction SilentlyContinue
+    if (-not $currentContext) {
+        Write-Host "Not currently connected to Azure"
+        return @{
+            IsAuthenticated = $false
+            Message = "No Azure context found"
+        }
+    }
+    
+    # Return context information
+    $contextInfo = @{
+        IsAuthenticated = $true
+        SubscriptionName = $currentContext.Subscription.Name
+        SubscriptionId = $currentContext.Subscription.Id
+        TenantId = $currentContext.Tenant.Id
+        Account = $currentContext.Account.Id
+        Environment = $currentContext.Environment.Name
+    }
+    
+    Write-Host "Current Azure Context:"
+    Write-Host "  Subscription: $($contextInfo.SubscriptionName) ($($contextInfo.SubscriptionId))"
+    Write-Host "  Tenant: $($contextInfo.TenantId)"
+    Write-Host "  Account: $($contextInfo.Account)"
+    Write-Host "  Environment: $($contextInfo.Environment)"
+    
+    return $contextInfo
+} catch {
+    Write-Error "Failed to get Azure context: $($_.Exception.Message)"
+    return @{
+        IsAuthenticated = $false
+        Message = "Error retrieving Azure context: $($_.Exception.Message)"
+    }
+}"""
+
+    try:
+        result = ps_executor.execute_ps_script(get_context_script)
+        
+        # Parse result if it's JSON
+        if isinstance(result, str):
+            try:
+                import json
+                parsed_result = json.loads(result)
+                return parsed_result
+            except json.JSONDecodeError:
+                # Return raw result if not JSON
+                return {
+                    'Status': 'Success',
+                    'Message': 'Azure context retrieved',
+                    'Result': result
+                }
+        
+        return result
+    except Exception as e:
+        return {
+            'IsAuthenticated': False,
+            'Message': f'Failed to get Azure context: {str(e)}'
+        }

@@ -852,7 +852,7 @@ helps['migrate local start-migration'] = """
         - name: Start migration and turn off source server
           text: az migrate local start-migration --target-object-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx" --turn-off-source-server
         - name: Start migration with input object
-          text: az migrate local start-migration --input-object '{"Id": "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx"}'
+          text: az migrate local start-migration --input-object "{\"Id\": \"/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx\"}"
 """
 
 helps['migrate local remove-replication'] = """
@@ -865,7 +865,7 @@ helps['migrate local remove-replication'] = """
         - name: Remove replication by target object ID
           text: az migrate local remove-replication --target-object-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx"
         - name: Remove replication with input object
-          text: az migrate local remove-replication --input-object '{"Id": "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx"}'
+          text: az migrate local remove-replication --input-object "{\"Id\": \"/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx\"}"
 """
 
 helps['migrate local get-azure-local-job'] = """
@@ -880,7 +880,7 @@ helps['migrate local get-azure-local-job'] = """
         - name: List all jobs in project
           text: az migrate local get-azure-local-job --resource-group myRG --project-name myProject
         - name: Get job with input object
-          text: az migrate local get-azure-local-job --resource-group myRG --project-name myProject --input-object '{"JobId": "job-12345"}'
+          text: az migrate local get-azure-local-job --resource-group myRG --project-name myProject --input-object "{\"JobId\": \"job-12345\"}"
 """
 
 helps['migrate local create-replication-with-mappings'] = """

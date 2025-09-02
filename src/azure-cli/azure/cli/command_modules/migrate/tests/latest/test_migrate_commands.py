@@ -8,6 +8,9 @@ from unittest.mock import Mock, patch
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.migrate.commands import load_command_table
 
+# Import unified testing framework
+from test_framework import MigrateTestCase, TestConfig
+
 
 class TestMigrateCommandLoading(unittest.TestCase):
     """Test command loading and registration."""
@@ -190,11 +193,12 @@ class TestMigrateCommandParameters(unittest.TestCase):
         }
         
         # Test with install_powershell parameter
-        result = mock_setup_env(Mock(), install_powershell=True, check_only=False)
+        cmd_mock = Mock()
+        result = mock_setup_env(cmd_mock, install_powershell=True, check_only=False)
         self.assertIn('checks', result)
         
         # Verify function was called with correct parameters
-        mock_setup_env.assert_called_with(Mock(), install_powershell=True, check_only=False)
+        mock_setup_env.assert_called_with(cmd_mock, install_powershell=True, check_only=False)
 
     @patch('azure.cli.command_modules.migrate.custom.get_discovered_server')
     def test_list_discovered_command_parameters(self, mock_get_discovered):

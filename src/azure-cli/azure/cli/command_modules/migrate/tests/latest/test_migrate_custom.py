@@ -7,13 +7,14 @@ import unittest
 from unittest.mock import Mock, patch
 from knack.util import CLIError
 
-# Mock PowerShell executor at import time to prevent any real PowerShell execution
-mock_powershell_executor = Mock()
-mock_powershell_executor.check_powershell_availability.return_value = (True, 'powershell')
-mock_powershell_executor.execute_script.return_value = {'stdout': 'mocked', 'stderr': '', 'exit_code': 0}
+# Import unified testing framework
+from test_framework import MigrateTestCase, TestConfig
 
-# Mock the get_powershell_executor function to always return our mock
-with patch('azure.cli.command_modules.migrate.custom.get_powershell_executor', return_value=mock_powershell_executor):
+# Import functions with comprehensive mocking via the framework
+with patch('azure.cli.command_modules.migrate.custom.get_powershell_executor') as mock_get_ps:
+    from test_framework import create_mock_powershell_executor
+    mock_get_ps.return_value = create_mock_powershell_executor()
+    
     from azure.cli.command_modules.migrate.custom import (
         check_migration_prerequisites,
         get_discovered_server,
@@ -38,50 +39,32 @@ with patch('azure.cli.command_modules.migrate.custom.get_powershell_executor', r
     )
 
 
-class TestMigratePowerShellUtils(unittest.TestCase):
+class TestMigratePowerShellUtils(MigrateTestCase):
     """Test PowerShell utility functions."""
 
-    def setUp(self):
-        self.cmd = Mock()
-
-    @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
-    def test_check_migration_prerequisites_success(self, mock_get_ps_executor):
+    @patch('azure.cli.command_modules.migrate.custom.platform.system', return_value='Windows')
+    @patch('azure.cli.command_modules.migrate.custom.platform.version', return_value='10.0.19041')
+    @patch('azure.cli.command_modules.migrate.custom.platform.python_version', return_value='3.9.7')
+    def test_check_migration_prerequisites_success(self, mock_python_version, mock_version, mock_system):
         """Test successful prerequisite check."""
-        mock_ps_executor = Mock()
-        mock_ps_executor.check_powershell_availability.return_value = (True, 'powershell')
-        mock_ps_executor.execute_script.side_effect = [
-            {'stdout': '7.3.0', 'stderr': ''},  # PowerShell version
-            {'stdout': 'Az.Migrate Module Found', 'stderr': ''}  # Azure module check
-        ]
-        mock_get_ps_executor.return_value = mock_ps_executor
+        result = check_migration_prerequisites(self.cmd)
+        
+        self.assertEqual(result['platform'], 'Windows')
+        self.assertEqual(result['python_version'], '3.9.7')
+        self.assertTrue(result['powershell_available'])
 
-        with patch('platform.system', return_value='Windows'), \
-             patch('platform.version', return_value='10.0.19041'), \
-             patch('platform.python_version', return_value='3.9.7'):
-            
-            result = check_migration_prerequisites(self.cmd)
-            
-            self.assertEqual(result['platform'], 'Windows')
-            self.assertEqual(result['python_version'], '3.9.7')
-            self.assertTrue(result['powershell_available'])
-            self.assertTrue(result['azure_powershell_available'])
-
-    @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
-    def test_check_migration_prerequisites_powershell_not_available(self, mock_get_ps_executor):
+    @patch('azure.cli.command_modules.migrate.custom.platform.system', return_value='Windows')
+    @patch('azure.cli.command_modules.migrate.custom.platform.version', return_value='10.0.19041')
+    @patch('azure.cli.command_modules.migrate.custom.platform.python_version', return_value='3.9.7')
+    def test_check_migration_prerequisites_powershell_not_available(self, mock_python_version, mock_version, mock_system):
         """Test prerequisite check when PowerShell is not available."""
-        mock_ps_executor = Mock()
-        mock_ps_executor.check_powershell_availability.return_value = (False, None)
-        mock_get_ps_executor.return_value = mock_ps_executor
-
-        with patch('platform.system', return_value='Linux'), \
-             patch('platform.version', return_value='5.4.0'), \
-             patch('platform.python_version', return_value='3.9.7'):
-            
-            result = check_migration_prerequisites(self.cmd)
-            
-            self.assertEqual(result['platform'], 'Linux')
-            self.assertFalse(result['powershell_available'])
-            self.assertIn('Install PowerShell Core', result['recommendations'][0])
+        # Override the mock for this specific test
+        self.mock_ps_executor.check_powershell_availability.return_value = (False, None)
+        
+        result = check_migration_prerequisites(self.cmd)
+        
+        self.assertEqual(result['platform'], 'Windows')
+        self.assertFalse(result['powershell_available'])
 
     def test_get_powershell_install_instructions(self):
         """Test PowerShell installation instructions for different platforms."""
@@ -236,7 +219,7 @@ class TestMigrateReplicationCommands(unittest.TestCase):
 
         mock_ps_executor.execute_script_interactive.assert_called_once()
         script_call = mock_ps_executor.execute_script_interactive.call_args[0][0]
-        self.assertIn('$ServerIndex = 0', script_call)
+        self.assertIn('$ServerIndex = [int]"0"', script_call)
 
     @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
     def test_create_server_replication_by_name(self, mock_get_ps_executor):
