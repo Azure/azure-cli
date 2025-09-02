@@ -692,3 +692,130 @@ helps['migrate storage show-account-details'] = """
             # Azure CLI equivalent:
             az migrate storage show-account-details --resource-group myRG --storage-account-name mystorageaccount --show-keys
 """
+
+helps['migrate local create-nic-mapping'] = """
+    type: command
+    short-summary: Create NIC mapping object for Azure Local migration.
+    long-summary: |
+        Creates a network interface mapping object that defines how network interfaces should be mapped 
+        during Azure Local migration. This is equivalent to the New-AzMigrateLocalNicMappingObject PowerShell cmdlet.
+    examples:
+        - name: Create basic NIC mapping
+          text: az migrate local create-nic-mapping --nic-id "nic001" --target-virtual-switch-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/logicalnetworks/xxx"
+        - name: Create NIC mapping without creating at target
+          text: az migrate local create-nic-mapping --nic-id "nic001" --target-virtual-switch-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/logicalnetworks/xxx" --no-create-at-target
+"""
+
+helps['migrate local init-azure-local'] = """
+    type: command
+    short-summary: Initialize Azure Local replication infrastructure.
+    long-summary: |
+        Initializes the replication infrastructure for Azure Local migration, setting up necessary 
+        infrastructure and metadata storage. This is equivalent to the Initialize-AzMigrateLocalReplicationInfrastructure 
+        PowerShell cmdlet.
+    examples:
+        - name: Initialize with default storage account
+          text: az migrate local init-azure-local --resource-group myRG --project-name myProject --source-appliance-name sourceApp --target-appliance-name targetApp
+        - name: Initialize with custom storage account
+          text: az migrate local init-azure-local --resource-group myRG --project-name myProject --source-appliance-name sourceApp --target-appliance-name targetApp --cache-storage-account-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Storage/storageAccounts/mystorageaccount"
+"""
+
+helps['migrate local get-replication'] = """
+    type: command
+    short-summary: Get Azure Local server replication details.
+    long-summary: |
+        Retrieves detailed information about Azure Local server replication jobs and protected items. 
+        This is equivalent to the Get-AzMigrateLocalServerReplication PowerShell cmdlet.
+    examples:
+        - name: Get replication by discovered machine ID
+          text: az migrate local get-replication --discovered-machine-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Migrate/assessmentProjects/xxx/machines/xxx"
+        - name: Get replication by target object ID
+          text: az migrate local get-replication --target-object-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx"
+"""
+
+helps['migrate local set-replication'] = """
+    type: command
+    short-summary: Update Azure Local server replication settings.
+    long-summary: |
+        Updates configuration settings for an existing Azure Local server replication. 
+        This is equivalent to the Set-AzMigrateLocalServerReplication PowerShell cmdlet.
+    examples:
+        - name: Enable dynamic memory
+          text: az migrate local set-replication --target-object-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx" --is-dynamic-memory-enabled true
+        - name: Update CPU and memory settings
+          text: az migrate local set-replication --target-object-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx" --target-vm-cpu-core 4 --target-vm-ram 8192
+"""
+
+helps['migrate local start-migration'] = """
+    type: command
+    short-summary: Start Azure Local server migration.
+    long-summary: |
+        Initiates the actual migration (planned failover) of a replicated server to Azure Local. 
+        This is equivalent to the Start-AzMigrateLocalServerMigration PowerShell cmdlet.
+    examples:
+        - name: Start migration by target object ID
+          text: az migrate local start-migration --target-object-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx"
+        - name: Start migration and turn off source server
+          text: az migrate local start-migration --target-object-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx" --turn-off-source-server
+        - name: Start migration with input object
+          text: az migrate local start-migration --input-object '{"Id": "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx"}'
+"""
+
+helps['migrate local remove-replication'] = """
+    type: command
+    short-summary: Remove Azure Local server replication.
+    long-summary: |
+        Removes an Azure Local server replication, stopping replication and cleaning up associated resources. 
+        This is equivalent to the Remove-AzMigrateLocalServerReplication PowerShell cmdlet.
+    examples:
+        - name: Remove replication by target object ID
+          text: az migrate local remove-replication --target-object-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx"
+        - name: Remove replication with input object
+          text: az migrate local remove-replication --input-object '{"Id": "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.RecoveryServices/vaults/xxx/replicationFabrics/xxx/replicationProtectionContainers/xxx/replicationProtectedItems/xxx"}'
+"""
+
+helps['migrate local get-azure-local-job'] = """
+    type: command
+    short-summary: Retrieve Azure Local migration jobs.
+    long-summary: |
+        Retrieves information about Azure Local migration jobs, including status, progress, and error details. 
+        This is equivalent to the Get-AzMigrateLocalJob PowerShell cmdlet.
+    examples:
+        - name: Get specific job by ID
+          text: az migrate local get-azure-local-job --resource-group myRG --project-name myProject --job-id "job-12345"
+        - name: List all jobs in project
+          text: az migrate local get-azure-local-job --resource-group myRG --project-name myProject
+        - name: Get job with input object
+          text: az migrate local get-azure-local-job --resource-group myRG --project-name myProject --input-object '{"JobId": "job-12345"}'
+"""
+
+helps['migrate local create-replication-with-mappings'] = """
+    type: command
+    short-summary: Create Azure Local server replication with disk and NIC mappings.
+    long-summary: |
+        Creates a comprehensive Azure Local server replication with custom disk and network interface mappings. 
+        This provides more granular control over the migration configuration compared to basic replication creation.
+    examples:
+        - name: Create replication with disk and NIC mappings
+          text: |
+            az migrate local create-replication-with-mappings \\
+              --resource-group myRG \\
+              --project-name myProject \\
+              --discovered-machine-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Migrate/assessmentProjects/xxx/machines/machine001" \\
+              --target-storage-path-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/storageContainers/container001" \\
+              --target-resource-group-id "/subscriptions/xxx/resourceGroups/targetRG" \\
+              --target-vm-name "migratedVM001" \\
+              --disk-mappings '[{"DiskID": "disk001", "IsOSDisk": true, "Size": 64, "Format": "VHDX"}]' \\
+              --nic-mappings '[{"NicID": "nic001", "TargetVirtualSwitchId": "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/logicalnetworks/network001", "CreateAtTarget": true}]' \\
+              --source-appliance-name sourceApp \\
+              --target-appliance-name targetApp
+        - name: Create basic replication without custom mappings
+          text: |
+            az migrate local create-replication-with-mappings \\
+              --resource-group myRG \\
+              --project-name myProject \\
+              --discovered-machine-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Migrate/assessmentProjects/xxx/machines/machine001" \\
+              --target-storage-path-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/storageContainers/container001" \\
+              --target-resource-group-id "/subscriptions/xxx/resourceGroups/targetRG" \\
+              --target-vm-name "migratedVM001"
+"""

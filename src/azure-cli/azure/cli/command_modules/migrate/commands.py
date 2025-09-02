@@ -57,9 +57,17 @@ def load_command_table(self, _):
     # Azure Stack HCI Local Migration Commands
     with self.command_group('migrate local') as g:
         g.custom_command('create-disk-mapping', 'create_local_disk_mapping')
+        g.custom_command('create-nic-mapping', 'create_local_nic_mapping')
         g.custom_command('create-replication', 'create_local_server_replication')
+        g.custom_command('create-replication-with-mappings', 'new_azure_local_server_replication_with_mappings')
         g.custom_command('get-job', 'get_local_replication_job')
+        g.custom_command('get-azure-local-job', 'get_azure_local_job')
         g.custom_command('init', 'initialize_local_replication_infrastructure')
+        g.custom_command('init-azure-local', 'initialize_azure_local_replication_infrastructure')
+        g.custom_command('get-replication', 'get_azure_local_server_replication')
+        g.custom_command('set-replication', 'set_azure_local_server_replication')
+        g.custom_command('start-migration', 'start_azure_local_server_migration')
+        g.custom_command('remove-replication', 'remove_azure_local_server_replication')
         g.custom_command('create-vm-replication', 'create_azstackhci_vm_replication')
         g.custom_command('set-vm-replication', 'set_azstackhci_vm_replication')
         g.custom_command('remove-vm-replication', 'remove_azstackhci_vm_replication')

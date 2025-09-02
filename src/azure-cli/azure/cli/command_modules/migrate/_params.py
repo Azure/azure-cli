@@ -272,6 +272,59 @@ def load_arguments(self, _):
                   help='Disk format type. Default is VHD.')
         c.argument('physical_sector_size', type=int, help='Physical sector size in bytes. Default is 512.')
 
+    with self.argument_context('migrate local create-nic-mapping') as c:
+        c.argument('nic_id', help='Network interface ID for the NIC mapping.', required=True)
+        c.argument('target_virtual_switch_id', help='Target virtual switch ARM ID.', required=True)
+        c.argument('create_at_target', action='store_true', 
+                  help='Whether to create the NIC at the target. Default is True.')
+
+    with self.argument_context('migrate local init-azure-local') as c:
+        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
+        c.argument('source_appliance_name', help='Name of the source appliance.', required=True)
+        c.argument('target_appliance_name', help='Name of the target appliance.', required=True)
+        c.argument('cache_storage_account_id', help='ARM ID of the custom storage account for replication metadata.')
+
+    with self.argument_context('migrate local get-replication') as c:
+        c.argument('discovered_machine_id', help='Discovered machine ID to get replication for.')
+        c.argument('target_object_id', help='Target object ID of the replication.')
+
+    with self.argument_context('migrate local set-replication') as c:
+        c.argument('target_object_id', help='Target object ID of the replication to update.', required=True)
+        c.argument('is_dynamic_memory_enabled', arg_type=get_three_state_flag(), 
+                  help='Enable or disable dynamic memory allocation.')
+        c.argument('target_vm_cpu_core', type=int, help='Number of CPU cores for target VM.')
+        c.argument('target_vm_ram', type=int, help='RAM size in MB for target VM.')
+
+    with self.argument_context('migrate local start-migration') as c:
+        c.argument('input_object', help='Input object containing protected item information (JSON string).')
+        c.argument('target_object_id', help='Target object ID of the replication to migrate.')
+        c.argument('turn_off_source_server', action='store_true', 
+                  help='Turn off the source server after migration.')
+
+    with self.argument_context('migrate local remove-replication') as c:
+        c.argument('input_object', help='Input object containing protected item information (JSON string).')
+        c.argument('target_object_id', help='Target object ID of the replication to remove.')
+
+    with self.argument_context('migrate local get-azure-local-job') as c:
+        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
+        c.argument('job_id', help='Specific job ID to retrieve.')
+        c.argument('input_object', help='Input object containing job information (JSON string).')
+        c.argument('subscription_id', help='Azure subscription ID.')
+
+    with self.argument_context('migrate local create-replication-with-mappings') as c:
+        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
+        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
+        c.argument('discovered_machine_id', help='Discovered machine ID to create replication for.', required=True)
+        c.argument('target_storage_path_id', help='Azure Stack HCI storage container ARM ID.', required=True)
+        c.argument('target_resource_group_id', help='Target resource group ARM ID.', required=True)
+        c.argument('target_vm_name', help='Name for the target VM in Azure Stack HCI.', required=True)
+        c.argument('disk_mappings', help='Disk mappings as JSON string or object.')
+        c.argument('nic_mappings', help='NIC mappings as JSON string or object.')
+        c.argument('source_appliance_name', help='Name of the source appliance.')
+        c.argument('target_appliance_name', help='Name of the target appliance.')
+
     with self.argument_context('migrate local create-replication') as c:
         c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)

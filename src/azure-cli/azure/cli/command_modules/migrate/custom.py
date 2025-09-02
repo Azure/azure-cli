@@ -2194,3 +2194,687 @@ def _get_powershell_install_instructions(system):
     }
     
     return instructions.get(system, instructions['linux'])
+
+def create_local_nic_mapping(cmd, nic_id, target_virtual_switch_id, create_at_target=True):
+    """Create NIC mapping object for Azure Local migration (equivalent to New-AzMigrateLocalNicMappingObject)."""
+    try:
+        ps_executor = get_powershell_executor()
+        if not ps_executor:
+            raise CLIError("PowerShell is not available. Please install PowerShell Core.")
+        
+        # Build the New-AzMigrateLocalNicMappingObject command
+        create_at_target_str = 'true' if create_at_target else 'false'
+        
+        script = f"""
+        try {{
+            $nicMapping = New-AzMigrateLocalNicMappingObject `
+                -NicID '{nic_id}' `
+                -TargetVirtualSwitchId '{target_virtual_switch_id}' `
+                -CreateAtTarget '{create_at_target_str}'
+            
+            $result = @{{
+                'Success' = $true
+                'NicMapping' = $nicMapping
+                'NicID' = '{nic_id}'
+                'TargetVirtualSwitchId' = '{target_virtual_switch_id}'
+                'CreateAtTarget' = '{create_at_target_str}'
+            }}
+            
+            $result | ConvertTo-Json -Depth 5
+        }} catch {{
+            $errorResult = @{{
+                'Success' = $false
+                'Error' = $_.Exception.Message
+                'ErrorType' = $_.Exception.GetType().Name
+            }}
+            $errorResult | ConvertTo-Json -Depth 3
+        }}
+        """
+        
+        result = ps_executor.execute_script(script)
+        
+        if result.get('returncode') == 0:
+            output = result.get('stdout', '').strip()
+            if output:
+                try:
+                    parsed_result = json.loads(output)
+                    if parsed_result.get('Success'):
+                        logger.info("Successfully created NIC mapping object")
+                        return parsed_result
+                    else:
+                        raise CLIError(f"Failed to create NIC mapping: {parsed_result.get('Error', 'Unknown error')}")
+                except json.JSONDecodeError:
+                    logger.warning("Could not parse PowerShell output as JSON")
+                    return {"Success": True, "Output": output}
+        
+        error_msg = result.get('stderr', 'Unknown PowerShell error')
+        raise CLIError(f"PowerShell execution failed: {error_msg}")
+        
+    except Exception as e:
+        logger.error(f"Failed to create NIC mapping: {str(e)}")
+        raise CLIError(f"Failed to create NIC mapping: {str(e)}")
+
+
+def initialize_azure_local_replication_infrastructure(cmd, resource_group_name, project_name,
+                                                     source_appliance_name, target_appliance_name,
+                                                     cache_storage_account_id=None):
+    """Initialize Azure Local replication infrastructure (equivalent to Initialize-AzMigrateLocalReplicationInfrastructure)."""
+    try:
+        ps_executor = get_powershell_executor()
+        if not ps_executor:
+            raise CLIError("PowerShell is not available. Please install PowerShell Core.")
+        
+        # Build the Initialize-AzMigrateLocalReplicationInfrastructure command
+        if cache_storage_account_id:
+            script = f"""
+            try {{
+                $result = Initialize-AzMigrateLocalReplicationInfrastructure `
+                    -ProjectName '{project_name}' `
+                    -ResourceGroupName '{resource_group_name}' `
+                    -CacheStorageAccountId '{cache_storage_account_id}' `
+                    -SourceApplianceName '{source_appliance_name}' `
+                    -TargetApplianceName '{target_appliance_name}'
+                
+                $infraResult = @{{
+                    'Success' = $true
+                    'ProjectName' = '{project_name}'
+                    'ResourceGroupName' = '{resource_group_name}'
+                    'SourceApplianceName' = '{source_appliance_name}'
+                    'TargetApplianceName' = '{target_appliance_name}'
+                    'CacheStorageAccountId' = '{cache_storage_account_id}'
+                    'Result' = $result
+                }}
+                
+                $infraResult | ConvertTo-Json -Depth 5
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        else:
+            script = f"""
+            try {{
+                $result = Initialize-AzMigrateLocalReplicationInfrastructure `
+                    -ProjectName '{project_name}' `
+                    -ResourceGroupName '{resource_group_name}' `
+                    -SourceApplianceName '{source_appliance_name}' `
+                    -TargetApplianceName '{target_appliance_name}'
+                
+                $infraResult = @{{
+                    'Success' = $true
+                    'ProjectName' = '{project_name}'
+                    'ResourceGroupName' = '{resource_group_name}'
+                    'SourceApplianceName' = '{source_appliance_name}'
+                    'TargetApplianceName' = '{target_appliance_name}'
+                    'Result' = $result
+                }}
+                
+                $infraResult | ConvertTo-Json -Depth 5
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        
+        result = ps_executor.execute_script(script)
+        
+        if result.get('returncode') == 0:
+            output = result.get('stdout', '').strip()
+            if output:
+                try:
+                    parsed_result = json.loads(output)
+                    if parsed_result.get('Success'):
+                        logger.info("Successfully initialized Azure Local replication infrastructure")
+                        return parsed_result
+                    else:
+                        raise CLIError(f"Failed to initialize infrastructure: {parsed_result.get('Error', 'Unknown error')}")
+                except json.JSONDecodeError:
+                    logger.warning("Could not parse PowerShell output as JSON")
+                    return {"Success": True, "Output": output}
+        
+        error_msg = result.get('stderr', 'Unknown PowerShell error')
+        raise CLIError(f"PowerShell execution failed: {error_msg}")
+        
+    except Exception as e:
+        logger.error(f"Failed to initialize Azure Local replication infrastructure: {str(e)}")
+        raise CLIError(f"Failed to initialize Azure Local replication infrastructure: {str(e)}")
+
+
+def get_azure_local_server_replication(cmd, discovered_machine_id=None, target_object_id=None):
+    """Get Azure Local server replication details (equivalent to Get-AzMigrateLocalServerReplication)."""
+    try:
+        ps_executor = get_powershell_executor()
+        if not ps_executor:
+            raise CLIError("PowerShell is not available. Please install PowerShell Core.")
+        
+        # Build the Get-AzMigrateLocalServerReplication command
+        if discovered_machine_id:
+            script = f"""
+            try {{
+                $replication = Get-AzMigrateLocalServerReplication -DiscoveredMachineId '{discovered_machine_id}'
+                
+                $result = @{{
+                    'Success' = $true
+                    'DiscoveredMachineId' = '{discovered_machine_id}'
+                    'Replication' = $replication
+                }}
+                
+                $result | ConvertTo-Json -Depth 7
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        elif target_object_id:
+            script = f"""
+            try {{
+                $replication = Get-AzMigrateLocalServerReplication -InputObject @{{ Id = '{target_object_id}' }}
+                
+                $result = @{{
+                    'Success' = $true
+                    'TargetObjectId' = '{target_object_id}'
+                    'Replication' = $replication
+                }}
+                
+                $result | ConvertTo-Json -Depth 7
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        else:
+            raise CLIError("Either discovered_machine_id or target_object_id must be provided")
+        
+        result = ps_executor.execute_script(script)
+        
+        if result.get('returncode') == 0:
+            output = result.get('stdout', '').strip()
+            if output:
+                try:
+                    parsed_result = json.loads(output)
+                    if parsed_result.get('Success'):
+                        logger.info("Successfully retrieved Azure Local server replication")
+                        return parsed_result
+                    else:
+                        raise CLIError(f"Failed to get server replication: {parsed_result.get('Error', 'Unknown error')}")
+                except json.JSONDecodeError:
+                    logger.warning("Could not parse PowerShell output as JSON")
+                    return {"Success": True, "Output": output}
+        
+        error_msg = result.get('stderr', 'Unknown PowerShell error')
+        raise CLIError(f"PowerShell execution failed: {error_msg}")
+        
+    except Exception as e:
+        logger.error(f"Failed to get Azure Local server replication: {str(e)}")
+        raise CLIError(f"Failed to get Azure Local server replication: {str(e)}")
+
+
+def set_azure_local_server_replication(cmd, target_object_id, is_dynamic_memory_enabled=None,
+                                       target_vm_cpu_core=None, target_vm_ram=None):
+    """Update Azure Local server replication settings (equivalent to Set-AzMigrateLocalServerReplication)."""
+    try:
+        ps_executor = get_powershell_executor()
+        if not ps_executor:
+            raise CLIError("PowerShell is not available. Please install PowerShell Core.")
+        
+        # Build the Set-AzMigrateLocalServerReplication command
+        params = []
+        if is_dynamic_memory_enabled is not None:
+            params.append(f"-IsDynamicMemoryEnabled '{str(is_dynamic_memory_enabled).lower()}'")
+        if target_vm_cpu_core is not None:
+            params.append(f"-TargetVMCPUCore {target_vm_cpu_core}")
+        if target_vm_ram is not None:
+            params.append(f"-TargetVMRam {target_vm_ram}")
+        
+        if not params:
+            raise CLIError("At least one parameter must be provided to update")
+        
+        params_str = " ".join(params)
+        
+        script = f"""
+        try {{
+            $setJob = Set-AzMigrateLocalServerReplication `
+                -TargetObjectID '{target_object_id}' `
+                {params_str}
+            
+            $result = @{{
+                'Success' = $true
+                'TargetObjectId' = '{target_object_id}'
+                'Job' = $setJob
+            }}
+            
+            $result | ConvertTo-Json -Depth 7
+        }} catch {{
+            $errorResult = @{{
+                'Success' = $false
+                'Error' = $_.Exception.Message
+                'ErrorType' = $_.Exception.GetType().Name
+            }}
+            $errorResult | ConvertTo-Json -Depth 3
+        }}
+        """
+        
+        result = ps_executor.execute_script(script)
+        
+        if result.get('returncode') == 0:
+            output = result.get('stdout', '').strip()
+            if output:
+                try:
+                    parsed_result = json.loads(output)
+                    if parsed_result.get('Success'):
+                        logger.info("Successfully updated Azure Local server replication")
+                        return parsed_result
+                    else:
+                        raise CLIError(f"Failed to update server replication: {parsed_result.get('Error', 'Unknown error')}")
+                except json.JSONDecodeError:
+                    logger.warning("Could not parse PowerShell output as JSON")
+                    return {"Success": True, "Output": output}
+        
+        error_msg = result.get('stderr', 'Unknown PowerShell error')
+        raise CLIError(f"PowerShell execution failed: {error_msg}")
+        
+    except Exception as e:
+        logger.error(f"Failed to update Azure Local server replication: {str(e)}")
+        raise CLIError(f"Failed to update Azure Local server replication: {str(e)}")
+
+
+def start_azure_local_server_migration(cmd, input_object=None, target_object_id=None,
+                                      turn_off_source_server=False):
+    """Start Azure Local server migration (equivalent to Start-AzMigrateLocalServerMigration)."""
+    try:
+        ps_executor = get_powershell_executor()
+        if not ps_executor:
+            raise CLIError("PowerShell is not available. Please install PowerShell Core.")
+        
+        # Build the Start-AzMigrateLocalServerMigration command
+        turn_off_param = "-TurnOffSourceServer" if turn_off_source_server else ""
+        
+        if input_object:
+            script = f"""
+            try {{
+                $inputObj = '{input_object}' | ConvertFrom-Json
+                $migrationJob = Start-AzMigrateLocalServerMigration `
+                    -InputObject $inputObj {turn_off_param}
+                
+                $result = @{{
+                    'Success' = $true
+                    'MigrationJob' = $migrationJob
+                    'TurnOffSourceServer' = {str(turn_off_source_server).lower()}
+                }}
+                
+                $result | ConvertTo-Json -Depth 7
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        elif target_object_id:
+            script = f"""
+            try {{
+                # First get the protected item
+                $protectedItem = Get-AzMigrateLocalServerReplication -InputObject @{{ Id = '{target_object_id}' }}
+                
+                $migrationJob = Start-AzMigrateLocalServerMigration `
+                    -InputObject $protectedItem {turn_off_param}
+                
+                $result = @{{
+                    'Success' = $true
+                    'TargetObjectId' = '{target_object_id}'
+                    'MigrationJob' = $migrationJob
+                    'TurnOffSourceServer' = {str(turn_off_source_server).lower()}
+                }}
+                
+                $result | ConvertTo-Json -Depth 7
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        else:
+            raise CLIError("Either input_object or target_object_id must be provided")
+        
+        result = ps_executor.execute_script(script)
+        
+        if result.get('returncode') == 0:
+            output = result.get('stdout', '').strip()
+            if output:
+                try:
+                    parsed_result = json.loads(output)
+                    if parsed_result.get('Success'):
+                        logger.info("Successfully started Azure Local server migration")
+                        return parsed_result
+                    else:
+                        raise CLIError(f"Failed to start migration: {parsed_result.get('Error', 'Unknown error')}")
+                except json.JSONDecodeError:
+                    logger.warning("Could not parse PowerShell output as JSON")
+                    return {"Success": True, "Output": output}
+        
+        error_msg = result.get('stderr', 'Unknown PowerShell error')
+        raise CLIError(f"PowerShell execution failed: {error_msg}")
+        
+    except Exception as e:
+        logger.error(f"Failed to start Azure Local server migration: {str(e)}")
+        raise CLIError(f"Failed to start Azure Local server migration: {str(e)}")
+
+
+def remove_azure_local_server_replication(cmd, input_object=None, target_object_id=None):
+    """Remove Azure Local server replication (equivalent to Remove-AzMigrateLocalServerReplication)."""
+    try:
+        ps_executor = get_powershell_executor()
+        if not ps_executor:
+            raise CLIError("PowerShell is not available. Please install PowerShell Core.")
+        
+        # Build the Remove-AzMigrateLocalServerReplication command
+        if input_object:
+            script = f"""
+            try {{
+                $inputObj = '{input_object}' | ConvertFrom-Json
+                $removeJob = Remove-AzMigrateLocalServerReplication -InputObject $inputObj
+                
+                $result = @{{
+                    'Success' = $true
+                    'RemoveJob' = $removeJob
+                    'Message' = 'Replication removal initiated successfully'
+                }}
+                
+                $result | ConvertTo-Json -Depth 7
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        elif target_object_id:
+            script = f"""
+            try {{
+                $removeJob = Remove-AzMigrateLocalServerReplication -TargetObjectID '{target_object_id}'
+                
+                $result = @{{
+                    'Success' = $true
+                    'TargetObjectId' = '{target_object_id}'
+                    'RemoveJob' = $removeJob
+                    'Message' = 'Replication removal initiated successfully'
+                }}
+                
+                $result | ConvertTo-Json -Depth 7
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        else:
+            raise CLIError("Either input_object or target_object_id must be provided")
+        
+        result = ps_executor.execute_script(script)
+        
+        if result.get('returncode') == 0:
+            output = result.get('stdout', '').strip()
+            if output:
+                try:
+                    parsed_result = json.loads(output)
+                    if parsed_result.get('Success'):
+                        logger.info("Successfully removed Azure Local server replication")
+                        return parsed_result
+                    else:
+                        raise CLIError(f"Failed to remove replication: {parsed_result.get('Error', 'Unknown error')}")
+                except json.JSONDecodeError:
+                    logger.warning("Could not parse PowerShell output as JSON")
+                    return {"Success": True, "Output": output}
+        
+        error_msg = result.get('stderr', 'Unknown PowerShell error')
+        raise CLIError(f"PowerShell execution failed: {error_msg}")
+        
+    except Exception as e:
+        logger.error(f"Failed to remove Azure Local server replication: {str(e)}")
+        raise CLIError(f"Failed to remove Azure Local server replication: {str(e)}")
+
+
+def get_azure_local_job(cmd, resource_group_name, project_name, job_id=None, input_object=None, subscription_id=None):
+    """Retrieve Azure Local migration jobs (equivalent to Get-AzMigrateLocalJob)."""
+    try:
+        ps_executor = get_powershell_executor()
+        if not ps_executor:
+            raise CLIError("PowerShell is not available. Please install PowerShell Core.")
+        
+        # Build the Get-AzMigrateLocalJob command
+        if job_id:
+            script = f"""
+            try {{
+                $job = Get-AzMigrateLocalJob `
+                    -ProjectName '{project_name}' `
+                    -ResourceGroupName '{resource_group_name}' `
+                    -JobId '{job_id}'
+                
+                $result = @{{
+                    'Success' = $true
+                    'ProjectName' = '{project_name}'
+                    'ResourceGroupName' = '{resource_group_name}'
+                    'JobId' = '{job_id}'
+                    'Job' = $job
+                }}
+                
+                $result | ConvertTo-Json -Depth 7
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        elif input_object:
+            script = f"""
+            try {{
+                $inputObj = '{input_object}' | ConvertFrom-Json
+                $job = Get-AzMigrateLocalJob -InputObject $inputObj
+                
+                $result = @{{
+                    'Success' = $true
+                    'InputObject' = $inputObj
+                    'Job' = $job
+                }}
+                
+                $result | ConvertTo-Json -Depth 7
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        else:
+            # List all jobs in the project
+            script = f"""
+            try {{
+                $jobs = Get-AzMigrateLocalJob `
+                    -ProjectName '{project_name}' `
+                    -ResourceGroupName '{resource_group_name}'
+                
+                $result = @{{
+                    'Success' = $true
+                    'ProjectName' = '{project_name}'
+                    'ResourceGroupName' = '{resource_group_name}'
+                    'Jobs' = $jobs
+                }}
+                
+                $result | ConvertTo-Json -Depth 7
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        
+        result = ps_executor.execute_script(script)
+        
+        if result.get('returncode') == 0:
+            output = result.get('stdout', '').strip()
+            if output:
+                try:
+                    parsed_result = json.loads(output)
+                    if parsed_result.get('Success'):
+                        logger.info("Successfully retrieved Azure Local job(s)")
+                        return parsed_result
+                    else:
+                        raise CLIError(f"Failed to get job: {parsed_result.get('Error', 'Unknown error')}")
+                except json.JSONDecodeError:
+                    logger.warning("Could not parse PowerShell output as JSON")
+                    return {"Success": True, "Output": output}
+        
+        error_msg = result.get('stderr', 'Unknown PowerShell error')
+        raise CLIError(f"PowerShell execution failed: {error_msg}")
+        
+    except Exception as e:
+        logger.error(f"Failed to get Azure Local job: {str(e)}")
+        raise CLIError(f"Failed to get Azure Local job: {str(e)}")
+
+
+def new_azure_local_server_replication_with_mappings(cmd, resource_group_name, project_name, 
+                                                    discovered_machine_id, target_storage_path_id,
+                                                    target_resource_group_id, target_vm_name,
+                                                    disk_mappings=None, nic_mappings=None,
+                                                    source_appliance_name=None, target_appliance_name=None):
+    """Create Azure Local server replication with disk and NIC mappings (enhanced New-AzMigrateLocalServerReplication)."""
+    try:
+        ps_executor = get_powershell_executor()
+        if not ps_executor:
+            raise CLIError("PowerShell is not available. Please install PowerShell Core.")
+        
+        # Build the New-AzMigrateLocalServerReplication command with mappings
+        if disk_mappings and nic_mappings:
+            # Convert mappings to PowerShell objects
+            disk_mappings_json = json.dumps(disk_mappings) if isinstance(disk_mappings, (list, dict)) else str(disk_mappings)
+            nic_mappings_json = json.dumps(nic_mappings) if isinstance(nic_mappings, (list, dict)) else str(nic_mappings)
+            
+            script = f"""
+            try {{
+                # Parse disk and NIC mappings
+                $diskMappings = '{disk_mappings_json}' | ConvertFrom-Json
+                $nicMappings = '{nic_mappings_json}' | ConvertFrom-Json
+                
+                $replicationJob = New-AzMigrateLocalServerReplication `
+                    -MachineId '{discovered_machine_id}' `
+                    -TargetStoragePathId '{target_storage_path_id}' `
+                    -TargetResourceGroupId '{target_resource_group_id}' `
+                    -TargetVMName '{target_vm_name}' `
+                    -DiskToInclude $diskMappings `
+                    -NicToInclude $nicMappings"""
+            
+            if source_appliance_name:
+                script += f" `\n                    -SourceApplianceName '{source_appliance_name}'"
+            if target_appliance_name:
+                script += f" `\n                    -TargetApplianceName '{target_appliance_name}'"
+            
+            script += f"""
+                
+                $result = @{{
+                    'Success' = $true
+                    'MachineId' = '{discovered_machine_id}'
+                    'TargetVMName' = '{target_vm_name}'
+                    'ReplicationJob' = $replicationJob
+                }}
+                
+                $result | ConvertTo-Json -Depth 7
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        else:
+            # Basic replication without custom mappings
+            script = f"""
+            try {{
+                $replicationJob = New-AzMigrateLocalServerReplication `
+                    -MachineId '{discovered_machine_id}' `
+                    -TargetStoragePathId '{target_storage_path_id}' `
+                    -TargetResourceGroupId '{target_resource_group_id}' `
+                    -TargetVMName '{target_vm_name}'"""
+            
+            if source_appliance_name:
+                script += f" `\n                    -SourceApplianceName '{source_appliance_name}'"
+            if target_appliance_name:
+                script += f" `\n                    -TargetApplianceName '{target_appliance_name}'"
+            
+            script += f"""
+                
+                $result = @{{
+                    'Success' = $true
+                    'MachineId' = '{discovered_machine_id}'
+                    'TargetVMName' = '{target_vm_name}'
+                    'ReplicationJob' = $replicationJob
+                }}
+                
+                $result | ConvertTo-Json -Depth 7
+            }} catch {{
+                $errorResult = @{{
+                    'Success' = $false
+                    'Error' = $_.Exception.Message
+                    'ErrorType' = $_.Exception.GetType().Name
+                }}
+                $errorResult | ConvertTo-Json -Depth 3
+            }}
+            """
+        
+        result = ps_executor.execute_script(script)
+        
+        if result.get('returncode') == 0:
+            output = result.get('stdout', '').strip()
+            if output:
+                try:
+                    parsed_result = json.loads(output)
+                    if parsed_result.get('Success'):
+                        logger.info("Successfully created Azure Local server replication with mappings")
+                        return parsed_result
+                    else:
+                        raise CLIError(f"Failed to create replication: {parsed_result.get('Error', 'Unknown error')}")
+                except json.JSONDecodeError:
+                    logger.warning("Could not parse PowerShell output as JSON")
+                    return {"Success": True, "Output": output}
+        
+        error_msg = result.get('stderr', 'Unknown PowerShell error')
+        raise CLIError(f"PowerShell execution failed: {error_msg}")
+        
+    except Exception as e:
+        logger.error(f"Failed to create Azure Local server replication with mappings: {str(e)}")
+        raise CLIError(f"Failed to create Azure Local server replication with mappings: {str(e)}")
