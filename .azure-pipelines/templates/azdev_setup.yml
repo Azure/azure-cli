@@ -32,6 +32,7 @@ steps:
         python $CLI_REPO_PATH/scripts/compact_aaz.py
       fi
 
+      python -c "import azure.cli; print(azure.cli.__path__)"
       # Verify installation and build command index
       az --version
     displayName: 'azdev setup'
