@@ -14,6 +14,30 @@ helps['migrate'] = """
         This command group provides cross-platform migration capabilities by leveraging PowerShell cmdlets
         from within Azure CLI. These commands work on Windows, Linux, and macOS when PowerShell Core is installed.
         Use 'az migrate setup-env' to configure your system for optimal migration operations.
+        
+        Available command groups:
+        - migrate                    : Core migration setup and prerequisite checks
+        - migrate server             : Server discovery and replication management
+        - migrate project            : Azure Migrate project management
+        - migrate assessment         : Assessment creation and management
+        - migrate machine            : Machine discovery and inventory
+        - migrate local              : Azure Local/Stack HCI migration commands
+        - migrate resource           : Azure resource management utilities
+        - migrate powershell         : PowerShell module management
+        - migrate infrastructure     : Replication infrastructure management
+        - migrate auth               : Azure authentication management
+        - migrate storage            : Azure Storage account operations
+    examples:
+        - name: Check migration prerequisites
+          text: az migrate check-prerequisites
+        - name: Set up migration environment
+          text: az migrate setup-env
+        - name: List all discovered servers
+          text: az migrate server list-discovered --resource-group myRG --project-name myProject
+        - name: Create Azure Local replication
+          text: az migrate local create-replication --resource-group myRG --project-name myProject --server-index 0 --target-vm-name myVM
+        - name: Initialize Azure Local infrastructure
+          text: az migrate local init-azure-local --resource-group myRG --project-name myProject --source-appliance-name sourceApp --target-appliance-name targetApp
 """
 
 helps['migrate check-prerequisites'] = """
@@ -433,6 +457,76 @@ helps['migrate job show'] = """
           text: az migrate job show --resource-group myRG --project-name myProject
         - name: Show specific job details
           text: az migrate job show --resource-group myRG --project-name myProject --job-id myJobId
+"""
+
+# Command Groups Help Documentation
+
+helps['migrate machine'] = """
+    type: group
+    short-summary: Machine discovery and inventory management.
+    long-summary: |
+        Commands for managing and viewing discovered machines in Azure Migrate projects.
+        These commands help you list and show details about machines discovered by appliances.
+    examples:
+        - name: List all discovered machines
+          text: az migrate machine list --project-name myProject --resource-group myRG
+        - name: Show specific machine details
+          text: az migrate machine show --machine-name myMachine --project-name myProject --resource-group myRG
+"""
+
+helps['migrate assessment'] = """
+    type: group
+    short-summary: Assessment creation and management commands.
+    long-summary: |
+        Commands for creating and managing Azure Migrate assessments. These commands help you
+        create assessments for discovered machines and view assessment results.
+    examples:
+        - name: List all assessments
+          text: az migrate assessment list --project-name myProject --resource-group myRG
+        - name: Create new assessment
+          text: az migrate assessment create --assessment-name myAssessment --project-name myProject --resource-group myRG
+        - name: Show assessment details
+          text: az migrate assessment show --assessment-name myAssessment --project-name myProject --resource-group myRG
+"""
+
+helps['migrate resource'] = """
+    type: group
+    short-summary: Azure resource management utilities for migration.
+    long-summary: |
+        Utility commands for managing Azure resources related to migration operations,
+        including resource group management and Azure resource discovery.
+    examples:
+        - name: List resource groups
+          text: az migrate resource list-groups
+        - name: List resource groups in specific subscription
+          text: az migrate resource list-groups --subscription-id "00000000-0000-0000-0000-000000000000"
+"""
+
+helps['migrate local'] = """
+    type: group
+    short-summary: Azure Local/Stack HCI migration commands.
+    long-summary: |
+        Comprehensive command set for migrating VMs to Azure Local (Azure Stack HCI) using Azure Migrate.
+        These commands provide CLI equivalents to PowerShell Az.Migrate cmdlets for Azure Local scenarios,
+        including disk mapping, NIC mapping, replication management, and migration execution.
+        
+        Key capabilities:
+        - Initialize Azure Local replication infrastructure
+        - Create disk and NIC mappings for granular control
+        - Manage server replication for Azure Local targets
+        - Execute migrations and monitor progress
+        - Remove and clean up replications
+    examples:
+        - name: Initialize Azure Local infrastructure
+          text: az migrate local init-azure-local --resource-group myRG --project-name myProject --source-appliance-name sourceApp --target-appliance-name targetApp
+        - name: Create disk mapping
+          text: az migrate local create-disk-mapping --disk-id "disk001" --is-os-disk --size-gb 64 --format-type VHDX
+        - name: Create NIC mapping
+          text: az migrate local create-nic-mapping --nic-id "nic001" --target-virtual-switch-id "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.AzureStackHCI/logicalnetworks/network001"
+        - name: Create replication with mappings
+          text: az migrate local create-replication-with-mappings --resource-group myRG --project-name myProject --discovered-machine-id "/subscriptions/xxx/machines/machine001" --target-vm-name "migratedVM"
+        - name: Start migration
+          text: az migrate local start-migration --target-object-id "/subscriptions/xxx/replicationProtectedItems/item001" --turn-off-source-server
 """
 
 helps['migrate project'] = """
