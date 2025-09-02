@@ -27,7 +27,7 @@ from azure.cli.core.util import get_file_json, read_file_content, shell_safe_jso
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import raise_subdivision_deployment_error
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZURE_API_PROFILES
+from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_deployments_client_factory, _resource_lock_client_factory,
