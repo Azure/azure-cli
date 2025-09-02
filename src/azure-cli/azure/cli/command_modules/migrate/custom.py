@@ -110,7 +110,7 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
         if is_available:
             setup_results['powershell_status'] = 'available'
             setup_results['powershell_command'] = ps_cmd
-            setup_results['checks'].append('✅ PowerShell is available')
+            setup_results['checks'].append('PowerShell is available')
             
             # Check PowerShell version compatibility
             try:
@@ -118,21 +118,21 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
                 major_version = int(version_result.get('stdout', '0').strip())
                 
                 if major_version >= 7:  # PowerShell Core 7+
-                    setup_results['checks'].append('✅ PowerShell Core 7+ detected (cross-platform compatible)')
+                    setup_results['checks'].append('PowerShell Core 7+ detected (cross-platform compatible)')
                     setup_results['cross_platform_ready'] = True
                 elif major_version >= 5 and system == 'windows':
-                    setup_results['checks'].append('⚠️ Windows PowerShell 5+ detected (Windows only)')
+                    setup_results['checks'].append('Windows PowerShell 5+ detected (Windows only)')
                     setup_results['cross_platform_ready'] = False
                 else:
-                    setup_results['checks'].append('❌ PowerShell version too old')
+                    setup_results['checks'].append('PowerShell version too old')
                     setup_results['cross_platform_ready'] = False
                     
             except Exception as e:
-                setup_results['checks'].append(f'⚠️ Could not determine PowerShell version: {e}')
+                setup_results['checks'].append(f'Could not determine PowerShell version: {e}')
                 
         else:
             setup_results['powershell_status'] = 'not_available'
-            setup_results['checks'].append('❌ PowerShell is not available')
+            setup_results['checks'].append('PowerShell is not available')
             
             if install_powershell and not check_only:
                 # Attempt automatic installation
@@ -143,7 +143,7 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
                 
     except Exception as e:
         setup_results['powershell_status'] = 'error'
-        setup_results['checks'].append(f'❌ PowerShell check failed: {str(e)}')
+        setup_results['checks'].append(f'PowerShell check failed: {str(e)}')
     
     # 2. Check Azure PowerShell modules
     if setup_results['powershell_status'] == 'available':
@@ -152,14 +152,14 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
             az_check = ps_executor.execute_script('Get-Module -ListAvailable Az.Migrate | Select-Object -First 1')
             
             if az_check.get('stdout', '').strip():
-                setup_results['checks'].append('✅ Az.Migrate module is available')
+                setup_results['checks'].append('Az.Migrate module is available')
             else:
-                setup_results['checks'].append('❌ Az.Migrate module is not installed')
+                setup_results['checks'].append('Az.Migrate module is not installed')
                 if not check_only:
-                    setup_results['checks'].append('💡 Install with: Install-Module -Name Az.Migrate -Force')
+                    setup_results['checks'].append('Install with: Install-Module -Name Az.Migrate -Force')
                     
         except Exception as e:
-            setup_results['checks'].append(f'⚠️ Could not check Azure modules: {str(e)}')
+            setup_results['checks'].append(f'Could not check Azure modules: {str(e)}')
     
     # 3. Platform-specific environment checks
     platform_checks = _perform_platform_specific_checks(system)
@@ -181,9 +181,9 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
 def _get_powershell_install_instructions(system):
     """Get platform-specific PowerShell installation instructions."""
     instructions = {
-        'windows': '💡 Install PowerShell Core: winget install Microsoft.PowerShell or visit https://github.com/PowerShell/PowerShell',
-        'linux': '💡 Install PowerShell Core: sudo apt install powershell (Ubuntu) or sudo yum install powershell (RHEL)',
-        'darwin': '💡 Install PowerShell Core: brew install powershell'
+        'windows': 'Install PowerShell Core: winget install Microsoft.PowerShell or visit https://github.com/PowerShell/PowerShell',
+        'linux': 'Install PowerShell Core: sudo apt install powershell (Ubuntu) or sudo yum install powershell (RHEL)',
+        'darwin': 'Install PowerShell Core: brew install powershell'
     }
     return instructions.get(system, instructions['linux'])
 
@@ -197,15 +197,15 @@ def _attempt_powershell_installation(system):
             result = subprocess.run(['winget', 'install', 'Microsoft.PowerShell'], 
                                   capture_output=True, text=True, timeout=300)
             if result.returncode == 0:
-                return '✅ PowerShell Core installed via winget'
+                return 'PowerShell Core installed via winget'
             else:
-                return f'❌ winget installation failed: {result.stderr}'
+                return f'winget installation failed: {result.stderr}'
         except Exception as e:
-            return f'❌ Automatic installation failed: {str(e)}'
+            return f'Automatic installation failed: {str(e)}'
     
     elif system == 'linux':
         # Note: This would require sudo, so we just provide instructions
-        return '💡 Automatic installation requires sudo. Please run: sudo apt install powershell'
+        return 'Automatic installation requires sudo. Please run: sudo apt install powershell'
     
     elif system == 'darwin':
         try:
@@ -213,13 +213,13 @@ def _attempt_powershell_installation(system):
             result = subprocess.run(['brew', 'install', 'powershell'], 
                                   capture_output=True, text=True, timeout=300)
             if result.returncode == 0:
-                return '✅ PowerShell Core installed via Homebrew'
+                return 'PowerShell Core installed via Homebrew'
             else:
-                return f'❌ Homebrew installation failed: {result.stderr}'
+                return f'Homebrew installation failed: {result.stderr}'
         except Exception as e:
-            return f'❌ Automatic installation failed: {str(e)}'
+            return f'Automatic installation failed: {str(e)}'
     
-    return '❌ Automatic installation not supported for this platform'
+    return 'Automatic installation not supported for this platform'
 
 
 def _perform_platform_specific_checks(system):
@@ -227,45 +227,45 @@ def _perform_platform_specific_checks(system):
     checks = []
     
     if system == 'windows':
-        checks.append('✅ Windows detected - native PowerShell support')
+        checks.append('Windows detected - native PowerShell support')
         
         # Check if running as administrator
         try:
             import ctypes
             is_admin = ctypes.windll.shell32.IsUserAnAdmin()
             if is_admin:
-                checks.append('✅ Running with administrator privileges')
+                checks.append('Running with administrator privileges')
             else:
-                checks.append('⚠️ Not running as administrator - some operations may require elevation')
+                checks.append('Not running as administrator - some operations may require elevation')
         except Exception:
-            checks.append('⚠️ Could not determine administrator status')
+            checks.append('Could not determine administrator status')
             
     elif system == 'linux':
-        checks.append('✅ Linux detected - PowerShell Core required')
+        checks.append('Linux detected - PowerShell Core required')
         
         # Check common package managers
         import shutil
         if shutil.which('apt'):
-            checks.append('✅ APT package manager available')
+            checks.append('APT package manager available')
         elif shutil.which('yum'):
-            checks.append('✅ YUM package manager available')
+            checks.append('YUM package manager available')
         elif shutil.which('dnf'):
-            checks.append('✅ DNF package manager available')
+            checks.append('DNF package manager available')
         else:
-            checks.append('⚠️ No common package manager detected')
+            checks.append('No common package manager detected')
             
     elif system == 'darwin':
-        checks.append('✅ macOS detected - PowerShell Core required')
+        checks.append('macOS detected - PowerShell Core required')
         
         # Check if Homebrew is available
         import shutil
         if shutil.which('brew'):
-            checks.append('✅ Homebrew available for PowerShell installation')
+            checks.append('Homebrew available for PowerShell installation')
         else:
-            checks.append('⚠️ Homebrew not found - install from https://brew.sh/')
+            checks.append('Homebrew not found - install from https://brew.sh/')
     
     else:
-        checks.append(f'⚠️ Unsupported platform: {system}')
+        checks.append(f'Unsupported platform: {system}')
     
     return checks
 
@@ -290,9 +290,9 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
         # 1. Check Python version
         python_version = sys.version_info
         if python_version.major >= 3 and python_version.minor >= 7:
-            setup_results['checks'].append(f'✅ Python {python_version.major}.{python_version.minor}.{python_version.micro} is compatible')
+            setup_results['checks'].append(f'Python {python_version.major}.{python_version.minor}.{python_version.micro} is compatible')
         else:
-            setup_results['checks'].append(f'❌ Python {python_version.major}.{python_version.minor}.{python_version.micro} - requires 3.7+')
+            setup_results['checks'].append(f'Python {python_version.major}.{python_version.minor}.{python_version.micro} - requires 3.7+')
             setup_results['status'] = 'warning'
         
         # 2. Check PowerShell availability
@@ -302,7 +302,7 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
             
             if is_available:
                 setup_results['powershell_status'] = 'available'
-                setup_results['checks'].append('✅ PowerShell is available')
+                setup_results['checks'].append('PowerShell is available')
                 
                 # Check PowerShell version compatibility
                 try:
@@ -310,21 +310,21 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
                     major_version = int(version_result.get('stdout', '0').strip())
                     
                     if major_version >= 7:  # PowerShell Core 7+
-                        setup_results['checks'].append('✅ PowerShell Core 7+ detected (cross-platform compatible)')
+                        setup_results['checks'].append('PowerShell Core 7+ detected (cross-platform compatible)')
                         setup_results['cross_platform_ready'] = True
                     elif major_version >= 5 and system == 'windows':
-                        setup_results['checks'].append('⚠️ Windows PowerShell 5+ detected (Windows only)')
+                        setup_results['checks'].append('Windows PowerShell 5+ detected (Windows only)')
                         setup_results['cross_platform_ready'] = False
                     else:
-                        setup_results['checks'].append('❌ PowerShell version too old')
+                        setup_results['checks'].append('PowerShell version too old')
                         setup_results['cross_platform_ready'] = False
                         
                 except Exception as e:
-                    setup_results['checks'].append(f'⚠️ Could not determine PowerShell version: {e}')
+                    setup_results['checks'].append(f'Could not determine PowerShell version: {e}')
                     
             else:
                 setup_results['powershell_status'] = 'not_available'
-                setup_results['checks'].append('❌ PowerShell is not available')
+                setup_results['checks'].append('PowerShell is not available')
                 
                 if install_powershell and not check_only:
                     # Attempt automatic installation
@@ -335,7 +335,7 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
                     
         except Exception as e:
             setup_results['powershell_status'] = 'error'
-            setup_results['checks'].append(f'❌ PowerShell check failed: {str(e)}')
+            setup_results['checks'].append(f'PowerShell check failed: {str(e)}')
         
         # 3. Check Azure PowerShell modules
         if setup_results['powershell_status'] == 'available':
@@ -344,14 +344,14 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
                 az_check = ps_executor.execute_script('Get-Module -ListAvailable Az.Migrate | Select-Object -First 1')
                 
                 if az_check.get('stdout', '').strip():
-                    setup_results['checks'].append('✅ Az.Migrate module is available')
+                    setup_results['checks'].append('Az.Migrate module is available')
                 else:
-                    setup_results['checks'].append('❌ Az.Migrate module is not installed')
+                    setup_results['checks'].append('Az.Migrate module is not installed')
                     if not check_only:
-                        setup_results['checks'].append('💡 Install with: Install-Module -Name Az.Migrate -Force')
+                        setup_results['checks'].append('Install with: Install-Module -Name Az.Migrate -Force')
                         
             except Exception as e:
-                setup_results['checks'].append(f'⚠️ Could not check Azure modules: {str(e)}')
+                setup_results['checks'].append(f'Could not check Azure modules: {str(e)}')
         
         # 4. Platform-specific environment checks
         platform_checks = _perform_platform_specific_checks(system)
@@ -771,7 +771,7 @@ try {
         if result['returncode'] != 0:
             raise CLIError(f'Failed to set Azure context: {result.get("stderr", "Unknown error")}')
         
-        print("✅ Azure context set successfully")
+        print("Azure context set successfully")
     except Exception as e:
         raise CLIError(f'Failed to set Azure context: {str(e)}')
 
@@ -1312,13 +1312,12 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
     
     module_check_script = f"""
     try {{
-        Write-Host "🔍 Checking PowerShell module: {module_name}" -ForegroundColor Cyan
-        Write-Host "=" * 50 -ForegroundColor Gray
+        Write-Host "Checking PowerShell module: {module_name}" -ForegroundColor Cyan
         
         $Module = Get-InstalledModule -Name "{module_name}" -ErrorAction SilentlyContinue
         
         if ($Module) {{
-            Write-Host "✅ Module found:" -ForegroundColor Green
+            Write-Host "Module found:" -ForegroundColor Green
             Write-Host "   Name: $($Module.Name)" -ForegroundColor White
             Write-Host "   Version: $($Module.Version)" -ForegroundColor White
             Write-Host "   Author: $($Module.Author)" -ForegroundColor White
@@ -1333,8 +1332,8 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
                 'Description' = $Module.Description
             }}
         }} else {{
-            Write-Host "❌ Module '{module_name}' is not installed" -ForegroundColor Red
-            Write-Host "💡 Install with: Install-Module -Name {module_name} -Force" -ForegroundColor Yellow
+            Write-Host "Module '{module_name}' is not installed" -ForegroundColor Red
+            Write-Host "Install with: Install-Module -Name {module_name} -Force" -ForegroundColor Yellow
             Write-Host ""
             
             return @{{
@@ -1345,7 +1344,7 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
         }}
         
     }} catch {{
-        Write-Host "❌ Error checking module:" -ForegroundColor Red
+        Write-Host "Error checking module:" -ForegroundColor Red
         Write-Host "   $($_.Exception.Message)" -ForegroundColor White
         throw
     }}
@@ -1389,18 +1388,16 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
     get_job_script = f"""
     # Azure CLI equivalent functionality for Get-AzMigrateLocalJob
     try {{
+        Write-Host "Getting Local Replication Job Details..." -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "🔍 Getting Local Replication Job Details..." -ForegroundColor Cyan
-        Write-Host "=" * 50 -ForegroundColor Gray
-        Write-Host ""
-        Write-Host "📋 Configuration:" -ForegroundColor Yellow
+        Write-Host "Configuration:" -ForegroundColor Yellow
         Write-Host "   Resource Group: {resource_group_name}" -ForegroundColor White
         Write-Host "   Project Name: {project_name}" -ForegroundColor White
         Write-Host "   Job ID: {job_id or 'All jobs'}" -ForegroundColor White
         Write-Host ""
         
         # First, let's check what parameters are available for Get-AzMigrateLocalJob
-        Write-Host "📋 Checking cmdlet parameters..." -ForegroundColor Yellow
+        Write-Host "Checking cmdlet parameters..." -ForegroundColor Yellow
         $cmdletInfo = Get-Command Get-AzMigrateLocalJob -ErrorAction SilentlyContinue
         if ($cmdletInfo) {{
             Write-Host "Available parameters:" -ForegroundColor Cyan
@@ -1414,30 +1411,30 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
         $Job = $null
         
         if ("{job_id}" -ne "None" -and "{job_id}" -ne "") {{
-            Write-Host "🔍 Trying to get job with ID: {job_id}" -ForegroundColor Cyan
+            Write-Host "Trying to get job with ID: {job_id}" -ForegroundColor Cyan
             
             # Method 1: Try with -ID parameter (capital ID based on cmdlet info)
             try {{
                 $Job = Get-AzMigrateLocalJob -ResourceGroupName "{resource_group_name}" -ProjectName "{project_name}" -ID "{job_id}"
-                Write-Host "✅ Found job using -ID parameter" -ForegroundColor Green
+                Write-Host "Found job using -ID parameter" -ForegroundColor Green
             }} catch {{
-                Write-Host "⚠️ -ID parameter failed: $($_.Exception.Message)" -ForegroundColor Yellow
+                Write-Host "-ID parameter failed: $($_.Exception.Message)" -ForegroundColor Yellow
             }}
             
             # Method 2: Try with -Name parameter if -ID failed
             if (-not $Job) {{
                 try {{
                     $Job = Get-AzMigrateLocalJob -ResourceGroupName "{resource_group_name}" -ProjectName "{project_name}" -Name "{job_id}"
-                    Write-Host "✅ Found job using -Name parameter" -ForegroundColor Green
+                    Write-Host "Found job using -Name parameter" -ForegroundColor Green
                 }} catch {{
-                    Write-Host "⚠️ -Name parameter failed: $($_.Exception.Message)" -ForegroundColor Yellow
+                    Write-Host "-Name parameter failed: $($_.Exception.Message)" -ForegroundColor Yellow
                 }}
             }}
             
             # Method 3: Try listing all jobs and filtering if previous methods failed
             if (-not $Job) {{
                 try {{
-                    Write-Host "🔍 Getting all jobs and filtering..." -ForegroundColor Cyan
+                    Write-Host "Getting all jobs and filtering..." -ForegroundColor Cyan
                     $AllJobs = Get-AzMigrateLocalJob -ResourceGroupName "{resource_group_name}" -ProjectName "{project_name}"
                     
                     if ($AllJobs) {{
@@ -1445,29 +1442,29 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
                         $Job = $AllJobs | Where-Object {{ $_.Id -like "*{job_id}*" -or $_.Name -like "*{job_id}*" }}
                         
                         if ($Job) {{
-                            Write-Host "✅ Found job by filtering all jobs" -ForegroundColor Green
+                            Write-Host "Found job by filtering all jobs" -ForegroundColor Green
                         }} else {{
-                            Write-Host "⚠️ No job found with ID containing: {job_id}" -ForegroundColor Yellow
+                            Write-Host "No job found with ID containing: {job_id}" -ForegroundColor Yellow
                             Write-Host "Available jobs:" -ForegroundColor Cyan
                             $AllJobs | ForEach-Object {{ Write-Host "   - $($_.Id) ($($_.Name))" -ForegroundColor White }}
                         }}
                     }} else {{
-                        Write-Host "⚠️ No jobs found in project" -ForegroundColor Yellow
+                        Write-Host "No jobs found in project" -ForegroundColor Yellow
                     }}
                 }} catch {{
-                    Write-Host "⚠️ Failed to list all jobs: $($_.Exception.Message)" -ForegroundColor Yellow
+                    Write-Host "Failed to list all jobs: $($_.Exception.Message)" -ForegroundColor Yellow
                 }}
             }}
         }} else {{
             # Get all jobs if no specific job ID provided
-            Write-Host "🔍 Getting all local replication jobs..." -ForegroundColor Cyan
+            Write-Host "Getting all local replication jobs..." -ForegroundColor Cyan
             $Job = Get-AzMigrateLocalJob -ResourceGroupName "{resource_group_name}" -ProjectName "{project_name}"
         }}
         
         if ($Job) {{
-            Write-Host "✅ Job found!" -ForegroundColor Green
+            Write-Host "Job found!" -ForegroundColor Green
             Write-Host ""
-            Write-Host "📊 Job Details:" -ForegroundColor Yellow
+            Write-Host "Job Details:" -ForegroundColor Yellow
             
             if ($Job -is [array] -and $Job.Count -gt 1) {{
                 Write-Host "   Found multiple jobs ($($Job.Count))" -ForegroundColor White
@@ -1487,7 +1484,7 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
                 }}
                 Write-Host "   Display Name: $($Job.Property.DisplayName)" -ForegroundColor White
                 Write-Host ""
-                Write-Host "🔍 Job State: $($Job.Property.State)" -ForegroundColor Cyan
+                Write-Host "Job State: $($Job.Property.State)" -ForegroundColor Cyan
                 Write-Host ""
             }}
             
@@ -1505,10 +1502,10 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
         
     }} catch {{
         Write-Host ""
-        Write-Host "❌ Failed to get job details:" -ForegroundColor Red
+        Write-Host "Failed to get job details:" -ForegroundColor Red
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
-        Write-Host "💡 Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "Troubleshooting:" -ForegroundColor Yellow
         Write-Host "   1. Verify the job ID is correct" -ForegroundColor White
         Write-Host "   2. Check if the job exists in the current project" -ForegroundColor White
         Write-Host "   3. Ensure you have access to the job" -ForegroundColor White
@@ -1552,7 +1549,7 @@ def initialize_local_replication_infrastructure(cmd, resource_group_name, projec
         
     }} catch {{
         Write-Host ""
-        Write-Host "❌ Failed to initialize local replication infrastructure:" -ForegroundColor Red
+        Write-Host "Failed to initialize local replication infrastructure:" -ForegroundColor Red
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
         throw
@@ -1581,16 +1578,16 @@ def list_resource_groups(cmd, subscription_id=None):
     # Azure CLI equivalent functionality for Get-AzResourceGroup
     try {{
         Write-Host ""
-        Write-Host "📋 Listing Resource Groups..." -ForegroundColor Cyan
+        Write-Host "Listing Resource Groups..." -ForegroundColor Cyan
         Write-Host "=" * 40 -ForegroundColor Gray
         Write-Host ""
         
         # Get all resource groups
         $ResourceGroups = Get-AzResourceGroup
         
-        Write-Host "✅ Found $($ResourceGroups.Count) resource group(s)" -ForegroundColor Green
+        Write-Host "Found $($ResourceGroups.Count) resource group(s)" -ForegroundColor Green
         Write-Host ""
-        Write-Host "📊 Resource Groups:" -ForegroundColor Yellow
+        Write-Host "Resource Groups:" -ForegroundColor Yellow
         
         $ResourceGroups | Format-Table ResourceGroupName, Location, ProvisioningState -AutoSize
         
@@ -1605,7 +1602,7 @@ def list_resource_groups(cmd, subscription_id=None):
         
     }} catch {{
         Write-Host ""
-        Write-Host "❌ Failed to list resource groups:" -ForegroundColor Red
+        Write-Host "Failed to list resource groups:" -ForegroundColor Red
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
         throw
@@ -1632,13 +1629,12 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
     
     module_check_script = f"""
     try {{
-        Write-Host "🔍 Checking PowerShell module: {module_name}" -ForegroundColor Cyan
-        Write-Host "=" * 50 -ForegroundColor Gray
+        Write-Host "Checking PowerShell module: {module_name}" -ForegroundColor Cyan
         
         $Module = Get-InstalledModule -Name "{module_name}" -ErrorAction SilentlyContinue
         
         if ($Module) {{
-            Write-Host "✅ Module found:" -ForegroundColor Green
+            Write-Host "Module found:" -ForegroundColor Green
             Write-Host "   Name: $($Module.Name)" -ForegroundColor White
             Write-Host "   Version: $($Module.Version)" -ForegroundColor White
             Write-Host "   Author: $($Module.Author)" -ForegroundColor White
@@ -1653,8 +1649,8 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
                 'Description' = $Module.Description
             }}
         }} else {{
-            Write-Host "❌ Module '{module_name}' is not installed" -ForegroundColor Red
-            Write-Host "💡 Install with: Install-Module -Name {module_name} -Force" -ForegroundColor Yellow
+            Write-Host "Module '{module_name}' is not installed" -ForegroundColor Red
+            Write-Host "Install with: Install-Module -Name {module_name} -Force" -ForegroundColor Yellow
             Write-Host ""
             
             return @{{
@@ -1665,7 +1661,7 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
         }}
         
     }} catch {{
-        Write-Host "❌ Error checking module:" -ForegroundColor Red
+        Write-Host "Error checking module:" -ForegroundColor Red
         Write-Host "   $($_.Exception.Message)" -ForegroundColor White
         throw
     }}
@@ -1727,18 +1723,18 @@ def create_azstackhci_vm_replication(cmd, vm_name, target_vm_name, resource_grou
         $Result = New-AzStackHCIVMReplication {' '.join(params)}
         
         if ($Result) {{
-            Write-Host "✅ VM replication created successfully!" -ForegroundColor Green
+            Write-Host "VM replication created successfully!" -ForegroundColor Green
             Write-Host ""
             Write-Host "Replication Details:" -ForegroundColor Yellow
             Write-Host "===================" -ForegroundColor Gray
             $Result | Format-List
         }} else {{
-            Write-Host "❌ Failed to create VM replication" -ForegroundColor Red
+            Write-Host "Failed to create VM replication" -ForegroundColor Red
         }}
         
     }} catch {{
         Write-Host ""
-        Write-Host "❌ Failed to create Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "Failed to create Azure Stack HCI VM replication:" -ForegroundColor Red
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
         throw
@@ -1789,18 +1785,18 @@ def set_azstackhci_vm_replication(cmd, vm_name, resource_group_name,
         $Result = Set-AzStackHCIVMReplication {' '.join(params)}
         
         if ($Result) {{
-            Write-Host "✅ VM replication settings updated successfully!" -ForegroundColor Green
+            Write-Host "VM replication settings updated successfully!" -ForegroundColor Green
             Write-Host ""
             Write-Host "Updated Settings:" -ForegroundColor Yellow
             Write-Host "================" -ForegroundColor Gray
             $Result | Format-List
         }} else {{
-            Write-Host "❌ Failed to update VM replication settings" -ForegroundColor Red
+            Write-Host "Failed to update VM replication settings" -ForegroundColor Red
         }}
         
     }} catch {{
         Write-Host ""
-        Write-Host "❌ Failed to update Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "Failed to update Azure Stack HCI VM replication:" -ForegroundColor Red
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
         throw
@@ -1845,15 +1841,15 @@ def remove_azstackhci_vm_replication(cmd, vm_name, resource_group_name, force=Fa
         {"if ($confirmation -eq 'y' -or $confirmation -eq 'Y') {" if not force else ""}
             $Result = Remove-AzStackHCIVMReplication {' '.join(params)}
             
-            Write-Host "✅ VM replication removed successfully!" -ForegroundColor Green
+            Write-Host "VM replication removed successfully!" -ForegroundColor Green
             Write-Host ""
         {"} else {" if not force else ""}
-        {"    Write-Host '❌ Operation cancelled by user' -ForegroundColor Yellow" if not force else ""}
+        {"    Write-Host 'Operation cancelled by user' -ForegroundColor Yellow" if not force else ""}
         {"}" if not force else ""}
         
     }} catch {{
         Write-Host ""
-        Write-Host "❌ Failed to remove Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "Failed to remove Azure Stack HCI VM replication:" -ForegroundColor Red
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
         throw
@@ -1883,7 +1879,7 @@ def get_azstackhci_vm_replication(cmd, vm_name=None, resource_group_name=None):
     get_vm_replication_script = f"""
     try {{
         Write-Host ""
-        Write-Host "📊 Retrieving Azure Stack HCI VM Replication Status..." -ForegroundColor Cyan
+        Write-Host "Retrieving Azure Stack HCI VM Replication Status..." -ForegroundColor Cyan
         {"Write-Host 'VM Name: " + vm_name + "' -ForegroundColor White" if vm_name else "Write-Host 'Listing all VM replications' -ForegroundColor White"}
         {"Write-Host 'Resource Group: " + resource_group_name + "' -ForegroundColor White" if resource_group_name else ""}
         Write-Host ""
@@ -1891,7 +1887,7 @@ def get_azstackhci_vm_replication(cmd, vm_name=None, resource_group_name=None):
         $Replications = Get-AzStackHCIVMReplication {' '.join(params)}
         
         if ($Replications) {{
-            Write-Host "✅ VM replication details retrieved successfully!" -ForegroundColor Green
+            Write-Host "VM replication details retrieved successfully!" -ForegroundColor Green
             Write-Host ""
             Write-Host "Replication Status:" -ForegroundColor Yellow
             Write-Host "==================" -ForegroundColor Gray
@@ -1917,7 +1913,7 @@ def get_azstackhci_vm_replication(cmd, vm_name=None, resource_group_name=None):
         
     }} catch {{
         Write-Host ""
-        Write-Host "❌ Failed to get Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "Failed to get Azure Stack HCI VM replication:" -ForegroundColor Red
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host "   Platform: $($PSVersionTable.Platform)" -ForegroundColor Gray
         Write-Host ""
@@ -1963,22 +1959,22 @@ def _create_cross_platform_error(operation, error_message):
     # Add platform-specific troubleshooting tips
     if "not recognized" in error_message.lower() or "command not found" in error_message.lower():
         if system == 'windows':
-            error_details += "\n💡 Troubleshooting:\n"
+            error_details += "\nTroubleshooting:\n"
             error_details += "   - Ensure PowerShell is installed and in PATH\n"
             error_details += "   - Try: winget install Microsoft.PowerShell\n"
             error_details += "   - Restart your terminal after installation"
         elif system == 'linux':
-            error_details += "\n💡 Troubleshooting:\n"
+            error_details += "\nTroubleshooting:\n"
             error_details += "   - Install PowerShell Core: sudo apt install powershell (Ubuntu)\n"
             error_details += "   - Or: sudo yum install powershell (RHEL/CentOS)\n"
             error_details += "   - Ensure /usr/bin/pwsh exists"
         elif system == 'darwin':
-            error_details += "\n💡 Troubleshooting:\n"
+            error_details += "\nTroubleshooting:\n"
             error_details += "   - Install PowerShell Core: brew install powershell\n"
             error_details += "   - Ensure /usr/local/bin/pwsh exists"
     
     elif "module" in error_message.lower() and "not found" in error_message.lower():
-        error_details += "\n💡 Install Azure PowerShell modules:\n"
+        error_details += "\nInstall Azure PowerShell modules:\n"
         error_details += "   PowerShell> Install-Module -Name Az.Migrate -Force\n"
         error_details += "   PowerShell> Install-Module -Name Az.StackHCI -Force"
     
@@ -2062,9 +2058,9 @@ def _validate_cross_platform_environment():
                 ps_edition = platform_result.get('stdout', '').strip()
                 
                 if ps_edition == 'Core':
-                    validation_results['warnings'].append('✅ PowerShell Core detected (cross-platform compatible)')
+                    validation_results['warnings'].append('PowerShell Core detected (cross-platform compatible)')
                 elif ps_edition == 'Desktop' and system == 'windows':
-                    validation_results['warnings'].append('⚠️ Windows PowerShell detected (Windows-only)')
+                    validation_results['warnings'].append('Windows PowerShell detected (Windows-only)')
                 
             except Exception as e:
                 validation_results['warnings'].append(f'Could not determine PowerShell version: {e}')
@@ -2074,9 +2070,9 @@ def _validate_cross_platform_environment():
                 az_result = ps_executor.execute_script('Get-Module -ListAvailable Az.Migrate | Select-Object -First 1 | ConvertTo-Json')
                 if az_result.get('stdout', '').strip():
                     validation_results['azure_modules_available'] = True
-                    validation_results['warnings'].append('✅ Az.Migrate module available')
+                    validation_results['warnings'].append('Az.Migrate module available')
                 else:
-                    validation_results['warnings'].append('⚠️ Az.Migrate module not found')
+                    validation_results['warnings'].append('Az.Migrate module not found')
                     
             except Exception as e:
                 validation_results['warnings'].append(f'Could not check Azure modules: {e}')
@@ -2104,8 +2100,7 @@ def validate_cross_platform_environment_cmd(cmd):
         results = _validate_cross_platform_environment()
         
         # Display results in a user-friendly format
-        print("\n🔍 Azure Migrate Cross-Platform Environment Check")
-        print("=" * 50)
+        print("\nAzure Migrate Cross-Platform Environment Check")
         
         # Platform information
         print(f"\n📍 Platform Information:")
@@ -2114,29 +2109,29 @@ def validate_cross_platform_environment_cmd(cmd):
         # PowerShell availability
         print(f"\n🔧 PowerShell Status:")
         if results['powershell_available']:
-            print("   ✅ PowerShell Available")
+            print("   PowerShell Available")
             if 'powershell_version' in results:
-                print(f"   📦 Version: {results['powershell_version']}")
+                print(f"   Version: {results['powershell_version']}")
         else:
-            print("   ❌ PowerShell Not Available")
+            print("   PowerShell Not Available")
         
         # Azure modules
-        print(f"\n📦 Azure Module Status:")
+        print(f"\nAzure Module Status:")
         if results['azure_modules_available']:
-            print("   ✅ Az.Migrate Module Available")
+            print("   Az.Migrate Module Available")
         else:
-            print("   ⚠️ Az.Migrate Module Not Found")
+            print("   Az.Migrate Module Not Found")
         
         # Platform capabilities
         capabilities = _get_platform_capabilities()
-        print(f"\n🎯 Platform Capabilities:")
+        print(f"\nPlatform Capabilities:")
         print(f"   Native PowerShell: {'✅' if capabilities['powershell_native'] else '❌'}")
         print(f"   PowerShell Core Support: {'✅' if capabilities['powershell_core_supported'] else '❌'}")
         print(f"   Azure PowerShell Compatible: {'✅' if capabilities['azure_powershell_compatible'] else '❌'}")
         
         # Warnings and recommendations
         if results['warnings']:
-            print(f"\n⚠️ Status Messages:")
+            print(f"\nStatus Messages:")
             for warning in results['warnings']:
                 print(f"   {warning}")
         
@@ -2146,13 +2141,13 @@ def validate_cross_platform_environment_cmd(cmd):
                 print(f"   • {limitation}")
         
         if capabilities['recommendations']:
-            print(f"\n💡 Recommendations:")
+            print(f"\nRecommendations:")
             for recommendation in capabilities['recommendations']:
                 print(f"   • {recommendation}")
         
         # Errors
         if results['errors']:
-            print(f"\n❌ Issues Found:")
+            print(f"\nIssues Found:")
             for error in results['errors']:
                 print(f"   • {error}")
         
@@ -2160,23 +2155,21 @@ def validate_cross_platform_environment_cmd(cmd):
         if not results['powershell_available']:
             system = platform.system().lower()
             install_guide = _get_powershell_install_instructions(system)
-            print(f"\n📥 Installation Instructions:")
+            print(f"\n Installation Instructions:")
             print(f"   {install_guide}")
         
         if not results['azure_modules_available'] and results['powershell_available']:
-            print(f"\n📥 Azure Module Installation:")
+            print(f"\n Azure Module Installation:")
             print(f"   Run in PowerShell: Install-Module -Name Az.Migrate -Force")
             print(f"   Run in PowerShell: Install-Module -Name Az.StackHCI -Force")
         
         # Overall status
-        print(f"\n📊 Overall Status:")
+        print(f"\nOverall Status:")
         if results['is_supported']:
-            print("   ✅ Environment is ready for Azure Migrate operations")
+            print("   Environment is ready for Azure Migrate operations")
         else:
-            print("   ❌ Environment requires setup before using Azure Migrate")
-        
-        print("\n" + "=" * 50)
-        
+            print("   Environment requires setup before using Azure Migrate")
+                
         # Return results for programmatic access
         return results
         
