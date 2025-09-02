@@ -982,6 +982,33 @@ type: command
 short-summary: List available built-in stacks which can be used for function apps on the Flex Consumption plan.
 """
 
+helps['functionapp flex-migration'] = """
+type: group
+short-summary: Manage migration of Linux Consumption function apps to the Flex Consumption plan.
+"""
+
+helps['functionapp flex-migration start'] = """
+type: command
+short-summary: Create a Flex Consumption app with the same settings as the provided Linux Consumption function app.
+examples:
+  - name: Migrate a Linux Consumption function app to the Flex Consumption plan.
+    text: >
+        az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --name MyFunctionApp --resource-group MyResourceGroup --storage-account MyStorageAccount
+
+  - name: Migrate a Linux Consumption function app to the Flex Consumption plan without migrating managed identity configurations.
+    text: >
+        az functionapp flex-migration start --source-name MyLinuxConsumptionApp --source-resource-group MyLinuxConsumptionResourceGroup --name MyFunctionApp --resource-group MyResourceGroup --storage-account MyStorageAccount --skip-managed-identities
+"""
+
+helps['functionapp flex-migration list'] = """
+type: command
+short-summary: List all Linux Consumption function apps that are eligible for migration to the Flex Consumption plan.
+examples:
+  - name: List all Linux Consumption function apps that are eligible for migration to the Flex Consumption plan.
+    text: >
+        az functionapp flex-migration list
+"""
+
 helps['functionapp plan'] = """
 type: group
 short-summary: Manage App Service Plans for an Azure Function
@@ -2341,6 +2368,16 @@ short-summary: Get the logs of a sitecontainer for a linux webapp
 examples:
   - name: Get the logs of a sitecontainer for a linux webapp
     text: az webapp sitecontainers log --name MyWebApp --resource-group MyResourceGroup --container-name MyContainer
+"""
+
+helps['webapp sitecontainers convert'] = """
+type: command
+short-summary: Convert a webapp from sitecontainers to a classic custom container and vice versa.
+examples:
+  - name: Convert a webapp to classic custom container (docker) from sitecontainers
+    text: az webapp sitecontainers convert --mode docker --name MyWebApp --resource-group MyResourceGroup
+  - name: Convert a webapp to sitecontainers from classic custom container (docker)
+    text: az webapp sitecontainers convert --mode sitecontainers --name MyWebApp --resource-group MyResourceGroup
 """
 
 

@@ -66,7 +66,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.74.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Network/publicIPAddresses/public-ip-000002?api-version=2022-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Network/publicIPAddresses/public-ip-000002?api-version=2024-07-01
   response:
     body:
       string: '{"name":"public-ip-000002","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Network/publicIPAddresses/public-ip-000002","etag":"W/\"9e111fe6-7b1c-414d-9a8b-cdf238ed7ce6\"","location":"westus","properties":{"provisioningState":"Updating","resourceGuid":"77a0cf1b-f120-4c00-b6ba-df18ed07e22b","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}}'
@@ -172,7 +172,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.74.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Network/publicIPAddresses/public-ip-000002?api-version=2022-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Network/publicIPAddresses/public-ip-000002?api-version=2024-07-01
   response:
     body:
       string: '{"name":"public-ip-000002","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Network/publicIPAddresses/public-ip-000002","etag":"W/\"c2dd62d5-d335-44b2-a6dc-b8ef95b6b814\"","location":"westus","properties":{"provisioningState":"Succeeded","resourceGuid":"77a0cf1b-f120-4c00-b6ba-df18ed07e22b","ipAddress":"52.159.249.5","publicIPAddressVersion":"IPv4","publicIPAllocationMethod":"Static","idleTimeoutInMinutes":4,"ipTags":[],"ddosSettings":{"protectionMode":"VirtualNetworkInherited"}},"type":"Microsoft.Network/publicIPAddresses","sku":{"name":"Standard","tier":"Regional"}}'
@@ -447,12 +447,12 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Resources/deployments/mock-deployment/operationStatuses/08584514391507953642?api-version=2024-11-01&t=638857645397675457&c=MIIHhzCCBm-gAwIBAgITfAeDEnPW_KxJbq8EjgAAB4MSczANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjUwNDIwMTUyMDI3WhcNMjUxMDE3MTUyMDI3WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALO1SAvt4DI7FxxBmZBcfoKDLiXpS8U5adZbRlRvVm-EcAWqGNnVo1AxaXu3ghKMY95LxffhvcYAZ56WhgOxA_gpAUzm4t0yW0aVzv7vAOWZHIG1fvTcWY_sHCkuTyCNAcRbNbaqbidaK9ZOTQ19baUQ26kVkP7tjTi6DWWRlM25d4YQcGaWJoBwUtol-hgB5Z_rVMljRF5Q1T9_3YpRBw57SpHvmb30JNQSpndyeu--Ip8pMwpNaiIRF70G8WfbTBoJhRqNqNAKBLU3CAVV4H6lYrXtSK-gkZC0EzjZ4ze_XVDGBd1sOPsbMx4aQgZEiuDJuuk9eqTzzur3IDUdrP0CAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBSRrAa71kVppeoZonY7QPy_R7XWQzAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAChQXwS0_EaMb7G3BWGDeoNhAAEaoKkJVUy5HVGyWKADFm6Tp2WidwOIMoOu-IuoA634ORJ7bIwsC2WhUA0Z8-c2AAD956dAtCkn5pEBXSqwuKMM3l9KOClAY1RiAQcP-GWtmb_mqZspO78GHaq-mwiyIDUICM-uZl-qR6UVt6rLn5xPqHNkenxrslS_G3IJ9yCV1sflxhz93B7VR9H7BtOxd_nqZOD5uSV3OpPnATTRO0KB3VBbZ0KqvdtWoHjNywLqMuhJUufHw2zmlQ-Yj3ndha_yTvOQlT-85ikSoyWI0P4_GeEwX9RdkiVHVzx3gR8HzFKkJXOwRvxQE_9Ov_0&s=MtLjzu-FIHtAmxF6F8uctNQLGkZyq17QrgdzEq0Dfmpr1iBexfm9mBXtU3Ji9bkhgSAStKfy3p3vnYGUx0k09ALNCvosa8ko_7EhCwly8INz-v8fEom12eu3ZywiYk4WyHkdriL3vGvV68ewo0m9SiN4-2X0JGRij41mbgo2qUX58RQFEQrGbV-5M5LsTNCsT2v3Ca98PQ0eZZbVv8Z5Qkt_QYOQuhGPmqYNwfKDfyi0VVE8tY8LFIG75OO2zOBWMiyU5-0h1bjuaIdncJV2BCPPzyJ-byF2HFI40nETbUon2YjyHZPXcl3yOWXq7Vp5QJpQch8Z-kg1Ezgecyp3lg&h=lTuowYKlAoGkZAbcagIOXvv7aDZmbv08RAU6iE3kEbw
   response:
     body:
-      string: '{"status":"Running"}'
+      string: '{"status":"Accepted"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '20'
+      - '21'
       content-type:
       - application/json; charset=utf-8
       date:
@@ -1000,7 +1000,7 @@ interactions:
       User-Agent:
       - AZURECLI/2.74.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Network/virtualNetworks/application-gateway-000003Vnet?api-version=2024-05-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Network/virtualNetworks/application-gateway-000003Vnet?api-version=2024-07-01
   response:
     body:
       string: '{"name":"application-gateway-000003Vnet","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Network/virtualNetworks/application-gateway-000003Vnet","etag":"W/\"070a3f80-c2f9-49d4-81af-c552f3ad89ce\"","type":"Microsoft.Network/virtualNetworks","location":"westus","tags":{},"properties":{"provisioningState":"Succeeded","resourceGuid":"5b3487dc-59b0-402b-b7e0-40ee1bdf94eb","addressSpace":{"addressPrefixes":["10.0.0.0/16"]},"privateEndpointVNetPolicies":"Disabled","subnets":[{"name":"default","id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Network/virtualNetworks/application-gateway-000003Vnet/subnets/default","etag":"W/\"070a3f80-c2f9-49d4-81af-c552f3ad89ce\"","properties":{"provisioningState":"Succeeded","addressPrefix":"10.0.0.0/24","applicationGatewayIPConfigurations":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_private_link_ip_config_000001/providers/Microsoft.Network/applicationGateways/application-gateway-000003/gatewayIPConfigurations/appGatewayFrontendIP"}],"delegations":[],"privateEndpointNetworkPolicies":"Disabled","privateLinkServiceNetworkPolicies":"Enabled"},"type":"Microsoft.Network/virtualNetworks/subnets"}],"virtualNetworkPeerings":[],"enableDdosProtection":false}}'

@@ -23,7 +23,7 @@ from azure.cli.testsdk.constants import AUX_SUBSCRIPTION, AUX_TENANT
 from azure.cli.core.util import get_file_json
 from knack.util import CLIError
 from azure.cli.core.azclierror import ResourceNotFoundError
-
+from azure.cli.core.commands.client_factory import get_subscription_id
 
 class ResourceGroupScenarioTest(ScenarioTest):
 
@@ -91,7 +91,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
         result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --skip-resource-name-params --query "parameters"')
 
         self.assertEqual('{}\n', result.output)
-    
+
     @ResourceGroupPreparer(name_prefix='cli_test_rg_scenario')
     def test_resource_group_export_output_format_bicep(self, resource_group):
         self.kwargs.update({
@@ -101,7 +101,7 @@ class ResourceGroupScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {rg} -n {vnet}')
         self.kwargs['vnet_id'] = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()['id']
         result = self.cmd('group export --name {rg} --resource-ids "{vnet_id}" --export-format bicep').get_output_in_json()
-        
+
         # Check for Bicep-specific syntax
         bicep_text = str(result)
         self.assertFalse(bicep_text.strip().startswith('{'))  # Bicep files do not start with '{'
@@ -902,7 +902,7 @@ class TemplateSpecsTest(ScenarioTest):
                                variables('locations')[parameters('location')],
                                parameters('group'),
                                parameters('service'),
-                               if(equals(parameters('kind'), ''), 
+                               if(equals(parameters('kind'), ''),
                                   variables('resources')[variables('provider')][variables('resourceType')],
                                   variables('resources')[variables('provider')][variables('resourceType')][parameters('kind')]))]"""),
             self.check('mainTemplate.variables.removeOptionalsFromHyphenedName', "[replace(variables('hyphenedName'), '--', '-')]"),
@@ -1016,6 +1016,29 @@ class TemplateSpecsTest(ScenarioTest):
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_update_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_update_template_spec_with_aux_subscription(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-ts-aux-update', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'description': '"Updated description"',
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l eastus2 -f "{tf}" --subscription {aux_subscription}').get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        ts_result = self.cmd('ts update --template-spec {template_spec_id} --description {description} --yes').get_output_in_json()
+        self.assertIn(AUX_SUBSCRIPTION, ts_result['id'])
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes --subscription {aux_subscription}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_show_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -1047,6 +1070,46 @@ class TemplateSpecsTest(ScenarioTest):
         # clean up
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_show_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_template_spec_show_with_aux_subscription(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-ts-aux-show', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'resource_group_location': resource_group_location,
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l {resource_group_location} -f "{tf}" --subscription {aux_subscription}',
+                          checks=[
+                              self.check('name', '1.0'),
+                              self.check('type', 'Microsoft.Resources/templateSpecs/versions')
+                          ]).get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        ts_result = self.cmd('ts show --template-spec {template_spec_id}',
+                            checks=[
+                                self.check('name', '{template_spec_name}'),
+                                self.check('type', 'Microsoft.Resources/templateSpecs')
+                            ]).get_output_in_json()
+        self.assertIn(AUX_SUBSCRIPTION, ts_result['id'])
+        self.assertEqual(ts_result['name'], template_spec_name)
+
+        ts_version_result = self.cmd('ts show --template-spec {template_spec_version_id}',
+                                    checks=[
+                                        self.check('name', '1.0'),
+                                        self.check('type', 'Microsoft.Resources/templateSpecs/versions')
+                                    ]).get_output_in_json()
+        self.assertIn(AUX_SUBSCRIPTION, ts_version_result['id'])
+        self.assertEqual(ts_version_result['name'], '1.0')
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes --subscription {aux_subscription}')
+
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_delete_template_spec(self, resource_group, resource_group_location):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
@@ -1075,6 +1138,25 @@ class TemplateSpecsTest(ScenarioTest):
         self.cmd('ts delete --template-spec {template_spec_id} --yes')
         self.cmd('ts list -g {rg}',
                  checks=self.check("length([?id=='{template_spec_id}'])", 0))
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_delete_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_delete_template_spec_with_aux_subscription(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        template_spec_name = self.create_random_name('cli-test-ts-aux-delete', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l eastus2 -f "{tf}" --subscription {aux_subscription}').get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes')
 
     @ResourceGroupPreparer(name_prefix='cli_test_template_specs', location='westus')
     def test_template_spec_create_and_update_with_tags(self, resource_group, resource_group_location):
@@ -1197,6 +1279,32 @@ class TemplateSpecsExportTest(LiveScenarioTest):
             self.cmd('ts export -g {rg} --name {template_spec_name} --output-folder {output_folder}')
             self.assertTrue('Please specify the template spec version for export' in str(err.exception))
 
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="cli_test_ts_aux_export_", location="eastus2", subscription=AUX_SUBSCRIPTION)
+    def test_template_spec_export_with_aux_subscription(self, resource_group):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        dir_name = self.create_random_name('TemplateSpecExportAux', 30)
+        template_spec_name = self.create_random_name('cli-test-ts-aux-export', 60)
+        self.kwargs.update({
+            "aux_rg": resource_group,
+            "aux_subscription": AUX_SUBSCRIPTION,
+            "template_spec_name": template_spec_name,
+            'tf': os.path.join(curr_dir, 'simple_deploy.json').replace('\\', '\\\\'),
+            'output_folder': os.path.join(curr_dir, dir_name).replace('\\', '\\\\'),
+        })
+
+        result = self.cmd('ts create -g {aux_rg} -n {template_spec_name} -v 1.0 -l eastus2 -f "{tf}" --subscription {aux_subscription}').get_output_in_json()
+        self.kwargs['template_spec_version_id'] = result['id']
+        self.kwargs['template_spec_id'] = result['id'].replace('/versions/1.0', '')
+        self.assertIn(AUX_SUBSCRIPTION, result['id'])
+
+        os.makedirs(self.kwargs['output_folder'])
+        output_path = self.cmd('ts export --template-spec {template_spec_version_id} --output-folder {output_folder}').get_output_in_json()
+        template_file = os.path.join(output_path, (self.kwargs['template_spec_name'] + '.json'))
+        self.assertTrue(os.path.isfile(template_file))
+
+        self.cmd('ts delete --template-spec {template_spec_id} --yes --subscription {aux_subscription}')
+
 
 class DeploymentTestsWithQueryString(LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_query_str_rg', location='eastus')
@@ -1287,6 +1395,96 @@ class DeploymentTestsWithQueryString(LiveScenarioTest):
         ])
 
         self.cmd('deployment sub create -l {resource_group_location} --template-uri {blob_url} --query-string "{sas_token}" --parameters keyVaultName="{key_vault}" rgName="{resource_group}" rgLocation="{resource_group_location}"', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+class DeploymentTestsWithValidationLevel(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_validation_level_rg', location='eastus')
+    def test_rg_deployment_with_validation_level(self, resource_group, resource_group_location):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_rg.json')
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'tf': tf,
+        })
+
+        self.cmd('deployment group validate -g {resource_group} --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment group what-if -g {resource_group} --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment group create -g {resource_group} --template-file "{tf}" --validation-level provider', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+    def test_sub_deployment_with_validation_level(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_sub.json')
+
+        self.kwargs.update({
+            'tf': tf,
+        })
+
+        self.cmd('deployment sub validate -l eastus --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment sub what-if -l eastus --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment sub create -l eastus --template-file "{tf}" --validation-level provider', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+    def test_mg_deployment_with_validation_level(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_mg.json')
+
+        self.kwargs.update({
+            'tf': tf,
+            'mg': self.create_random_name('azure-cli-management', 30),
+        })
+
+        self.cmd('account management-group create --name {mg}', checks=[])
+
+        self.cmd('deployment mg validate --management-group-id {mg} -l eastus --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment mg what-if --management-group-id {mg} -l eastus --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment mg create --management-group-id {mg} -l eastus --template-file "{tf}" --validation-level provider', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+
+    def test_tenant_deployment_with_validation_level(self):
+        curr_dir = os.path.dirname(os.path.realpath(__file__))
+        tf = os.path.join(curr_dir, 'empty_template_tenant.json')
+
+        self.kwargs.update({
+            'tf': tf,
+        })
+
+        self.cmd('deployment tenant validate -l eastus --template-file "{tf}" --validation-level template', checks=[
+            self.check('properties.provisioningState', 'Succeeded')
+        ])
+
+        self.cmd('deployment tenant what-if -l eastus --template-file "{tf}" --validation-level providerNoRbac --no-pretty-print', checks=[
+            self.check('status', 'Succeeded'),
+        ])
+
+        self.cmd('deployment tenant create -l eastus --template-file "{tf}" --validation-level provider', checks=[
             self.check('properties.provisioningState', 'Succeeded')
         ])
 
@@ -2325,7 +2523,7 @@ class DeploymentStacksTest(ScenarioTest):
         # update stack with resource2 set to detach
         self.cmd('stack sub create --name {name} --location {location} --template-file "{template-file-rg}" --parameters "name={resource-two}" "rgLocation={location}" --deny-settings-mode "none" --action-on-unmanage detachAll --yes', checks=self.check('provisioningState', 'succeeded'))
 
-        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding. 
+        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding.
         #        See https://github.com/Azure/azure-cli/issues/31719 for more information. Temporarily commenting this portion of the test out to unblock
         #        merging https://github.com/Azure/azure-cli/pull/31684.
         #
@@ -2695,7 +2893,7 @@ class DeploymentStacksTest(ScenarioTest):
         # check template spec exists in Azure
         self.cmd('resource list -g {resource-group-two} --name "{template-spec-name}"', checks=self.check("length(@)", 1))
 
-        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding. 
+        # TODO - This portion of the test has been commented out because there is a service-side issue that's preventing deletion from succeeding.
         #        See https://github.com/Azure/azure-cli/issues/31719 for more information. Temporarily commenting this portion of the test out to unblock
         #        merging https://github.com/Azure/azure-cli/pull/31684.
         #
@@ -3800,7 +3998,7 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('displayName', '{psdn}'),
             self.check('description', '{ps_desc}'),
             self.check('policyDefinitions[0].parameters.allowedLocations.value', "[parameters('allowedLocations')]"),
-            self.check('parameters.allowedLocations.type', 'array'),
+            self.check('parameters.allowedLocations.type', 'Array'),
             self.check('metadata.category', '{updated_metadata}')
         ])
 
@@ -3855,7 +4053,7 @@ class PolicyScenarioTest(ScenarioTest):
             'em': 'DoNotEnforce'
         })
 
-        with self.assertRaises(IncorrectUsageError):
+        with self.assertRaises(InvalidArgumentValueError):
             self.cmd('policy assignment create --policy \'test/error_policy\' -n {pan} -g {rg} --location {location} --assign-identity --enforcement-mode {em}')
 
         # create a policy assignment with managed identity using a built in policy definition
@@ -4090,7 +4288,7 @@ class PolicyScenarioTest(ScenarioTest):
         ])
 
         # remove the managed identity and ensure it is removed when retrieving the policy assignment
-        self.cmd('policy assignment identity remove -n {pan} -g {rg}', checks=[
+        self.cmd('policy assignment identity remove -n {pan} -g {rg} --user-assigned', checks=[
             self.check('type', 'None')
         ])
         self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
@@ -4115,6 +4313,11 @@ class PolicyScenarioTest(ScenarioTest):
         self.assertEqual(msis[0], msi_result['id'].lower())
 
         # replace an identity with system assigned msi
+        # cstack 5/6/2025: replacement is not supported in auto-generated commands, existing MSI must be removed before assigning a new one
+        self.cmd('policy assignment identity remove -n {pan} -g {rg} --user-assigned', checks=[
+            self.check('type', 'None')
+        ])
+
         self.cmd('policy assignment identity assign --system-assigned -n {pan} -g {rg}', checks=[
             self.check('type', 'SystemAssigned'),
             self.exists('principalId'),
@@ -4156,17 +4359,13 @@ class PolicyScenarioTest(ScenarioTest):
 
         # Add two non-compliance messages
         self.cmd('policy assignment non-compliance-message create -n {pan} -g {rg} -m "General message"', checks=[
-            self.check('length([])', 1),
-            self.check('[0].message', 'General message'),
-            self.not_exists('[0].policyDefinitionReferenceId')
+            self.check('message', 'General message'),
+            self.not_exists('policyDefinitionReferenceId')
         ])
 
         self.cmd('policy assignment non-compliance-message create -n {pan} -g {rg} -m "Specific message" -r {drid}', checks=[
-            self.check('length([])', 2),
-            self.check('[0].message', 'General message'),
-            self.not_exists('[0].policyDefinitionReferenceId'),
-            self.check('[1].message', 'Specific message'),
-            self.check('[1].policyDefinitionReferenceId', '{drid}')
+            self.check('message', 'Specific message'),
+            self.check('policyDefinitionReferenceId', '{drid}')
         ])
 
         # list the non-compliance messages, should be two
@@ -4201,15 +4400,35 @@ class PolicyScenarioTest(ScenarioTest):
 
         # remove a non-compliance message that does not exist
         self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Unknown message"', checks=[
+             self.is_empty()
+        ])
+
+        # list the non-compliance messages, should still be two
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
             self.check('length([])', 2),
             self.check('[0].message', 'General message'),
             self.not_exists('[0].policyDefinitionReferenceId'),
             self.check('[1].message', 'Specific message'),
             self.check('[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
+        # show the assignment, should should still contain both non-compliance messages
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('length(nonComplianceMessages)', 2),
+            self.check('nonComplianceMessages[0].message', 'General message'),
+            self.not_exists('nonComplianceMessages[0].policyDefinitionReferenceId'),
+            self.check('nonComplianceMessages[1].message', 'Specific message'),
+            self.check('nonComplianceMessages[1].policyDefinitionReferenceId', '{drid}')
         ])
 
         # remove a non-compliance message that exists but without the right reference ID
         self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "Specific message"', checks=[
+            self.is_empty()
+        ])
+
+        # list the non-compliance messages, should still be two
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
             self.check('length([])', 2),
             self.check('[0].message', 'General message'),
             self.not_exists('[0].policyDefinitionReferenceId'),
@@ -4217,8 +4436,23 @@ class PolicyScenarioTest(ScenarioTest):
             self.check('[1].policyDefinitionReferenceId', '{drid}')
         ])
 
+        # show the assignment, should should still contain both non-compliance messages
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('length(nonComplianceMessages)', 2),
+            self.check('nonComplianceMessages[0].message', 'General message'),
+            self.not_exists('nonComplianceMessages[0].policyDefinitionReferenceId'),
+            self.check('nonComplianceMessages[1].message', 'Specific message'),
+            self.check('nonComplianceMessages[1].policyDefinitionReferenceId', '{drid}')
+        ])
+
         # remove a non-compliance message
         self.cmd('policy assignment non-compliance-message delete -n {pan} -g {rg} -m "General message"', checks=[
+            self.is_empty()
+        ])
+
+        # verify the other one is still there
+        self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
             self.check('length([])', 1),
             self.check('[0].message', 'Specific message'),
             self.check('[0].policyDefinitionReferenceId', '{drid}')
@@ -4229,9 +4463,15 @@ class PolicyScenarioTest(ScenarioTest):
             self.is_empty()
         ])
 
-        # list the non-compliance messages, should be 0
+        # list the non-compliance messages, should be none
         self.cmd('policy assignment non-compliance-message list -n {pan} -g {rg}', checks=[
             self.is_empty()
+        ])
+
+        # show the assignment, should have empty non-compliance messages array
+        self.cmd('policy assignment show -n {pan} -g {rg}', checks=[
+            self.check('name', '{pan}'),
+            self.check('length(nonComplianceMessages)', 0)
         ])
 
         self.cmd('policy assignment delete -n {pan} -g {rg}')
@@ -4239,61 +4479,52 @@ class PolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_policy_management_group')
     @AllowLargeResponse(4096)
     def test_resource_policy_management_group(self, resource_group):
-        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
-        self.cmd('account management-group create -n ' + management_group_name)
-        try:
-            self.resource_policy_operations(resource_group, management_group_name)
+        management_group_name = 'PowershellTesting'
+        self.resource_policy_operations(resource_group, management_group_name)
 
-            # Attempt to get a policy definition at an invalid management group scope
-            with self.assertRaises(IncorrectUsageError):
-                self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
-        finally:
-            self.cmd('account management-group delete -n ' + management_group_name)
+        # Attempt to get a policy definition at an invalid management group scope
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd(self.cmdstring('policy definition show -n "/providers/microsoft.management/managementgroups/myMg/providers/microsoft.authorization/missingsegment"'))
 
-    @live_only()
-    @unittest.skip('mock doesnt work when the subscription comes from --scope')
     @ResourceGroupPreparer(name_prefix='cli_test_policy_subscription_id')
-    @AllowLargeResponse()
+    @AllowLargeResponse(4096)
     def test_resource_policy_subscription_id(self, resource_group):
-        # under playback, we mock it so the subscription id will be '00000000...' and it will match
-        # the same sanitized value in the recording
         if not self.in_recording:
-            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
-                            return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policy_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+            other_sub_id = '00000000-0000-0000-0000-000000000000'     # subscription id in recording file
         else:
-            self.resource_policy_operations(resource_group, None, 'f67cc918-f64f-4c3f-aa24-a855465f9d41')
+            # This must be a subscription you have Owner access to OTHER THAN the current subscription
+            other_sub_id = 'e5a130f3-57fd-46b6-9c55-03d21a853935'     # Azure Governance Perf 20
+            sub_id = get_subscription_id(self.cli_ctx)
+            self.assertFalse(sub_id == other_sub_id, 'This test requires a subscription other than that of the current context')
+
+        self.resource_policy_operations(resource_group, None, other_sub_id)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyset_default(self, resource_group):
         self.resource_policyset_operations(resource_group)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_management_group')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyset_management_group(self, resource_group):
-        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
-        self.cmd('account management-group create -n ' + management_group_name)
-        try:
-            self.resource_policyset_operations(resource_group, management_group_name)
-        finally:
-            self.cmd('account management-group delete -n ' + management_group_name)
+        management_group_name = 'PowershellTesting'
+        self.resource_policyset_operations(resource_group, management_group_name)
 
-    @record_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_subscription_id')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyset_subscription_id(self, resource_group):
-        # under playback, we mock it so the subscription id will be '00000000...' and it will match
-        # the same sanitized value in the recording
         if not self.in_recording:
-            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
-                            return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
+            other_sub_id = '00000000-0000-0000-0000-000000000000'     # subscription id in recording file
         else:
-            self.resource_policyset_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
+            # This must be a subscription you have Owner access to OTHER THAN the current subscription
+            other_sub_id = 'e5a130f3-57fd-46b6-9c55-03d21a853935'     # Azure Governance Perf 20
+            sub_id = get_subscription_id(self.cli_ctx)
+            self.assertFalse(sub_id == other_sub_id, 'This test requires a subscription other than that of the current context')
+
+        self.resource_policyset_operations(resource_group, None, other_sub_id)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyset_grouping')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyset_grouping(self, resource_group):
         curr_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -4379,8 +4610,11 @@ class PolicyScenarioTest(ScenarioTest):
     # so it cannot be rerecord.
     @ResourceGroupPreparer(name_prefix='cli_test_resource_create_policy_assignment_random')
     @AllowLargeResponse(4096)
-    @live_only()
     def test_resource_create_policy_assignment_random(self, resource_group, management_group=None, subscription=None):
+
+        if not self.in_recording:
+            return
+
         curr_dir = os.path.dirname(os.path.realpath(__file__))
         self.kwargs.update({
             'pn': self.create_random_name('azure-cli-test-policy', 30),
@@ -4499,6 +4733,13 @@ class PolicyScenarioTest(ScenarioTest):
                 self.check('expiresOn', '{expiration}')
             ])
 
+            # ensure the exemption still appears in the list results just once and the update is present
+            self.cmd('policy exemption list --scope {scope}'.format(**self.kwargs), checks=[
+                self.check("length([?name=='{pen}'])", 1),
+                self.check("[?name=='{pen}'] | [0].expiresOn", '{expiration}')
+            ])
+
+            # verify properties of the updated exemption
             cmd = self.cmdstring('policy exemption show -n {pen} --scope {scope}'.format(**self.kwargs))
             self.cmd(cmd, checks=[
                 self.check('name', '{pen}'),
@@ -4604,34 +4845,50 @@ class PolicyScenarioTest(ScenarioTest):
         self.cmd(cmd, checks=self.check("length([?name=='{dpn}'])", 0))
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyexemption')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyexemption_default(self, resource_group):
         self.resource_policyexemption_operations(resource_group)
 
     @ResourceGroupPreparer(name_prefix='cli_test_policyexemption_management_group')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyexemption_management_group(self, resource_group):
-        management_group_name = self.create_random_name('cli-test-mgmt-group', 30)
-        self.cmd('account management-group create -n ' + management_group_name)
-        try:
-            self.resource_policyexemption_operations(resource_group, management_group_name)
-        finally:
-            self.cmd('account management-group delete -n ' + management_group_name)
+        management_group_name = 'PowershellTesting'
+        self.resource_policyexemption_operations(resource_group, management_group_name)
 
-    # mock doesnt work when the subscription comes from --scope, so it cannot be rerecord.
-    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_policyexemption_subscription')
-    @AllowLargeResponse(4096)
+    @AllowLargeResponse(16384)
     def test_resource_policyexemption_subscription(self, resource_group):
         # under playback, we mock it so the subscription id will be '00000000...' and it will match
         # the same sanitized value in the recording
         if not self.in_recording:
-            with mock.patch('azure.cli.command_modules.resource.custom._get_subscription_id_from_subscription',
-                            return_value=MOCKED_SUBSCRIPTION_ID):
-                self.resource_policyexemption_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
+            other_sub_id = '00000000-0000-0000-0000-000000000000'     # subscription id in recording file
         else:
-            self.resource_policyexemption_operations(resource_group, None, '0b1f6471-1bf0-4dda-aec3-cb9272f09590')
+            # This must be a subscription you have Owner access to OTHER THAN the current subscription
+            other_sub_id = 'e5a130f3-57fd-46b6-9c55-03d21a853935'     # Azure Governance Perf 20
+            sub_id = get_subscription_id(self.cli_ctx)
+            self.assertFalse(sub_id == other_sub_id, 'This test requires a subscription other than that of the current context')
 
+        self.resource_policyexemption_operations(resource_group, None, other_sub_id)
+
+    def test_resource_policy_arg_validate(self):
+
+        from azure.cli.core.azclierror import InvalidArgumentValueError, ArgumentUsageError
+
+        self.kwargs['sub'] = get_subscription_id(self.cli_ctx)
+
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('policy assignment create --name someName --scope someScope --policy somePolicyDefinition --policy-set-definition somePolicySetDefinition')
+
+        with self.assertRaises(ArgumentUsageError):
+            self.cmd('policy assignment create --name someName --scope someScope --subscription {sub} --resource-group someName --policy somePolicyDefinition'.format(**self.kwargs))
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('policy assignment create --name someName --scope someScope --policy somePolicyDefinition')
+
+        # Get a handy built-in (without parameters)
+        definitionId = self.cmd('policy definition show -n fee5cb2b-9d9b-410e-afe3-2902d90d0004').get_output_in_json()['id']
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('policy assignment create --name someName --scope someScope --policy {}'.format(definitionId))
 
 class ManagedAppDefinitionScenarioTest(ScenarioTest):
 

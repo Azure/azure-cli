@@ -936,6 +936,14 @@ class ContainerAppsJobClient():
             formatted = formatter(app)
             app_list.append(formatted)
 
+        while j.get("nextLink") is not None:
+            request_url = j["nextLink"]
+            r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+            j = r.json()
+            for app in j["value"]:
+                formatted = formatter(app)
+                app_list.append(formatted)
+
         return app_list
 
     @classmethod
@@ -956,6 +964,14 @@ class ContainerAppsJobClient():
         for app in j["value"]:
             formatted = formatter(app)
             app_list.append(formatted)
+
+        while j.get("nextLink") is not None:
+            request_url = j["nextLink"]
+            r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+            j = r.json()
+            for app in j["value"]:
+                formatted = formatter(app)
+                app_list.append(formatted)
 
         return app_list
 

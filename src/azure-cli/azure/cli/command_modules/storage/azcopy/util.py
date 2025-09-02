@@ -145,9 +145,9 @@ def login_auth_for_azcopy(cmd):
     return AzCopyCredentials(token_info=token_info)
 
 
-def client_auth_for_azcopy(cmd, client, service='blob'):
+def client_auth_for_azcopy(cmd, client):
     # prefer oauth mode
-    if client.token_credential:
+    if client.credential:
         raw_token = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)
         token_info = raw_token[0][2]
         try:
@@ -158,20 +158,6 @@ def client_auth_for_azcopy(cmd, client, service='blob'):
             return AzCopyCredentials(tenant_id=tenant_id)
         return AzCopyCredentials(token_info=token_info)
 
-    # try to get sas
-    azcopy_creds = storage_client_auth_for_azcopy(client, service)
-    if azcopy_creds is not None:
-        return azcopy_creds
-
-    return None
-
-
-def storage_client_auth_for_azcopy(client, service):
-    if service not in SERVICES:
-        raise Exception('{} not one of: {}'.format(service, str(SERVICES)))  # pylint: disable=broad-exception-raised
-
-    if client.sas_token:
-        return AzCopyCredentials(sas_token=client.sas_token)
     return None
 
 

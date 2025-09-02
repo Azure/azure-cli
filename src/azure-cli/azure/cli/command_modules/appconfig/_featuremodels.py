@@ -134,6 +134,8 @@ class FeatureFlag:
         The list of variants defined for this feature.
     :ivar dict {string, object} telemetry:
         The declaration of options used to configure telemetry for this feature.
+    :ivar dict tags:
+        Tags associated with the feature flag.
     """
 
     def __init__(
@@ -151,6 +153,7 @@ class FeatureFlag:
         allocation=None,
         variants=None,
         telemetry=None,
+        tags=None
     ):
         self.name = name
         self.key = key
@@ -165,6 +168,7 @@ class FeatureFlag:
         self.variants = variants
         self.telemetry = telemetry
         self.display_name = display_name
+        self.tags = tags
 
     def __repr__(self):
         featureflag = {
@@ -180,7 +184,8 @@ class FeatureFlag:
             "Allocation": custom_serialize_allocation(self.allocation),
             "Variants": custom_serialize_variants(self.variants),
             "Telemetry": custom_serialize_telemetry(self.telemetry),
-            "Display Name": self.display_name
+            "Display Name": self.display_name,
+            "Tags": self.tags
         }
 
         return json.dumps(featureflag, indent=2, ensure_ascii=False)
@@ -803,7 +808,8 @@ def map_keyvalue_to_featureflag(keyvalue, show_all_details=True, hide_enabled=Tr
         last_modified=keyvalue.last_modified,
         allocation=feature_flag_value.allocation,
         variants=feature_flag_value.variants,
-        telemetry=feature_flag_value.telemetry
+        telemetry=feature_flag_value.telemetry,
+        tags=keyvalue.tags
     )
 
     # By Default, we will try to show conditions unless the user has

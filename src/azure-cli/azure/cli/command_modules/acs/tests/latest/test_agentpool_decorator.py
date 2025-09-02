@@ -58,11 +58,7 @@ class AKSAgentPoolModelsTestCase(unittest.TestCase):
 
     def test__init__(self):
         # load models directly (instead of through the `get_sdk` method provided by the cli component)
-        from azure.cli.core.profiles._shared import AZURE_API_PROFILES
-
-        sdk_profile = AZURE_API_PROFILES["latest"][self.resource_type]
-        api_version = sdk_profile.default_api_version
-        module_name = "azure.mgmt.containerservice.v{}.models".format(api_version.replace("-", "_"))
+        module_name = "azure.mgmt.containerservice.models"
         module = importlib.import_module(module_name)
 
         standalone_models = AKSAgentPoolModels(self.cmd, self.resource_type, AgentPoolDecoratorMode.STANDALONE)
@@ -493,6 +489,16 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
                 ctx_4.get_node_vm_size()
         else:
             self.assertEqual(ctx_4.get_node_vm_size(), CONST_DEFAULT_WINDOWS_NODE_VM_SIZE)
+
+        # if --node-vm-size is not specified, but --sku automatic is explicitly specified
+        ctx_5 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"sku": "automatic", "os_type": "Linux"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_5.get_node_vm_size(), "")
 
     def common_get_vm_sizes(self):
         # linux default
