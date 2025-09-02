@@ -11,13 +11,11 @@ Uses the comprehensive test framework with PowerShell mocking.
 
 import sys
 import os
+from latest.test_framework import run_all_tests
 
 # Add current directory to path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
-
-# Import and run the unified test framework
-from test_framework import run_all_tests
 
 if __name__ == '__main__':
     # Run all tests with the unified framework

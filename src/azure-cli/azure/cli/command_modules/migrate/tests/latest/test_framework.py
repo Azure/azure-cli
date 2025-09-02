@@ -23,9 +23,7 @@ import sys
 import os
 import re
 import json
-import platform
-from unittest.mock import Mock, patch, MagicMock
-from knack.util import CLIError
+from unittest.mock import Mock, patch
 
 
 # ============================================================================
