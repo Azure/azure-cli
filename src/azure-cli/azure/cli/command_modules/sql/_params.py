@@ -1335,13 +1335,13 @@ def load_arguments(self, _):
                    help='The Week of Year, 1 to 52, in which to take the yearly LTR backup.')
 
         c.argument('time_based_immutability',
-                   options_list=['--immutability'],
-                   help='Whether to make the LTR backups immutable.'
+                   options_list=['--make-backups-immutable', '--tb-immutability'],
+                   help='Whether to enable time based immutability on the LTR backups. '
                    'Possible values are: \'Enabled\', \'Disabled\'.',
-                   is_preview=True)
-
+                    is_preview=True)
+        
         c.argument('time_based_immutability_mode',
-                   options_list=['--immutability-mode'],
+                   options_list=['--tb-immutability-mode'],
                    help='The mode of time based immutability to be set on the LTR backups. '
                    'Possible values are: \'Locked\', \'Unlocked\'.',
                    is_preview=True)
