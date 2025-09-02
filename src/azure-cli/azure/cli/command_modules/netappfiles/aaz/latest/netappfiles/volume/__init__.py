@@ -23,5 +23,6 @@ from ._reset_cifs_pw import *
 from ._revert import *
 from ._revert_relocation import *
 from ._show import *
+from ._splitclonefromparent import *
 from ._update import *
 from ._wait import *

@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes", "2025-06-01"],
         ]
     }
 
@@ -138,7 +138,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -206,6 +206,9 @@ class List(AAZCommand):
             _element.zones = AAZListType()
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrType(
+                serialized_name="acceptGrowCapacityPoolForShortTermCloneSplit",
+            )
             properties.actual_throughput_mibps = AAZFloatType(
                 serialized_name="actualThroughputMibps",
                 flags={"read_only": True},
@@ -282,6 +285,11 @@ class List(AAZCommand):
             )
             properties.file_system_id = AAZStrType(
                 serialized_name="fileSystemId",
+                flags={"read_only": True},
+            )
+            properties.inherited_size_in_bytes = AAZIntType(
+                serialized_name="inheritedSizeInBytes",
+                nullable=True,
                 flags={"read_only": True},
             )
             properties.is_default_quota_enabled = AAZBoolType(
@@ -428,6 +436,7 @@ class List(AAZCommand):
             )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
+                flags={"read_only": True},
             )
             replication.remote_path = AAZObjectType(
                 serialized_name="remotePath",

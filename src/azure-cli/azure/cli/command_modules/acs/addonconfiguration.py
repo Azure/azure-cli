@@ -717,22 +717,64 @@ def create_or_delete_dcr_association(cmd, cluster_region, remove_monitoring, clu
         raise error
 
 
-def create_ampls_scope(cmd, ampls_resource_id, dce_endpoint_name, dce_resource_id):
-    link_dce_ampls_body = json.dumps(
+def is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
+    """
+    Check if the specified resource is already scoped (linked) to the AMPLS by iterating through all scoped resources.
+
+    Args:
+        cmd: Command context
+        ampls_resource_id: Full resource ID of the AMPLS
+        scoped_resource_id: Full resource ID of the resource to be linked
+
+    Returns:
+        bool: True if the resource is already scoped to the AMPLS, False otherwise
+    """
+    try:
+        # Get all scoped resources for this AMPLS
+        ampls_scoped_resources_url = f"{cmd.cli_ctx.cloud.endpoints.resource_manager}{ampls_resource_id}/scopedresources?api-version=2021-07-01-preview"
+        response = send_raw_request(cmd.cli_ctx, "GET", ampls_scoped_resources_url)
+        scoped_resources_data = json.loads(response.text)
+
+        # Check if any scoped resource has the same linkedResourceId
+        for scoped_resource in scoped_resources_data.get('value', []):
+            properties = scoped_resource.get('properties', {})
+            linked_resource_id = properties.get('linkedResourceId', '')
+            scoped_resource_name = scoped_resource.get('name', 'unknown')
+            # Compare case-insensitively since Azure resource IDs can have case variations
+            if linked_resource_id.lower() == scoped_resource_id.lower():
+                logger.info("Resource already scoped in AMPLS. Scoped resource name: %s, LinkedResourceId: %s", scoped_resource_name, linked_resource_id)
+                return True
+
+        logger.info("No matching linkedResourceId found. Resource is not yet scoped.")
+        return False
+
+    except CLIError as e:
+        logger.warning("Error checking AMPLS scoped resources: %s", str(e))
+        return False
+
+
+def create_ampls_scope(cmd, ampls_resource_id, scoped_resource_name, scoped_resource_id):
+    # Check if the resource is already scoped to the AMPLS
+    if is_ampls_scoped_exist(cmd, ampls_resource_id, scoped_resource_id):
+        return
+
+    scoped_resource_ampls_body = json.dumps(
         {
             "properties": {
-                "linkedResourceId": dce_resource_id,
+                "linkedResourceId": scoped_resource_id,
             },
         }
     )
+
     resources = get_resources_client(cmd.cli_ctx, cmd.cli_ctx.data.get('subscription_id'))
-    ampls_scope_id = f"{ampls_resource_id}/scopedresources/{dce_endpoint_name}-connection"
+    ampls_scope_id = f"{ampls_resource_id}/scopedresources/{scoped_resource_name}-connection"
+
     for _ in range(3):
         try:
             resources.begin_create_or_update_by_id(
                 ampls_scope_id,
                 "2021-07-01-preview",
-                json.loads(link_dce_ampls_body)
+                json.loads(scoped_resource_ampls_body)
             )
             error = None
             break
