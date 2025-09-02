@@ -724,44 +724,54 @@ def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_
     if not subscription_id and not subscription_name:
         raise CLIError('Either subscription_id or subscription_name must be provided')
     
-    set_context_script = f"""
-    try {{ 
-        $currentContext = Get-AzContext -ErrorAction SilentlyContinue
-        if (-not $currentContext) {{
-            Write-Host "Not currently connected to Azure. Please connect first with: az migrate auth login"
-        }}
-        
-        # Set context parameters
-        $contextParams = @{{}}
-        """
+    set_context_script = """
+try { 
+    $currentContext = Get-AzContext -ErrorAction SilentlyContinue
+    if (-not $currentContext) {
+        Write-Host "Not currently connected to Azure. Please connect first with: az migrate auth login"
+        throw "No Azure context found"
+    }
+    
+    # Set context parameters
+    $contextParams = @{}
+    """
     
     if subscription_id:
         set_context_script += f"""
-        $contextParams['SubscriptionId'] = '{subscription_id}'
-        """
+    $contextParams['SubscriptionId'] = '{subscription_id}'
+    """
     elif subscription_name:
         set_context_script += f"""
-        $contextParams['SubscriptionName'] = '{subscription_name}'
-        """
+    $contextParams['SubscriptionName'] = '{subscription_name}'
+    """
     
     if tenant_id:
         set_context_script += f"""
-        $contextParams['TenantId'] = '{tenant_id}'
-        """
-    
-    set_context_script += """
-        $newContext = Set-AzContext @contextParams
-        
-        if ($newContext) {
-            Write-Host "Azure context updated successfully"
-        }}
-    } catch {
-        Write-Error "Failed to set Azure context: $($_.Exception.Message)"
-    }
+    $contextParams['TenantId'] = '{tenant_id}'
     """
     
+    set_context_script += """
+    $newContext = Set-AzContext @contextParams
+    
+    if ($newContext) {
+        Write-Host "Azure context updated successfully"
+        Write-Host "Current subscription: $($newContext.Subscription.Name) ($($newContext.Subscription.Id))"
+        Write-Host "Current tenant: $($newContext.Tenant.Id)"
+    } else {
+        throw "Failed to set Azure context"
+    }
+} catch {
+    Write-Error "Failed to set Azure context: $($_.Exception.Message)"
+    throw
+}
+"""
+    
     try:
-        ps_executor.execute_script_interactive(set_context_script)
+        result = ps_executor.execute_script_interactive(set_context_script)
+        if result['returncode'] != 0:
+            raise CLIError(f'Failed to set Azure context: {result.get("stderr", "Unknown error")}')
+        
+        print("✅ Azure context set successfully")
     except Exception as e:
         raise CLIError(f'Failed to set Azure context: {str(e)}')
 
@@ -1107,7 +1117,7 @@ def create_local_server_replication(cmd, resource_group_name, project_name, serv
         $DiskMappings = New-AzMigrateLocalDiskMappingObject `
             -DiskID $OSDiskID `
             -IsOSDisk $true `
-            -IsDynamic '${'$true' if is_dynamic else '$false'}' `
+            -IsDynamic {'$true' if is_dynamic else '$false'} `
             -Size {disk_size_gb} `
             -Format '{disk_format}' `
             -PhysicalSectorSize {physical_sector_size}

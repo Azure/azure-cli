@@ -435,24 +435,54 @@ class PowerShellExecutor:
         try:
             result = self.execute_script(auth_check_script)
             # Parse the JSON output from PowerShell
-            json_output = result['stdout'].strip()
-            if json_output:
-                # Extract JSON from the output (may have other text)
-                json_start = json_output.find('{')
-                json_end = json_output.rfind('}')
-                if json_start != -1 and json_end != -1:
-                    json_content = json_output[json_start:json_end + 1]
+            json_output = result.get('stdout', '').strip()
+            
+            if not json_output:
+                return {
+                    'IsAuthenticated': False,
+                    'ModuleAvailable': False,
+                    'Error': 'No output from authentication check',
+                    'Platform': self.platform,
+                    'PSVersion': 'Unknown'
+                }
+            
+            # Extract JSON from the output (may have other text)
+            json_start = json_output.find('{')
+            json_end = json_output.rfind('}')
+            
+            if json_start != -1 and json_end != -1 and json_end > json_start:
+                json_content = json_output[json_start:json_end + 1]
+                
+                # Ensure we have a string for json.loads
+                if isinstance(json_content, bytes):
+                    json_content = json_content.decode('utf-8')
+                
+                try:
                     auth_status = json.loads(json_content)
                     return auth_status
-            
-            return {
-                'IsAuthenticated': False,
-                'ModuleAvailable': False,
-                'Error': 'No output from authentication check',
-                'Platform': self.platform,
-                'PSVersion': 'Unknown'
-            }
+                except json.JSONDecodeError as je:
+                    logger.debug(f'JSON decode error: {str(je)}')
+                    logger.debug(f'JSON content: {json_content}')
+                    return {
+                        'IsAuthenticated': False,
+                        'ModuleAvailable': False,
+                        'Error': f'Failed to parse authentication response: {str(je)}',
+                        'Platform': self.platform,
+                        'PSVersion': 'Unknown',
+                        'RawOutput': json_output
+                    }
+            else:
+                return {
+                    'IsAuthenticated': False,
+                    'ModuleAvailable': False,
+                    'Error': 'No valid JSON found in authentication response',
+                    'Platform': self.platform,
+                    'PSVersion': 'Unknown',
+                    'RawOutput': json_output
+                }
+                
         except Exception as e:
+            logger.debug(f'Authentication check error: {str(e)}')
             return {
                 'IsAuthenticated': False,
                 'ModuleAvailable': False,
@@ -728,7 +758,6 @@ class PowerShellExecutor:
                 'Error': 'Either subscription_id or tenant_id must be provided'
             }
         
-        context_script = "try {\n"        
         context_cmd = "Set-AzContext"
         
         if subscription_id:
@@ -737,25 +766,53 @@ class PowerShellExecutor:
         if tenant_id:
             context_cmd += f" -TenantId '{tenant_id}'"
         
-        context_script += f"    $context = {context_cmd}\n"
-        context_script += """
-    if (-Not $context) {
-        $contextResult = @{
+        context_script = f"""
+try {{
+    $context = {context_cmd}
+    
+    if ($context) {{
+        $contextResult = @{{
+            'Success' = $true
+            'SubscriptionId' = $context.Subscription.Id
+            'SubscriptionName' = $context.Subscription.Name
+            'TenantId' = $context.Tenant.Id
+            'AccountId' = $context.Account.Id
+        }}
+    }} else {{
+        $contextResult = @{{
             'Success' = $false
             'Error' = 'Failed to set Azure context'
-        }
-    }    
-} catch {
-    $errorResult = @{
+        }}
+    }}
+    
+    $contextResult | ConvertTo-Json -Depth 3
+}} catch {{
+    $errorResult = @{{
         'Success' = $false
         'Error' = $_.Exception.Message
-    }
+    }}
     $errorResult | ConvertTo-Json -Depth 3
-}
+}}
 """
         
         try:
-            self.execute_script(context_script)
+            result = self.execute_script(context_script)
+            
+            stdout_content = result.get('stdout', '').strip()
+            json_start = stdout_content.find('{')
+            json_end = stdout_content.rfind('}')
+            
+            if json_start != -1 and json_end != -1:
+                json_content = stdout_content[json_start:json_end + 1]
+                context_result = json.loads(json_content)
+                return context_result
+            else:
+                return {
+                    'Success': False,
+                    'Error': 'No valid JSON response from Set-AzContext',
+                    'RawOutput': stdout_content
+                }
+                
         except Exception as e:
             return {
                 'Success': False,
@@ -769,13 +826,25 @@ class PowerShellExecutor:
 try {
     $context = Get-AzContext
     
-    if (-Not $context) {
+    if ($context) {
+        $contextInfo = @{
+            'Success' = $true
+            'IsAuthenticated' = $true
+            'SubscriptionId' = $context.Subscription.Id
+            'SubscriptionName' = $context.Subscription.Name
+            'TenantId' = $context.Tenant.Id
+            'AccountId' = $context.Account.Id
+            'Environment' = $context.Environment.Name
+        }
+    } else {
         $contextInfo = @{
             'Success' = $true
             'IsAuthenticated' = $false
             'Message' = 'No Azure context found. Please run Connect-AzAccount.'
         }
     }
+    
+    $contextInfo | ConvertTo-Json -Depth 3
 } catch {
     $errorResult = @{
         'Success' = $false
@@ -786,7 +855,23 @@ try {
 """
         
         try:
-            self.execute_script(context_script)
+            result = self.execute_script(context_script)
+            
+            stdout_content = result.get('stdout', '').strip()
+            json_start = stdout_content.find('{')
+            json_end = stdout_content.rfind('}')
+            
+            if json_start != -1 and json_end != -1:
+                json_content = stdout_content[json_start:json_end + 1]
+                context_result = json.loads(json_content)
+                return context_result
+            else:
+                return {
+                    'Success': False,
+                    'Error': 'No valid JSON response from Get-AzContext',
+                    'RawOutput': stdout_content
+                }
+                
         except Exception as e:
             return {
                 'Success': False,
