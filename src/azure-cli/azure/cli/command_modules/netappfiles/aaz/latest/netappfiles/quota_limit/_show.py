@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/quotalimits/{}", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/quotalimits/{}", "2025-06-01"],
         ]
     }
 
@@ -53,6 +53,9 @@ class Show(AAZCommand):
             help="The name of the Quota Limit",
             required=True,
             id_part="child_name_1",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-]{0,62}$",
+            ),
         )
         return cls._args_schema
 
@@ -121,7 +124,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }

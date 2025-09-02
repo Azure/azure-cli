@@ -3094,6 +3094,67 @@ class WebappSiteContainersTests(ScenarioTest):
                     JMESPathCheck('[2].userName', 'Username')
                     ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_sitecontainers', location='eastus')
+    def test_webapp_sitecontainers_convert_to_docker(self, resource_group):
+        webapp_name = self.create_random_name('webapp-sitecontainers-test', 40)
+        plan_name = self.create_random_name('webapp-sitecontainers-plan', 40)
+        spec_file = os.path.join(TEST_DIR, 'data', 'sitecontainers_spec_usercreds.json')
+
+        self.cmd('appservice plan create -g {} -n {} --sku S1 --is-linux'.format(resource_group, plan_name))
+        self.cmd('webapp create -g {} -n {} --plan {} --sitecontainers-app'.format(resource_group, webapp_name, plan_name))
+
+        self.cmd('webapp sitecontainers create --name {} --resource-group {} --sitecontainers-spec-file "{}"'.
+                  format(webapp_name, resource_group, spec_file)).assert_with_checks([
+                    JMESPathCheck('length([])', 1),
+                    JMESPathCheck('[0].name', 'main')
+                    ])
+
+        self.cmd('webapp sitecontainers convert --mode docker --resource-group {} --name {}'.
+                  format(resource_group, webapp_name))
+        
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('linuxFxVersion', 'DOCKER|mcr.microsoft.com/appsvc/docs/sidecars/sample-nginx:latest')])
+        
+        self.cmd('webapp config container show -g {} -n {} '.format(resource_group, webapp_name), checks=[
+            JMESPathCheck(
+                "[?name=='DOCKER_REGISTRY_SERVER_USERNAME']|[0].value", 'Username')
+        ])
+
+        self.cmd('webapp sitecontainers list --name {} --resource-group {}'.
+                  format(webapp_name, resource_group)).assert_with_checks([
+                    JMESPathCheck('length([])', 0)
+                    ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_sitecontainers', location='eastus')
+    @AllowLargeResponse()
+    def test_webapp_sitecontainers_convert_to_sitecontainers(self, resource_group):
+        webapp_name = self.create_random_name('webapp-sitecontainers-test', 40)
+        plan_name = self.create_random_name('webapp-sitecontainers-plan', 40)
+        acr_registry_name = self.create_random_name('webappsitecontainersacr', 40)
+        self.cmd('acr create --admin-enabled -g {} -n {} --sku Basic'.format(
+            resource_group, acr_registry_name))
+        self.cmd(
+            'appservice plan create -g {} -n {} --sku S1 --is-linux' .format(resource_group, plan_name))
+        creds = self.cmd('acr credential show -n {} -g {}'.format(
+            acr_registry_name, resource_group)).get_output_in_json()
+        self.cmd('az webapp create -g {} -n {} -p {} --container-registry-url {}.azurecr.io --container-image-name image-name:latest -s {} -w {}'.format(
+            resource_group, webapp_name, plan_name, acr_registry_name, creds['username'], creds['passwords'][0]['value']
+        ))
+
+        self.cmd('webapp sitecontainers convert --mode sitecontainers --resource-group {} --name {}'.
+                  format(resource_group, webapp_name))
+        self.cmd('webapp sitecontainers list --name {} --resource-group {}'.
+                  format(webapp_name, resource_group)).assert_with_checks([
+                    JMESPathCheck('length([])', 1),
+                    JMESPathCheck('[0].name', 'main'),
+                    JMESPathCheck('[0].isMain', True),
+                    JMESPathCheck('[0].authType', "UserCredentials"),
+                    JMESPathCheck('[0].userName', creds['username'])
+                    ])
+        
+        self.cmd('webapp config show -g {} -n {}'.format(resource_group, webapp_name), checks=[
+            JMESPathCheck('linuxFxVersion', 'SITECONTAINERS')])
+
 class TrackRuntimeStatusTest(ScenarioTest):
     @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_webapp_deploy_runtimestatus', location='eastus')
@@ -3358,6 +3419,35 @@ class WebappStackTest(ScenarioTest):
             JMESPathCheck('[0].siteConfig.javaContainer', 'TOMCAT'),
             JMESPathCheck('[0].siteConfig.javaContainerVersion', '9.0'),
         ])
+
+class WebappDNLTests(ScenarioTest):
+    @AllowLargeResponse(8192)
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_dnl(self, resource_group):
+        webapp_name = self.create_random_name(prefix='webapp-dnl', length=24)
+        plan = self.create_random_name(prefix='webapp-dnl-plan', length=24)
+
+        self.cmd('appservice plan create -g {} -n {}'.format(resource_group, plan))
+        self.cmd('appservice plan list -g {}'.format(resource_group), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', plan),
+            JMESPathCheck('[0].perSiteScaling', False)
+        ])
+
+        result = self.cmd('webapp create -g {} -n {} --plan {} --domain-name-scope {}'.format(
+            resource_group, webapp_name, plan, 'TenantReuse'), checks=[
+                JMESPathCheck('state', 'Running'),
+                JMESPathCheck('name', webapp_name),
+                JMESPathCheck('autoGeneratedDomainNameLabelScope', 'TenantReuse')
+        ]).get_output_in_json()
+
+        default_hostname = result.get('defaultHostName')
+        pattern = r'^([a-zA-Z0-9\-]+)-([a-z0-9]{16})\.([a-z]+-\d{2})\.azurewebsites\.net$'
+        match = re.match(pattern, default_hostname)
+        self.assertIsNotNone(match, "defaultHostName '{}' does not match expected pattern".format(default_hostname))
+        app_name, hash_part, region = match.groups()
+        self.assertTrue(len(hash_part) == 16 and hash_part.islower(), "Hash is not 16 chars or not lowercase.")
+        self.assertIn('-', region, "Region part does not have '-' separator.")
 
 if __name__ == '__main__':
     unittest.main()

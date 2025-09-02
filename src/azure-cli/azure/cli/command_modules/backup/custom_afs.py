@@ -189,9 +189,27 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
 
     afs_restore_request.copy_options = resolve_conflict
     afs_restore_request.recovery_type = restore_mode
-    afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx,
-                                                                     item.properties.container_name.split(';')[-1],
-                                                                     item.properties.container_name.split(';')[-2])
+
+    # Try to get source resource ID from storage account first, fallback to item's source resource ID
+    try:
+        afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx,
+                                                                         item.properties.container_name.split(';')[-1],
+                                                                         item.properties.container_name.split(';')[-2])
+        # Check if source_resource_id is null or empty after assignment
+        if not afs_restore_request.source_resource_id:
+            raise CLIError("Source resource ID is null or empty after retrieval from storage account.")
+    except (CLIError) as e:
+        logger.warning(
+            "Failed to get storage account ID: %s. Falling back to source resource ID from protected item.",
+            str(e))
+        source_resource_id = _get_source_resource_id_from_item(item)
+        if source_resource_id:
+            afs_restore_request.source_resource_id = source_resource_id
+        else:
+            raise CLIError(
+                "Unable to retrieve source resource ID. The storage account might have been deleted "
+                "and no fallback source resource ID is available.") from e
+
     afs_restore_request.restore_request_type = restore_request_type
 
     restore_file_specs = None
@@ -418,6 +436,16 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
         storage_account = resources_client.get(storage_account_rg, storage_resource_namespace, parent_resource_path,
                                                resource_type, storage_account_name, api_version)
     return storage_account.id
+
+
+def _get_source_resource_id_from_item(item):
+    """
+    Helper function to retrieve source resource ID from a protected item.
+    This is used as a fallback when the storage account is deleted.
+    """
+    if item and hasattr(item, 'properties') and hasattr(item.properties, 'source_resource_id'):
+        return item.properties.source_resource_id
+    return None
 
 
 def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name, tenant_id=None,

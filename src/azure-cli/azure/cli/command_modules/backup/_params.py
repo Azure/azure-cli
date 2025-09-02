@@ -403,6 +403,7 @@ def load_arguments(self, _):
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
         c.argument('disk_access_option', arg_type=get_enum_type(allowed_disk_access_options), help='Specify the disk access option for target disks.')
         c.argument('target_disk_access_id', help='Specify the target disk access ID when --disk-access-option is set to EnablePrivateAccessForAllDisks')
+        c.argument('cvm_os_des_id', options_list=['--cvm-os-des-id', '--cvm-os-disk-encryption-set-id'], help='Specify the Disk Encryption Set ID to use for OS disk encryption during restore of a Confidential VM. This is applicable only for Confidential VMs with managed disks. Please ensure that Disk Encryption Set has access to the Key vault.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)

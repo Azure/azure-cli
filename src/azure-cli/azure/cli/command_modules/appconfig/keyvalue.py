@@ -30,6 +30,7 @@ from ._kv_import_helpers import (
     __delete_configuration_setting_from_config_store,
     __read_features_from_file,
     __read_kv_from_app_service,
+    __read_kv_from_kubernetes_configmap,
     __read_kv_from_file,
 )
 from knack.log import get_logger
@@ -92,7 +93,11 @@ def import_config(cmd,
                   src_endpoint=None,
                   src_tags=None,  # tags to filter
                   # from-appservice parameters
-                  appservice_account=None):
+                  appservice_account=None,
+                  # from-aks parameters
+                  aks_cluster=None,
+                  configmap_namespace="default",
+                  configmap_name=None):
 
     src_features = []
     dest_features = []
@@ -175,6 +180,25 @@ def import_config(cmd,
     elif source == 'appservice':
         src_kvs = __read_kv_from_app_service(
             cmd, appservice_account=appservice_account, prefix_to_add=prefix, content_type=content_type)
+
+    elif source == 'aks':
+        if separator:
+            # If separator is provided, use max depth by default unless depth is specified.
+            depth = sys.maxsize if depth is None else int(depth)
+        else:
+            if depth and int(depth) != 1:
+                logger.warning("Cannot flatten hierarchical data without a separator. --depth argument will be ignored.")
+            depth = 1
+
+        src_kvs = __read_kv_from_kubernetes_configmap(cmd,
+                                                      aks_cluster=aks_cluster,
+                                                      configmap_name=configmap_name,
+                                                      namespace=configmap_namespace,
+                                                      prefix_to_add=prefix,
+                                                      content_type=content_type,
+                                                      format_=format_,
+                                                      separator=separator,
+                                                      depth=depth)
 
     if strict or not yes or import_mode == ImportMode.IGNORE_MATCH:
         # fetch key values from user's configstore
