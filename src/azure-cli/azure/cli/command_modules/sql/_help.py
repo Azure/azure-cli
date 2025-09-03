@@ -242,7 +242,7 @@ type: command
 short-summary: Update long term retention settings for a database.
 examples:
   - name: Set long term retention for a database.
-    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --make-backups-immutable true
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --make-backups-immutable Enabled
 """
 
 helps['sql db ltr-policy show'] = """
@@ -308,9 +308,9 @@ short-summary: Place the CLI in a waiting state until a condition of the databas
 
 helps['sql db ltr-backup set-legal-hold-immutability'] = """
 type: command
-short-summary: Add a legal hold on the long term retention backup database.
+short-summary: Set a legal hold on the long term retention backup database.
 examples:
-  - name: Add legal hold on a long term retention backup for a database.
+  - name: Set legal hold on a long term retention backup for a database.
     text: az sql db ltr-backup set-legal-hold-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
