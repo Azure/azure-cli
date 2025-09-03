@@ -5,13 +5,9 @@
 
 import unittest
 from unittest.mock import Mock, patch
-from azure.cli.core.commands import CliCommandType
+from knack.util import CLIError
 from azure.cli.command_modules.migrate.commands import load_command_table
-
-# Import unified testing framework
-from test_framework import MigrateTestCase, TestConfig
-
-
+from azure.cli.command_modules.migrate.custom import check_migration_prerequisites, list_resource_groups, get_discovered_server
 class TestMigrateCommandLoading(unittest.TestCase):
     """Test command loading and registration."""
 
@@ -21,7 +17,6 @@ class TestMigrateCommandLoading(unittest.TestCase):
 
     def test_command_table_loading(self):
         """Test that all command groups are properly loaded."""
-        # Mock the command group context manager
         mock_command_group = Mock()
         mock_command_group.__enter__ = Mock(return_value=mock_command_group)
         mock_command_group.__exit__ = Mock(return_value=None)
@@ -30,10 +25,8 @@ class TestMigrateCommandLoading(unittest.TestCase):
         
         self.loader.command_group.return_value = mock_command_group
         
-        # Load the command table
         load_command_table(self.loader, None)
         
-        # Verify that command groups were created
         expected_groups = [
             'migrate',
             'migrate server',
@@ -48,7 +41,6 @@ class TestMigrateCommandLoading(unittest.TestCase):
             'migrate storage'
         ]
         
-        # Check that command_group was called for each expected group
         group_calls = [call[0][0] for call in self.loader.command_group.call_args_list]
         for group in expected_groups:
             self.assertIn(group, group_calls)
@@ -64,7 +56,6 @@ class TestMigrateCommandLoading(unittest.TestCase):
         
         load_command_table(self.loader, None)
         
-        # Verify core commands are registered
         custom_command_calls = mock_command_group.custom_command.call_args_list
         command_names = [call[0][0] for call in custom_command_calls]
         
@@ -87,7 +78,6 @@ class TestMigrateCommandLoading(unittest.TestCase):
         
         load_command_table(self.loader, None)
         
-        # Check specific server commands
         custom_command_calls = mock_command_group.custom_command.call_args_list
         command_names = [call[0][0] for call in custom_command_calls]
         
@@ -158,8 +148,6 @@ class TestMigrateCommandLoading(unittest.TestCase):
         
         for command in expected_auth_commands:
             self.assertIn(command, command_names)
-
-
 class TestMigrateCommandParameters(unittest.TestCase):
     """Test command parameter validation and parsing."""
 
@@ -176,8 +164,6 @@ class TestMigrateCommandParameters(unittest.TestCase):
             'recommendations': []
         }
         
-        # This would be an integration test if we could actually execute the command
-        # For now, we just verify the mock is set up correctly
         result = mock_check_prereqs(Mock())
         self.assertIn('platform', result)
         self.assertTrue(result['powershell_available'])
@@ -192,12 +178,9 @@ class TestMigrateCommandParameters(unittest.TestCase):
             'cross_platform_ready': True
         }
         
-        # Test with install_powershell parameter
         cmd_mock = Mock()
         result = mock_setup_env(cmd_mock, install_powershell=True, check_only=False)
-        self.assertIn('checks', result)
-        
-        # Verify function was called with correct parameters
+        self.assertIn('checks', result)        
         mock_setup_env.assert_called_with(cmd_mock, install_powershell=True, check_only=False)
 
     @patch('azure.cli.command_modules.migrate.custom.get_discovered_server')
@@ -208,7 +191,6 @@ class TestMigrateCommandParameters(unittest.TestCase):
             'Count': 0
         }
         
-        # Test with required parameters
         result = mock_get_discovered(
             Mock(),
             resource_group_name='test-rg',
@@ -217,7 +199,6 @@ class TestMigrateCommandParameters(unittest.TestCase):
         
         self.assertEqual(result['Count'], 0)
         
-        # Test with optional parameters
         mock_get_discovered(
             Mock(),
             resource_group_name='test-rg',
@@ -229,15 +210,12 @@ class TestMigrateCommandParameters(unittest.TestCase):
             display_fields='Name,Type'
         )
         
-        # Verify the function was called with all parameters
         self.assertEqual(mock_get_discovered.call_count, 2)
 
     @patch('azure.cli.command_modules.migrate.custom.create_server_replication')
     def test_create_replication_command_parameters(self, mock_create_replication):
         """Test create-replication command parameters."""
         mock_create_replication.return_value = None
-        
-        # Test with required parameters
         mock_create_replication(
             Mock(),
             resource_group_name='test-rg',
@@ -247,7 +225,6 @@ class TestMigrateCommandParameters(unittest.TestCase):
             target_network='target-network'
         )
         
-        # Test with optional server selection parameters
         mock_create_replication(
             Mock(),
             resource_group_name='test-rg',
@@ -332,7 +309,6 @@ class TestMigrateCommandValidation(unittest.TestCase):
     @patch('azure.cli.command_modules.migrate.custom.set_azure_context')
     def test_set_context_parameter_validation(self, mock_set_context):
         """Test set-context command parameter validation."""
-        from knack.util import CLIError
         
         # Test missing required parameters
         mock_set_context.side_effect = CLIError(
@@ -344,9 +320,7 @@ class TestMigrateCommandValidation(unittest.TestCase):
 
     @patch('azure.cli.command_modules.migrate.custom.get_discovered_server')
     def test_authentication_required_validation(self, mock_get_discovered):
-        """Test that authentication is properly validated."""
-        from knack.util import CLIError
-        
+        """Test that authentication is properly validated."""        
         mock_get_discovered.side_effect = CLIError(
             'Azure authentication required: Not authenticated'
         )
@@ -362,10 +336,7 @@ class TestMigrateCommandValidation(unittest.TestCase):
 
     @patch('azure.cli.command_modules.migrate.custom.create_server_replication')
     def test_server_selection_validation(self, mock_create_replication):
-        """Test server selection parameter validation."""
-        from knack.util import CLIError
-        
-        # Mock validation error when neither server_name nor server_index is provided
+        """Test server selection parameter validation."""        
         mock_create_replication.side_effect = CLIError(
             'Either server_name or server_index must be provided'
         )
@@ -387,8 +358,6 @@ class TestMigrateCommandIntegration(unittest.TestCase):
     @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
     def test_powershell_executor_integration(self, mock_get_executor):
         """Test that commands properly integrate with PowerShell executor."""
-        from azure.cli.command_modules.migrate.custom import check_migration_prerequisites
-        
         mock_executor = Mock()
         mock_executor.check_powershell_availability.return_value = (True, 'powershell')
         mock_executor.execute_script.return_value = {'stdout': '7.3.0', 'stderr': ''}
@@ -400,19 +369,15 @@ class TestMigrateCommandIntegration(unittest.TestCase):
             
             result = check_migration_prerequisites(Mock())
             
-            # Verify PowerShell executor was used
             mock_get_executor.assert_called()
             mock_executor.check_powershell_availability.assert_called()
             
-            # Verify result structure
             self.assertIn('platform', result)
             self.assertIn('powershell_available', result)
 
     @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
     def test_azure_authentication_integration(self, mock_get_executor):
-        """Test that Azure authentication is properly integrated."""
-        from azure.cli.command_modules.migrate.custom import list_resource_groups
-        
+        """Test that Azure authentication is properly integrated."""        
         mock_executor = Mock()
         mock_executor.check_azure_authentication.return_value = {'IsAuthenticated': True}
         mock_executor.execute_script_interactive.return_value = None
@@ -420,16 +385,12 @@ class TestMigrateCommandIntegration(unittest.TestCase):
         
         list_resource_groups(Mock())
         
-        # Verify authentication check was performed
         mock_executor.check_azure_authentication.assert_called()
         mock_executor.execute_script_interactive.assert_called()
 
     @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
     def test_error_propagation(self, mock_get_executor):
         """Test that errors are properly propagated through the command stack."""
-        from azure.cli.command_modules.migrate.custom import get_discovered_server
-        from knack.util import CLIError
-        
         mock_executor = Mock()
         mock_executor.check_azure_authentication.return_value = {
             'IsAuthenticated': False,

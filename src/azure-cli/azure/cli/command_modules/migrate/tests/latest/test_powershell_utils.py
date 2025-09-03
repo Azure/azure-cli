@@ -4,14 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-import platform
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 from knack.util import CLIError
+from test_framework import MigrateTestCase
 
-# Import unified testing framework
-from test_framework import MigrateTestCase, TestConfig, create_mock_powershell_executor
-
-# Import PowerShell utilities with comprehensive mocking
 with patch('azure.cli.core.util.run_cmd') as mock_run_cmd, \
      patch('subprocess.run') as mock_subprocess:
     mock_run_cmd.return_value = Mock(returncode=0, stdout='7.1.3', stderr='')
@@ -28,7 +24,6 @@ class TestPowerShellExecutor(MigrateTestCase):
 
     def test_powershell_executor_windows_success(self):
         """Test PowerShell executor initialization on Windows."""
-        # Use the mock executor from the base class
         executor = self.mock_ps_executor
         
         self.assertEqual(executor.platform, 'windows')
@@ -45,7 +40,6 @@ class TestPowerShellExecutor(MigrateTestCase):
         """Test PowerShell executor initialization on Linux with pwsh available."""
         mock_platform.return_value = 'Linux'
         
-        # Mock successful pwsh detection
         mock_result = Mock()
         mock_result.returncode = 0
         mock_result.stdout = '7.3.0'
@@ -58,7 +52,6 @@ class TestPowerShellExecutor(MigrateTestCase):
 
     def test_powershell_executor_not_available(self):
         """Test PowerShell executor when PowerShell is not available."""
-        # Create a mock executor that reports PowerShell as unavailable
         unavailable_executor = Mock()
         unavailable_executor.check_powershell_availability.return_value = (False, None)
         
@@ -86,20 +79,17 @@ class TestPowerShellExecutor(MigrateTestCase):
 
     def test_execute_script_success(self):
         """Test successful PowerShell script execution."""
-        # Use our framework's mock executor
         executor = self.mock_ps_executor
         
         # Test execution with a custom script
         result = executor.execute_script('Write-Host "Hello World"')
         
-        # Our framework returns default PowerShell version for unknown commands
         self.assertIsNotNone(result.get('stdout'))
         self.assertEqual(result.get('stderr', ''), '')
         self.assertEqual(result.get('returncode'), 0)
 
     def test_execute_script_with_parameters(self):
         """Test PowerShell script execution with parameters."""
-        # Use our framework's mock executor
         executor = self.mock_ps_executor
         
         parameters = {'Name': 'TestValue', 'Count': '5'}
@@ -110,7 +100,6 @@ class TestPowerShellExecutor(MigrateTestCase):
 
     def test_execute_script_failure(self):
         """Test PowerShell script execution failure."""
-        # Create a mock executor that returns failure
         failure_executor = Mock()
         def mock_execute_failure(script, parameters=None):
             return {
@@ -120,14 +109,12 @@ class TestPowerShellExecutor(MigrateTestCase):
             }
         failure_executor.execute_script.side_effect = mock_execute_failure
         
-        # Test that the mock properly returns failure
         result = failure_executor.execute_script('throw "Error"')
         self.assertEqual(result['returncode'], 1)
         self.assertIn('failed', result['stderr'])
 
     def test_execute_azure_authenticated_script(self):
         """Test Azure authenticated PowerShell script execution."""
-        # Use our framework's mock executor that has Azure authentication method
         executor = self.mock_ps_executor
         
         result = executor.execute_azure_authenticated_script('Get-AzContext')
@@ -137,7 +124,6 @@ class TestPowerShellExecutor(MigrateTestCase):
 
     def test_check_azure_authentication_success(self):
         """Test successful Azure authentication check."""
-        # Use our framework's mock executor with Azure authentication
         executor = self.mock_ps_executor
         
         result = executor.check_azure_authentication()
@@ -147,7 +133,6 @@ class TestPowerShellExecutor(MigrateTestCase):
 
     def test_check_azure_authentication_failure(self):
         """Test failed Azure authentication check.""" 
-        # Create a mock executor that reports authentication failure
         failure_executor = Mock()
         def mock_auth_failure():
             return {
@@ -167,7 +152,6 @@ class TestPowerShellExecutor(MigrateTestCase):
         """Test PowerShell detection on macOS."""
         mock_platform.return_value = 'Darwin'
         
-        # Mock successful pwsh detection on macOS
         mock_result = Mock()
         mock_result.returncode = 0
         mock_result.stdout = '7.3.0'
@@ -180,16 +164,12 @@ class TestPowerShellExecutor(MigrateTestCase):
 
     def test_installation_guidance_provided(self):
         """Test that appropriate installation guidance is provided for each platform."""
-        # Test that our framework provides guidance through mock responses
-        # Since we're using mocked responses, just verify the concept works
         executor = self.mock_ps_executor
         
-        # Test that the executor is properly configured
         self.assertIsNotNone(executor)
         self.assertEqual(executor.platform, 'windows')
         
-        # Test availability check still works
-        is_available, cmd_path = executor.check_powershell_availability()
+        is_available, _ = executor.check_powershell_availability()
         self.assertTrue(is_available)
 
 
@@ -221,35 +201,28 @@ class TestPowerShellExecutorEdgeCases(MigrateTestCase):
 
     def test_empty_script_execution(self):
         """Test execution of empty script."""
-        # Use our framework's mock executor
         executor = self.mock_ps_executor
         
         result = executor.execute_script('')
         
-        # Verify the basic response structure (our framework returns default responses)
         self.assertEqual(result['returncode'], 0)
         self.assertIsNotNone(result.get('stdout'))
 
     def test_large_output_handling(self):
         """Test handling of large script output.""" 
-        # Use our framework's mock executor
         executor = self.mock_ps_executor
         
-        # Test that large output can be handled (our framework returns standard responses)
         result = executor.execute_script('Write-Host ("A" * 10000)')
         
-        # Verify the response structure is correct
         self.assertEqual(result['returncode'], 0)
         self.assertIsNotNone(result.get('stdout'))
 
     def test_special_characters_in_script(self):
         """Test handling of special characters in scripts."""
-        # Use our framework's mock executor
         executor = self.mock_ps_executor
         
         result = executor.execute_script('Write-Host "Special chars: àáâãäå"')
         
-        # Verify basic response structure
         self.assertEqual(result['returncode'], 0)
         self.assertIsNotNone(result.get('stdout'))
 

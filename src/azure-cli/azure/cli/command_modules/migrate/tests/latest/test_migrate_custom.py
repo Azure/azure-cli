@@ -7,10 +7,7 @@ import unittest
 from unittest.mock import Mock, patch
 from knack.util import CLIError
 
-# Import unified testing framework
-from test_framework import MigrateTestCase, TestConfig
-
-# Import functions with comprehensive mocking via the framework
+from test_framework import MigrateTestCase
 with patch('azure.cli.command_modules.migrate.custom.get_powershell_executor') as mock_get_ps:
     from test_framework import create_mock_powershell_executor
     mock_get_ps.return_value = create_mock_powershell_executor()
@@ -58,7 +55,6 @@ class TestMigratePowerShellUtils(MigrateTestCase):
     @patch('azure.cli.command_modules.migrate.custom.platform.python_version', return_value='3.9.7')
     def test_check_migration_prerequisites_powershell_not_available(self, mock_python_version, mock_version, mock_system):
         """Test prerequisite check when PowerShell is not available."""
-        # Override the mock for this specific test
         self.mock_ps_executor.check_powershell_availability.return_value = (False, None)
         
         result = check_migration_prerequisites(self.cmd)
@@ -168,7 +164,6 @@ class TestMigrateDiscoveryCommands(unittest.TestCase):
         mock_ps_executor.execute_script_interactive.return_value = None
         mock_get_ps_executor.return_value = mock_ps_executor
 
-        # Should not raise an exception
         get_discovered_servers_table(
             self.cmd, self.resource_group, self.project_name
         )
@@ -187,7 +182,6 @@ class TestMigrateDiscoveryCommands(unittest.TestCase):
         )
 
         mock_ps_executor.execute_script_interactive.assert_called_once()
-        # Verify the script contains the display name filter
         script_call = mock_ps_executor.execute_script_interactive.call_args[0][0]
         self.assertIn('test-server', script_call)
 

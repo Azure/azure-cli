@@ -13,16 +13,14 @@ import sys
 import os
 from latest.test_framework import run_all_tests
 
-# Add current directory to path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
 
 if __name__ == '__main__':
-    # Run all tests with the unified framework
     success = run_all_tests(
         verbosity=2,
         buffer=True,
-        exclude_modules=['test_framework']  # Don't test the framework itself
+        exclude_modules=['test_framework']
     )
     
     sys.exit(0 if success else 1)

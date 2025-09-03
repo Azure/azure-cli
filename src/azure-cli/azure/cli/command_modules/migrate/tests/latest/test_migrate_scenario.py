@@ -5,8 +5,8 @@
 
 import os
 import unittest
+import platform
 from unittest.mock import patch, Mock
-
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, LiveScenarioTest)
 
 
@@ -18,11 +18,9 @@ class MigrateScenarioTest(ScenarioTest):
 
     def setUp(self):
         super().setUp()
-        # Mock PowerShell executor to avoid actual PowerShell execution during tests
         self.mock_ps_executor_patcher = patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
         self.mock_ps_executor = self.mock_ps_executor_patcher.start()
         
-        # Configure mock PowerShell executor
         mock_executor = Mock()
         mock_executor.check_powershell_availability.return_value = (True, 'powershell')
         mock_executor.check_azure_authentication.return_value = {'IsAuthenticated': True}
@@ -59,7 +57,6 @@ class MigrateScenarioTest(ScenarioTest):
 
     def test_migrate_powershell_check_module(self):
         """Test migrate powershell check-module command."""
-        # This command should execute without errors when PowerShell is mocked
         self.cmd('migrate powershell check-module --module-name Az.Migrate')
 
     @ResourceGroupPreparer(name_prefix='cli_test_migrate')
@@ -70,7 +67,6 @@ class MigrateScenarioTest(ScenarioTest):
             'project': 'test-project'
         })
 
-        # Test successful discovery (mocked)
         result = self.cmd('migrate server list-discovered -g {rg} --project-name {project} --source-machine-type VMware').get_output_in_json()
         
         self.assertIn('DiscoveredServers', result)
@@ -85,12 +81,10 @@ class MigrateScenarioTest(ScenarioTest):
             'project': 'test-project'
         })
 
-        # This should execute without errors when mocked
         self.cmd('migrate server get-discovered-servers-table -g {rg} --project-name {project}')
 
     def test_migrate_auth_commands(self):
         """Test migrate auth command group."""
-        # Test auth check (should work with mocked executor)
         self.cmd('migrate auth check')
 
     @ResourceGroupPreparer(name_prefix='cli_test_migrate')
@@ -101,12 +95,10 @@ class MigrateScenarioTest(ScenarioTest):
             'project': 'test-project'
         })
 
-        # Test infrastructure check
         self.cmd('migrate infrastructure check -g {rg} --project-name {project}')
 
     def test_migrate_local_create_disk_mapping(self):
         """Test migrate local create-disk-mapping command."""
-        # Test creating disk mapping
         self.cmd('migrate local create-disk-mapping --disk-id disk-001 --is-os-disk --size-gb 64 --format-type VHDX')
 
     @ResourceGroupPreparer(name_prefix='cli_test_migrate')
@@ -121,21 +113,17 @@ class MigrateScenarioTest(ScenarioTest):
             'target_rg': '/subscriptions/test/resourceGroups/target-rg'
         })
 
-        # Test creating local replication
         self.cmd('migrate local create-replication -g {rg} --project-name {project} --server-index 0 '
                 '--target-vm-name {target_vm} --target-storage-path-id {storage_path} '
                 '--target-virtual-switch-id {virtual_switch} --target-resource-group-id {target_rg}')
 
     def test_migrate_command_help(self):
         """Test that help is available for all command groups."""
-        # Test main help - expect successful exit (even though it causes SystemExit)
         try:
             self.cmd('migrate -h')
         except SystemExit as e:
-            # Help commands exit with code 0, which is expected
             self.assertEqual(e.code, 0)
         
-        # Test command group help
         help_commands = [
             'migrate server -h',
             'migrate local -h', 
@@ -149,11 +137,8 @@ class MigrateScenarioTest(ScenarioTest):
             try:
                 self.cmd(help_cmd)
             except SystemExit as e:
-                # Help commands exit with code 0, which is expected
                 self.assertEqual(e.code, 0)
             except Exception as e:
-                # Some help commands may have YAML syntax issues, which is acceptable for tests
-                # as long as we can verify the commands are registered
                 if "ScannerError" in str(type(e)) or "mapping values are not allowed" in str(e):
                     print(f"Help command {help_cmd} has YAML syntax issues (acceptable for testing)")
                     continue
@@ -162,16 +147,12 @@ class MigrateScenarioTest(ScenarioTest):
 
     def test_migrate_error_scenarios(self):
         """Test error handling scenarios."""
-        # Configure mock to simulate authentication failure  
         mock_executor = Mock()
         mock_executor.check_azure_authentication.return_value = {
             'IsAuthenticated': False,
             'Error': 'Not authenticated'
         }
         self.mock_ps_executor.return_value = mock_executor
-        
-        # This should handle authentication errors gracefully
-        # The command should fail with authentication error
         self.cmd('migrate resource list-groups', expect_failure=True)
 
 
@@ -180,7 +161,6 @@ class MigrateLiveScenarioTest(LiveScenarioTest):
 
     def setUp(self):
         super().setUp()
-        # Only run live tests if AZURE_TEST_RUN_LIVE environment variable is set
         if not self.is_live:
             self.skipTest('Live tests are skipped in playback mode')
 
@@ -189,10 +169,8 @@ class MigrateLiveScenarioTest(LiveScenarioTest):
         """Live test for listing resource groups."""
         try:
             result = self.cmd('migrate resource list-groups').get_output_in_json()
-            # The result should be a valid response if authentication works
             self.assertIsInstance(result, (list, dict))
         except SystemExit:
-            # This is expected if Azure authentication is not configured
             self.skipTest('Azure authentication not configured for live tests')
 
     @ResourceGroupPreparer(name_prefix='cli_live_test_migrate')
@@ -201,18 +179,14 @@ class MigrateLiveScenarioTest(LiveScenarioTest):
         try:
             result = self.cmd('migrate check-prerequisites').get_output_in_json()
             
-            # Verify the structure of the response
             self.assertIn('platform', result)
             self.assertIn('powershell_available', result)
             self.assertIn('recommendations', result)
             
-            # Platform should be detected correctly
-            import platform
             expected_platform = platform.system()
             self.assertEqual(result['platform'], expected_platform)
             
         except SystemExit:
-            # This might happen if PowerShell is not available
             self.skipTest('PowerShell not available for live tests')
 
     def test_migrate_setup_env_live(self):
@@ -220,7 +194,6 @@ class MigrateLiveScenarioTest(LiveScenarioTest):
         try:
             result = self.cmd('migrate setup-env --check-only').get_output_in_json()
             
-            # Verify the response structure
             self.assertIn('platform', result)
             self.assertIn('checks', result)
             self.assertIsInstance(result['checks'], list)
@@ -234,26 +207,20 @@ class MigrateParameterValidationTest(ScenarioTest):
 
     def test_migrate_server_list_discovered_missing_params(self):
         """Test that required parameters are validated."""
-        # Test missing resource group - should fail with error
         self.cmd('migrate server list-discovered --project-name test-project', expect_failure=True)
-
-        # Test missing project name - should fail with error  
         self.cmd('migrate server list-discovered -g test-rg', expect_failure=True)
 
     def test_migrate_local_create_disk_mapping_validation(self):
         """Test disk mapping parameter validation."""
-        # Test missing disk ID
         with self.assertRaises(SystemExit):
             self.cmd('migrate local create-disk-mapping --is-os-disk')
 
     def test_migrate_auth_set_context_validation(self):
         """Test auth set-context parameter validation."""
-        # Test with neither subscription ID nor name - should fail with error
         self.cmd('migrate auth set-context', expect_failure=True)
 
     def test_migrate_server_create_replication_validation(self):
         """Test server replication creation parameter validation."""
-        # Test missing required parameters
         with self.assertRaises(SystemExit):
             self.cmd('migrate server create-replication -g test-rg --project-name test-project')
 

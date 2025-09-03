@@ -2,23 +2,12 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
-"""
-PowerShell Mock System for Azure Migrate CLI Tests
-This module provides comprehensive mocking for PowerShell cmdlets with realistic responses.
-"""
-
-import re
-import json
 from unittest.mock import Mock
-
-
 class PowerShellCmdletMocker:
     """Mock system that provides realistic responses for specific PowerShell cmdlets."""
     
     def __init__(self):
         self.cmdlet_responses = {
-            # PowerShell version and system info
             '$PSVersionTable.PSVersion.ToString()': {
                 'stdout': '7.3.4',
                 'stderr': '',

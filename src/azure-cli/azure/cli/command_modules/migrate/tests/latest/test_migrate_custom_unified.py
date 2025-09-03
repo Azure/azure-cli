@@ -4,13 +4,9 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
-from unittest.mock import Mock, patch
 from knack.util import CLIError
 
-# Import unified testing framework
 from test_framework import MigrateTestCase, TestConfig
-
-# Import functions - mocking is handled by MigrateTestCase
 from azure.cli.command_modules.migrate.custom import (
     check_migration_prerequisites,
     get_discovered_server,
@@ -29,9 +25,7 @@ from azure.cli.command_modules.migrate.custom import (
     connect_azure_account,
     disconnect_azure_account,
     set_azure_context,
-    _get_powershell_install_instructions,
-    _attempt_powershell_installation,
-    _perform_platform_specific_checks
+    _get_powershell_install_instructions
 )
 
 
@@ -48,7 +42,6 @@ class TestMigratePowerShellUtils(MigrateTestCase):
 
     def test_check_migration_prerequisites_powershell_not_available(self):
         """Test prerequisite check when PowerShell is not available."""
-        # Override the mock for this specific test
         self.mock_ps_executor.check_powershell_availability.return_value = (False, None)
         
         result = check_migration_prerequisites(self.cmd)
@@ -72,44 +65,37 @@ class TestMigrateDiscoveryCommands(MigrateTestCase):
 
     def test_get_discovered_server(self):
         """Test getting a specific discovered server."""
-        result = get_discovered_server(
+        get_discovered_server(
             self.cmd,
             resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
             project_name=TestConfig.SAMPLE_PROJECT_NAME,
             server_id=TestConfig.SAMPLE_SERVER_NAME
         )
         
-        # The function should execute successfully with mocked PowerShell
-        # Specific assertions depend on the function's return format
-
     def test_get_discovered_servers_table(self):
         """Test getting discovered servers in table format."""
-        result = get_discovered_servers_table(
+        get_discovered_servers_table(
             self.cmd,
             resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
             project_name=TestConfig.SAMPLE_PROJECT_NAME
         )
         
-        # Should execute without errors
 
     def test_get_discovered_servers_by_display_name(self):
         """Test getting servers by display name."""
-        result = get_discovered_servers_by_display_name(
+        get_discovered_servers_by_display_name(
             self.cmd,
             resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
             project_name=TestConfig.SAMPLE_PROJECT_NAME,
             display_name=TestConfig.SAMPLE_SERVER_NAME
         )
-        
-        # Should execute without errors
-
 
 class TestMigrateReplicationCommands(MigrateTestCase):
     """Test server replication and migration commands."""
 
     def test_create_server_replication(self):
         """Test creating server replication."""
-        result = create_server_replication(
+        create_server_replication(
             self.cmd,
             resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
             project_name=TestConfig.SAMPLE_PROJECT_NAME,
@@ -119,22 +105,18 @@ class TestMigrateReplicationCommands(MigrateTestCase):
             server_index=0
         )
         
-        # Should execute without errors
-
     def test_get_replication_job_status(self):
         """Test getting replication job status."""
-        result = get_replication_job_status(
+        get_replication_job_status(
             self.cmd,
             resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
             project_name=TestConfig.SAMPLE_PROJECT_NAME,
             vm_name='test-vm'
         )
         
-        # Should execute without errors
-
     def test_set_replication_target_properties(self):
         """Test setting replication target properties."""
-        result = set_replication_target_properties(
+        set_replication_target_properties(
             self.cmd,
             resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
             project_name=TestConfig.SAMPLE_PROJECT_NAME,
@@ -142,16 +124,12 @@ class TestMigrateReplicationCommands(MigrateTestCase):
             target_vm_size='Standard_D2s_v3',
             target_disk_type='Premium_LRS'
         )
-        
-        # Should execute without errors
-
-
 class TestMigrateLocalCommands(MigrateTestCase):
     """Test local migration commands."""
 
     def test_create_local_disk_mapping(self):
         """Test creating local disk mapping."""
-        result = create_local_disk_mapping(
+        create_local_disk_mapping(
             self.cmd,
             disk_id='disk-001',
             is_os_disk=True,
@@ -161,11 +139,9 @@ class TestMigrateLocalCommands(MigrateTestCase):
             physical_sector_size=512
         )
         
-        # Should execute without errors
-
     def test_create_local_server_replication(self):
         """Test creating local server replication."""
-        result = create_local_server_replication(
+        create_local_server_replication(
             self.cmd,
             resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
             project_name=TestConfig.SAMPLE_PROJECT_NAME,
@@ -176,107 +152,79 @@ class TestMigrateLocalCommands(MigrateTestCase):
             target_resource_group_id='/subscriptions/xxx/resourceGroups/target-rg'
         )
         
-        # Should execute without errors
-
     def test_get_local_replication_job(self):
         """Test getting local replication job status."""
-        result = get_local_replication_job(
+        get_local_replication_job(
             self.cmd,
             resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
             project_name=TestConfig.SAMPLE_PROJECT_NAME,
             job_id='job-12345'
         )
         
-        # Should execute without errors
-
-
 class TestMigrateInfrastructureCommands(MigrateTestCase):
     """Test infrastructure management commands."""
 
     def test_initialize_replication_infrastructure(self):
         """Test initializing replication infrastructure."""
-        result = initialize_replication_infrastructure(
+        initialize_replication_infrastructure(
             self.cmd,
             resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
             project_name=TestConfig.SAMPLE_PROJECT_NAME,
             target_region='East US'
         )
         
-        # Should execute without errors
 
     def test_check_replication_infrastructure(self):
         """Test checking replication infrastructure status."""
-        result = check_replication_infrastructure(
+        check_replication_infrastructure(
             self.cmd,
             resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
             project_name=TestConfig.SAMPLE_PROJECT_NAME
         )
-        
-        # Should execute without errors
-
-
 class TestMigrateAuthenticationCommands(MigrateTestCase):
     """Test authentication management commands."""
 
     def test_connect_azure_account(self):
         """Test Azure account connection."""
-        result = connect_azure_account(self.cmd)
-        
-        # Should execute without errors
+        connect_azure_account(self.cmd)
 
     def test_disconnect_azure_account(self):
         """Test Azure account disconnection."""
-        result = disconnect_azure_account(self.cmd)
-        
-        # Should execute without errors
+        disconnect_azure_account(self.cmd)
 
     def test_set_azure_context(self):
         """Test setting Azure context."""
-        result = set_azure_context(
+        set_azure_context(
             self.cmd,
             subscription_id=TestConfig.SAMPLE_SUBSCRIPTION_ID
         )
-        
-        # Should execute without errors
-
-
 class TestMigrateUtilityCommands(MigrateTestCase):
     """Test utility and helper commands."""
 
     def test_list_resource_groups(self):
         """Test listing resource groups."""
-        result = list_resource_groups(self.cmd)
-        
-        # Should execute without errors
+        list_resource_groups(self.cmd)
 
     def test_check_powershell_module(self):
         """Test checking PowerShell module availability."""
-        result = check_powershell_module(
+        check_powershell_module(
             self.cmd,
             module_name="Az.Migrate"
         )
-        
-        # Should execute without errors
-
-
 class TestMigrateErrorHandling(MigrateTestCase):
     """Test error handling and edge cases."""
 
     def test_invalid_parameters(self):
         """Test handling of invalid parameters."""
-        # Test that our function handles missing required parameters correctly
-        # Since our mock framework returns success, test parameter validation logic
         try:
             result = get_discovered_server(
                 self.cmd,
-                resource_group_name="",  # Empty resource group
+                resource_group_name="",
                 project_name="test-project",
                 server_id="test-server"
             )
-            # If it succeeds with our mock, that's expected behavior
             self.assertIsNotNone(result)
         except (ValueError, CLIError):
-            # If it raises an error, that's also acceptable
             pass
 
 

@@ -13,7 +13,6 @@ import unittest
 from unittest.mock import patch
 from powershell_mock import create_mock_powershell_executor
 
-# Import with comprehensive mocking
 with patch('azure.cli.command_modules.migrate.custom.get_powershell_executor') as mock_get_ps:
     mock_get_ps.return_value = create_mock_powershell_executor()
     from azure.cli.command_modules.migrate.custom import check_migration_prerequisites
@@ -26,7 +25,6 @@ class TestPowerShellMocking(unittest.TestCase):
         """Set up test with mocked PowerShell executor."""
         self.mock_ps_executor = create_mock_powershell_executor()
         
-        # Patch all PowerShell executor calls
         self.ps_patcher = patch('azure.cli.command_modules.migrate.custom.get_powershell_executor', 
                                return_value=self.mock_ps_executor)
         self.ps_patcher.start()
@@ -63,11 +61,9 @@ class TestPowerShellMocking(unittest.TestCase):
         cmd = Mock()
         result = check_migration_prerequisites(cmd)
         
-        # Verify the result contains expected data
         self.assertEqual(result['platform'], 'Windows')
         self.assertEqual(result['python_version'], '3.9.7')
         self.assertTrue(result['powershell_available'])
-        # Note: azure_powershell_available depends on the specific mocking in the function
 
     def test_custom_cmdlet_response(self):
         """Test that unknown cmdlets get default response."""
@@ -77,5 +73,4 @@ class TestPowerShellMocking(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # Run just these demonstration tests
     unittest.main(verbosity=2)
