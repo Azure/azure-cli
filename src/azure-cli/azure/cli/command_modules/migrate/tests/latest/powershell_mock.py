@@ -48,14 +48,11 @@ class PowerShellCmdletMocker:
 
     def get_response(self, script_content):
         """Get mock response for a PowerShell script."""
-        # Clean up the script content
         clean_script = script_content.strip()
         
-        # Check for exact matches first
         if clean_script in self.cmdlet_responses:
             return self.cmdlet_responses[clean_script]
         
-        # Handle Azure cmdlets
         if any(cmdlet in clean_script for cmdlet in ['Connect-Az', 'Set-Az', 'Get-Az', 'New-Az']):
             return {
                 'stdout': 'Azure operation completed successfully',
@@ -63,7 +60,6 @@ class PowerShellCmdletMocker:
                 'exit_code': 0
             }
         
-        # Default response for unknown cmdlets
         return {
             'stdout': 'Mock PowerShell command executed successfully',
             'stderr': '',
@@ -74,16 +70,12 @@ class PowerShellCmdletMocker:
 def create_mock_powershell_executor():
     """Create a fully mocked PowerShell executor for testing."""
     mocker = PowerShellCmdletMocker()
-    
-    # Create the mock executor
+
     mock_executor = Mock()
     mock_executor.platform = 'windows'
-    mock_executor.powershell_cmd = 'powershell'
-    
-    # Mock availability check
+    mock_executor.powershell_cmd = 'powershell'    
     mock_executor.check_powershell_availability.return_value = (True, 'powershell')
     
-    # Mock script execution with smart responses
     def mock_execute_script(script_content, parameters=None):
         return mocker.get_response(script_content)
     
@@ -98,10 +90,7 @@ def create_mock_powershell_executor():
 
 
 if __name__ == '__main__':
-    # Test the mock system
-    mock_ps = create_mock_powershell_executor()
-    
-    # Test various cmdlets
+    mock_ps = create_mock_powershell_executor()    
     test_scripts = [
         '$PSVersionTable.PSVersion.ToString()',
         'Get-Module -ListAvailable Az.Migrate',
@@ -109,8 +98,7 @@ if __name__ == '__main__':
     ]
     
     print("Testing PowerShell Mock System:")
-    print("=" * 50)
-    
+
     for script in test_scripts:
         print(f"\nScript: {script}")
         result = mock_ps.execute_script(script)
