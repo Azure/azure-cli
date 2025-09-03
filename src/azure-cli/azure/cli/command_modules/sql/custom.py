@@ -3125,6 +3125,12 @@ def update_long_term_retention(
             if not confirmation:
                 return
 
+    if time_based_immutability.lower() == "true":
+        time_based_immutability ="Enabled"
+
+    if time_based_immutability.lower() == "false":
+        time_based_immutability ="Disabled"
+
     if time_based_immutability_mode:
         if not time_based_immutability or time_based_immutability.lower() != "enabled":
             raise CLIError('Time-based immutability mode can only be set if time-based immutability is enabled.')
