@@ -16,7 +16,6 @@ from azure.cli.core.commands.validators import get_default_location_from_resourc
 def load_arguments(self, _):
     from azure.cli.core.commands.parameters import tags_type
 
-    # Common argument types for reuse
     project_name_type = CLIArgumentType(
         options_list=['--project-name'],
         help='Name of the Azure Migrate project.',
@@ -28,7 +27,6 @@ def load_arguments(self, _):
         help='Azure subscription ID. Uses the default subscription if not specified.'
     )
 
-    # Global migrate arguments
     with self.argument_context('migrate') as c:
         c.argument('subscription_id', subscription_id_type)
 
@@ -39,7 +37,6 @@ def load_arguments(self, _):
         c.argument('check_only', action='store_true',
                   help='Only check environment requirements without making changes.')
 
-    # Project management arguments
     with self.argument_context('migrate project') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('project_name', project_name_type)
@@ -53,7 +50,6 @@ def load_arguments(self, _):
         c.argument('migration_solution', 
                   help='Migration solution to enable (e.g., ServerMigration).')
 
-    # Assessment arguments
     with self.argument_context('migrate assessment') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('project_name', project_name_type)
@@ -68,7 +64,6 @@ def load_arguments(self, _):
                   help='Type of assessment to perform.')
         c.argument('group_name', help='Name of the group containing machines to assess.')
 
-    # Machine arguments
     with self.argument_context('migrate machine') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('project_name', project_name_type)
@@ -77,7 +72,6 @@ def load_arguments(self, _):
                   help='Name of the machine.',
                   id_part='child_name_1')
 
-    # Server discovery and replication arguments
     with self.argument_context('migrate server') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('project_name', project_name_type)
@@ -103,7 +97,7 @@ def load_arguments(self, _):
         c.argument('test_migrate', action='store_true',
                   help='Perform test migration only.')
 
-    # Azure Stack HCI Local Migration
+    # Azure Local Migration
     with self.argument_context('migrate local') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('project_name', project_name_type)
@@ -145,7 +139,6 @@ def load_arguments(self, _):
     with self.argument_context('migrate infrastructure init') as c:
         c.argument('target_region', help='Target Azure region for replication.', required=True)
 
-    # Storage management
     with self.argument_context('migrate storage') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('subscription_id', subscription_id_type)
@@ -162,7 +155,6 @@ def load_arguments(self, _):
         c.argument('show_keys', action='store_true', 
                   help='Include storage account access keys.')
 
-    # PowerShell module management
     with self.argument_context('migrate powershell check-module') as c:
         c.argument('module_name', 
                   help='Name of the PowerShell module to check. Default is Az.Migrate.')
@@ -175,7 +167,6 @@ def load_arguments(self, _):
                   arg_type=get_enum_type(['HyperV', 'VMware']),
                   help='Type of source machine (HyperV or VMware). Default is VMware.')
 
-    # New Azure Migrate server replication command parameters
     with self.argument_context('migrate server find-by-name') as c:
         c.argument('resource_group_name', help='Name of the resource group.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
@@ -261,7 +252,7 @@ def load_arguments(self, _):
         c.argument('subscription_id', help='Azure subscription ID.')
         c.argument('show_keys', action='store_true', help='Include storage account access keys in the output (requires appropriate permissions).')
 
-    # Azure Stack HCI Local Migration Commands
+    # Azure Local Migration Commands
     with self.argument_context('migrate local create-disk-mapping') as c:
         c.argument('disk_id', help='Disk ID (UUID) for the disk mapping.', required=True)
         c.argument('is_os_disk', action='store_true', help='Whether this is the OS disk. Default is True.')
@@ -360,10 +351,10 @@ def load_arguments(self, _):
         c.argument('module_name', help='Name of the PowerShell module to check. Default is Az.Migrate.')
         c.argument('subscription_id', help='Azure subscription ID.')
 
-    # Azure Stack HCI VM Replication Commands
+    # Azure Local VM Replication Commands
     with self.argument_context('migrate local create-vm-replication') as c:
         c.argument('vm_name', help='Name of the source VM to replicate.', required=True)
-        c.argument('target_vm_name', help='Name for the target VM in Azure Stack HCI.', required=True)
+        c.argument('target_vm_name', help='Name for the target VM in Azure Local.', required=True)
         c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], 
                   help='Name of the resource group containing the Azure Migrate project.', required=True)
         c.argument('source_appliance_name', help='Name of the source appliance.', required=True)

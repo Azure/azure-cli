@@ -8,6 +8,12 @@ import platform
 import json
 from knack.util import CLIError
 from knack.log import get_logger
+import select
+import sys
+import threading
+import queue
+import time
+import subprocess
 
 logger = get_logger(__name__)
 
@@ -72,7 +78,6 @@ class PowerShellExecutor:
         try:
             cmd = [self.powershell_cmd, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command']
             
-            # Add parameters to script if provided
             if parameters:
                 param_string = ' '.join([f'-{k} "{v}"' for k, v in parameters.items()])
                 script_with_params = f'{script_content} {param_string}'
@@ -111,14 +116,11 @@ class PowerShellExecutor:
         
         Note: This method uses subprocess.Popen directly for real-time output streaming,
         which is an approved exception to the CLI subprocess guidelines for interactive scenarios.
-        """
-        import subprocess
-        
+        """        
         try:
             if not self.powershell_cmd:
                 raise CLIError('PowerShell not available')
             
-            # Construct command array to avoid shell injection
             cmd = [self.powershell_cmd, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', script_content]
             
             logger.debug(f'Executing interactive PowerShell command: {" ".join(cmd)}')
@@ -135,15 +137,7 @@ class PowerShellExecutor:
             output_lines = []
             error_lines = []
             
-            import select
-            import sys
-            
-            # For Windows, we need a different approach since select doesn't work with pipes
             if platform.system().lower() == 'windows':
-                import threading
-                import queue
-                import time
-                
                 stdout_queue = queue.Queue()
                 stderr_queue = queue.Queue()
                 
@@ -170,7 +164,6 @@ class PowerShellExecutor:
                 stderr_done = False
                 
                 while not (stdout_done and stderr_done):
-                    # Check stdout queue
                     try:
                         _, line = stdout_queue.get_nowait()
                         if line is None:
@@ -184,7 +177,6 @@ class PowerShellExecutor:
                     except queue.Empty:
                         pass
                     
-                    # Check stderr queue
                     try:
                         _, line = stderr_queue.get_nowait()
                         if line is None:
@@ -204,7 +196,6 @@ class PowerShellExecutor:
                         break
             
             else:
-                # Unix-like systems can use select
                 while True:
                     reads = [process.stdout.fileno(), process.stderr.fileno()]
                     ret = select.select(reads, [], [])
@@ -302,7 +293,6 @@ class PowerShellExecutor:
     def check_powershell_available(self):
         """Check if PowerShell is available on the system."""
         
-        # Try pwsh first (PowerShell Core)
         try:
             result = run_cmd(['pwsh', '-Command', 'echo "test"'], 
                             capture_output=True, timeout=10)
@@ -311,7 +301,6 @@ class PowerShellExecutor:
         except Exception:
             pass
         
-        # Try powershell.exe (Windows PowerShell)
         try:
             result = run_cmd(['powershell.exe', '-Command', 'echo "test"'], 
                             capture_output=True, timeout=10)
@@ -320,7 +309,6 @@ class PowerShellExecutor:
         except Exception:
             pass
         
-        # On Windows, also try just 'powershell' 
         if platform.system() == "Windows":
             try:
                 result = run_cmd(['powershell', '-Command', 'echo "test"'], 
@@ -432,7 +420,6 @@ class PowerShellExecutor:
         
         try:
             result = self.execute_script(auth_check_script)
-            # Parse the JSON output from PowerShell
             json_output = result.get('stdout', '').strip()
             
             if not json_output:
@@ -444,14 +431,12 @@ class PowerShellExecutor:
                     'PSVersion': 'Unknown'
                 }
             
-            # Extract JSON from the output (may have other text)
             json_start = json_output.find('{')
             json_end = json_output.rfind('}')
             
             if json_start != -1 and json_end != -1 and json_end > json_start:
                 json_content = json_output[json_start:json_end + 1]
                 
-                # Ensure we have a string for json.loads
                 if isinstance(json_content, bytes):
                     json_content = json_content.decode('utf-8')
                 
@@ -490,9 +475,7 @@ class PowerShellExecutor:
             }
 
     def connect_azure_account(self, tenant_id=None, subscription_id=None, device_code=False, service_principal=None):
-        """Execute Connect-AzAccount PowerShell command with cross-platform support."""
-        
-        # Check PowerShell availability first
+        """Execute Connect-AzAccount PowerShell command with cross-platform support."""        
         is_available, _ = self.check_powershell_availability()
         if not is_available:
             return {
@@ -500,7 +483,6 @@ class PowerShellExecutor:
                 'Error': f'PowerShell not available on this platform ({platform.system()}). Please install PowerShell Core for cross-platform support.'
             }
         
-        # For interactive authentication without parameters, use the enhanced method
         if not service_principal and not device_code and not tenant_id:
             result = self.interactive_connect_azure()
             if result['success']:
@@ -508,7 +490,6 @@ class PowerShellExecutor:
             else:
                 return {'Success': False, 'Error': result.get('error', 'Authentication failed')}
         
-        # Build Connect-AzAccount command with parameters
         connect_cmd = "Connect-AzAccount"
         
         if device_code:
@@ -537,7 +518,6 @@ class PowerShellExecutor:
             import subprocess
             import sys
             
-            # Prepare the command array to avoid shell injection
             cmd = [self.powershell_cmd, '-NoProfile', '-ExecutionPolicy', 'Bypass', '-Command', connect_cmd]
            
             process = subprocess.Popen(
@@ -549,7 +529,6 @@ class PowerShellExecutor:
                 universal_newlines=True
             )
             
-            # Stream output in real-time
             output_lines = []
             while True:
                 output = process.stdout.readline()
@@ -932,7 +911,7 @@ try {
             print(f"PowerShell Edition: {module_info.get('PSEdition', 'Unknown')}")
             
             if not module_info.get('AzAccountsAvailable', False):
-                print("\n❌ Azure PowerShell modules not found!")
+                print("\nAzure PowerShell modules not found!")
                 install_info = module_info.get('InstallationInstructions', {})
                 print(f"\n{install_info.get('Message', 'Installation required')}")
                 
@@ -952,17 +931,17 @@ try {
                 return {'success': False, 'error': 'Azure PowerShell modules not installed'}
             
             if not module_info.get('AzMigrateAvailable', False):
-                print("\n⚠️  Az.Migrate module not found. Installing...")
+                print("\nAz.Migrate module not found. Installing...")
                 install_script = "Install-Module -Name Az.Migrate -Force -AllowClobber"
                 install_result = self.execute_script(install_script)
                 if install_result['returncode'] != 0:
                     print(f"Failed to install Az.Migrate: {install_result['stderr']}")
                     return {'success': False, 'error': 'Failed to install Az.Migrate module'}
-                print("✅ Az.Migrate module installed successfully")
+                print("Az.Migrate module installed successfully")
             
             connect_script = "Connect-AzAccount"
             
-            print("\n🔐 Starting Azure authentication...")
+            print("\nStarting Azure authentication...")
             print("This will open a browser window for interactive authentication.")
             print("Please complete the sign-in process in your browser.")
             print("You may need to:")
@@ -974,28 +953,28 @@ try {
             result = self.execute_script_interactive(connect_script)
             
             if result['returncode'] == 0:
-                print("\n✅ Azure authentication successful!")
+                print("\nAzure authentication successful!")
                 
                 try:
                     context_info = self.get_azure_context()
                     if context_info.get('Success') and context_info.get('IsAuthenticated'):
-                        print(f"✅ Authenticated as: {context_info.get('AccountId', 'Unknown')}")
-                        print(f"✅ Active subscription: {context_info.get('SubscriptionName', 'Unknown')}")
-                        print(f"✅ Tenant ID: {context_info.get('TenantId', 'Unknown')}")
+                        print(f"Authenticated as: {context_info.get('AccountId', 'Unknown')}")
+                        print(f"Active subscription: {context_info.get('SubscriptionName', 'Unknown')}")
+                        print(f"Tenant ID: {context_info.get('TenantId', 'Unknown')}")
                 except:
                     pass
                 
                 return {'success': True, 'output': result['stdout']}
             else:
                 error_output = result.get('stderr', 'Unknown error')
-                print(f"\n❌ Authentication failed!")
+                print(f"\nAuthentication failed!")
                 if error_output:
                     print(f"Error details: {error_output}")
                 return {'success': False, 'error': error_output}
                 
         except Exception as e:
             error_msg = f"Failed to execute authentication: {str(e)}"
-            print(f"\n❌ {error_msg}")
+            print(f"\n{error_msg}")
             return {'success': False, 'error': error_msg}
 
 def get_powershell_executor():

@@ -36,7 +36,7 @@ def check_migration_prerequisites(cmd):
     try:
         ps_executor = get_powershell_executor()
         if ps_executor:
-            is_available, cmd_path = ps_executor.check_powershell_availability()
+            is_available, _ = ps_executor.check_powershell_availability()
             if is_available:
                 prereqs['powershell_available'] = True
                 try:
