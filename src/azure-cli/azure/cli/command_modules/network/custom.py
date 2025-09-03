@@ -4330,6 +4330,11 @@ class NICCreate(_NICCreate):
                          "/networkSecurityGroups/{}",
             ),
         )
+        args_schema.ip_config_name = AAZStrArg(
+            options=["--ip-config-name"],
+            help="Name of the Ip configuration",
+            required=False
+        )
         args_schema.extended_location._registered = False
         args_schema.ip_configurations._registered = False
         args_schema.nsg._registered = False
@@ -4343,7 +4348,7 @@ class NICCreate(_NICCreate):
             args.extended_location.name = args.edge_zone
             args.extended_location.type = "EdgeZone"
         ip_configuration = {
-            "name": "ipconfig1",
+            "name": args.ip_config_name,
             "private_ip_address": args.private_ip_address,
             "private_ip_address_version": args.private_ip_address_version,  # when address doesn't exist, version should be ipv4 (default)
             "private_ip_allocation_method": "Static" if has_value(args.private_ip_address) else "Dynamic",
