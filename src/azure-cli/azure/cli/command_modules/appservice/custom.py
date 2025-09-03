@@ -9,7 +9,7 @@ import time
 import re
 from xml.etree import ElementTree
 
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 from urllib.request import urlopen
 
 from binascii import hexlify
@@ -8421,7 +8421,7 @@ def _build_onedeploy_scm_url(params):
         deploy_url = deploy_url + '&ignorestack=' + str(params.should_ignore_stack)
 
     if params.target_path is not None:
-        deploy_url = deploy_url + '&path=' + params.target_path
+        deploy_url = deploy_url + '&path=' + quote(params.target_path)
 
     return deploy_url
 
