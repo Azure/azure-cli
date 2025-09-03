@@ -4333,6 +4333,7 @@ class NICCreate(_NICCreate):
         args_schema.ip_config_name = AAZStrArg(
             options=["--ip-config-name"],
             help="Name of the Ip configuration",
+            default="ipconfig1",
             required=False
         )
         args_schema.extended_location._registered = False
