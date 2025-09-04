@@ -159,6 +159,16 @@ def load_arguments(self, _):
         c.argument('module_name', 
                   help='Name of the PowerShell module to check. Default is Az.Migrate.')
 
+    with self.argument_context('migrate powershell update-modules') as c:
+        c.argument('modules', nargs='+',
+                  help='Space-separated list of PowerShell modules to update. If not specified, updates all Azure migration-related modules (Az.Accounts, Az.Profile, Az.Resources, Az.Migrate, Az.Storage, Az.RecoveryServices).')
+        c.argument('force', action='store_true',
+                  help='Force update even if modules are already installed and up to date.')
+        c.argument('include_dependencies', get_three_state_flag(),
+                  help='Include dependency modules during update. Default is true.')
+        c.argument('allow_prerelease', action='store_true',
+                  help='Allow installation of prerelease versions of modules.')
+
     with self.argument_context('migrate server get-discovered-servers-table') as c:
         c.argument('resource_group_name', options_list=['--resource-group', '-g'], help='Name of the resource group.', required=True)
         c.argument('project_name', help='Name of the Azure Migrate project.', required=True)

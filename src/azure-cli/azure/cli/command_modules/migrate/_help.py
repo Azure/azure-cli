@@ -223,6 +223,29 @@ helps['migrate powershell get-module'] = """
             az migrate powershell get-module --module-name "Az.Resources"
 """
 
+helps['migrate powershell update-modules'] = """
+    type: command
+    short-summary: Update Azure PowerShell modules to the latest version.
+    long-summary: |
+        Updates Azure PowerShell modules to their latest versions. This command installs or updates
+        the specified Azure PowerShell modules to ensure you have the latest features and security fixes.
+        By default, it updates all core Azure modules required for migration operations. Works cross-platform
+        with PowerShell Core on Linux/macOS and Windows PowerShell on Windows.
+    examples:
+        - name: Update all Azure migration-related modules
+          text: az migrate powershell update-modules
+        - name: Update specific modules
+          text: az migrate powershell update-modules --modules "Az.Migrate,Az.Accounts"
+        - name: Force update even if modules are current
+          text: az migrate powershell update-modules --force
+        - name: Update with prerelease versions
+          text: az migrate powershell update-modules --allow-prerelease
+        - name: Update a single module
+          text: az migrate powershell update-modules --modules "Az.Migrate"
+        - name: Update without dependencies (not recommended)
+          text: az migrate powershell update-modules --include-dependencies false
+"""
+
 helps['migrate setup-env'] = """
     type: command
     short-summary: Configure the system environment for migration operations.

@@ -333,7 +333,7 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
         # 2. Check PowerShell availability
         try:
             ps_executor = get_powershell_executor()
-            is_available, ps_cmd = ps_executor.check_powershell_availability()
+            is_available, _ = ps_executor.check_powershell_availability()
             
             if is_available:
                 setup_results['powershell_status'] = 'available'
@@ -1328,12 +1328,7 @@ def list_resource_groups(cmd, subscription_id=None):
     """
     
     try:
-        result = ps_executor.execute_script_interactive(list_rg_script)
-        return {
-            'message': 'Resource groups listed successfully. See detailed results above.',
-            'command_executed': 'Get-AzResourceGroup'
-        }
-        
+        ps_executor.execute_script_interactive(list_rg_script)
     except Exception as e:
         raise CLIError(f'Failed to list resource groups: {str(e)}')
 
@@ -1352,7 +1347,7 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
         $Module = Get-InstalledModule -Name "{module_name}" -ErrorAction SilentlyContinue
         
         if ($Module) {{
-            Write-Host "Module found:" -ForegroundColor Green
+            Write-Host "Module found:"
             Write-Host "   Name: $($Module.Name)" -ForegroundColor White
             Write-Host "   Version: $($Module.Version)" -ForegroundColor White
             Write-Host "   Author: $($Module.Author)" -ForegroundColor White
@@ -1367,8 +1362,8 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
                 'Description' = $Module.Description
             }}
         }} else {{
-            Write-Host "Module '{module_name}' is not installed" -ForegroundColor Red
-            Write-Host "Install with: Install-Module -Name {module_name} -Force" -ForegroundColor Yellow
+            Write-Host "Module '{module_name}' is not installed"
+            Write-Host "Install with: Install-Module -Name {module_name} -Force"
             Write-Host ""
             
             return @{{
@@ -1379,22 +1374,198 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
         }}
         
     }} catch {{
-        Write-Host "Error checking module:" -ForegroundColor Red
+        Write-Host "Error checking module:"
         Write-Host "   $($_.Exception.Message)" -ForegroundColor White
         throw
     }}
     """
     
     try:
-        result = ps_executor.execute_script_interactive(module_check_script)
-        return {
-            'message': f'PowerShell module check completed for {module_name}',
-            'command_executed': f'Get-InstalledModule -Name {module_name}',
-            'module_name': module_name
-        }
-        
+        ps_executor.execute_script_interactive(module_check_script) 
     except Exception as e:
         raise CLIError(f'Failed to check PowerShell module {module_name}: {str(e)}')
+
+
+def update_powershell_modules(cmd, modules=None, force=False, include_dependencies=True, allow_prerelease=False):
+    """
+    Update Azure PowerShell modules to the latest version.
+    This command installs or updates the specified Azure PowerShell modules.
+    
+    Args:
+        modules: List of specific modules to update (default: all Az modules)
+        force: Force update even if modules are already installed
+        include_dependencies: Include dependency modules during update
+        allow_prerelease: Allow installation of prerelease versions
+    """
+    ps_executor = get_powershell_executor()
+    
+    # Default modules for Azure Migrate functionality
+    if not modules:
+        modules = [
+            'Az.Accounts',
+            'Az.Profile', 
+            'Az.Resources',
+            'Az.Migrate',
+            'Az.Storage',
+            'Az.RecoveryServices'
+        ]
+    elif isinstance(modules, str):
+        modules = [modules]
+    
+    update_script = f"""
+    try {{
+        Write-Host "Azure PowerShell Module Update Utility" -ForegroundColor Cyan
+        Write-Host "=" * 50 -ForegroundColor Cyan
+        Write-Host ""
+        
+        # Check PowerShell execution policy
+        $policy = Get-ExecutionPolicy -Scope CurrentUser
+        if ($policy -eq 'Restricted') {{
+            Write-Host "Setting PowerShell execution policy to RemoteSigned for current user..."
+            Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+        }}
+        
+        # Ensure PowerShell Gallery is trusted
+        Write-Host "Configuring PowerShell Gallery as trusted repository..."
+        Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+        
+        # Check if PowerShellGet is up to date
+        Write-Host "Checking PowerShellGet module..."
+        $psGet = Get-Module -ListAvailable PowerShellGet | Sort-Object Version -Descending | Select-Object -First 1
+        if ($psGet.Version -lt [version]"2.2.5") {{
+            Write-Host "Updating PowerShellGet module..."
+            Install-Module -Name PowerShellGet -Force -AllowClobber -Scope CurrentUser
+            Write-Host "Please restart PowerShell and run this command again for best results."
+        }}
+        
+        # Update each module
+        $modules = @({', '.join([f'"{module}"' for module in modules])})
+        $updateResults = @()
+        
+        foreach ($moduleName in $modules) {{
+            Write-Host "Processing module: $moduleName" -ForegroundColor Cyan
+            Write-Host "-" * 30 -ForegroundColor Gray
+            
+            try {{
+                # Check if module is already installed
+                $installedModule = Get-InstalledModule -Name $moduleName -ErrorAction SilentlyContinue
+                $availableModule = Find-Module -Name $moduleName -ErrorAction SilentlyContinue
+                
+                if (-not $availableModule) {{
+                    Write-Host "   Module '$moduleName' not found in PowerShell Gallery"
+                    $updateResults += @{{
+                        Module = $moduleName
+                        Status = "NotFound"
+                        Error = "Module not found in PowerShell Gallery"
+                    }}
+                    continue
+                }}
+                
+                $installParams = @{{
+                    Name = $moduleName
+                    Scope = 'CurrentUser'
+                    Force = ${str(force).lower()}
+                    AllowClobber = $true
+                }}
+                
+                if ({str(allow_prerelease).lower()}) {{
+                    $installParams['AllowPrerelease'] = $true
+                }}
+                
+                if ($installedModule) {{
+                    Write-Host "   Current version: $($installedModule.Version)" -ForegroundColor White
+                    Write-Host "   Available version: $($availableModule.Version)" -ForegroundColor White
+                    
+                    if ($installedModule.Version -lt $availableModule.Version -or {str(force).lower()}) {{
+                        Write-Host "   Updating module..."
+                        Install-Module @installParams
+                        
+                        # Verify update
+                        $newModule = Get-InstalledModule -Name $moduleName | Sort-Object Version -Descending | Select-Object -First 1
+                        Write-Host "   Successfully updated to version: $($newModule.Version)"
+                        
+                        $updateResults += @{{
+                            Module = $moduleName
+                            Status = "Updated"
+                            OldVersion = $installedModule.Version.ToString()
+                            NewVersion = $newModule.Version.ToString()
+                        }}
+                    }} else {{
+                        Write-Host "   Module is already up to date"
+                        $updateResults += @{{
+                            Module = $moduleName
+                            Status = "UpToDate"
+                            Version = $installedModule.Version.ToString()
+                        }}
+                    }}
+                }} else {{
+                    Write-Host "   Installing module..."
+                    Install-Module @installParams
+                    
+                    # Verify installation
+                    $newModule = Get-InstalledModule -Name $moduleName
+                    Write-Host "   Successfully installed version: $($newModule.Version)"
+                    
+                    $updateResults += @{{
+                        Module = $moduleName
+                        Status = "Installed"
+                        Version = $newModule.Version.ToString()
+                    }}
+                }}
+                
+            }} catch {{
+                Write-Host "   Error processing module '$moduleName': $($_.Exception.Message)"
+                $updateResults += @{{
+                    Module = $moduleName
+                    Status = "Error"
+                    Error = $_.Exception.Message
+                }}
+            }}
+            
+            Write-Host ""
+        }}
+        
+        # Summary
+        Write-Host "Update Summary:" -ForegroundColor Cyan
+        
+        $updated = ($updateResults | Where-Object {{ $_.Status -eq "Updated" }}).Count
+        $installed = ($updateResults | Where-Object {{ $_.Status -eq "Installed" }}).Count
+        $upToDate = ($updateResults | Where-Object {{ $_.Status -eq "UpToDate" }}).Count
+        $errors = ($updateResults | Where-Object {{ $_.Status -eq "Error" -or $_.Status -eq "NotFound" }}).Count
+        
+        Write-Host "   Updated: $updated modules"
+        Write-Host "   Newly Installed: $installed modules"
+        Write-Host "   Already Up-to-Date: $upToDate modules"
+        Write-Host "   Errors: $errors modules"
+        Write-Host ""
+        
+        if ($errors -eq 0) {{
+            Write-Host "All Azure PowerShell modules are now up to date!"
+        }} else {{
+            Write-Host "Some modules encountered errors. Check the output above for details."
+        }}
+        
+        # Return results
+        return @{{
+            Success = ($errors -eq 0)
+            UpdatedModules = $updated
+            InstalledModules = $installed
+            UpToDateModules = $upToDate
+            ErrorCount = $errors
+            Results = $updateResults
+        }}
+        
+    }} catch {{
+        Write-Host "Error during module update process:"
+        Write-Host "   $($_.Exception.Message)" -ForegroundColor White
+        throw
+    }}
+    """
+    
+    try:
+        ps_executor.execute_script_interactive(update_script)
+    except Exception as e:
+        raise CLIError(f'Failed to update PowerShell modules: {str(e)}')
 
 
 def get_local_replication_job(cmd, resource_group_name, project_name, job_id=None, input_object=None, subscription_id=None):
@@ -1425,14 +1596,14 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
     try {{
         Write-Host "Getting Local Replication Job Details..." -ForegroundColor Cyan
         Write-Host ""
-        Write-Host "Configuration:" -ForegroundColor Yellow
+        Write-Host "Configuration:"
         Write-Host "   Resource Group: {resource_group_name}" -ForegroundColor White
         Write-Host "   Project Name: {project_name}" -ForegroundColor White
         Write-Host "   Job ID: {job_id or 'All jobs'}" -ForegroundColor White
         Write-Host ""
         
         # First, let's check what parameters are available for Get-AzMigrateLocalJob
-        Write-Host "Checking cmdlet parameters..." -ForegroundColor Yellow
+        Write-Host "Checking cmdlet parameters..."
         $cmdletInfo = Get-Command Get-AzMigrateLocalJob -ErrorAction SilentlyContinue
         if ($cmdletInfo) {{
             Write-Host "Available parameters:" -ForegroundColor Cyan
@@ -1451,18 +1622,18 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
             # Method 1: Try with -ID parameter (capital ID based on cmdlet info)
             try {{
                 $Job = Get-AzMigrateLocalJob -ResourceGroupName "{resource_group_name}" -ProjectName "{project_name}" -ID "{job_id}"
-                Write-Host "Found job using -ID parameter" -ForegroundColor Green
+                Write-Host "Found job using -ID parameter"
             }} catch {{
-                Write-Host "-ID parameter failed: $($_.Exception.Message)" -ForegroundColor Yellow
+                Write-Host "-ID parameter failed: $($_.Exception.Message)"
             }}
             
             # Method 2: Try with -Name parameter if -ID failed
             if (-not $Job) {{
                 try {{
                     $Job = Get-AzMigrateLocalJob -ResourceGroupName "{resource_group_name}" -ProjectName "{project_name}" -Name "{job_id}"
-                    Write-Host "Found job using -Name parameter" -ForegroundColor Green
+                    Write-Host "Found job using -Name parameter"
                 }} catch {{
-                    Write-Host "-Name parameter failed: $($_.Exception.Message)" -ForegroundColor Yellow
+                    Write-Host "-Name parameter failed: $($_.Exception.Message)"
                 }}
             }}
             
@@ -1477,17 +1648,17 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
                         $Job = $AllJobs | Where-Object {{ $_.Id -like "*{job_id}*" -or $_.Name -like "*{job_id}*" }}
                         
                         if ($Job) {{
-                            Write-Host "Found job by filtering all jobs" -ForegroundColor Green
+                            Write-Host "Found job by filtering all jobs"
                         }} else {{
-                            Write-Host "No job found with ID containing: {job_id}" -ForegroundColor Yellow
+                            Write-Host "No job found with ID containing: {job_id}"
                             Write-Host "Available jobs:" -ForegroundColor Cyan
                             $AllJobs | ForEach-Object {{ Write-Host "   - $($_.Id) ($($_.Name))" -ForegroundColor White }}
                         }}
                     }} else {{
-                        Write-Host "No jobs found in project" -ForegroundColor Yellow
+                        Write-Host "No jobs found in project"
                     }}
                 }} catch {{
-                    Write-Host "Failed to list all jobs: $($_.Exception.Message)" -ForegroundColor Yellow
+                    Write-Host "Failed to list all jobs: $($_.Exception.Message)"
                 }}
             }}
         }} else {{
@@ -1497,9 +1668,9 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
         }}
         
         if ($Job) {{
-            Write-Host "Job found!" -ForegroundColor Green
+            Write-Host "Job found!"
             Write-Host ""
-            Write-Host "Job Details:" -ForegroundColor Yellow
+            Write-Host "Job Details:"
             
             if ($Job -is [array] -and $Job.Count -gt 1) {{
                 Write-Host "   Found multiple jobs ($($Job.Count))" -ForegroundColor White
@@ -1537,10 +1708,10 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
         
     }} catch {{
         Write-Host ""
-        Write-Host "Failed to get job details:" -ForegroundColor Red
+        Write-Host "Failed to get job details:"
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
-        Write-Host "Troubleshooting:" -ForegroundColor Yellow
+        Write-Host "Troubleshooting:"
         Write-Host "   1. Verify the job ID is correct" -ForegroundColor White
         Write-Host "   2. Check if the job exists in the current project" -ForegroundColor White
         Write-Host "   3. Ensure you have access to the job" -ForegroundColor White
@@ -1550,16 +1721,7 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
     """
     
     try:
-        result = ps_executor.execute_script_interactive(get_job_script)
-        return {
-            'message': 'Local replication job details retrieved successfully. See detailed results above.',
-            'command_executed': f'Get-AzMigrateLocalJob',
-            'parameters': {
-                'JobId': job_id,
-                'InputObject': input_object is not None
-            }
-        }
-        
+        ps_executor.execute_script_interactive(get_job_script)
     except Exception as e:
         raise CLIError(f'Failed to get local replication job: {str(e)}')
 
@@ -1584,7 +1746,7 @@ def initialize_local_replication_infrastructure(cmd, resource_group_name, projec
         
     }} catch {{
         Write-Host ""
-        Write-Host "Failed to initialize local replication infrastructure:" -ForegroundColor Red
+        Write-Host "Failed to initialize local replication infrastructure:"
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
         throw
@@ -1620,9 +1782,9 @@ def list_resource_groups(cmd, subscription_id=None):
         # Get all resource groups
         $ResourceGroups = Get-AzResourceGroup
         
-        Write-Host "Found $($ResourceGroups.Count) resource group(s)" -ForegroundColor Green
+        Write-Host "Found $($ResourceGroups.Count) resource group(s)"
         Write-Host ""
-        Write-Host "Resource Groups:" -ForegroundColor Yellow
+        Write-Host "Resource Groups:"
         
         $ResourceGroups | Format-Table ResourceGroupName, Location, ProvisioningState -AutoSize
         
@@ -1637,7 +1799,7 @@ def list_resource_groups(cmd, subscription_id=None):
         
     }} catch {{
         Write-Host ""
-        Write-Host "Failed to list resource groups:" -ForegroundColor Red
+        Write-Host "Failed to list resource groups:"
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
         throw
@@ -1645,12 +1807,7 @@ def list_resource_groups(cmd, subscription_id=None):
     """
     
     try:
-        result = ps_executor.execute_script_interactive(list_rg_script)
-        return {
-            'message': 'Resource groups listed successfully. See detailed results above.',
-            'command_executed': 'Get-AzResourceGroup'
-        }
-        
+        ps_executor.execute_script_interactive(list_rg_script)
     except Exception as e:
         raise CLIError(f'Failed to list resource groups: {str(e)}')
 
@@ -1669,7 +1826,7 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
         $Module = Get-InstalledModule -Name "{module_name}" -ErrorAction SilentlyContinue
         
         if ($Module) {{
-            Write-Host "Module found:" -ForegroundColor Green
+            Write-Host "Module found:"
             Write-Host "   Name: $($Module.Name)" -ForegroundColor White
             Write-Host "   Version: $($Module.Version)" -ForegroundColor White
             Write-Host "   Author: $($Module.Author)" -ForegroundColor White
@@ -1684,8 +1841,8 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
                 'Description' = $Module.Description
             }}
         }} else {{
-            Write-Host "Module '{module_name}' is not installed" -ForegroundColor Red
-            Write-Host "Install with: Install-Module -Name {module_name} -Force" -ForegroundColor Yellow
+            Write-Host "Module '{module_name}' is not installed"
+            Write-Host "Install with: Install-Module -Name {module_name} -Force"
             Write-Host ""
             
             return @{{
@@ -1696,20 +1853,14 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
         }}
         
     }} catch {{
-        Write-Host "Error checking module:" -ForegroundColor Red
+        Write-Host "Error checking module:"
         Write-Host "   $($_.Exception.Message)" -ForegroundColor White
         throw
     }}
     """
     
     try:
-        result = ps_executor.execute_script_interactive(module_check_script)
-        return {
-            'message': f'PowerShell module check completed for {module_name}',
-            'command_executed': f'Get-InstalledModule -Name {module_name}',
-            'module_name': module_name
-        }
-        
+        ps_executor.execute_script_interactive(module_check_script)
     except Exception as e:
         raise CLIError(f'Failed to check PowerShell module {module_name}: {str(e)}')
 
@@ -1758,18 +1909,18 @@ def create_azstackhci_vm_replication(cmd, vm_name, target_vm_name, resource_grou
         $Result = New-AzStackHCIVMReplication {' '.join(params)}
         
         if ($Result) {{
-            Write-Host "VM replication created successfully!" -ForegroundColor Green
+            Write-Host "VM replication created successfully!"
             Write-Host ""
-            Write-Host "Replication Details:" -ForegroundColor Yellow
+            Write-Host "Replication Details:"
             Write-Host "===================" -ForegroundColor Gray
             $Result | Format-List
         }} else {{
-            Write-Host "Failed to create VM replication" -ForegroundColor Red
+            Write-Host "Failed to create VM replication"
         }}
         
     }} catch {{
         Write-Host ""
-        Write-Host "Failed to create Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "Failed to create Azure Stack HCI VM replication:"
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
         throw
@@ -1820,18 +1971,18 @@ def set_azstackhci_vm_replication(cmd, vm_name, resource_group_name,
         $Result = Set-AzStackHCIVMReplication {' '.join(params)}
         
         if ($Result) {{
-            Write-Host "VM replication settings updated successfully!" -ForegroundColor Green
+            Write-Host "VM replication settings updated successfully!"
             Write-Host ""
-            Write-Host "Updated Settings:" -ForegroundColor Yellow
+            Write-Host "Updated Settings:"
             Write-Host "================" -ForegroundColor Gray
             $Result | Format-List
         }} else {{
-            Write-Host "Failed to update VM replication settings" -ForegroundColor Red
+            Write-Host "Failed to update VM replication settings"
         }}
         
     }} catch {{
         Write-Host ""
-        Write-Host "Failed to update Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "Failed to update Azure Stack HCI VM replication:"
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
         throw
@@ -1876,15 +2027,15 @@ def remove_azstackhci_vm_replication(cmd, vm_name, resource_group_name, force=Fa
         {"if ($confirmation -eq 'y' -or $confirmation -eq 'Y') {" if not force else ""}
             $Result = Remove-AzStackHCIVMReplication {' '.join(params)}
             
-            Write-Host "VM replication removed successfully!" -ForegroundColor Green
+            Write-Host "VM replication removed successfully!"
             Write-Host ""
         {"} else {" if not force else ""}
-        {"    Write-Host 'Operation cancelled by user' -ForegroundColor Yellow" if not force else ""}
+        {"    Write-Host 'Operation cancelled by user'" if not force else ""}
         {"}" if not force else ""}
         
     }} catch {{
         Write-Host ""
-        Write-Host "Failed to remove Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "Failed to remove Azure Stack HCI VM replication:"
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host ""
         throw
@@ -1922,9 +2073,9 @@ def get_azstackhci_vm_replication(cmd, vm_name=None, resource_group_name=None):
         $Replications = Get-AzStackHCIVMReplication {' '.join(params)}
         
         if ($Replications) {{
-            Write-Host "VM replication details retrieved successfully!" -ForegroundColor Green
+            Write-Host "VM replication details retrieved successfully!"
             Write-Host ""
-            Write-Host "Replication Status:" -ForegroundColor Yellow
+            Write-Host "Replication Status:"
             Write-Host "==================" -ForegroundColor Gray
             
             if ($Replications -is [array]) {{
@@ -1943,12 +2094,12 @@ def get_azstackhci_vm_replication(cmd, vm_name=None, resource_group_name=None):
             }}
             
         }} else {{
-            Write-Host "ℹ️ No VM replications found" -ForegroundColor Yellow
+            Write-Host "ℹ️ No VM replications found"
         }}
         
     }} catch {{
         Write-Host ""
-        Write-Host "Failed to get Azure Stack HCI VM replication:" -ForegroundColor Red
+        Write-Host "Failed to get Azure Stack HCI VM replication:"
         Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
         Write-Host "   Platform: $($PSVersionTable.Platform)" -ForegroundColor Gray
         Write-Host ""

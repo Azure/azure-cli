@@ -80,6 +80,7 @@ def load_command_table(self, _):
     # PowerShell Module Management Commands  
     with self.command_group('migrate powershell') as g:
         g.custom_command('check-module', 'check_powershell_module')
+        g.custom_command('update-modules', 'update_powershell_modules')
 
     # Infrastructure management
     with self.command_group('migrate infrastructure') as g:
