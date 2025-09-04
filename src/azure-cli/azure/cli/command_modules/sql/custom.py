@@ -3116,7 +3116,7 @@ def update_long_term_retention(
 
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')
- 
+
     if time_based_immutability and time_based_immutability.lower() == "true":
         time_based_immutability = "Enabled"
 
