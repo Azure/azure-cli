@@ -3116,6 +3116,12 @@ def update_long_term_retention(
 
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')
+ 
+    if time_based_immutability and time_based_immutability.lower() == "true":
+        time_based_immutability = "Enabled"
+
+    if time_based_immutability and time_based_immutability.lower() == "false":
+        time_based_immutability = "Disabled"
 
     if time_based_immutability and time_based_immutability.lower() == "enabled":
         if not yes:
@@ -3124,12 +3130,6 @@ def update_long_term_retention(
             Do you want to proceed?""")
             if not confirmation:
                 return
-
-    if time_based_immutability.lower() == "true":
-        time_based_immutability = "Enabled"
-
-    if time_based_immutability.lower() == "false":
-        time_based_immutability = "Disabled"
 
     if time_based_immutability_mode:
         if not time_based_immutability or time_based_immutability.lower() != "enabled":
