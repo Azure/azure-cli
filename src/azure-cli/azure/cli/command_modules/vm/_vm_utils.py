@@ -133,7 +133,7 @@ def list_sku_info(cli_ctx, location=None):
 
 
 # pylint: disable=line-too-long
-def is_sku_available(cmd, sku_info, zone):
+def is_sku_available(sku_info, zone):
     """
     The SKU is unavailable in the following cases:
     1. regional restriction and the region is restricted
