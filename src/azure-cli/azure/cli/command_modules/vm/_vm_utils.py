@@ -147,10 +147,6 @@ def is_sku_available(cmd, sku_info, zone):
         return is_available
     for restriction in sku_info['restrictions']:
         if restriction.get('reasonCode', '') == 'NotAvailableForSubscription':
-            # The attribute location_info is not supported in versions 2017-03-30 and earlier
-            if cmd.supported_api_version(max_api='2017-03-30'):
-                is_available = False
-                break
             if restriction['type'] == 'Zone' and not (
                     set(sku_info['locationInfo'][0].get('zones', []) or []) - set(restriction['restrictionInfo'].get('zones', []) or [])):
                 is_restrict_zone = True
