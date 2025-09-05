@@ -787,7 +787,7 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
                                           parameters=parameters)
                 break
             except HttpResponseError as ex:
-                if 'role assignment already exists' in ex.message:
+                if ex.error.code == 'RoleAssignmentExists':
                     logger.info('Role assignment already exists')
                     break
                 if retry_time < retry_times and ' does not exist in the directory ' in ex.message:

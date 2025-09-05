@@ -84,6 +84,12 @@ class Create(AAZCommand):
             help="A reference to the source virtual network using this nat gateway resource.",
         )
         cls._build_args_sub_resource_create(_args_schema.source_vnet)
+        _args_schema.sku = AAZStrArg(
+            options=["--sku"],
+            help="Name of Nat Gateway SKU.",
+            default="Standard",
+            enum={"Standard": "Standard", "StandardV2": "StandardV2"},
+        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             help="Space-separated tags: key[=value] [key[=value] ...].",
@@ -126,20 +132,6 @@ class Create(AAZCommand):
         zone.Element = AAZStrArg()
 
         # define Arg Group "Parameters"
-
-        _args_schema = cls._args_schema
-        _args_schema.sku = AAZObjectArg(
-            options=["--sku"],
-            arg_group="Parameters",
-            help="The nat gateway SKU.",
-        )
-
-        sku = cls._args_schema.sku
-        sku.name = AAZStrArg(
-            options=["name"],
-            help="Name of Nat Gateway SKU.",
-            enum={"Standard": "Standard", "StandardV2": "StandardV2"},
-        )
         return cls._args_schema
 
     _args_sub_resource_create = None
@@ -268,7 +260,7 @@ class Create(AAZCommand):
             )
             _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("sku", AAZObjectType, ".sku")
+            _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
             _builder.set_prop("zones", AAZListType, ".zone")
 
@@ -307,7 +299,7 @@ class Create(AAZCommand):
 
             sku = _builder.get(".sku")
             if sku is not None:
-                sku.set_prop("name", AAZStrType, ".name")
+                sku.set_prop("name", AAZStrType, ".sku")
 
             tags = _builder.get(".tags")
             if tags is not None:
