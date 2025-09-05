@@ -24,6 +24,7 @@ def load_command_table(self, _):
     with self.command_group('migrate') as g:
         g.custom_command('check-prerequisites', 'check_migration_prerequisites')
         g.custom_command('setup-env', 'setup_migration_environment')
+        g.custom_command('verify-setup', 'verify_migrate_setup')
 
     # Server discovery and replication commands
     with self.command_group('migrate server') as g:

@@ -37,7 +37,8 @@ class PowerShellExecutor:
                     result = run_cmd([cmd, '-Command', '$PSVersionTable.PSVersion.ToString()'], 
                                     capture_output=True, timeout=10)
                     if result.returncode == 0:
-                        logger.info(f'Found Windows PowerShell: {result.stdout.strip()}')
+                        stdout_str = result.stdout.decode('utf-8') if isinstance(result.stdout, bytes) else result.stdout
+                        logger.info(f'Found Windows PowerShell: {stdout_str.strip()}')
                         return cmd
                 except Exception:
                     logger.debug(f'PowerShell command {cmd} not found')
@@ -47,7 +48,8 @@ class PowerShellExecutor:
                     result = run_cmd([cmd, '-Command', '$PSVersionTable.PSVersion.ToString()'], 
                                     capture_output=True, timeout=10)
                     if result.returncode == 0:
-                        logger.info(f'Found PowerShell Core: {result.stdout.strip()}')
+                        stdout_str = result.stdout.decode('utf-8') if isinstance(result.stdout, bytes) else result.stdout
+                        logger.info(f'Found PowerShell Core: {stdout_str.strip()}')
                         return cmd
                 except Exception:
                     logger.debug(f'PowerShell command {cmd} not found')
@@ -101,8 +103,8 @@ class PowerShellExecutor:
                 raise CLIError(error_msg)
             
             return {
-                'stdout': result.stdout,
-                'stderr': result.stderr,
+                'stdout': result.stdout.decode('utf-8') if isinstance(result.stdout, bytes) else result.stdout,
+                'stderr': result.stderr.decode('utf-8') if isinstance(result.stderr, bytes) else result.stderr,
                 'returncode': result.returncode
             }
             
@@ -420,7 +422,13 @@ class PowerShellExecutor:
         
         try:
             result = self.execute_script(auth_check_script)
-            json_output = result.get('stdout', '').strip()
+            json_output = result.get('stdout', '')
+            
+            # Ensure json_output is a string, not bytes
+            if isinstance(json_output, bytes):
+                json_output = json_output.decode('utf-8')
+            
+            json_output = json_output.strip()
             
             if not json_output:
                 return {

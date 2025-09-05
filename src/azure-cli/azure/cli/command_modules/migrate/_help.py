@@ -32,6 +32,8 @@ helps['migrate'] = """
           text: az migrate check-prerequisites
         - name: Set up migration environment
           text: az migrate setup-env
+        - name: Verify Azure Migrate project setup
+          text: az migrate verify-setup --resource-group myRG --project-name myProject
         - name: List all discovered servers
           text: az migrate server list-discovered --resource-group myRG --project-name myProject
         - name: Create Azure Local replication
@@ -260,6 +262,26 @@ helps['migrate setup-env'] = """
           text: az migrate setup-env --install-powershell
         - name: Basic environment setup
           text: az migrate setup-env
+"""
+
+helps['migrate verify-setup'] = """
+    type: command
+    short-summary: Verify Azure Migrate project setup and troubleshoot common issues.
+    long-summary: |
+        Performs comprehensive verification of Azure Migrate project configuration including:
+        - Resource group accessibility and permissions
+        - Azure Migrate project existence and configuration
+        - Migration solutions setup (especially Server Discovery)
+        - PowerShell module availability
+        - End-to-end discovery functionality testing
+        
+        This command helps diagnose and troubleshoot common setup issues before attempting
+        server discovery or migration operations.
+    examples:
+        - name: Verify Azure Migrate setup for a specific project
+          text: az migrate verify-setup --resource-group myRG --project-name myProject
+        - name: Diagnose server discovery issues
+          text: az migrate verify-setup -g saifaldinali-vmw-ga-bb-rg --project-name saifaldinali-vmw-ga-bb
 """
 
 # Help documentation for Azure CLI equivalents to PowerShell Az.Migrate commands

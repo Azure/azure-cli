@@ -29,6 +29,40 @@ Verify that the Azure Migrate PowerShell module is installed and version is 2.9.
 az migrate powershell check-module --module-name Az.Migrate
 ```
 
+### Update PowerShell modules to latest version
+
+Update Azure PowerShell modules to ensure you have the latest features and security fixes:
+
+```bash
+# Update all Azure PowerShell modules to latest version
+az migrate powershell update-modules
+
+# Update with force (to update even if already latest)
+az migrate powershell update-modules --force
+
+# Update only specific modules
+az migrate powershell update-modules --modules "Az.Migrate" "Az.Accounts"
+
+# Update and allow prerelease versions
+az migrate powershell update-modules --allow-prerelease
+```
+
+### Verify Azure Migrate project setup
+
+Before running migration commands, verify your Azure Migrate project is properly configured:
+
+```bash
+# Verify project setup and diagnose issues
+az migrate verify-setup --resource-group "myResourceGroup" --project-name "myMigrateProject"
+
+# This command checks:
+# - Resource group accessibility
+# - Azure Migrate project existence  
+# - Migration solutions configuration
+# - PowerShell module availability
+# - End-to-end discovery functionality
+```
+
 ### Sign in to your Azure subscription
 
 Use the following command to sign in:

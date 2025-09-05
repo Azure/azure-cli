@@ -37,6 +37,13 @@ def load_arguments(self, _):
         c.argument('check_only', action='store_true',
                   help='Only check environment requirements without making changes.')
 
+    # Verify setup arguments  
+    with self.argument_context('migrate verify-setup') as c:
+        c.argument('resource_group_name', resource_group_name_type,
+                  help='Name of the resource group containing the Azure Migrate project.')
+        c.argument('project_name', project_name_type,
+                  help='Name of the Azure Migrate project to verify.')
+
     with self.argument_context('migrate project') as c:
         c.argument('resource_group_name', resource_group_name_type)
         c.argument('project_name', project_name_type)
