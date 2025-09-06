@@ -13,7 +13,7 @@ class TestBatchTransformers(unittest.TestCase):
 
     def test_transform_object_empty_list(self):
         fake_transformer = Transformer({"testing": "potato"})
-        result = fake_transformer.transform_result([])
+        result = fake_transformer.transform_result([]) 
         self.assertEqual(result, [])
     
     def test_transform_object(self):
