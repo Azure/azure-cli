@@ -483,6 +483,7 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
             logger.debug("HTTP content is being overwritten to preserve template whitepace accurately. The request body logging may not accurately represent this.")
 
 
+# pylint: disable=unused-argument
 def deploy_arm_template_at_subscription_scope(cmd,
                                               template_file=None, template_uri=None, parameters=None,
                                               deployment_name=None, deployment_location=None,
@@ -519,6 +520,7 @@ def deploy_arm_template_at_subscription_scope(cmd,
                                                       validation_level=validation_level)
 
 
+# pylint: disable=unused-argument
 def validate_arm_template_at_subscription_scope(cmd,
                                                 template_file=None, template_uri=None, parameters=None,
                                                 deployment_name=None, deployment_location=None,
@@ -566,6 +568,7 @@ def _deploy_arm_template_at_subscription_scope(cmd,
     return sdk_no_wait(no_wait, mgmt_client.begin_create_or_update_at_subscription_scope, deployment_name, deployment)
 
 
+# pylint: disable=unused-argument
 def deploy_arm_template_at_resource_group(cmd,
                                           resource_group_name=None,
                                           template_file=None, template_uri=None, parameters=None,
@@ -606,6 +609,7 @@ def deploy_arm_template_at_resource_group(cmd,
                                                   validation_level=validation_level)
 
 
+# pylint: disable=unused-argument
 def validate_arm_template_at_resource_group(cmd,
                                             resource_group_name=None,
                                             template_file=None, template_uri=None, parameters=None,
@@ -657,6 +661,7 @@ def _deploy_arm_template_at_resource_group(cmd,
     return sdk_no_wait(no_wait, mgmt_client.begin_create_or_update, resource_group_name, deployment_name, deployment)
 
 
+# pylint: disable=unused-argument
 def deploy_arm_template_at_management_group(cmd,
                                             management_group_id=None,
                                             template_file=None, template_uri=None, parameters=None,
@@ -696,6 +701,7 @@ def deploy_arm_template_at_management_group(cmd,
                                                     mode=mode, validation_level=validation_level)
 
 
+# pylint: disable=unused-argument
 def validate_arm_template_at_management_group(cmd,
                                               management_group_id=None,
                                               template_file=None, template_uri=None, parameters=None,
@@ -747,6 +753,7 @@ def _deploy_arm_template_at_management_group(cmd,
                        deployment_name, deployment)
 
 
+# pylint: disable=unused-argument
 def deploy_arm_template_at_tenant_scope(cmd,
                                         template_file=None, template_uri=None, parameters=None,
                                         deployment_name=None, deployment_location=None,
@@ -783,6 +790,7 @@ def deploy_arm_template_at_tenant_scope(cmd,
                                                 validation_level=validation_level)
 
 
+# pylint: disable=unused-argument
 def validate_arm_template_at_tenant_scope(cmd,
                                           template_file=None, template_uri=None, parameters=None,
                                           deployment_name=None, deployment_location=None,
@@ -1353,6 +1361,7 @@ def _build_stacks_confirmation_string(rcf, yes, name, stack_scope, delete_resour
     return build_confirmation_string
 
 
+# pylint: disable=unused-argument
 def _prepare_stacks_templates_and_parameters(cmd, rcf, deployment_scope, deployment_stack_model, template_file, template_spec, template_uri, parameters, query_string):
     t_spec, t_uri = None, None
     template_obj = None
