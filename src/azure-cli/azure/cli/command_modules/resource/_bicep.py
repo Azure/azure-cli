@@ -30,6 +30,13 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.util import should_disable_connection_verify
 
+from ._bicep_config import (
+    get_check_version_config,
+    get_use_binary_from_path_config,
+    remove_use_binary_from_path_config,
+    set_use_binary_from_path_config
+)
+
 # See: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 _semver_pattern = r"(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?"  # pylint: disable=line-too-long
 
@@ -78,7 +85,7 @@ def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
     installed = os.path.isfile(installation_path)
     _logger.debug("Bicep CLI installed: %s.", installed)
 
-    check_version = cli_ctx.config.getboolean("bicep", "check_version", True)
+    check_version = get_check_version_config(cli_ctx)
 
     if not installed:
         if auto_install:
@@ -108,6 +115,16 @@ def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
 
 
 def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, stdout=True):
+    if _use_binary_from_path(cli_ctx):
+        from shutil import which
+
+        if which("bicep") is None:
+            raise ValidationError(
+                'Could not find the "bicep" executable on PATH. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".'  # pylint: disable=line-too-long
+            )
+
+        return
+
     system = platform.system()
     machine = platform.machine()
     installation_path = _get_bicep_installation_path(system)
@@ -122,8 +139,7 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
             return
 
     installation_dir = os.path.dirname(installation_path)
-    if not os.path.exists(installation_dir):
-        os.makedirs(installation_dir)
+    os.makedirs(installation_dir, exist_ok=True)
 
     try:
         release_tag = release_tag if release_tag else get_bicep_latest_release_tag()
@@ -146,10 +162,10 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
 
         os.chmod(installation_path, os.stat(installation_path).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
 
-        use_binary_from_path = cli_ctx.config.get("bicep", "use_binary_from_path", "if_found_in_ci").lower()
+        use_binary_from_path = get_use_binary_from_path_config(cli_ctx)
         if use_binary_from_path not in ["0", "no", "false", "off"]:
             _logger.warning("The configuration value of bicep.use_binary_from_path has been set to 'false'.")
-            cli_ctx.config.set_value("bicep", "use_binary_from_path", "false")
+            set_use_binary_from_path_config(cli_ctx, "false")
 
         if stdout:
             print(f'Successfully installed Bicep CLI to "{installation_path}".')
@@ -171,10 +187,10 @@ def remove_bicep_installation(cli_ctx):
     if os.path.exists(_bicep_version_check_file_path):
         os.remove(_bicep_version_check_file_path)
 
-    use_binary_from_path = cli_ctx.config.get("bicep", "use_binary_from_path", "if_found_in_ci").lower()
+    use_binary_from_path = get_use_binary_from_path_config(cli_ctx)
     if use_binary_from_path in ["0", "no", "false", "off"]:
         _logger.warning("The configuration value of bicep.use_binary_from_path has been reset")
-        cli_ctx.config.remove_option("bicep", "use_binary_from_path")
+        remove_use_binary_from_path_config(cli_ctx)
 
 
 def is_bicep_file(file_path):
@@ -204,10 +220,14 @@ def get_bicep_latest_release_tag():
         raise ClientRequestError(f"Error while attempting to retrieve the latest Bicep version: {err}.")
 
 
-def bicep_version_greater_than_or_equal_to(version):
-    system = platform.system()
-    installation_path = _get_bicep_installation_path(system)
-    installed_version = _get_bicep_installed_version(installation_path)
+def bicep_version_greater_than_or_equal_to(cli_ctx, version):
+    if _use_binary_from_path(cli_ctx):
+        installed_version = _get_bicep_installed_version("bicep")
+    else:
+        system = platform.system()
+        installation_path = _get_bicep_installation_path(system)
+        installed_version = _get_bicep_installed_version(installation_path)
+
     parsed_version = semver.VersionInfo.parse(version)
     return installed_version >= parsed_version
 
@@ -224,7 +244,7 @@ def _bicep_installed_in_ci():
 
 
 def _use_binary_from_path(cli_ctx):
-    use_binary_from_path = cli_ctx.config.get("bicep", "use_binary_from_path", "if_found_in_ci").lower()
+    use_binary_from_path = get_use_binary_from_path_config(cli_ctx)
 
     _logger.debug('Current value of "use_binary_from_path": %s.', use_binary_from_path)
 
@@ -276,18 +296,22 @@ def _get_bicep_installed_version(bicep_executable_path):
     return _extract_version(installed_version_output)
 
 
+def _is_arm_architecture(machine):
+    return machine in ("arm64", "aarch64", "aarch64_be", "armv8b", "armv8l")
+
+
 def _has_musl_library_only():
     return os.path.exists("/lib/ld-musl-x86_64.so.1") and not os.path.exists("/lib/x86_64-linux-gnu/libc.so.6")
 
 
 def _get_bicep_download_url(system, machine, release_tag, target_platform=None):
     if not target_platform:
-        if system == "Windows" and machine == "arm64":
+        if system == "Windows" and _is_arm_architecture(machine):
             target_platform = "win-arm64"
         elif system == "Windows":
             # default to x64
             target_platform = "win-x64"
-        elif system == "Linux" and machine == "arm64":
+        elif system == "Linux" and _is_arm_architecture(machine):
             target_platform = "linux-arm64"
         elif system == "Linux" and _has_musl_library_only():
             # check for alpine linux
@@ -295,7 +319,7 @@ def _get_bicep_download_url(system, machine, release_tag, target_platform=None):
         elif system == "Linux":
             # default to x64
             target_platform = "linux-x64"
-        elif system == "Darwin" and machine == "arm64":
+        elif system == "Darwin" and _is_arm_architecture(machine):
             target_platform = "osx-arm64"
         elif system == "Darwin":
             # default to x64

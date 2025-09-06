@@ -244,8 +244,12 @@ def add_network_security_rule(cmd,
                               priority=None,
                               source_port_ranges=None,
                               dest_port_ranges=None,
+                              source_port_range=None,
+                              dest_port_range=None,
                               dest_addr_prefixes=None,
-                              source_addr_prefixes=None):
+                              source_addr_prefixes=None,
+                              dest_addr_prefix=None,
+                              source_addr_prefix=None):
     try:
         cluster = client.managed_clusters.get(resource_group_name, cluster_name)
 
@@ -260,8 +264,12 @@ def add_network_security_rule(cmd,
                                                        priority=priority,
                                                        source_port_ranges=source_port_ranges,
                                                        destination_port_ranges=dest_port_ranges,
+                                                       source_port_range=source_port_range,
+                                                       destination_port_range=dest_port_range,
                                                        destination_address_prefixes=dest_addr_prefixes,
-                                                       source_address_prefixes=source_addr_prefixes)
+                                                       source_address_prefixes=source_addr_prefixes,
+                                                       destination_address_prefix=dest_addr_prefix,
+                                                       source_address_prefix=source_addr_prefix)
 
         cluster.network_security_rules.append(new_network_securityRule)
 

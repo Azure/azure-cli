@@ -12,7 +12,7 @@ import socket
 from knack.log import get_logger
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id, resource_id
 
-from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client
+from azure.cli.core.aaz import AAZClientConfiguration, has_value, register_client, AAZFileArgTextFormat
 from azure.cli.core.aaz._client import AAZMgmtClient
 from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
@@ -139,7 +139,6 @@ from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetA
                              RecordSetCAADelete as DNSRecordSetCAADelete, RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
-RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "1.1": "1.1", "2.1": "2.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
                           "Please be aware that Basic option will be removed in the future."
@@ -1948,8 +1947,7 @@ class WAFCreate(_WAFCreate):
             options=["--version"],
             help="Version of the web application firewall rule set type. "
                  "0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet",
-            default="2.1",
-            enum=RULESET_VERSION
+            default="2.1"
         )
         return args_schema
 
@@ -2189,6 +2187,21 @@ def list_waf_managed_rules(cmd, resource_group_name, policy_name):
         "resource_group": resource_group_name,
         "name": policy_name
     })["managedRules"]
+# endregion
+
+
+# region ApplicationGatewayWAFPolicy ManagedRule Exception
+def remove_waf_managed_rule_exception(cmd, resource_group_name, policy_name):
+    from .aaz.latest.network.application_gateway.waf_policy import Update
+
+    class WAFExceptionRemove(Update):
+        def pre_instance_update(self, instance):
+            instance.properties.managed_rules.exceptions = []
+
+    return WAFExceptionRemove(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": policy_name,
+        "resource_group": resource_group_name,
+    })
 # endregion
 
 
@@ -3892,7 +3905,6 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
             options=['--subnet'],
             arg_group="IP Configuration",
             help="Name or ID of subnet to use. If name provided, also supply `--vnet-name`.",
-            required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}"
             )
@@ -3910,20 +3922,21 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
             )
         )
 
-        args_schema.ip_configurations._registered = False
         args_schema.load_balancer_frontend_ip_configurations._registered = False
         args_schema.edge_zone_type._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.ip_configurations = [{
-            'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
-            'private_ip_address': args.private_ip_address,
-            'private_ip_allocation_method': args.private_ip_allocation_method,
-            'private_ip_address_version': args.private_ip_address_version,
-            'subnet': {'id': args.subnet}
-        }]
+
+        if not has_value(args.ip_configurations):
+            args.ip_configurations = [{
+                'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
+                'private_ip_address': args.private_ip_address,
+                'private_ip_allocation_method': args.private_ip_allocation_method,
+                'private_ip_address_version': args.private_ip_address_version,
+                'subnet': {'id': args.subnet}
+            }]
 
         args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
             args.load_balancer_frontend_ip_configurations,
@@ -4473,6 +4486,10 @@ class NICIPConfigCreate(_NICIPConfigCreate):
     def pre_operations(self):
         args = self.ctx.args
         args.private_ip_allocation_method = "Static" if has_value(args.private_ip_address) else "Dynamic"
+        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
+                args.make_primary.to_serialized_data() is True:
+            raise ArgumentUsageError(
+                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
 
         args.asgs_obj = assign_aaz_list_arg(
             args.asgs_obj,
@@ -4614,6 +4631,11 @@ class NICIPConfigUpdate(_NICIPConfigUpdate):
             else:
                 # if specific address provided, allocation is static
                 args.private_ip_allocation_method = "Static"
+
+        if has_value(args.private_ip_address_prefix_length) and has_value(args.make_primary) and \
+                args.make_primary.to_serialized_data() is True:
+            raise ArgumentUsageError(
+                'usage error: When `--private-ip-address-prefix-length` is specified, `--make-primary` must be false')
 
     def pre_instance_update(self, instance):
         args = self.ctx.args
@@ -5305,14 +5327,12 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
         )
         args_schema.ip_tags.Element = AAZStrArg()
         args_schema.type._registered = False
-        args_schema.sku._registered = False
         args_schema.ip_tags_list._registered = False
 
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.sku = 'Standard'
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
         if has_value(args.ip_tags):
@@ -5566,7 +5586,7 @@ class VNetUpdate(_VNetUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.ipam_pool_prefix_allocations):
+        if args.ipam_pool_prefix_allocations.to_serialized_data():
             args.address_prefixes = []
 
     def post_instance_update(self, instance):
@@ -5677,6 +5697,9 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         if has_value(args.disable_private_link_service_network_policies):
             logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+
+        if has_value(args.ipam_pool_prefix_allocations):
+            args.address_prefixes = []
 
 
 class VNetSubnetUpdate(_VNetSubnetUpdate):
@@ -5793,6 +5816,9 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         if has_value(args.disable_private_link_service_network_policies):
             logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+
+        if args.ipam_pool_prefix_allocations.to_serialized_data():
+            args.address_prefixes = []
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.network_security_group.id):
@@ -5916,11 +5942,19 @@ class VnetGatewayRevokedCertCreate(_VnetGatewayRevokedCertCreate):
         return args_schema
 
 
+class RootCertFormat(AAZFileArgTextFormat):
+    def read_file(self, file_path):
+        with open(file_path, 'r', encoding=self._encoding) as cert_file:
+            lines = cert_file.readlines()
+
+        cert_data = ''.join(line.strip() for line in lines if not line.startswith('-----'))
+        return cert_data
+
+
 class VnetGatewayCreate(_VnetGatewayCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZFileArg, AAZResourceIdArg, AAZResourceIdArgFormat, \
-            AAZFileArgBase64EncodeFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZFileArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_addresses = AAZListArg(options=['--public-ip-addresses', '--public-ip-address'],
                                                      help="Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.")
@@ -5947,12 +5981,13 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         )
         args_schema.root_cert_data = AAZFileArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
                                                 help="Base64 contents of the root certificate file or file path.",
-                                                fmt=AAZFileArgBase64EncodeFormat())
+                                                fmt=RootCertFormat())
         args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication",
                                                help="Root certificate name.")
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
+        args_schema.virtual_network_gateway_migration_status._registered = False
         args_schema.ip_configurations._registered = False
         args_schema.edge_zone_type._registered = False
         args_schema.active._registered = False
@@ -6010,13 +6045,12 @@ class VnetGatewayCreate(_VnetGatewayCreate):
             args.nat_rules = rules
 
         if has_value(args.address_prefixes) or has_value(args.client_protocol):
-            import os
             if has_value(args.root_cert_data):
-                path = os.path.expanduser(args.root_cert_data.to_serialized_data())
+                data = args.root_cert_data.to_serialized_data()
             else:
-                path = None
+                data = None
             if has_value(args.root_cert_name):
-                args.vpn_client_root_certificates = [{'name': args.root_cert_name, 'public_cert_data': path}]
+                args.vpn_client_root_certificates = [{'name': args.root_cert_name, 'public_cert_data': data}]
             else:
                 args.vpn_client_root_certificates = []
 
@@ -6039,8 +6073,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
 class VnetGatewayUpdate(_VnetGatewayUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
-        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZFileArg, AAZResourceIdArg, AAZResourceIdArgFormat, \
-            AAZFileArgBase64EncodeFormat
+        from azure.cli.core.aaz import AAZListArg, AAZStrArg, AAZFileArg, AAZResourceIdArg, AAZResourceIdArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.public_ip_addresses = AAZListArg(options=['--public-ip-addresses', '--public-ip-address'],
                                                      help="Specify a single public IP (name or ID) for an active-standby gateway. Specify two space-separated public IPs for an active-active gateway.",
@@ -6060,12 +6093,14 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
         )
         args_schema.root_cert_data = AAZFileArg(options=['--root-cert-data'], arg_group="Root Cert Authentication",
                                                 help="Base64 contents of the root certificate file or file path.",
-                                                fmt=AAZFileArgBase64EncodeFormat(), nullable=True)
+                                                fmt=RootCertFormat(), nullable=True)
         args_schema.root_cert_name = AAZStrArg(options=['--root-cert-name'], arg_group="Root Cert Authentication",
                                                help="Root certificate name.", nullable=True,)
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
+        args_schema.enable_high_bandwidth_vpn_gateway._registered = False
+        args_schema.virtual_network_gateway_migration_status._registered = False
         args_schema.ip_configurations._registered = False
         args_schema.active._registered = False
         args_schema.vpn_client_root_certificates._registered = False
@@ -6075,10 +6110,6 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.root_cert_data):
-            import os
-            path = os.path.expanduser(args.root_cert_data.to_serialized_data())
-            args.root_cert_data = path
 
         if has_value(args.sku):
             args.sku_tier = args.sku
@@ -6189,6 +6220,14 @@ class VnetGatewayVpnConnectionsDisconnect(_VnetGatewayVpnConnectionsDisconnect):
 
 # region VirtualNetworkGatewayConnections
 # pylint: disable=too-many-locals
+def _get_vpn_connection_aux_subscriptions(local_gateway, vnet_gateway):
+    aux_subscriptions = []
+    _add_aux_subscription(aux_subscriptions, local_gateway)
+    _add_aux_subscription(aux_subscriptions, vnet_gateway)
+
+    return aux_subscriptions
+
+
 def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gateway1,
                           location=None, tags=None, no_wait=False, validate=False,
                           vnet_gateway2=None, express_route_circuit2=None, local_gateway2=None,
@@ -6220,9 +6259,11 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
     template = master_template.build()
     parameters = master_template.build_parameters()
 
+    aux_subscriptions = _get_vpn_connection_aux_subscriptions(local_gateway2, vnet_gateway2)
+
     # deploy ARM template
     deployment_name = 'vpn_connection_deploy_' + random_string(32)
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES).deployments
+    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, aux_subscriptions=aux_subscriptions).deployments
     properties = DeploymentProperties(template=template, parameters=parameters, mode='incremental')
     Deployment = cmd.get_models('Deployment', resource_type=ResourceType.MGMT_RESOURCE_RESOURCES)
     deployment = Deployment(properties=properties)
@@ -6461,6 +6502,7 @@ def create_virtual_hub(cmd,
                        hosted_subnet,
                        public_ip_address,
                        hub_routing_preference=None,
+                       auto_scale_config=None,
                        location=None,
                        tags=None):
     from azure.core.exceptions import HttpResponseError
@@ -6480,7 +6522,8 @@ def create_virtual_hub(cmd,
         'location': location,
         'tags': tags,
         'sku': 'Standard',
-        "hub_routing_preference": hub_routing_preference
+        "hub_routing_preference": hub_routing_preference,
+        "auto_scale_config": auto_scale_config
     }
     from .aaz.latest.network.routeserver import Create
     vhub_poller = Create(cli_ctx=cmd.cli_ctx)(command_args=args)

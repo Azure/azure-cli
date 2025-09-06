@@ -6,10 +6,10 @@
 # pylint: disable=line-too-long
 
 def load_command_table(self, _):
-    with self.command_group('netappfiles account'):
-        from .custom import AccountCreate, AccountUpdate
-        self.command_table["netappfiles account create"] = AccountCreate(loader=self)
-        self.command_table["netappfiles account update"] = AccountUpdate(loader=self)
+    # with self.command_group('netappfiles account'):
+    #     from .custom import AccountCreate, AccountUpdate
+    #     self.command_table["netappfiles account create"] = AccountCreate(loader=self)
+    #     self.command_table["netappfiles account update"] = AccountUpdate(loader=self)
 
     with self.command_group('netappfiles account ad'):
         from .custom import ActiveDirectoryAdd, ActiveDirectoryList, ActiveDirectoryUpdate

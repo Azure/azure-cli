@@ -256,8 +256,8 @@ def is_azure_connection_error(error_msg):
 
 # pylint: disable=inconsistent-return-statements
 def empty_on_404(ex):
-    from msrestazure.azure_exceptions import CloudError
-    if isinstance(ex, CloudError) and ex.status_code == 404:
+    from azure.core.exceptions import HttpResponseError
+    if isinstance(ex, HttpResponseError) and ex.status_code == 404:
         return None
     raise ex
 
@@ -363,6 +363,7 @@ def _get_local_versions():
 
 def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statements
     from azure.cli.core.extension import get_extensions, EXTENSIONS_DIR, DEV_EXTENSION_SOURCES, EXTENSIONS_SYS_DIR
+    from azure.cli.core._environment import get_config_dir
     import io
     output = io.StringIO()
     versions = _get_local_versions()
@@ -410,6 +411,7 @@ def get_az_version_string(use_cache=False):  # pylint: disable=too-many-statemen
     _print()
 
     _print("Python location '{}'".format(os.path.abspath(sys.executable)))
+    _print("Config directory '{}'".format(get_config_dir()))
     _print("Extensions directory '{}'".format(EXTENSIONS_DIR))
     if os.path.isdir(EXTENSIONS_SYS_DIR) and os.listdir(EXTENSIONS_SYS_DIR):
         _print("Extensions system directory '{}'".format(EXTENSIONS_SYS_DIR))
@@ -601,13 +603,24 @@ def shell_safe_json_parse(json_or_dict_string, preserve_order=False, strict=True
 
 def b64encode(s):
     """
-    Encodes a string to base64 on 2.x and 3.x
+    Encodes a string to a base64 string.
     :param str s: latin_1 encoded string
     :return: base64 encoded string
     :rtype: str
     """
     encoded = base64.b64encode(s.encode("latin-1"))
-    return encoded if encoded is str else encoded.decode('latin-1')
+    return encoded.decode('latin-1')
+
+
+def b64decode(s):
+    """
+    Decodes a base64 string to a string.
+    :param str s: latin_1 encoded base64 string
+    :return: decoded string
+    :rtype: str
+    """
+    encoded = base64.b64decode(s.encode("latin-1"))
+    return encoded.decode('latin-1')
 
 
 def b64_to_hex(s):
@@ -631,6 +644,7 @@ def todict(obj, post_processor=None):
     """
     from datetime import date, time, datetime, timedelta
     from enum import Enum
+    from azure.core.serialization import attribute_list
     if isinstance(obj, dict):
         result = {k: todict(v, post_processor) for (k, v) in obj.items()}
         return post_processor(obj, result) if post_processor else result
@@ -644,9 +658,12 @@ def todict(obj, post_processor=None):
         return str(obj)
     # This is the only difference with knack.util.todict because for typespec generated SDKs
     # The base model stores data in obj.__dict__['_data'] instead of in obj.__dict__
-    # We need to call obj.as_dict() to extract data for this kind of model
-    if hasattr(obj, 'as_dict') and not hasattr(obj, '_attribute_map'):
-        result = {to_camel_case(k): todict(v, post_processor) for k, v in obj.as_dict().items()}
+    # The way to detect if it's a typespec generated model is to check the private `_is_model` attribute
+    # azure-core provided new function `attribute_list` to list all attribute names
+    # so that we don't need to use raw __dict__ directly
+    if getattr(obj, "_is_model", False):
+        result = {to_camel_case(attr): todict(getattr(obj, attr), post_processor)
+                  for attr in attribute_list(obj) if hasattr(obj, attr)}
         return post_processor(obj, result) if post_processor else result
     if hasattr(obj, '_asdict'):
         return todict(obj._asdict(), post_processor)
@@ -1147,12 +1164,6 @@ ConfiguredDefaultSetter = ScopedConfig
 
 
 def _ssl_context():
-    if sys.version_info < (3, 4) or (in_cloud_console() and platform.system() == 'Windows'):
-        try:
-            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
-        except AttributeError:
-            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
     return ssl.create_default_context()
 
 
@@ -1426,3 +1437,17 @@ def run_az_cmd(args, out_file=None):
     cli = get_default_cli()
     cli.invoke(args, out_file=out_file)
     return cli.result
+
+
+def getprop(o, name, *default):
+    """ This function is used to get the property of the object.
+    It will raise an error if the property is a private property or a method.
+    """
+    if name.startswith('_'):
+        # avoid to access the private properties or methods
+        raise AttributeError(name)
+    v = getattr(o, name, *default)
+    if callable(v):
+        # avoid to access the methods
+        raise AttributeError(name)
+    return v

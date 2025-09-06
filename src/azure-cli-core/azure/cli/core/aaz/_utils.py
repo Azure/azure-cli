@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 import re
 from collections import OrderedDict
-
+import json
 from azure.cli.core.aaz.exceptions import AAZInvalidShorthandSyntaxError
 from ._help import AAZShowHelp
 from ._base import AAZBlankArgValue
@@ -57,7 +57,7 @@ class AAZShortHandSyntaxParser:
         if remain.startswith('['):
             return self.parse_list(remain)
 
-        return self.parse_string(remain)
+        return self.parse_string(remain, convert_simple_type=True)
 
     def parse_dict(self, remain):  # pylint: disable=too-many-statements
         result = OrderedDict()
@@ -165,7 +165,7 @@ class AAZShortHandSyntaxParser:
             raise AAZInvalidShorthandSyntaxError(remain, idx, 1, "Expect character ']'")
         return result, idx
 
-    def parse_string(self, remain):
+    def parse_string(self, remain, convert_simple_type=False):
         idx = 0
         if len(remain) and remain[0] == "'":
             return self.parse_single_quotes_string(remain)
@@ -190,6 +190,14 @@ class AAZShortHandSyntaxParser:
 
         if remain[:idx] in self.HELP_EXPRESSIONS:
             raise AAZShowHelp()
+
+        if convert_simple_type:
+            try:
+                converted = json.loads(remain[:idx])
+                if isinstance(converted, (str, int, float, bool)):
+                    return converted, idx
+            except ValueError:
+                pass
 
         return remain[:idx], idx
 

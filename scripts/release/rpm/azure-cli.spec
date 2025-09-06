@@ -51,13 +51,11 @@ source %{repo_path}/scripts/install_full.sh
 # Remove unused SDK version
 %{python_cmd} %{repo_path}/scripts/trim_sdk.py
 
-# cffi 1.15.0 doesn't work with RPM: https://foss.heptapod.net/pypy/cffi/-/issues/513
-%{python_cmd} -m pip install cffi==1.14.6
-
 deactivate
 
 # Fix up %{buildroot} appearing in some files...
 for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" $d; done;
+rm %{buildroot}%{cli_lib_dir}/pyvenv.cfg
 
 # Create executable (entry script)
 
@@ -67,7 +65,7 @@ for d in %{buildroot}%{cli_lib_dir}/bin/*; do perl -p -i -e "s#%{buildroot}##g" 
 #   - We also can't use %{_lib}, because %{_lib} expands to different values on difference OSes：
 #     https://github.com/Azure/azure-cli/pull/20061
 #     - Fedora/CentOS/RedHat: relative path 'lib64'
-#     - Mariner: abolute path '/usr/lib'
+#     - Azure Linux: absolute path '/usr/lib'
 # The only solution left is to hard-code 'lib64' as we only release 64-bit RPM packages.
 mkdir -p %{buildroot}%{_bindir}
 python_version=$(ls %{buildroot}%{cli_lib_dir}/lib/ | head -n 1)

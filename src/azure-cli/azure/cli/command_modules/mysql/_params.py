@@ -113,13 +113,25 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     auto_scale_iops_arg_type = CLIArgumentType(
         arg_type=get_enum_type(['Enabled', 'Disabled']),
         options_list=['--auto-scale-iops'],
-        help='Enable or disable the auto scale iops. Default value is Disabled.'
+        help='Enable or disable the auto scale iops. Default value is Enabled.'
     )
 
     accelerated_logs_arg_type = CLIArgumentType(
         arg_type=get_enum_type(['Enabled', 'Disabled']),
         options_list=['--accelerated-logs'],
         help='Enable or disable accelerated logs. Only support for Business Critical tier. Default value is Enabled.'
+    )
+
+    faster_restore_arg_type = CLIArgumentType(
+        arg_type=get_enum_type(['Enabled', 'Disabled']),
+        options_list=['--faster-restore'],
+        help='Enable or disable Auto scale IOPS configuration for both the source and the newly restored server to enable faster restore.'
+    )
+
+    faster_provisioning_arg_type = CLIArgumentType(
+        arg_type=get_enum_type(['Enabled', 'Disabled']),
+        options_list=['--faster-provisioning'],
+        help='Enable or disable Auto scale IOPS configuration for both the source and the newly provisioned replica server to enable faster provisioning.'
     )
 
     storage_redundancy_arg_type = CLIArgumentType(
@@ -204,7 +216,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     )
 
     mysql_version_upgrade_arg_type = CLIArgumentType(
-        arg_type=get_enum_type(['8']),
+        arg_type=get_enum_type(['8', '8.4']),
         options_list=['--version', '-v'],
         help='Server major version.'
     )
@@ -254,6 +266,12 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         options_list=['--backup-identity'],
         help='The name or resource ID of the geo backup user identity for data encryption. The identity needs to be in the same region as the backup region.',
         validator=validate_byok_identity
+    )
+
+    backup_interval_arg_type = CLIArgumentType(
+        type=int,
+        options_list=['--backup-interval'],
+        help='The interval between backups in hours. Accepted values are 24, 12 and 6. The default value is 24.'
     )
 
     key_arg_type = CLIArgumentType(
@@ -335,13 +353,14 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('tier', default='Burstable', arg_type=tier_arg_type)
         c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
         c.argument('storage_gb', default='32', arg_type=storage_gb_arg_type)
-        c.argument('version', default='5.7', arg_type=version_arg_type)
+        c.argument('version', default='8.0.21', arg_type=version_arg_type)
         c.argument('iops', arg_type=iops_arg_type)
         c.argument('auto_grow', default='Enabled', arg_type=auto_grow_arg_type)
-        c.argument('auto_scale_iops', default='Disabled', arg_type=auto_scale_iops_arg_type)
+        c.argument('auto_scale_iops', default='Enabled', arg_type=auto_scale_iops_arg_type)
         c.argument('accelerated_logs', arg_type=accelerated_logs_arg_type)
         c.argument('backup_retention', default=7, arg_type=mysql_backup_retention_arg_type)
         c.argument('backup_byok_identity', arg_type=backup_identity_arg_type)
+        c.argument('backup_interval', arg_type=backup_interval_arg_type)
         c.argument('backup_byok_key', arg_type=backup_key_arg_type)
         c.argument('byok_identity', arg_type=identity_arg_type)
         c.argument('byok_key', arg_type=key_arg_type)
@@ -353,7 +372,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('public_access', arg_type=public_access_create_arg_type)
         c.argument('vnet', arg_type=vnet_arg_type)
         c.argument('vnet_address_prefix', arg_type=vnet_address_prefix_arg_type)
-        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type)
+        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type, default="LocalRedundancy")
         c.argument('subnet', arg_type=subnet_arg_type)
         c.argument('subnet_address_prefix', arg_type=subnet_address_prefix_arg_type)
         c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
@@ -422,6 +441,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('storage_gb', arg_type=storage_gb_arg_type)
         c.argument('auto_grow', arg_type=auto_grow_arg_type)
         c.argument('accelerated_logs', arg_type=accelerated_logs_arg_type)
+        c.argument('faster_restore', arg_type=faster_restore_arg_type)
         c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
         c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)
         c.argument('database_port', arg_type=database_port_arg_type)
@@ -459,6 +479,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('storage_gb', arg_type=storage_gb_arg_type)
         c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
         c.argument('high_availability', arg_type=high_availability_arg_type)
+        c.argument('backup_interval', arg_type=backup_interval_arg_type)
         c.argument('byok_key', arg_type=key_arg_type)
         c.argument('byok_identity', arg_type=identity_arg_type)
         c.argument('auto_grow', arg_type=auto_grow_arg_type)
@@ -573,7 +594,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         c.argument('sku_name', arg_type=sku_name_arg_type)
         c.argument('storage_gb', arg_type=storage_gb_arg_type)
         c.argument('iops', arg_type=iops_arg_type)
-        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type)
+        c.argument('storage_redundancy', arg_type=storage_redundancy_arg_type, default="LocalRedundancy")
+        c.argument('faster_provisioning', arg_type=faster_provisioning_arg_type)
         c.argument('database_port', arg_type=database_port_arg_type)
         c.argument('backup_retention', arg_type=mysql_backup_retention_arg_type)
         c.argument('geo_redundant_backup', arg_type=geo_redundant_backup_arg_type)

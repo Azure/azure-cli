@@ -32,7 +32,6 @@ from azure.mgmt.sql.models import (
     ServerKeyType,
     StorageKeyType,
     TransparentDataEncryptionState,
-    FreemiumType,
     ManagedInstanceDatabaseFormat
 )
 
@@ -59,11 +58,13 @@ from .custom import (
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
+    FailoverReadOnlyEndpointPolicy,
     ResourceIdType,
     ServicePrincipalType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
     AuthenticationType,
+    FreemiumType,
     FreeLimitExhaustionBehavior,
     FailoverGroupDatabasesSecondaryType
 )
@@ -1133,6 +1134,11 @@ def load_arguments(self, _):
                    help='Type of secondary to create.'
                    ' Allowed values include: Geo, Named.')
 
+        c.argument('partner_sub_id',
+                   options_list=['--partner-sub-id'],
+                   help='Subscription id to create the new replica in.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
                    help='Name of the database to fail over.')
@@ -1307,8 +1313,8 @@ def load_arguments(self, _):
                 'monthly_retention',
                 'yearly_retention',
                 'week_of_year',
-                'make_backups_immutable',
-                'backup_storage_access_tier'])
+                'time_based_immutability',
+                'time_based_immutability_mode'])
 
         c.argument('weekly_retention',
                    help='Retention for the weekly backup. '
@@ -1328,15 +1334,22 @@ def load_arguments(self, _):
         c.argument('week_of_year',
                    help='The Week of Year, 1 to 52, in which to take the yearly LTR backup.')
 
-        c.argument('make_backups_immutable',
-                   help='Whether to make the LTR backups immutable.',
-                   arg_type=get_three_state_flag())
+        c.argument('time_based_immutability',
+                   options_list=['--make-backups-immutable', '--tb-immutability'],
+                   help='Whether to enable time based immutability on the LTR backups. '
+                   'Possible values are: \'True\', \'False\', \'Enabled\', \'Disabled\'.',
+                   is_preview=True)
 
-        c.argument('backup_storage_access_tier',
-                   options_list=['--access-tier', '--backup-storage-access-tier'],
-                   arg_type=get_enum_type(["Hot", "Archive"]),
-                   help='The access tier of a LTR backup.'
-                   'Possible values = [Hot, Archive]')
+        c.argument('time_based_immutability_mode',
+                   options_list=['--tb-immutability-mode'],
+                   help='The mode of time based immutability to be set on the LTR backups. '
+                   'Possible values are: \'Locked\', \'Unlocked\'. '
+                   'This is only valid if make-backups-immutable is enabled',
+                   is_preview=True)
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql db ltr-backup') as c:
         c.argument('location_name',
@@ -1722,6 +1735,11 @@ def load_arguments(self, _):
                    arg_type=try_planned_before_forced_failover_param_type)
         c.argument('secondary_type', help="Databases secondary type on partner server",
                    arg_type=get_enum_type(FailoverGroupDatabasesSecondaryType))
+        c.argument('partner_server_ids', nargs='+',
+                   help="The list of partner server resource id's of the Failover Group")
+        c.argument('ro_failover_policy', help="The policy of the read only endpoint of the Failover Group",
+                   arg_type=get_enum_type(FailoverReadOnlyEndpointPolicy))
+        c.argument('ro_endpoint_target', help="The resource id of the read only endpoint target server")
 
     ###############################################
     #             sql instance pool               #
@@ -1904,7 +1922,8 @@ def load_arguments(self, _):
                 'administrator_login',
                 'administrator_login_password',
                 'location',
-                'minimal_tls_version'
+                'minimal_tls_version',
+                'tags'
             ])
 
         c.argument('administrator_login',

@@ -68,10 +68,9 @@ def storage_remove(cmd, client, service, target, recursive=None, exclude_pattern
     elif service == 'blob':
         flags.append('--from-to=BlobTrash')
 
-    sas_token = client.sas_token
-
-    if not sas_token and client.account_key:
-        sas_token = _generate_sas_token(cmd, client.account_name, client.account_key, service=service,
+    sas_token = None
+    if not sas_token and client.credential and hasattr(client.credential, "account_key"):
+        sas_token = _generate_sas_token(cmd, client.account_name, client.credential.account_key, service=service,
                                         resource_types='co',
                                         permissions='rdl')
 
@@ -104,10 +103,9 @@ def storage_blob_sync(cmd, client, source, destination, delete_destination='true
     if extra_options is not None:
         flags.extend(extra_options)
 
-    sas_token = client.sas_token
-
-    if not sas_token and client.account_key:
-        sas_token = _generate_sas_token(cmd, client.account_name, client.account_key, service='blob',
+    sas_token = None
+    if not sas_token and client.credential and hasattr(client.credential, "account_key"):
+        sas_token = _generate_sas_token(cmd, client.account_name, client.credential.account_key, service='blob',
                                         resource_types='co',
                                         permissions='rwdlac')
 
@@ -134,7 +132,7 @@ def _azcopy_blob_client(cmd, client):
 
 
 def _azcopy_file_client(cmd, client):
-    return AzCopy(creds=client_auth_for_azcopy(cmd, client, service='file'))
+    return AzCopy(creds=client_auth_for_azcopy(cmd, client))
 
 
 def _azcopy_login_client(cmd):

@@ -71,7 +71,7 @@ def delete_container(client, resource_group_name, name, **kwargs):
     return client.begin_delete(resource_group_name, name)
 
 
-# pylint: disable=too-many-statements
+# pylint: disable=too-many-statements,too-many-branches
 def create_container(cmd,
                      resource_group_name,
                      name=None,
@@ -142,8 +142,13 @@ def create_container(cmd,
 
     standby_pool_profile_reference = _create_standby_pool_profile_reference(standby_pool_profile_id=standby_pool_profile_id, fail_container_group_create_on_reuse_failure=fail_container_group_create_on_reuse_failure)
 
-    ports = ports or [80]
-    protocol = protocol or ContainerGroupNetworkProtocol.tcp
+    # No default values need to be set for the standbypool reuse scenario
+    if standby_pool_profile_id is not None:
+        vnet_address_prefix = None
+        subnet_address_prefix = None
+    else:
+        ports = ports or [80]
+        protocol = protocol or ContainerGroupNetworkProtocol.tcp
 
     config_map = _create_config_map(config_map)
 
@@ -221,7 +226,9 @@ def create_container(cmd,
         subnet_id = _get_subnet_id(cmd, location, resource_group_name, vnet, vnet_address_prefix, subnet, subnet_address_prefix)
         cgroup_subnet = [ContainerGroupSubnetId(id=subnet_id)]
 
-    cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id)
+    cgroup_ip_address = None
+    if standby_pool_profile_id is None:
+        cgroup_ip_address = _create_ip_address(ip_address, ports, protocol, dns_name_label, subnet_id)
 
     # Setup zones, validation done in control plane so check is not needed here
     zones = None
@@ -1003,10 +1010,16 @@ def _start_exec_pipe_windows(web_socket_uri, password):
 
 def _start_exec_pipe_linux(web_socket_uri, password):
     stdin_fd = sys.stdin.fileno()
-    old_tty = termios.tcgetattr(stdin_fd)
+    try:
+        old_tty = termios.tcgetattr(stdin_fd)
+        has_tty = True
+    except termios.error:
+        old_tty = None
+        has_tty = False
     old_winch_handler = signal.getsignal(signal.SIGWINCH)
-    tty.setraw(stdin_fd)
-    tty.setcbreak(stdin_fd)
+    if has_tty:
+        tty.setraw(stdin_fd)
+        tty.setcbreak(stdin_fd)
     buff = bytearray()
     lock = threading.Lock()
 
@@ -1018,7 +1031,8 @@ def _start_exec_pipe_linux(web_socket_uri, password):
         flushKeyboard.start()
     ws = websocket.WebSocketApp(web_socket_uri, on_open=_on_ws_open_linux, on_message=_on_ws_msg)
     ws.run_forever()
-    termios.tcsetattr(stdin_fd, termios.TCSADRAIN, old_tty)
+    if has_tty:
+        termios.tcsetattr(stdin_fd, termios.TCSADRAIN, old_tty)
     signal.signal(signal.SIGWINCH, old_winch_handler)
 
 

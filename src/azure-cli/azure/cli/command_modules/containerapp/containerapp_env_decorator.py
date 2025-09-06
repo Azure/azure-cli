@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long, consider-using-f-string, logging-format-interpolation, inconsistent-return-statements, broad-except, bare-except, too-many-statements, too-many-locals, too-many-boolean-expressions, too-many-branches, too-many-nested-blocks, pointless-statement, expression-not-assigned, unbalanced-tuple-unpacking, unsupported-assignment-operation, too-many-public-methods, broad-exception-caught, expression-not-assigned, ungrouped-imports
-
+from copy import deepcopy
 from typing import Any, Dict
 from knack.log import get_logger
 
@@ -128,7 +128,7 @@ class ContainerAppEnvDecorator(BaseResource):
 class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
     def __init__(self, cmd: AzCliCommand, client: Any, raw_parameters: Dict, models: str):
         super().__init__(cmd, client, raw_parameters, models)
-        self.managed_env_def = ManagedEnvironmentModel
+        self.managed_env_def = deepcopy(ManagedEnvironmentModel)
 
     def get_argument_enable_workload_profiles(self):
         return self.get_param("enable_workload_profiles")
@@ -188,7 +188,7 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
 
         # Custom domains
         if self.get_argument_hostname():
-            custom_domain = CustomDomainConfigurationModel
+            custom_domain = deepcopy(CustomDomainConfigurationModel)
             blob, _ = load_cert_file(self.get_argument_certificate_file(), self.get_argument_certificate_password())
             custom_domain["dnsSuffix"] = self.get_argument_hostname()
             custom_domain["certificatePassword"] = self.get_argument_certificate_password()
@@ -235,13 +235,13 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
             self.set_argument_logs_key(logs_key)
 
         if self.get_argument_logs_destination() == "log-analytics":
-            log_analytics_config_def = LogAnalyticsConfigurationModel
+            log_analytics_config_def = deepcopy(LogAnalyticsConfigurationModel)
             log_analytics_config_def["customerId"] = self.get_argument_logs_customer_id()
             log_analytics_config_def["sharedKey"] = self.get_argument_logs_key()
         else:
             log_analytics_config_def = None
 
-        app_logs_config_def = AppLogsConfigurationModel
+        app_logs_config_def = deepcopy(AppLogsConfigurationModel)
         app_logs_config_def["destination"] = self.get_argument_logs_destination() if self.get_argument_logs_destination() != "none" else None
         app_logs_config_def["logAnalyticsConfiguration"] = log_analytics_config_def
 
@@ -249,7 +249,7 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
 
     def set_up_vnet_configuration(self):
         if self.get_argument_infrastructure_subnet_resource_id() or self.get_argument_platform_reserved_cidr() or self.get_argument_platform_reserved_dns_ip():
-            vnet_config_def = VnetConfigurationModel
+            vnet_config_def = deepcopy(VnetConfigurationModel)
 
             if self.get_argument_infrastructure_subnet_resource_id() is not None:
                 vnet_config_def["infrastructureSubnetId"] = self.get_argument_infrastructure_subnet_resource_id()

@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access
+
 """Custom operations for storage account commands"""
 
 import os
@@ -11,6 +13,7 @@ from azure.cli.command_modules.storage._client_factory import storage_client_fac
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item, user_confirmation
 from azure.cli.core.profiles import ResourceType, get_sdk
 from ..aaz.latest.storage.account.migration._start import Start as _AccountMigrationStart
+from ..aaz.latest.storage.account import FileServiceUsage as _FileServiceUsage
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -70,7 +73,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
                            identity_type=None, user_identity_id=None,
                            key_vault_user_identity_id=None, federated_identity_client_id=None,
-                           sas_expiration_period=None, key_expiration_period_in_days=None,
+                           sas_expiration_action=None, sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
@@ -262,9 +265,16 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         KeyPolicy = cmd.get_models('KeyPolicy')
         params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
 
-    if sas_expiration_period:
+    if sas_expiration_period is not None or sas_expiration_action is not None:
         SasPolicy = cmd.get_models('SasPolicy')
-        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
+        if sas_expiration_period is None and sas_expiration_action is not None:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError('--sas-expiration-action can only be specified together with'
+                                            ' --sas-expiration-period')
+        if sas_expiration_action is None:
+            sas_expiration_action = 'Log'
+        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period,
+                                      expiration_action=sas_expiration_action)
 
     if allow_cross_tenant_replication is not None:
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
@@ -384,7 +394,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
                            identity_type=None, user_identity_id=None,
                            key_vault_user_identity_id=None, federated_identity_client_id=None,
-                           sas_expiration_period=None, key_expiration_period_in_days=None,
+                           sas_expiration_action=None, sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
@@ -643,9 +653,19 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         KeyPolicy = cmd.get_models('KeyPolicy')
         params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
 
-    if sas_expiration_period:
+    if sas_expiration_period is not None or sas_expiration_action is not None:
         SasPolicy = cmd.get_models('SasPolicy')
-        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
+        if sas_expiration_period is None and sas_expiration_action is not None:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError('--sas-expiration-action can only be specified together '
+                                            'with --sas-expiration-period')
+        if sas_expiration_action is None:
+            sas_expiration_action = 'Log'
+            if instance.sas_policy is not None and instance.sas_policy.expiration_action is not None:
+                sas_expiration_action = instance.sas_policy.expiration_action
+
+        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period,
+                                      expiration_action=sas_expiration_action)
 
     if allow_cross_tenant_replication is not None:
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
@@ -1220,3 +1240,31 @@ class AccountMigrationStart(_AccountMigrationStart):
                        'be stopped after being initiated, and for accounts with geo redundancy a failover can’t be '
                        'initiated while conversion is in progress. The data within the storage account will continue '
                        'to be accessible with no loss of durability or availability.')
+
+
+def _format_storage_account_id(args_schema):
+    from azure.cli.core.aaz import AAZResourceIdArgFormat
+    args_schema.account_name._fmt = AAZResourceIdArgFormat(
+        template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/"
+                 "storageAccounts/{}"
+    )
+    args_schema.resource_group._required = False
+
+
+class FileServiceUsage(_FileServiceUsage):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+        args_schema.file_services_name._registered = False
+        args_schema.file_services_name._required = False
+        args_schema.file_service_usages_name._registered = False
+        args_schema.file_service_usages_name._required = False
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_account_name_aaz
+        args = self.ctx.args
+        parse_account_name_aaz(self, args)
+        args.file_services_name = 'default'
+        args.file_service_usages_name = 'default'

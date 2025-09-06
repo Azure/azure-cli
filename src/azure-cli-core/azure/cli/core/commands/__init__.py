@@ -830,6 +830,9 @@ class AzCliCommandInvoker(CommandInvoker):
                 experimentals.append(ImplicitExperimentalItem(cli_ctx=self.cli_ctx, **experimental_kwargs))
 
         if not self.cli_ctx.only_show_errors:
+            from azure.cli.core.breaking_change import upcoming_breaking_changes
+            for bc in upcoming_breaking_changes.get('', []):
+                print(bc.message, file=sys.stderr)
             for d in deprecations:
                 print(d.message, file=sys.stderr)
             for p in previews:
@@ -1051,7 +1054,13 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
                 if self.progress_bar:
-                    self.progress_bar.update_progress()
+                    status = ""
+                    # some pollers do not have a status method (eg. AAZLROPoller)
+                    try:
+                        status = poller.status()
+                    except AttributeError:
+                        pass
+                    self.progress_bar.update_progress_with_msg(status)
                 self._delay()
             except KeyboardInterrupt:
                 if self.progress_bar:

@@ -16,4 +16,5 @@ from ._list import *
 from ._show import *
 from ._start import *
 from ._stop import *
+from ._hibernate import *
 from ._wait import *

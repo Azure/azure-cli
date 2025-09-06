@@ -434,7 +434,7 @@ AZURE_US_GOV_CLOUD = Cloud(
         gallery='https://gallery.usgovcloudapi.net/',
         active_directory='https://login.microsoftonline.us',
         active_directory_resource_id='https://management.core.usgovcloudapi.net/',
-        active_directory_graph_resource_id='https://graph.windows.net/',
+        active_directory_graph_resource_id='https://graph.microsoftazure.us/',
         microsoft_graph_resource_id='https://graph.microsoft.us/',
         vm_image_alias_doc='https://raw.githubusercontent.com/Azure/azure-rest-api-specs/main/arm-compute/quickstart-templates/aliases.json',
         media_resource_id='https://rest.media.usgovcloudapi.net',
@@ -583,6 +583,7 @@ def get_clouds(cli_ctx):
     except configparser.MissingSectionHeaderError:
         os.remove(CLOUD_CONFIG_FILE)
         logger.warning("'%s' is in bad format and has been removed.", CLOUD_CONFIG_FILE)
+    active_cloud_name = get_active_cloud_name(cli_ctx)
     for section in config.sections():
         c = Cloud(section)
         for option in config.options(section):
@@ -596,13 +597,26 @@ def get_clouds(cli_ctx):
             # If profile isn't set, use latest
             setattr(c, 'profile', 'latest')
         if c.profile not in API_PROFILES:
-            raise CLIError('Profile {} does not exist or is not supported.'.format(c.profile))
+            if c.profile in (
+                "2017-03-09-profile",
+                "2018-03-01-hybrid",
+                "2019-03-01-hybrid",
+                "2020-09-01-hybrid",
+            ):
+                if c.name == active_cloud_name:
+                    # only apply to the active cloud
+                    logger.error(
+                        "The azure stack profile '%s' has been deprecated and removed, using the 'latest' profile instead.\n"
+                        "To continue using Azure Stack, please install the Azure CLI `2.66.*` (LTS) version. For more details, refer to: https://learn.microsoft.com/en-us/cli/azure/whats-new-overview#important-notice-for-azure-stack-hub-customers", c.profile
+                    )
+                    c.profile = 'latest'
+            else:
+                raise CLIError('Profile {} does not exist or is not supported.'.format(c.profile))
         if not c.endpoints.has_endpoint_set('management') and \
                 c.endpoints.has_endpoint_set('resource_manager'):
             # If management endpoint not set, use resource manager endpoint
             c.endpoints.management = c.endpoints.resource_manager
         clouds.append(c)
-    active_cloud_name = get_active_cloud_name(cli_ctx)
     for c in clouds:
         if c.name == active_cloud_name:
             c.is_active = True
@@ -622,13 +636,16 @@ def get_active_cloud(cli_ctx=None):
         from azure.cli.core import get_default_cli
         cli_ctx = get_default_cli()
     try:
-        return get_cloud(cli_ctx, get_active_cloud_name(cli_ctx))
+        cloud = get_cloud(cli_ctx, get_active_cloud_name(cli_ctx))
     except CloudNotRegisteredException as err:
         logger.warning(err)
         default_cloud_name = get_default_cloud_name()
         logger.warning("Resetting active cloud to'%s'.", default_cloud_name)
         _set_active_cloud(cli_ctx, default_cloud_name)
-        return get_cloud(cli_ctx, default_cloud_name)
+        cloud = get_cloud(cli_ctx, default_cloud_name)
+    if cloud.profile != 'latest':
+        logger.warning("Cloud profile '%s' will be deprecated starting from 2.73.0. Please use the 'latest' profile or the CLI 2.66.* (LTS) version instead.", cloud.profile)
+    return cloud
 
 
 def get_cloud_subscription(cloud_name):

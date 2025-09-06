@@ -59,7 +59,7 @@ class Create(AAZCommand):
         )
         _args_schema.log_analytics_destination_type = AAZStrArg(
             options=["--log-analytics-destination-type"],
-            help="A string indicating whether the export to Log Analytics should use the default destination type, i.e. AzureDiagnostics, or use a destination type constructed as follows: <normalized service identity>_<normalized category name>. Possible values are: Dedicated and null (null is default.)",
+            help="A string indicating whether the export to Log Analytics should use the default destination type, i.e. AzureDiagnostics, or use a destination type constructed as follows: `<normalized service identity>_<normalized category name>`. Possible values are: Dedicated and null (null is default.)",
         )
         _args_schema.logs = AAZListArg(
             options=["--logs"],

@@ -108,6 +108,63 @@ class NWFlowLogScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='centraluseuap')
     @StorageAccountPreparer(name_prefix='testflowlog', location='centraluseuap', kind='StorageV2')
+    def test_nw_flow_log_create_vnetfl_with_filtering(self, resource_group, resource_group_location, storage_account):
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'storage_account': storage_account,
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'nic': 'nic1',
+            'watcher_rg': 'NetworkWatcherRG',
+            'watcher_name': 'NetworkWatcher_{}'.format(resource_group_location),
+            'flow_log': 'flow_log_test',
+            'filtering_criteria': 'dstip=20.252.145.59 || DstPort=8080',
+            'workspace': self.create_random_name('clitest', 20),
+        })
+
+        # enable network watcher
+        # self.cmd('network watcher configure -g {rg} --locations {location} --enabled')
+
+        # prepare the target resource
+        self.cmd('network vnet create -g {rg} -n {vnet}')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24')
+        self.cmd('network nic create -g {rg} -n {nic} --vnet-name {vnet} --subnet {subnet}')
+
+        # prepare workspace
+        workspace = self.cmd('monitor log-analytics workspace create '
+                             '--resource-group {rg} '
+                             '--location eastus '
+                             '--workspace-name {workspace} ').get_output_in_json()
+        self.kwargs.update({
+            'workspace_id': workspace['id']
+        })
+
+        #targetId as vnet
+        self.cmd('network watcher flow-log create '
+                 '--location {location} '
+                 '--resource-group {rg} '
+                 '--vnet {vnet} '
+                 '--storage-account {storage_account} '
+                 '--filtering-criteria {filtering_criteria} '
+                 '--workspace {workspace_id} '
+                 '--name {flow_log} ')
+
+        self.cmd('network watcher flow-log list --location {location}')
+
+        # This output is Azure Management Resource formatted.
+        self.cmd('network watcher flow-log show --location {location} --name {flow_log}', checks=[
+            self.check('name', self.kwargs['flow_log']),
+            self.check('enabledFilteringCriteria', '.*/{filtering_criteria}$'),
+            self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId',
+                       self.kwargs['workspace_id']),
+            self.check_pattern('targetResourceId', '.*/{vnet}$'),
+            self.check('retentionPolicy.days', 0),
+            self.check('retentionPolicy.enabled', False),
+        ])
+
+    @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='testflowlog', location='centraluseuap', kind='StorageV2')
     def test_nw_flow_log_create_vnetflWithManagedIdentity(self, resource_group, resource_group_location, storage_account):
         self.kwargs.update({
             'rg': resource_group,

@@ -11,10 +11,6 @@ def cf_monitor(cli_ctx, **kwargs):
     return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_MONITOR, **kwargs)
 
 
-def cf_alert_rules(cli_ctx, _):
-    return cf_monitor(cli_ctx).alert_rules
-
-
 def cf_alert_rule_incidents(cli_ctx, _):
     return cf_monitor(cli_ctx).alert_rule_incidents
 

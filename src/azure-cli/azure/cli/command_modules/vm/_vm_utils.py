@@ -73,7 +73,7 @@ def log_pprint_template(template):
 
 
 def check_existence(cli_ctx, value, resource_group, provider_namespace, resource_type,
-                    parent_name=None, parent_type=None):
+                    parent_name=None, parent_type=None, static_version=None):
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.core.exceptions import HttpResponseError
@@ -93,7 +93,10 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         parent_path = ''
         resource_name = id_parts['name']
         resource_type = id_parts.get('type', resource_type)
+
     api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
+    if static_version:  # only for vnet
+        api_version = static_version
 
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
@@ -118,18 +121,18 @@ def get_key_vault_base_url(cli_ctx, vault_name):
 
 
 def list_sku_info(cli_ctx, location=None):
-    from ._client_factory import _compute_client_factory
+    from .aaz.latest.vm import ListSkus as _ListSkus
 
     def _match_location(loc, locations):
-        return next((x for x in locations if x.lower() == loc.lower()), None)
+        return next((x for x in locations if str(x).lower() == str(loc).lower()), None)
 
-    client = _compute_client_factory(cli_ctx)
-    result = client.resource_skus.list()
+    result = _ListSkus(cli_ctx=cli_ctx)(command_args={})
     if location:
-        result = [r for r in result if _match_location(location, r.locations)]
+        result = [r for r in result if _match_location(location, r['locations'])]
     return result
 
 
+# pylint: disable=line-too-long
 def is_sku_available(cmd, sku_info, zone):
     """
     The SKU is unavailable in the following cases:
@@ -140,19 +143,19 @@ def is_sku_available(cmd, sku_info, zone):
     is_available = True
     is_restrict_zone = False
     is_restrict_location = False
-    if not sku_info.restrictions:
+    if not sku_info.get('restrictions', []):
         return is_available
-    for restriction in sku_info.restrictions:
-        if restriction.reason_code == 'NotAvailableForSubscription':
+    for restriction in sku_info['restrictions']:
+        if restriction.get('reason_code', '') == 'NotAvailableForSubscription':
             # The attribute location_info is not supported in versions 2017-03-30 and earlier
             if cmd.supported_api_version(max_api='2017-03-30'):
                 is_available = False
                 break
-            if restriction.type == 'Zone' and not (
-                    set(sku_info.location_info[0].zones or []) - set(restriction.restriction_info.zones or [])):
+            if restriction['type'] == 'Zone' and not (
+                    set(sku_info['location_info'][0].get('zones', []) or []) - set(restriction['restriction_info'].get('zones', []) or [])):
                 is_restrict_zone = True
-            if restriction.type == 'Location' and (
-                    sku_info.location_info[0].location in (restriction.restriction_info.locations or [])):
+            if restriction['type'] == 'Location' and (
+                    sku_info['location_info'][0]['location'] in (restriction['restriction_info'].get('locations', []) or [])):
                 is_restrict_location = True
 
             if is_restrict_location or (is_restrict_zone and zone):
@@ -653,23 +656,20 @@ def validate_vm_disk_trusted_launch(namespace, disk_security_profile):
         return
 
     security_type = disk_security_profile.security_type if hasattr(disk_security_profile, 'security_type') else None
-    if security_type.lower() == 'trustedlaunch':
+    if security_type and security_type.lower() == 'trustedlaunch':
         if namespace.enable_secure_boot is None:
             namespace.enable_secure_boot = True
         if namespace.enable_vtpm is None:
             namespace.enable_vtpm = True
         namespace.security_type = 'TrustedLaunch'
-    elif security_type.lower() == 'standard':
+    elif security_type and security_type.lower() == 'standard':
         logger.warning(UPGRADE_SECURITY_HINT)
 
 
 def validate_image_trusted_launch(namespace):
     from ._constants import UPGRADE_SECURITY_HINT
 
-    # set securityType to Standard by default if no inputs by end user
-    if namespace.security_type is None:
-        namespace.security_type = 'Standard'
-    if namespace.security_type.lower() != 'trustedlaunch':
+    if namespace.security_type and namespace.security_type.lower() != 'trustedlaunch':
         logger.warning(UPGRADE_SECURITY_HINT)
 
 

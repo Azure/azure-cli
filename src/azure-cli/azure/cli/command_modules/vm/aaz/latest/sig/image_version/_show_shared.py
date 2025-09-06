@@ -52,7 +52,7 @@ class ShowShared(AAZCommand):
         )
         _args_schema.gallery_image_version_name = AAZStrArg(
             options=["-e", "--gallery-image-version", "--gallery-image-version-name"],
-            help="The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: <MajorVersion>.<MinorVersion>.<Patch>",
+            help="The name of the gallery image version to be created. Needs to follow semantic version name pattern: The allowed characters are digit and period. Digits must be within the range of a 32-bit integer. Format: `<MajorVersion>.<MinorVersion>.<Patch>`",
             required=True,
             id_part="child_name_3",
         )

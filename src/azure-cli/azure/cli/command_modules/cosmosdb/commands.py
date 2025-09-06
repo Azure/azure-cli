@@ -167,6 +167,7 @@ def load_command_table(self, _):
         g.command('check-name-exists', 'check_name_exists')
         g.custom_command('delete', 'cli_cosmosdb_delete', confirmation=True, supports_no_wait=True)
         g.command('failover-priority-change', 'begin_failover_priority_change')
+        g.custom_command('offline-region', 'cli_offline_region')
         g.custom_command('create', 'cli_cosmosdb_create', transform=transform_db_account_json_output)
         g.custom_command('update', 'cli_cosmosdb_update', transform=transform_db_account_json_output)
         g.custom_command('list', 'cli_cosmosdb_list', transform=transform_db_account_list_output)

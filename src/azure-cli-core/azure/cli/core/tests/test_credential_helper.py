@@ -12,7 +12,7 @@ class TestCredentialHelper(unittest.TestCase):
     def _get_test_secret_masker(self):
         from microsoft_security_utilities_secret_masker import SecretMasker, load_regex_pattern_from_json
         email_address_json = {
-            "Pattern": r"(?<refine>[\w.%#+-]+)(%40|@)([a-z0-9.-]*.[a-z]{2,})",
+            "Pattern": r"(?P<refine>[\w.%#+-]+)(%40|@)([a-z0-9.-]*.[a-z]{2,})",
             "Id": "001",
             "Name": "EmailAddress",
             "Signatures": [
@@ -22,7 +22,7 @@ class TestCredentialHelper(unittest.TestCase):
             "DetectionMetadata": "HighConfidence"
         }
         guid_json = {
-            "Pattern": r"(?<refine>[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})",
+            "Pattern": r"(?P<refine>[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12})",
             "Id": "002",
             "Name": "GUID",
             "DetectionMetadata": "LowConfidence"

@@ -1,4 +1,14 @@
 ---
+afd custom-domain create:
+    parameters:
+        customized_cipher_suite_set:
+            rule_exclusions:
+            - option_length_too_long
+afd custom-domain update:
+    parameters:
+        customized_cipher_suite_set:
+            rule_exclusions:
+            - option_length_too_long
 afd profile create:
     parameters:
         origin_response_timeout_seconds:
@@ -341,6 +351,10 @@ cdn profile update:
         origin_response_timeout_seconds:
             rule_exclusions:
             - option_length_too_long
+
+cdn profile deployment-version:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
 
 cdn profile-migration:
     rule_exclusions:

@@ -72,6 +72,7 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
             'nsg': self.create_random_name(prefix='nsg', length=16),
             'ws': self.create_random_name(prefix='ws', length=16),
             'sa': self.create_random_name(prefix='sa', length=16),
+            'sa1': self.create_random_name(prefix='sa', length=16),
             'vm1': 'vm1',
             'vmss': 'vmss1'
         })
@@ -83,11 +84,11 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
         # self.kwargs['mp_id'] = self.cmd('vm create -g {rg} -n {vm1} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-password TestPassword11!! '
         #                     '--admin-username testadmin --authentication-type password').get_output_in_json()['id']
 
-        self.cmd('monitor log-analytics workspace create -g {rg} -n {ws}')
-        #self.kwargs['mp_id'] = self.cmd('monitor log-analytics workspace show -g {rg} -n {ws}').get_output_in_json()['id']
-        #self.kwargs['mp_id'] = self.cmd('az storage account create -n {sa} -g {rg} -l westus --sku Standard_LRS --kind Storage --https-only').get_output_in_json()['id']
+        # self.cmd('monitor log-analytics workspace create -g {rg} -n {ws}')
+        # self.kwargs['mp_id'] = self.cmd('monitor log-analytics workspace show -g {rg} -n {ws}').get_output_in_json()['id']
+        self.kwargs['mp_id'] = self.cmd('az storage account create -n {sa1} -g {rg} -l westus --sku Standard_LRS --kind Storage --https-only').get_output_in_json()['id']
         self.cmd('az storage account create -n {sa} -g {rg} -l westus --sku Standard_LRS --kind Storage --https-only')
-        self.kwargs['mp_id'] = "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/test-rg/providers/Microsoft.Datadog/monitors/dd1"
+        # self.kwargs['mp_id'] = "/subscriptions/0b1f6471-1bf0-4dda-aec3-cb9272f09590/resourceGroups/test-rg/providers/Microsoft.Datadog/monitors/dd1"
 
         self.kwargs['log_config'] = json.dumps([
             {
@@ -101,8 +102,7 @@ class TestMonitorDiagnosticSettings(ScenarioTest):
                 "retention-policy": {"days": 0, "enabled": False}
             }
         ])
-        with self.assertRaisesRegex(HttpResponseError, '/resourcegroups/test-rg/providers/microsoft.datadog/monitors/dd1 was not '
-                                                       'found or does not support the required functionality.'):
+        with self.assertRaisesRegex(HttpResponseError, "The resource type 'microsoft.storage/storageaccounts' is not a marketplace resource."):
             self.cmd('monitor diagnostic-settings create -n test01 --resource {nsg} --resource-type Microsoft.Network/networkSecurityGroups --resource-group {rg} --storage-account {sa} --marketplace-partner-id {mp_id} --logs \'{log_config}\' -o json')
 
     @ResourceGroupPreparer(location='southcentralus')

@@ -41,10 +41,7 @@ logger = get_logger(__name__)
 
 
 class Identity:  # pylint: disable=too-many-instance-attributes
-    """Class to manage identities:
-        - user
-        - service principal
-        - TODO: managed identity
+    """Manage user or service principal identities and log into Microsoft identity platform.
     """
 
     # MSAL token cache.
@@ -115,7 +112,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
     def _msal_public_app_kwargs(self):
         """kwargs for creating PublicClientApplication."""
         # enable_broker_on_windows can only be used on PublicClientApplication.
-        return {**self._msal_app_kwargs, "enable_broker_on_windows": self._enable_broker_on_windows}
+        return {**self._msal_app_kwargs,
+                "enable_broker_on_windows": self._enable_broker_on_windows,
+                "enable_pii_log": True}
 
     @property
     def _msal_app(self):
@@ -146,7 +145,7 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             Identity._service_principal_store_instance = ServicePrincipalStore(store)
         return Identity._service_principal_store_instance
 
-    def login_with_auth_code(self, scopes, **kwargs):
+    def login_with_auth_code(self, scopes, claims_challenge=None):
         # Emit a warning to inform that a browser is opened.
         # Only show the path part of the URL and hide the query string.
 
@@ -169,21 +168,21 @@ class Identity:  # pylint: disable=too-many-instance-attributes
             success_template=success_template, error_template=error_template,
             parent_window_handle=self._msal_app.CONSOLE_WINDOW_HANDLE, on_before_launching_ui=_prompt_launching_ui,
             enable_msa_passthrough=True,
-            **kwargs)
+            claims_challenge=claims_challenge)
         return check_result(result)
 
-    def login_with_device_code(self, scopes, **kwargs):
-        flow = self._msal_app.initiate_device_flow(scopes, **kwargs)
+    def login_with_device_code(self, scopes, claims_challenge=None):
+        flow = self._msal_app.initiate_device_flow(scopes, claims_challenge=claims_challenge)
         if "user_code" not in flow:
             raise ValueError(
                 "Fail to create device flow. Err: %s" % json.dumps(flow, indent=4))
         from azure.cli.core.style import print_styled_text, Style
         print_styled_text((Style.WARNING, flow["message"]), file=sys.stderr)
-        result = self._msal_app.acquire_token_by_device_flow(flow, **kwargs)  # By default it will block
+        result = self._msal_app.acquire_token_by_device_flow(flow, claims_challenge=claims_challenge)
         return check_result(result)
 
-    def login_with_username_password(self, username, password, scopes, **kwargs):
-        result = self._msal_app.acquire_token_by_username_password(username, password, scopes, **kwargs)
+    def login_with_username_password(self, username, password, scopes):
+        result = self._msal_app.acquire_token_by_username_password(username, password, scopes)
         return check_result(result)
 
     def login_with_service_principal(self, client_id, credential, scopes):
@@ -192,19 +191,12 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         """
         sp_auth = ServicePrincipalAuth.build_from_credential(self.tenant_id, client_id, credential)
         client_credential = sp_auth.get_msal_client_credential()
-        cca = ConfidentialClientApplication(client_id, client_credential=client_credential, **self._msal_app_kwargs)
-        result = cca.acquire_token_for_client(scopes)
-        check_result(result)
+        cred = ServicePrincipalCredential(client_id, client_credential, **self._msal_app_kwargs)
+        cred.acquire_token(scopes)
 
         # Only persist the service principal after a successful login
         entry = sp_auth.get_entry_to_persist()
         self._service_principal_store.save_entry(entry)
-
-    def login_with_managed_identity(self, scopes, identity_id=None):  # pylint: disable=too-many-statements
-        raise NotImplementedError
-
-    def login_in_cloud_shell(self, scopes):
-        raise NotImplementedError
 
     def logout_user(self, username):
         # If username is an SP client ID, it is ignored
@@ -251,9 +243,6 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         entry = self._service_principal_store.load_entry(client_id, self.tenant_id)
         client_credential = ServicePrincipalAuth(entry).get_msal_client_credential()
         return ServicePrincipalCredential(client_id, client_credential, **self._msal_app_kwargs)
-
-    def get_managed_identity_credential(self, client_id=None):
-        raise NotImplementedError
 
 
 class ServicePrincipalAuth:  # pylint: disable=too-many-instance-attributes

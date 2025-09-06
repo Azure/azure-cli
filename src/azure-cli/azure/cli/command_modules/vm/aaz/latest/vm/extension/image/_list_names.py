@@ -25,9 +25,9 @@ class ListNames(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmextension/types", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/locations/{}/publishers/{}/artifacttypes/vmextension/types", "2024-11-01"],
         ]
     }
 
@@ -48,7 +48,6 @@ class ListNames(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.location = AAZResourceLocationArg(
-            help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
             required=True,
             id_part="name",
         )
@@ -125,7 +124,7 @@ class ListNames(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -168,7 +167,7 @@ class ListNames(AAZCommand):
                 flags={"required": True},
             )
             _element.name = AAZStrType(
-                flags={"required": True, "read_only": True},
+                flags={"read_only": True},
             )
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},

@@ -184,7 +184,7 @@ class Create(AAZCommand):
             help="Enumerates the possible values for cleanup policy",
             enum={"Compact": "Compact", "Delete": "Delete", "DeleteOrCompact": "DeleteOrCompact"},
         )
-        _args_schema.min_compaction_lag_in_mins = AAZIntArg(
+        _args_schema.min_compaction_lag_time_in_minutes = AAZIntArg(
             options=["--min-lag", "--min-compaction-lag-in-mins"],
             arg_group="RetentionDescription",
             help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.",
@@ -340,7 +340,7 @@ class Create(AAZCommand):
             retention_description = _builder.get(".properties.retentionDescription")
             if retention_description is not None:
                 retention_description.set_prop("cleanupPolicy", AAZStrType, ".cleanup_policy")
-                retention_description.set_prop("minCompactionLagInMins", AAZIntType, ".min_compaction_lag_in_mins")
+                retention_description.set_prop("minCompactionLagTimeInMinutes", AAZIntType, ".min_compaction_lag_time_in_minutes")
                 retention_description.set_prop("retentionTimeInHours", AAZIntType, ".retention_time_in_hours")
                 retention_description.set_prop("tombstoneRetentionTimeInHours", AAZIntType, ".tombstone_retention_time_in_hours")
 
@@ -479,8 +479,8 @@ class Create(AAZCommand):
             retention_description.cleanup_policy = AAZStrType(
                 serialized_name="cleanupPolicy",
             )
-            retention_description.min_compaction_lag_in_mins = AAZIntType(
-                serialized_name="minCompactionLagInMins",
+            retention_description.min_compaction_lag_time_in_minutes = AAZIntType(
+                serialized_name="minCompactionLagTimeInMinutes",
             )
             retention_description.retention_time_in_hours = AAZIntType(
                 serialized_name="retentionTimeInHours",

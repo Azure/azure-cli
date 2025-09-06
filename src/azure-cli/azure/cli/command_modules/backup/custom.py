@@ -27,7 +27,8 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemRe
     BackupResourceVaultConfig, BackupResourceVaultConfigResource, DiskExclusionProperties, ExtendedProperties, \
     MoveRPAcrossTiersRequest, RecoveryPointRehydrationInfo, IaasVMRestoreWithRehydrationRequest, IdentityInfo, \
     BackupStatusRequest, ListRecoveryPointsRecommendedForMoveRequest, IdentityBasedRestoreDetails, ScheduleRunType, \
-    UnlockDeleteRequest, ResourceGuardProxyBase, ResourceGuardProxyBaseResource, TargetDiskNetworkAccessSettings
+    UnlockDeleteRequest, ResourceGuardProxyBase, ResourceGuardProxyBaseResource, TargetDiskNetworkAccessSettings, \
+    SecuredVMDetails
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrrJobRequest, CrossRegionRestoreRequest
 
 import azure.cli.command_modules.backup._validators as validators
@@ -70,6 +71,7 @@ secondary_region_map = {
     "eastasia": "southeastasia",
     "eastus": "westus",
     "eastus2": "centralus",
+    "eastus3": "westus3",
     "eastus2euap": "centraluseuap",
     "francecentral": "francesouth",
     "francesouth": "francecentral",
@@ -91,9 +93,13 @@ secondary_region_map = {
     "southafricanorth": "southafricawest",
     "southafricawest": "southafricanorth",
     "southcentralus": "northcentralus",
+    "southcentralus2": "westcentralus",
     "southeastasia": "eastasia",
     "southeastus": "westus3",
+    "southeastus3": "westus3",
+    "southeastus5": "centralus",
     "southindia": "centralindia",
+    "southwestus": "centralus",
     "swedencentral": "swedensouth",
     "swedensouth": "swedencentral",
     "switzerlandnorth": "switzerlandwest",
@@ -868,11 +874,8 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     policy = show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name, policy_name)
 
-    logger.warning('Ignite (November) 2023 onwards Virtual Machine deployments using PS and CLI will default to '
-                   'security type Trusted Launch. Please ensure Policy Name used with "az backup '
-                   'protection enable-for-vm" command is of type Enhanced Policy for Trusted Launch VMs. Non-Trusted '
-                   'Launch Virtual Machines will not be impacted by this change. To know more about default change '
-                   'and Trusted Launch, please visit https://aka.ms/TLaD.')
+    logger.warning('Starting in May 2025, Trusted Launch virtual machines can be protected with both'
+                   ' standard and enhanced policies via PS and CLI')
 
     # throw error if policy has more than 1000 protected VMs.
     if policy.properties.protected_items_count >= 1000:
@@ -890,16 +893,6 @@ def enable_protection_for_vm(cmd, client, resource_group_name, vault_name, vm, p
             The policy type should match with the workload being protected.
             Use the relevant get-default policy command and use it to protect the workload.
             """)
-
-    if (hasattr(vm, 'security_profile') and hasattr(vm.security_profile, 'security_type') and
-            vm.security_profile.security_type is not None and
-            vm.security_profile.security_type.lower() == 'trustedlaunch'):
-        if policy.properties.policy_type != 'V2':
-            raise InvalidArgumentValueError(
-                """
-                Trusted VM can only be protected using Enhanced Policy. Please provide a valid IaasVM Enhanced Policy
-                in --policy-name argument.
-                """)
 
     # Get protectable item.
     protectable_item = _get_protectable_item_for_vm(cmd.cli_ctx, vault_name, resource_group_name, vm_name, vm_rg)
@@ -1414,7 +1407,7 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
                   mi_user_assigned=None, target_zone=None, restore_mode='AlternateLocation', target_vm_name=None,
                   target_vnet_name=None, target_vnet_resource_group=None, target_subnet_name=None,
                   target_subscription_id=None, storage_account_resource_group=None, restore_to_edge_zone=None,
-                  tenant_id=None, disk_access_option=None, target_disk_access_id=None):
+                  tenant_id=None, disk_access_option=None, target_disk_access_id=None, cvm_os_des_id=None):
     vault = vaults_cf(cmd.cli_ctx).get(resource_group_name, vault_name)
     vault_location = vault.location
     vault_identity = vault.identity
@@ -1548,6 +1541,11 @@ def restore_disks(cmd, client, resource_group_name, vault_name, container_name, 
         trigger_restore_request.properties.resource_guard_operation_requests = [
             cust_help.get_resource_guard_operation_request(
                 cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore")]
+
+    if cvm_os_des_id is not None:
+        trigger_restore_request.properties.secured_vm_details = SecuredVMDetails(
+            secured_vmos_disk_encryption_set_id=cvm_os_des_id
+        )
 
     # Trigger restore
     result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,

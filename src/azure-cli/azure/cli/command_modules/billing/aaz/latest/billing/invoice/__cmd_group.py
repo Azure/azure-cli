@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "billing invoice",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage invoice
+    """Manage invoice.
     """
     pass
 

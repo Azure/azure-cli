@@ -6,7 +6,7 @@
 from azure.cli.core import _debug
 from azure.cli.core.auth.util import resource_to_scopes
 from azure.cli.core.extension import EXTENSIONS_MOD_PREFIX
-from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version, get_sdk
+from azure.cli.core.profiles import ResourceType, CustomResourceType, get_api_version
 from azure.cli.core.profiles._shared import get_client_class, SDKProfile
 from azure.cli.core.util import get_az_user_agent, is_track2
 from knack.log import get_logger
@@ -166,6 +166,9 @@ def _prepare_client_kwargs_track2(cli_ctx):
     from azure.cli.core.sdk.policies import RecordTelemetryUserAgentPolicy
     client_kwargs['user_agent_policy'] = RecordTelemetryUserAgentPolicy(**client_kwargs)
 
+    from azure.cli.core.sdk.policies import get_custom_hook_policy
+    client_kwargs['custom_hook_policy'] = get_custom_hook_policy(cli_ctx)
+
     # Replace NetworkTraceLoggingPolicy to redact 'Authorization' and 'x-ms-authorization-auxiliary' headers.
     #   NetworkTraceLoggingPolicy: log raw network trace, with all headers.
     from azure.cli.core.sdk.policies import SafeNetworkTraceLoggingPolicy
@@ -213,7 +216,6 @@ def _get_mgmt_service_client(cli_ctx,
                              subscription_id=None,
                              api_version=None,
                              base_url_bound=True,
-                             resource=None,
                              sdk_profile=None,
                              aux_subscriptions=None,
                              aux_tenants=None,
@@ -221,10 +223,6 @@ def _get_mgmt_service_client(cli_ctx,
                              **kwargs):
     from azure.cli.core._profile import Profile
     logger.debug('Getting management service client client_type=%s', client_type.__name__)
-
-    # Track 1 SDK doesn't maintain the `resource`. The `resource` of the token is the one passed to
-    # get_login_credentials.
-    resource = resource or cli_ctx.cloud.endpoints.active_directory_resource_id
 
     if credential:
         # Use a custom credential
@@ -234,7 +232,7 @@ def _get_mgmt_service_client(cli_ctx,
         # Get a credential for the current `az login` context
         profile = Profile(cli_ctx=cli_ctx)
         credential, subscription_id, _ = profile.get_login_credentials(
-            subscription_id=subscription_id, resource=resource,
+            subscription_id=subscription_id,
             aux_subscriptions=aux_subscriptions, aux_tenants=aux_tenants)
 
     client_kwargs = {}
@@ -280,8 +278,8 @@ def get_data_service_client(cli_ctx, service_type, account_name, account_key, co
         if location_mode:
             client.location_mode = location_mode
     except ValueError as exc:
-        _ERROR_STORAGE_MISSING_INFO = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
-                                              'common._error#_ERROR_STORAGE_MISSING_INFO')
+        _ERROR_STORAGE_MISSING_INFO = ('You need to provide an account name and either an account_key or sas_token '
+                                       'when creating a storage service.')
         if _ERROR_STORAGE_MISSING_INFO in str(exc):
             raise ValueError(exc)
         raise CLIError('Unable to obtain data client. Check your connection parameters.')

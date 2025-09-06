@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.67.0"
+VERSION = "2.77.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -39,12 +39,14 @@ CLASSIFIERS = [
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
     'License :: OSI Approved :: MIT License',
 ]
 
 DEPENDENCIES = [
-    'argcomplete~=3.3.0',
+    'argcomplete~=3.5.2',
     'azure-cli-telemetry==1.1.0.*',
+    'azure-core~=1.35.0',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are logged in telemetry
@@ -52,17 +54,18 @@ DEPENDENCIES = [
     'humanfriendly~=10.0',
     'jmespath',
     'knack~=0.11.0',
+    'microsoft-security-utilities-secret-masker~=1.0.0b4',
     'msal-extensions==1.2.0',
-    'msal[broker]==1.31.1',
-    'msrestazure~=0.6.4',
+    'msal[broker]==1.34.0b1; sys_platform == "win32"',
+    'msal==1.34.0b1; sys_platform != "win32"',
     'packaging>=20.9',
     'pkginfo>=1.5.0.1',
     # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
     'psutil>=5.9; sys_platform != "cygwin"',
     'PyJWT>=2.1.0',
     'pyopenssl>=17.1.0',  # https://github.com/pyca/pyopenssl/pull/612
+    'py-deviceid',
     'requests[socks]',
-    'microsoft-security-utilities-secret-masker~=1.0.0b2',
 ]
 
 with open('README.rst', 'r', encoding='utf-8') as f:

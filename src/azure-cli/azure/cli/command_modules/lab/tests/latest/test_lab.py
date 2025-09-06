@@ -13,6 +13,7 @@ TEST_DIR = os.path.dirname(os.path.realpath(__file__))
 TEMPLATE = os.path.join(TEST_DIR, 'lab_template.json').replace('\\', '\\\\')
 ENV_PARAMETERS = os.path.join(TEST_DIR, 'docdbenv_parameters.json').replace('\\', '\\\\')
 LAB_NAME = 'cliautomationlab'
+HIBERNATE_VM_NAME = 'hibernatevm'
 
 
 class LabScenarioTest(ScenarioTest):
@@ -27,6 +28,7 @@ class LabScenarioTest(ScenarioTest):
             'size': 'Standard_DS1_v2',
             'password': 'SecretPassword123',
             'lab_name': LAB_NAME,
+            'hibernate_vm_name': HIBERNATE_VM_NAME,
             'rg': 'labtest'
         })
 
@@ -87,6 +89,12 @@ class LabScenarioTest(ScenarioTest):
         self.cmd('lab vm list -g {rg} --lab-name {lab_name}', checks=[
             self.check('length(@)', 4)
         ])
+
+        # Try to hibernate a VM with hibernation not enabled
+        self.cmd('lab vm hibernate -g {rg} --lab-name {lab_name} --name {linux_vm_name}', expect_failure=True)
+
+        # Hibernate VM
+        self.cmd('lab vm hibernate -g {rg} --lab-name {lab_name} --name {hibernate_vm_name}')
 
         # Delete all the vms
         self.cmd('lab vm delete -g {rg} --lab-name {lab_name} --name {linux_vm_name} -y', checks=[

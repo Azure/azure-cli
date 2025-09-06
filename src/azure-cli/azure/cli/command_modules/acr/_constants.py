@@ -5,11 +5,14 @@
 # pylint: disable=line-too-long
 
 from azure.cli.core.profiles import ResourceType
+from enum import Enum
 
 ACR_RESOURCE_PROVIDER = 'Microsoft.ContainerRegistry'
 REGISTRY_RESOURCE_TYPE = ACR_RESOURCE_PROVIDER + '/registries'
 WEBHOOK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/webhooks'
 REPLICATION_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/replications'
+
+CREDENTIAL_SET_RESOURCE_ID_TEMPLATE = '/subscriptions/{sub_id}/resourceGroups/{rg}/providers/Microsoft.ContainerRegistry/registries/{reg_name}/credentialSets/{cred_set_name}'
 
 TASK_RESOURCE_TYPE = REGISTRY_RESOURCE_TYPE + '/tasks'
 TASK_VALID_VSTS_URLS = ['visualstudio.com', 'dev.azure.com']
@@ -38,6 +41,11 @@ ALLOWED_TASK_FILE_TYPES = ('.yaml', '.yml', '.toml', '.json', '.sh', '.bash', '.
 
 # https://github.com/opencontainers/distribution-spec/blob/main/spec.md#listing-referrers
 REF_KEY = "manifests"
+
+
+class AbacRoleAssignmentMode(Enum):
+    ABAC = "rbac-abac"
+    RBAC = "rbac"
 
 
 def get_classic_sku(cmd):

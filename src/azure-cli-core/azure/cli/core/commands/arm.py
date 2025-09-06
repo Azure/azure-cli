@@ -15,7 +15,7 @@ from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.events import EVENT_INVOKER_PRE_LOAD_ARGUMENTS
 from azure.cli.core.commands.validators import IterateValue
-from azure.cli.core.util import shell_safe_json_parse, get_command_type_kwarg
+from azure.cli.core.util import shell_safe_json_parse, get_command_type_kwarg, getprop
 from azure.cli.core.profiles import ResourceType, get_sdk
 
 from knack.arguments import CLICommandArgument, ignore_type
@@ -185,6 +185,52 @@ def resource_exists(cli_ctx, subscription, resource_group, name, namespace, type
         cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, subscription_id=subscription).resources
     existing = len(list(client.list(filter=odata_filter))) == 1
     return existing
+
+
+def register_global_policy_argument(cli_ctx):
+
+    def add_global_policy_argument(_, **kwargs):
+        command_table = kwargs.get('commands_loader').command_table
+
+        if not command_table:
+            return
+
+        class ChangeReferenceAction(argparse.Action):  # pylint:disable=too-few-public-methods
+
+            def __call__(self, parser, namespace, value, option_string=None):
+                # save change reference to CLI context
+                cmd = getattr(namespace, 'cmd', None) or getattr(namespace, '_cmd', None)
+                cmd.cli_ctx.data['_change_reference'] = value
+
+        class AcquirePolicyTokenAction(argparse.Action):  # pylint:disable=too-few-public-methods
+
+            def __call__(self, parser, namespace, value, option_string=None):
+                # save change reference to CLI context
+                cmd = getattr(namespace, 'cmd', None) or getattr(namespace, '_cmd', None)
+                cmd.cli_ctx.data['_acquire_policy_token'] = True
+
+        for command in command_table.values():
+            if command.name.split()[-1] in ['list', 'show']:
+                continue
+
+            change_reference_kwargs = {
+                'help': 'The related change reference ID for this resource operation',
+                'arg_group': 'Global Policy',
+                'action': ChangeReferenceAction,
+            }
+            acquire_policy_token_kwargs = {
+                'help': 'Acquiring an Azure Policy token automatically for this resource operation',
+                'arg_group': 'Global Policy',
+                'nargs': 0,
+                'action': AcquirePolicyTokenAction,
+            }
+            command.add_argument('_change_reference', '--change-reference', **change_reference_kwargs)
+            command.add_argument('_acquire_policy_token', '--acquire-policy-token', **acquire_policy_token_kwargs)
+
+    policy_token_feature_enabled = cli_ctx.config.getboolean('core', 'enable_policy_token', False)
+    if policy_token_feature_enabled:
+        from knack import events
+        cli_ctx.register_event(events.EVENT_INVOKER_POST_CMD_TBL_CREATE, add_global_policy_argument)
 
 
 # pylint: disable=too-many-statements
@@ -600,7 +646,7 @@ def remove_properties(instance, argument_values):
 def throw_and_show_options(instance, part, path):
     from msrest.serialization import Model
     options = instance.__dict__ if hasattr(instance, '__dict__') else instance
-    if isinstance(instance, Model) and isinstance(getattr(instance, 'additional_properties', None), dict):
+    if isinstance(instance, Model) and isinstance(getprop(instance, 'additional_properties', None), dict):
         options.update(options.pop('additional_properties'))
     parent = '.'.join(path[:-1]).replace('.[', '[')
     error_message = "Couldn't find '{}' in '{}'.".format(part, parent)
@@ -673,7 +719,7 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
                     matches.append(x)
                 elif not isinstance(x, dict):
                     snake_key = make_snake_case(key)
-                    if hasattr(x, snake_key) and getattr(x, snake_key, None) == value:
+                    if hasattr(x, snake_key) and getprop(x, snake_key, None) == value:
                         matches.append(x)
 
             if len(matches) == 1:
@@ -681,7 +727,7 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
             if len(matches) > 1:
                 raise CLIError("non-unique key '{}' found multiple matches on {}. Key must be unique."
                                .format(key, path[-2]))
-            if key in getattr(instance, 'additional_properties', {}):
+            if key in getprop(instance, 'additional_properties', {}):
                 instance.enable_additional_properties_sending()
                 return instance.additional_properties[key]
             raise CLIError("item with value '{}' doesn\'t exist for key '{}' on {}".format(value, key, path[-2]))
@@ -697,8 +743,8 @@ def _update_instance(instance, part, path):  # pylint: disable=too-many-return-s
             return instance[part]
 
         if hasattr(instance, make_snake_case(part)):
-            return getattr(instance, make_snake_case(part), None)
-        if part in getattr(instance, 'additional_properties', {}):
+            return getprop(instance, make_snake_case(part), None)
+        if part in getprop(instance, 'additional_properties', {}):
             instance.enable_additional_properties_sending()
             return instance.additional_properties[part]
         raise AttributeError()
@@ -741,7 +787,7 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
                                           parameters=parameters)
                 break
             except HttpResponseError as ex:
-                if 'role assignment already exists' in ex.message:
+                if ex.error.code == 'RoleAssignmentExists':
                     logger.info('Role assignment already exists')
                     break
                 if retry_time < retry_times and ' does not exist in the directory ' in ex.message:

@@ -14,10 +14,10 @@ _Fedora:_
 docker build --target build-env -f ./scripts/release/rpm/fedora.dockerfile -t azure/azure-cli:fedora29-builder .
 ```
 
-_Mariner:_
+_Azure Linux:_
 
 ```bash
-docker build --target build-env -f ./scripts/release/rpm/mariner.dockerfile -t azure/azure-cli:mariner-builder .
+docker build --target build-env -f ./scripts/release/rpm/azurelinux.dockerfile -t azure/azure-cli:azurelinux-builder .
 ```
 
 After several minutes, this will have created a Docker image named `azure/azure-cli:centos7-builder` containing an
@@ -34,9 +34,9 @@ _Fedora:_
 docker run azure/azure-cli:fedora29-builder cat /root/rpmbuild/RPMS/x86_64/azure-cli-dev-1.fc29.x86_64.rpm > ./bin/azure-cli-dev-1.fc29.x86_64.rpm
 ```
 
-_Mariner:_
+_Azure Linux:_
 ```bash
-docker run azure/azure-cli:mariner-builder cat /usr/src/mariner/RPMS/x86_64/azure-cli-dev-1.cm1.x86_64.rpm > ./bin/azure-cli-dev-1.cm1.x86_64.rpm
+docker run azure/azure-cli:azurelinux-builder cat /usr/src/azl/RPMS/x86_64/azure-cli-dev-1.azl3.x86_64.rpm > ./bin/azure-cli-dev-1.azl3.x86_64.rpm
 ```
 
 This launches a container running from the image built and tagged by the previous command, prints the contents of the

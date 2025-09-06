@@ -20,6 +20,7 @@ from azure.cli.command_modules.network._validators import (
     validate_dns_record_type, validate_private_ip_address,
     get_servers_validator, get_public_ip_validator, get_nsg_validator,
     get_vnet_validator, validate_ip_tags, validate_ddos_name_or_id,
+    auto_scale_config_validator,
     validate_service_endpoint_policy,
     validate_custom_error_pages,
     validate_custom_headers, validate_status_code_ranges, validate_subnet_ranges,
@@ -34,7 +35,6 @@ from azure.cli.command_modules.network._completers import (
 from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
-from azure.cli.command_modules.network.custom import RULESET_VERSION
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
@@ -58,6 +58,11 @@ def load_arguments(self, _):
         help='Space-separated list of availability zones into which to provision the resource.',
     )
     edge_zone = CLIArgumentType(help='The name of edge zone.')
+    auto_scale_config = CLIArgumentType(
+        nargs='*',
+        options_list='--auto-scale-config',
+        validator=auto_scale_config_validator
+    )
 
     # region NetworkRoot
     with self.argument_context('network') as c:
@@ -220,11 +225,10 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway waf-policy') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
         c.argument('rule_set_type', options_list='--type',
-                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'OWASP']),
+                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'Microsoft_DefaultRuleSet', 'OWASP']),
                    help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   arg_type=get_enum_type(RULESET_VERSION.values()),
                    help='The version of the web application firewall rule set type. '
                         '0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet.')
 
@@ -447,7 +451,7 @@ def load_arguments(self, _):
         c.argument('request', help='Query inbound NAT rule port mapping request.', action=AddMappingRequest, nargs='*')
 
     with self.argument_context('network lb create') as c:
-        c.argument('frontend_ip_zone', zone_type, options_list=['--frontend-ip-zone'], help='used to create internal facing Load balancer')
+        c.argument('frontend_ip_zone', zones_type, options_list=['--frontend-ip-zone'], help='used to create internal facing Load balancer')
         c.argument('validate', help='Generate and validate the ARM template without creating any resources.', action='store_true')
         c.argument('sku', help='Load balancer SKU', arg_type=get_enum_type(['Basic', 'Gateway', 'Standard'], default='Standard'))
         c.argument('edge_zone', edge_zone)
@@ -609,7 +613,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
-        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard"]), default="Standard")
+        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard", "StandardV2"]), default="Standard")
         c.argument('tier', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(["Regional", "Global"]))
         c.ignore('dns_name_type')
         c.argument('edge_zone', edge_zone)
@@ -789,6 +793,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network routeserver create') as c:
         c.argument('virtual_hub_name', id_part=None)
+        c.argument('auto_scale_config', auto_scale_config)
     # endregion
 
     # region Remove --ids from listsaz

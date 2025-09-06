@@ -19,7 +19,7 @@ class Update(AAZCommand):
 
     :example: Updates a Service Bus Namespace
         az servicebus namespace update --resource-group myresourcegroup --name mynamespace --tags tag=value
-        az az servicebus namespace update --name mynamespace --resource-group myresourcegroup --sku Basic
+        az servicebus namespace update --name mynamespace --resource-group myresourcegroup --sku Basic
     """
 
     _aaz_info = {

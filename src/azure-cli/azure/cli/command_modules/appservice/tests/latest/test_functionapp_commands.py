@@ -169,7 +169,6 @@ class FunctionappACRDeploymentScenarioTest(ScenarioTest):
 
 
 class FunctionAppReservedInstanceTest(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_reserved_instance(self, resource_group, storage_account):
@@ -192,7 +191,6 @@ class FunctionAppReservedInstanceTest(ScenarioTest):
 
 
 class FunctionAppHttpsOnlyTest(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_https_only(self, resource_group, storage_account):
@@ -210,9 +208,43 @@ class FunctionAppHttpsOnlyTest(ScenarioTest):
         functionapp_name = self.create_random_name('function', 40)
         self.cmd(f'functionapp create -g {resource_group} -n {functionapp_name} --plan {linux_plan} --os-type linux --runtime python -s {storage_account} --https-only false --functions-version 4').assert_with_checks([JMESPathCheck('httpsOnly', False)])
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_slot_https_only_default_true(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('function', 40)
+        slot_name = self.create_random_name('slot', 40)
+        ep_plan_name = self.create_random_name('epplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+        self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --runtime node --https-only=False'.format(resource_group, functionapp_name, storage_account, ep_plan_name))
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+            JMESPathCheck('httpsOnly', True)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_slot_https_only_true(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('function', 40)
+        slot_name = self.create_random_name('slot', 40)
+        ep_plan_name = self.create_random_name('epplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+        self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --runtime node --https-only=False'.format(resource_group, functionapp_name, storage_account, ep_plan_name))
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {} --https-only'.format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+            JMESPathCheck('httpsOnly', True)])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_create_slot_https_only_false(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name('function', 40)
+        slot_name = self.create_random_name('slot', 40)
+        ep_plan_name = self.create_random_name('epplan', 40)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+        self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --runtime node --https-only=False'.format(resource_group, functionapp_name, storage_account, ep_plan_name))
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {} --https-only=False'.format(resource_group, functionapp_name, slot_name)).assert_with_checks([
+            JMESPathCheck('httpsOnly', False)])
 
 class FunctionAppWithPlanE2ETest(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_e2e(self, resource_group, resource_group2):
@@ -224,8 +256,8 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             resource_group, plan)).get_output_in_json()['id']
         self.cmd('appservice plan list -g {}'.format(resource_group))
         self.cmd(
-            'storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(storage, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
-        storage_account_id2 = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'.format(
+            'storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(storage, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+        storage_account_id2 = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'.format(
             storage2, resource_group2, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()['id']
 
         self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'.format(resource_group, functionapp_name, plan, storage), checks=[
@@ -262,7 +294,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Java|17')])
+            JMESPathCheck('linuxFxVersion', 'Java|21')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -289,7 +321,6 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
             JMESPathCheck('linuxFxVersion', 'Java|11')])
 
-    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_app_service_powershell(self, resource_group, storage_account):
@@ -313,9 +344,8 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7.4')])
 
-    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_app_service_powershell_with_runtime_version(self, resource_group, storage_account):
@@ -327,7 +357,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --runtime-version 7.2 --functions-version 4'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --runtime powershell --functions-version 4'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -339,7 +369,7 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7.4')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -367,7 +397,6 @@ class FunctionAppWithPlanE2ETest(ScenarioTest):
 
 
 class FunctionUpdatePlan(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_move_plan_to_elastic(self, resource_group, storage_account):
@@ -435,7 +464,6 @@ class FunctionUpdatePlan(ScenarioTest):
 
 
 class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_e2e(self, resource_group, storage_account):
@@ -464,7 +492,6 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-c-e2e-ragrs', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer(sku='Standard_RAGRS')
     def test_functionapp_consumption_ragrs_storage_e2e(self, resource_group, storage_account):
@@ -488,7 +515,7 @@ class FunctionAppWithConsumptionPlanE2ETest(ScenarioTest):
 
 
 class FunctionWorkloadProfile(ScenarioTest):
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_workloadprofiles(self, resource_group, storage_account):
@@ -602,7 +629,6 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
-    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_consumption_linux_powershell(self, resource_group, storage_account):
@@ -623,7 +649,7 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
             JMESPathPatternCheck("[?name=='WEBSITE_CONTENTSHARE'].value|[0]", "^" + functionapp_name.lower()[0:50])])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('linuxFxVersion', 'PowerShell|7.2')])
+            JMESPathCheck('linuxFxVersion', 'PowerShell|7.4')])
 
     @ResourceGroupPreparer(name_prefix='azurecli-functionapp-linux', location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -644,7 +670,6 @@ class FunctionAppWithLinuxConsumptionPlanTest(ScenarioTest):
 
 
 class FunctionappDaprConfig(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_enable_dapr(self, resource_group, storage_account):
@@ -687,7 +712,7 @@ class FunctionappDaprConfig(ScenarioTest):
 
 
 class FunctionappDapr(LiveScenarioTest):
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location="northeurope")
     @StorageAccountPreparer()
     def test_functionapp_disable_dapr(self, resource_group, storage_account):
@@ -784,14 +809,554 @@ class FunctionappDapr(LiveScenarioTest):
         ])
 
 
+class FunctionAppFlexMigrationTest(LiveScenarioTest):
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_migration_list_candidates(self, resource_group, storage_account):
+        eligible_functionapp_name = self.create_random_name('consumption-func', 24)
+        noneligible_runtime_functionapp_name = self.create_random_name('noneligible-runtime-func', 40)
+        noneligible_slots_functionapp_name = self.create_random_name('noneligible-slots-func', 40)
+        noneligible_region_functionapp_name = self.create_random_name('noneligible-region-func', 40)
+        noneligible_cert_functionapp_name = self.create_random_name('noneligible-cert-func', 40)
+        slot_name = self.create_random_name(prefix='slotname', length=24)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, eligible_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.9 --functions-version 4'
+                  .format(resource_group, noneligible_runtime_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, noneligible_slots_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, noneligible_slots_functionapp_name, slot_name))
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, noneligible_cert_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings WEBSITE_LOAD_CERTIFICATES=*'.format(resource_group, noneligible_cert_functionapp_name))
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, noneligible_region_functionapp_name, 'canadaeast', storage_account))
+
+        candidates = self.cmd('functionapp flex-migration list').get_output_in_json().get('eligible_apps', [])
+
+        candidate_names = [candidate.get('name') for candidate in candidates if 'name' in candidate]
+
+        self.assertTrue(eligible_functionapp_name in candidate_names)
+        self.assertTrue(noneligible_runtime_functionapp_name not in candidate_names)
+        self.assertTrue(noneligible_slots_functionapp_name in candidate_names)
+        self.assertTrue(noneligible_region_functionapp_name not in candidate_names)
+        self.assertTrue(noneligible_cert_functionapp_name not in candidate_names)
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_migration_private_cert_list_candidates(self, resource_group, storage_account):
+        noneligible_privatekey_functionapp_name = self.create_random_name('noneligible-privatekey-func', 40)
+        pfx_file = os.path.join(TEST_DIR, 'server.pfx')
+        cert_password = 'test'
+        cert_thumbprint = '9E9735C45C792B03B3FFCCA614852B32EE71AD6B'
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, noneligible_privatekey_functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd('webapp config ssl upload -g {} -n {} --certificate-file "{}" --certificate-password {} --certificate-name {}'.format(resource_group, noneligible_privatekey_functionapp_name, pfx_file, cert_password, "test123"), checks=[
+            JMESPathCheck('thumbprint', cert_thumbprint),
+            JMESPathCheck('name', 'test123')
+        ])
+
+        candidates = self.cmd('functionapp flex-migration list').get_output_in_json().get('eligible_apps', [])
+
+        candidate_names = [candidate.get('name') for candidate in candidates if 'name' in candidate]
+
+        self.assertTrue(noneligible_privatekey_functionapp_name in candidate_names)
+
+        self.cmd('webapp config ssl bind -g {} -n {} --certificate-thumbprint {} --ssl-type {}'.format(resource_group, noneligible_privatekey_functionapp_name, cert_thumbprint, 'SNI'), checks=[
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].sslState".format(
+                noneligible_privatekey_functionapp_name), 'SniEnabled'),
+            JMESPathCheck("hostNameSslStates|[?name=='{}.azurewebsites.net']|[0].thumbprint".format(
+                noneligible_privatekey_functionapp_name), cert_thumbprint)
+        ])
+
+        candidates = self.cmd('functionapp flex-migration list').get_output_in_json().get('eligible_apps', [])
+
+        candidate_names = [candidate.get('name') for candidate in candidates if 'name' in candidate]
+
+        self.assertTrue(noneligible_privatekey_functionapp_name not in candidate_names)
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_default_storage_account(self, resource_group, resource_group2, storage_account):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, src_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        src_app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {}'
+            .format(resource_group, src_name, resource_group2, tgt_name)
+        )
+
+        tgt_app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group2, tgt_name)).get_output_in_json()
+
+        src_storage_setting = next((setting for setting in src_app_settings if setting['name'] == 'AzureWebJobsStorage'), None)
+        tgt_storage_setting = next((setting for setting in tgt_app_settings if setting['name'] == 'AzureWebJobsStorage'), None)
+        self.assertEqual(src_storage_setting['value'], tgt_storage_setting['value'])
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    def test_functionapp_flex_migration_storage_account_conn_string_format(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, src_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        tgt_app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group2, tgt_name)).get_output_in_json()
+
+        tgt_storage_setting = next((setting for setting in tgt_app_settings if setting['name'] == 'AzureWebJobsStorage'), None)
+        self.assertIn('AccountName=', tgt_storage_setting['value'])
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_default_identity_based_account_name_storage(self, resource_group, resource_group2, storage_account):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, src_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd('functionapp config appsettings delete -g {} -n {} --setting-names AzureWebJobsStorage'
+                .format(resource_group, src_name))
+
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings AzureWebJobsStorage__accountName={}'
+                .format(resource_group, src_name, storage_account))
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {}'
+            .format(resource_group, src_name, resource_group2, tgt_name)
+        )
+
+        src_app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
+        tgt_app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group2, tgt_name)).get_output_in_json()
+
+        src_account_name_setting = next((setting for setting in src_app_settings if setting['name'] == 'AzureWebJobsStorage__accountName'), None)
+        self.assertEqual(src_account_name_setting['value'], storage_account)
+
+        tgt_storage_setting = next((setting for setting in tgt_app_settings if setting['name'] == 'AzureWebJobsStorage__accountName'), None)
+        self.assertIn(tgt_storage_setting['value'], storage_account)
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    def test_functionapp_flex_migration_identity_based_account_name_storage_format(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, src_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd('functionapp config appsettings delete -g {} -n {} --setting-names AzureWebJobsStorage'
+                .format(resource_group, src_name))
+
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings AzureWebJobsStorage__accountName={}'
+                .format(resource_group, src_name, storage_account))
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        src_app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
+        tgt_app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group2, tgt_name)).get_output_in_json()
+
+        src_account_name_setting = next((setting for setting in src_app_settings if setting['name'] == 'AzureWebJobsStorage__accountName'), None)
+        self.assertEqual(src_account_name_setting['value'], storage_account)
+
+        tgt_storage_setting = next((setting for setting in tgt_app_settings if setting['name'] == 'AzureWebJobsStorage__accountName'), None)
+        self.assertIn(tgt_storage_setting['value'], storage_account2)
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_default_identity_based_blob_service_uri_storage(self, resource_group, resource_group2, storage_account):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, src_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd('functionapp config appsettings delete -g {} -n {} --setting-names AzureWebJobsStorage'
+                .format(resource_group, src_name))
+
+        blob_service_uri = f"https://{storage_account}.blob.core.windows.net"
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings AzureWebJobsStorage__blobServiceUri={}'
+                .format(resource_group, src_name, blob_service_uri))
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {}'
+            .format(resource_group, src_name, resource_group2, tgt_name)
+        )
+
+        src_app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
+        tgt_app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group2, tgt_name)).get_output_in_json()
+
+        src_blob_uri_setting = next((setting for setting in src_app_settings if setting['name'] == 'AzureWebJobsStorage__blobServiceUri'), None)
+        self.assertEqual(src_blob_uri_setting['value'], blob_service_uri)
+
+        tgt_storage_setting = next((setting for setting in tgt_app_settings if setting['name'] == 'AzureWebJobsStorage__blobServiceUri'), None)
+        self.assertIn(tgt_storage_setting['value'], blob_service_uri)
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    def test_functionapp_flex_migration_identity_based_blob_service_uri_storage_format(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+
+        self.cmd('functionapp create -g {} -n {} -c {} -s {}  --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+                .format(resource_group, src_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
+
+        self.cmd('functionapp config appsettings delete -g {} -n {} --setting-names AzureWebJobsStorage'
+                .format(resource_group, src_name))
+
+        blob_service_uri = f"https://{storage_account}.blob.core.windows.net"
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings AzureWebJobsStorage__blobServiceUri={}'
+                .format(resource_group, src_name, blob_service_uri))
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        src_app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
+        tgt_app_settings = self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group2, tgt_name)).get_output_in_json()
+
+        src_blob_uri_setting = next((setting for setting in src_app_settings if setting['name'] == 'AzureWebJobsStorage__blobServiceUri'), None)
+        self.assertEqual(src_blob_uri_setting['value'], blob_service_uri)
+
+        tgt_storage_setting = next((setting for setting in tgt_app_settings if setting['name'] == 'AzureWebJobsStorage__blobServiceUri'), None)
+        self.assertIn(tgt_storage_setting['value'], f"https://{storage_account2}.blob.core.windows.net")
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_app_with_slots(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+        slot_name = self.create_random_name(prefix='slotname', length=24)
+        location = FLEX_ASP_LOCATION_FUNCTIONAPP
+
+        self.cmd(
+            'functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+            .format(resource_group, src_name, location, storage_account)
+        )
+
+        self.cmd('functionapp deployment slot create -g {} -n {} --slot {}'.format(resource_group, src_name, slot_name))
+
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO=BAR'.format(resource_group, src_name))
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group2, tgt_name), checks=[
+            JMESPathCheck("[?name=='FOO'].value|[0]", "BAR")])
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_site_configuration(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+        location = FLEX_ASP_LOCATION_FUNCTIONAPP
+
+        self.cmd(
+            'functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+            .format(resource_group, src_name, location, storage_account), checks=[
+                JMESPathCheck('httpsOnly', False),
+                JMESPathCheck('clientCertMode', 'Required'),
+                JMESPathCheck('clientCertEnabled', False),
+                JMESPathCheck('clientCertExclusionPaths', None)
+            ]
+        )
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group, src_name), checks=[
+            JMESPathCheck('http20Enabled', True),
+            JMESPathCheck('minTlsVersion', '1.2'),
+            JMESPathCheck('minTlsCipherSuite', None)])
+
+        self.cmd('webapp config set -g {} -n {} --http20-enabled false --min-tls-version 1.3 --min-tls-cipher-suite TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384'.format(resource_group, src_name), checks=[
+            JMESPathCheck('http20Enabled', False),
+            JMESPathCheck('minTlsVersion', '1.3'),
+            JMESPathCheck('minTlsCipherSuite', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384')
+        ])
+
+        self.cmd('functionapp update -g {} -n {} --set httpsOnly=true clientCertMode=Optional clientCertEnabled=true'.format(resource_group, src_name), checks=[
+            JMESPathCheck('clientCertMode', 'Optional'),
+            JMESPathCheck('clientCertEnabled', True),
+            JMESPathCheck('httpsOnly', True)
+        ])
+
+        self.cmd('functionapp config appsettings set -g {} -n {} --settings FOO=BAR'.format(resource_group, src_name))
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2), checks=[
+                JMESPathCheck('clientCertMode', 'Optional'),
+                JMESPathCheck('clientCertEnabled', True),
+                JMESPathCheck('httpsOnly', True)
+            ]
+        )
+
+        self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group2, tgt_name), checks=[
+            JMESPathCheck("[?name=='FOO'].value|[0]", "BAR")])
+
+        self.cmd('functionapp config show -g {} -n {}'.format(resource_group2, tgt_name), checks=[
+            JMESPathCheck('http20Enabled', False),
+            JMESPathCheck('minTlsVersion', '1.3'),
+            JMESPathCheck('minTlsCipherSuite', 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384'),
+        ])
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_storage_mounts(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+        location = FLEX_ASP_LOCATION_FUNCTIONAPP
+
+        self.cmd(
+            'functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+            .format(resource_group, src_name, location, storage_account)
+        )
+
+        self.cmd(('webapp config storage-account add -g {} -n {} --custom-id Id --storage-type AzureFiles --account-name name '
+                  '--share-name sharename --access-key key --mount-path /path/to/mount')
+                  .format(resource_group, src_name)).assert_with_checks([(JMESPathCheck("[?name=='Id']|[0].value.accessKey", None))])
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        self.cmd('webapp config storage-account list -g {} -n {}'.format(resource_group2, tgt_name)).assert_with_checks([
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck("[?name=='Id']|[0].value.type", "AzureFiles"),
+            JMESPathCheck("[?name=='Id']|[0].value.accountName", "name"),
+            JMESPathCheck("[?name=='Id']|[0].value.shareName", "sharename"),
+            JMESPathCheck("[?name=='Id']|[0].value.accessKey", "key"),
+            JMESPathCheck("[?name=='Id']|[0].value.mountPath", "/path/to/mount")])
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_managed_identities(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+        location = FLEX_ASP_LOCATION_FUNCTIONAPP
+
+        self.cmd(
+            'functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+            .format(resource_group, src_name, location, storage_account)
+        )
+
+        self.cmd('functionapp identity assign -g {} -n {}'.format(resource_group, src_name))
+
+        user_identity_name = self.create_random_name('useridentity', 24)
+        user_identity = self.cmd('identity create -g {} -n {}'.format(resource_group, user_identity_name)).get_output_in_json()
+        user_identity_id = user_identity['id']
+
+        self.cmd('functionapp identity assign -g {} -n {} --identities {}'.format(resource_group, src_name, user_identity_id))
+
+        src_identity_info = self.cmd('functionapp identity show -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
+        system_identity_principal_id = src_identity_info['principalId']
+
+        self.cmd('role assignment create --assignee {} --role "Storage Blob Data Contributor" --scope /subscriptions/{}/resourceGroups/{}/providers/Microsoft.Storage/storageAccounts/{}'
+                 .format(system_identity_principal_id, self.get_subscription_id(), resource_group, storage_account))
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        tgt_identity_info = self.cmd('functionapp identity show -g {} -n {}'.format(resource_group2, tgt_name)).get_output_in_json()
+        self.assertTrue(tgt_identity_info['type'] in ['SystemAssigned', 'SystemAssigned, UserAssigned'])
+        self.assertTrue('userAssignedIdentities' in tgt_identity_info)
+        self.assertTrue(user_identity_id in tgt_identity_info['userAssignedIdentities'])
+
+        time.sleep(30)
+
+        tgt_system_principal_id = tgt_identity_info['principalId']
+        self.cmd('role assignment list --assignee {} --all'.format(tgt_system_principal_id), checks=[
+            JMESPathCheck('length([])', 1),
+            JMESPathCheck('[0].roleDefinitionName', 'Storage Blob Data Contributor')
+        ])
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_access_restrictions(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+        vnet_name = self.create_random_name('vnet', 24)
+        location = FLEX_ASP_LOCATION_FUNCTIONAPP
+
+        self.cmd(
+            'functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+            .format(resource_group, src_name, location, storage_account)
+        )
+
+        self.cmd('webapp config access-restriction add -g {} -n {} --rule-name afd-extended --action Allow --service-tag AzureFrontDoor.Backend --priority 200 --http-header x-azure-fdid=12345678-abcd-1234-abcd-12345678910a x-azure-FDID=next-id x-forwarded-host=contoso.com'.format(resource_group, src_name), checks=[
+            JMESPathCheck('length(@)', 2),
+            JMESPathCheck('[0].name', 'afd-extended'),
+            JMESPathCheck('[0].action', 'Allow'),
+            JMESPathCheck('[0].ipAddress', 'AzureFrontDoor.Backend'),
+            JMESPathCheck('[0].tag', 'ServiceTag'),
+            JMESPathCheck('length([0].headers)', 2),
+            JMESPathCheck('length([0].headers.\"x-azure-fdid\")', 2),
+            JMESPathCheck('length([0].headers.\"x-forwarded-host\")', 1)
+        ])
+
+        self.cmd('az network vnet create -g {} -n {} --address-prefixes 10.0.0.0/16 --subnet-name endpoint-subnet --subnet-prefixes 10.0.0.0/24'.format(resource_group, vnet_name), checks=[
+            JMESPathCheck('subnets[0].serviceEndpoints', None)
+        ])
+
+        self.cmd('webapp config access-restriction add -g {} -n {} --rule-name vnet-integration --action Allow --vnet-name {} --subnet endpoint-subnet --priority 150'.format(resource_group, src_name, vnet_name), checks=[
+            JMESPathCheck('length(@)', 3),
+            JMESPathCheck('[1].name', 'vnet-integration'),
+            JMESPathCheck('[1].action', 'Allow')
+        ])
+
+        self.cmd('webapp config access-restriction add -g {} -n {} --rule-name multi-source --action Allow --ip-address "2004::1000/120,192.168.0.0/24" --priority 200'.format(resource_group, src_name), checks=[
+            JMESPathCheck('length(@)', 4),
+            JMESPathCheck('[2].name', 'multi-source'),
+            JMESPathCheck('[2].action', 'Allow'),
+            JMESPathCheck('[2].ipAddress', '2004::1000/120,192.168.0.0/24')
+        ])
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        self.cmd('webapp config access-restriction show -g {} -n {}'.format(resource_group2, tgt_name), checks=[
+            JMESPathCheck('length(@)', 5),
+            JMESPathCheck('length(ipSecurityRestrictions)', 4),
+            JMESPathCheck('ipSecurityRestrictions[0].name', 'afd-extended'),
+            JMESPathCheck('ipSecurityRestrictions[0].action', 'Allow'),
+            JMESPathCheck('ipSecurityRestrictions[0].ip_address', 'AzureFrontDoor.Backend'),
+            JMESPathCheck('ipSecurityRestrictions[0].tag', 'ServiceTag'),
+            JMESPathCheck('length(ipSecurityRestrictions[0].headers)', 2),
+            JMESPathCheck('ipSecurityRestrictions[1].name', 'vnet-integration'),
+            JMESPathCheck('ipSecurityRestrictions[1].action', 'Allow'),
+            JMESPathCheck('ipSecurityRestrictions[2].name', 'multi-source'),
+            JMESPathCheck('ipSecurityRestrictions[2].action', 'Allow'),
+            JMESPathCheck('ipSecurityRestrictions[2].ip_address', '2004::1000/120,192.168.0.0/24'),
+            JMESPathCheck('ipSecurityRestrictions[3].name', 'Deny all'),
+            JMESPathCheck('ipSecurityRestrictions[3].action', 'Deny'),
+            JMESPathCheck('length(scmIpSecurityRestrictions)', 1),
+            JMESPathCheck('scmIpSecurityRestrictions[0].name', 'Allow all'),
+            JMESPathCheck('scmIpSecurityRestrictions[0].action', 'Allow'),
+            JMESPathCheck('scmIpSecurityRestrictionsUseMain', False),
+            JMESPathCheck('pSecurityRestrictionsDefaultAction', None),
+            JMESPathCheck('scmIpSecurityRestrictionsDefaultAction', None)
+        ])
+
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @ResourceGroupPreparer(parameter_name='resource_group2', location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group2', parameter_name='storage_account2')
+    @StorageAccountPreparer(resource_group_parameter_name='resource_group')
+    def test_functionapp_flex_migration_cors(self, resource_group, resource_group2, storage_account, storage_account2):
+        src_name = self.create_random_name('srcfunc', 24)
+        tgt_name = self.create_random_name('tgtfunc', 24)
+        location = FLEX_ASP_LOCATION_FUNCTIONAPP
+
+        self.cmd(
+            'functionapp create -g {} -n {} -c {} -s {} --os-type linux --runtime python --runtime-version 3.11 --functions-version 4'
+            .format(resource_group, src_name, location, storage_account)
+        )
+
+        self.cmd('functionapp cors add -g {} -n {} --allowed-origins https://example.com https://api.example.com https://localhost:3000'
+                 .format(resource_group, src_name))
+
+        self.cmd('functionapp cors credentials -g {} -n {} --enable'
+                 .format(resource_group, src_name))
+
+        src_cors_config = self.cmd('functionapp cors show -g {} -n {}'.format(resource_group, src_name)).get_output_in_json()
+
+        self.assertTrue('allowedOrigins' in src_cors_config)
+        self.assertTrue('https://example.com' in src_cors_config['allowedOrigins'])
+        self.assertTrue('https://api.example.com' in src_cors_config['allowedOrigins'])
+        self.assertTrue('https://localhost:3000' in src_cors_config['allowedOrigins'])
+        self.assertTrue(src_cors_config['supportCredentials'])
+
+        self.cmd(
+            'functionapp flex-migration start --source-resource-group {} --source-name {} --resource-group {} --name {} --storage-account {}'
+            .format(resource_group, src_name, resource_group2, tgt_name, storage_account2)
+        )
+
+        tgt_cors_config = self.cmd('functionapp cors show -g {} -n {}'.format(resource_group2, tgt_name)).get_output_in_json()
+
+        self.assertTrue('allowedOrigins' in tgt_cors_config, "Target app should have allowedOrigins")
+        self.assertTrue('https://example.com' in tgt_cors_config['allowedOrigins'],
+                       "https://example.com should be migrated to target app")
+        self.assertTrue('https://api.example.com' in tgt_cors_config['allowedOrigins'],
+                       "https://api.example.com should be migrated to target app")
+        self.assertTrue('https://localhost:3000' in tgt_cors_config['allowedOrigins'],
+                       "https://localhost:3000 should be migrated to target app")
+
+        self.assertTrue(tgt_cors_config['supportCredentials'])
+
+
 class FunctionAppFlex(LiveScenarioTest):
     def test_functionapp_list_flexconsumption_locations(self):
         locations = self.cmd('functionapp list-flexconsumption-locations').get_output_in_json()
-        self.assertTrue(len(locations) == 13)
+        self.assertTrue(len(locations) == 12)
 
     def test_functionapp_list_flexconsumption_locations_zone_redundant(self):
         locations = self.cmd('functionapp list-flexconsumption-locations --zone-redundant').get_output_in_json()
         self.assertTrue(len(locations) > 0)
+
+    def test_functionapp_list_flexconsumption_locations_details(self):
+        locations = self.cmd('functionapp list-flexconsumption-locations --show-details --runtime java').get_output_in_json()
+        self.assertTrue(len(locations) > 0)
+        self.assertTrue(locations[0]['name'] is not None)
+        self.assertTrue(locations[0]['details'][0]['runtime'] is not None)
+        self.assertTrue(locations[0]['details'][0]['runtime'] == 'java') 
 
     def test_functionapp_list_flexconsumption_runtimes(self):
         runtimes = self.cmd('functionapp list-flexconsumption-runtimes -l eastasia --runtime python').get_output_in_json()
@@ -821,8 +1386,42 @@ class FunctionAppFlex(LiveScenarioTest):
                                .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
 
         server_farm_id =functionapp['properties']['serverFarmId']
-        function_plan = self.cmd('az functionapp plan show --ids {}'
+        function_plan = self.cmd('functionapp plan show --ids {}'
                                .format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == False) 
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_plan_enable_zone_redundant(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id = functionapp['properties']['serverFarmId']
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == False) 
+        updated_plan = self.cmd('functionapp plan update --id {} --set zoneRedundant=true'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(updated_plan['zoneRedundant'] == True)
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == True) 
+
+    @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_flex_plan_disable_zone_redundant(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionapp', 40)
+
+        functionapp = self.cmd('functionapp create -g {} -n {} -f {} -s {} --runtime python --runtime-version 3.11 --zone-redundant'
+                               .format(resource_group, functionapp_name, FLEX_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+
+        server_farm_id = functionapp['properties']['serverFarmId']
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(function_plan['zoneRedundant'] == True) 
+        updated_plan = self.cmd('functionapp plan update --id {} --set zoneRedundant=false'.format(server_farm_id)).get_output_in_json()
+        self.assertTrue(updated_plan['zoneRedundant'] == False)
+        function_plan = self.cmd('functionapp plan show --ids {}'.format(server_farm_id)).get_output_in_json()
         self.assertTrue(function_plan['zoneRedundant'] == False) 
 
     @ResourceGroupPreparer(location=FLEX_ASP_LOCATION_FUNCTIONAPP)
@@ -904,10 +1503,10 @@ class FunctionAppFlex(LiveScenarioTest):
         container_name = self.create_random_name('funccontainer', 24)
         storage2_name = self.create_random_name('funcstorage2', 24)
         identity_name = self.create_random_name('id1', 8)
-        storage_account = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS'
+        storage_account = self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --allow-blob-public-access false'
                                    .format(storage_name, resource_group, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
         storage_account_blob_endpoint = storage_account['primaryEndpoints']['blob']
-        deployment_storage_account = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS'
+        deployment_storage_account = self.cmd('storage account create -g {} -n {} -l {} --sku Standard_LRS --allow-blob-public-access false'
                                               .format(resource_group, storage2_name, FLEX_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
         deployment_account_blob_endpoint = deployment_storage_account['primaryEndpoints']['blob']
         self.cmd('storage container create -g {} -n {} --account-name {}'
@@ -985,11 +1584,7 @@ class FunctionAppFlex(LiveScenarioTest):
 
 
 class FunctionAppManagedEnvironment(ScenarioTest):
-    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None, random_config_dir=False):
-        super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
-        self.cmd('extension add -n application-insights')
-
-    @live_only()  # TODO to be fixed
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location='westeurope')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment(self, resource_group, storage_account):
@@ -1014,7 +1609,6 @@ class FunctionAppManagedEnvironment(ScenarioTest):
 
         self.assertTrue('ftpPublishingUrl' not in r)
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_existing_app_insights(self, resource_group, storage_account):
@@ -1079,7 +1673,6 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp create -g {} -n {} -s {} --vnet {} --subnet {}  --environment {} --runtime dotnet --functions-version 4'
                     .format(resource_group, functionapp_name, storage_account, vnet_name, subnet_name, managed_environment_name))
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='westeurope')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_add_vnet_error(self, resource_group, storage_account):
@@ -1108,7 +1701,6 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'
             .format(resource_group, functionapp_name, vnet_name, subnet_name))
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_remove_vnet_error(self, resource_group, storage_account):
@@ -1134,7 +1726,6 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         with self.assertRaises(ValidationError):
             self.cmd('functionapp vnet-integration remove -g {} -n {}'.format(resource_group, functionapp_name))
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='westeurope')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_list_vnet_error(self, resource_group, storage_account):
@@ -1160,7 +1751,6 @@ class FunctionAppManagedEnvironment(ScenarioTest):
         with self.assertRaises(ValidationError):
             self.cmd('functionapp vnet-integration list -g {} -n {}'.format(resource_group, functionapp_name))
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_delete_functions(self, resource_group, storage_account):
@@ -1185,7 +1775,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp function delete -g {} -n {} --function-name {}'
             .format(resource_group, functionapp_name, function_name))
 
-    @ResourceGroupPreparer(location='southcentralus')
+    @ResourceGroupPreparer(location='eastus2')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_plan_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
@@ -1197,19 +1787,18 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'functionappplan', 40
         )
 
-        self.cmd('containerapp env create --name {} --resource-group {} --location southcentralus --logs-destination none'
+        self.cmd('containerapp env create --name {} --resource-group {} --location eastus2 --logs-destination none'
         .format(managed_environment_name, resource_group)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('location', 'South Central US')])
+                     JMESPathCheck('location', 'East US 2')])
 
-        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location southcentralus'.format(resource_group, plan_name))
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location eastus2'.format(resource_group, plan_name))
 
         with self.assertRaises(ArgumentUsageError):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --environment {} --runtime dotnet --functions-version 4'
                     .format(resource_group, functionapp_name, plan_name, storage_account, managed_environment_name))
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='northeurope')
     @StorageAccountPreparer()
     def test_functionapp_config_with_appcontainer_managed_environment_error(self, resource_group, storage_account):
@@ -1236,7 +1825,6 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             self.cmd('functionapp config show -g {} -n {}'
             .format(resource_group, functionapp_name))
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer()
     def test_functionapp_create_with_replicas(self, resource_group, storage_account):
@@ -1260,7 +1848,7 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             JMESPathCheck('siteConfig.minimumElasticInstanceCount', 1),
             JMESPathCheck('siteConfig.functionAppScaleLimit', 10)])
 
-    @ResourceGroupPreparer(location='southcentralus')
+    @ResourceGroupPreparer(location='eastus2')
     @StorageAccountPreparer()
     def test_functionapp_create_with_min_replicas_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
@@ -1270,13 +1858,12 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             'functionappplan', 40
         )
 
-        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location southcentralus'.format(resource_group, plan_name))
+        self.cmd('functionapp plan create -g {} -n {} --sku S1 --is-linux --location eastus2'.format(resource_group, plan_name))
 
         with self.assertRaises(RequiredArgumentMissingError):
             self.cmd('functionapp create -g {} -n {} -p {} -s {} --runtime dotnet --functions-version 4 --min-replicas 1'
                     .format(resource_group, functionapp_name, plan_name, storage_account))
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location='eastus')
     @StorageAccountPreparer()
     def test_functionapp_container_config_set_replicas(self, resource_group, storage_account):
@@ -1432,9 +2019,8 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'java')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('javaVersion', '17')])
+            JMESPathCheck('javaVersion', '21')])
 
-    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_windows_runtime_powershell(self, resource_group, storage_account):
@@ -1454,7 +2040,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
             JMESPathCheck("[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'powershell')])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name), checks=[
-            JMESPathCheck('powerShellVersion', '7.2')])
+            JMESPathCheck('powerShellVersion', '7.4')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1462,7 +2048,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         functionapp_name = self.create_random_name(
             'functionappwindowsruntime', 40)
 
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 18'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 22'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
@@ -1474,7 +2060,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_WORKER_RUNTIME'].value|[0]", 'node'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~18')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~22')])
 
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
@@ -1505,7 +2091,7 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name), checks=[
                  JMESPathCheck(
                      "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4'),
-                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~20')])
+                 JMESPathCheck("[?name=='WEBSITE_NODE_DEFAULT_VERSION'].value|[0]", '~22')])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1527,7 +2113,6 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
 
 
 class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_windows_without_runtime(self, resource_group, storage_account):
@@ -1546,7 +2131,6 @@ class FunctionAppOnWindowsWithoutRuntime(ScenarioTest):
 
 
 class FunctionAppWithAppInsightsKey(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_app_insights_key(self, resource_group, storage_account):
@@ -1574,20 +2158,18 @@ class FunctionAppWithAppInsightsKey(ScenarioTest):
 
 
 class FunctionAppWithAppInsightsConnString(ScenarioTest):
-    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None, random_config_dir=False):
-        super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
-        self.cmd('extension add -n application-insights')
-
-    @live_only()  # TODO to be fixed
+    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_app_insights_conn_string(self, resource_group, storage_account):
+        self.cmd('extension add -n application-insights')
+
         functionapp_name = self.create_random_name(prefix='functionappwithappinsights', length=40)
         workspace_name = self.create_random_name(prefix='existingworkspace', length=40)
         app_insights_name = self.create_random_name(prefix='existingappinsights', length=40)
         workspace = self.cmd('monitor log-analytics workspace create -g {} -n {} -l {}'.format(resource_group, workspace_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
         app_insights = self.cmd('monitor app-insights component create --app {} --location {} --kind web -g {} --application-type web'.format(app_insights_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, resource_group)).get_output_in_json()
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --app-insights {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, app_insights_name))
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --app-insights {} --functions-version 4 --runtime java'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account, app_insights_name))
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
             JMESPathCheck(
                 "[?name=='APPLICATIONINSIGHTS_CONNECTION_STRING'].value|[0]", app_insights['connectionString'])
@@ -1654,7 +2236,6 @@ class FunctionAppWithDistributedTracing(ScenarioTest):
 
 
 class FunctionAppWithAppInsightsDefault(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_default_app_insights(self, resource_group, storage_account):
@@ -1677,7 +2258,6 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
         self.assertTrue('AzureWebJobsDashboard' not in [
                         kp['name'] for kp in app_set])
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_with_no_default_app_insights(self, resource_group, storage_account):
@@ -1702,14 +2282,12 @@ class FunctionAppWithAppInsightsDefault(ScenarioTest):
 
 
 class FunctionappAppInsightsWorkspace(ScenarioTest):
-    def __init__(self, method_name, config_file=None, recording_name=None, recording_processors=None, replay_processors=None, recording_patches=None, replay_patches=None, random_config_dir=False):
-        super().__init__(method_name, config_file, recording_name, recording_processors, replay_processors, recording_patches, replay_patches, random_config_dir)
-        self.cmd('extension add -n application-insights')
-
-    @live_only()  # TODO to be fixed
+    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_create_default_rg_and_workspace(self, resource_group, storage_account):
+        self.cmd('extension add -n application-insights')
+
         functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
         self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'.format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account))
         subscription_id = 'dbf67cc6-6c57-44b8-97fc-4356f0d555b3'
@@ -1724,10 +2302,12 @@ class FunctionappAppInsightsWorkspace(ScenarioTest):
             self.check('workspaceResourceId', workspace_id)
         ])
 
-    @live_only()  # TODO to be fixed
+    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_existing_workspace(self, resource_group, storage_account):
+        self.cmd('extension add -n application-insights')
+
         functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
         existing_workspace_name = 'ExistingWorkspace-PAR'
         workspace = self.cmd('monitor log-analytics workspace create -g {} -n {} -l {}'.format(resource_group, existing_workspace_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).get_output_in_json()
@@ -1736,10 +2316,12 @@ class FunctionappAppInsightsWorkspace(ScenarioTest):
             self.check('workspaceResourceId', workspace['id'])
         ])
 
-    @live_only()  # TODO to be fixed
+    @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_existing_default_rg(self, resource_group, storage_account):
+        self.cmd('extension add -n application-insights')
+
         functionapp_name = self.create_random_name(prefix='functionappworkspaceai', length=40)
         subscription_id = 'dbf67cc6-6c57-44b8-97fc-4356f0d555b3'
         default_rg_name = 'DefaultResourceGroup-PAR'
@@ -1778,7 +2360,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|18')])
+            JMESPathCheck('linuxFxVersion', 'Node|22')])
 
         self.cmd('functionapp delete -g {} -n {}'.format(resource_group, functionapp))
 
@@ -1793,7 +2375,7 @@ class FunctionAppOnLinux(ScenarioTest):
             JMESPathCheck('reserved', True),
             JMESPathCheck('sku.name', 'S1'),
         ])
-        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node --runtime-version 18'
+        self.cmd('functionapp create -g {} -n {} --plan {} -s {} --functions-version 4 --runtime node --runtime-version 22'
                  .format(resource_group, functionapp, plan, storage_account),
                  checks=[
                      JMESPathCheck('name', functionapp)
@@ -1805,7 +2387,7 @@ class FunctionAppOnLinux(ScenarioTest):
         self.assertTrue('functionapp,linux' in result[0]['kind'])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|18')])
+            JMESPathCheck('linuxFxVersion', 'Node|22')])
 
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -1864,7 +2446,7 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|20')
+            JMESPathCheck('linuxFxVersion', 'Node|22')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -1901,14 +2483,13 @@ class FunctionAppOnLinux(ScenarioTest):
                  ])
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'Node|20')
+            JMESPathCheck('linuxFxVersion', 'Node|22')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
                 "[?name=='FUNCTIONS_EXTENSION_VERSION'].value|[0]", '~4')
         ])
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=LINUX_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_on_linux_dotnet_consumption(self, resource_group, storage_account):
@@ -1922,7 +2503,7 @@ class FunctionAppOnLinux(ScenarioTest):
         time.sleep(30)
 
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp), checks=[
-            JMESPathCheck('linuxFxVersion', 'DOTNET|6.0')
+            JMESPathCheck('linuxFxVersion', 'DOTNET|8.0')
         ])
         self.cmd('functionapp config appsettings list -g {} -n {}'.format(resource_group, functionapp)).assert_with_checks([
             JMESPathCheck(
@@ -2063,7 +2644,6 @@ class FunctionAppSlotTests(ScenarioTest):
 
 
 class FunctionAppKeysTests(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_keys_set(self, resource_group, storage_account):
@@ -2091,7 +2671,6 @@ class FunctionAppKeysTests(ScenarioTest):
                      JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
                      JMESPathCheck('value', None)])
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_keys_list(self, resource_group, storage_account):
@@ -2116,7 +2695,6 @@ class FunctionAppKeysTests(ScenarioTest):
                  .format(resource_group, functionapp_name)).assert_with_checks([
                      JMESPathCheck('functionKeys.{}'.format(key_name), key_value)])
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_keys_delete(self, resource_group, storage_account):
@@ -2144,17 +2722,20 @@ class FunctionAppKeysTests(ScenarioTest):
                  .format(resource_group, functionapp_name)).assert_with_checks([
                      JMESPathCheck('functionKeys.{}'.format(key_name), None)])
 
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_keys_set_slot(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappkeys', 40)
         slot_name = self.create_random_name(prefix='slotname', length=24)
+        plan = self.create_random_name(prefix='funcappplan', length=24)
         key_name = "keyname1"
         key_value = "keyvalue1"
         key_type = "functionKeys"
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --functions-version 4'
-                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, plan))
+
+        self.cmd('functionapp create -g {} -n {} -p {} -s {} --functions-version 4'
+                 .format(resource_group, functionapp_name, plan, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
@@ -2172,6 +2753,8 @@ class FunctionAppKeysTests(ScenarioTest):
                      JMESPathCheck('name', key_name),
                      JMESPathCheck('type', 'Microsoft.Web/sites/host/functionKeys'),
                      JMESPathCheck('value', None)])
+
+        time.sleep(30)
 
         key_value = "keyvalue1_changed"
         self.cmd('functionapp keys set -g {} -n {} -s {} --key-name {} --key-value {} --key-type {}'
@@ -2552,7 +3135,6 @@ class FunctionappDeploymentLogsScenarioTest(LiveScenarioTest):
 
 
 class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_local_context(self, resource_group, storage_account):
@@ -2577,7 +3159,7 @@ class FunctionappLocalContextScenarioTest(LocalContextScenarioTest):
         self.cmd('functionapp plan delete -n {plan_name} -y')
 
 class FunctionappIdentityTest(ScenarioTest):
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     @unittest.skip("Temp Skip")
@@ -2609,8 +3191,7 @@ class FunctionappIdentityTest(ScenarioTest):
         self.cmd('functionapp identity show -g {} -n {}'.format(resource_group,
                                                            functionapp_name), checks=self.is_empty())
 
-    @live_only()  # TODO to be fixed
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_assign_user_identity(self, resource_group, storage_account):
@@ -2642,8 +3223,7 @@ class FunctionappIdentityTest(ScenarioTest):
             self.check('userAssignedIdentities', None),
         ])
 
-    @live_only()  # TODO to be fixed
-    @AllowLargeResponse(8192)
+    @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_remove_identity(self, resource_group, storage_account):
@@ -2687,7 +3267,6 @@ class FunctionappIdentityTest(ScenarioTest):
 
 
 class FunctionappCorsTest(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_cors_credentials(self, resource_group, storage_account):
@@ -2704,7 +3283,6 @@ class FunctionappCorsTest(ScenarioTest):
 
 
 class FunctionappNetworkConnectionTests(ScenarioTest):
-    @live_only()  # TODO to be fixed
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2747,7 +3325,6 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0)
         ])
 
-    @live_only()  # TODO to be fixed
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2769,6 +3346,98 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         ])
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_consumption_disabled_public_network_access_storage(self, resource_group):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        storage_account = self.create_random_name('funcstorage1', 24)
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --public-network-access Disabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_consumption_restricted_public_network_access_storage(self, resource_group):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        storage_account = self.create_random_name('funcstorage', 24)
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_elastic_premium_restricted_public_network_access_storage_no_vnet(self, resource_group):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        storage_account = self.create_random_name('funcstorage', 24)
+        ep_plan_name = self.create_random_name('epplan', 24)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, ep_plan_name))
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_elastic_premium_restricted_public_network_access_storage_mutually_exclusive_flags(self, resource_group):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        storage_account = self.create_random_name('funcstorage', 24)
+        ep_plan_name = self.create_random_name('epplan', 24)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name))
+
+        with self.assertRaises(ValidationError):
+            self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --vnet {} --subnet {} --configure-networking-later'.format(resource_group, functionapp_name, storage_account, ep_plan_name, vnet_name, subnet_name))
+
+    @live_only()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_elastic_premium_restricted_public_network_access_storage_vnet(self, resource_group):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        storage_account = self.create_random_name('funcstorage', 24)
+        ep_plan_name = self.create_random_name('epplan', 24)
+        subnet_name = self.create_random_name('swiftsubnet', 24)
+        vnet_name = self.create_random_name('swiftname', 24)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+        subnet_id = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name)).get_output_in_json()['newVNet']['subnets'][0]['id']
+
+        self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --vnet {} --subnet {}'.format(resource_group, functionapp_name, storage_account, ep_plan_name, vnet_name, subnet_name)).assert_with_checks([
+            JMESPathCheck('vnetContentShareEnabled', True),
+            JMESPathCheck('vnetRouteAllEnabled', True),
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+
+    @live_only()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_elastic_premium_restricted_public_network_access_storage_configure_vnet_later(self, resource_group):
+        functionapp_name = self.create_random_name('functionapp', 24)
+        storage_account = self.create_random_name('funcstorage', 24)
+        ep_plan_name = self.create_random_name('epplan', 24)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1'.format(resource_group, ep_plan_name))
+
+        self.cmd('storage account create --name {} -g {} -l {} --sku Standard_LRS --default-action Deny --public-network-access Enabled --allow-blob-public-access false'.format(storage_account, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
+
+        self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --cnl'.format(resource_group, functionapp_name, storage_account, ep_plan_name)).assert_with_checks([
+            JMESPathCheck('vnetContentShareEnabled', True),
+        ])
+
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_create_with_vnet_consumption_plan(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('swiftfunctionapp', 24)
@@ -2780,7 +3449,6 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             self.cmd(
                 'functionapp create -g {} -n {} -s {} --consumption-plan-location {} --vnet {} --subnet {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP, vnet_name, subnet_name))
 
-    @live_only()  # TODO to be fixed
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2803,7 +3471,6 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('[0].name', subnet_name)
         ])
 
-    @live_only()  # TODO to be fixed
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
@@ -2826,7 +3493,6 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('[0].name', subnet_name)
         ])
 
-    @live_only()  # TODO to be fixed
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP, parameter_name="rg2")
@@ -3040,26 +3706,25 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
                                                                                subnet_name, storage_account), expect_failure=True)
 
 class FunctionAppConfigTest(ScenarioTest):
-    @live_only()  # TODO: to be fixed
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
     def test_functionapp_powershell_version(self, resource_group, storage_account):
         functionapp_name = self.create_random_name(
             'powershellfunctionapp', 40)
-        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime powershell --runtime-version 7.2'
+        self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime powershell'
                  .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).assert_with_checks([
                      JMESPathCheck('state', 'Running'),
                      JMESPathCheck('name', functionapp_name),
                      JMESPathCheck('kind', 'functionapp'),
                      JMESPathCheck('hostNames[0]', functionapp_name + '.azurewebsites.net')])
         self.cmd('functionapp config show -g {} -n {}'.format(resource_group, functionapp_name)).assert_with_checks([
-            JMESPathCheck('powerShellVersion', '7.2')
+            JMESPathCheck('powerShellVersion', '7.4')
         ])
 
         time.sleep(60)
-        self.cmd('functionapp config set -g {} -n {} --powershell-version 7.0'
+        self.cmd('functionapp config set -g {} -n {} --powershell-version 7.4'
                  .format(resource_group, functionapp_name)).assert_with_checks([
-                     JMESPathCheck('powerShellVersion', '7.0')])
+                     JMESPathCheck('powerShellVersion', '7.4')])
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
 

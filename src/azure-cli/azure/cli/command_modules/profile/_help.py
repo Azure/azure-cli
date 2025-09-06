@@ -43,8 +43,10 @@ examples:
       text: az login --service-principal --username APP_ID --certificate /path/to/cert.pem --tenant TENANT_ID
     - name: Log in with a system-assigned managed identity.
       text: az login --identity
-    - name: Log in with a user-assigned managed identity. You must specify the client ID, object ID or resource ID of the user-assigned managed identity with --username.
-      text: az login --identity --username 00000000-0000-0000-0000-000000000000
+    - name: Log in with a user-assigned managed identity's client ID.
+      text: az login --identity --client-id 00000000-0000-0000-0000-000000000000
+    - name: Log in with a user-assigned managed identity's resource ID.
+      text: az login --identity --resource-id /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
 """
 
 helps['account'] = """

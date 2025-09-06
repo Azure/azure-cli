@@ -310,13 +310,6 @@ def transform_share_rm_output(result):
     return result
 
 
-def transform_share_rm_list_output(result):
-    new_result = []
-    for item in result:
-        new_result.append(transform_share_rm_output(item))
-    return new_result
-
-
 def delete_blob_output_key(_, result):
     result.pop('additionalProperties', None)
     return result

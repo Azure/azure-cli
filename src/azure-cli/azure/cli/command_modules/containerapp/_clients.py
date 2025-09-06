@@ -16,7 +16,7 @@ from knack.log import get_logger
 
 logger = get_logger(__name__)
 
-CURRENT_API_VERSION = "2024-03-01"
+CURRENT_API_VERSION = "2025-01-01"
 POLLING_TIMEOUT = 1200  # how many seconds before exiting
 POLLING_SECONDS = 2  # how many seconds between requests
 POLLING_TIMEOUT_FOR_MANAGED_CERTIFICATE = 1500  # how many seconds before exiting
@@ -936,6 +936,14 @@ class ContainerAppsJobClient():
             formatted = formatter(app)
             app_list.append(formatted)
 
+        while j.get("nextLink") is not None:
+            request_url = j["nextLink"]
+            r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+            j = r.json()
+            for app in j["value"]:
+                formatted = formatter(app)
+                app_list.append(formatted)
+
         return app_list
 
     @classmethod
@@ -956,6 +964,14 @@ class ContainerAppsJobClient():
         for app in j["value"]:
             formatted = formatter(app)
             app_list.append(formatted)
+
+        while j.get("nextLink") is not None:
+            request_url = j["nextLink"]
+            r = send_raw_request(cmd.cli_ctx, "GET", request_url)
+            j = r.json()
+            for app in j["value"]:
+                formatted = formatter(app)
+                app_list.append(formatted)
 
         return app_list
 
@@ -1012,6 +1028,8 @@ class ContainerAppsJobClient():
                 resource_group_name,
                 name,
                 cls.api_version)
+            r = send_raw_request(cmd.cli_ctx, "POST", request_url)
+            return r.json()
         else:
             url_fmt = "{}/subscriptions/{}/resourceGroups/{}/providers/Microsoft.App/jobs/{}/stop/{}?api-version={}"
             request_url = url_fmt.format(
@@ -1021,9 +1039,8 @@ class ContainerAppsJobClient():
                 name,
                 job_execution_name,
                 cls.api_version)
-
-        r = send_raw_request(cmd.cli_ctx, "POST", request_url)
-        return r
+            r = send_raw_request(cmd.cli_ctx, "POST", request_url)
+            return r
 
     @classmethod
     def get_executions(cls, cmd, resource_group_name, name):

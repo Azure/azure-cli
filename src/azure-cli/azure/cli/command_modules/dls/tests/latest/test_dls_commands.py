@@ -24,7 +24,7 @@ class DataLakeStoreFileAccessScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
-            'loc': 'westus2',
+            'loc': 'centraluseuap',
             'dir': 'adltestfolder01',
             'user_id': user_id,
             'acl_to_add': 'user:{}:rwx'.format(user_id),
@@ -142,7 +142,7 @@ class DataLakeStoreFileScenarioTest(ScenarioTest):
         local_folder = 'adls_resources'
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
-            'loc': 'westus2',
+            'loc': 'centraluseuap',
             'dir': local_folder,
             'local_folder': os.path.join(os.getcwd(), local_folder),
             'local_file': os.path.join(local_folder, 'sample_file.txt'),
@@ -306,7 +306,7 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'dls': self.create_random_name('cliadls', 24),
-            'loc': 'westus2',
+            'loc': 'centraluseuap',
             'updated_subnet': 'updatedSubnet'
         })
 
@@ -363,7 +363,7 @@ class DataLakeStoreAccountScenarioTest(ScenarioTest):
             self.check('endIpAddress', '{end_ip}'),
         ])
 
-        self.cmd('dls account firewall update -g {rg} -n {dls} --firewall-rule-name {fw} --end-ip-address {new_end_ip}')
+        self.cmd('dls account firewall update -g {rg} -n {dls} --firewall-rule-name {fw} --start-ip-address {start_ip} --end-ip-address {new_end_ip}')
         self.cmd('dls account firewall show -g {rg} -n {dls} --firewall-rule-name {fw}', checks=[
             self.check('name', '{fw}'),
             self.check('startIpAddress', '{start_ip}'),

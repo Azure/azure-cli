@@ -5,14 +5,13 @@
 
 from knack.log import get_logger
 from knack.util import CLIError
-from azure.cli.core.commands import LongRunningOperation
 
 from ._constants import ACR_TASK_YAML_DEFAULT_NAME
 from ._stream_utils import stream_logs
 from ._utils import (
     validate_managed_registry,
     get_validate_platform,
-    get_custom_registry_credentials,
+    get_source_and_custom_registry_credentials,
     get_yaml_template,
     prepare_source_location
 )
@@ -40,9 +39,10 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
             resource_group_name=None,
             platform=None,
             auth_mode=None,
-            log_template=None):
+            log_template=None,
+            source_acr_auth_id=None):
 
-    _, resource_group_name = validate_managed_registry(
+    registry, resource_group_name = validate_managed_registry(
         cmd, registry_name, resource_group_name, RUN_NOT_SUPPORTED)
 
     if cmd_value and file:
@@ -57,8 +57,18 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
 
     platform_os, platform_arch, platform_variant = get_validate_platform(cmd, platform)
 
-    EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties = cmd.get_models(
-        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties', operation_group='runs')
+    EncodedTaskRunRequest, FileTaskRunRequest, PlatformProperties, RoleAssignmentMode = cmd.get_models(
+        'EncodedTaskRunRequest', 'FileTaskRunRequest', 'PlatformProperties', 'RoleAssignmentMode',
+        operation_group='runs')
+
+    registry_abac_enabled = registry.role_assignment_mode == RoleAssignmentMode.ABAC_REPOSITORY_PERMISSIONS
+    credentials = get_source_and_custom_registry_credentials(
+        cmd=cmd,
+        auth_mode=auth_mode,
+        source_acr_auth_id=source_acr_auth_id,
+        registry_abac_enabled=registry_abac_enabled,
+        deprecate_auth_mode=True
+    )
 
     if source_location:
         request = FileTaskRunRequest(
@@ -72,10 +82,7 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
                 architecture=platform_arch,
                 variant=platform_variant
             ),
-            credentials=get_custom_registry_credentials(
-                cmd=cmd,
-                auth_mode=auth_mode
-            ),
+            credentials=credentials,
             agent_pool_name=agent_pool_name,
             log_template=log_template
         )
@@ -92,18 +99,15 @@ def acr_run(cmd,  # pylint: disable=too-many-locals
                 architecture=platform_arch,
                 variant=platform_variant
             ),
-            credentials=get_custom_registry_credentials(
-                cmd=cmd,
-                auth_mode=auth_mode
-            ),
+            credentials=credentials,
             agent_pool_name=agent_pool_name,
             log_template=log_template
         )
 
-    queued = LongRunningOperation(cmd.cli_ctx)(client_registries.begin_schedule_run(
+    queued = client_registries.schedule_run(
         resource_group_name=resource_group_name,
         registry_name=registry_name,
-        run_request=request))
+        run_request=request)
 
     run_id = queued.run_id
     logger.warning("Queued a run with ID: %s", run_id)

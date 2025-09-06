@@ -123,7 +123,17 @@ def transform_key_output(result, **command_args):
                 setattr(result.key, attr, base64.b64encode(value))
 
     output = {
-        'attributes': result.properties._attributes,
+        'attributes': {
+            'created': result.properties.created_on,
+            'enabled': result.properties.enabled,
+            'expires': result.properties.expires_on,
+            'exportable': result.properties.exportable,
+            'hsmPlatform': result.properties.hsm_platform,
+            'notBefore': result.properties.not_before,
+            'recoverableDays': result.properties.recoverable_days,
+            'recoveryLevel': result.properties.recovery_level,
+            'updated': result.properties.updated_on
+        },
         'key': result.key,
         'managed': result.properties.managed,
         'tags': result.properties.tags,

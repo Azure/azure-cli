@@ -8,7 +8,8 @@ import random
 from base64 import b64decode
 import textwrap
 
-from azure.core.exceptions import HttpResponseError
+from azure.core.exceptions import HttpResponseError, \
+    ResourceNotFoundError as CoreResourceNotFoundError
 from azure.mgmt.core.tools import resource_id, parse_resource_id
 import azure.mgmt.redhatopenshift.models as openshiftcluster
 
@@ -59,9 +60,9 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
                outbound_type='Loadbalancer',
                disk_encryption_set=None,
                master_encryption_at_host=False,
-               master_vm_size='Standard_D8s_v3',
+               master_vm_size='Standard_D8s_v5',
                worker_encryption_at_host=False,
-               worker_vm_size='Standard_D4s_v3',
+               worker_vm_size='Standard_D4s_v5',
                worker_vm_disk_size_gb='128',
                worker_count='3',
                apiserver_visibility='Public',
@@ -115,7 +116,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
     if not rp_client_sp_id:
         raise ResourceNotFoundError("RP service principal not found.")
 
-    worker_vm_size = worker_vm_size or 'Standard_D4s_v3'
+    worker_vm_size = worker_vm_size or 'Standard_D4s_v5'
 
     if apiserver_visibility is not None:
         apiserver_visibility = apiserver_visibility.capitalize()
@@ -152,7 +153,7 @@ def aro_create(cmd,  # pylint: disable=too-many-locals
             preconfigured_nsg='Enabled' if enable_preconfigured_nsg else 'Disabled',
         ),
         master_profile=openshiftcluster.MasterProfile(
-            vm_size=master_vm_size or 'Standard_D8s_v3',
+            vm_size=master_vm_size or 'Standard_D8s_v5',
             subnet_id=master_subnet,
             encryption_at_host='Enabled' if master_encryption_at_host else 'Disabled',
             disk_encryption_set_id=disk_encryption_set,
@@ -462,11 +463,14 @@ def get_network_resources_from_subnets(cli_ctx, subnets, fail, oc):
                     Please retry, if issue persists: raise azure support ticket""")
             logger.info("Failed to validate subnet '%s'", sn)
 
-        subnet = subnet_show(cli_ctx=cli_ctx)(command_args={
-            "name": sid['resource_name'],
-            "vnet_name": sid['name'],
-            "resource_group": sid['resource_group']
-        })
+        try:
+            subnet = subnet_show(cli_ctx=cli_ctx)(command_args={
+                "name": sid['resource_name'],
+                "vnet_name": sid['name'],
+                "resource_group": sid['resource_group']}
+            )
+        except CoreResourceNotFoundError:
+            continue
 
         if subnet.get("routeTable", None):
             subnet_resources.add(subnet["routeTable"]["id"])
@@ -503,8 +507,11 @@ def get_cluster_network_resources(cli_ctx, oc, fail):
 
     # Ensure that worker_profiles_status exists
     # it will not be returned if the cluster resources do not exist
+
+    # We filter nonexistent subnets here as we only propagate subnet values for
+    # worker profiles/machinesets considered valid.
     if oc.worker_profiles_status is not None:
-        worker_subnets |= {w.subnet_id for w in oc.worker_profiles_status}
+        worker_subnets |= {w.subnet_id for w in oc.worker_profiles_status if w.subnet_id is not None}
 
     master_parts = parse_resource_id(master_subnet)
     vnet = resource_id(

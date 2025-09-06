@@ -58,6 +58,8 @@ examples:
     crafted: true
   - name: Configure the multiple zones for new Premium Azure Cache for Redis
     text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --zones 1 2
+  - name: Deploying a Premium Azure Cache for Redis with zones automatically allocated
+    text: az redis create --location westus2 --name MyRedisCache --resource-group MyResourceGroup --sku Premium --vm-size p1 --zonal-allocation-policy Automatic
     crafted: true
   - name: Configure the memory policies for the cache.
     text: az redis create --resource-group resourceGroupName --name cacheName --location westus2 --sku Standard --vm-size c0 --redis-configuration @"config_max-memory.json"
@@ -179,6 +181,8 @@ examples:
     crafted: true
   - name: Disable access keys authentication for Redis.
     text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "disableAccessKeyAuthentication=true"
+  - name: Updating a non zone redundant cache to zone redundant cache using automatic zonal allocation policy.
+    text: az redis update --name MyRedisCache --resource-group MyResourceGroup --set "zonalAllocationPolicy=Automatic"
 """
 
 helps['redis force-reboot'] = """

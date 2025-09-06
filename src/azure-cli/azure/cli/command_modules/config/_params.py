@@ -11,7 +11,7 @@ def load_arguments(self, _):
         c.ignore('_subscription')  # ignore the global subscription param
 
     with self.argument_context('config set') as c:
-        c.positional('key_value', nargs='+', help="Space-separated configurations in the form of <section>.<key>=<value>.")
+        c.positional('key_value', nargs='+', help="Space-separated configurations in the form of `<section>.<key>=<value>`.")
         c.argument('local', action='store_true', help='Set as a local configuration in the working directory.')
 
     with self.argument_context('config get') as c:
@@ -24,7 +24,7 @@ def load_arguments(self, _):
                         'and return the first occurrence.')
 
     with self.argument_context('config unset') as c:
-        c.positional('key', nargs='+', help='The configuration to unset, in the form of <section>.<key>.')
+        c.positional('key', nargs='+', help='The configuration to unset, in the form of `<section>.<key>`.')
         c.argument('local', action='store_true',
                    help='Include local configuration. Scan from the working directory up to the root drive, then the global configuration '
                         'and unset the first occurrence.')

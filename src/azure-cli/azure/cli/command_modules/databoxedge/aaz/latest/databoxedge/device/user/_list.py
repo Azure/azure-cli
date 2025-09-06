@@ -55,7 +55,7 @@ class List(AAZCommand):
         )
         _args_schema.filter = AAZStrArg(
             options=["--filter"],
-            help="Specify $filter='Type eq <type>' to filter on user type property",
+            help="Specify `$filter='Type eq <type>'` to filter on user type property",
         )
         return cls._args_schema
 

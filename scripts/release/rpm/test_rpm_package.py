@@ -12,7 +12,7 @@ root_dir = f'/usr/lib64/az/lib/{python_version}/site-packages/azure/cli/command_
 mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path.join(root_dir, mod)) and mod != '__pycache__']
 
 pytest_base_cmd = f'PYTHONPATH=/usr/lib64/az/lib/{python_version}/site-packages python -m pytest -v --forked -p no:warnings --log-level=WARN'
-pytest_parallel_cmd = '{} -n auto'.format(pytest_base_cmd)
+pytest_parallel_cmd = '{} -n logical'.format(pytest_base_cmd)
 
 # cloud: https://github.com/Azure/azure-cli/pull/14994
 # appservice: https://github.com/Azure/azure-cli/pull/19810

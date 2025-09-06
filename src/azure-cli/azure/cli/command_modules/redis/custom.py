@@ -76,7 +76,8 @@ def cli_redis_update(cmd, instance, sku=None, vm_size=None):
         sku=instance.sku,
         tags=instance.tags,
         update_channel=instance.update_channel,
-        disable_access_key_authentication=instance.disable_access_key_authentication
+        disable_access_key_authentication=instance.disable_access_key_authentication,
+        zonal_allocation_policy=instance.zonal_allocation_policy
     )
     return update_params
 
@@ -95,7 +96,8 @@ def cli_redis_create(cmd, client,
                      redis_configuration=None, enable_non_ssl_port=None, tenant_settings=None,
                      shard_count=None, minimum_tls_version=None, subnet_id=None, static_ip=None,
                      zones=None, replicas_per_master=None, redis_version=None, mi_system_assigned=None,
-                     mi_user_assigned=None, update_channel=None, disable_access_key_authentication=None):
+                     mi_user_assigned=None, update_channel=None, disable_access_key_authentication=None,
+                     zonal_allocation_policy=None):
     # pylint:disable=line-too-long
     if ((sku.lower() in ['standard', 'basic'] and vm_size.lower() not in allowed_c_family_sizes) or (
             sku.lower() in ['premium'] and vm_size.lower() not in allowed_p_family_sizes)):
@@ -126,7 +128,8 @@ def cli_redis_create(cmd, client,
         public_network_access=None,
         tags=tags,
         update_channel=update_channel,
-        disable_access_key_authentication=disable_access_key_authentication
+        disable_access_key_authentication=disable_access_key_authentication,
+        zonal_allocation_policy=zonal_allocation_policy
     )
     return client.begin_create(resource_group_name, name, params)
 
