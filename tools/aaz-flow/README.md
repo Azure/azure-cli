@@ -6,7 +6,7 @@ Please note that AAZ Flow is currently in early development. The functionality a
 ### Tools
 `generate_code`
 
-## Implemetation
+## Implementation
 1. Performs elicitation for user input to perform workflow
 2. Generates content using llm sampling
 3. Executes AAZ Flow commands directly
