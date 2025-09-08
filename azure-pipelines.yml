@@ -67,6 +67,18 @@ jobs:
       echo "Reject pull request directly to master branch"
       exit 1
 
+- job: ShowVariables
+  pool:
+    name: ubuntu-latest
+  steps:
+  - script: |
+      echo "Pipeline workspace: $PIPELINE_WORKSPACE"
+      echo "Listing repo root:"
+      ls -R $PIPELINE_WORKSPACE/.azure-pipelines/templates
+      echo "Contents of variables.yml:"
+      cat $PIPELINE_WORKSPACE/.azure-pipelines/templates/variables.yml
+    displayName: 'Inspect variables template'
+
 - job: CredentialScanner
   displayName: "Credential Scanner"
   pool:
