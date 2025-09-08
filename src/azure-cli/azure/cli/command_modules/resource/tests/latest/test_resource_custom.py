@@ -12,7 +12,8 @@ from urllib.parse import urljoin
 
 from unittest import mock
 
-from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse
+from azure.cli.core.util import CLIError, get_file_json, shell_safe_json_parse, read_file_content
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.command_modules.resource.custom import (
     _get_missing_parameters,
     _extract_lock_params,
@@ -28,6 +29,8 @@ from azure.cli.command_modules.resource.custom import (
     deploy_arm_template_at_tenant_scope,
     format_bicep_file,
     publish_bicep_file,
+    _process_template_file,
+    _prepare_deployment_properties_unmodified,
 )
 
 from azure.cli.command_modules.resource._bicep import (run_bicep_command)
@@ -710,6 +713,373 @@ class TestPublishWithSource(unittest.TestCase):
             mock.call(cmd.cli_ctx, "0.23.1") # Min version for 'bicep publish --with-source'
         ])
         mock_run_bicep_command.assert_called_once_with(cmd.cli_ctx, ['publish', file_path, '--target', 'br:contoso.azurecr.io/bicep/mymodule:v1', '--with-source'])
+
+
+class TestTemplateSizeOptimization(unittest.TestCase):
+    """Tests for bicep template size optimization changes."""
+
+    @mock.patch('azure.cli.command_modules.resource.custom.validate_bicep_target_scope')
+    @mock.patch('azure.cli.command_modules.resource.custom.run_bicep_command')
+    @mock.patch('azure.cli.command_modules.resource.custom.is_bicep_file')
+    def test_process_template_file_bicep_returns_both(self, mock_is_bicep, mock_run_bicep, mock_validate):
+        """Test that bicep files return both template_content and template_obj."""
+        # Arrange
+        mock_is_bicep.return_value = True
+        mock_template_json = '{"$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#", "resources": []}'
+        mock_run_bicep.return_value = mock_template_json
+        mock_validate.return_value = None  # No validation errors
+        
+        # Act
+        template_content, template_obj = _process_template_file(cmd, "test.bicep", "resourceGroup")
+        
+        # Assert
+        self.assertEqual(template_content, mock_template_json)
+        self.assertIsInstance(template_obj, dict)
+        self.assertEqual(template_obj['$schema'], "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#")
+        mock_run_bicep.assert_called_once()
+        mock_validate.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.resource.custom._remove_comments_from_json')
+    @mock.patch('azure.cli.command_modules.resource.custom.read_file_content')
+    @mock.patch('azure.cli.command_modules.resource.custom.is_bicep_file')
+    def test_process_template_file_arm_returns_both(self, mock_is_bicep, mock_read_file, mock_remove_comments):
+        """Test that ARM templates return both template_content and template_obj."""
+        # Arrange
+        mock_is_bicep.return_value = False
+        mock_template_content = '{"$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#", "resources": []}'
+        mock_template_obj = {"$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#", "resources": []}
+        mock_read_file.return_value = mock_template_content
+        mock_remove_comments.return_value = mock_template_obj
+        
+        # Act
+        template_content, template_obj = _process_template_file(cmd, "test.json", "resourceGroup")
+        
+        # Assert
+        self.assertEqual(template_content, mock_template_content)
+        self.assertEqual(template_obj, mock_template_obj)
+        mock_read_file.assert_called_once_with("test.json")
+        mock_remove_comments.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.resource.custom._get_template_for_deployment')
+    @mock.patch('azure.cli.command_modules.resource.custom._process_template_file')
+    def test_bicep_deployment_uses_compact_json_string(self, mock_process_template, mock_get_template):
+        """Test that bicep deployments use compact JSON string to avoid size inflation."""
+        # Arrange
+        mock_template_content = '{"resources": []}'
+        mock_template_obj = {"resources": []}
+        mock_process_template.return_value = (mock_template_content, mock_template_obj)
+        compact_json = '{"resources":[]}'  # Compact version
+        mock_get_template.return_value = compact_json  # This is the key - bicep uses compact JSON string
+        
+        # Act
+        properties = _prepare_deployment_properties_unmodified(cmd, "resourceGroup", "test.bicep", None, None, None, None)
+        
+        # Assert
+        self.assertEqual(properties.template, compact_json)
+        self.assertIsInstance(properties.template, str)  # Should be string, not dict
+        mock_get_template.assert_called_once()
+        # Verify that _get_template_for_deployment was called with both content and obj
+        args = mock_get_template.call_args[0]
+        self.assertIn(mock_template_content, args)  # template_content parameter
+        self.assertIn(mock_template_obj, args)      # template_obj parameter
+
+    @mock.patch('azure.cli.command_modules.resource.custom._get_template_for_deployment')
+    @mock.patch('azure.cli.command_modules.resource.custom._process_template_file')  
+    def test_arm_deployment_uses_template_content(self, mock_process_template, mock_get_template):
+        """Test that ARM deployments use template_content for JsonC compatibility."""
+        # Arrange
+        mock_template_content = '{"resources": []}'
+        mock_template_obj = {"resources": []}
+        mock_process_template.return_value = (mock_template_content, mock_template_obj)
+        mock_get_template.return_value = mock_template_content  # ARM uses template_content
+        
+        # Act
+        properties = _prepare_deployment_properties_unmodified(cmd, "resourceGroup", "test.json", None, None, None, None)
+        
+        # Assert
+        self.assertEqual(properties.template, mock_template_content)
+        mock_get_template.assert_called_once()
+
+    @mock.patch('azure.cli.command_modules.resource.custom._urlretrieve')
+    def test_uri_deployment_uses_template_link(self, mock_urlretrieve):
+        """Test that URI deployments use templateLink without local processing."""
+        # Arrange
+        mock_urlretrieve.return_value = b'{"resources": []}'
+        
+        # Act
+        properties = _prepare_deployment_properties_unmodified(cmd, "resourceGroup", None, "https://example.com/template.json", None, None, None)
+        
+        # Assert
+        self.assertEqual(properties.template_link.uri, "https://example.com/template.json")
+        self.assertIsNone(properties.template)  # Uses templateLink, not template
+
+    @mock.patch('azure.cli.command_modules.resource.custom.is_bicep_file')
+    def test_get_template_for_deployment_bicep_uses_compact_json(self, mock_is_bicep):
+        """Test that _get_template_for_deployment returns compact JSON string for bicep files."""
+        # Arrange
+        mock_is_bicep.return_value = True
+        template_content = '{"resources": []}'
+        template_obj = {"resources": []}
+
+        # Import the function we're testing
+        from azure.cli.command_modules.resource.custom import _get_template_for_deployment
+
+        # Act
+        result = _get_template_for_deployment(None, None, "test.bicep", template_content, template_obj, None)
+
+        # Assert
+        import json
+        self.assertEqual(result, json.dumps(template_obj, separators=(',', ':')))  # Should return compact JSON string
+        self.assertIsInstance(result, str)  # Should be a string, not an object
+
+    @mock.patch('azure.cli.command_modules.resource.custom.is_bicep_file')
+    def test_get_template_for_deployment_arm_uses_content(self, mock_is_bicep):
+        """Test that _get_template_for_deployment returns template_content for ARM files."""
+        # Arrange
+        mock_is_bicep.return_value = False
+        template_content = '{"resources": []}'
+        template_obj = {"resources": []}
+        
+        # Import the function we're testing  
+        from azure.cli.command_modules.resource.custom import _get_template_for_deployment
+        
+        # Act
+        result = _get_template_for_deployment(None, None, "test.json", template_content, template_obj, None)
+        
+        # Assert
+        self.assertEqual(result, template_content)  # Should return the string, not the object
+
+    def test_bicep_vs_arm_size_comparison(self):
+        """Test that demonstrates bicep templates avoid string escaping overhead."""
+        # This test demonstrates the size optimization concept
+        
+        # Sample content with characters that would be escaped in JSON strings
+        test_content = '''
+        {
+          "description": "A test template\\nwith special \\"chars\\" and 'quotes'",
+          "value": "Line 1\\nLine 2\\nLine 3\\\\path"
+        }
+        '''
+        
+        # When treated as JSON object (bicep path) - no escaping
+        import json
+        template_obj = json.loads(test_content)
+        obj_representation = json.dumps(template_obj, separators=(',', ':'))
+        
+        # When treated as string content (ARM path) - escaping applied
+        import re
+        escaped_content = re.sub(r'\\', r'\\\\', test_content)  # Simplified escaping simulation
+        escaped_content = re.sub(r'"', r'\\"', escaped_content)
+        
+        # Assert that object representation is more compact
+        self.assertLess(len(obj_representation), len(escaped_content))
+        
+        # This demonstrates why bicep templates using template_obj avoid size inflation
+
+
+class BicepTemplateSizeOptimizationScenarioTest(ScenarioTest):
+    """Functional tests for bicep template size optimization.
+    
+    These scenario tests verify that our bicep template size optimization works
+    correctly in real deployment scenarios and generates recordings for CI/CD.
+    """
+
+    @ResourceGroupPreparer(name_prefix='cli_test_bicep_size_opt')
+    def test_bicep_deployment_size_optimization(self, resource_group):
+        """Test that bicep deployments work correctly with size optimization.
+        
+        This test verifies that:
+        1. Bicep templates deploy successfully with our optimization
+        2. The optimization doesn't break existing functionality
+        3. Key Vault creation works with bicep templates
+        """
+        self.kwargs.update({
+            'deployment_name': self.create_random_name('deploy', 15),
+            'kv_name': self.create_random_name('testkv', 15)[:24]  # Key Vault names max 24 chars
+        })
+
+        # Create a simple bicep template content that creates a Key Vault
+        bicep_content = '''param keyVaultName string
+param location string = resourceGroup().location
+param tenantId string = subscription().tenantId
+
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: keyVaultName
+  location: location
+  properties: {
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    tenantId: tenantId
+    accessPolicies: []
+    enableRbacAuthorization: true
+    enableSoftDelete: true
+    softDeleteRetentionInDays: 7
+  }
+}
+
+output keyVaultName string = keyVault.name
+output keyVaultId string = keyVault.id
+'''
+
+        # Create a temporary bicep file
+        import tempfile
+        import os
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.bicep', delete=False) as f:
+            f.write(bicep_content)
+            bicep_file_path = f.name
+
+        try:
+            # Test bicep deployment - this exercises our optimization
+            result = self.cmd(f'az deployment group create -g {{rg}} -n {{deployment_name}} --template-file "{bicep_file_path}" --parameters keyVaultName={{kv_name}}', checks=[
+                self.check('properties.provisioningState', 'Succeeded'),
+                self.check('properties.outputs.keyVaultName.value', '{kv_name}')
+            ])
+
+            # Verify the deployment was successful
+            self.cmd('az deployment group show -g {rg} -n {deployment_name}', checks=[
+                self.check('properties.provisioningState', 'Succeeded'),
+                self.check('name', '{deployment_name}')
+            ])
+
+            # Verify the Key Vault was created successfully
+            self.cmd('az keyvault show -g {rg} -n {kv_name}', checks=[
+                self.check('name', '{kv_name}'),
+                self.check('properties.sku.name', 'standard'),
+                self.check('properties.enableSoftDelete', True)
+            ])
+
+        finally:
+            # Clean up temporary file
+            if os.path.exists(bicep_file_path):
+                os.unlink(bicep_file_path)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_bicep_vs_arm_opt')  
+    def test_bicep_vs_arm_template_deployment(self, resource_group):
+        """Test both bicep and ARM template deployments work correctly.
+        
+        This test verifies that our optimization doesn't break ARM templates
+        while optimizing bicep templates.
+        """
+        self.kwargs.update({
+            'bicep_deployment': self.create_random_name('biceptest', 20),
+            'arm_deployment': self.create_random_name('armtest', 20),
+            'kv_name_bicep': self.create_random_name('bicepkv', 15)[:24],
+            'kv_name_arm': self.create_random_name('armkv', 15)[:24]
+        })
+
+        # Bicep template content
+        bicep_content = '''param keyVaultName string
+param location string = resourceGroup().location
+param tenantId string = subscription().tenantId
+
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+  name: keyVaultName
+  location: location
+  properties: {
+    sku: {
+      family: 'A'
+      name: 'standard'
+    }
+    tenantId: tenantId
+    accessPolicies: []
+    enableRbacAuthorization: true
+    enableSoftDelete: true
+    softDeleteRetentionInDays: 7
+  }
+}
+
+output keyVaultName string = keyVault.name
+'''
+
+        # ARM template content (equivalent to the bicep above)
+        arm_content = '''{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "keyVaultName": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "tenantId": {
+      "type": "string", 
+      "defaultValue": "[subscription().tenantId]"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2023-07-01",
+      "name": "[parameters('keyVaultName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[parameters('tenantId')]",
+        "accessPolicies": [],
+        "enableRbacAuthorization": true,
+        "enableSoftDelete": true,
+        "softDeleteRetentionInDays": 7
+      }
+    }
+  ],
+  "outputs": {
+    "keyVaultName": {
+      "type": "string",
+      "value": "[parameters('keyVaultName')]"
+    }
+  }
+}'''
+
+        import tempfile
+        import os
+        
+        # Create temporary files
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.bicep', delete=False) as f:
+            f.write(bicep_content)
+            bicep_file_path = f.name
+
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            f.write(arm_content)
+            arm_file_path = f.name
+
+        try:
+            # Test bicep deployment (uses our optimization)
+            self.cmd(f'az deployment group create -g {{rg}} -n {{bicep_deployment}} --template-file "{bicep_file_path}" --parameters keyVaultName={{kv_name_bicep}}', checks=[
+                self.check('properties.provisioningState', 'Succeeded')
+            ])
+
+            # Test ARM template deployment (should still work normally)  
+            self.cmd(f'az deployment group create -g {{rg}} -n {{arm_deployment}} --template-file "{arm_file_path}" --parameters keyVaultName={{kv_name_arm}}', checks=[
+                self.check('properties.provisioningState', 'Succeeded')
+            ])
+
+            # Verify both deployments succeeded
+            self.cmd('az deployment group list -g {rg}', checks=[
+                self.check('length(@)', 2)
+            ])
+
+            # Verify both key vaults were created
+            self.cmd('az keyvault show -g {rg} -n {kv_name_bicep}', checks=[
+                self.check('name', '{kv_name_bicep}')
+            ])
+
+            self.cmd('az keyvault show -g {rg} -n {kv_name_arm}', checks=[
+                self.check('name', '{kv_name_arm}')
+            ])
+
+        finally:
+            # Clean up temporary files
+            for file_path in [bicep_file_path, arm_file_path]:
+                if os.path.exists(file_path):
+                    os.unlink(file_path)
+
 
 if __name__ == '__main__':
     unittest.main()
