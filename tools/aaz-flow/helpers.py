@@ -17,7 +17,7 @@ paths = {
 
 async def fetch_available_services():
     """Fetch available services from azure-rest-api-specs repository."""
-    url = "https://api.github.com/repos/a0x1ab/azure-rest-api-specs/contents/specification"
+    url = "https://api.github.com/repos/Azure/azure-rest-api-specs/contents/specification"
     try:
         response = requests.get(url, timeout=10)
         response.raise_for_status()
