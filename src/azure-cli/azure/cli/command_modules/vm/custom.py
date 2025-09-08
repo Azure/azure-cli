@@ -5009,7 +5009,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          data_vhds_uris=None, data_vhds_luns=None, data_vhds_storage_accounts=None,
                          replication_mode=None, target_region_cvm_encryption=None, virtual_machine=None,
                          image_version=None, target_zone_encryption=None, target_edge_zones=None,
-                         allow_replicated_location_deletion=None, block_deletion_before_end_of_life=None):
+                         allow_replicated_location_deletion=None, block_deletion_before_end_of_life=None, no_wait=False):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
@@ -5142,6 +5142,7 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     args["gallery_name"] = gallery_name
     args["gallery_image_definition"] = gallery_image_name
     args["gallery_image_version_name"] = gallery_image_version
+    args["no_wait"] = no_wait
 
     from .aaz.latest.sig.image_version import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
@@ -5255,6 +5256,7 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     args["gallery_name"] = gallery_name
     args["gallery_image_definition"] = gallery_image_name
     args["gallery_image_version_name"] = gallery_image_version_name
+    args["no_wait"] = no_wait
 
     from .aaz.latest.sig.image_version import Create
     return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
