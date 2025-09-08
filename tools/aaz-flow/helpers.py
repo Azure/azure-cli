@@ -1,3 +1,8 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
 import asyncio
 from pathlib import Path
 import sys
@@ -252,7 +257,7 @@ async def generate_tests(ctx: "Context"):
     module_name = getattr(ctx, "generated_module", None)
     if not module_name:
         response = await ctx.elicit("Enter the module/extension name to generate tests for:")
-        if not response.action == "accept" or not response.data:
+        if response.action != "accept" or not response.data:
             return "Test generation cancelled."
         module_name = response.data
     else:
