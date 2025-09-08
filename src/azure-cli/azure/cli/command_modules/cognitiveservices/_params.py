@@ -163,6 +163,7 @@ def load_arguments(self, _):
 
     with self.argument_context('cognitiveservices account', arg_group="AI Services") as c:
         c.argument('allow_project_management',
+                   options_list=['--manage-projects', '--allow-project-management'],
                    arg_type=get_three_state_flag(),
                    help='Only used for AIServices kind. Specifies whether this resource support project management.  Default is true.')
 
