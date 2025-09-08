@@ -86,6 +86,7 @@ def list_skus(cmd, kind=None, location=None, resource_group_name=None, account_n
 
     return [x for x in cf_resource_skus(cmd.cli_ctx).list() if _filter_sku(x)]
 
+
 def _is_valid_kind_change(current_kind, target_kind):
     valid_upgrades = {
         'AIServices': ['OpenAI'],
@@ -93,8 +94,10 @@ def _is_valid_kind_change(current_kind, target_kind):
     }
     return target_kind in valid_upgrades.get(current_kind, [])
 
+
 def _kind_uses_project_management(kind):
     return kind in ['AIServices']
+
 
 def create(
         client, resource_group_name, account_name, sku_name, kind, location, custom_domain=None,

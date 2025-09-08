@@ -165,7 +165,7 @@ def load_arguments(self, _):
         c.argument('allow_project_management',
                    options_list=['--manage-projects', '--allow-project-management'],
                    arg_type=get_three_state_flag(),
-                   help='Only used for AIServices kind. Specifies whether this resource support project management.  Default is true.')
+                   help='AIServices kind only. Enables project management.  Default true.')
 
     with self.argument_context('cognitiveservices account create') as c:
         c.argument('assign_identity', help='Generate and assign an Azure Active Directory Identity for this account.')
@@ -174,7 +174,7 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account update', arg_group="AI Services") as c:
         c.argument('kind',
                    arg_type=get_enum_type(data=['AIServices', 'OpenAI']),
-                   help='The target API name to transform the existing account into.  See https://aka.ms/upgrade-aoai-foundry for details.')
+                   help='The target API name to transform the existing account into.')
 
     with self.argument_context('cognitiveservices account network-rule') as c:
         c.argument('ip_address', help='IPv4 address or CIDR range.')
