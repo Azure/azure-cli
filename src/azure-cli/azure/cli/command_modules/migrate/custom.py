@@ -1316,47 +1316,6 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
     except Exception as e:
         raise CLIError(f'Failed to get local replication job: {str(e)}')
 
-def list_resource_groups(cmd, subscription_id=None):
-    """
-    Azure CLI equivalent to Get-AzResourceGroup.
-    Lists all resource groups in the current subscription.
-    """
-    ps_executor = get_powershell_executor()
-    
-    # Check Azure authentication first
-    auth_status = ps_executor.check_azure_authentication()
-    if not auth_status.get('IsAuthenticated', False):
-        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
-    
-    list_rg_script = f"""
-    # Azure CLI equivalent functionality for Get-AzResourceGroup
-    try {{
-        # Get all resource groups
-        $ResourceGroups = Get-AzResourceGroup
-        
-        Write-Host "Found $($ResourceGroups.Count) resource group(s)"
-        $ResourceGroups | Format-Table ResourceGroupName, Location, ProvisioningState -AutoSize
-        
-        return $ResourceGroups | ForEach-Object {{
-            @{{
-                'ResourceGroupName' = $_.ResourceGroupName
-                'Location' = $_.Location
-                'ProvisioningState' = $_.ProvisioningState
-                'ResourceId' = $_.ResourceId
-            }}
-        }}
-        
-    }} catch {{
-        Write-Error "Failed to list resource groups: $($_.Exception.Message)"
-        throw
-    }}
-    """
-    
-    try:
-        ps_executor.execute_script_interactive(list_rg_script)
-    except Exception as e:
-        raise CLIError(f'Failed to list resource groups: {str(e)}')
-
 def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None):
     """
     Azure CLI equivalent of Get-InstalledModule -Name Az.Migrate

@@ -40,10 +40,6 @@ def load_command_table(self, _):
         g.custom_command('start-migration', 'start_azure_local_server_migration')
         g.custom_command('remove-replication', 'remove_azure_local_server_replication')
 
-    # Azure Resource Management Commands
-    with self.command_group('migrate resource') as g:
-        g.custom_command('list-groups', 'list_resource_groups')
-
     # PowerShell Module Management Commands  
     with self.command_group('migrate powershell') as g:
         g.custom_command('check-module', 'check_powershell_module')
