@@ -8,14 +8,10 @@ from azure.cli.core.commands.parameters import (
     get_enum_type, 
     get_three_state_flag,
     resource_group_name_type,
-    get_location_type
 )
-from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
 
 def load_arguments(self, _):
-    from azure.cli.core.commands.parameters import tags_type
-
     project_name_type = CLIArgumentType(
         options_list=['--project-name'],
         help='Name of the Azure Migrate project.',
