@@ -44,46 +44,6 @@ def load_arguments(self, _):
         c.argument('project_name', project_name_type,
                   help='Name of the Azure Migrate project to verify.')
 
-    with self.argument_context('migrate project') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('project_name', project_name_type)
-        c.argument('location', get_location_type(self.cli_ctx), 
-                  validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-
-    with self.argument_context('migrate project create') as c:
-        c.argument('assessment_solution', 
-                  help='Assessment solution to enable (e.g., ServerAssessment).')
-        c.argument('migration_solution', 
-                  help='Migration solution to enable (e.g., ServerMigration).')
-
-    with self.argument_context('migrate assessment') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('project_name', project_name_type)
-        c.argument('assessment_name', 
-                  options_list=['--assessment-name', '--name', '-n'],
-                  help='Name of the assessment.',
-                  id_part='child_name_1')
-
-    with self.argument_context('migrate assessment create') as c:
-        c.argument('assessment_type',
-                  arg_type=get_enum_type(['Basic', 'Standard', 'Premium']),
-                  help='Type of assessment to perform.')
-        c.argument('group_name', help='Name of the group containing machines to assess.')
-
-    with self.argument_context('migrate machine') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('project_name', project_name_type)
-        c.argument('machine_name', 
-                  options_list=['--machine-name', '--name', '-n'],
-                  help='Name of the machine.',
-                  id_part='child_name_1')
-
-    with self.argument_context('migrate server') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('project_name', project_name_type)
-        c.argument('subscription_id', subscription_id_type)
-
     with self.argument_context('migrate server list-discovered') as c:
         c.argument('server_id', help='Specific server ID to retrieve.')
         c.argument('source_machine_type', 
@@ -136,31 +96,6 @@ def load_arguments(self, _):
         c.argument('subscription_id', subscription_id_type)
         c.argument('subscription_name', help='Azure subscription name.')
         c.argument('tenant_id', help='Azure tenant ID.')
-
-    # Infrastructure management
-    with self.argument_context('migrate infrastructure') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('project_name', project_name_type)
-        c.argument('subscription_id', subscription_id_type)
-
-    with self.argument_context('migrate infrastructure init') as c:
-        c.argument('target_region', help='Target Azure region for replication.', required=True)
-
-    with self.argument_context('migrate storage') as c:
-        c.argument('resource_group_name', resource_group_name_type)
-        c.argument('subscription_id', subscription_id_type)
-
-    with self.argument_context('migrate storage get-account') as c:
-        c.argument('storage_account_name', 
-                  options_list=['--storage-account-name', '--name', '-n'],
-                  help='Name of the Azure Storage account.', required=True)
-
-    with self.argument_context('migrate storage show-account-details') as c:
-        c.argument('storage_account_name', 
-                  options_list=['--storage-account-name', '--name', '-n'],
-                  help='Name of the Azure Storage account.', required=True)
-        c.argument('show_keys', action='store_true', 
-                  help='Include storage account access keys.')
 
     with self.argument_context('migrate powershell check-module') as c:
         c.argument('module_name', 
@@ -218,57 +153,7 @@ def load_arguments(self, _):
         c.argument('target_vm_name', help='Updated target VM name.')
         c.argument('target_vm_cpu_core', type=int, help='Updated number of CPU cores for target VM.')
         c.argument('target_vm_ram', type=int, help='Updated RAM size in MB for target VM.')
-
-    with self.argument_context('migrate job show') as c:
-        c.argument('resource_group_name', help='Name of the resource group.', required=True)
-        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('job_id', help='Specific job ID to retrieve.')
-
-    with self.argument_context('migrate project create') as c:
-        c.argument('resource_group_name', help='Name of the resource group.', required=True)
-        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('location', help='Azure region for the project.')
-        c.argument('assessment_solution', help='Assessment solution to enable.')
-        c.argument('migration_solution', help='Migration solution to enable.')
-
-    # Azure authentication commands
-    with self.argument_context('migrate auth login') as c:
-        c.argument('tenant_id', help='Azure tenant ID to authenticate against.')
-        c.argument('subscription_id', help='Azure subscription ID to set as default context.')
-        c.argument('device_code', action='store_true', help='Use device code authentication flow.')
-        c.argument('app_id', help='Service principal application ID for non-interactive authentication.')
-        c.argument('secret', help='Service principal secret for non-interactive authentication.')
-
-    with self.argument_context('migrate auth set-context') as c:
-        c.argument('subscription_id', help='Azure subscription ID to set as current context.')
-        c.argument('subscription_name', help='Azure subscription name to set as current context.')
-        c.argument('tenant_id', help='Azure tenant ID to set as current context.')
-
-    with self.argument_context('migrate infrastructure init') as c:
-        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
-        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('target_region', help='Target Azure region for replication infrastructure (e.g., eastus, westus2).', required=True)
-
-    with self.argument_context('migrate infrastructure check') as c:
-        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
-        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-
-    # Azure Storage commands
-    with self.argument_context('migrate storage get-account') as c:
-        c.argument('resource_group_name', help='Name of the resource group containing the storage account.', required=True)
-        c.argument('storage_account_name', help='Name of the Azure Storage account.', required=True)
-        c.argument('subscription_id', help='Azure subscription ID.')
-
-    with self.argument_context('migrate storage list-accounts') as c:
-        c.argument('resource_group_name', help='Name of the resource group to list storage accounts from. If not specified, lists from entire subscription.')
-        c.argument('subscription_id', help='Azure subscription ID.')
-
-    with self.argument_context('migrate storage show-account-details') as c:
-        c.argument('resource_group_name', help='Name of the resource group containing the storage account.', required=True)
-        c.argument('storage_account_name', help='Name of the Azure Storage account.', required=True)
-        c.argument('subscription_id', help='Azure subscription ID.')
-        c.argument('show_keys', action='store_true', help='Include storage account access keys in the output (requires appropriate permissions).')
-
+    
     # Azure Local Migration Commands
     with self.argument_context('migrate local create-disk-mapping') as c:
         c.argument('disk_id', help='Disk ID (UUID) for the disk mapping.', required=True)
@@ -285,17 +170,6 @@ def load_arguments(self, _):
         c.argument('target_virtual_switch_id', help='Target virtual switch ARM ID.', required=True)
         c.argument('create_at_target', action='store_true', 
                   help='Whether to create the NIC at the target. Default is True.')
-
-    with self.argument_context('migrate local init-azure-local') as c:
-        c.argument('resource_group_name', help='Name of the resource group containing the Azure Migrate project.', required=True)
-        c.argument('project_name', help='Name of the Azure Migrate project.', required=True)
-        c.argument('source_appliance_name', help='Name of the source appliance.', required=True)
-        c.argument('target_appliance_name', help='Name of the target appliance.', required=True)
-        c.argument('cache_storage_account_id', help='ARM ID of the custom storage account for replication metadata.')
-
-    with self.argument_context('migrate local get-replication') as c:
-        c.argument('discovered_machine_id', help='Discovered machine ID to get replication for.')
-        c.argument('target_object_id', help='Target object ID of the replication.')
 
     with self.argument_context('migrate local set-replication') as c:
         c.argument('target_object_id', help='Target object ID of the replication to update.', required=True)
@@ -361,49 +235,6 @@ def load_arguments(self, _):
         c.argument('source_appliance_name', help='Name of the source appliance.', required=True)
         c.argument('target_appliance_name', help='Name of the target appliance.', required=True)
 
-    with self.argument_context('migrate resource list-groups') as c:
-        c.argument('subscription_id', help='Azure subscription ID.')
-
     with self.argument_context('migrate powershell check-module') as c:
         c.argument('module_name', help='Name of the PowerShell module to check. Default is Az.Migrate.')
         c.argument('subscription_id', help='Azure subscription ID.')
-
-    # Azure Local VM Replication Commands
-    with self.argument_context('migrate local create-vm-replication') as c:
-        c.argument('vm_name', help='Name of the source VM to replicate.', required=True)
-        c.argument('target_vm_name', help='Name for the target VM in Azure Local.', required=True)
-        c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], 
-                  help='Name of the resource group containing the Azure Migrate project.', required=True)
-        c.argument('source_appliance_name', help='Name of the source appliance.', required=True)
-        c.argument('target_appliance_name', help='Name of the target appliance.', required=True)
-        c.argument('replication_frequency', type=int, 
-                  help='Replication frequency in seconds (e.g., 300 for 5 minutes).')
-        c.argument('recovery_point_history', type=int, 
-                  help='Number of recovery points to maintain.')
-        c.argument('app_consistent_frequency', type=int, 
-                  help='Application-consistent snapshot frequency in seconds.')
-
-    with self.argument_context('migrate local set-vm-replication') as c:
-        c.argument('vm_name', help='Name of the VM with existing replication.', required=True)
-        c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], 
-                  help='Name of the resource group containing the Azure Migrate project.', required=True)
-        c.argument('replication_frequency', type=int, 
-                  help='Updated replication frequency in seconds.')
-        c.argument('recovery_point_history', type=int, 
-                  help='Updated number of recovery points to maintain.')
-        c.argument('app_consistent_frequency', type=int, 
-                  help='Updated application-consistent snapshot frequency in seconds.')
-        c.argument('enable_compression', action='store_true', 
-                  help='Enable compression for replication traffic.')
-
-    with self.argument_context('migrate local remove-vm-replication') as c:
-        c.argument('vm_name', help='Name of the VM to remove replication for.', required=True)
-        c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], 
-                  help='Name of the resource group containing the Azure Migrate project.', required=True)
-        c.argument('force', action='store_true', 
-                  help='Force removal without confirmation prompt.')
-
-    with self.argument_context('migrate local get-vm-replication') as c:
-        c.argument('vm_name', help='Name of the VM to get replication status for. If not specified, lists all VM replications.')
-        c.argument('resource_group_name', options_list=['--resource-group-name', '-g'], 
-                  help='Name of the resource group containing the Azure Migrate project.')
