@@ -79,23 +79,23 @@ jobs:
       cat $PIPELINE_WORKSPACE/.azure-pipelines/templates/variables.yml
     displayName: 'Inspect variables template'
 
-  - job: DebugTemplates
-    displayName: "Debug: List YAML templates + check ubuntu_pool"
-    pool:
-      vmImage: pool-ubuntu-latest-multi-core
-    steps:
-      - bash: |
-          echo "##[group]List all YAML files under workspace"
-          find "$(Pipeline.Workspace)" -type f \( -name "*.yml" -o -name "*.yaml" \) || true
-          echo "##[endgroup]"
+- job: DebugTemplates
+  displayName: "Debug: List YAML templates + check ubuntu_pool"
+  pool:
+    vmImage: pool-ubuntu-latest-multi-core
+  steps:
+    - bash: |
+        echo "##[group]List all YAML files under workspace"
+        find "$(Pipeline.Workspace)" -type f \( -name "*.yml" -o -name "*.yaml" \) || true
+        echo "##[endgroup]"
 
-          echo "##[group]Show relevant variables only"
-          echo "ubuntu_pool = $ubuntu_pool"
-          echo "Pipeline.Workspace = $PIPELINE_WORKSPACE"
-          echo "Build.SourcesDirectory = $BUILD_SOURCESDIRECTORY"
-          echo "System.DefaultWorkingDirectory = $SYSTEM_DEFAULTWORKINGDIRECTORY"
-          echo "##[endgroup]"
-        displayName: "Inspect workspace and pool variable" 
+        echo "##[group]Show relevant variables only"
+        echo "ubuntu_pool = $ubuntu_pool"
+        echo "Pipeline.Workspace = $PIPELINE_WORKSPACE"
+        echo "Build.SourcesDirectory = $BUILD_SOURCESDIRECTORY"
+        echo "System.DefaultWorkingDirectory = $SYSTEM_DEFAULTWORKINGDIRECTORY"
+        echo "##[endgroup]"
+      displayName: "Inspect workspace and pool variable" 
 
 - job: CredentialScanner
   displayName: "Credential Scanner"
