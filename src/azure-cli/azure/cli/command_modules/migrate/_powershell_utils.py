@@ -5,7 +5,6 @@
 
 from azure.cli.core.util import run_cmd
 import platform
-import json
 from knack.util import CLIError
 from knack.log import get_logger
 import select
