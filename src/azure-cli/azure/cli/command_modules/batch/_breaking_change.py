@@ -29,10 +29,10 @@ register_argument_deprecate(
 # Outputs
 register_output_breaking_change(
     "batch pool show", 
-    description="Reduce output field `targetNodeCommunicationMode`, `currentNodeCommunicationMode`, and `resourceTags`"
+    description="Remove output fields `targetNodeCommunicationMode`, `currentNodeCommunicationMode`, and `resourceTags`"
 )
 
 register_output_breaking_change(
     "batch pool list", 
-    description="Reduce output field `targetNodeCommunicationMode`, `currentNodeCommunicationMode`, and `resourceTags`"
+    description="Remove output fields `targetNodeCommunicationMode`, `currentNodeCommunicationMode`, and `resourceTags`"
 )
