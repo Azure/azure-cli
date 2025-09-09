@@ -3,15 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.core.commands import CliCommandType
-
-
 def load_command_table(self, _):
-    # Define command types for different operation groups
-    migrate_machines_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.migrate.operations#MachinesOperations.{}',
-    )
-
     # Basic migration commands
     with self.command_group('migrate') as g:
         g.custom_command('check-prerequisites', 'check_migration_prerequisites')

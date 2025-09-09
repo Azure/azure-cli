@@ -148,7 +148,7 @@ You can initialize the replication infrastructure for your Azure Migrate project
 ### Option 1: Initialize replication infrastructure with default storage account
 
 ```bash
-az migrate local init-azure-local \
+az migrate local init \
     --project-name $PROJECT_NAME \
     --resource-group $RESOURCE_GROUP_NAME \
     --source-appliance-name $SOURCE_APPLIANCE_NAME \
@@ -165,7 +165,7 @@ CUSTOM_STORAGE_ACCOUNT_ID=$(az storage account show \
     --query "id" --output tsv)
 
 # Initialize with custom storage account
-az migrate local init-azure-local \
+az migrate local init \
     --project-name $PROJECT_NAME \
     --resource-group $RESOURCE_GROUP_NAME \
     --cache-storage-account-id $CUSTOM_STORAGE_ACCOUNT_ID \
@@ -272,50 +272,7 @@ az migrate local get-azure-local-job \
     --resource-group $RESOURCE_GROUP_NAME \
     --project-name $PROJECT_NAME \
     --job-id $JOB_ID
-
-# List all jobs
-az migrate job list \
-    --project-name $PROJECT_NAME \
-    --resource-group $RESOURCE_GROUP_NAME
-
-# Get detailed error information
-az migrate job show \
-    --job-id $JOB_ID \
-    --project-name $PROJECT_NAME \
-    --resource-group $RESOURCE_GROUP_NAME \
-    --query "properties.error"
 ```
-
-## Retrieve (get) a replication protected item
-
-```bash
-az migrate local get-replication \
-    --discovered-machine-id $DISCOVERED_SERVER_ID \
-    --resource-group $RESOURCE_GROUP_NAME \
-    --project-name $PROJECT_NAME
-```
-
-## Update a replication protected item
-
-```bash
-az migrate local set-replication \
-    --target-object-id $PROTECTED_ITEM_ID \
-    --is-dynamic-memory-enabled true \
-    --resource-group $RESOURCE_GROUP_NAME \
-    --project-name $PROJECT_NAME
-```
-
-## (Optional) Delete a replicating protected item
-
-```bash
-az migrate local remove-replication \
-    --target-object-id $PROTECTED_ITEM_ID \
-    --resource-group $RESOURCE_GROUP_NAME \
-    --project-name $PROJECT_NAME
-
-echo "Protected item removed successfully."
-```
-
 ## Migrate a VM
 
 Use the Azure CLI to migrate a replication as part of planned failover.
@@ -405,22 +362,6 @@ az migrate setup-env --install-powershell
 az migrate powershell check-module --module-name Az.Migrate
 ```
 
-## Additional Utility Commands
-
-### Check replication infrastructure status
-
-```bash
-az migrate infrastructure check \
-    --resource-group $RESOURCE_GROUP_NAME \
-    --project-name $PROJECT_NAME
-```
-
-### List resource groups
-
-```bash
-az migrate resource list-groups
-```
-
 ## Complete migration workflow script
 
 Here's a complete bash script that demonstrates the end-to-end migration workflow:
@@ -451,7 +392,7 @@ az migrate auth login
 
 # Step 3: Initialize replication infrastructure
 echo "Initializing replication infrastructure..."
-az migrate local init-azure-local \
+az migrate local init \
     --project-name $PROJECT_NAME \
     --resource-group $RESOURCE_GROUP_NAME \
     --source-appliance-name $SOURCE_APPLIANCE_NAME \
