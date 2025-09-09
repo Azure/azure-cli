@@ -87,16 +87,6 @@ class MigrateScenarioTest(ScenarioTest):
         """Test migrate auth command group."""
         self.cmd('migrate auth check')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_migrate')
-    def test_migrate_infrastructure_commands(self, resource_group):
-        """Test migrate infrastructure commands."""
-        self.kwargs.update({
-            'rg': resource_group,
-            'project': 'test-project'
-        })
-
-        self.cmd('migrate infrastructure check -g {rg} --project-name {project}')
-
     def test_migrate_local_create_disk_mapping(self):
         """Test migrate local create-disk-mapping command."""
         self.cmd('migrate local create-disk-mapping --disk-id disk-001 --is-os-disk --size-gb 64 --format-type VHDX')
@@ -128,9 +118,7 @@ class MigrateScenarioTest(ScenarioTest):
             'migrate server -h',
             'migrate local -h', 
             'migrate auth -h',
-            'migrate infrastructure -h',
-            'migrate powershell -h',
-            'migrate resource -h'
+            'migrate powershell -h'
         ]
         
         for help_cmd in help_commands:
@@ -145,16 +133,6 @@ class MigrateScenarioTest(ScenarioTest):
                 else:
                     raise e
 
-    def test_migrate_error_scenarios(self):
-        """Test error handling scenarios."""
-        mock_executor = Mock()
-        mock_executor.check_azure_authentication.return_value = {
-            'IsAuthenticated': False,
-            'Error': 'Not authenticated'
-        }
-        self.mock_ps_executor.return_value = mock_executor
-        self.cmd('migrate resource list-groups', expect_failure=True)
-
 
 class MigrateLiveScenarioTest(LiveScenarioTest):
     """Live scenario tests for Azure Migrate (require actual Azure resources)."""
@@ -163,15 +141,6 @@ class MigrateLiveScenarioTest(LiveScenarioTest):
         super().setUp()
         if not self.is_live:
             self.skipTest('Live tests are skipped in playback mode')
-
-    @ResourceGroupPreparer(name_prefix='cli_live_test_migrate')
-    def test_migrate_resource_list_groups_live(self, resource_group):
-        """Live test for listing resource groups."""
-        try:
-            result = self.cmd('migrate resource list-groups').get_output_in_json()
-            self.assertIsInstance(result, (list, dict))
-        except SystemExit:
-            self.skipTest('Azure authentication not configured for live tests')
 
     @ResourceGroupPreparer(name_prefix='cli_live_test_migrate')
     def test_migrate_check_prerequisites_live(self, resource_group):

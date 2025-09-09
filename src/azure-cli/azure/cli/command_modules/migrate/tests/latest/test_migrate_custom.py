@@ -23,16 +23,11 @@ with patch('azure.cli.command_modules.migrate.custom.get_powershell_executor') a
         create_local_disk_mapping,
         create_local_server_replication,
         get_local_replication_job,
-        list_resource_groups,
         check_powershell_module,
-        initialize_replication_infrastructure,
-        check_replication_infrastructure,
         connect_azure_account,
         disconnect_azure_account,
         set_azure_context,
-        _get_powershell_install_instructions,
-        _attempt_powershell_installation,
-        _perform_platform_specific_checks
+        _get_powershell_install_instructions
     )
 
 
@@ -71,45 +66,6 @@ class TestMigratePowerShellUtils(MigrateTestCase):
         self.assertIn('winget install', windows_instructions)
         self.assertIn('sudo apt install', linux_instructions)
         self.assertIn('brew install', darwin_instructions)
-
-    @patch('subprocess.run')
-    def test_attempt_powershell_installation_windows_success(self, mock_subprocess):
-        """Test successful PowerShell installation on Windows."""
-        mock_result = Mock()
-        mock_result.returncode = 0
-        mock_subprocess.return_value = mock_result
-        
-        result = _attempt_powershell_installation('windows')
-        
-        self.assertIn('PowerShell Core installed via winget', result)
-        mock_subprocess.assert_called_once()
-
-    @patch('subprocess.run')
-    def test_attempt_powershell_installation_failure(self, mock_subprocess):
-        """Test failed PowerShell installation."""
-        mock_result = Mock()
-        mock_result.returncode = 1
-        mock_result.stderr = 'Installation failed'
-        mock_subprocess.return_value = mock_result
-        
-        result = _attempt_powershell_installation('windows')
-        
-        self.assertIn('winget installation failed', result)
-
-    def test_perform_platform_specific_checks_windows(self):
-        """Test platform-specific checks for Windows."""
-        with patch('platform.system', return_value='Windows'):
-            checks = _perform_platform_specific_checks('windows')
-            
-            self.assertIn('Windows detected', checks[0])
-
-    def test_perform_platform_specific_checks_linux(self):
-        """Test platform-specific checks for Linux."""
-        with patch('shutil.which', return_value='/usr/bin/apt'):
-            checks = _perform_platform_specific_checks('linux')
-            
-            self.assertIn('Linux detected', checks[0])
-            self.assertIn('APT package manager available', checks[1])
 
 
 class TestMigrateDiscoveryCommands(unittest.TestCase):
@@ -344,48 +300,6 @@ class TestMigrateLocalCommands(unittest.TestCase):
         self.assertIn('job-12345', script_call)
 
 
-class TestMigrateInfrastructureCommands(unittest.TestCase):
-    """Test infrastructure management commands."""
-
-    def setUp(self):
-        self.cmd = Mock()
-
-    @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
-    def test_initialize_replication_infrastructure(self, mock_get_ps_executor):
-        """Test initializing replication infrastructure."""
-        mock_ps_executor = Mock()
-        mock_ps_executor.check_azure_authentication.return_value = {'IsAuthenticated': True}
-        mock_ps_executor.execute_script_interactive.return_value = None
-        mock_get_ps_executor.return_value = mock_ps_executor
-
-        initialize_replication_infrastructure(
-            self.cmd,
-            resource_group_name='test-rg',
-            project_name='test-project',
-            target_region='East US'
-        )
-
-        mock_ps_executor.execute_script_interactive.assert_called_once()
-        script_call = mock_ps_executor.execute_script_interactive.call_args[0][0]
-        self.assertIn('East US', script_call)
-
-    @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
-    def test_check_replication_infrastructure(self, mock_get_ps_executor):
-        """Test checking replication infrastructure status."""
-        mock_ps_executor = Mock()
-        mock_ps_executor.check_azure_authentication.return_value = {'IsAuthenticated': True}
-        mock_ps_executor.execute_script_interactive.return_value = None
-        mock_get_ps_executor.return_value = mock_ps_executor
-
-        check_replication_infrastructure(
-            self.cmd,
-            resource_group_name='test-rg',
-            project_name='test-project'
-        )
-
-        mock_ps_executor.execute_script_interactive.assert_called_once()
-
-
 class TestMigrateAuthenticationCommands(unittest.TestCase):
     """Test authentication management commands."""
 
@@ -479,18 +393,6 @@ class TestMigrateUtilityCommands(unittest.TestCase):
         self.cmd = Mock()
 
     @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
-    def test_list_resource_groups(self, mock_get_ps_executor):
-        """Test listing resource groups."""
-        mock_ps_executor = Mock()
-        mock_ps_executor.check_azure_authentication.return_value = {'IsAuthenticated': True}
-        mock_ps_executor.execute_script_interactive.return_value = None
-        mock_get_ps_executor.return_value = mock_ps_executor
-
-        list_resource_groups(self.cmd)
-
-        mock_ps_executor.execute_script_interactive.assert_called_once()
-
-    @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
     def test_check_powershell_module(self, mock_get_ps_executor):
         """Test checking PowerShell module availability."""
         mock_ps_executor = Mock()
@@ -542,21 +444,6 @@ class TestMigrateErrorHandling(unittest.TestCase):
 
         self.assertIn('raw_output', result)
         self.assertEqual(result['raw_output'], 'Invalid JSON response')
-
-    @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
-    def test_authentication_required_error(self, mock_get_ps_executor):
-        """Test authentication required error."""
-        mock_ps_executor = Mock()
-        mock_ps_executor.check_azure_authentication.return_value = {
-            'IsAuthenticated': False,
-            'Error': 'Authentication token expired'
-        }
-        mock_get_ps_executor.return_value = mock_ps_executor
-
-        with self.assertRaises(CLIError) as context:
-            list_resource_groups(self.cmd)
-
-        self.assertIn('Azure authentication required', str(context.exception))
 
 
 if __name__ == '__main__':

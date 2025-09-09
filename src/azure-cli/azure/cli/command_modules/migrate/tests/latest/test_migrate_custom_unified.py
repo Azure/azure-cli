@@ -18,10 +18,7 @@ from azure.cli.command_modules.migrate.custom import (
     create_local_disk_mapping,
     create_local_server_replication,
     get_local_replication_job,
-    list_resource_groups,
     check_powershell_module,
-    initialize_replication_infrastructure,
-    check_replication_infrastructure,
     connect_azure_account,
     disconnect_azure_account,
     set_azure_context,
@@ -160,27 +157,6 @@ class TestMigrateLocalCommands(MigrateTestCase):
             project_name=TestConfig.SAMPLE_PROJECT_NAME,
             job_id='job-12345'
         )
-        
-class TestMigrateInfrastructureCommands(MigrateTestCase):
-    """Test infrastructure management commands."""
-
-    def test_initialize_replication_infrastructure(self):
-        """Test initializing replication infrastructure."""
-        initialize_replication_infrastructure(
-            self.cmd,
-            resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
-            project_name=TestConfig.SAMPLE_PROJECT_NAME,
-            target_region='East US'
-        )
-        
-
-    def test_check_replication_infrastructure(self):
-        """Test checking replication infrastructure status."""
-        check_replication_infrastructure(
-            self.cmd,
-            resource_group_name=TestConfig.SAMPLE_RESOURCE_GROUP,
-            project_name=TestConfig.SAMPLE_PROJECT_NAME
-        )
 class TestMigrateAuthenticationCommands(MigrateTestCase):
     """Test authentication management commands."""
 
@@ -200,10 +176,6 @@ class TestMigrateAuthenticationCommands(MigrateTestCase):
         )
 class TestMigrateUtilityCommands(MigrateTestCase):
     """Test utility and helper commands."""
-
-    def test_list_resource_groups(self):
-        """Test listing resource groups."""
-        list_resource_groups(self.cmd)
 
     def test_check_powershell_module(self):
         """Test checking PowerShell module availability."""

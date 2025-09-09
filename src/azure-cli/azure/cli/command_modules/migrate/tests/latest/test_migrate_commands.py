@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import Mock, patch
 from knack.util import CLIError
 from azure.cli.command_modules.migrate.commands import load_command_table
-from azure.cli.command_modules.migrate.custom import check_migration_prerequisites, list_resource_groups, get_discovered_server
+from azure.cli.command_modules.migrate.custom import check_migration_prerequisites, get_discovered_server
 class TestMigrateCommandLoading(unittest.TestCase):
     """Test command loading and registration."""
 
@@ -30,15 +30,9 @@ class TestMigrateCommandLoading(unittest.TestCase):
         expected_groups = [
             'migrate',
             'migrate server',
-            'migrate project',
-            'migrate assessment',
-            'migrate machine',
             'migrate local',
-            'migrate resource',
             'migrate powershell',
-            'migrate infrastructure',
-            'migrate auth',
-            'migrate storage'
+            'migrate auth'
         ]
         
         group_calls = [call[0][0] for call in self.loader.command_group.call_args_list]
@@ -111,12 +105,8 @@ class TestMigrateCommandLoading(unittest.TestCase):
             'create-disk-mapping',
             'create-nic-mapping',
             'create-replication',
-            'get-job',
             'get-azure-local-job',
             'init',
-            'init-azure-local',
-            'get-replication',
-            'set-replication',
             'start-migration',
             'remove-replication'
         ]
@@ -374,19 +364,6 @@ class TestMigrateCommandIntegration(unittest.TestCase):
             
             self.assertIn('platform', result)
             self.assertIn('powershell_available', result)
-
-    @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
-    def test_azure_authentication_integration(self, mock_get_executor):
-        """Test that Azure authentication is properly integrated."""        
-        mock_executor = Mock()
-        mock_executor.check_azure_authentication.return_value = {'IsAuthenticated': True}
-        mock_executor.execute_script_interactive.return_value = None
-        mock_get_executor.return_value = mock_executor
-        
-        list_resource_groups(Mock())
-        
-        mock_executor.check_azure_authentication.assert_called()
-        mock_executor.execute_script_interactive.assert_called()
 
     @patch('azure.cli.command_modules.migrate.custom.get_powershell_executor')
     def test_error_propagation(self, mock_get_executor):
