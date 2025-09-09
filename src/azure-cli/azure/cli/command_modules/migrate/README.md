@@ -7,10 +7,7 @@ This module provides comprehensive migration capabilities for Azure resources an
 - **Cross-platform PowerShell integration**: Leverages PowerShell cmdlets on Windows, Linux, and macOS
 - **Azure Local migration**: Full support for migrating VMs to Azure Stack HCI
 - **Server discovery and replication**: Discover and replicate servers from various sources
-- **Azure Migrate project management**: Create and manage Azure Migrate projects
-- **Infrastructure management**: Initialize and manage replication infrastructure
 - **Authentication management**: Comprehensive Azure authentication support
-- **Storage management**: Azure Storage account operations for migration
 
 ## Prerequisites
 
@@ -31,6 +28,9 @@ az migrate check-prerequisites
 
 # Set up migration environment
 az migrate setup-env --install-powershell
+
+# Verify migration setup
+az migrate verify-setup --resource-group myRG --project-name myProject
 ```
 
 ### Server Discovery and Replication
@@ -51,14 +51,21 @@ az migrate server create-replication --resource-group myRG --project-name myProj
 az migrate server show-replication-status --resource-group myRG --project-name myProject --vm-name myVM
 
 # Update replication properties
+az migrate server update-replication --resource-group myRG --project-name myProject --vm-name myVM
+
+# Check cross-platform environment
+az migrate server check-environment
+```
+az migrate server show-replication-status --resource-group myRG --project-name myProject --vm-name myVM
+
+# Update replication properties
 az migrate server update-replication --resource-group myRG --project-name myProject --target-object-id objectId
 ```
 
 ### Azure Local (Stack HCI) Migration Commands
 ```bash
-# Initialize Azure Local replication infrastructure
-az migrate local init-azure-local --resource-group myRG --project-name myProject \
-  --source-appliance-name sourceApp --target-appliance-name targetApp
+# Initialize Azure Local replication infrastructure  
+az migrate local init --resource-group myRG --project-name myProject
 
 # Create disk mapping for fine-grained control
 az migrate local create-disk-mapping --disk-id "disk001" --is-os-disk --size-gb 64 --format-type VHDX
@@ -83,70 +90,18 @@ az migrate local create-replication-with-mappings --resource-group myRG --projec
   --disk-mappings '[{"DiskID": "disk001", "IsOSDisk": true, "Size": 64, "Format": "VHDX"}]' \
   --nic-mappings '[{"NicID": "nic001", "TargetVirtualSwitchId": "/subscriptions/xxx/logicalnetworks/network001"}]'
 
-# Get replication details
-az migrate local get-replication --discovered-machine-id "/subscriptions/xxx/machines/machine001"
+# Get replication job details
+az migrate local get-job --resource-group myRG --project-name myProject --job-id "job-12345"
 
-# Update replication settings
-az migrate local set-replication --target-object-id "/subscriptions/xxx/replicationProtectedItems/item001" \
-  --is-dynamic-memory-enabled true --target-vm-cpu-core 4 --target-vm-ram 8192
+# Get Azure Local specific job
+az migrate local get-azure-local-job --resource-group myRG --project-name myProject --job-id "job-12345"
 
 # Start migration (planned failover)
 az migrate local start-migration --target-object-id "/subscriptions/xxx/replicationProtectedItems/item001" \
   --turn-off-source-server
 
-# Monitor migration jobs
-az migrate local get-azure-local-job --resource-group myRG --project-name myProject --job-id "job-12345"
-
 # Remove replication after successful migration
 az migrate local remove-replication --target-object-id "/subscriptions/xxx/replicationProtectedItems/item001"
-```
-
-### Project Management Commands
-```bash
-# Create migration project
-az migrate project create --name "MyMigrationProject" --resource-group "MyRG" --location "East US"
-
-# List migration projects
-az migrate project list
-
-# Show project details
-az migrate project show --name "MyMigrationProject" --resource-group "MyRG"
-
-# Delete migration project
-az migrate project delete --name "MyMigrationProject" --resource-group "MyRG"
-```
-
-### Assessment Commands
-```bash
-# List assessments in a project
-az migrate assessment list --project-name "MyMigrationProject" --resource-group "MyRG"
-
-# Create new assessment
-az migrate assessment create --assessment-name "MyAssessment" --project-name "MyMigrationProject" --resource-group "MyRG"
-
-# Show assessment details
-az migrate assessment show --assessment-name "MyAssessment" --project-name "MyMigrationProject" --resource-group "MyRG"
-
-# Delete assessment
-az migrate assessment delete --assessment-name "MyAssessment" --project-name "MyMigrationProject" --resource-group "MyRG"
-```
-
-### Machine Discovery and Management
-```bash
-# List discovered machines
-az migrate machine list --project-name "MyMigrationProject" --resource-group "MyRG"
-
-# Show machine details
-az migrate machine show --machine-name "MyMachine" --project-name "MyMigrationProject" --resource-group "MyRG"
-```
-
-### Infrastructure Management
-```bash
-# Initialize replication infrastructure
-az migrate infrastructure init --resource-group myRG --project-name myProject --target-region "East US"
-
-# Check infrastructure status
-az migrate infrastructure check --resource-group myRG --project-name myProject
 ```
 
 ### Authentication Management
@@ -173,36 +128,13 @@ az migrate auth show-context
 az migrate auth logout
 ```
 
-### Resource Management
-```bash
-# List resource groups
-az migrate resource list-groups
-
-# List resource groups in specific subscription
-az migrate resource list-groups --subscription-id "00000000-0000-0000-0000-000000000000"
-```
-
-### Storage Management
-```bash
-# Get storage account details
-az migrate storage get-account --resource-group myRG --storage-account-name mystorageaccount
-
-# List storage accounts
-az migrate storage list-accounts --resource-group myRG
-
-# Show detailed storage account information including keys
-az migrate storage show-account-details --resource-group myRG --storage-account-name mystorageaccount --show-keys
-```
-
 ### PowerShell Module Management
 ```bash
 # Check PowerShell module availability
 az migrate powershell check-module --module-name Az.Migrate
-```
-### PowerShell Module Management
-```bash
-# Check PowerShell module availability
-az migrate powershell check-module --module-name Az.Migrate
+
+# Update PowerShell modules
+az migrate powershell update-modules --modules Az.Migrate
 ```
 
 ## Architecture
@@ -211,12 +143,8 @@ The migration module consists of several key components:
 
 1. **Cross-Platform PowerShell Integration**: Executes PowerShell cmdlets across Windows, Linux, and macOS
 2. **Azure Local Migration**: Specialized support for Azure Stack HCI migration scenarios
-3. **Project Management**: Core project operations and lifecycle management
-4. **Assessment Operations**: Resource assessment and evaluation capabilities  
-5. **Machine Discovery**: Discovery and inventory of source machines
-6. **Infrastructure Management**: Replication infrastructure setup and management
-7. **Authentication Management**: Azure authentication and context management
-8. **Storage Operations**: Azure Storage account management for migration
+3. **Authentication Management**: Azure authentication and context management
+4. **Server Discovery and Replication**: Discovery and replication of source machines
 
 ## Common Workflows
 
@@ -235,20 +163,21 @@ az migrate auth login
 # 4. Set subscription context
 az migrate auth set-context --subscription-id "your-subscription-id"
 
-# 5. Initialize Azure Local replication infrastructure
-az migrate local init-azure-local \
-  --resource-group "migration-rg" \
-  --project-name "azure-local-migration" \
-  --source-appliance-name "VMware-Appliance" \
-  --target-appliance-name "AzureLocal-Target"
+# 5. Verify setup
+az migrate verify-setup --resource-group "migration-rg" --project-name "azure-local-migration"
 
-# 6. List discovered servers
+# 6. Initialize Azure Local replication infrastructure
+az migrate local init \
+  --resource-group "migration-rg" \
+  --project-name "azure-local-migration"
+
+# 7. List discovered servers
 az migrate server list-discovered \
   --resource-group "migration-rg" \
   --project-name "azure-local-migration" \
   --source-machine-type VMware
 
-# 7. Create replication for a specific server
+# 8. Create replication for a specific server
 az migrate local create-replication \
   --resource-group "migration-rg" \
   --project-name "azure-local-migration" \
@@ -258,43 +187,41 @@ az migrate local create-replication \
   --target-virtual-switch-id "/subscriptions/xxx/providers/Microsoft.AzureStackHCI/logicalnetworks/migration-network" \
   --target-resource-group-id "/subscriptions/xxx/resourceGroups/azure-local-vms"
 
-# 8. Monitor replication progress
-az migrate local get-replication --discovered-machine-id "machine-id"
+# 9. Monitor replication progress
+az migrate local get-job --resource-group "migration-rg" --project-name "azure-local-migration" --job-id "job-id"
 
-# 9. Start migration when ready
+# 10. Start migration when ready
 az migrate local start-migration --target-object-id "replication-id" --turn-off-source-server
 
-# 10. Monitor migration job
-az migrate local get-azure-local-job --resource-group "migration-rg" --project-name "azure-local-migration"
+# 11. Monitor migration job
+az migrate local get-azure-local-job --resource-group "migration-rg" --project-name "azure-local-migration" --job-id "job-id"
 ```
 
-### Setting up a Regular Azure Migration Project
+### Setting up Server Discovery and Replication
 
 ```bash
-# Create resource group if needed
-az group create --name "migration-rg" --location "East US"
+# 1. Check prerequisites and setup
+az migrate check-prerequisites
+az migrate setup-env --install-powershell
 
-# Create migration project
-az migrate project create --name "server-migration-2025" --resource-group "migration-rg" --location "East US"
+# 2. Authenticate and set context
+az migrate auth login
+az migrate auth set-context --subscription-id "your-subscription-id"
 
-# Initialize replication infrastructure
-az migrate infrastructure init --resource-group "migration-rg" --project-name "server-migration-2025" --target-region "East US"
+# 3. Verify setup
+az migrate verify-setup --resource-group "migration-rg" --project-name "server-migration-2025"
 
-# List project contents
-az migrate project show --name "server-migration-2025" --resource-group "migration-rg"
-```
+# 4. List discovered servers
+az migrate server list-discovered --resource-group "migration-rg" --project-name "server-migration-2025" --source-machine-type VMware
 
-### Viewing Migration Data
+# 5. Find specific servers
+az migrate server find-by-name --resource-group "migration-rg" --project-name "server-migration-2025" --display-name "WebServer"
 
-```bash
-# List all discovered machines
-az migrate machine list --project-name "server-migration-2025" --resource-group "migration-rg"
+# 6. Create server replication
+az migrate server create-replication --resource-group "migration-rg" --project-name "server-migration-2025" --target-vm-name "WebServer-Azure" --target-resource-group "target-rg" --target-network "target-vnet"
 
-# View assessments
-az migrate assessment list --project-name "server-migration-2025" --resource-group "migration-rg"
-
-# Get detailed assessment information
-az migrate assessment show --assessment-name "ServerAssessment" --project-name "server-migration-2025" --resource-group "migration-rg"
+# 7. Monitor replication status
+az migrate server show-replication-status --resource-group "migration-rg" --project-name "server-migration-2025" --vm-name "WebServer-Azure"
 ```
 
 ## PowerShell Integration
@@ -303,16 +230,16 @@ This module provides Azure CLI equivalents to PowerShell Az.Migrate cmdlets:
 
 | PowerShell Cmdlet | Azure CLI Command |
 |-------------------|-------------------|
-| `Initialize-AzMigrateLocalReplicationInfrastructure` | `az migrate local init-azure-local` |
+| `Initialize-AzMigrateLocalReplicationInfrastructure` | `az migrate local init` |
 | `New-AzMigrateLocalServerReplication` | `az migrate local create-replication` |
 | `New-AzMigrateLocalDiskMappingObject` | `az migrate local create-disk-mapping` |
 | `New-AzMigrateLocalNicMappingObject` | `az migrate local create-nic-mapping` |
-| `Get-AzMigrateLocalServerReplication` | `az migrate local get-replication` |
-| `Set-AzMigrateLocalServerReplication` | `az migrate local set-replication` |
 | `Start-AzMigrateLocalServerMigration` | `az migrate local start-migration` |
 | `Remove-AzMigrateLocalServerReplication` | `az migrate local remove-replication` |
 | `Get-AzMigrateLocalJob` | `az migrate local get-azure-local-job` |
 | `Get-AzMigrateDiscoveredServer` | `az migrate server list-discovered` |
+| `New-AzMigrateServerReplication` | `az migrate server create-replication` |
+| `Get-AzMigrateServerReplication` | `az migrate server show-replication-status` |
 
 ## Error Handling
 
@@ -334,26 +261,28 @@ The module includes comprehensive error handling for:
 - On Linux/macOS: Install PowerShell Core from https://github.com/PowerShell/PowerShell
 - Use `az migrate setup-env --install-powershell` for automatic installation guidance
 
-**Project Creation Fails**
-- Verify you have Contributor permissions on the subscription
-- Ensure the location supports Azure Migrate
-- Check resource naming conventions
+**Authentication Issues**
+- Use `az migrate auth check` to verify authentication status
+- Re-authenticate using `az migrate auth login`
+- Verify subscription context with `az migrate auth show-context`
 
-**Assessment Data Not Visible**
+**Server Discovery Issues**
 - Confirm the appliance is properly configured
 - Verify network connectivity from appliance to Azure
 - Check that discovery is running on the appliance
+- Use `az migrate server list-discovered` to check for discovered servers
 
 **Permission Errors**
 - Ensure Azure Migrate Contributor role is assigned
 - Verify subscription-level permissions for creating resources
-- Use `az migrate auth check` to verify authentication status
+- Check resource group permissions
 
 **Azure Local Specific Issues**
 - Verify Azure Stack HCI cluster is properly registered with Azure
 - Ensure proper networking between source and Azure Local target
 - Check that both source and target appliances are properly configured
 - Verify storage containers and logical networks are properly set up in Azure Local
+- Use `az migrate local init` to initialize infrastructure
 
 **Script Execution Errors**
 - Check PowerShell execution policy
