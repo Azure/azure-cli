@@ -1038,7 +1038,7 @@ def update_or_policy(cmd, client, parameters, resource_group_name, account_name,
 
     if enable_metrics is not None:
         ObjectReplicationPolicyPropertiesMetrics = cmd.get_models('ObjectReplicationPolicyPropertiesMetrics')
-        parameters.metrics=ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics)
+        parameters.metrics = ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics)
 
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    object_replication_policy_id=object_replication_policy_id, properties=parameters)
