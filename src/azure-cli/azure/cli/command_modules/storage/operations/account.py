@@ -1023,7 +1023,7 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
         raise ex
 
 
-def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
+def update_or_policy(cmd, client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
                      properties=None, source_account=None, destination_account=None, enable_metrics=None):
 
     if source_account is not None:
@@ -1037,7 +1037,8 @@ def update_or_policy(client, parameters, resource_group_name, account_name, obje
             object_replication_policy_id = properties["policyId"]
 
     if enable_metrics is not None:
-        parameters.metrics.enabled = enable_metrics
+        ObjectReplicationPolicyPropertiesMetrics = cmd.get_models('ObjectReplicationPolicyPropertiesMetrics')
+        parameters.metrics=ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics)
 
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    object_replication_policy_id=object_replication_policy_id, properties=parameters)
