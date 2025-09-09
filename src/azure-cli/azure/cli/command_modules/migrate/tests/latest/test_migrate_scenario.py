@@ -143,7 +143,7 @@ class MigrateLiveScenarioTest(LiveScenarioTest):
             self.skipTest('Live tests are skipped in playback mode')
 
     @ResourceGroupPreparer(name_prefix='cli_live_test_migrate')
-    def test_migrate_check_prerequisites_live(self, resource_group):
+    def test_migrate_check_prerequisites_live(self):
         """Live test for checking migration prerequisites."""
         try:
             result = self.cmd('migrate check-prerequisites').get_output_in_json()
@@ -173,7 +173,7 @@ class MigrateLiveScenarioTest(LiveScenarioTest):
 
 class MigrateParameterValidationTest(ScenarioTest):
     """Test parameter validation for migrate commands."""
-    
+
     def test_migrate_local_create_disk_mapping_validation(self):
         """Test disk mapping parameter validation."""
         with self.assertRaises(SystemExit):
