@@ -97,6 +97,12 @@ jobs:
         echo "##[endgroup]"
       displayName: "Inspect workspace and pool variable" 
 
+    - bash: |
+        echo "UBUNTU_POOL = $UBUNTU_POOL"
+        echo "WINDOWS_POOL = $WINDOWS_POOL"
+        echo "UBUNTU_ARM64_POOL = $UBUNTU_ARM64_POOL"
+      displayName: "Check pool variables"
+
 - job: CredentialScanner
   displayName: "Credential Scanner"
   pool:
