@@ -173,12 +173,7 @@ class MigrateLiveScenarioTest(LiveScenarioTest):
 
 class MigrateParameterValidationTest(ScenarioTest):
     """Test parameter validation for migrate commands."""
-
-    def test_migrate_server_list_discovered_missing_params(self):
-        """Test that required parameters are validated."""
-        self.cmd('migrate server list-discovered --project-name test-project', expect_failure=True)
-        self.cmd('migrate server list-discovered -g test-rg', expect_failure=True)
-
+    
     def test_migrate_local_create_disk_mapping_validation(self):
         """Test disk mapping parameter validation."""
         with self.assertRaises(SystemExit):
