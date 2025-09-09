@@ -21,17 +21,18 @@ paths = {
 }
 
 async def fetch_available_services():
-    """Fetch available services from azure-rest-api-specs repository."""
-    url = "https://api.github.com/repos/Azure/azure-rest-api-specs/contents/specification"
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-    except requests.RequestException:
+    """Retrieve available services by parsing local azure-rest-api-specs/specification directory"""
+    spec_path = os.path.join(paths["swagger_path"], "specification")
+    if not os.path.exists(spec_path):
+        # Fallback to common services if local path is missing
         return ["storage", "compute", "network", "keyvault", "monitor"]
 
-    directories = [item['name'] for item in response.json() if item['type'] == 'dir']
-    directories.sort()
-    return directories
+    try:
+        directories = [d for d in os.listdir(spec_path) if os.path.isdir(os.path.join(spec_path, d))]
+        directories.sort()
+        return directories
+    except Exception:
+        return ["storage", "compute", "network", "keyvault", "monitor"]
 
 async def validate_paths(ctx: Context) -> dict:
     """Validate and get correct paths for required directories."""
