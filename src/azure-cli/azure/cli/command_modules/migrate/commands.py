@@ -8,14 +8,6 @@ from azure.cli.core.commands import CliCommandType
 
 def load_command_table(self, _):
     # Define command types for different operation groups
-    migrate_projects_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.migrate.operations#ProjectsOperations.{}',
-    )
-
-    migrate_assessments_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.migrate.operations#AssessmentsOperations.{}',
-    )
-
     migrate_machines_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.migrate.operations#MachinesOperations.{}',
     )
@@ -36,26 +28,7 @@ def load_command_table(self, _):
         g.custom_command('update-replication', 'set_replication_target_properties')
         g.custom_command('check-environment', 'validate_cross_platform_environment_cmd')
 
-    # Azure Migrate project management
-    with self.command_group('migrate project', migrate_projects_sdk) as g:
-        g.custom_command('create', 'create_migrate_project')
-        g.custom_command('delete', 'delete_migrate_project')
-        g.show_command('show', 'get')
-        g.custom_command('list', 'list_migrate_projects')
-
-    # Assessment management
-    with self.command_group('migrate assessment', migrate_assessments_sdk) as g:
-        g.custom_command('create', 'create_assessment')
-        g.custom_command('list', 'list_assessments')
-        g.show_command('show', 'get')
-        g.custom_command('delete', 'delete_assessment')
-
-    # Machine management
-    with self.command_group('migrate machine', migrate_machines_sdk) as g:
-        g.custom_command('list', 'list_machines')
-        g.show_command('show', 'get')
-
-    # Azure Stack HCI Local Migration Commands
+    # Azure Local Migration Commands
     with self.command_group('migrate local') as g:
         g.custom_command('create-disk-mapping', 'create_local_disk_mapping')
         g.custom_command('create-nic-mapping', 'create_local_nic_mapping')
@@ -64,15 +37,8 @@ def load_command_table(self, _):
         g.custom_command('get-job', 'get_local_replication_job')
         g.custom_command('get-azure-local-job', 'get_azure_local_job')
         g.custom_command('init', 'initialize_local_replication_infrastructure')
-        g.custom_command('init-azure-local', 'initialize_azure_local_replication_infrastructure')
-        g.custom_command('get-replication', 'get_azure_local_server_replication')
-        g.custom_command('set-replication', 'set_azure_local_server_replication')
         g.custom_command('start-migration', 'start_azure_local_server_migration')
         g.custom_command('remove-replication', 'remove_azure_local_server_replication')
-        g.custom_command('create-vm-replication', 'create_azstackhci_vm_replication')
-        g.custom_command('set-vm-replication', 'set_azstackhci_vm_replication')
-        g.custom_command('remove-vm-replication', 'remove_azstackhci_vm_replication')
-        g.custom_command('get-vm-replication', 'get_azstackhci_vm_replication')
 
     # Azure Resource Management Commands
     with self.command_group('migrate resource') as g:
@@ -83,11 +49,6 @@ def load_command_table(self, _):
         g.custom_command('check-module', 'check_powershell_module')
         g.custom_command('update-modules', 'update_powershell_modules')
 
-    # Infrastructure management
-    with self.command_group('migrate infrastructure') as g:
-        g.custom_command('init', 'initialize_replication_infrastructure')
-        g.custom_command('check', 'check_replication_infrastructure')
-
     # Authentication commands
     with self.command_group('migrate auth') as g:
         g.custom_command('check', 'check_azure_authentication')
@@ -96,9 +57,4 @@ def load_command_table(self, _):
         g.custom_command('set-context', 'set_azure_context')
         g.custom_command('show-context', 'get_azure_context')
 
-    # Azure Storage commands
-    with self.command_group('migrate storage') as g:
-        g.custom_command('get-account', 'get_storage_account')
-        g.custom_command('list-accounts', 'list_storage_accounts')
-        g.custom_command('show-account-details', 'show_storage_account_details')
 

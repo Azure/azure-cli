@@ -4,20 +4,16 @@
 # --------------------------------------------------------------------------------------------
 
 import json
-import os
 import platform
-import sys
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.core.util import run_cmd
-from azure.cli.command_modules.migrate._powershell_utils import get_powershell_executor, PowerShellExecutor
+from azure.cli.command_modules.migrate._powershell_utils import get_powershell_executor
 
 logger = get_logger(__name__)
 
 # --------------------------------------------------------------------------------------------
 # System Environment Commands
 # --------------------------------------------------------------------------------------------
-
 
 def check_migration_prerequisites(cmd):
     """Check if the system meets migration prerequisites."""
@@ -87,7 +83,6 @@ def check_migration_prerequisites(cmd):
     
     return prereqs
 
-
 def check_azure_authentication(cmd):
     """Check Azure authentication status."""
     try:
@@ -120,7 +115,6 @@ def check_azure_authentication(cmd):
     except Exception as e:
         logger.error(f"Failed to check authentication: {str(e)}")
         return {'IsAuthenticated': False, 'Error': str(e)}
-
 
 def setup_migration_environment(cmd, install_powershell=False, check_only=False):
     """Configure the system environment for migration operations."""    
@@ -212,7 +206,6 @@ def setup_migration_environment(cmd, install_powershell=False, check_only=False)
     
     return setup_results
 
-
 def _get_powershell_install_instructions(system):
     """Get platform-specific PowerShell installation instructions."""
     instructions = {
@@ -221,7 +214,6 @@ def _get_powershell_install_instructions(system):
         'darwin': 'Install PowerShell Core: brew install powershell'
     }
     return instructions.get(system, instructions['linux'])
-
 
 def _attempt_powershell_installation(system):
     """Attempt to automatically install PowerShell (platform-dependent)."""
@@ -255,7 +247,6 @@ def _attempt_powershell_installation(system):
             return f'Automatic installation failed: {str(e)}'
     
     return 'Automatic installation not supported for this platform'
-
 
 def _perform_platform_specific_checks(system):
     """Perform platform-specific environment checks."""
@@ -303,109 +294,6 @@ def _perform_platform_specific_checks(system):
         checks.append(f'Unsupported platform: {system}')
     
     return checks
-
-
-def setup_migration_environment(cmd, install_powershell=False, check_only=False):
-    """Configure the system environment for migration operations with cross-platform support."""    
-    logger = get_logger(__name__)
-    system = platform.system().lower()
-    
-    setup_results = {
-        'platform': system,
-        'checks': [],
-        'actions_taken': [],
-        'cross_platform_ready': False,
-        'powershell_status': 'not_checked',
-        'status': 'success'
-    }
-    
-    logger.info(f"Setting up migration environment for {system}")
-    
-    try:
-        # 1. Check Python version
-        python_version = sys.version_info
-        if python_version.major >= 3 and python_version.minor >= 7:
-            setup_results['checks'].append(f'Python {python_version.major}.{python_version.minor}.{python_version.micro} is compatible')
-        else:
-            setup_results['checks'].append(f'Python {python_version.major}.{python_version.minor}.{python_version.micro} - requires 3.7+')
-            setup_results['status'] = 'warning'
-        
-        # 2. Check PowerShell availability
-        try:
-            ps_executor = get_powershell_executor()
-            is_available, _ = ps_executor.check_powershell_availability()
-            
-            if is_available:
-                setup_results['powershell_status'] = 'available'
-                setup_results['checks'].append('PowerShell is available')
-                
-                # Check PowerShell version compatibility
-                try:
-                    version_result = ps_executor.execute_script('$PSVersionTable.PSVersion.Major')
-                    major_version = int(version_result.get('stdout', '0').strip())
-                    
-                    if major_version >= 7:  # PowerShell Core 7+
-                        setup_results['checks'].append('PowerShell Core 7+ detected (cross-platform compatible)')
-                        setup_results['cross_platform_ready'] = True
-                    elif major_version >= 5 and system == 'windows':
-                        setup_results['checks'].append('Windows PowerShell 5+ detected (Windows only)')
-                        setup_results['cross_platform_ready'] = False
-                    else:
-                        setup_results['checks'].append('PowerShell version too old')
-                        setup_results['cross_platform_ready'] = False
-                        
-                except Exception as e:
-                    setup_results['checks'].append(f'Could not determine PowerShell version: {e}')
-                    
-            else:
-                setup_results['powershell_status'] = 'not_available'
-                setup_results['checks'].append('PowerShell is not available')
-                
-                if install_powershell and not check_only:
-                    # Attempt automatic installation
-                    install_result = _attempt_powershell_installation(system)
-                    setup_results['actions_taken'].append(install_result)
-                else:
-                    setup_results['checks'].append(_get_powershell_install_instructions(system))
-                    
-        except Exception as e:
-            setup_results['powershell_status'] = 'error'
-            setup_results['checks'].append(f'PowerShell check failed: {str(e)}')
-        
-        # 3. Check Azure PowerShell modules
-        if setup_results['powershell_status'] == 'available':
-            try:
-                ps_executor = get_powershell_executor()
-                az_check = ps_executor.execute_script('Get-Module -ListAvailable Az.Migrate | Select-Object -First 1')
-                
-                if az_check.get('stdout', '').strip():
-                    setup_results['checks'].append('Az.Migrate module is available')
-                else:
-                    setup_results['checks'].append('Az.Migrate module is not installed')
-                    if not check_only:
-                        setup_results['checks'].append('Install with: Install-Module -Name Az.Migrate -Force')
-                        
-            except Exception as e:
-                setup_results['checks'].append(f'Could not check Azure modules: {str(e)}')
-        
-        # 4. Platform-specific environment checks
-        platform_checks = _perform_platform_specific_checks(system)
-        setup_results['checks'].extend(platform_checks)
-        
-        # Display results
-        logger.info("Environment Setup Results:")
-        for check in setup_results['checks']:
-            logger.info(f"  {check}")
-        
-        if setup_results['actions_taken']:
-            logger.info("Actions taken:")
-            for action in setup_results['actions_taken']:
-                logger.info(f"  {action}")
-        
-        return setup_results
-        
-    except Exception as e:
-        raise CLIError(f'Failed to setup migration environment: {str(e)}')
 
 # --------------------------------------------------------------------------------------------
 # Authentication and Discovery Commands
@@ -567,12 +455,7 @@ def verify_migrate_setup(cmd, resource_group_name, project_name):
     """
     
     try:
-        result = ps_executor.execute_script_interactive(verify_script)
-        return {
-            'message': 'Azure Migrate setup verification completed',
-            'resource_group': resource_group_name,
-            'project_name': project_name
-        }
+        ps_executor.execute_script_interactive(verify_script)
     except Exception as e:
         raise CLIError(f'Failed to verify Azure Migrate setup: {str(e)}')
 
@@ -791,101 +674,37 @@ def get_discovered_servers_table(cmd, resource_group_name, project_name, source_
     except Exception as e:
         raise CLIError(f'Failed to execute PowerShell commands: {str(e)}')
 
-def initialize_replication_infrastructure(cmd, resource_group_name, project_name, target_region):
-    """Initialize Azure Migrate replication infrastructure."""
+def get_discovered_servers_by_display_name(cmd, resource_group_name, project_name, display_name, source_machine_type='VMware'):
+    """Find discovered servers by display name."""
     
     ps_executor = get_powershell_executor()
     
-    # Check Azure authentication first
-    auth_status = ps_executor.check_azure_authentication()
-    if not auth_status.get('IsAuthenticated', False):
-        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
-    
-    init_script = f"""
-    # Initialize Azure Migrate replication infrastructure
+    search_script = f"""
+    # Find servers by display name
     try {{
-        # Initialize the replication infrastructure
-        $InitResult = Initialize-AzMigrateReplicationInfrastructure `
-            -ResourceGroupName "{resource_group_name}" `
-            -ProjectName "{project_name}" `
-            -Scenario "agentlessVMware" `
-            -TargetRegion "{target_region}"
+        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType {source_machine_type}
+        $MatchingServers = $DiscoveredServers | Where-Object {{ $_.DisplayName -like "*{display_name}*" }}
         
-        if ($InitResult) {{
-            $InitResult | Format-List
+        if ($MatchingServers) {{
+            Write-Host "Found $($MatchingServers.Count) matching server(s):"
+            $MatchingServers | Format-Table DisplayName, Name, Type -AutoSize
+        }} else {{
+            Write-Host "No servers found matching: {display_name}"
         }}
         
+        return $MatchingServers
+        
     }} catch {{
-        Write-Error "Failed to initialize replication infrastructure: $($_.Exception.Message)"
+        Write-Error "Error searching for servers: $($_.Exception.Message)"
         throw
     }}
     """
     
     try:
-        ps_executor.execute_script_interactive(init_script)    
+        ps_executor.execute_script_interactive(search_script)
     except Exception as e:
-        raise CLIError(f'Failed to initialize replication infrastructure: {str(e)}')
-
-
-def check_replication_infrastructure(cmd, resource_group_name, project_name):
-    """Check the status of Azure Migrate replication infrastructure."""
+        raise CLIError(f'Failed to search for servers: {str(e)}')
     
-    ps_executor = get_powershell_executor()
-    
-    # Check Azure authentication first
-    auth_status = ps_executor.check_azure_authentication()
-    if not auth_status.get('IsAuthenticated', False):
-        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
-    
-    check_script = f"""
-    # Check Azure Migrate replication infrastructure status
-    try {{
-        # Check if the Azure Migrate project exists
-        $Project = Get-AzResource -ResourceGroupName "{resource_group_name}" -ResourceType "Microsoft.Migrate/MigrateProjects" -Name "{project_name}" -ErrorAction SilentlyContinue
-        if (-Not $Project) {{
-            Write-Host "Azure Migrate Project not found"
-        }}
-        
-        # Check for replication infrastructure resources
-        $Vaults = Get-AzResource -ResourceGroupName "{resource_group_name}" -ResourceType "Microsoft.RecoveryServices/vaults" -ErrorAction SilentlyContinue
-        if (-Not $Vaults) {{
-            Write-Host "No Recovery Services Vault(s) found"
-        }}
-        
-        # Check for Storage Accounts (used for replication)
-        $StorageAccounts = Get-AzStorageAccount -ResourceGroupName "{resource_group_name}" -ErrorAction SilentlyContinue
-        if (-Not $StorageAccounts) {{
-            Write-Host "No Storage Account(s) found"
-        }}
-        
-        # Try to get existing server replications to test if infrastructure is working
-        try {{
-            $Replications = Get-AzMigrateServerReplication -ProjectName "{project_name}" -ResourceGroupName "{resource_group_name}" -ErrorAction SilentlyContinue
-            Write-Host "Replication infrastructure is accessible"
-            if (-Not $Replications) {{
-                Write-Host "No existing replications found"
-            }}
-        }} catch {{
-            if ($_.Exception.Message -like "*not initialized*") {{
-                Write-Host "Replication infrastructure is NOT initialized"
-            }} else {{
-                Write-Host "Could not test replication infrastructure: $($_.Exception.Message)"
-            }}
-        }}
-        
-    }} catch {{
-        Write-Error "Failed to check replication infrastructure: $($_.Exception.Message)"
-        throw
-    }}
-    """
-    
-    try:
-        # Use interactive execution to show real-time PowerShell output
-        ps_executor.execute_script_interactive(check_script)
-        
-    except Exception as e:
-        raise CLIError(f'Failed to check replication infrastructure: {str(e)}')
-
 def connect_azure_account(cmd, subscription_id=None, tenant_id=None, device_code=False, app_id=None, secret=None):
     """
     Connect to Azure account using PowerShell Connect-AzAccount with enhanced visibility.
@@ -1169,40 +988,7 @@ def create_server_replication(cmd, resource_group_name, project_name, target_vm_
         ps_executor.execute_script_interactive(replication_script)       
     except Exception as e:
         raise CLIError(f'Failed to create server replication: {str(e)}')
-
-
-def get_discovered_servers_by_display_name(cmd, resource_group_name, project_name, display_name, source_machine_type='VMware'):
-    """Find discovered servers by display name."""
     
-    ps_executor = get_powershell_executor()
-    
-    search_script = f"""
-    # Find servers by display name
-    try {{
-        $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName {project_name} -ResourceGroupName {resource_group_name} -SourceMachineType {source_machine_type}
-        $MatchingServers = $DiscoveredServers | Where-Object {{ $_.DisplayName -like "*{display_name}*" }}
-        
-        if ($MatchingServers) {{
-            Write-Host "Found $($MatchingServers.Count) matching server(s):"
-            $MatchingServers | Format-Table DisplayName, Name, Type -AutoSize
-        }} else {{
-            Write-Host "No servers found matching: {display_name}"
-        }}
-        
-        return $MatchingServers
-        
-    }} catch {{
-        Write-Error "Error searching for servers: $($_.Exception.Message)"
-        throw
-    }}
-    """
-    
-    try:
-        ps_executor.execute_script_interactive(search_script)
-    except Exception as e:
-        raise CLIError(f'Failed to search for servers: {str(e)}')
-
-
 def get_replication_job_status(cmd, resource_group_name, project_name, vm_name=None, 
                               job_id=None, subscription_id=None):
     """Get replication job status for a VM or job."""
@@ -1241,7 +1027,6 @@ def get_replication_job_status(cmd, resource_group_name, project_name, vm_name=N
         ps_executor.execute_script_interactive(status_script)
     except Exception as e:
         raise CLIError(f'Failed to get replication status: {str(e)}')
-
 
 def set_replication_target_properties(cmd, resource_group_name, project_name, vm_name, 
                                      target_vm_size=None, target_disk_type=None, target_network=None):
@@ -1348,7 +1133,6 @@ def create_local_disk_mapping(cmd, disk_id, is_os_disk=True, is_dynamic=False,
         ps_executor.execute_script_interactive(disk_mapping_script)   
     except Exception as e:
         raise CLIError(f'Failed to create disk mapping object: {str(e)}')
-
 
 def create_local_server_replication(cmd, resource_group_name, project_name, server_index, 
                                    target_vm_name, target_storage_path_id, target_virtual_switch_id, 
@@ -1573,7 +1357,6 @@ def list_resource_groups(cmd, subscription_id=None):
     except Exception as e:
         raise CLIError(f'Failed to list resource groups: {str(e)}')
 
-
 def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None):
     """
     Azure CLI equivalent of Get-InstalledModule -Name Az.Migrate
@@ -1625,7 +1408,6 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
         ps_executor.execute_script_interactive(module_check_script) 
     except Exception as e:
         raise CLIError(f'Failed to check PowerShell module {module_name}: {str(e)}')
-
 
 def update_powershell_modules(cmd, modules=None, force=False, include_dependencies=True, allow_prerelease=False):
     """
@@ -1822,7 +1604,6 @@ def update_powershell_modules(cmd, modules=None, force=False, include_dependenci
     except Exception as e:
         raise CLIError(f'Failed to update PowerShell modules: {str(e)}')
 
-
 def get_local_replication_job(cmd, resource_group_name, project_name, job_id=None, input_object=None, subscription_id=None):
     """
     Azure CLI equivalent to Get-AzMigrateLocalJob.
@@ -1980,7 +1761,6 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
     except Exception as e:
         raise CLIError(f'Failed to get local replication job: {str(e)}')
 
-
 def initialize_local_replication_infrastructure(cmd, resource_group_name, project_name, 
                                                source_appliance_name, target_appliance_name):
     """
@@ -2012,60 +1792,6 @@ def initialize_local_replication_infrastructure(cmd, resource_group_name, projec
         ps_executor.execute_script_interactive(initialize_script)
     except Exception as e:
         raise CLIError(f'Failed to initialize local replication infrastructure: {str(e)}')
-
-
-def list_resource_groups(cmd, subscription_id=None):
-    """
-    Azure CLI equivalent to Get-AzResourceGroup.
-    Lists all resource groups in the current subscription.
-    """
-    ps_executor = get_powershell_executor()
-    
-    # Check Azure authentication first
-    auth_status = ps_executor.check_azure_authentication()
-    if not auth_status.get('IsAuthenticated', False):
-        raise CLIError(f"Azure authentication required: {auth_status.get('Error', 'Unknown error')}")
-    
-    list_rg_script = f"""
-    # Azure CLI equivalent functionality for Get-AzResourceGroup
-    try {{
-        Write-Host ""
-        Write-Host "Listing Resource Groups..." -ForegroundColor Cyan
-        Write-Host "=" * 40 -ForegroundColor Gray
-        Write-Host ""
-        
-        # Get all resource groups
-        $ResourceGroups = Get-AzResourceGroup
-        
-        Write-Host "Found $($ResourceGroups.Count) resource group(s)"
-        Write-Host ""
-        Write-Host "Resource Groups:"
-        
-        $ResourceGroups | Format-Table ResourceGroupName, Location, ProvisioningState -AutoSize
-        
-        return $ResourceGroups | ForEach-Object {{
-            @{{
-                'ResourceGroupName' = $_.ResourceGroupName
-                'Location' = $_.Location
-                'ProvisioningState' = $_.ProvisioningState
-                'ResourceId' = $_.ResourceId
-            }}
-        }}
-        
-    }} catch {{
-        Write-Host ""
-        Write-Host "Failed to list resource groups:"
-        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
-        Write-Host ""
-        throw
-    }}
-    """
-    
-    try:
-        ps_executor.execute_script_interactive(list_rg_script)
-    except Exception as e:
-        raise CLIError(f'Failed to list resource groups: {str(e)}')
-
 
 def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None):
     """
@@ -2120,307 +1846,8 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
         raise CLIError(f'Failed to check PowerShell module {module_name}: {str(e)}')
 
 # --------------------------------------------------------------------------------------------
-# Azure Stack HCI VM Replication Commands
-# --------------------------------------------------------------------------------------------
-
-def create_azstackhci_vm_replication(cmd, vm_name, target_vm_name, resource_group_name, 
-                                     source_appliance_name, target_appliance_name,
-                                     replication_frequency=None, recovery_point_history=None,
-                                     app_consistent_frequency=None):
-    """
-    Azure CLI equivalent to New-AzStackHCIVMReplication.
-    Creates a new VM replication for Azure Stack HCI migration.
-    """
-    # Cross-platform prerequisite check
-    _check_cross_platform_prerequisites()
-    
-    ps_executor = get_powershell_executor()
-    
-    # Build the PowerShell script with parameters
-    params = [
-        f'-VMName "{vm_name}"',
-        f'-TargetVMName "{target_vm_name}"',
-        f'-ResourceGroupName "{resource_group_name}"',
-        f'-SourceApplianceName "{source_appliance_name}"',
-        f'-TargetApplianceName "{target_appliance_name}"'
-    ]
-    
-    if replication_frequency:
-        params.append(f'-ReplicationFrequency {replication_frequency}')
-    if recovery_point_history:
-        params.append(f'-RecoveryPointHistory {recovery_point_history}')
-    if app_consistent_frequency:
-        params.append(f'-AppConsistentFrequency {app_consistent_frequency}')
-    
-    create_vm_replication_script = f"""
-    try {{
-        Write-Host ""
-        Write-Host "🔄 Creating Azure Stack HCI VM Replication..." -ForegroundColor Cyan
-        Write-Host "VM Name: {vm_name}" -ForegroundColor White
-        Write-Host "Target VM Name: {target_vm_name}" -ForegroundColor White
-        Write-Host "Resource Group: {resource_group_name}" -ForegroundColor White
-        Write-Host ""
-        
-        $Result = New-AzStackHCIVMReplication {' '.join(params)}
-        
-        if ($Result) {{
-            Write-Host "VM replication created successfully!"
-            Write-Host ""
-            Write-Host "Replication Details:"
-            Write-Host "===================" -ForegroundColor Gray
-            $Result | Format-List
-        }} else {{
-            Write-Host "Failed to create VM replication"
-        }}
-        
-    }} catch {{
-        Write-Host ""
-        Write-Host "Failed to create Azure Stack HCI VM replication:"
-        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
-        Write-Host ""
-        throw
-    }}
-    """
-    
-    try:
-        ps_executor.execute_script_interactive(create_vm_replication_script)
-    except Exception as e:
-        raise _create_cross_platform_error('create Azure Stack HCI VM replication', str(e))
-
-
-def set_azstackhci_vm_replication(cmd, vm_name, resource_group_name, 
-                                  replication_frequency=None, recovery_point_history=None,
-                                  app_consistent_frequency=None, enable_compression=None):
-    """
-    Azure CLI equivalent to Set-AzStackHCIVMReplication.
-    Updates settings for an existing Azure Stack HCI VM replication.
-    """
-    # Cross-platform prerequisite check
-    _check_cross_platform_prerequisites()
-    
-    ps_executor = get_powershell_executor()
-    
-    # Build the PowerShell script with parameters
-    params = [
-        f'-VMName "{vm_name}"',
-        f'-ResourceGroupName "{resource_group_name}"'
-    ]
-    
-    if replication_frequency:
-        params.append(f'-ReplicationFrequency {replication_frequency}')
-    if recovery_point_history:
-        params.append(f'-RecoveryPointHistory {recovery_point_history}')
-    if app_consistent_frequency:
-        params.append(f'-AppConsistentFrequency {app_consistent_frequency}')
-    if enable_compression is not None:
-        params.append(f'-EnableCompression ${str(enable_compression).lower()}')
-    
-    set_vm_replication_script = f"""
-    try {{
-        Write-Host ""
-        Write-Host "Updating Azure Stack HCI VM Replication Settings..." -ForegroundColor Cyan
-        Write-Host "VM Name: {vm_name}" -ForegroundColor White
-        Write-Host "Resource Group: {resource_group_name}" -ForegroundColor White
-        Write-Host ""
-        
-        $Result = Set-AzStackHCIVMReplication {' '.join(params)}
-        
-        if ($Result) {{
-            Write-Host "VM replication settings updated successfully!"
-            Write-Host ""
-            Write-Host "Updated Settings:"
-            Write-Host "================" -ForegroundColor Gray
-            $Result | Format-List
-        }} else {{
-            Write-Host "Failed to update VM replication settings"
-        }}
-        
-    }} catch {{
-        Write-Host ""
-        Write-Host "Failed to update Azure Stack HCI VM replication:"
-        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
-        Write-Host ""
-        throw
-    }}
-    """
-    
-    try:
-        ps_executor.execute_script_interactive(set_vm_replication_script)
-    except Exception as e:
-        raise _create_cross_platform_error('update Azure Stack HCI VM replication', str(e))
-
-
-def remove_azstackhci_vm_replication(cmd, vm_name, resource_group_name, force=False):
-    """
-    Azure CLI equivalent to Remove-AzStackHCIVMReplication.
-    Removes an existing Azure Stack HCI VM replication.
-    """
-    # Cross-platform prerequisite check
-    _check_cross_platform_prerequisites()
-    
-    ps_executor = get_powershell_executor()
-    
-    # Build the PowerShell script with parameters
-    params = [
-        f'-VMName "{vm_name}"',
-        f'-ResourceGroupName "{resource_group_name}"'
-    ]
-    
-    if force:
-        params.append('-Force')
-    
-    remove_vm_replication_script = f"""
-    try {{
-        Write-Host ""
-        Write-Host "🗑️ Removing Azure Stack HCI VM Replication..." -ForegroundColor Cyan
-        Write-Host "VM Name: {vm_name}" -ForegroundColor White
-        Write-Host "Resource Group: {resource_group_name}" -ForegroundColor White
-        Write-Host ""
-        
-        {"# Confirmation prompt" if not force else "# Force removal without confirmation"}
-        {"$confirmation = Read-Host 'Are you sure you want to remove VM replication? (y/N)'" if not force else ""}
-        {"if ($confirmation -eq 'y' -or $confirmation -eq 'Y') {" if not force else ""}
-            $Result = Remove-AzStackHCIVMReplication {' '.join(params)}
-            
-            Write-Host "VM replication removed successfully!"
-            Write-Host ""
-        {"} else {" if not force else ""}
-        {"    Write-Host 'Operation cancelled by user'" if not force else ""}
-        {"}" if not force else ""}
-        
-    }} catch {{
-        Write-Host ""
-        Write-Host "Failed to remove Azure Stack HCI VM replication:"
-        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
-        Write-Host ""
-        throw
-    }}
-    """
-    
-    try:
-        ps_executor.execute_script_interactive(remove_vm_replication_script)
-    except Exception as e:
-        raise _create_cross_platform_error('remove Azure Stack HCI VM replication', str(e))
-
-
-def get_azstackhci_vm_replication(cmd, vm_name=None, resource_group_name=None):
-    """
-    Azure CLI equivalent to Get-AzStackHCIVMReplication.
-    Retrieves Azure Stack HCI VM replication status and details.
-    """
-    ps_executor = get_powershell_executor()
-    
-    # Build the PowerShell script with parameters
-    params = []
-    if vm_name:
-        params.append(f'-VMName "{vm_name}"')
-    if resource_group_name:
-        params.append(f'-ResourceGroupName "{resource_group_name}"')
-    
-    get_vm_replication_script = f"""
-    try {{
-        Write-Host ""
-        Write-Host "Retrieving Azure Stack HCI VM Replication Status..." -ForegroundColor Cyan
-        {"Write-Host 'VM Name: " + vm_name + "' -ForegroundColor White" if vm_name else "Write-Host 'Listing all VM replications' -ForegroundColor White"}
-        {"Write-Host 'Resource Group: " + resource_group_name + "' -ForegroundColor White" if resource_group_name else ""}
-        Write-Host ""
-        
-        $Replications = Get-AzStackHCIVMReplication {' '.join(params)}
-        
-        if ($Replications) {{
-            Write-Host "VM replication details retrieved successfully!"
-            Write-Host ""
-            Write-Host "Replication Status:"
-            Write-Host "==================" -ForegroundColor Gray
-            
-            if ($Replications -is [array]) {{
-                foreach ($replication in $Replications) {{
-                    Write-Host ""
-                    Write-Host "VM Name: $($replication.VMName)" -ForegroundColor Cyan
-                    Write-Host "Status: $($replication.ReplicationStatus)" -ForegroundColor White
-                    Write-Host "Health: $($replication.ReplicationHealth)" -ForegroundColor White
-                    Write-Host "Last Replication Time: $($replication.LastReplicationTime)" -ForegroundColor White
-                    Write-Host "Target Location: $($replication.TargetLocation)" -ForegroundColor White
-                    Write-Host "Recovery Points: $($replication.RecoveryPointCount)" -ForegroundColor White
-                    Write-Host "---"
-                }}
-            }} else {{
-                $Replications | Format-List
-            }}
-            
-        }} else {{
-            Write-Host "ℹ️ No VM replications found"
-        }}
-        
-    }} catch {{
-        Write-Host ""
-        Write-Host "Failed to get Azure Stack HCI VM replication:"
-        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
-        Write-Host "   Platform: $($PSVersionTable.Platform)" -ForegroundColor Gray
-        Write-Host ""
-        throw
-    }}
-    """
-    
-    try:
-        ps_executor.execute_script_interactive(get_vm_replication_script)
-    except Exception as e:
-        raise _create_cross_platform_error('get Azure Stack HCI VM replication', str(e))
-
-
-# --------------------------------------------------------------------------------------------
 # Cross-Platform Helper Functions
 # --------------------------------------------------------------------------------------------
-
-
-def _check_cross_platform_prerequisites():
-    """Check cross-platform prerequisites before executing PowerShell commands."""
-    try:
-        ps_executor = get_powershell_executor()
-        is_available, _ = ps_executor.check_powershell_availability()
-        
-        if not is_available:
-            system = platform.system().lower()
-            install_guide = _get_powershell_install_instructions(system)
-            raise CLIError(f"PowerShell is required but not available. {install_guide}")
-            
-    except Exception as e:
-        if "PowerShell is required" in str(e):
-            raise
-        else:
-            raise CLIError(f"Failed to check PowerShell prerequisites: {str(e)}")
-
-
-def _create_cross_platform_error(operation, error_message):
-    """Create a cross-platform friendly error message."""
-    system = platform.system().lower()
-    
-    error_details = f"Failed to {operation}: {error_message}"
-    
-    # Add platform-specific troubleshooting tips
-    if "not recognized" in error_message.lower() or "command not found" in error_message.lower():
-        if system == 'windows':
-            error_details += "\nTroubleshooting:\n"
-            error_details += "   - Ensure PowerShell is installed and in PATH\n"
-            error_details += "   - Try: winget install Microsoft.PowerShell\n"
-            error_details += "   - Restart your terminal after installation"
-        elif system == 'linux':
-            error_details += "\nTroubleshooting:\n"
-            error_details += "   - Install PowerShell Core: sudo apt install powershell (Ubuntu)\n"
-            error_details += "   - Or: sudo yum install powershell (RHEL/CentOS)\n"
-            error_details += "   - Ensure /usr/bin/pwsh exists"
-        elif system == 'darwin':
-            error_details += "\nTroubleshooting:\n"
-            error_details += "   - Install PowerShell Core: brew install powershell\n"
-            error_details += "   - Ensure /usr/local/bin/pwsh exists"
-    
-    elif "module" in error_message.lower() and "not found" in error_message.lower():
-        error_details += "\nInstall Azure PowerShell modules:\n"
-        error_details += "   PowerShell> Install-Module -Name Az.Migrate -Force\n"
-        error_details += "   PowerShell> Install-Module -Name Az.StackHCI -Force"
-    
-    return CLIError(error_details)
-
 
 def _get_platform_capabilities():
     """Get platform-specific capabilities and limitations."""
@@ -2466,7 +1893,6 @@ def _get_platform_capabilities():
     }
     
     return capabilities.get(system, capabilities['linux'])
-
 
 def _validate_cross_platform_environment():
     """Validate that the environment is properly configured for cross-platform operations."""
@@ -2527,7 +1953,6 @@ def _validate_cross_platform_environment():
         validation_results['is_supported'] = False
     
     return validation_results
-
 
 def validate_cross_platform_environment_cmd(cmd):
     """
@@ -2618,7 +2043,6 @@ def validate_cross_platform_environment_cmd(cmd):
         telemetry.set_exception(e, 'validate-environment-failed')
         raise CLIError(f"Failed to validate environment: {str(e)}")
 
-
 def _get_powershell_install_instructions(system):
     """Get platform-specific PowerShell installation instructions."""
     instructions = {
@@ -2687,246 +2111,6 @@ def create_local_nic_mapping(cmd, nic_id, target_virtual_switch_id, create_at_ta
     except Exception as e:
         logger.error(f"Failed to create NIC mapping: {str(e)}")
         raise CLIError(f"Failed to create NIC mapping: {str(e)}")
-
-
-def initialize_azure_local_replication_infrastructure(cmd, resource_group_name, project_name,
-                                                     source_appliance_name, target_appliance_name,
-                                                     cache_storage_account_id=None):
-    """Initialize Azure Local replication infrastructure (equivalent to Initialize-AzMigrateLocalReplicationInfrastructure)."""
-    try:
-        ps_executor = get_powershell_executor()
-        if not ps_executor:
-            raise CLIError("PowerShell is not available. Please install PowerShell Core.")
-        
-        # Build the Initialize-AzMigrateLocalReplicationInfrastructure command
-        if cache_storage_account_id:
-            script = f"""
-            try {{
-                $result = Initialize-AzMigrateLocalReplicationInfrastructure `
-                    -ProjectName '{project_name}' `
-                    -ResourceGroupName '{resource_group_name}' `
-                    -CacheStorageAccountId '{cache_storage_account_id}' `
-                    -SourceApplianceName '{source_appliance_name}' `
-                    -TargetApplianceName '{target_appliance_name}'
-                
-                $infraResult = @{{
-                    'Success' = $true
-                    'ProjectName' = '{project_name}'
-                    'ResourceGroupName' = '{resource_group_name}'
-                    'SourceApplianceName' = '{source_appliance_name}'
-                    'TargetApplianceName' = '{target_appliance_name}'
-                    'CacheStorageAccountId' = '{cache_storage_account_id}'
-                    'Result' = $result
-                }}
-                
-                $infraResult | ConvertTo-Json -Depth 5
-            }} catch {{
-                $errorResult = @{{
-                    'Success' = $false
-                    'Error' = $_.Exception.Message
-                    'ErrorType' = $_.Exception.GetType().Name
-                }}
-                $errorResult | ConvertTo-Json -Depth 3
-            }}
-            """
-        else:
-            script = f"""
-            try {{
-                $result = Initialize-AzMigrateLocalReplicationInfrastructure `
-                    -ProjectName '{project_name}' `
-                    -ResourceGroupName '{resource_group_name}' `
-                    -SourceApplianceName '{source_appliance_name}' `
-                    -TargetApplianceName '{target_appliance_name}'
-                
-                $infraResult = @{{
-                    'Success' = $true
-                    'ProjectName' = '{project_name}'
-                    'ResourceGroupName' = '{resource_group_name}'
-                    'SourceApplianceName' = '{source_appliance_name}'
-                    'TargetApplianceName' = '{target_appliance_name}'
-                    'Result' = $result
-                }}
-                
-                $infraResult | ConvertTo-Json -Depth 5
-            }} catch {{
-                $errorResult = @{{
-                    'Success' = $false
-                    'Error' = $_.Exception.Message
-                    'ErrorType' = $_.Exception.GetType().Name
-                }}
-                $errorResult | ConvertTo-Json -Depth 3
-            }}
-            """
-        
-        result = ps_executor.execute_script(script)
-        
-        if result.get('returncode') == 0:
-            output = result.get('stdout', '').strip()
-            if output:
-                try:
-                    parsed_result = json.loads(output)
-                    if parsed_result.get('Success'):
-                        logger.info("Successfully initialized Azure Local replication infrastructure")
-                        return parsed_result
-                    else:
-                        raise CLIError(f"Failed to initialize infrastructure: {parsed_result.get('Error', 'Unknown error')}")
-                except json.JSONDecodeError:
-                    logger.warning("Could not parse PowerShell output as JSON")
-                    return {"Success": True, "Output": output}
-        
-        error_msg = result.get('stderr', 'Unknown PowerShell error')
-        raise CLIError(f"PowerShell execution failed: {error_msg}")
-        
-    except Exception as e:
-        logger.error(f"Failed to initialize Azure Local replication infrastructure: {str(e)}")
-        raise CLIError(f"Failed to initialize Azure Local replication infrastructure: {str(e)}")
-
-
-def get_azure_local_server_replication(cmd, discovered_machine_id=None, target_object_id=None):
-    """Get Azure Local server replication details (equivalent to Get-AzMigrateLocalServerReplication)."""
-    try:
-        ps_executor = get_powershell_executor()
-        if not ps_executor:
-            raise CLIError("PowerShell is not available. Please install PowerShell Core.")
-        
-        # Build the Get-AzMigrateLocalServerReplication command
-        if discovered_machine_id:
-            script = f"""
-            try {{
-                $replication = Get-AzMigrateLocalServerReplication -DiscoveredMachineId '{discovered_machine_id}'
-                
-                $result = @{{
-                    'Success' = $true
-                    'DiscoveredMachineId' = '{discovered_machine_id}'
-                    'Replication' = $replication
-                }}
-                
-                $result | ConvertTo-Json -Depth 7
-            }} catch {{
-                $errorResult = @{{
-                    'Success' = $false
-                    'Error' = $_.Exception.Message
-                    'ErrorType' = $_.Exception.GetType().Name
-                }}
-                $errorResult | ConvertTo-Json -Depth 3
-            }}
-            """
-        elif target_object_id:
-            script = f"""
-            try {{
-                $replication = Get-AzMigrateLocalServerReplication -InputObject @{{ Id = '{target_object_id}' }}
-                
-                $result = @{{
-                    'Success' = $true
-                    'TargetObjectId' = '{target_object_id}'
-                    'Replication' = $replication
-                }}
-                
-                $result | ConvertTo-Json -Depth 7
-            }} catch {{
-                $errorResult = @{{
-                    'Success' = $false
-                    'Error' = $_.Exception.Message
-                    'ErrorType' = $_.Exception.GetType().Name
-                }}
-                $errorResult | ConvertTo-Json -Depth 3
-            }}
-            """
-        else:
-            raise CLIError("Either discovered_machine_id or target_object_id must be provided")
-        
-        result = ps_executor.execute_script(script)
-        
-        if result.get('returncode') == 0:
-            output = result.get('stdout', '').strip()
-            if output:
-                try:
-                    parsed_result = json.loads(output)
-                    if parsed_result.get('Success'):
-                        logger.info("Successfully retrieved Azure Local server replication")
-                        return parsed_result
-                    else:
-                        raise CLIError(f"Failed to get server replication: {parsed_result.get('Error', 'Unknown error')}")
-                except json.JSONDecodeError:
-                    logger.warning("Could not parse PowerShell output as JSON")
-                    return {"Success": True, "Output": output}
-        
-        error_msg = result.get('stderr', 'Unknown PowerShell error')
-        raise CLIError(f"PowerShell execution failed: {error_msg}")
-        
-    except Exception as e:
-        logger.error(f"Failed to get Azure Local server replication: {str(e)}")
-        raise CLIError(f"Failed to get Azure Local server replication: {str(e)}")
-
-
-def set_azure_local_server_replication(cmd, target_object_id, is_dynamic_memory_enabled=None,
-                                       target_vm_cpu_core=None, target_vm_ram=None):
-    """Update Azure Local server replication settings (equivalent to Set-AzMigrateLocalServerReplication)."""
-    try:
-        ps_executor = get_powershell_executor()
-        if not ps_executor:
-            raise CLIError("PowerShell is not available. Please install PowerShell Core.")
-        
-        # Build the Set-AzMigrateLocalServerReplication command
-        params = []
-        if is_dynamic_memory_enabled is not None:
-            params.append(f"-IsDynamicMemoryEnabled '{str(is_dynamic_memory_enabled).lower()}'")
-        if target_vm_cpu_core is not None:
-            params.append(f"-TargetVMCPUCore {target_vm_cpu_core}")
-        if target_vm_ram is not None:
-            params.append(f"-TargetVMRam {target_vm_ram}")
-        
-        if not params:
-            raise CLIError("At least one parameter must be provided to update")
-        
-        params_str = " ".join(params)
-        
-        script = f"""
-        try {{
-            $setJob = Set-AzMigrateLocalServerReplication `
-                -TargetObjectID '{target_object_id}' `
-                {params_str}
-            
-            $result = @{{
-                'Success' = $true
-                'TargetObjectId' = '{target_object_id}'
-                'Job' = $setJob
-            }}
-            
-            $result | ConvertTo-Json -Depth 7
-        }} catch {{
-            $errorResult = @{{
-                'Success' = $false
-                'Error' = $_.Exception.Message
-                'ErrorType' = $_.Exception.GetType().Name
-            }}
-            $errorResult | ConvertTo-Json -Depth 3
-        }}
-        """
-        
-        result = ps_executor.execute_script(script)
-        
-        if result.get('returncode') == 0:
-            output = result.get('stdout', '').strip()
-            if output:
-                try:
-                    parsed_result = json.loads(output)
-                    if parsed_result.get('Success'):
-                        logger.info("Successfully updated Azure Local server replication")
-                        return parsed_result
-                    else:
-                        raise CLIError(f"Failed to update server replication: {parsed_result.get('Error', 'Unknown error')}")
-                except json.JSONDecodeError:
-                    logger.warning("Could not parse PowerShell output as JSON")
-                    return {"Success": True, "Output": output}
-        
-        error_msg = result.get('stderr', 'Unknown PowerShell error')
-        raise CLIError(f"PowerShell execution failed: {error_msg}")
-        
-    except Exception as e:
-        logger.error(f"Failed to update Azure Local server replication: {str(e)}")
-        raise CLIError(f"Failed to update Azure Local server replication: {str(e)}")
-
 
 def start_azure_local_server_migration(cmd, input_object=None, target_object_id=None,
                                       turn_off_source_server=False):
@@ -3014,7 +2198,6 @@ def start_azure_local_server_migration(cmd, input_object=None, target_object_id=
         logger.error(f"Failed to start Azure Local server migration: {str(e)}")
         raise CLIError(f"Failed to start Azure Local server migration: {str(e)}")
 
-
 def remove_azure_local_server_replication(cmd, input_object=None, target_object_id=None):
     """Remove Azure Local server replication (equivalent to Remove-AzMigrateLocalServerReplication)."""
     try:
@@ -3092,7 +2275,6 @@ def remove_azure_local_server_replication(cmd, input_object=None, target_object_
     except Exception as e:
         logger.error(f"Failed to remove Azure Local server replication: {str(e)}")
         raise CLIError(f"Failed to remove Azure Local server replication: {str(e)}")
-
 
 def get_azure_local_job(cmd, resource_group_name, project_name, job_id=None, input_object=None, subscription_id=None):
     """Retrieve Azure Local migration jobs (equivalent to Get-AzMigrateLocalJob)."""
@@ -3198,7 +2380,6 @@ def get_azure_local_job(cmd, resource_group_name, project_name, job_id=None, inp
     except Exception as e:
         logger.error(f"Failed to get Azure Local job: {str(e)}")
         raise CLIError(f"Failed to get Azure Local job: {str(e)}")
-
 
 def new_azure_local_server_replication_with_mappings(cmd, resource_group_name, project_name, 
                                                     discovered_machine_id, target_storage_path_id,
@@ -3312,7 +2493,6 @@ def new_azure_local_server_replication_with_mappings(cmd, resource_group_name, p
     except Exception as e:
         logger.error(f"Failed to create Azure Local server replication with mappings: {str(e)}")
         raise CLIError(f"Failed to create Azure Local server replication with mappings: {str(e)}")
-
 
 def get_azure_context(cmd):
     """
