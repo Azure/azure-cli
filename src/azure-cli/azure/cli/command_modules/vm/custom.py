@@ -364,7 +364,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         public_network_access=None, accelerated_network=None, architecture=None,
                         data_access_auth_mode=None, gallery_image_reference_type=None, security_data_uri=None,
                         upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None,
-                        optimized_for_frequent_attach=None, security_metadata_uri=None):
+                        optimized_for_frequent_attach=None, security_metadata_uri=None, action_on_disk_delay=None,
+                        supported_security_option=None):
 
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -539,20 +540,24 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         args["supports_hibernation"] = support_hibernation
     if public_network_access is not None:
         args["public_network_access"] = public_network_access
-    if accelerated_network is not None or architecture is not None:
+    if accelerated_network is not None or architecture is not None or supported_security_option is not None:
         if args.get("supported_capabilities", None) is None:
             supported_capabilities = {
                 "accelerated_network": accelerated_network,
-                "architecture": architecture
+                "architecture": architecture,
+                "supported_security_option": supported_security_option
             }
             args["supported_capabilities"] = supported_capabilities
         else:
             args["supported_capabilities"]["accelerated_network"] = accelerated_network
             args["supported_capabilities"]["architecture"] = architecture
+            args["supported_capabilities"]["supported_security_option"] = supported_security_option
     if data_access_auth_mode is not None:
         args["data_access_auth_mode"] = data_access_auth_mode
     if optimized_for_frequent_attach is not None:
         args["optimized_for_frequent_attach"] = optimized_for_frequent_attach
+    if action_on_disk_delay is not None:
+        args["availability_policy"] = {'action_on_disk_delay': action_on_disk_delay}
 
     args["no_wait"] = no_wait
     args["disk_name"] = disk_name
