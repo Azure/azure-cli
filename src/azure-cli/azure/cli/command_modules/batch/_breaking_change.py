@@ -7,32 +7,32 @@ from azure.cli.core.breaking_change import register_argument_deprecate, register
 
 # Arguments
 register_argument_deprecate(
-    "az batch pool create", 
+    "az batch pool create",
     argument="--target-communication"
 )
 
 # fixed with action=None but check with CLI team
 register_argument_deprecate(
-    "az batch pool create", 
+    "az batch pool create",
     argument="--resource-tags"
 )
 
 register_argument_deprecate(
-    "az batch pool reset", 
+    "az batch pool reset",
     argument="--target-communication"
 )
 register_argument_deprecate(
-    "az batch pool set", 
+    "az batch pool set",
     argument="--target-communication"
 )
 
 # Outputs
 register_output_breaking_change(
-    "batch pool show", 
+    "batch pool show",
     description="Remove output fields `targetNodeCommunicationMode`, `currentNodeCommunicationMode`, and `resourceTags`"
 )
 
 register_output_breaking_change(
-    "batch pool list", 
+    "batch pool list",
     description="Remove output fields `targetNodeCommunicationMode`, `currentNodeCommunicationMode`, and `resourceTags`"
 )
