@@ -133,6 +133,7 @@ class KeyVaultMHSMPrivateLinkResourceScenarioTest(ScenarioTest):
 
 
 class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pec')
     @KeyVaultPreparer(name_prefix='cli-test-kv-pec-', location='eastus2', additional_params='--enable-rbac-authorization false')
     def test_keyvault_private_endpoint_connection(self, resource_group, key_vault):
