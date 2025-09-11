@@ -370,3 +370,16 @@ class AccessTokenCredential:  # pylint: disable=too-few-public-methods
         from azure.cli.core.auth.util import AccessToken
         # Assume the access token expires in 1 year / 31536000 seconds
         return AccessToken(self.access_token, int(time.time()) + 31536000)
+
+def show_what_if(cmd, cli_ctx, azcli_script):  # pylint: disable=unused-argument
+    FUNCTION_APP_URL = "https://azcli-script-insight.azurewebsites.net"
+    subscription_id = cmd.cli_ctx.subscription_id
+    payload = {
+        "azcli_script": azcli_script,
+        "subscription_id": subscription_id
+    }
+    from azure.cli.core.util import send_raw_request
+    response = send_raw_request(cli_ctx, "GET", f"{FUNCTION_APP_URL}/api/what_if_preview", json=payload)
+    if response.status_code == 200:
+        results = response.json()
+    return results

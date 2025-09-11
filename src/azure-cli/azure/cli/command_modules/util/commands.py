@@ -22,3 +22,6 @@ def load_command_table(self, _):
     with self.command_group('demo secret-store') as g:
         g.custom_command('save', 'secret_store_save')
         g.custom_command('load', 'secret_store_load')
+
+    with self.command_group('') as g:
+        g.custom_command('what-if', 'show_what_if', is_preview=True)
