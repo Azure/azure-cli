@@ -2417,15 +2417,19 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
 
         # Create ORS policy on destination account
         result = self.cmd('storage account or-policy create -n {dest_sc} -s {src_sc} --dcont {dcont} '
-                          '--scont {scont} -t "2020-02-19T16:05:00Z"').get_output_in_json()
+                          '--scont {scont} -t "2020-02-19T16:05:00Z" --enable-metrics True').get_output_in_json()
         self.assertIn('policyId', result)
         self.assertIn('ruleId', result['rules'][0])
         self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
+        self.assertEqual(result["metrics"]["enabled"], True)
 
         self.kwargs.update({
             'policy_id': result["policyId"],
             'rule_id': result["rules"][0]["ruleId"]
         })
+
+        self.cmd('storage account or-policy update -g {rg} -n {dest_sc} -s {src_sc} --policy-id {policy_id} '
+                 '--enable-metrics False', checks=[JMESPathCheck('metrics.enabled', False)])
 
         # Get policy properties from destination account
         self.cmd('storage account or-policy show -g {rg} -n {dest_sc} --policy-id {policy_id}') \
