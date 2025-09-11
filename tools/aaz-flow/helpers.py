@@ -14,10 +14,10 @@ import subprocess as sp
 from models import AAZRequest
 
 paths = {
-    "aaz": os.getenv("AAZ_PATH", "/workspaces-src/aaz"),
+    "aaz": os.getenv("AAZ_PATH", "/workspaces/aaz"),
     "cli": "/workspaces/azure-cli",
-    "cli_extension": os.getenv("CLI_EXTENSION_PATH", "/workspaces-src/azure-cli-extensions"),
-    "swagger_path": os.getenv("SWAGGER_PATH", "/workspaces-src/azure-rest-api-specs")
+    "cli_extension": os.getenv("CLI_EXTENSION_PATH", "/workspaces/azure-cli-extensions"),
+    "swagger_path": os.getenv("SWAGGER_PATH", "/workspaces/azure-rest-api-specs")
 }
 
 async def fetch_available_services():
