@@ -244,6 +244,7 @@ def load_arguments(self, _):
                    help='Space-separated list of storage permissions to assign.')
 
     with self.argument_context('keyvault network-rule') as c:
+        c.argument('hsm_name', mgmt_plane_hsm_name_type)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)

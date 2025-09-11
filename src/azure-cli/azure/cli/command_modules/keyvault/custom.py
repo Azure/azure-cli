@@ -824,8 +824,17 @@ def set_policy(cmd, client, resource_group_name, vault_name,
                            tags=vault.tags,
                            properties=vault.properties))
 
+def add_network_rule_for_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None,
+                                      ip_address=None, subnet=None, vnet_name=None, no_wait=False):
+    if vault_name:
+        return add_vault_network_rule(cmd, client, resource_group_name, vault_name,
+                                      ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
+    if hsm_name:
+        hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
 
-def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
+
+
+def add_vault_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
                      vnet_name=None, no_wait=False):  # pylint: disable=unused-argument
     """ Add a network rule to the network ACLs for a Key Vault. """
 
@@ -882,6 +891,43 @@ def add_network_rule(cmd, client, resource_group_name, vault_name, ip_address=No
                            location=vault.location,
                            tags=vault.tags,
                            properties=vault.properties))
+
+
+def add_hsm_network_rule(cmd, client, resource_group_name, hsm_name,
+                         ip_address=None, subnet=None, vnet_name=None, no_wait=False):
+    if subnet or vnet_name:
+        raise InvalidArgumentValueError("--subnet and --vnet-name are not supported for MHSM yet")
+
+    hsm = client.get(resource_group_name=resource_group_name, name=hsm_name)
+    hsm.properties.network_acls = hsm.properties.network_acls or _create_network_rule_set(cmd)
+    rules = hsm.properties.network_acls
+    IPRule = cmd.get_models('MHSMIPRule', resource_type=ResourceType.MGMT_KEYVAULT)
+
+    to_update = False
+    if ip_address:
+        rules.ip_rules = rules.ip_rules or []
+        # if the rule already exists, don't add again
+        for ip in ip_address:
+            to_modify = True
+            for x in rules.ip_rules:
+                existing_ip_network = ip_network(x.value)
+                new_ip_network = ip_network(ip)
+                if new_ip_network.overlaps(existing_ip_network):
+                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                                   ip, x.value)
+                    to_modify = False
+                    break
+            if to_modify:
+                rules.ip_rules.append(IPRule(value=ip))
+                to_update = True
+
+    if not to_update:
+        return hsm
+
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       name=hsm_name,
+                       parameters=hsm)
 
 
 def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
