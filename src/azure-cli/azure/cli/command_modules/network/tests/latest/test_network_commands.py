@@ -557,6 +557,10 @@ class NetworkPublicIpWithSku(ScenarioTest):
             self.check('publicIPAllocationMethod', 'Static')
         ])
 
+        self.cmd('network public-ip create -g {rg} -n {ip4} --sku standardv2 --allocation-method static --ip-tags FirstPartyUsage=/NonProd', checks=[
+            self.check('publicIp.sku.name', 'StandardV2'),
+        ])
+
 
 class NetworkCustomIPPrefix(ScenarioTest):
     @ResourceGroupPreparer(name_prefix="cli_test_network_custom_ip_prefix_", location="eastus2")

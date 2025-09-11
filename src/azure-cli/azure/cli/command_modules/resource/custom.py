@@ -384,13 +384,11 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
     if template_uri:
         template_link = TemplateLink(uri=template_uri)
         template_obj = _remove_comments_from_json(_urlretrieve(template_uri).decode('utf-8'), file_path=template_uri)
+        template_for_deployment = None  # Use template_link for URI-based deployments
     else:
-        template_content = (
-            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
-            if is_bicep_file(template_file)
-            else read_file_content(template_file)
-        )
-        template_obj = _remove_comments_from_json(template_content, file_path=template_file)
+        # This function is resource-group-specific, so we hardcode 'resourceGroup' deployment scope
+        template_content, template_obj = _process_template_file(cmd, template_file, 'resourceGroup')
+        template_for_deployment = _get_template_for_deployment(template_uri, None, template_file, template_content, template_obj, None)
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
@@ -403,7 +401,7 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
 
     parameters = json.loads(json.dumps(parameters))
 
-    properties = DeploymentProperties(template=template_content, template_link=template_link,
+    properties = DeploymentProperties(template=template_for_deployment, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
     smc = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS,
@@ -476,6 +474,7 @@ class JsonCTemplatePolicy(SansIOHTTPPolicy):
             # Because the service cannot deserialize the template element: "template": "{\r\n  \"$schema\": \"...\",\r\n  \"contentVersion\": \"...\",\r\n  \"parameters\": {...}}"
             partial_request = json.dumps(modified_data)
             json_data = partial_request[:-2] + ", template:" + template + r"}}"
+
             http_request.data = json_data.encode('utf-8')
 
             # This caused a very difficult-to-debug issue, because AzCLI's debug logs are written before this transformation.
@@ -1118,6 +1117,46 @@ def _load_template_spec_template(cmd, template_spec):
     return template_obj
 
 
+def _get_template_for_deployment(template_uri, template_spec, template_file, template_content, template_obj, parameters):
+    """Determine what to use for template deployment based on the source"""
+    if template_uri or template_spec:
+        # For URI and template spec deployments, use None (template_link will be used)
+        return None
+
+    if _is_bicepparam_file_provided(parameters):
+        # For bicepparam files, use the content
+        return template_content
+
+    if template_file and is_bicep_file(template_file):
+        # For bicep files, convert the parsed object back to compact JSON string
+        # This avoids the size inflation issue while maintaining compatibility
+        # with the Azure SDK which expects string content
+        return json.dumps(template_obj, separators=(',', ':'))
+
+    # For ARM template files, use string content
+    return template_content
+
+
+def _process_template_file(cmd, template_file, deployment_scope):
+    """Process template file and return template_content and template_obj"""
+    if is_bicep_file(template_file):
+        # Get compiled JSON from bicep
+        template_content = run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
+        # For bicep files, parse JSON directly to avoid Azure SDK size inflation.
+        # Bicep compilation outputs clean JSON without comments, so it's safe to
+        # parse directly. This prevents the 4MB template size limit issue caused
+        # by Azure SDK string escaping when using template content as string.
+        template_obj = json.loads(template_content)
+        template_schema = template_obj.get('$schema', '')
+        validate_bicep_target_scope(template_schema, deployment_scope)
+    else:
+        # For ARM template files, read content and process comments
+        template_content = read_file_content(template_file)
+        template_obj = _remove_comments_from_json(template_content, file_path=template_file)
+
+    return template_content, template_obj
+
+
 def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_file=None, template_uri=None, parameters=None,
                                               mode=None, rollback_on_error=None, no_prompt=False, template_spec=None, query_string=None,
                                               validation_level=None):
@@ -1164,17 +1203,7 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         template_schema = template_obj.get('$schema', '')
         validate_bicep_target_scope(template_schema, deployment_scope)
     else:
-        template_content = (
-            run_bicep_command(cmd.cli_ctx, ["build", "--stdout", template_file])
-            if is_bicep_file(template_file)
-            else read_file_content(template_file)
-        )
-
-        template_obj = _remove_comments_from_json(template_content, file_path=template_file)
-
-        if is_bicep_file(template_file):
-            template_schema = template_obj.get('$schema', '')
-            validate_bicep_target_scope(template_schema, deployment_scope)
+        template_content, template_obj = _process_template_file(cmd, template_file, deployment_scope)
 
     if rollback_on_error == '':
         on_error_deployment = OnErrorDeployment(type='LastSuccessful')
@@ -1190,7 +1219,9 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
         parameters = json.loads(json.dumps(parameters))
 
-    properties = DeploymentProperties(template=template_content, template_link=template_link,
+    template_for_deployment = _get_template_for_deployment(template_uri, template_spec, template_file, template_content, template_obj, parameters)
+
+    properties = DeploymentProperties(template=template_for_deployment, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment,
                                       validation_level=validation_level)
     return properties

@@ -213,7 +213,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
         client_factory=cf_or_policy)
 
-    with self.command_group('storage account or-policy', or_policy_sdk, is_preview=True,
+    with self.command_group('storage account or-policy', or_policy_sdk,
                             resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=or_policy_custom_type) as g:
         g.show_command('show', 'get')
@@ -222,7 +222,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.generic_update_command('update', setter_name='update_or_policy', setter_type=or_policy_custom_type)
         g.command('delete', 'delete')
 
-    with self.command_group('storage account or-policy rule', or_policy_sdk, is_preview=True,
+    with self.command_group('storage account or-policy rule', or_policy_sdk,
                             resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=or_policy_custom_type) as g:
         g.custom_show_command('show', 'get_or_rule')
