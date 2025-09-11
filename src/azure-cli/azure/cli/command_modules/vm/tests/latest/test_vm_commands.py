@@ -2299,47 +2299,47 @@ class ComputeListSkusScenarioTest(ScenarioTest):
         restriction_info_zone = mock.MagicMock()
         restriction_info_zone.zones = [1, 2, 3]
         restriction_zone = mock.MagicMock()
-        restriction_zone.reason_code = 'NotAvailableForSubscription'
+        restriction_zone.reasonCode = 'NotAvailableForSubscription'
         restriction_zone.type = 'Zone'
-        restriction_zone.restriction_info = restriction_info_zone
+        restriction_zone.restrictionInfo = restriction_info_zone
         restriction_info_location = mock.MagicMock()
         restriction_info_location.locations = ['location']
         restriction_location = mock.MagicMock()
-        restriction_location.reason_code = 'NotAvailableForSubscription'
+        restriction_location.reasonCode = 'NotAvailableForSubscription'
         restriction_location.type = 'Location'
-        restriction_location.restriction_info = restriction_info_location
+        restriction_location.restrictionInfo = restriction_info_location
 
         # zonal restriction but not regional restriction
         restrictions = [restriction_zone]
         np.restrictions = restrictions
         # show skus supporting availability zones
-        is_available = is_sku_available(cmd, np, True)
+        is_available = is_sku_available(np, True)
         self.assertFalse(is_available)
         # not show skus supporting availability zones
-        is_available = is_sku_available(cmd, np, None)
+        is_available = is_sku_available(np, None)
         self.assertTrue(is_available)
 
         # not all zones are restricted
         restriction_info_zone.zones = [1, 2]
-        is_available = is_sku_available(cmd, np, True)
+        is_available = is_sku_available(np, True)
         self.assertTrue(is_available)
-        is_available = is_sku_available(cmd, np, None)
+        is_available = is_sku_available(np, None)
         self.assertTrue(is_available)
 
         # regional restriction but not zonal restriction
         restrictions = [restriction_location]
         np.restrictions = restrictions
-        is_available = is_sku_available(cmd, np, True)
+        is_available = is_sku_available(np, True)
         self.assertFalse(is_available)
-        is_available = is_sku_available(cmd, np, None)
+        is_available = is_sku_available(np, None)
         self.assertFalse(is_available)
 
         # regional restriction and zonal restriction
         restrictions = [restriction_location, restriction_zone]
         np.restrictions = restrictions
-        is_available = is_sku_available(cmd, np, True)
+        is_available = is_sku_available(np, True)
         self.assertFalse(is_available)
-        is_available = is_sku_available(cmd, np, None)
+        is_available = is_sku_available(np, None)
         self.assertFalse(is_available)
 
 
