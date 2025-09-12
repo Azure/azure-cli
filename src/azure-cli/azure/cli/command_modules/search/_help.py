@@ -108,15 +108,9 @@ helps['search service network-security-perimeter-configuration reconcile'] = """
 type: command
 short-summary: Reconcile network security perimeter configuration for a given Azure Search service.
 examples:
-  - name: Reconcile network security perimeter configuration for a Search service.
-    text: >
-      az search service network-security-perimeter-configuration reconcile --resource-group MyResourceGroup --search-service-name MySearchService
   - name: Reconcile network security perimeter configuration and specify a perimeter name.
     text: >
-      az search service network-security-perimeter-configuration reconcile --resource-group MyResourceGroup --search-service-name MySearchService --perimeter-name MyPerimeter
-  - name: Reconcile network security perimeter configuration and enable diagnostics.
-    text: >
-      az search service network-security-perimeter-configuration reconcile --resource-group MyResourceGroup --search-service-name MySearchService --enable-diagnostics true
+      az search service network-security-perimeter-configuration reconcile --resource-group MyResourceGroup --search-service-name MySearchService --nsp-config-name MyPerimeter
 """
 
 helps['search service shared-private-link-resource create'] = """
@@ -141,9 +135,6 @@ examples:
   - name: Approve a shared private link resource connection.
     text: >
       az search service shared-private-link-resource update --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --status Approved
-  - name: Reject a shared private link resource connection with a description.
-    text: >
-      az search service shared-private-link-resource update --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --status Rejected --description "Connection not allowed."
 """
 
 helps['search service private-endpoint-connection update'] = """
@@ -152,11 +143,5 @@ short-summary: Update a private endpoint connection for a given Azure Search ser
 examples:
   - name: Approve a private endpoint connection.
     text: >
-      az search service private-endpoint-connection update --resource-group MyResourceGroup --search-service-name MySearchService --name MyPrivateEndpointConnection --status Approved
-  - name: Reject a private endpoint connection with a description.
-    text: >
-      az search service private-endpoint-connection update --resource-group MyResourceGroup --search-service-name MySearchService --name MyPrivateEndpointConnection --status Rejected --description "Connection not allowed."
-  - name: Update the request message for a private endpoint connection.
-    text: >
-      az search service private-endpoint-connection update --resource-group MyResourceGroup --search-service-name MySearchService --name MyPrivateEndpointConnection --request-message "Updated request message."
+      az search service private-endpoint-connection update --resource-group MyResourceGroup --search-service-name MySearchService --name MyPrivateEndpointConnection
 """
