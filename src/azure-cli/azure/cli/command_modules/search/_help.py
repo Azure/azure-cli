@@ -71,7 +71,7 @@ short-summary: Creates a query key for a given Azure Search service.
 examples:
   - name: Create a query key for a Search service.
     text: >
-      az search service query-key create --resource-group MyResourceGroup --search-service-name MySearchService -n MyQueryKey
+        az search service query-key create --resource-group MyResourceGroup --search-service-name MySearchService -n MyQueryKey
 """
 
 helps['search service admin-key regenerate'] = """
@@ -80,10 +80,10 @@ short-summary: Regenerate an admin key for a given Azure Search service.
 examples:
   - name: Regenerate the primary admin key for a Search service.
     text: >
-      az search service admin-key regenerate --resource-group MyResourceGroup --search-service-name MySearchService --key-kind primary
+        az search service admin-key regenerate --resource-group MyResourceGroup --search-service-name MySearchService --key-kind primary
   - name: Regenerate the secondary admin key for a Search service.
     text: >
-      az search service admin-key regenerate --resource-group MyResourceGroup --search-service-name MySearchService --key-kind secondary
+        az search service admin-key regenerate --resource-group MyResourceGroup --search-service-name MySearchService --key-kind secondary
 """
 
 helps['search service check-name-availability'] = """
@@ -92,7 +92,7 @@ short-summary: Check the availability of a given Azure Search service name.
 examples:
   - name: Check if a Search service name is available.
     text: >
-      az search service check-name-availability --name MySearchService --type searchServices
+        az search service check-name-availability --name MySearchService --type searchServices
 """
 
 helps['search service upgrade'] = """
@@ -101,7 +101,7 @@ short-summary: Upgrade a given Azure Search service.
 examples:
   - name: Upgrade a Search service.
     text: >
-      az search service upgrade --resource-group MyResourceGroup --search-service-name MySearchService
+        az search service upgrade --resource-group MyResourceGroup --search-service-name MySearchService
 """
 
 helps['search service network-security-perimeter-configuration reconcile'] = """
@@ -110,7 +110,7 @@ short-summary: Reconcile network security perimeter configuration for a given Az
 examples:
   - name: Reconcile network security perimeter configuration and specify a perimeter name.
     text: >
-      az search service network-security-perimeter-configuration reconcile --resource-group MyResourceGroup --search-service-name MySearchService --nsp-config-name MyPerimeter
+        az search service network-security-perimeter-configuration reconcile --resource-group MyResourceGroup --search-service-name MySearchService --nsp-config-name MyPerimeter
 """
 
 helps['search service shared-private-link-resource create'] = """
@@ -119,10 +119,10 @@ short-summary: Create a shared private link resource for a given Azure Search se
 examples:
   - name: Create a shared private link resource for a Search service.
     text: >
-      az search service shared-private-link-resource create --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --group-id MyGroupId --resource-id /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{provider}/{resourceType}/{resourceName}
+        az search service shared-private-link-resource create --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --group-id MyGroupId --resource-id /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{provider}/{resourceType}/{resourceName}
   - name: Create a shared private link resource and specify a request message.
     text: >
-      az search service shared-private-link-resource create --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --group-id MyGroupId --resource-id /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{provider}/{resourceType}/{resourceName} --request-message "Please approve this connection."
+        az search service shared-private-link-resource create --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --group-id MyGroupId --resource-id /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{provider}/{resourceType}/{resourceName} --request-message "Please approve this connection."
 """
 
 helps['search service shared-private-link-resource update'] = """
@@ -131,10 +131,10 @@ short-summary: Update a shared private link resource for a given Azure Search se
 examples:
   - name: Update the request message for a shared private link resource.
     text: >
-      az search service shared-private-link-resource update --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --request-message "Updated request message."
+        az search service shared-private-link-resource update --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --request-message "Updated request message."
   - name: Approve a shared private link resource connection.
     text: >
-      az search service shared-private-link-resource update --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --status Approved
+        az search service shared-private-link-resource update --resource-group MyResourceGroup --search-service-name MySearchService --name MySharedPrivateLinkResource --status Approved
 """
 
 helps['search service private-endpoint-connection update'] = """
@@ -143,5 +143,5 @@ short-summary: Update a private endpoint connection for a given Azure Search ser
 examples:
   - name: Approve a private endpoint connection.
     text: >
-      az search service private-endpoint-connection update --resource-group MyResourceGroup --search-service-name MySearchService --name MyPrivateEndpointConnection
+        az search service private-endpoint-connection update --resource-group MyResourceGroup --search-service-name MySearchService --name MyPrivateEndpointConnection
 """
