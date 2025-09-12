@@ -15,7 +15,7 @@ from models import AAZRequest
 
 paths = {
     "aaz": os.getenv("AAZ_PATH", "/workspaces/aaz"),
-    "cli": "/workspaces/azure-cli",
+    "cli": os.getenv("CLI_PATH", "/workspaces/azure-cli"),
     "cli_extension": os.getenv("CLI_EXTENSION_PATH", "/workspaces/azure-cli-extensions"),
     "swagger_path": os.getenv("SWAGGER_PATH", "/workspaces/azure-rest-api-specs")
 }
