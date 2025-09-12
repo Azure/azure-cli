@@ -3,6 +3,16 @@
 Release History
 ===============
 
+2.77.0
+++++++
+* Resolve CVE-2025-4517 (#31928)
+* Add global policy arguments `--acquire-policy-token` and `--change-reference` to support Change Safety feature (#31741)
+
+2.76.0
+++++++
+* Resolve CVE-2024-47081 (#31708)
+* Provide actionable error recommendation when a command fails because of Multi-Factor Authentication (MFA) policy violation (#31699)
+
 2.75.0
 ++++++
 * Resolve CVE-2025-50181 (#31669)

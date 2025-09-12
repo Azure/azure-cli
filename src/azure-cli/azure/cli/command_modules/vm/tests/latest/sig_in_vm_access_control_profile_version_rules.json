@@ -1,0 +1,36 @@
+{
+  "privileges": [
+    {
+      "name": "GoalState",
+      "path": "/machine",
+      "queryParameters": {
+        "comp": "goalstate"
+      }
+    }
+  ],
+  "roles": [
+    {
+      "name": "Provisioning",
+      "privileges": [
+        "GoalState"
+      ]
+    }
+  ],
+  "identities": [
+    {
+      "name": "WinPA",
+      "userName": "SYSTEM",
+      "groupName": "Administrators",
+      "exePath": "C:\\Windows\\System32\\cscript.exe",
+      "processName": "cscript"
+    }
+  ],
+  "roleAssignments": [
+    {
+      "role": "Provisioning",
+      "identities": [
+        "WinPA"
+      ]
+    }
+  ]
+}

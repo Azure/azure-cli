@@ -224,6 +224,16 @@ sig image-version undelete:
         allow_replicated_location_deletion:
             rule_exclusions:
             - option_length_too_long
+sig in-vm-access-control-profile create:
+    parameters:
+        applicable_host_endpoint:
+            rule_exclusions:
+                - option_length_too_long
+sig in-vm-access-control-profile update:
+    parameters:
+        applicable_host_endpoint:
+            rule_exclusions:
+                - option_length_too_long
 restore-point create:
     rule_exclusions:
         - missing_command_test_coverage

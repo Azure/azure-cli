@@ -181,7 +181,6 @@ class AFDProfileUpdate(_AFDProfileUpdate):
             'The dictionary values can be empty objects ({{}}) in requests.',
         )
         args_schema.user_assigned_identities.Element = AAZStrArg()
-        args_schema.location._registered = False
         args_schema.sku._registered = False
         return args_schema
 
@@ -194,8 +193,6 @@ class AFDProfileUpdate(_AFDProfileUpdate):
         if existing['sku']['name'] not in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
             logger.warning('Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported')
             raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
-        existing_location = None if 'location' not in existing else existing['location']
-        args.location = existing_location
 
         if has_value(args.identity_type):
             user_assigned_identities = {}
@@ -241,19 +238,8 @@ class AFDEndpointUpdate(_AFDEndpointUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.location._registered = False
         args_schema.name_reuse_scope._registered = False
         return args_schema
-
-    def pre_operations(self):
-        args = self.ctx.args
-        existing = _AFDEndpointShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group,
-            'profile_name': args.profile_name,
-            'endpoint_name': args.endpoint_name
-        })
-        existing_location = None if 'location' not in existing else existing['location']
-        args.location = existing_location
 
 
 def get_health_probe_settings(enable_health_probe, probe_interval_in_seconds,

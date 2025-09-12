@@ -37,7 +37,6 @@ class GatewayCreate(_GatewayCreate):
         )
         args_schema.pip_addresses._registered = False
         args_schema.pip_prefixes._registered = False
-        args_schema.sku._registered = False
         return args_schema
 
     def pre_operations(self):

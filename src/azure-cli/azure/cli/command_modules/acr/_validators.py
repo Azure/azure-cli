@@ -19,6 +19,8 @@ BAD_MANIFEST_FQDN = "The positional parameter 'manifest_id' must be a fully qual
                     " manifest specifier such as 'myregistry.azurecr.io/hello-world:latest' or"\
                     " 'myregistry.azurecr.io/hello-world@sha256:abc123'."
 BAD_REGISTRY_NAME = "Registry names may contain only alpha numeric characters and must be between 5 and 50 characters"
+INVALID_LOGIN_SERVER_SUFFIX = "The login server suffix is not valid for the current cloud. Please try again using"\
+                              " '{}'."
 
 logger = get_logger(__name__)
 
@@ -104,29 +106,42 @@ def validate_retention_days(namespace):
 
 
 def validate_registry_name(cmd, namespace):
-    """Omit login server endpoint suffix."""
+    """Omit login server endpoint suffix and domain name label (DNL) hash if given."""
     registry = namespace.registry_name
     if registry is None:
         return
     suffixes = cmd.cli_ctx.cloud.suffixes
-    dnl_hash = registry.find("-")
 
-    if dnl_hash > 0:
-        logger.warning(
-            "Registry name is %s. The following suffix '%s' is automatically omitted.",
-            registry[:dnl_hash],
-            registry[dnl_hash:])
-        namespace.registry_name = registry[:dnl_hash]
+    # Split registry login server into components ['myregistry-dnlhash', '.azurecr.io']
+    registry_parts = registry.split('.', 1)
+    trimmed_registry_name = registry_parts[0]
+    registry_login_server_suffix = '.' + registry_parts[1] if len(registry_parts) > 1 else ''
+
+    dnl_hash_index = trimmed_registry_name.find("-")
+
+    # Registry name has hyphen but no login server endpoint suffix
+    if registry_login_server_suffix == '' and dnl_hash_index != -1:
+        raise InvalidArgumentValueError(BAD_REGISTRY_NAME)
+
     # Some clouds do not define 'acr_login_server_endpoint' (e.g. AzureGermanCloud)
-    elif hasattr(suffixes, 'acr_login_server_endpoint'):
+    if hasattr(suffixes, 'acr_login_server_endpoint'):
         acr_suffix = suffixes.acr_login_server_endpoint
-        pos = registry.find(acr_suffix)
-        if pos > 0:
-            logger.warning("Registry name is %s. The following suffix '%s' is automatically omitted.",
-                           registry[:pos],
-                           acr_suffix)
-            namespace.registry_name = registry[:pos]
-            registry = registry[:pos]
+        if registry_login_server_suffix.lower() == acr_suffix and registry_login_server_suffix != '':
+            if dnl_hash_index != -1:
+                removed_suffix = trimmed_registry_name[dnl_hash_index:] + registry_login_server_suffix
+                registry_name = trimmed_registry_name[:dnl_hash_index]
+            else:
+                removed_suffix = registry_login_server_suffix
+                registry_name = trimmed_registry_name
+            logger.warning("Registry name is '%s'. The following suffix '%s' is automatically omitted.",
+                           registry_name,
+                           removed_suffix)
+        else:
+            if registry_login_server_suffix != '':
+                raise InvalidArgumentValueError(INVALID_LOGIN_SERVER_SUFFIX.format(acr_suffix))
+            registry_name = trimmed_registry_name
+        namespace.registry_name = registry_name
+        registry = registry_name
 
     registry = namespace.registry_name
     if not re.match(ACR_NAME_VALIDATION_REGEX, registry):

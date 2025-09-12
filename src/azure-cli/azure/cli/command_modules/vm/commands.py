@@ -422,7 +422,6 @@ def load_command_table(self, _):
         g.custom_command('application list', 'list_vmss_applications', min_api='2021-07-01')
         g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('deallocate', 'deallocate_vmss', supports_no_wait=True)
-        g.custom_command('delete-instances', 'delete_vmss_instances', supports_no_wait=True)
         g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
         g.custom_command('list-instance-connection-info', 'list_vmss_instance_connection_info')
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
@@ -430,7 +429,6 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
-        g.custom_command('start', 'start_vmss', supports_no_wait=True)
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vmss_modified', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
@@ -526,6 +524,11 @@ def load_command_table(self, _):
         from .operations.sig_gallery_application_version import SigGalleryApplicationVersionCreate, SiggalleryApplicationversionUpdate
         self.command_table['sig gallery-application version create'] = SigGalleryApplicationVersionCreate(loader=self)
         self.command_table['sig gallery-application version update'] = SiggalleryApplicationversionUpdate(loader=self)
+
+    with self.command_group('sig in-vm-access-control-profile-version'):
+        from .operations.sig_in_vm_access_control_profile_version import SigInVMAccessControlProfileVersionCreate, SigInVMAccessControlProfileVersionUpdate
+        self.command_table['sig in-vm-access-control-profile-version create'] = SigInVMAccessControlProfileVersionCreate(loader=self)
+        self.command_table['sig in-vm-access-control-profile-version update'] = SigInVMAccessControlProfileVersionUpdate(loader=self)
 
     with self.command_group('ppg', compute_proximity_placement_groups_sdk, min_api='2018-04-01', client_factory=cf_proximity_placement_groups) as g:
         from .operations.ppg import PPGCreate, PPGUpdate

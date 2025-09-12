@@ -139,7 +139,6 @@ from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetA
                              RecordSetCAADelete as DNSRecordSetCAADelete, RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
-RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "1.1": "1.1", "2.1": "2.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
                           "Please be aware that Basic option will be removed in the future."
@@ -1948,8 +1947,7 @@ class WAFCreate(_WAFCreate):
             options=["--version"],
             help="Version of the web application firewall rule set type. "
                  "0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet",
-            default="2.1",
-            enum=RULESET_VERSION
+            default="2.1"
         )
         return args_schema
 
@@ -3907,7 +3905,6 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
             options=['--subnet'],
             arg_group="IP Configuration",
             help="Name or ID of subnet to use. If name provided, also supply `--vnet-name`.",
-            required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}"
             )
@@ -3925,20 +3922,21 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
             )
         )
 
-        args_schema.ip_configurations._registered = False
         args_schema.load_balancer_frontend_ip_configurations._registered = False
         args_schema.edge_zone_type._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.ip_configurations = [{
-            'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
-            'private_ip_address': args.private_ip_address,
-            'private_ip_allocation_method': args.private_ip_allocation_method,
-            'private_ip_address_version': args.private_ip_address_version,
-            'subnet': {'id': args.subnet}
-        }]
+
+        if not has_value(args.ip_configurations):
+            args.ip_configurations = [{
+                'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
+                'private_ip_address': args.private_ip_address,
+                'private_ip_allocation_method': args.private_ip_allocation_method,
+                'private_ip_address_version': args.private_ip_address_version,
+                'subnet': {'id': args.subnet}
+            }]
 
         args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
             args.load_balancer_frontend_ip_configurations,
@@ -5329,14 +5327,12 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
         )
         args_schema.ip_tags.Element = AAZStrArg()
         args_schema.type._registered = False
-        args_schema.sku._registered = False
         args_schema.ip_tags_list._registered = False
 
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.sku = 'Standard'
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
         if has_value(args.ip_tags):

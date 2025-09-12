@@ -5,87 +5,12 @@
 
 import os
 from datetime import datetime
-from azure.cli.testsdk import LiveScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, JMESPathCheck
+from azure.cli.testsdk import (LiveScenarioTest, StorageAccountPreparer, ResourceGroupPreparer, JMESPathCheck,
+                               ScenarioTest)
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 
 
-class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    @StorageTestFilesPreparer()
-    def test_storage_blob_batch_download_scenarios(self, test_dir, storage_account_info):
-        src_container = self.create_container(storage_account_info)
-
-        # upload test files to storage account
-        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
-                         test_dir, src_container)
-
-        # test upload-batch with & without --overwrite
-        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
-                         test_dir, src_container).assert_with_checks(JMESPathCheck('length(@)', 0))
-        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3 --overwrite', storage_account_info,
-                         test_dir, src_container).assert_with_checks(JMESPathCheck('length(@)', 41))
-
-        # download recursively without pattern
-        local_folder = self.create_temp_dir()
-        cmd = 'storage blob download-batch -s {} -d "{}"'.format(src_container, local_folder)
-        self.storage_cmd(cmd, storage_account_info)
-        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
-
-        # test --overwrite
-        self.storage_cmd_negative(cmd, storage_account_info)
-        cmd = 'storage blob download-batch -s {} -d "{}" --overwrite'.format(src_container, local_folder)
-        self.storage_cmd(cmd, storage_account_info)
-        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
-
-        # download recursively with wild card *, and use URL as source
-        local_folder = self.create_temp_dir()
-        src_url = self.storage_cmd('storage blob url -c {} -n readme -otsv', storage_account_info, src_container).output
-        src_url = src_url[:src_url.rfind('/')]
-
-        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern *', storage_account_info, src_url,
-                         local_folder)
-        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
-
-        # download recursively with wild card after dir
-        local_folder = self.create_temp_dir()
-        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
-                         local_folder, 'apple/*')
-
-        self.assertEqual(10, sum(len(f) for r, d, f in os.walk(local_folder)))
-
-        # download recursively with wild card before name
-        local_folder = self.create_temp_dir()
-        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
-                         local_folder, '*/file_0')
-        self.assertEqual(4, sum(len(f) for r, d, f in os.walk(local_folder)))
-
-        # download blob without wild cards
-        local_folder = self.create_temp_dir()
-        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
-                         local_folder, 'apple/file_0')
-        self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
-
-        # upload blobs with names that start with path separator
-        local_file = self.create_temp_file(1)
-        src_container = self.create_container(storage_account_info)
-        blob_names = ['/dir1/file', 'dir1/file', '/dir2//file', 'dir2/file']
-
-        for name in blob_names:
-            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block', storage_account_info,
-                             src_container, local_file, name)
-
-        # download blobs that start with forward slash into local folder
-        local_folder = self.create_temp_dir()
-        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
-                         local_folder, '/*')
-        self.assertEqual(2, sum(len(f) for r, d, f in os.walk(local_folder)))
-
-        # download blobs that start with forward slash into local folder with conflicts
-        local_folder = self.create_temp_dir()
-        self.storage_cmd_negative('storage blob download-batch -s {} -d "{}"', storage_account_info, src_container,
-                                  local_folder)
-
+class StorageBatchOperationLiveScenarios(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind='StorageV2')
     @StorageTestFilesPreparer()
@@ -477,69 +402,6 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
     @StorageTestFilesPreparer()
-    def test_storage_blob_batch_delete_scenarios(self, test_dir, storage_account_info):
-        def create_and_populate_container():
-            src_container = self.create_container(storage_account_info)
-
-            # upload test files to storage account
-            self.storage_cmd('storage blob upload-batch -s "{}" -d {}', storage_account_info, test_dir, src_container)
-            return src_container
-
-        # delete recursively without pattern
-        src_container = create_and_populate_container()
-        cmd = 'storage blob delete-batch -s {}'.format(src_container)
-        self.storage_cmd(cmd, storage_account_info)
-        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 0))
-
-        # delete recursively with wild card *, and use URL as source
-        src_container = create_and_populate_container()
-        src_url = self.storage_cmd('storage blob url -c {} -n readme -otsv', storage_account_info, src_container).output
-        src_url = src_url[:src_url.rfind('/')]
-
-        self.storage_cmd('storage blob delete-batch -s {} --pattern *', storage_account_info, src_url)
-        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 0))
-
-        # delete recursively with wild card after dir
-        src_container = create_and_populate_container()
-        self.storage_cmd('storage blob delete-batch -s {} --pattern apple/*', storage_account_info, src_container)
-        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 31))
-
-        # delete recursively with wild card before name
-        src_container = create_and_populate_container()
-        self.storage_cmd('storage blob delete-batch -s {} --pattern */file_0', storage_account_info, src_container)
-        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 37))
-
-        # delete recursively with non-existing pattern
-        src_container = create_and_populate_container()
-        self.storage_cmd('storage blob delete-batch -s {} --pattern nonexists/*', storage_account_info, src_container)
-        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 41))
-
-        # delete recursively with if-modified-since
-        src_container = create_and_populate_container()
-        self.storage_cmd('storage blob delete-batch -s {} --if-modified-since {} --dryrun',
-                         storage_account_info, src_container, '2000-12-31T12:59:59Z')
-        self.storage_cmd('storage blob delete-batch -s {} --if-modified-since {}',
-                         storage_account_info, src_container, '2000-12-31T12:59:59Z')
-        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 0))
-
-        # delete recursively with if-unmodified-since
-        src_container = create_and_populate_container()
-        self.storage_cmd('storage blob delete-batch -s {} --if-unmodified-since {} --dryrun',
-                         storage_account_info, src_container, datetime.max.strftime('%Y-%m-%dT%H:%MZ'))
-        self.storage_cmd('storage blob delete-batch -s {} --if-unmodified-since {}',
-                         storage_account_info, src_container, datetime.max.strftime('%Y-%m-%dT%H:%MZ'))
-        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
-            JMESPathCheck('length(@)', 0))
-
-    @ResourceGroupPreparer()
-    @StorageAccountPreparer()
-    @StorageTestFilesPreparer()
     def test_storage_file_batch_delete_scenarios(self, test_dir, storage_account_info):
         def create_and_populate_share():
             src_share = self.create_share(storage_account_info)
@@ -785,6 +647,154 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, LiveScenarioTest):
         self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
         single_thread_time = time.time() - start_time
         self.assertGreater(single_thread_time, multi_thread_time)
+
+class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    @StorageTestFilesPreparer()
+    def test_storage_blob_batch_download_scenarios(self, test_dir, storage_account_info):
+        src_container = 'container1'
+        self.storage_cmd('storage container create -n {}', storage_account_info, src_container)
+
+        # upload test files to storage account
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+                         test_dir, src_container)
+
+        # test upload-batch with & without --overwrite
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+                         test_dir, src_container).assert_with_checks(JMESPathCheck('length(@)', 0))
+        self.storage_cmd('storage blob upload-batch -s "{}" -d {} --max-connections 3 --overwrite', storage_account_info,
+                         test_dir, src_container).assert_with_checks(JMESPathCheck('length(@)', 41))
+
+        # download recursively without pattern
+        local_folder = self.create_temp_dir()
+        cmd = 'storage blob download-batch -s {} -d "{}"'.format(src_container, local_folder)
+        self.storage_cmd(cmd, storage_account_info)
+        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # test --overwrite
+        self.storage_cmd_negative(cmd, storage_account_info)
+        cmd = 'storage blob download-batch -s {} -d "{}" --overwrite'.format(src_container, local_folder)
+        self.storage_cmd(cmd, storage_account_info)
+        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # download recursively with wild card *, and use URL as source
+        local_folder = self.create_temp_dir()
+        src_url = self.storage_cmd('storage blob url -c {} -n readme -otsv', storage_account_info, src_container).output
+        src_url = src_url[:src_url.rfind('/')]
+
+        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern *', storage_account_info, src_url,
+                         local_folder)
+        self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # download recursively with wild card after dir
+        local_folder = self.create_temp_dir()
+        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
+                         local_folder, 'apple/*')
+
+        self.assertEqual(10, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # download recursively with wild card before name
+        local_folder = self.create_temp_dir()
+        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
+                         local_folder, '*/file_0')
+        self.assertEqual(4, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # download blob without wild cards
+        local_folder = self.create_temp_dir()
+        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
+                         local_folder, 'apple/file_0')
+        self.assertEqual(1, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # upload blobs with names that start with path separator
+        local_file = self.create_temp_file(1)
+        src_container = 'container2'
+        self.storage_cmd('storage container create -n {}', storage_account_info, src_container)
+        blob_names = ['/dir1/file', 'dir1/file', '/dir2//file', 'dir2/file']
+
+        for name in blob_names:
+            self.storage_cmd('storage blob upload -c {} -f "{}" -n {} --type block', storage_account_info,
+                             src_container, local_file, name)
+
+        # download blobs that start with forward slash into local folder
+        local_folder = self.create_temp_dir()
+        self.storage_cmd('storage blob download-batch -s {} -d "{}" --pattern {}', storage_account_info, src_container,
+                         local_folder, '/*')
+        self.assertEqual(2, sum(len(f) for r, d, f in os.walk(local_folder)))
+
+        # download blobs that start with forward slash into local folder with conflicts
+        local_folder = self.create_temp_dir()
+        self.storage_cmd_negative('storage blob download-batch -s {} -d "{}"', storage_account_info, src_container,
+                                  local_folder)
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
+    @StorageTestFilesPreparer()
+    def test_storage_blob_batch_delete_scenarios(self, test_dir, storage_account_info):
+        def create_and_populate_container(src_container):
+            self.storage_cmd('storage container create -n {}', storage_account_info, src_container)
+
+            # upload test files to storage account
+            self.storage_cmd('storage blob upload-batch -s "{}" -d {}', storage_account_info, test_dir, src_container)
+
+        # delete recursively without pattern
+        src_container = 'container1'
+        create_and_populate_container(src_container)
+        cmd = 'storage blob delete-batch -s {}'.format(src_container)
+        self.storage_cmd(cmd, storage_account_info)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 0))
+
+        # delete recursively with wild card *, and use URL as source
+        src_container = 'container2'
+        create_and_populate_container(src_container)
+        src_url = self.storage_cmd('storage blob url -c {} -n readme -otsv', storage_account_info, src_container).output
+        src_url = src_url[:src_url.rfind('/')]
+
+        self.storage_cmd('storage blob delete-batch -s {} --pattern *', storage_account_info, src_url)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 0))
+
+        # delete recursively with wild card after dir
+        src_container = 'container3'
+        create_and_populate_container(src_container)
+        self.storage_cmd('storage blob delete-batch -s {} --pattern apple/*', storage_account_info, src_container)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 31))
+
+        # delete recursively with wild card before name
+        src_container = 'container4'
+        create_and_populate_container(src_container)
+        self.storage_cmd('storage blob delete-batch -s {} --pattern */file_0', storage_account_info, src_container)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 37))
+
+        # delete recursively with non-existing pattern
+        src_container = 'container5'
+        create_and_populate_container(src_container)
+        self.storage_cmd('storage blob delete-batch -s {} --pattern nonexists/*', storage_account_info, src_container)
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 41))
+
+        # delete recursively with if-modified-since
+        src_container = 'container6'
+        create_and_populate_container(src_container)
+        self.storage_cmd('storage blob delete-batch -s {} --if-modified-since {} --dryrun',
+                         storage_account_info, src_container, '2000-12-31T12:59:59Z')
+        self.storage_cmd('storage blob delete-batch -s {} --if-modified-since {}',
+                         storage_account_info, src_container, '2000-12-31T12:59:59Z')
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 0))
+
+        # delete recursively with if-unmodified-since
+        src_container = 'container7'
+        create_and_populate_container(src_container)
+        self.storage_cmd('storage blob delete-batch -s {} --if-unmodified-since {} --dryrun',
+                         storage_account_info, src_container, datetime.max.strftime('%Y-%m-%dT%H:%MZ'))
+        self.storage_cmd('storage blob delete-batch -s {} --if-unmodified-since {}',
+                         storage_account_info, src_container, datetime.max.strftime('%Y-%m-%dT%H:%MZ'))
+        self.storage_cmd('storage blob list -c {}', storage_account_info, src_container).assert_with_checks(
+            JMESPathCheck('length(@)', 0))
 
 if __name__ == '__main__':
     import unittest

@@ -6,7 +6,7 @@
 from collections import OrderedDict
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.core.profiles import get_api_version, ResourceType
+from azure.cli.core.profiles import ResourceType
 
 from azure.cli.command_modules.keyvault._client_factory import (
     get_client, get_client_factory, Clients)
@@ -43,19 +43,19 @@ def transform_definition_list(result):
 # pylint: disable=too-many-locals, too-many-statements
 def load_command_table(self, _):
     # region Command Types
-    mgmt_vaults_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.vaults)
-    mgmt_pec_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_endpoint_connections)
-    mgmt_plr_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
-    data_key_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_KEYS)
-    data_certificate_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES)
-    data_secret_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_SECRETS)
+    mgmt_vaults_entity = get_client(ResourceType.MGMT_KEYVAULT, Clients.vaults)
+    mgmt_pec_entity = get_client(ResourceType.MGMT_KEYVAULT, Clients.private_endpoint_connections)
+    mgmt_plr_entity = get_client(ResourceType.MGMT_KEYVAULT, Clients.private_link_resources)
+    data_key_entity = get_client(ResourceType.DATA_KEYVAULT_KEYS)
+    data_certificate_entity = get_client(ResourceType.DATA_KEYVAULT_CERTIFICATES)
+    data_secret_entity = get_client(ResourceType.DATA_KEYVAULT_SECRETS)
 
-    mgmt_hsms_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
-    mgmt_hsms_regions_entity = get_client(self.cli_ctx, ResourceType.MGMT_KEYVAULT, Clients.mhsm_regions)
-    data_security_domain_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN)
-    data_backup_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
-    data_access_control_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
-    data_setting_entity = get_client(self.cli_ctx, ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
+    mgmt_hsms_entity = get_client(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)
+    mgmt_hsms_regions_entity = get_client(ResourceType.MGMT_KEYVAULT, Clients.mhsm_regions)
+    data_security_domain_entity = get_client(ResourceType.DATA_KEYVAULT_SECURITY_DOMAIN)
+    data_backup_entity = get_client(ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP)
+    data_access_control_entity = get_client(ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL)
+    data_setting_entity = get_client(ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING)
 
     kv_vaults_custom = CliCommandType(
         operations_tmpl='azure.cli.command_modules.keyvault.custom#{}',
@@ -96,7 +96,6 @@ def load_command_table(self, _):
 
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,
-                            min_api='2018-02-14',
                             client_factory=mgmt_vaults_entity.client_factory) as g:
         g.custom_command('add', 'add_network_rule', supports_no_wait=True)
         g.custom_command('remove', 'remove_network_rule', supports_no_wait=True)
@@ -105,7 +104,6 @@ def load_command_table(self, _):
 
     with self.command_group('keyvault private-endpoint-connection',
                             mgmt_pec_entity.command_type,
-                            min_api='2018-02-14',
                             client_factory=mgmt_pec_entity.client_factory) as g:
         g.custom_command('approve', 'approve_private_endpoint_connection', supports_no_wait=True,
                          validator=validate_private_endpoint_connection_id)
@@ -121,7 +119,6 @@ def load_command_table(self, _):
 
     with self.command_group('keyvault private-link-resource',
                             mgmt_plr_entity.command_type,
-                            min_api='2018-02-14',
                             client_factory=mgmt_plr_entity.client_factory) as g:
         from azure.cli.core.commands.transform import gen_dict_to_list_transform
         g.custom_command('list', 'list_private_link_resource', transform=gen_dict_to_list_transform(key='value'))
@@ -241,13 +238,9 @@ def load_command_table(self, _):
         g.keyvault_custom('download', 'download_certificate')
         g.keyvault_custom('get-default-policy', 'get_default_policy')
 
-    data_api_version = str(get_api_version(self.cli_ctx, ResourceType.DATA_KEYVAULT_CERTIFICATES)). \
-        replace('.', '_').replace('-', '_')
-
-    if data_api_version != '2016_10_01':
-        with self.command_group('keyvault certificate', data_certificate_entity.command_type) as g:
-            g.keyvault_custom('backup', 'backup_certificate')
-            g.keyvault_custom('restore', 'restore_certificate', transform=transform_certificate_show)
+    with self.command_group('keyvault certificate', data_certificate_entity.command_type) as g:
+        g.keyvault_custom('backup', 'backup_certificate')
+        g.keyvault_custom('restore', 'restore_certificate', transform=transform_certificate_show)
 
     with self.command_group('keyvault certificate pending', data_certificate_entity.command_type) as g:
         g.keyvault_command('merge', 'merge_certificate', transform=transform_certificate_show)
@@ -298,11 +291,11 @@ def load_command_table(self, _):
         g.keyvault_custom('update', 'update_hsm_setting')
 
     with self.command_group('keyvault region', mgmt_hsms_regions_entity.command_type,
-                            client_factory=mgmt_hsms_regions_entity.client_factory, min_api='2023-02-01') as g:
+                            client_factory=mgmt_hsms_regions_entity.client_factory) as g:
         g.command('list', 'list_by_resource', client_factory=mgmt_hsms_regions_entity.client_factory)
 
     with self.command_group('keyvault region', mgmt_hsms_entity.command_type,
-                            client_factory=mgmt_hsms_entity.client_factory, min_api='2023-02-01') as g:
+                            client_factory=mgmt_hsms_entity.client_factory) as g:
         g.custom_command('add', 'add_hsm_region', supports_no_wait=True)
         g.custom_command('remove', 'remove_hsm_region', supports_no_wait=True)
         g.wait_command('wait')

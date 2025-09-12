@@ -822,7 +822,8 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
             raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
 
         subnet_exists = \
-            check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets', vnet, 'virtualNetworks')
+            check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets', vnet, 'virtualNetworks',
+                            static_version="2024-07-01")
 
         if subnet_is_id and not subnet_exists:
             raise CLIError("Subnet '{}' does not exist.".format(subnet))
@@ -1886,8 +1887,10 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
 
 # region disk, snapshot, image validators
 def process_vm_disk_attach_namespace(cmd, namespace):
-    if not namespace.disks and not namespace.disk and not namespace.disk_ids:
-        raise RequiredArgumentMissingError("Please use at least one of --name, --disks and --disk-ids")
+    if not namespace.disks and not namespace.disk and not namespace.disk_ids and \
+            not namespace.source_snapshots_or_disks and not namespace.source_disk_restore_point:
+        raise RequiredArgumentMissingError("Please use at least one of --name, --disks, --disk-ids,"
+                                           " --source-snapshots-or-disks and --source-disk-restore-point")
 
     if namespace.disk and namespace.disks:
         raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disks")
@@ -2530,6 +2533,9 @@ def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=
         if namespace.load_balancer is None or namespace.health_probe is None:
             raise ArgumentUsageError("usage error: --load-balancer and --health-probe are required "
                                      "when creating vmss with automatic repairs")
+        if namespace.enable_automatic_repairs is not None and namespace.enable_automatic_repairs is False:
+            raise ArgumentUsageError("usage error: --enable-automatic-repairs cannot be false when "
+                                     "--automatic-repairs-action or --automatic-repairs-grace-period are used")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 

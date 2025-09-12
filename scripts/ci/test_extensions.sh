@@ -25,15 +25,25 @@ exit_code=0
 # Disable alias temporarily: https://github.com/Azure/azure-cli/pull/27717
 # hybridaks is going to be deprecated: https://github.com/Azure/azure-cli/pull/29838
 # db-up is going to be deprecated: https://github.com/Azure/azure-cli/pull/29887
-ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias hybridaks db-up'
+# serviceconnector-passwordless's dependency is not compatible with 3.13 https://github.com/Azure/azure-cli/pull/31895
+# partnercenter is not compatible with latest pydantic: https://github.com/Azure/azure-cli/pull/31967
+ignore_list='azure-cli-ml fzf arcappliance arcdata connectedk8s k8s-extension alias hybridaks db-up serviceconnector-passwordless partnercenter'
 
 # Does not exit if az extension add fails until all extensions have been tested
 set +e
 
 for ext in $output; do
     echo
-    # Use regex to detect if $ext is in $ignore_list
-    if [[ $ignore_list =~ $ext ]]; then
+    # Exact string matching against each item in the ignore list
+    ignore_match=0
+    for item in $ignore_list; do
+        if [ "$ext" = "$item" ]; then
+            ignore_match=1
+            break
+        fi
+    done
+    
+    if [ $ignore_match -eq 1 ]; then
         echo "Ignore extension: $ext"
         continue
     fi
@@ -53,7 +63,7 @@ az self-test --debug
 if [ $? != 0 ]
 then
     exit_code=1
-    echo "Failed to verify:" $ext
+    echo "Failed to verify"
 fi
 
 exit $exit_code

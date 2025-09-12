@@ -144,6 +144,7 @@ class CompareFields:
 CompareFieldsMap = {
     "appconfig": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
     "appservice": (CompareFields.VALUE, CompareFields.TAGS),
+    "aks": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
     "file": (CompareFields.CONTENT_TYPE, CompareFields.VALUE),
     "kvset": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
     "restore": (CompareFields.VALUE, CompareFields.CONTENT_TYPE, CompareFields.LOCKED, CompareFields.TAGS)

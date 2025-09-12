@@ -206,6 +206,7 @@ def load_arguments(self, _):
         c.argument('upload_type', arg_type=get_enum_type(['Upload', 'UploadWithSecurityData']), min_api='2018-09-30',
                    help="Create the disk for upload scenario. 'Upload' is for Standard disk only upload. 'UploadWithSecurityData' is for OS Disk upload along with VM Guest State. Please note the 'UploadWithSecurityData' is not valid for data disk upload, it only to be used for OS Disk upload at present.")
         c.argument('performance_plus', arg_type=get_three_state_flag(), min_api='2022-07-02', help='Set this flag to true to get a boost on the performance target of the disk deployed. This flag can only be set on disk creation time and cannot be disabled after enabled')
+        c.argument('security_metadata_uri', help='Specify the blob URI to be imported into VM metadata for Confidential VM')
     # endregion
 
     # region Snapshots
@@ -227,6 +228,7 @@ def load_arguments(self, _):
         c.argument('bandwidth_copy_speed', min_api='2023-10-02',
                    help='If this field is set on a snapshot and createOption is CopyStart, the snapshot will be copied at a quicker speed.',
                    arg_type=get_enum_type(["None", "Enhanced"]))
+        c.argument('instant_access_duration_minutes', options_list=['--instant-access-duration-minutes', '--ia-duration'], type=int, help='For snapshots created from Premium SSD v2 or Ultra disk, this property determines the time in minutes the snapshot is retained for instant access to enable faster restore. The disk sku should be UltraSSD_LRS or PremiumV2_LRS')
     # endregion
 
     # region Images
@@ -544,6 +546,8 @@ def load_arguments(self, _):
                    completer=get_resource_name_completion_list('Microsoft.Compute/disks'))
         c.argument('ids', deprecate_info=c.deprecate(target='--ids', redirect='--disks', hide=True))
         c.argument('disk_ids', nargs='+', min_api='2024-03-01', help='The disk IDs of the managed disk (space-delimited).')
+        c.argument('source_snapshots_or_disks', options_list=['--source-snapshots-or-disks', '--source-resource'], nargs='+', min_api='2024-11-01', help='Create a data disk from a snapshot or another disk. Can use the ID of a disk or snapshot.')
+        c.argument('source_disk_restore_point', options_list=['--source-disk-restore-point', '--source-disk-rp'], nargs='+', min_api='2024-11-01', help='create a data disk from a disk restore point. Can use the ID of a disk restore point.')
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
@@ -703,7 +707,7 @@ def load_arguments(self, _):
         c.argument('host_group', min_api='2020-06-01',
                    help='Name or ID of dedicated host group that the virtual machine scale set resides in')
 
-    for scope in ['vmss deallocate', 'vmss delete-instances', 'vmss restart', 'vmss start', 'vmss stop', 'vmss show', 'vmss update-instances', 'vmss simulate-eviction']:
+    for scope in ['vmss deallocate', 'vmss restart', 'vmss stop', 'vmss show', 'vmss update-instances', 'vmss simulate-eviction']:
         with self.argument_context(scope) as c:
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
@@ -740,6 +744,7 @@ def load_arguments(self, _):
         c.argument('orchestration_mode', help='Choose how virtual machines are managed by the scale set. In Uniform mode, you define a virtual machine model and Azure will generate identical instances based on that model.',
                    arg_type=get_enum_type(['Uniform']), default='Uniform', max_api='2020-09-30')
         c.argument('scale_in_policy', scale_in_policy_type)
+        c.argument('enable_automatic_repairs', options_list=['--enable-automatic-repairs', '--enable-auto-repairs'], min_api='2021-11-01', arg_type=get_three_state_flag(), help='Enable automatic repairs')
         c.argument('automatic_repairs_grace_period', min_api='2018-10-01',
                    help='The amount of time (in minutes, between 30 and 90) for which automatic repairs are suspended due to a state change on VM.')
         c.argument('automatic_repairs_action', arg_type=get_enum_type(['Replace', 'Restart', 'Reimage']), min_api='2021-11-01', help='Type of repair action that will be used for repairing unhealthy virtual machines in the scale set.')
@@ -872,7 +877,7 @@ def load_arguments(self, _):
     with self.argument_context('vmss wait') as c:
         c.argument('instance_id', id_part='child_name_1', help="Wait on the VM instance with this ID. If missing, wait on the VMSS.")
 
-    for scope in ['vmss update-instances', 'vmss delete-instances']:
+    for scope in ['vmss update-instances']:
         with self.argument_context(scope) as c:
             c.argument('instance_ids', multi_ids_type, help='Space-separated list of IDs (ex: 1 2 3 ...) or * for all instances.')
 
@@ -1243,7 +1248,7 @@ def load_arguments(self, _):
             c.argument('v_cpus_available', type=int, min_api='2021-11-01', help='Specify the number of vCPUs available')
             c.argument('v_cpus_per_core', type=int, min_api='2021-11-01', help='Specify the ratio of vCPU to physical core. Setting this property to 1 also means that hyper-threading is disabled.')
             c.argument('disk_controller_type', disk_controller_type)
-            c.argument('enable_proxy_agent', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Specify whether proxy agent feature should be enabled on the virtual machine or virtual machine scale set.')
+            c.argument('enable_proxy_agent', arg_type=get_three_state_flag(), min_api='2023-09-01', help='Specify whether metadata security protoco (proxy agent) feature should be enabled on the virtual machine or virtual machine scale set.')
             c.argument('proxy_agent_mode', deprecate_info=c.deprecate(target='--proxy-agent-mode', redirect='--wire-server-mode'), arg_type=get_enum_type(self.get_models('Mode')), min_api='2023-09-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
             c.argument('wire_server_mode', arg_type=get_enum_type(self.get_models('Mode')), min_api='2024-11-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
             c.argument('wire_server_access_control_profile_reference_id', options_list=['--wire-server-access-control-profile-reference-id', '--wire-server-profile-id'], min_api='2024-11-01', help='Specify the access control profile version resource id of wire server.')
