@@ -9,7 +9,7 @@
 def load_command_table(self, _):
     from azure.cli.core.commands import CliCommandType
     from azure.cli.command_modules.search._client_factory import cf_search_services, cf_search_private_endpoint_connections, \
-        cf_search_private_link_resources, cf_search_shared_private_link_resources, cf_search_admin_keys, cf_search_query_keys#, cf_search_network_security_perimeter_configurations
+        cf_search_private_link_resources, cf_search_shared_private_link_resources, cf_search_admin_keys, cf_search_query_keys
 
     search_services_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.search.operations#ServicesOperations.{}',
@@ -40,11 +40,6 @@ def load_command_table(self, _):
         operations_tmpl='azure.mgmt.search.operations#QueryKeysOperations.{}',
         client_factory=cf_search_query_keys
     )
-
-    #search_network_security_perimeter_configurations_sdk = CliCommandType(
-    #    operations_tmpl='azure.mgmt.search.operations#NetworkSecurityPerimeterConfigurationsOperations.{}',
-    #    client_factory=cf_search_network_security_perimeter_configurations
-    #)
 
     with self.command_group('search service', search_services_sdk) as g:
         # right now list_by_resource_group is the only way to list, so directly map to list_by_resource_group.
@@ -84,11 +79,6 @@ def load_command_table(self, _):
         g.command('list', 'list_by_search_service')
         g.command('create', 'create')
         g.command('delete', 'delete')
-
-    #with self.command_group('search network_security_perimeter_configurations', search_network_security_perimeter_configurations_sdk) as g:
-    #    g.command('list', 'list_by_service')
-    #    g.command('reconcile', 'begin_reconcile')
-    #    g.command('show', 'get')
 
     with self.command_group('search'):
         pass

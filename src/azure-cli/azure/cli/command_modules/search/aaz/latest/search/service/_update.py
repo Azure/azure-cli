@@ -25,10 +25,13 @@ class Update(AAZCommand):
         ]
     }
 
+    AZ_SUPPORT_NO_WAIT = True
+
+    AZ_SUPPORT_GENERIC_UPDATE = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
-        self._execute_operations()
-        return self._output()
+        return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
 
@@ -51,39 +54,59 @@ class Update(AAZCommand):
             id_part="name",
         )
 
+        # define Arg Group "AuthOptions"
+
+        _args_schema = cls._args_schema
+        _args_schema.aad_auth_failure_mode = AAZStrArg(
+            options=["--aad-auth-failure-mode"],
+            arg_group="AuthOptions",
+            help="Describes what response the data plane API of a Search service would send for requests that failed authentication.",
+            nullable=True,
+            enum={"http401WithBearerChallenge": "http401WithBearerChallenge", "http403": "http403"},
+        )
+        _args_schema.api_key_only = AAZObjectArg(
+            options=["--api-key-only"],
+            arg_group="AuthOptions",
+            help="Indicates that only the API key needs to be used for authentication.",
+            nullable=True,
+            blank={},
+        )
+
         # define Arg Group "Identity"
 
         _args_schema = cls._args_schema
-        _args_schema.mi_system_assigned = AAZStrArg(
-            options=["--system-assigned", "--mi-system-assigned"],
+        _args_schema.identity_type = AAZStrArg(
+            options=["--identity-type"],
             arg_group="Identity",
-            help="Set the system managed identity.",
-            blank="True",
-        )
-        _args_schema.mi_user_assigned = AAZListArg(
-            options=["--user-assigned", "--mi-user-assigned"],
-            arg_group="Identity",
-            help="Set the user managed identities.",
-            blank=[],
+            help="The identity type.",
+            enum={"None": "None", "SystemAssigned": "SystemAssigned"},
         )
 
-        mi_user_assigned = cls._args_schema.mi_user_assigned
-        mi_user_assigned.Element = AAZStrArg()
+        # define Arg Group "NetworkRuleSet"
+
+        _args_schema = cls._args_schema
+        _args_schema.ip_rules_internal = AAZListArg(
+            options=["--ip-rules-internal"],
+            arg_group="NetworkRuleSet",
+            help="A list of IP restriction rules that defines the inbound network(s) with allowing access to the search service endpoint. At the meantime, all other public IP networks are blocked by the firewall. These restriction rules are applied only when the 'publicNetworkAccess' of the search service is 'enabled'; otherwise, traffic over public interface is not allowed even with any public IP rules, and private endpoint connections would be the exclusive access method.",
+            nullable=True,
+        )
+
+        ip_rules_internal = cls._args_schema.ip_rules_internal
+        ip_rules_internal.Element = AAZObjectArg(
+            nullable=True,
+        )
+
+        _element = cls._args_schema.ip_rules_internal.Element
+        _element.value = AAZStrArg(
+            options=["value"],
+            help="Value corresponding to a single IPv4 address (eg., 123.1.2.3) or an IP range in CIDR format (eg., 123.1.2.3/24) to be allowed.",
+            nullable=True,
+        )
 
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.auth_options = AAZObjectArg(
-            options=["--auth-options"],
-            arg_group="Properties",
-            help="Defines the options for how the data plane API of a search service authenticates requests. This cannot be set if 'disableLocalAuth' is set to true.",
-        )
-        _args_schema.compute_type = AAZStrArg(
-            options=["--compute-type"],
-            arg_group="Properties",
-            help="Configure this property to support the search service using either the Default Compute or Azure Confidential Compute.",
-            enum={"confidential": "confidential", "default": "default"},
-        )
         _args_schema.data_exfiltration_protections = AAZListArg(
             options=["--data-exfiltration-protections"],
             arg_group="Properties",
@@ -100,45 +123,28 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="Specifies any policy regarding encryption of resources (such as indexes) using customer manager keys within a search service.",
         )
-        _args_schema.endpoint = AAZStrArg(
-            options=["--endpoint"],
-            arg_group="Properties",
-            help="The endpoint of the Azure AI Search service.",
-        )
-        _args_schema.hosting_mode = AAZStrArg(
-            options=["--hosting-mode"],
-            arg_group="Properties",
-            help="Applicable only for the standard3 SKU. You can set this property to enable up to 3 high density partitions that allow up to 1000 indexes, which is much higher than the maximum indexes allowed for any other SKU. For the standard3 SKU, the value is either 'default' or 'highDensity'. For all other SKUs, this value must be 'default'.",
-            default="default",
-            enum={"default": "default", "highDensity": "highDensity"},
-        )
-        _args_schema.network_rule_set = AAZObjectArg(
-            options=["--network-rule-set"],
-            arg_group="Properties",
-            help="Network specific rules that determine how the Azure AI Search service may be reached.",
-        )
         _args_schema.partition_count = AAZIntArg(
             options=["--partition-count"],
             arg_group="Properties",
             help="The number of partitions in the search service; if specified, it can be 1, 2, 3, 4, 6, or 12. Values greater than 1 are only valid for standard SKUs. For 'standard3' services with hostingMode set to 'highDensity', the allowed values are between 1 and 3.",
-            default=1,
+            nullable=True,
             fmt=AAZIntArgFormat(
                 maximum=12,
                 minimum=1,
             ),
         )
         _args_schema.public_network_access = AAZStrArg(
-            options=["--public-network-access"],
+            options=["--public-access", "--public-network-access"],
             arg_group="Properties",
             help="This value can be set to 'enabled' to avoid breaking changes on existing customer resources and templates. If set to 'disabled', traffic over public interface is not allowed, and private endpoint connections would be the exclusive access method.",
-            default="enabled",
-            enum={"disabled": "disabled", "enabled": "enabled", "securedByPerimeter": "securedByPerimeter"},
+            nullable=True,
+            enum={"disabled": "disabled", "enabled": "enabled"},
         )
         _args_schema.replica_count = AAZIntArg(
             options=["--replica-count"],
             arg_group="Properties",
             help="The number of replicas in the search service. If specified, it must be a value between 1 and 12 inclusive for standard SKUs or between 1 and 3 inclusive for basic SKU.",
-            default=1,
+            nullable=True,
             fmt=AAZIntArgFormat(
                 maximum=12,
                 minimum=1,
@@ -147,33 +153,9 @@ class Update(AAZCommand):
         _args_schema.semantic_search = AAZStrArg(
             options=["--semantic-search"],
             arg_group="Properties",
-            help="Sets options that control the availability of semantic search. This configuration is only possible for certain Azure AI Search SKUs in certain locations.",
+            help="Sets options that control the availability of semantic search. This configuration is only possible for certain Azure Cognitive Search SKUs in certain locations.",
             nullable=True,
             enum={"disabled": "disabled", "free": "free", "standard": "standard"},
-        )
-        _args_schema.upgrade_available = AAZStrArg(
-            options=["--upgrade-available"],
-            arg_group="Properties",
-            help="Indicates if the search service has an upgrade available.",
-            enum={"available": "available", "notAvailable": "notAvailable"},
-        )
-
-        auth_options = cls._args_schema.auth_options
-        auth_options.aad_or_api_key = AAZObjectArg(
-            options=["aad-or-api-key"],
-            help="Indicates that either the API key or an access token from a Microsoft Entra ID tenant can be used for authentication.",
-        )
-        auth_options.api_key_only = AAZObjectArg(
-            options=["api-key-only"],
-            help="Indicates that only the API key can be used for authentication.",
-            blank={},
-        )
-
-        aad_or_api_key = cls._args_schema.auth_options.aad_or_api_key
-        aad_or_api_key.aad_auth_failure_mode = AAZStrArg(
-            options=["aad-auth-failure-mode"],
-            help="Describes what response the data plane API of a search service would send for requests that failed authentication.",
-            enum={"http401WithBearerChallenge": "http401WithBearerChallenge", "http403": "http403"},
         )
 
         data_exfiltration_protections = cls._args_schema.data_exfiltration_protections
@@ -188,54 +170,38 @@ class Update(AAZCommand):
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "Unspecified": "Unspecified"},
         )
 
-        network_rule_set = cls._args_schema.network_rule_set
-        network_rule_set.bypass = AAZStrArg(
-            options=["bypass"],
-            help="Possible origins of inbound traffic that can bypass the rules defined in the 'ipRules' section.",
-            enum={"AzureServices": "AzureServices", "None": "None"},
-        )
-        network_rule_set.ip_rules = AAZListArg(
-            options=["ip-rules"],
-            help="A list of IP restriction rules that defines the inbound network(s) with allowing access to the search service endpoint. At the meantime, all other public IP networks are blocked by the firewall. These restriction rules are applied only when the 'publicNetworkAccess' of the search service is 'enabled'; otherwise, traffic over public interface is not allowed even with any public IP rules, and private endpoint connections would be the exclusive access method.",
-        )
-
-        ip_rules = cls._args_schema.network_rule_set.ip_rules
-        ip_rules.Element = AAZObjectArg()
-
-        _element = cls._args_schema.network_rule_set.ip_rules.Element
-        _element.value = AAZStrArg(
-            options=["value"],
-            help="Value corresponding to a single IPv4 address (eg., 123.1.2.3) or an IP range in CIDR format (eg., 123.1.2.3/24) to be allowed.",
-        )
-
         # define Arg Group "Service"
 
         _args_schema = cls._args_schema
-        _args_schema.sku = AAZObjectArg(
+        _args_schema.sku = AAZStrArg(
             options=["--sku"],
             arg_group="Service",
-            help="The SKU of the search service, which determines price tier and capacity limits. This property is required when creating a new search service.",
+            help="The SKU of the search service. Valid values include: 'free': Shared service. 'basic': Dedicated service with up to 3 replicas. 'standard': Dedicated service with up to 12 partitions and 12 replicas. 'standard2': Similar to standard, but with more capacity per search unit. 'standard3': The largest Standard offering with up to 12 partitions and 12 replicas (or up to 3 partitions with more indexes if you also set the hostingMode property to 'highDensity'). 'storage_optimized_l1': Supports 1TB per partition, up to 12 partitions. 'storage_optimized_l2': Supports 2TB per partition, up to 12 partitions.'",
+            enum={"basic": "basic", "free": "free", "standard": "standard", "standard2": "standard2", "standard3": "standard3", "storage_optimized_l1": "storage_optimized_l1", "storage_optimized_l2": "storage_optimized_l2"},
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Service",
-            help="Tags to help categorize the resource in the Azure portal.",
-        )
-
-        sku = cls._args_schema.sku
-        sku.name = AAZStrArg(
-            options=["name"],
-            help="The SKU of the search service. Valid values include: 'free': Shared service. 'basic': Dedicated service with up to 3 replicas. 'standard': Dedicated service with up to 12 partitions and 12 replicas. 'standard2': Similar to standard, but with more capacity per search unit. 'standard3': The largest Standard offering with up to 12 partitions and 12 replicas (or up to 3 partitions with more indexes if you also set the hostingMode property to 'highDensity'). 'storage_optimized_l1': Supports 1TB per partition, up to 12 partitions. 'storage_optimized_l2': Supports 2TB per partition, up to 12 partitions.'",
-            enum={"basic": "basic", "free": "free", "standard": "standard", "standard2": "standard2", "standard3": "standard3", "storage_optimized_l1": "storage_optimized_l1", "storage_optimized_l2": "storage_optimized_l2"},
+            help="Resource tags.",
+            nullable=True,
         )
 
         tags = cls._args_schema.tags
-        tags.Element = AAZStrArg()
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        # define Arg Group "Sku"
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.ServicesUpdate(ctx=self.ctx)()
+        self.ServicesGet(ctx=self.ctx)()
+        self.pre_instance_update(self.ctx.vars.instance)
+        self.InstanceUpdateByJson(ctx=self.ctx)()
+        self.InstanceUpdateByGeneric(ctx=self.ctx)()
+        self.post_instance_update(self.ctx.vars.instance)
+        yield self.ServicesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -246,11 +212,19 @@ class Update(AAZCommand):
     def post_operations(self):
         pass
 
+    @register_callback
+    def pre_instance_update(self, instance):
+        pass
+
+    @register_callback
+    def post_instance_update(self, instance):
+        pass
+
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
-    class ServicesUpdate(AAZHttpOperation):
+    class ServicesGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -270,7 +244,106 @@ class Update(AAZCommand):
 
         @property
         def method(self):
-            return "PATCH"
+            return "GET"
+
+        @property
+        def error_format(self):
+            return "ODataV4Format"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "searchServiceName", self.ctx.args.search_service_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2025-05-01",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+            _UpdateHelper._build_schema_search_service_read(cls._schema_on_200)
+
+            return cls._schema_on_200
+
+    class ServicesCreateOrUpdate(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200, 201]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200_201,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Search/searchServices/{searchServiceName}",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "PUT"
 
         @property
         def error_format(self):
@@ -320,48 +393,72 @@ class Update(AAZCommand):
         def content(self):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
-                typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+                value=self.ctx.vars.instance,
             )
-            _builder.set_prop("identity", AAZIdentityObjectType)
+
+            return self.serialize_content(_content_value)
+
+        def on_200_201(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200_201
+            )
+
+        _schema_on_200_201 = None
+
+        @classmethod
+        def _build_schema_on_200_201(cls):
+            if cls._schema_on_200_201 is not None:
+                return cls._schema_on_200_201
+
+            cls._schema_on_200_201 = AAZObjectType()
+            _UpdateHelper._build_schema_search_service_read(cls._schema_on_200_201)
+
+            return cls._schema_on_200_201
+
+    class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
+
+        def __call__(self, *args, **kwargs):
+            self._update_instance(self.ctx.vars.instance)
+
+        def _update_instance(self, instance):
+            _instance_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                value=instance,
+                typ=AAZObjectType
+            )
+            _builder.set_prop("identity", AAZObjectType)
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("sku", AAZObjectType, ".sku")
+            _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             identity = _builder.get(".identity")
             if identity is not None:
-                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
-                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
-
-            user_assigned = _builder.get(".identity.userAssigned")
-            if user_assigned is not None:
-                user_assigned.set_elements(AAZStrType, ".")
+                identity.set_prop("type", AAZStrType, ".identity_type", typ_kwargs={"flags": {"required": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("authOptions", AAZObjectType, ".auth_options")
-                properties.set_prop("computeType", AAZStrType, ".compute_type")
+                properties.set_prop("authOptions", AAZObjectType)
                 properties.set_prop("dataExfiltrationProtections", AAZListType, ".data_exfiltration_protections")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth", typ_kwargs={"nullable": True})
                 properties.set_prop("encryptionWithCmk", AAZObjectType, ".encryption_with_cmk")
-                properties.set_prop("endpoint", AAZStrType, ".endpoint")
-                properties.set_prop("hostingMode", AAZStrType, ".hosting_mode")
-                properties.set_prop("networkRuleSet", AAZObjectType, ".network_rule_set")
+                properties.set_prop("networkRuleSet", AAZObjectType)
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
                 properties.set_prop("replicaCount", AAZIntType, ".replica_count")
                 properties.set_prop("semanticSearch", AAZStrType, ".semantic_search", typ_kwargs={"nullable": True})
-                properties.set_prop("upgradeAvailable", AAZStrType, ".upgrade_available")
 
             auth_options = _builder.get(".properties.authOptions")
             if auth_options is not None:
-                auth_options.set_prop("aadOrApiKey", AAZObjectType, ".aad_or_api_key")
+                auth_options.set_prop("aadOrApiKey", AAZObjectType)
                 auth_options.set_prop("apiKeyOnly", AAZObjectType, ".api_key_only")
 
             aad_or_api_key = _builder.get(".properties.authOptions.aadOrApiKey")
             if aad_or_api_key is not None:
                 aad_or_api_key.set_prop("aadAuthFailureMode", AAZStrType, ".aad_auth_failure_mode")
-
+            
             data_exfiltration_protections = _builder.get(".properties.dataExfiltrationProtections")
             if data_exfiltration_protections is not None:
                 data_exfiltration_protections.set_elements(AAZStrType, ".")
@@ -372,8 +469,7 @@ class Update(AAZCommand):
 
             network_rule_set = _builder.get(".properties.networkRuleSet")
             if network_rule_set is not None:
-                network_rule_set.set_prop("bypass", AAZStrType, ".bypass")
-                network_rule_set.set_prop("ipRules", AAZListType, ".ip_rules")
+                network_rule_set.set_prop("ipRules", AAZListType, ".ip_rules_internal")
 
             ip_rules = _builder.get(".properties.networkRuleSet.ipRules")
             if ip_rules is not None:
@@ -385,284 +481,277 @@ class Update(AAZCommand):
 
             sku = _builder.get(".sku")
             if sku is not None:
-                sku.set_prop("name", AAZStrType, ".name")
+                sku.set_prop("name", AAZStrType, ".sku", typ_kwargs={"flags": {"required": True}})
 
             tags = _builder.get(".tags")
             if tags is not None:
                 tags.set_elements(AAZStrType, ".")
 
-            return self.serialize_content(_content_value)
+            return _instance_value
 
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
+    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
 
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.id = AAZStrType(
-                flags={"read_only": True},
+        def __call__(self, *args, **kwargs):
+            self._update_instance_by_generic(
+                self.ctx.vars.instance,
+                self.ctx.generic_update_args
             )
-            _schema_on_200.identity = AAZIdentityObjectType()
-            _schema_on_200.location = AAZStrType(
-                flags={"required": True},
-            )
-            _schema_on_200.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
-            _schema_on_200.sku = AAZObjectType()
-            _schema_on_200.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _UpdateHelper._build_schema_system_data_read(_schema_on_200.system_data)
-            _schema_on_200.tags = AAZDictType()
-            _schema_on_200.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            identity = cls._schema_on_200.identity
-            identity.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
-            identity.tenant_id = AAZStrType(
-                serialized_name="tenantId",
-                flags={"read_only": True},
-            )
-            identity.type = AAZStrType(
-                flags={"required": True},
-            )
-            identity.user_assigned_identities = AAZDictType(
-                serialized_name="userAssignedIdentities",
-            )
-
-            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
-            user_assigned_identities.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.identity.user_assigned_identities.Element
-            _element.client_id = AAZStrType(
-                serialized_name="clientId",
-                flags={"read_only": True},
-            )
-            _element.principal_id = AAZStrType(
-                serialized_name="principalId",
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.properties
-            properties.auth_options = AAZObjectType(
-                serialized_name="authOptions",
-            )
-            properties.compute_type = AAZStrType(
-                serialized_name="computeType",
-            )
-            properties.data_exfiltration_protections = AAZListType(
-                serialized_name="dataExfiltrationProtections",
-            )
-            properties.disable_local_auth = AAZBoolType(
-                serialized_name="disableLocalAuth",
-                nullable=True,
-            )
-            properties.e_tag = AAZStrType(
-                serialized_name="eTag",
-                flags={"read_only": True},
-            )
-            properties.encryption_with_cmk = AAZObjectType(
-                serialized_name="encryptionWithCmk",
-            )
-            properties.endpoint = AAZStrType()
-            properties.hosting_mode = AAZStrType(
-                serialized_name="hostingMode",
-            )
-            properties.network_rule_set = AAZObjectType(
-                serialized_name="networkRuleSet",
-            )
-            properties.partition_count = AAZIntType(
-                serialized_name="partitionCount",
-            )
-            properties.private_endpoint_connections = AAZListType(
-                serialized_name="privateEndpointConnections",
-                flags={"read_only": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.public_network_access = AAZStrType(
-                serialized_name="publicNetworkAccess",
-            )
-            properties.replica_count = AAZIntType(
-                serialized_name="replicaCount",
-            )
-            properties.semantic_search = AAZStrType(
-                serialized_name="semanticSearch",
-                nullable=True,
-            )
-            properties.service_upgraded_at = AAZStrType(
-                serialized_name="serviceUpgradedAt",
-                flags={"read_only": True},
-            )
-            properties.shared_private_link_resources = AAZListType(
-                serialized_name="sharedPrivateLinkResources",
-                flags={"read_only": True},
-            )
-            properties.status = AAZStrType(
-                flags={"read_only": True},
-            )
-            properties.status_details = AAZStrType(
-                serialized_name="statusDetails",
-                flags={"read_only": True},
-            )
-            properties.upgrade_available = AAZStrType(
-                serialized_name="upgradeAvailable",
-            )
-
-            auth_options = cls._schema_on_200.properties.auth_options
-            auth_options.aad_or_api_key = AAZObjectType(
-                serialized_name="aadOrApiKey",
-            )
-            auth_options.api_key_only = AAZObjectType(
-                serialized_name="apiKeyOnly",
-            )
-
-            aad_or_api_key = cls._schema_on_200.properties.auth_options.aad_or_api_key
-            aad_or_api_key.aad_auth_failure_mode = AAZStrType(
-                serialized_name="aadAuthFailureMode",
-            )
-
-            data_exfiltration_protections = cls._schema_on_200.properties.data_exfiltration_protections
-            data_exfiltration_protections.Element = AAZStrType()
-
-            encryption_with_cmk = cls._schema_on_200.properties.encryption_with_cmk
-            encryption_with_cmk.encryption_compliance_status = AAZStrType(
-                serialized_name="encryptionComplianceStatus",
-                flags={"read_only": True},
-            )
-            encryption_with_cmk.enforcement = AAZStrType()
-
-            network_rule_set = cls._schema_on_200.properties.network_rule_set
-            network_rule_set.bypass = AAZStrType()
-            network_rule_set.ip_rules = AAZListType(
-                serialized_name="ipRules",
-            )
-
-            ip_rules = cls._schema_on_200.properties.network_rule_set.ip_rules
-            ip_rules.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.network_rule_set.ip_rules.Element
-            _element.value = AAZStrType()
-
-            private_endpoint_connections = cls._schema_on_200.properties.private_endpoint_connections
-            private_endpoint_connections.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.private_endpoint_connections.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType()
-            _element.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _UpdateHelper._build_schema_system_data_read(_element.system_data)
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.properties.private_endpoint_connections.Element.properties
-            properties.group_id = AAZStrType(
-                serialized_name="groupId",
-            )
-            properties.private_endpoint = AAZObjectType(
-                serialized_name="privateEndpoint",
-            )
-            properties.private_link_service_connection_state = AAZObjectType(
-                serialized_name="privateLinkServiceConnectionState",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-            )
-
-            private_endpoint = cls._schema_on_200.properties.private_endpoint_connections.Element.properties.private_endpoint
-            private_endpoint.id = AAZStrType()
-
-            private_link_service_connection_state = cls._schema_on_200.properties.private_endpoint_connections.Element.properties.private_link_service_connection_state
-            private_link_service_connection_state.actions_required = AAZStrType(
-                serialized_name="actionsRequired",
-            )
-            private_link_service_connection_state.description = AAZStrType()
-            private_link_service_connection_state.status = AAZStrType()
-
-            shared_private_link_resources = cls._schema_on_200.properties.shared_private_link_resources
-            shared_private_link_resources.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.shared_private_link_resources.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType()
-            _element.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _UpdateHelper._build_schema_system_data_read(_element.system_data)
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.properties.shared_private_link_resources.Element.properties
-            properties.group_id = AAZStrType(
-                serialized_name="groupId",
-            )
-            properties.private_link_resource_id = AAZStrType(
-                serialized_name="privateLinkResourceId",
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-            )
-            properties.request_message = AAZStrType(
-                serialized_name="requestMessage",
-            )
-            properties.resource_region = AAZStrType(
-                serialized_name="resourceRegion",
-            )
-            properties.status = AAZStrType()
-
-            sku = cls._schema_on_200.sku
-            sku.name = AAZStrType()
-
-            tags = cls._schema_on_200.tags
-            tags.Element = AAZStrType()
-
-            return cls._schema_on_200
 
 
 class _UpdateHelper:
     """Helper class for Update"""
 
+    _schema_search_service_read = None
     _schema_system_data_read = None
 
+    @classmethod
+    def _build_schema_search_service_read(cls, _schema):
+        if cls._schema_search_service_read is not None:
+            _schema.id = cls._schema_search_service_read.id
+            _schema.identity = cls._schema_search_service_read.identity
+            _schema.location = cls._schema_search_service_read.location
+            _schema.name = cls._schema_search_service_read.name
+            _schema.properties = cls._schema_search_service_read.properties
+            _schema.sku = cls._schema_search_service_read.sku
+            _schema.tags = cls._schema_search_service_read.tags
+            _schema.type = cls._schema_search_service_read.type
+            return
+
+        cls._schema_search_service_read = _schema_search_service_read = AAZObjectType()
+
+        search_service_read = _schema_search_service_read
+        search_service_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        search_service_read.identity = AAZObjectType()
+        search_service_read.location = AAZStrType(
+            flags={"required": True},
+        )
+        search_service_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        search_service_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        search_service_read.sku = AAZObjectType(
+            flags={"required": True},
+        )
+        search_service_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        _UpdateHelper._build_schema_system_data_read(search_service_read.system_data)
+        search_service_read.tags = AAZDictType()
+        search_service_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        identity = _schema_search_service_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType(
+            flags={"required": True},
+        )
+
+        properties = _schema_search_service_read.properties
+        properties.auth_options = AAZObjectType(
+            serialized_name="authOptions",
+        )
+        properties.data_exfiltration_protections = AAZListType(
+            serialized_name="dataExfiltrationProtections",
+        )
+        properties.disable_local_auth = AAZBoolType(
+            serialized_name="disableLocalAuth",
+            nullable=True,
+        )
+        properties.e_tag = AAZStrType(
+            serialized_name="eTag",
+            flags={"read_only": True},
+        )
+        properties.encryption_with_cmk = AAZObjectType(
+            serialized_name="encryptionWithCmk",
+        )
+        properties.hosting_mode = AAZStrType(
+            serialized_name="hostingMode",
+        )
+        properties.network_rule_set = AAZObjectType(
+            serialized_name="networkRuleSet",
+        )
+        properties.partition_count = AAZIntType(
+            serialized_name="partitionCount",
+        )
+        properties.private_endpoint_connections = AAZListType(
+            serialized_name="privateEndpointConnections",
+            flags={"read_only": True},
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.public_network_access = AAZStrType(
+            serialized_name="publicNetworkAccess",
+        )
+        properties.replica_count = AAZIntType(
+            serialized_name="replicaCount",
+        )
+        properties.semantic_search = AAZStrType(
+            serialized_name="semanticSearch",
+            nullable=True,
+        )
+        properties.shared_private_link_resources = AAZListType(
+            serialized_name="sharedPrivateLinkResources",
+            flags={"read_only": True},
+        )
+        properties.status = AAZStrType(
+            flags={"read_only": True},
+        )
+        properties.status_details = AAZStrType(
+            serialized_name="statusDetails",
+            flags={"read_only": True},
+        )
+        properties.upgrade_available = AAZStrType(
+            serialized_name="upgradeAvailable",
+        )
+
+        auth_options = _schema_search_service_read.properties.auth_options
+        auth_options.aad_or_api_key = AAZObjectType(
+            serialized_name="aadOrApiKey",
+        )
+        auth_options.api_key_only = AAZObjectType(
+            serialized_name="apiKeyOnly",
+        )
+
+        aad_or_api_key = _schema_search_service_read.properties.auth_options.aad_or_api_key
+        aad_or_api_key.aad_auth_failure_mode = AAZStrType(
+            serialized_name="aadAuthFailureMode",
+        )
+
+        data_exfiltration_protections = _schema_search_service_read.properties.data_exfiltration_protections
+        data_exfiltration_protections.Element = AAZStrType()
+
+        encryption_with_cmk = _schema_search_service_read.properties.encryption_with_cmk
+        encryption_with_cmk.encryption_compliance_status = AAZStrType(
+            serialized_name="encryptionComplianceStatus",
+            flags={"read_only": True},
+        )
+        encryption_with_cmk.enforcement = AAZStrType()
+
+        network_rule_set = _schema_search_service_read.properties.network_rule_set
+        network_rule_set.ip_rules = AAZListType(
+            serialized_name="ipRules",
+        )
+
+        ip_rules = _schema_search_service_read.properties.network_rule_set.ip_rules
+        ip_rules.Element = AAZObjectType()
+
+        _element = _schema_search_service_read.properties.network_rule_set.ip_rules.Element
+        _element.value = AAZStrType()
+
+        private_endpoint_connections = _schema_search_service_read.properties.private_endpoint_connections
+        private_endpoint_connections.Element = AAZObjectType()
+
+        _element = _schema_search_service_read.properties.private_endpoint_connections.Element
+        _element.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.properties = AAZObjectType()
+        _element.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        _UpdateHelper._build_schema_system_data_read(_element.system_data)
+        _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        properties = _schema_search_service_read.properties.private_endpoint_connections.Element.properties
+        properties.group_id = AAZStrType(
+            serialized_name="groupId",
+        )
+        properties.private_endpoint = AAZObjectType(
+            serialized_name="privateEndpoint",
+        )
+        properties.private_link_service_connection_state = AAZObjectType(
+            serialized_name="privateLinkServiceConnectionState",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+        )
+
+        private_endpoint = _schema_search_service_read.properties.private_endpoint_connections.Element.properties.private_endpoint
+        private_endpoint.id = AAZStrType()
+
+        private_link_service_connection_state = _schema_search_service_read.properties.private_endpoint_connections.Element.properties.private_link_service_connection_state
+        private_link_service_connection_state.actions_required = AAZStrType(
+            serialized_name="actionsRequired",
+        )
+        private_link_service_connection_state.description = AAZStrType()
+        private_link_service_connection_state.status = AAZStrType()
+
+        shared_private_link_resources = _schema_search_service_read.properties.shared_private_link_resources
+        shared_private_link_resources.Element = AAZObjectType()
+
+        _element = _schema_search_service_read.properties.shared_private_link_resources.Element
+        _element.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        _element.properties = AAZObjectType()
+        _element.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        _UpdateHelper._build_schema_system_data_read(_element.system_data)
+        _element.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        properties = _schema_search_service_read.properties.shared_private_link_resources.Element.properties
+        properties.group_id = AAZStrType(
+            serialized_name="groupId",
+        )
+        properties.private_link_resource_id = AAZStrType(
+            serialized_name="privateLinkResourceId",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+        )
+        properties.request_message = AAZStrType(
+            serialized_name="requestMessage",
+        )
+        properties.resource_region = AAZStrType(
+            serialized_name="resourceRegion",
+        )
+        properties.status = AAZStrType()
+
+        sku = _schema_search_service_read.sku
+        sku.name = AAZStrType(
+            flags={"required": True},
+        )
+
+        tags = _schema_search_service_read.tags
+        tags.Element = AAZStrType()
+
+        _schema.id = cls._schema_search_service_read.id
+        _schema.identity = cls._schema_search_service_read.identity
+        _schema.location = cls._schema_search_service_read.location
+        _schema.name = cls._schema_search_service_read.name
+        _schema.properties = cls._schema_search_service_read.properties
+        _schema.sku = cls._schema_search_service_read.sku
+        _schema.tags = cls._schema_search_service_read.tags
+        _schema.type = cls._schema_search_service_read.type
+    
     @classmethod
     def _build_schema_system_data_read(cls, _schema):
         if cls._schema_system_data_read is not None:
@@ -704,6 +793,7 @@ class _UpdateHelper:
         _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
         _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
         _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
+
 
 
 __all__ = ["Update"]

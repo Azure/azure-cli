@@ -42,6 +42,9 @@ class KeyReplacer(RecordingProcessor):
         if 'principalId' in val:
             val = re.sub(r'"principalId":( ?)"([^"]+)"', r'"principalId":"{}"'
                          .format(MOCK_GUID), val, flags=re.IGNORECASE)
+        if 'key' in val:
+            val = re.sub(r'"key":( ?)"([^"]+)"', r'"key":"{}"'
+                         .format(MOCK_SECRET), val, flags=re.IGNORECASE)
         return val
 
     # pylint: disable=no-self-use

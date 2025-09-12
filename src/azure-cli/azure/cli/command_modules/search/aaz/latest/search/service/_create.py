@@ -51,33 +51,60 @@ class Create(AAZCommand):
             required=True,
         )
 
+        # define Arg Group "AuthOptions"
+
+        _args_schema = cls._args_schema
+        _args_schema.aad_auth_failure_mode = AAZStrArg(
+            options=["--aad-auth-failure-mode"],
+            arg_group="AuthOptions",
+            help="Describes what response the data plane API of a Search service would send for requests that failed authentication.",
+            enum={"http401WithBearerChallenge": "http401WithBearerChallenge", "http403": "http403"},
+        )
+        _args_schema.api_key_only = AAZObjectArg(
+            options=["--api-key-only"],
+            arg_group="AuthOptions",
+            help="Indicates that only the API key needs to be used for authentication.",
+            blank={},
+        )
+
         # define Arg Group "Identity"
 
         _args_schema = cls._args_schema
-        _args_schema.mi_system_assigned = AAZStrArg(
-            options=["--system-assigned", "--mi-system-assigned"],
+        _args_schema.identity_type = AAZStrArg(
+            options=["--identity-type"],
             arg_group="Identity",
-            help="Set the system managed identity.",
-            blank="True",
-        )
-        _args_schema.mi_user_assigned = AAZListArg(
-            options=["--user-assigned", "--mi-user-assigned"],
-            arg_group="Identity",
-            help="Set the user managed identities.",
-            blank=[],
+            help="The identity type.",
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "UserAssigned": "UserAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned"},
         )
 
-        mi_user_assigned = cls._args_schema.mi_user_assigned
-        mi_user_assigned.Element = AAZStrArg()
+         # define Arg Group "NetworkRuleSet"
+
+        _args_schema = cls._args_schema
+        _args_schema.ip_rules_internal = AAZListArg(
+            options=["--ip-rules-internal"],
+            arg_group="NetworkRuleSet",
+            help="A list of IP restriction rules that defines the inbound network(s) with allowing access to the search service endpoint. At the meantime, all other public IP networks are blocked by the firewall. These restriction rules are applied only when the 'publicNetworkAccess' of the search service is 'enabled'; otherwise, traffic over public interface is not allowed even with any public IP rules, and private endpoint connections would be the exclusive access method.",
+        )
+
+        ip_rules_internal = cls._args_schema.ip_rules_internal
+        ip_rules_internal.Element = AAZObjectArg()
+
+        _element = cls._args_schema.ip_rules_internal.Element
+        _element.value = AAZStrArg(
+            options=["value"],
+            help="Value corresponding to a single IPv4 address (eg., 123.1.2.3) or an IP range in CIDR format (eg., 123.1.2.3/24) to be allowed.",
+        )
+
+        _args_schema.bypass = AAZStrArg(
+            options=["--bypass"],
+            arg_group="NetworkRuleSet",
+            help="Possible origins of inbound traffic that can bypass the rules defined in the 'ipRules' section.",
+            enum={"AzureServices": "AzureServices", "None": "None"},
+        )
 
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.auth_options = AAZObjectArg(
-            options=["--auth-options"],
-            arg_group="Properties",
-            help="Defines the options for how the data plane API of a search service authenticates requests. This cannot be set if 'disableLocalAuth' is set to true.",
-        )
         _args_schema.compute_type = AAZStrArg(
             options=["--compute-type"],
             arg_group="Properties",
@@ -111,11 +138,6 @@ class Create(AAZCommand):
             help="Applicable only for the standard3 SKU. You can set this property to enable up to 3 high density partitions that allow up to 1000 indexes, which is much higher than the maximum indexes allowed for any other SKU. For the standard3 SKU, the value is either 'default' or 'highDensity'. For all other SKUs, this value must be 'default'.",
             default="default",
             enum={"default": "default", "highDensity": "highDensity"},
-        )
-        _args_schema.network_rule_set = AAZObjectArg(
-            options=["--network-rule-set"],
-            arg_group="Properties",
-            help="Network specific rules that determine how the Azure AI Search service may be reached.",
         )
         _args_schema.partition_count = AAZIntArg(
             options=["--partition-count"],
@@ -158,24 +180,6 @@ class Create(AAZCommand):
             enum={"available": "available", "notAvailable": "notAvailable"},
         )
 
-        auth_options = cls._args_schema.auth_options
-        auth_options.aad_or_api_key = AAZObjectArg(
-            options=["aad-or-api-key"],
-            help="Indicates that either the API key or an access token from a Microsoft Entra ID tenant can be used for authentication.",
-        )
-        auth_options.api_key_only = AAZObjectArg(
-            options=["api-key-only"],
-            help="Indicates that only the API key can be used for authentication.",
-            blank={},
-        )
-
-        aad_or_api_key = cls._args_schema.auth_options.aad_or_api_key
-        aad_or_api_key.aad_auth_failure_mode = AAZStrArg(
-            options=["aad-auth-failure-mode"],
-            help="Describes what response the data plane API of a search service would send for requests that failed authentication.",
-            enum={"http401WithBearerChallenge": "http401WithBearerChallenge", "http403": "http403"},
-        )
-
         data_exfiltration_protections = cls._args_schema.data_exfiltration_protections
         data_exfiltration_protections.Element = AAZStrArg(
             enum={"BlockAll": "BlockAll"},
@@ -186,26 +190,6 @@ class Create(AAZCommand):
             options=["enforcement"],
             help="Describes how a search service should enforce compliance if it finds objects that aren't encrypted with the customer-managed key.",
             enum={"Disabled": "Disabled", "Enabled": "Enabled", "Unspecified": "Unspecified"},
-        )
-
-        network_rule_set = cls._args_schema.network_rule_set
-        network_rule_set.bypass = AAZStrArg(
-            options=["bypass"],
-            help="Possible origins of inbound traffic that can bypass the rules defined in the 'ipRules' section.",
-            enum={"AzureServices": "AzureServices", "None": "None"},
-        )
-        network_rule_set.ip_rules = AAZListArg(
-            options=["ip-rules"],
-            help="A list of IP restriction rules that defines the inbound network(s) with allowing access to the search service endpoint. At the meantime, all other public IP networks are blocked by the firewall. These restriction rules are applied only when the 'publicNetworkAccess' of the search service is 'enabled'; otherwise, traffic over public interface is not allowed even with any public IP rules, and private endpoint connections would be the exclusive access method.",
-        )
-
-        ip_rules = cls._args_schema.network_rule_set.ip_rules
-        ip_rules.Element = AAZObjectArg()
-
-        _element = cls._args_schema.network_rule_set.ip_rules.Element
-        _element.value = AAZStrArg(
-            options=["value"],
-            help="Value corresponding to a single IPv4 address (eg., 123.1.2.3) or an IP range in CIDR format (eg., 123.1.2.3/24) to be allowed.",
         )
 
         # define Arg Group "Service"
@@ -219,22 +203,17 @@ class Create(AAZCommand):
                 resource_group_arg="resource_group",
             ),
         )
-        _args_schema.sku = AAZObjectArg(
+        _args_schema.sku = AAZStrArg(
             options=["--sku"],
             arg_group="Service",
-            help="The SKU of the search service, which determines price tier and capacity limits. This property is required when creating a new search service.",
+            help="The SKU of the search service. Valid values include: 'free': Shared service. 'basic': Dedicated service with up to 3 replicas. 'standard': Dedicated service with up to 12 partitions and 12 replicas. 'standard2': Similar to standard, but with more capacity per search unit. 'standard3': The largest Standard offering with up to 12 partitions and 12 replicas (or up to 3 partitions with more indexes if you also set the hostingMode property to 'highDensity'). 'storage_optimized_l1': Supports 1TB per partition, up to 12 partitions. 'storage_optimized_l2': Supports 2TB per partition, up to 12 partitions.'",
+            required=True,
+            enum={"basic": "basic", "free": "free", "standard": "standard", "standard2": "standard2", "standard3": "standard3", "storage_optimized_l1": "storage_optimized_l1", "storage_optimized_l2": "storage_optimized_l2"},
         )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Service",
             help="Resource tags.",
-        )
-
-        sku = cls._args_schema.sku
-        sku.name = AAZStrArg(
-            options=["name"],
-            help="The SKU of the search service. Valid values include: 'free': Shared service. 'basic': Dedicated service with up to 3 replicas. 'standard': Dedicated service with up to 12 partitions and 12 replicas. 'standard2': Similar to standard, but with more capacity per search unit. 'standard3': The largest Standard offering with up to 12 partitions and 12 replicas (or up to 3 partitions with more indexes if you also set the hostingMode property to 'highDensity'). 'storage_optimized_l1': Supports 1TB per partition, up to 12 partitions. 'storage_optimized_l2': Supports 2TB per partition, up to 12 partitions.'",
-            enum={"basic": "basic", "free": "free", "standard": "standard", "standard2": "standard2", "standard3": "standard3", "storage_optimized_l1": "storage_optimized_l1", "storage_optimized_l2": "storage_optimized_l2"},
         )
 
         tags = cls._args_schema.tags
@@ -350,28 +329,23 @@ class Create(AAZCommand):
             _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-            _builder.set_prop("sku", AAZObjectType, ".sku")
+            _builder.set_prop("sku", AAZObjectType, ".", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
             identity = _builder.get(".identity")
             if identity is not None:
-                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
-                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
-
-            user_assigned = _builder.get(".identity.userAssigned")
-            if user_assigned is not None:
-                user_assigned.set_elements(AAZStrType, ".")
+                identity.set_prop("type", AAZStrType, ".identity_type", typ_kwargs={"flags": {"required": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("authOptions", AAZObjectType, ".auth_options")
+                properties.set_prop("authOptions", AAZObjectType)
                 properties.set_prop("computeType", AAZStrType, ".compute_type")
                 properties.set_prop("dataExfiltrationProtections", AAZListType, ".data_exfiltration_protections")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth", typ_kwargs={"nullable": True})
                 properties.set_prop("encryptionWithCmk", AAZObjectType, ".encryption_with_cmk")
                 properties.set_prop("endpoint", AAZStrType, ".endpoint")
                 properties.set_prop("hostingMode", AAZStrType, ".hosting_mode")
-                properties.set_prop("networkRuleSet", AAZObjectType, ".network_rule_set")
+                properties.set_prop("networkRuleSet", AAZObjectType)
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
                 properties.set_prop("replicaCount", AAZIntType, ".replica_count")
@@ -380,7 +354,7 @@ class Create(AAZCommand):
 
             auth_options = _builder.get(".properties.authOptions")
             if auth_options is not None:
-                auth_options.set_prop("aadOrApiKey", AAZObjectType, ".aad_or_api_key")
+                auth_options.set_prop("aadOrApiKey", AAZObjectType)
                 auth_options.set_prop("apiKeyOnly", AAZObjectType, ".api_key_only")
 
             aad_or_api_key = _builder.get(".properties.authOptions.aadOrApiKey")
@@ -398,7 +372,7 @@ class Create(AAZCommand):
             network_rule_set = _builder.get(".properties.networkRuleSet")
             if network_rule_set is not None:
                 network_rule_set.set_prop("bypass", AAZStrType, ".bypass")
-                network_rule_set.set_prop("ipRules", AAZListType, ".ip_rules")
+                network_rule_set.set_prop("ipRules", AAZListType, ".ip_rules_internal")
 
             ip_rules = _builder.get(".properties.networkRuleSet.ipRules")
             if ip_rules is not None:
@@ -410,7 +384,7 @@ class Create(AAZCommand):
 
             sku = _builder.get(".sku")
             if sku is not None:
-                sku.set_prop("name", AAZStrType, ".name")
+                sku.set_prop("name", AAZStrType, ".sku", typ_kwargs={"flags": {"required": True}})
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -675,7 +649,9 @@ class Create(AAZCommand):
             properties.status = AAZStrType()
 
             sku = cls._schema_on_200_201.sku
-            sku.name = AAZStrType()
+            sku.name = AAZStrType(
+                flags={"required": True},
+            )
 
             tags = cls._schema_on_200_201.tags
             tags.Element = AAZStrType()
