@@ -458,7 +458,7 @@ class AzureSearchServicesTests(ScenarioTest):
                          self.check('replicaCount', '{replica_count}'),
                          self.check('partitionCount', '{partition_count}'),
                          self.check('semanticSearch', '{semantic_search}')])
-        
+
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_compute_type(self, resource_group):
         self.kwargs.update({
@@ -478,7 +478,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('replicaCount', '{replica_count}'),
                     self.check('partitionCount', '{partition_count}'),
                     self.check('computeType', '{compute_type}')])
-        
+
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_data_exfiltration_protections(self, resource_group):
         self.kwargs.update({

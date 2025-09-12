@@ -30,7 +30,7 @@ class SearchServiceCreate(_SearchServiceCreate):
         args_schema.ip_rules = AAZStrArg(
             arg_group="NetworkRuleSet",
             options=['--ip-rules'],
-            help="A list of IP restriction rules that defines the inbound network(s) with allowing access to the search service endpoint. At the meantime, all other public IP networks are blocked by the firewall. These restriction rules are applied only when the 'publicNetworkAccess' of the search service is 'enabled'; otherwise, traffic over public interface is not allowed even with any public IP rules, and private endpoint connections would be the exclusive access method."
+            help="A list of IP restriction rules that defines the inbound network(s) with allowing access to the search service endpoint. "
         )
 
         args_schema.auth_options = AAZStrArg(
@@ -90,7 +90,7 @@ class SearchServiceUpdate(_SearchServiceUpdate):
         args_schema.ip_rules = AAZStrArg(
             arg_group="NetworkRuleSet",
             options=['--ip-rules'],
-            help="A list of IP restriction rules that defines the inbound network(s) with allowing access to the search service endpoint. At the meantime, all other public IP networks are blocked by the firewall. These restriction rules are applied only when the 'publicNetworkAccess' of the search service is 'enabled'; otherwise, traffic over public interface is not allowed even with any public IP rules, and private endpoint connections would be the exclusive access method.",
+            help="A list of IP restriction rules that defines the inbound network(s) with allowing access to the search service endpoint.",
             nullable=True,  # allow to remove all the value when it's assigned by null
         )
 
@@ -117,7 +117,7 @@ class SearchServiceUpdate(_SearchServiceUpdate):
             if has_value(args.aad_auth_failure_mode):
                 raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AadAuthFailureMode parameters "
                                                      "can't be given at the same time")
-        
+
         if has_value(args.ip_rules):
             if args.ip_rules.to_serialized_data() is None or args.ip_rules in [';', ',']:
                 # cleanup all ip_rules
