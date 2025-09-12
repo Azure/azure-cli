@@ -47,7 +47,7 @@ class Create(AAZCommand):
         )
         _args_schema.search_service_name = AAZStrArg(
             options=["-n", "--name", "--search-service-name"],
-            help="The name of the Azure AI Search service to create or update. Search service names must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and must be between 2 and 60 characters in length. Search service names must be unique since they are part of the service URI (https://<name>.search.windows.net). You cannot change the service name after the service is created.",
+            help="The name of the Azure AI Search service to create or update. Search service names must only contain lowercase letters, digits or dashes, cannot use dash as the first two or last one characters, cannot contain consecutive dashes, and must be between 2 and 60 characters in length. Search service names must be unique since they are part of the service URI (https://`<name>`.search.windows.net). You cannot change the service name after the service is created.",
             required=True,
         )
 
@@ -112,7 +112,7 @@ class Create(AAZCommand):
             enum={"confidential": "confidential", "default": "default"},
         )
         _args_schema.data_exfiltration_protections = AAZListArg(
-            options=["--data-exfiltration-protections"],
+            options=["--data-exfiltration-protections", "--data--protections"],
             arg_group="Properties",
             help="A list of data exfiltration scenarios that are explicitly disallowed for the search service. Currently, the only supported value is 'All' to disable all possible data export scenarios with more fine grained controls planned for the future.",
         )

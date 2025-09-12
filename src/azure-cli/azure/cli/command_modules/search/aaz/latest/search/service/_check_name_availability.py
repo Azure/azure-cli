@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "search service check-name-availability",
 )
 class CheckNameAvailability(AAZCommand):
-    """Checks whether or not the given search service name is available for use. Search service names must be globally unique since they are part of the service URI (https://<name>.search.windows.net).
+    """Checks whether or not the given search service name is available for use. Search service names must be globally unique since they are part of the service URI (https://`<name>`.search.windows.net).
     """
 
     _aaz_info = {

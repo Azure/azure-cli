@@ -108,7 +108,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.data_exfiltration_protections = AAZListArg(
-            options=["--data-exfiltration-protections"],
+            options=["--data-exfiltration-protections", "--data--protections"],
             arg_group="Properties",
             help="A list of data exfiltration scenarios that are explicitly disallowed for the search service. Currently, the only supported value is 'All' to disable all possible data export scenarios with more fine grained controls planned for the future.",
         )

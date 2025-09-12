@@ -78,7 +78,7 @@ class Update(AAZCommand):
             nullable=True,
         )
         _args_schema.private_link_service_connection_state = AAZObjectArg(
-            options=["--private-link-service-connection-state"],
+            options=["--private-link-service-connection-state", "--connection-state"],
             arg_group="Properties",
             help="Describes the current state of an existing Azure Private Link service connection to the private endpoint.",
             nullable=True,

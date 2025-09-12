@@ -68,7 +68,7 @@ class Create(AAZCommand):
             help="The group ID from the provider of resource the shared private link resource is for.",
         )
         _args_schema.private_link_resource_id = AAZStrArg(
-            options=["--private-link-resource-id"],
+            options=["--private-link-resource-id", "--resource-id"],
             arg_group="Properties",
             help="The resource ID of the resource the shared private link resource is for.",
         )
