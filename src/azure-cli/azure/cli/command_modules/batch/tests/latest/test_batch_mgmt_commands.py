@@ -316,6 +316,27 @@ class BatchMgmtApplicationScenarioTests(ScenarioTest):
         with open(download_file_name, 'r') as f:
             self.assertEqual(f.read(), 'storage blob test sample file')
 
+        # test overwriting blob content
+        _, package_file_name_2 = tempfile.mkstemp()
+        with open(package_file_name_2, 'w') as f:
+            f.write('storage blob test overwrite file')
+        self.kwargs.update({"package_file_name_2": package_file_name_2})
+
+        package_create = self.cmd('batch application package create -g {rg} -n {acc} --application-name {app}'
+                                  ' --version {app_p} --package-file "{package_file_name_2}"').assert_with_checks([
+            self.check('name', '{app_p}'),
+            self.check('storageUrl != null', True),
+            self.check('state', 'Active')])
+
+        # verify blob content
+        blob_url = package_create.get_output_in_json()['storageUrl']
+        _, download_file_name2 = tempfile.mkstemp()
+        self.kwargs.update({"blob_url": blob_url, "download_file_name2": download_file_name2})
+
+        self.cmd('storage blob download --blob-url {blob_url} --file "{download_file_name2}"')
+        with open(download_file_name2, 'r') as f:
+            self.assertEqual(f.read(), 'storage blob test overwrite file')
+
         self.cmd('batch application package activate -g {rg} -n {acc} --application-name {app}'
                  ' --version {app_p} --format zip')
 
