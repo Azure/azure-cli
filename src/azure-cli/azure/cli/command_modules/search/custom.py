@@ -30,7 +30,7 @@ class SearchServiceCreate(_SearchServiceCreate):
         args_schema.ip_rules = AAZStrArg(
             arg_group="NetworkRuleSet",
             options=['--ip-rules'],
-            help="A list of IP restriction rules that defines the inbound network(s) with allowing access to the search service endpoint. "
+            help="A list of IP defineing the inbound network(s) allowed to access to the search service endpoint.",
         )
 
         args_schema.auth_options = AAZStrArg(
@@ -90,7 +90,7 @@ class SearchServiceUpdate(_SearchServiceUpdate):
         args_schema.ip_rules = AAZStrArg(
             arg_group="NetworkRuleSet",
             options=['--ip-rules'],
-            help="A list of IP restriction rules that defines the inbound network(s) with allowing access to the search service endpoint.",
+            help="A list of IP defineing the inbound network(s) allowed to access to the search service endpoint.",
             nullable=True,  # allow to remove all the value when it's assigned by null
         )
 
