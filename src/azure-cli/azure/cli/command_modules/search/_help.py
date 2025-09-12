@@ -64,3 +64,48 @@ helps['search service wait'] = """
 type: command
 short-summary: Wait for async service operations.
 """
+
+helps['search service query-key create'] = """
+type: command
+short-summary: Creates a query key for a given Azure Search service.
+"""
+
+helps['search service admin-key regenerate'] = """
+type: command
+short-summary: Regenerate an admin key for a given Azure Search service.
+"""
+
+helps['search service check-name-availability'] = """
+type: command
+short-summary: Check the availability of a given Azure Search service name.
+"""
+
+helps['search service upgrade'] = """
+type: command
+short-summary: Upgrade a given Azure Search service.
+"""
+
+helps['search service network-security-perimeter-configuration reconcile'] = """
+type: command
+short-summary: Reconcile network security perimeter configuration for a given Azure Search service.
+"""
+
+helps['search service private-endpoint-connection create'] = """
+type: command
+short-summary: Create a private endpoint connection for a given Azure Search service.
+"""
+
+helps['search service shared-private-link-resource create'] = """
+type: command
+short-summary: Create a shared private link resource for a given Azure Search service.
+"""
+
+helps['search service shared-private-link-resource update'] = """
+type: command
+short-summary: Update a shared private link resource for a given Azure Search service.
+"""
+
+helps['search service private-endpoint-connection update'] = """
+type: command
+short-summary: Update a private endpoint connection for a given Azure Search service.
+"""
