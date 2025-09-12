@@ -1,4 +1,5 @@
 # coding=utf-8
+Examples:
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
@@ -68,44 +69,95 @@ short-summary: Wait for async service operations.
 helps['search service query-key create'] = """
 type: command
 short-summary: Creates a query key for a given Azure Search service.
+examples:
+  - name: Create a query key for a Search service.
+    text: >
+      az search service query-key create --resource-group MyResourceGroup --service-name MySearchService
 """
 
 helps['search service admin-key regenerate'] = """
 type: command
 short-summary: Regenerate an admin key for a given Azure Search service.
+examples:
+  - name: Regenerate the primary admin key for a Search service.
+    text: >
+      az search service admin-key regenerate --resource-group MyResourceGroup --service-name MySearchService --key-kind primary
+  - name: Regenerate the secondary admin key for a Search service.
+    text: >
+      az search service admin-key regenerate --resource-group MyResourceGroup --service-name MySearchService --key-kind secondary
 """
 
 helps['search service check-name-availability'] = """
 type: command
 short-summary: Check the availability of a given Azure Search service name.
+examples:
+  - name: Check if a Search service name is available.
+    text: >
+      az search service check-name-availability --name MySearchService
 """
 
 helps['search service upgrade'] = """
 type: command
 short-summary: Upgrade a given Azure Search service.
+examples:
+  - name: Upgrade a Search service.
+    text: >
+      az search service upgrade --resource-group MyResourceGroup --service-name MySearchService
 """
 
 helps['search service network-security-perimeter-configuration reconcile'] = """
 type: command
 short-summary: Reconcile network security perimeter configuration for a given Azure Search service.
-"""
-
-helps['search service private-endpoint-connection create'] = """
-type: command
-short-summary: Create a private endpoint connection for a given Azure Search service.
+examples:
+  - name: Reconcile network security perimeter configuration for a Search service.
+    text: >
+      az search service network-security-perimeter-configuration reconcile --resource-group MyResourceGroup --service-name MySearchService
+  - name: Reconcile network security perimeter configuration and specify a perimeter name.
+    text: >
+      az search service network-security-perimeter-configuration reconcile --resource-group MyResourceGroup --service-name MySearchService --perimeter-name MyPerimeter
+  - name: Reconcile network security perimeter configuration and enable diagnostics.
+    text: >
+      az search service network-security-perimeter-configuration reconcile --resource-group MyResourceGroup --service-name MySearchService --enable-diagnostics true
 """
 
 helps['search service shared-private-link-resource create'] = """
 type: command
 short-summary: Create a shared private link resource for a given Azure Search service.
+examples:
+  - name: Create a shared private link resource for a Search service.
+    text: >
+      az search service shared-private-link-resource create --resource-group MyResourceGroup --service-name MySearchService --name MySharedPrivateLinkResource --group-id MyGroupId --resource-id /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{provider}/{resourceType}/{resourceName}
+  - name: Create a shared private link resource and specify a request message.
+    text: >
+      az search service shared-private-link-resource create --resource-group MyResourceGroup --service-name MySearchService --name MySharedPrivateLinkResource --group-id MyGroupId --resource-id /subscriptions/{subscriptionId}/resourceGroups/{resourceGroup}/providers/{provider}/{resourceType}/{resourceName} --request-message "Please approve this connection."
 """
 
 helps['search service shared-private-link-resource update'] = """
 type: command
 short-summary: Update a shared private link resource for a given Azure Search service.
+examples:
+  - name: Update the request message for a shared private link resource.
+    text: >
+      az search service shared-private-link-resource update --resource-group MyResourceGroup --service-name MySearchService --name MySharedPrivateLinkResource --request-message "Updated request message."
+  - name: Approve a shared private link resource connection.
+    text: >
+      az search service shared-private-link-resource update --resource-group MyResourceGroup --service-name MySearchService --name MySharedPrivateLinkResource --status Approved
+  - name: Reject a shared private link resource connection with a description.
+    text: >
+      az search service shared-private-link-resource update --resource-group MyResourceGroup --service-name MySearchService --name MySharedPrivateLinkResource --status Rejected --description "Connection not allowed."
 """
 
 helps['search service private-endpoint-connection update'] = """
 type: command
 short-summary: Update a private endpoint connection for a given Azure Search service.
+examples:
+  - name: Approve a private endpoint connection.
+    text: >
+      az search service private-endpoint-connection update --resource-group MyResourceGroup --service-name MySearchService --name MyPrivateEndpointConnection --status Approved
+  - name: Reject a private endpoint connection with a description.
+    text: >
+      az search service private-endpoint-connection update --resource-group MyResourceGroup --service-name MySearchService --name MyPrivateEndpointConnection --status Rejected --description "Connection not allowed."
+  - name: Update the request message for a private endpoint connection.
+    text: >
+      az search service private-endpoint-connection update --resource-group MyResourceGroup --service-name MySearchService --name MyPrivateEndpointConnection --request-message "Updated request message."
 """
