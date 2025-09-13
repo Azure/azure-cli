@@ -46,11 +46,11 @@ class AcrCommandsTests(ScenarioTest):
                          self.check('days', 30)])
 
         # test content-trust
-        self.cmd('acr config content-trust update -n {} --status enabled'.format(registry_name),
-                 checks=[self.check('status', "enabled")])
+        self.cmd('acr config content-trust update -n {} --status disabled -y'.format(registry_name),
+                 checks=[self.check('status', "disabled")])
 
         self.cmd('acr config content-trust show -n {}'.format(registry_name),
-                 checks=[self.check('status', "enabled")])
+                 checks=[self.check('status', "disabled")])
 
         # test soft-delete
         self.cmd('acr config soft-delete update -r {} --status enabled --days 30 --yes'.format(registry_name),
