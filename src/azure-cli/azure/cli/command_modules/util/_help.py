@@ -92,3 +92,11 @@ examples:
 - name: List resource groups by bringing your own access token
   text: az demo byo-access-token --access-token "eyJ0eXAiO..." --subscription-id 00000000-0000-0000-0000-000000000000
 """
+
+helps['what-if'] = """
+type: command
+short-summary: Creates a sandboxed what-if simulation of Azure CLI scripts to visualize infrastructure changes before execution.
+examples:
+- name: Simulate a what-if scenario for a resource group deletion
+  text: az what-if --script-path "/path/to/your/script.sh"
+"""

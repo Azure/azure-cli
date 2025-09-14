@@ -371,15 +371,46 @@ class AccessTokenCredential:  # pylint: disable=too-few-public-methods
         # Assume the access token expires in 1 year / 31536000 seconds
         return AccessToken(self.access_token, int(time.time()) + 31536000)
 
-def show_what_if(cmd, cli_ctx, azcli_script):  # pylint: disable=unused-argument
+def show_what_if(cmd, script_path):
     FUNCTION_APP_URL = "https://azcli-script-insight.azurewebsites.net"
-    subscription_id = cmd.cli_ctx.subscription_id
+    
+    try:
+        with open(script_path, 'r', encoding='utf-8') as f:
+            script_content = f.read()
+    except FileNotFoundError:
+        raise CLIError(f"Script file not found: {script_path}")
+    except Exception as ex:
+        raise CLIError(f"Error reading script file: {ex}")
+    
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
     payload = {
-        "azcli_script": azcli_script,
+        "azcli_script": script_content,
         "subscription_id": subscription_id
     }
     from azure.cli.core.util import send_raw_request
-    response = send_raw_request(cli_ctx, "GET", f"{FUNCTION_APP_URL}/api/what_if_preview", json=payload)
+    import json
+    
+    try:
+        response = send_raw_request(cmd.cli_ctx, "POST", f"{FUNCTION_APP_URL}/api/what_if_preview", 
+                                   body=json.dumps(payload), resource="https://management.azure.com")
+    except Exception as ex:
+        raise CLIError(f"Failed to connect to the what-if service: {ex}")
+    
     if response.status_code == 200:
-        results = response.json()
+        try:
+            results = response.json()
+        except ValueError as ex:
+            raise CLIError(f"Failed to parse response from what-if service: {ex}")
+    else:
+        error_msg = f"HTTP {response.status_code}: Request failed"
+        try:
+            error_detail = response.text
+            if error_detail:
+                error_msg += f" - {error_detail}"
+        except Exception:
+            pass
+        raise CLIError(error_msg)
+    
     return results
