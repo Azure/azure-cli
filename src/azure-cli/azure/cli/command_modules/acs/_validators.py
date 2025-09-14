@@ -42,14 +42,28 @@ logger = get_logger(__name__)
 def validate_ssh_key(namespace):
     if hasattr(namespace, 'no_ssh_key') and namespace.no_ssh_key:
         return
-    string_or_file = (namespace.ssh_key_value or
-                      os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
+
+    exists = os.path.exists(
+        string_or_file := (
+            namespace.ssh_key_value
+            or os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
+        )
+    )
     content = string_or_file
-    if os.path.exists(string_or_file):
+
+    if exists:
         logger.info('Use existing SSH public key file: %s', string_or_file)
         with open(string_or_file, 'r') as f:
             content = f.read()
-    elif not keys.is_valid_ssh_rsa_public_key(content):
+
+    if not (namespace.ssh_key_value or namespace.generate_ssh_keys):
+        if exists:
+            namespace.ssh_key_value = content
+            return
+        namespace.no_ssh_key = True
+        return
+
+    if not exists and not keys.is_valid_ssh_rsa_public_key(content):
         if namespace.generate_ssh_keys:
             # figure out appropriate file names:
             # 'base_name'(with private keys), and 'base_name.pub'(with public keys)
