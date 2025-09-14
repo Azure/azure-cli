@@ -45,8 +45,8 @@ def validate_ssh_key(namespace):
 
     exists = os.path.exists(
         string_or_file := (
-            namespace.ssh_key_value
-            or os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
+            namespace.ssh_key_value or
+            os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
         )
     )
     content = string_or_file
