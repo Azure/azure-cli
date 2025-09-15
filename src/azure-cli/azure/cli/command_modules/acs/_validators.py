@@ -42,28 +42,14 @@ logger = get_logger(__name__)
 def validate_ssh_key(namespace):
     if hasattr(namespace, 'no_ssh_key') and namespace.no_ssh_key:
         return
-
-    exists = os.path.exists(
-        string_or_file := (
-            namespace.ssh_key_value or
-            os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub')
-        )
-    )
+    string_or_file = (namespace.ssh_key_value or
+                      os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))
     content = string_or_file
-
-    if exists:
+    if os.path.exists(string_or_file):
         logger.info('Use existing SSH public key file: %s', string_or_file)
         with open(string_or_file, 'r') as f:
             content = f.read()
-
-    if not (namespace.ssh_key_value or namespace.generate_ssh_keys):
-        if exists:
-            namespace.ssh_key_value = content
-            return
-        namespace.no_ssh_key = True
-        return
-
-    if not exists and not keys.is_valid_ssh_rsa_public_key(content):
+    elif not keys.is_valid_ssh_rsa_public_key(content):
         if namespace.generate_ssh_keys:
             # figure out appropriate file names:
             # 'base_name'(with private keys), and 'base_name.pub'(with public keys)
@@ -79,8 +65,15 @@ def validate_ssh_key(namespace):
                            "file share, back up your keys to a safe location",
                            private_key_filepath, public_key_filepath)
         else:
-            raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
-                           'You can use --generate-ssh-keys to let CLI generate one for you')
+            if not content or str(content).strip() == "":
+                namespace.no_ssh_key = True
+                return
+            else:
+                raise CLIError(
+                    "The SSH key provided is not a valid RSA public key. "
+                    "Provide the contents of a valid SSH public key (for example, '~/.ssh/id_rsa.pub'), "
+                    "specify a path to a public key file, or add --generate-ssh-keys as a parameter to create a new key pair."
+                )
     namespace.ssh_key_value = content
 
 
