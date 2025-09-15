@@ -150,7 +150,7 @@ class Create(AAZCommand):
             ),
         )
         _args_schema.public_network_access = AAZStrArg(
-            options=["--public-network-access"],
+            options=["--public-access", "--public-network-access"],
             arg_group="Properties",
             help="This value can be set to 'enabled' to avoid breaking changes on existing customer resources and templates. If set to 'disabled', traffic over public interface is not allowed, and private endpoint connections would be the exclusive access method.",
             default="enabled",
