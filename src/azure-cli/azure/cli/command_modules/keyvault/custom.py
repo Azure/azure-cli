@@ -474,6 +474,8 @@ def create_vault_or_hsm(cmd, client,
                               sku=sku,
                               enable_purge_protection=enable_purge_protection,
                               retention_days=retention_days,
+                              network_acls_ips=network_acls_ips,
+                              public_network_access=public_network_access,
                               bypass=bypass,
                               default_action=default_action,
                               tags=tags,
@@ -493,6 +495,7 @@ def create_hsm(cmd, client,
                resource_group_name, hsm_name, administrators, location=None, sku=None,
                enable_purge_protection=None,
                retention_days=None,
+               network_acls_ips=None,
                public_network_access=None,
                bypass=None,
                default_action=None,
@@ -517,6 +520,14 @@ def create_hsm(cmd, client,
                                           operation_group='managed_hsms')
     ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT,
                                    operation_group='managed_hsms')
+    MHSMIPRule = cmd.get_models('MHSMIPRule', resource_type=ResourceType.MGMT_KEYVAULT,
+                                   operation_group='managed_hsms')
+
+    network_acls = _create_network_rule_set(cmd, bypass, default_action)
+    network_acls.ip_rules = []
+    if network_acls_ips:
+        for ip in network_acls_ips:
+            network_acls.ip_rules.append(MHSMIPRule(value=ip))
 
     profile = Profile(cli_ctx=cmd.cli_ctx)
     tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
@@ -525,7 +536,7 @@ def create_hsm(cmd, client,
                                       enable_purge_protection=enable_purge_protection,
                                       soft_delete_retention_in_days=retention_days,
                                       initial_admin_object_ids=administrators,
-                                      network_acls=_create_network_rule_set(cmd, bypass, default_action),
+                                      network_acls=network_acls,
                                       public_network_access=public_network_access)
     parameters = ManagedHsm(location=location,
                             tags=tags,
@@ -549,6 +560,13 @@ def create_hsm(cmd, client,
 
 def wait_hsm(client, hsm_name, resource_group_name):
     return client.get(resource_group_name=resource_group_name, name=hsm_name)
+
+
+def wait_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None):
+    if vault_name:
+        return client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    return hsm_client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
 def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-statements
@@ -831,6 +849,8 @@ def add_network_rule_for_vault_or_hsm(cmd, client, resource_group_name, vault_na
                                       ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
     if hsm_name:
         hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+        return add_hsm_network_rule(cmd, hsm_client, resource_group_name, hsm_name,
+                                    ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
 
 
 
@@ -930,8 +950,18 @@ def add_hsm_network_rule(cmd, client, resource_group_name, hsm_name,
                        parameters=hsm)
 
 
-def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
-                        vnet_name=None, no_wait=False):  # pylint: disable=unused-argument
+def remove_network_rule_for_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None,
+                                         ip_address=None, subnet=None, vnet_name=None, no_wait=False):
+    if vault_name:
+        return remove_vault_network_rule(cmd, client, resource_group_name, vault_name,
+                                         ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
+    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    return remove_hsm_network_rule(cmd, hsm_client, resource_group_name, hsm_name,
+                                   ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
+
+
+def remove_vault_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None,
+                              subnet=None, vnet_name=None, no_wait=False):  # pylint: disable=unused-argument
     """ Remove a network rule from the network ACLs for a Key Vault. """
 
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
@@ -973,10 +1003,46 @@ def remove_network_rule(cmd, client, resource_group_name, vault_name, ip_address
                            properties=vault.properties))
 
 
-def list_network_rules(cmd, client, resource_group_name, vault_name):  # pylint: disable=unused-argument
-    """ List the network rules from the network ACLs for a Key Vault. """
-    vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
-    return vault.properties.network_acls
+def remove_hsm_network_rule(cmd, client, resource_group_name, hsm_name,
+                            ip_address=None, subnet=None, vnet_name=None, no_wait=False):
+    if subnet or vnet_name:
+        raise InvalidArgumentValueError("--subnet and --vnet-name are not supported for MHSM yet")
+
+    hsm = client.get(resource_group_name=resource_group_name, name=hsm_name)
+
+    if not hsm.properties.network_acls:
+        return hsm
+
+    rules = hsm.properties.network_acls
+
+    to_modify = False
+
+    if ip_address and rules.ip_rules:
+        to_remove = [ip_network(x) for x in ip_address]
+        new_rules = list(filter(lambda x: all(ip_network(x.value) != i for i in to_remove), rules.ip_rules))
+        to_modify |= len(new_rules) != len(rules.ip_rules)
+        if to_modify:
+            rules.ip_rules = new_rules
+
+    # if we didn't modify the network rules just return the vault as is
+    if not to_modify:
+        return hsm
+
+    # otherwise update
+    return sdk_no_wait(no_wait, client.begin_create_or_update,
+                       resource_group_name=resource_group_name,
+                       name=hsm_name,
+                       parameters=hsm)
+
+
+def list_network_rules(cmd, client, resource_group_name, vault_name=None, hsm_name=None):  # pylint: disable=unused-argument
+    """ List the network rules from the network ACLs for a Key Vault or a Managed HSM. """
+    if vault_name:
+        vault = client.get(resource_group_name=resource_group_name, vault_name=vault_name)
+        return vault.properties.network_acls
+    hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
+    hsm = hsm_client.get(resource_group_name, name=hsm_name)
+    return hsm.properties.network_acls
 
 
 def delete_policy(cmd, client, resource_group_name, vault_name,

@@ -104,7 +104,7 @@ def load_arguments(self, _):
     # region vault (management)
     with self.argument_context('keyvault') as c:
         c.argument('resource_group_name', resource_group_name_type, id_part=None, required=False,
-                   help='Proceed only if Key Vault belongs to the specified resource group.',
+                   help='Name of resource group.',
                    validator=validate_resource_group_name)
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'])
         c.argument('object_id', help='a GUID that identifies the principal that will receive permissions')
