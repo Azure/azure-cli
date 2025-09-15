@@ -3970,7 +3970,7 @@ def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
 
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
-                            tags=None, no_wait=False, zone_redundant=False):
+                            tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
 
@@ -4009,7 +4009,8 @@ has been deployed ".format(app_service_environment)
     sku_def = SkuDescription(tier=get_sku_tier(sku), name=_normalize_sku(sku), capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None),
-                              per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+                              per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def,
+                              async_scaling_enabled=async_scaling_enabled)
 
     if sku.upper() in ['WS1', 'WS2', 'WS3']:
         existing_plan = get_resource_if_exists(client.app_service_plans,
@@ -4027,11 +4028,17 @@ has been deployed ".format(app_service_environment)
 
 
 def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, elastic_scale=None,
-                            max_elastic_worker_count=None):
-    if number_of_workers is None and sku is None and elastic_scale is None and max_elastic_worker_count is None:
+                            max_elastic_worker_count=None, async_scaling_enabled=None):
+    if (number_of_workers is None and sku is None and
+    elastic_scale is None and max_elastic_worker_count is None and
+    async_scaling_enabled is None):
         safe_params = cmd.cli_ctx.data['safe_params']
         if '--set' not in safe_params:
-            args = ["--number-of-workers", "--sku", "--elastic-scale", "--max-elastic-worker-count"]
+            args = ["--number-of-workers", 
+                    "--sku", 
+                    "--elastic-scale", 
+                    "--max-elastic-worker-count", 
+                    "--async-scaling-enabled"]
             logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
     sku_def = instance.sku
     if sku is not None:
@@ -4067,9 +4074,11 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
         use_additional_properties(instance)
         instance.additional_properties["properties"]["maximumElasticWorkerCount"] = max_elastic_worker_count
 
+    if async_scaling_enabled is not None:
+        instance.async_scaling_enabled = async_scaling_enabled
+
     instance.sku = sku_def
     return instance
-
 
 def show_plan(cmd, resource_group_name, name):
     from azure.cli.core.commands.client_factory import get_subscription_id
