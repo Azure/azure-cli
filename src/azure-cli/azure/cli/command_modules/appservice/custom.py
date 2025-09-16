@@ -19,7 +19,6 @@ import json
 import ssl
 import sys
 import uuid
-import os
 from functools import reduce
 import invoke
 from nacl import encoding, public
@@ -1668,6 +1667,7 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
         cmd.cli_ctx.get_progress_controller().add(message=progress_message)
 
     blob_client = None
+    import os
     with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
         zip_content = fs.read()
         blob_client = container_client.upload_blob(blob_name, zip_content, validate_content=True,
