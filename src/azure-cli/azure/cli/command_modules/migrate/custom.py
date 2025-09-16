@@ -1337,42 +1337,24 @@ def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None)
     except Exception as e:
         raise CLIError(f'Failed to check PowerShell module {module_name}: {str(e)}')
 
-def update_powershell_modules(cmd, modules=None, force=False, include_dependencies=True, allow_prerelease=False):
+def update_powershell_module(cmd, force=False, allow_prerelease=False):
     """
-    Update Azure PowerShell modules to the latest version.
-    This command installs or updates the specified Azure PowerShell modules.
+    Update Azure PowerShell Az.Migrate module to the latest version.
+    This command installs or updates the Az.Migrate module specifically.
     
     Args:
-        modules: List of specific modules to update (default: all Az modules)
-        force: Force update even if modules are already installed
-        include_dependencies: Include dependency modules during update
+        force: Force update even if module is already installed
         allow_prerelease: Allow installation of prerelease versions
     """
     ps_executor = get_powershell_executor()
-    
-    # Default modules for Azure Migrate functionality
-    if not modules:
-        modules = [
-            'Az.Accounts',
-            'Az.Profile', 
-            'Az.Resources',
-            'Az.Migrate',
-            'Az.Storage',
-            'Az.RecoveryServices'
-        ]
-    elif isinstance(modules, str):
-        modules = [modules]
     
     # Convert Python booleans to PowerShell booleans
     ps_force = '$true' if force else '$false'
     ps_allow_prerelease = '$true' if allow_prerelease else '$false'
     
-    # Create the modules array string for PowerShell
-    modules_str = ', '.join([f'"{module}"' for module in modules])
-    
     update_script = f"""
     try {{
-        Write-Host "Azure PowerShell Module Update Utility"
+        Write-Host "Azure PowerShell Az.Migrate Module Update"
         Write-Host ""
         
         # Check PowerShell execution policy
@@ -1395,125 +1377,75 @@ def update_powershell_modules(cmd, modules=None, force=False, include_dependenci
             Write-Host "Please restart PowerShell and run this command again for best results."
         }}
         
-        # Update each module
-        $modules = @({modules_str})
-        $updateResults = @()
+        Write-Host "Processing Az.Migrate module..."
         
-        foreach ($moduleName in $modules) {{
-            Write-Host "Processing module: $moduleName"
+        # Check if module is already installed
+        $installedModule = Get-InstalledModule -Name Az.Migrate -ErrorAction SilentlyContinue
+        $availableModule = Find-Module -Name Az.Migrate -ErrorAction SilentlyContinue
+        
+        if (-not $availableModule) {{
+            throw "Az.Migrate module not found in PowerShell Gallery"
+        }}
+        
+        $installParams = @{{
+            Name = 'Az.Migrate'
+            Scope = 'CurrentUser'
+            Force = {ps_force}
+            AllowClobber = $true
+        }}
+        
+        if ({ps_allow_prerelease}) {{
+            $installParams['AllowPrerelease'] = $true
+        }}
+        
+        if ($installedModule) {{
+            Write-Host "   Current version: $($installedModule.Version)"
+            Write-Host "   Available version: $($availableModule.Version)"
             
-            try {{
-                # Check if module is already installed
-                $installedModule = Get-InstalledModule -Name $moduleName -ErrorAction SilentlyContinue
-                $availableModule = Find-Module -Name $moduleName -ErrorAction SilentlyContinue
+            if ($installedModule.Version -lt $availableModule.Version -or {ps_force}) {{
+                Write-Host "   Updating Az.Migrate module..."
                 
-                if (-not $availableModule) {{
-                    Write-Host "   Module '$moduleName' not found in PowerShell Gallery"
-                    $updateResults += @{{
-                        Module = $moduleName
-                        Status = "NotFound"
-                        Error = "Module not found in PowerShell Gallery"
-                    }}
-                    continue
-                }}
-                
-                $installParams = @{{
-                    Name = $moduleName
-                    Scope = 'CurrentUser'
-                    Force = {ps_force}
-                    AllowClobber = $true
-                }}
-                
-                if ({ps_allow_prerelease}) {{
-                    $installParams['AllowPrerelease'] = $true
-                }}
-                
-                if ($installedModule) {{
-                    Write-Host "   Current version: $($installedModule.Version)"
-                    Write-Host "   Available version: $($availableModule.Version)"
-                    
-                    if ($installedModule.Version -lt $availableModule.Version -or {ps_force}) {{
-                        Write-Host "   Updating module..."
-                        Install-Module @installParams
-                        
-                        # Verify update
-                        $newModule = Get-InstalledModule -Name $moduleName | Sort-Object Version -Descending | Select-Object -First 1
-                        Write-Host "   Successfully updated to version: $($newModule.Version)"
-                        
-                        $updateResults += @{{
-                            Module = $moduleName
-                            Status = "Updated"
-                            OldVersion = $installedModule.Version.ToString()
-                            NewVersion = $newModule.Version.ToString()
-                        }}
-                    }} else {{
-                        Write-Host "   Module is already up to date"
-                        $updateResults += @{{
-                            Module = $moduleName
-                            Status = "UpToDate"
-                            Version = $installedModule.Version.ToString()
-                        }}
-                    }}
-                }} else {{
-                    Write-Host "   Installing module..."
+                # Use Update-Module for existing installations
+                try {{
+                    Update-Module -Name Az.Migrate -Force
+                    $newModule = Get-InstalledModule -Name Az.Migrate | Sort-Object Version -Descending | Select-Object -First 1
+                    Write-Host ""
+                    Write-Host "Successfully updated Az.Migrate from version $($installedModule.Version) to $($newModule.Version)"
+                }} catch {{
+                    # If Update-Module fails, try uninstalling old version and installing new
+                    Write-Host "   Update-Module failed, trying alternative approach..."
+                    Uninstall-Module -Name Az.Migrate -AllVersions -Force -ErrorAction SilentlyContinue
                     Install-Module @installParams
-                    
-                    # Verify installation
-                    $newModule = Get-InstalledModule -Name $moduleName
-                    Write-Host "   Successfully installed version: $($newModule.Version)"
-                    
-                    $updateResults += @{{
-                        Module = $moduleName
-                        Status = "Installed"
-                        Version = $newModule.Version.ToString()
-                    }}
+                    $newModule = Get-InstalledModule -Name Az.Migrate | Sort-Object Version -Descending | Select-Object -First 1
+                    Write-Host ""
+                    Write-Host "Successfully installed Az.Migrate version $($newModule.Version) (replaced version $($installedModule.Version))"
                 }}
-                
-            }} catch {{
-                Write-Host "   Error processing module '$moduleName': $($_.Exception.Message)"
-                $updateResults += @{{
-                    Module = $moduleName
-                    Status = "Error"
-                    Error = $_.Exception.Message
-                }}
+            }} else {{
+                Write-Host ""
+                Write-Host "Az.Migrate module is already up to date (version $($installedModule.Version))"
             }}
-            
-            Write-Host ""
-        }}
-        
-        # Summary
-        Write-Host "Update Summary:"
-        
-        $updated = ($updateResults | Where-Object {{ $_.Status -eq "Updated" }}).Count
-        $installed = ($updateResults | Where-Object {{ $_.Status -eq "Installed" }}).Count
-        $upToDate = ($updateResults | Where-Object {{ $_.Status -eq "UpToDate" }}).Count
-        $errors = ($updateResults | Where-Object {{ $_.Status -eq "Error" -or $_.Status -eq "NotFound" }}).Count
-        
-        Write-Host "   Updated: $updated modules"
-        Write-Host "   Newly Installed: $installed modules"
-        Write-Host "   Already Up-to-Date: $upToDate modules"
-        Write-Host "   Errors: $errors modules"
-        Write-Host ""
-        
-        if ($errors -eq 0) {{
-            Write-Host "All Azure PowerShell modules are now up to date!"
         }} else {{
-            Write-Host "Some modules encountered errors. Check the output above for details."
+            Write-Host "   Installing Az.Migrate module..."
+            Install-Module @installParams
+            
+            # Verify installation
+            $newModule = Get-InstalledModule -Name Az.Migrate
+            Write-Host ""
+            Write-Host "Successfully installed Az.Migrate version $($newModule.Version)"
         }}
         
-        # Return results
-        return @{{
-            Success = ($errors -eq 0)
-            UpdatedModules = $updated
-            InstalledModules = $installed
-            UpToDateModules = $upToDate
-            ErrorCount = $errors
-            Results = $updateResults
-        }}
+        Write-Host ""
+        Write-Host "Az.Migrate module is ready for use!"
         
     }} catch {{
-        Write-Host "Error during module update process:"
+        Write-Host ""
+        Write-Host "Error updating Az.Migrate module:"
         Write-Host "   $($_.Exception.Message)"
+        Write-Host ""
+        Write-Host "Troubleshooting:"
+        Write-Host "   1. Ensure you have internet connectivity"
+        Write-Host "   2. Try running PowerShell as Administrator"
+        Write-Host "   3. Manually install with: Install-Module -Name Az.Migrate -Force"
         throw
     }}
     """
@@ -1521,7 +1453,7 @@ def update_powershell_modules(cmd, modules=None, force=False, include_dependenci
     try:
         ps_executor.execute_script_interactive(update_script)
     except Exception as e:
-        raise CLIError(f'Failed to update PowerShell modules: {str(e)}')
+        raise CLIError(f'Failed to update Az.Migrate module: {str(e)}')
 
 def get_local_replication_job(cmd, resource_group_name, project_name, job_id=None, input_object=None, subscription_id=None):
     """

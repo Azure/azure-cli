@@ -35,7 +35,7 @@ def load_command_table(self, _):
     # PowerShell Module Management Commands  
     with self.command_group('migrate powershell') as g:
         g.custom_command('check-module', 'check_powershell_module')
-        g.custom_command('update-modules', 'update_powershell_modules')
+        g.custom_command('update-module', 'update_powershell_module')
 
     # Authentication commands
     with self.command_group('migrate auth') as g:
