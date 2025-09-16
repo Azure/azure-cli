@@ -2851,7 +2851,7 @@ def vm_run_command_create(cmd,
         args['output_blob_uri'] = output_blob_uri
     if error_blob_uri is not None:
         args['error_blob_uri'] = error_blob_uri
-    return LongRunningOperation(cmd.cli_ctx)(Create(cli_ctx=cmd.cli_ctx)(command_args=args))
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def vm_run_command_update(cmd,
@@ -2930,7 +2930,7 @@ def vm_run_command_update(cmd,
     args['run_command_name'] = run_command_name
     args['vm_name'] = vm_name
     args['no_wait'] = no_wait
-    return LongRunningOperation(cmd.cli_ctx)(Update(cli_ctx=cmd.cli_ctx)(command_args=args))
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
 def vm_run_command_list(cmd,
