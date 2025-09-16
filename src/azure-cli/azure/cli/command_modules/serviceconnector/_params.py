@@ -191,6 +191,12 @@ def add_connstr_props_argument(context):
                      validator=validate_connstr_props)
 
 
+def add_force_create_arguments(context):
+    context.argument('force', options_list=['--force', '-f'],
+                     arg_type=get_three_state_flag(), default=False,
+                     help='Indicates whether to force to execute operation to create \
+                           an existing connection even without any updates.')
+
 def add_target_type_argument(context, source):
     TARGET_TYPES = [
         elem.value for elem in SUPPORTED_AUTH_TYPE.get(source).keys()]
@@ -321,6 +327,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_customized_keys_argument(c)
                 add_opt_out_argument(c)
                 add_connstr_props_argument(c)
+                add_force_create_arguments(c)
 
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)

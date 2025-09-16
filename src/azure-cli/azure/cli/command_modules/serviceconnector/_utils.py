@@ -573,3 +573,53 @@ def get_aks_resource_name(linker):
 def get_aks_resource_secret_name(connection_name):
     valid_name = re.sub(r'[^a-zA-Z0-9]', '', connection_name, flags=re.IGNORECASE)
     return f'sc-{valid_name}-secret'
+
+
+def compare_properties_changed(new_props, existing_props):
+    """
+    Deep comparison function that checks if there are meaningful differences
+    between new properties and existing properties, ignoring None values.
+    Returns True if there are differences that require an update.
+    """
+    def has_meaningful_changes(new_value, existing_value):
+        if new_value is None:
+            # If new value is None, no change needed
+            return False
+
+        if isinstance(new_value, dict) and isinstance(existing_value, dict):
+            # For nested dictionaries, check each key recursively
+            for key, value in new_value.items():
+                existing_props_key = key
+                if '_' in key:
+                    existing_props_key = to_camel_case(key)
+                existing_nested = existing_value.get(existing_props_key) if existing_value else None
+                if has_meaningful_changes(value, existing_nested):
+                    return True
+            return False
+        elif isinstance(new_value, dict) and existing_value is None:
+            # If existing is None but new is a dict, check if any values in new dict are meaningful
+            for value in new_value.values():
+                if value is not None:
+                    return True
+            return False
+        else:
+            # For primitive values, compare directly
+            return new_value != existing_value
+
+    # Check if any property has meaningful changes
+    for key, new_value in new_props.items():
+        existing_props_key = key
+        if '_' in key:
+            existing_props_key = to_camel_case(key)
+        existing_value = existing_props.get(existing_props_key) if existing_props else None
+        if has_meaningful_changes(new_value, existing_value):
+            return True
+    return False
+
+
+def to_camel_case(snake_str):
+    if not snake_str or '_' not in snake_str:
+        return snake_str
+    components = snake_str.split('_')
+    return components[0] + ''.join(word.capitalize() for word in components[1:])
+
