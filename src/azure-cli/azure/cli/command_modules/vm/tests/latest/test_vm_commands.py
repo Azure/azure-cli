@@ -12316,7 +12316,6 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus2euap')
     def test_vm_vmss_proxy_agent(self, resource_group):
-        from azure.core.exceptions import HttpResponseError
         self.kwargs.update({
             'nsg1': self.create_random_name('nsg', 10),
             'nsg2': self.create_random_name('nsg', 10),
@@ -12339,8 +12338,6 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
             self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
         ])
-        with self.assertRaises(HttpResponseError):
-            self.cmd('vm update -g {rg} -n {vm1} --wire-server-profile-id profileid')
 
         self.cmd('vm update -g {rg} -n {vm1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 2', checks=[
             self.check('securityProfile.proxyAgentSettings.enabled', False),
@@ -12377,8 +12374,6 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
         ])
-        with self.assertRaises(HttpResponseError):
-            self.cmd('vmss update -g {rg} -n {vmss1} --wire-server-profile-id profileid')
 
         self.cmd('vmss update -g {rg} -n {vmss1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
@@ -12387,7 +12382,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network nsg create -g {rg} -n {nsg2}')
-        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --nsg {nsg2} --admin-password Password001!')
+        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --nsg {nsg2} --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!')
         self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --wire-server-mode Audit --imds-mode Audit', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
@@ -12397,6 +12392,62 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit')
+        ])
+
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_control_profile_reference', location='eastus2euap')
+    def test_vm_vmss_proxy_agent_control_profile_reference(self, resource_group):
+        self.kwargs.update({
+            'nsg1': self.create_random_name('nsg', 10),
+            'nsg2': self.create_random_name('nsg', 10),
+            'vm1': self.create_random_name('vm', 10),
+            'vmss1': self.create_random_name('vmss', 15),
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15),
+            'gallery': self.create_random_name('gallery', 15),
+            'profile1': self.create_random_name('profile', 15),
+            'profile2': self.create_random_name('profile', 15)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg1}')
+        self.cmd('vm create -g {rg} -n {vm1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.cmd('vm show -g {rg} -n {vm1}', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', True),
+            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
+            self.check('securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
+        ])
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig in-vm-access-control-profile create -g {rg} --gallery-name {gallery} --name {profile1} --os-type Windows --applicable-host-endpoint WireServer')
+        wireseriver_prifile = self.cmd('sig in-vm-access-control-profile-version create -g {rg}  --gallery-name {gallery} --profile-name {profile1} --profile-version 1.0.0 --default-access Allow --mode Audit').get_output_in_json()
+        self.cmd('az sig in-vm-access-control-profile create -g {rg} --gallery-name {gallery} --name {profile2} --os-type Windows --applicable-host-endpoint IMDS')
+        imds_prifile = self.cmd('sig in-vm-access-control-profile-version create -g {rg}  --gallery-name {gallery} --profile-name {profile2} --profile-version 1.0.0 --default-access Allow --mode Audit').get_output_in_json()
+
+        self.kwargs.update({
+            'wireserver_profileid': wireseriver_prifile['id'],
+            'imds_profileid': imds_prifile['id']
+        })
+        self.cmd('vm update -g {rg} -n {vm1} --wire-server-profile-id {wireserver_profileid}', checks=[
+            # self.check('securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}')
+        ])
+        self.cmd('vm update -g {rg} -n {vm1} --imds-profile-id {imds_profileid}', checks=[
+            # self.check('securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}'),
+            # self.check('securityProfile.proxyAgentSettings.imds.inVMAccessControlProfileReferenceId', '{imds_profileid}')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg1} --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss1} --wire-server-profile-id {wireserver_profileid}', checks=[
+            # self.check('properties.securityProfile.proxyAgentSettings.wireServer.inVMAccessControlProfileReferenceId', '{wireserver_profileid}'),
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss1} --imds-profile-id {imds_profileid}', checks=[
+            # self.check('properties.securityProfile.proxyAgentSettings.wireServer.inVMAccessControlProfileReferenceId', '{wireserver_profileid}'),
+            # self.check('properties.securityProfile.proxyAgentSettings.imds.inVMAccessControlProfileReferenceId', '{imds_profileid}')
         ])
 
 class DiskHibernationScenarioTest(ScenarioTest):

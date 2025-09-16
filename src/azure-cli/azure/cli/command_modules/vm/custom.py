@@ -1633,6 +1633,30 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
     vm = kwargs['parameters']
 
+    if wire_server_access_control_profile_reference_id is not None or \
+            imds_access_control_profile_reference_id is not None:
+        from .aaz.latest.vm import Patch as VMPatchUpdate
+
+        class VMUpdateReferenceId(VMPatchUpdate):
+            def _output(self, *args, **kwargs):
+                result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+                return result
+
+        security_profile = {'proxy_agent_settings': {}}
+        if wire_server_access_control_profile_reference_id:
+            security_profile['proxy_agent_settings']['wire_server'] = {
+                'in_vm_access_control_profile_reference_id': wire_server_access_control_profile_reference_id}
+        if imds_access_control_profile_reference_id:
+            security_profile['proxy_agent_settings']['imds'] = {
+                'in_vm_access_control_profile_reference_id': imds_access_control_profile_reference_id}
+
+        LongRunningOperation(cmd.cli_ctx)(VMUpdateReferenceId(cli_ctx=cmd.cli_ctx)(command_args={
+            'vm_name': vm_name,
+            'resource_group': resource_group_name,
+            'security_profile': security_profile
+        }))
+        vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+
     disk_name = None
     if os_disk is not None:
         if is_valid_resource_id(os_disk):
@@ -1750,10 +1774,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.security_profile.uefi_settings = UefiSettings(secure_boot_enabled=enable_secure_boot,
                                                          v_tpm_enabled=enable_vtpm)
 
-    proxy_agent_parameters = [
-        enable_proxy_agent, wire_server_mode, imds_mode, key_incarnation_id,
-        wire_server_access_control_profile_reference_id, imds_access_control_profile_reference_id
-    ]
+    proxy_agent_parameters = [enable_proxy_agent, wire_server_mode, imds_mode, key_incarnation_id]
     if any(parameter is not None for parameter in proxy_agent_parameters):
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
         HostEndpointSettings = cmd.get_models('HostEndpointSettings')
@@ -1776,14 +1797,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             vm.security_profile.proxy_agent_settings.key_incarnation_id = key_incarnation_id
         if wire_server_mode is not None:
             vm.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
-        if wire_server_access_control_profile_reference_id is not None:
-            vm.security_profile.proxy_agent_settings.wire_server.in_vm_access_control_profile_reference_id = \
-                wire_server_access_control_profile_reference_id
         if imds_mode is not None:
             vm.security_profile.proxy_agent_settings.imds.mode = imds_mode
-        if imds_access_control_profile_reference_id is not None:
-            vm.security_profile.proxy_agent_settings.imds.in_vm_access_control_profile_reference_id = \
-                imds_access_control_profile_reference_id
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -1858,6 +1873,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                     "automaticallyApprove": enable_user_reboot_scheduled_events
                 }
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
+    if wire_server_access_control_profile_reference_id is not None or \
+            imds_access_control_profile_reference_id is not None:
+        kwargs['parameters'] = vm
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
 
@@ -4082,6 +4100,33 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
     vmss = kwargs['parameters']
+
+    if wire_server_access_control_profile_reference_id is not None or \
+            imds_access_control_profile_reference_id is not None:
+        from .aaz.latest.vmss import Patch as VMSSPatchUpdate
+
+        class VMSSUpdateReferenceId(VMSSPatchUpdate):
+            def _output(self, *args, **kwargs):
+                result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+                return result
+
+        security_profile = {'proxy_agent_settings': {}}
+        if wire_server_access_control_profile_reference_id:
+            security_profile['proxy_agent_settings']['wire_server'] = {
+                'in_vm_access_control_profile_reference_id': wire_server_access_control_profile_reference_id}
+        if imds_access_control_profile_reference_id:
+            security_profile['proxy_agent_settings']['imds'] = {
+                'in_vm_access_control_profile_reference_id': imds_access_control_profile_reference_id}
+
+        LongRunningOperation(cmd.cli_ctx)(VMSSUpdateReferenceId(cli_ctx=cmd.cli_ctx)(command_args={
+            'vm_scale_set_name': name,
+            'resource_group': resource_group_name,
+            'virtual_machine_profile': {
+                'security_profile': security_profile
+            }
+        }))
+        vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
+
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
     if vmss and hasattr(vmss, 'virtual_machine_profile') and vmss.virtual_machine_profile and \
@@ -4243,9 +4288,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 'vTpmEnabled': enable_vtpm
             }}
 
-    if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None or \
-            wire_server_access_control_profile_reference_id is not None or \
-            imds_access_control_profile_reference_id is not None:
+    if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None:
         SecurityProfile = cmd.get_models('SecurityProfile')
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
         HostEndpointSettings = cmd.get_models('HostEndpointSettings')
@@ -4268,14 +4311,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
         if wire_server_mode is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
-        if wire_server_access_control_profile_reference_id is not None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server. \
-                in_vm_access_control_profile_reference_id = wire_server_access_control_profile_reference_id
         if imds_mode is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds.mode = imds_mode
-        if imds_access_control_profile_reference_id is not None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds. \
-                in_vm_access_control_profile_reference_id = imds_access_control_profile_reference_id
 
     if regular_priority_count is not None or regular_priority_percentage is not None:
         if vmss.orchestration_mode != 'Flexible':
@@ -4433,6 +4470,10 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if zone_balance is not None:
         vmss.zone_balance = zone_balance
+
+    if wire_server_access_control_profile_reference_id is not None or \
+            imds_access_control_profile_reference_id is not None:
+        kwargs['parameters'] = vmss
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)
