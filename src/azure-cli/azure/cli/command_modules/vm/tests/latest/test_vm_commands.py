@@ -12430,11 +12430,11 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'imds_profileid': imds_prifile['id']
         })
         self.cmd('vm update -g {rg} -n {vm1} --wire-server-profile-id {wireserver_profileid}', checks=[
-            # self.check('securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}')
+            self.check('securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}')
         ])
         self.cmd('vm update -g {rg} -n {vm1} --imds-profile-id {imds_profileid}', checks=[
-            # self.check('securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}'),
-            # self.check('securityProfile.proxyAgentSettings.imds.inVMAccessControlProfileReferenceId', '{imds_profileid}')
+            self.check('securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}'),
+            self.check('securityProfile.proxyAgentSettings.imds.inVmAccessControlProfileReferenceId', '{imds_profileid}')
         ])
 
         self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg1} --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!', checks=[
@@ -12443,11 +12443,11 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
         ])
         self.cmd('vmss update -g {rg} -n {vmss1} --wire-server-profile-id {wireserver_profileid}', checks=[
-            # self.check('properties.securityProfile.proxyAgentSettings.wireServer.inVMAccessControlProfileReferenceId', '{wireserver_profileid}'),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}')
         ])
         self.cmd('vmss update -g {rg} -n {vmss1} --imds-profile-id {imds_profileid}', checks=[
-            # self.check('properties.securityProfile.proxyAgentSettings.wireServer.inVMAccessControlProfileReferenceId', '{wireserver_profileid}'),
-            # self.check('properties.securityProfile.proxyAgentSettings.imds.inVMAccessControlProfileReferenceId', '{imds_profileid}')
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.inVmAccessControlProfileReferenceId', '{imds_profileid}'),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}'),
         ])
 
 class DiskHibernationScenarioTest(ScenarioTest):
