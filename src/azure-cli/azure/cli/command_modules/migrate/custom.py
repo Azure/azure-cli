@@ -313,129 +313,127 @@ def verify_migrate_setup(cmd, resource_group_name, project_name):
     
     verify_script = f"""
     try {{
-        Write-Host "Azure Migrate Setup Verification" -ForegroundColor Cyan
-        Write-Host "=================================" -ForegroundColor Cyan
+        Write-Host "Azure Migrate Setup Verification"
         Write-Host ""
         
         # Get current context
         $context = Get-AzContext
-        Write-Host "Current Azure Context:" -ForegroundColor Green
-        Write-Host "  Subscription: $($context.Subscription.Name) ($($context.Subscription.Id))" -ForegroundColor White
-        Write-Host "  Account: $($context.Account.Id)" -ForegroundColor White
-        Write-Host "  Tenant: $($context.Tenant.Id)" -ForegroundColor White
+        Write-Host "Current Azure Context:"
+        Write-Host "  Subscription: $($context.Subscription.Name) ($($context.Subscription.Id))"
+        Write-Host "  Account: $($context.Account.Id)"
+        Write-Host "  Tenant: $($context.Tenant.Id)"
         Write-Host ""
         
         $allChecks = @()
         $errors = @()
         
         # 1. Check resource group
-        Write-Host "1. Checking resource group..." -ForegroundColor Yellow
+        Write-Host "1. Checking resource group..."
         try {{
             $rg = Get-AzResourceGroup -Name '{resource_group_name}' -ErrorAction Stop
-            Write-Host "   ✓ Resource group '{resource_group_name}' found in $($rg.Location)" -ForegroundColor Green
+            Write-Host "   ✓ Resource group '{resource_group_name}' found in $($rg.Location)"
             $allChecks += "Resource group exists"
         }} catch {{
-            Write-Host "   ✗ Resource group '{resource_group_name}' not found or not accessible" -ForegroundColor Red
+            Write-Host "   ✗ Resource group '{resource_group_name}' not found or not accessible"
             $errors += "Resource group not found"
-            
-            Write-Host "   Available resource groups:" -ForegroundColor Yellow
+
+            Write-Host "   Available resource groups:"
             Get-AzResourceGroup | Select-Object ResourceGroupName, Location | Format-Table -AutoSize
         }}
         
         # 2. Check Azure Migrate project
-        Write-Host "2. Checking Azure Migrate project..." -ForegroundColor Yellow
+        Write-Host "2. Checking Azure Migrate project..."
         try {{
             $project = Get-AzResource -ResourceGroupName '{resource_group_name}' -ResourceType "Microsoft.Migrate/MigrateProjects" -Name '{project_name}' -ErrorAction Stop
-            Write-Host "   ✓ Azure Migrate project '{project_name}' found" -ForegroundColor Green
+            Write-Host "   ✓ Azure Migrate project '{project_name}' found"
             $allChecks += "Azure Migrate project exists"
         }} catch {{
-            Write-Host "   ✗ Azure Migrate project '{project_name}' not found" -ForegroundColor Red
+            Write-Host "   ✗ Azure Migrate project '{project_name}' not found"
             $errors += "Azure Migrate project not found"
-            
-            Write-Host "   Available Migrate projects in resource group:" -ForegroundColor Yellow
+
+            Write-Host "   Available Migrate projects in resource group:"
             $migrateProjects = Get-AzResource -ResourceGroupName '{resource_group_name}' -ResourceType "Microsoft.Migrate/MigrateProjects" -ErrorAction SilentlyContinue
             if ($migrateProjects) {{
                 $migrateProjects | Select-Object Name, Location | Format-Table -AutoSize
             }} else {{
-                Write-Host "   No Azure Migrate projects found in this resource group" -ForegroundColor Red
+                Write-Host "   No Azure Migrate projects found in this resource group"
             }}
         }}
         
         # 3. Check Azure Migrate solutions
-        Write-Host "3. Checking Azure Migrate solutions..." -ForegroundColor Yellow
+        Write-Host "3. Checking Azure Migrate solutions..."
         try {{
             $solutions = Get-AzMigrateSolution -SubscriptionId $context.Subscription.Id -ResourceGroupName '{resource_group_name}' -MigrateProjectName '{project_name}' -ErrorAction Stop
             
             if ($solutions) {{
-                Write-Host "   ✓ Found $($solutions.Count) solution(s) in project" -ForegroundColor Green
+                Write-Host "   Found $($solutions.Count) solution(s) in project"
                 $allChecks += "Azure Migrate solutions found"
-                
-                Write-Host "   Available solutions:" -ForegroundColor Cyan
+
+                Write-Host "   Available solutions:"
                 $solutions | Select-Object Tool, Status, @{{Name='Details';Expression={{$_.Details.ExtendedDetails}}}} | Format-Table -AutoSize
                 
                 # Check for Server Discovery specifically
                 $serverDiscovery = $solutions | Where-Object {{ $_.Tool -eq "ServerDiscovery" }}
                 if ($serverDiscovery) {{
-                    Write-Host "   ✓ Server Discovery solution found (Status: $($serverDiscovery.Status))" -ForegroundColor Green
+                    Write-Host "   ✓ Server Discovery solution found (Status: $($serverDiscovery.Status))"
                     $allChecks += "Server Discovery solution exists"
                 }} else {{
-                    Write-Host "   ⚠ Server Discovery solution not found" -ForegroundColor Yellow
+                    Write-Host "   ⚠ Server Discovery solution not found"
                     $errors += "Server Discovery solution not configured"
                 }}
             }} else {{
-                Write-Host "   ⚠ No solutions found in project" -ForegroundColor Yellow
+                Write-Host "   ⚠ No solutions found in project"
                 $errors += "No migration solutions configured"
             }}
         }} catch {{
-            Write-Host "   ✗ Failed to check solutions: $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host "   ✗ Failed to check solutions: $($_.Exception.Message)"
             $errors += "Cannot access migration solutions"
         }}
         
         # 4. Check PowerShell modules
-        Write-Host "4. Checking PowerShell modules..." -ForegroundColor Yellow
+        Write-Host "4. Checking PowerShell modules..."
         $azMigrate = Get-Module -ListAvailable Az.Migrate | Sort-Object Version -Descending | Select-Object -First 1
         if ($azMigrate) {{
-            Write-Host "   ✓ Az.Migrate module found (Version: $($azMigrate.Version))" -ForegroundColor Green
+            Write-Host "   ✓ Az.Migrate module found (Version: $($azMigrate.Version))"
             $allChecks += "Az.Migrate module available"
         }} else {{
-            Write-Host "   ✗ Az.Migrate module not found" -ForegroundColor Red
+            Write-Host "   ✗ Az.Migrate module not found"
             $errors += "Az.Migrate module not installed"
         }}
         
         # 5. Test actual discovery command (only if basic checks pass)
         if ($errors.Count -eq 0) {{
-            Write-Host "5. Testing server discovery..." -ForegroundColor Yellow
+            Write-Host "5. Testing server discovery..."
             try {{
                 $testServers = Get-AzMigrateDiscoveredServer -ProjectName '{project_name}' -ResourceGroupName '{resource_group_name}' -SourceMachineType VMware -ErrorAction Stop
-                Write-Host "   ✓ Successfully retrieved discovered servers (Count: $($testServers.Count))" -ForegroundColor Green
+                Write-Host "   ✓ Successfully retrieved discovered servers (Count: $($testServers.Count))"
                 $allChecks += "Server discovery working"
             }} catch {{
-                Write-Host "   ✗ Server discovery test failed: $($_.Exception.Message)" -ForegroundColor Red
+                Write-Host "   ✗ Server discovery test failed: $($_.Exception.Message)"
                 $errors += "Server discovery not working"
             }}
         }} else {{
-            Write-Host "5. Skipping server discovery test due to previous errors" -ForegroundColor Yellow
+            Write-Host "5. Skipping server discovery test due to previous errors"
         }}
         
         # Summary
         Write-Host ""
-        Write-Host "Verification Summary:" -ForegroundColor Cyan
-        Write-Host "===================" -ForegroundColor Cyan
+        Write-Host "Verification Summary:"
         
         if ($errors.Count -eq 0) {{
-            Write-Host "✓ All checks passed! Your Azure Migrate setup appears to be working correctly." -ForegroundColor Green
+            Write-Host "✓ All checks passed! Your Azure Migrate setup appears to be working correctly."
         }} else {{
-            Write-Host "✗ Found $($errors.Count) issue(s) that need to be resolved:" -ForegroundColor Red
+            Write-Host "✗ Found $($errors.Count) issue(s) that need to be resolved:"
             foreach ($error in $errors) {{
-                Write-Host "  - $error" -ForegroundColor Yellow
+                Write-Host "  - $error"
             }}
             
             Write-Host ""
-            Write-Host "Recommended actions:" -ForegroundColor Cyan
-            Write-Host "1. Ensure you have proper permissions on the resource group and subscription" -ForegroundColor White
-            Write-Host "2. Verify the Azure Migrate project exists and is properly configured" -ForegroundColor White
-            Write-Host "3. Configure discovery tools in the Azure Migrate project portal" -ForegroundColor White
-            Write-Host "4. Install required PowerShell modules: Install-Module Az.Migrate -Force" -ForegroundColor White
+            Write-Host "Recommended actions:"
+            Write-Host "1. Ensure you have proper permissions on the resource group and subscription"
+            Write-Host "2. Verify the Azure Migrate project exists and is properly configured"
+            Write-Host "3. Configure discovery tools in the Azure Migrate project portal"
+            Write-Host "4. Install required PowerShell modules: Install-Module Az.Migrate -Force"
         }}
         
         # Return structured result
@@ -476,61 +474,61 @@ def get_discovered_server(cmd, resource_group_name, project_name, subscription_i
     
     try {{
         # First, verify the resource group exists and is accessible
-        Write-Host "Checking resource group accessibility..." -ForegroundColor Cyan
+        Write-Host "Checking resource group accessibility..."
         $rg = Get-AzResourceGroup -Name $ResourceGroupName -ErrorAction SilentlyContinue
         if (-not $rg) {{
             Write-Error "Resource group '$ResourceGroupName' not found or not accessible."
-            Write-Host "Available resource groups in current subscription:" -ForegroundColor Yellow
+            Write-Host "Available resource groups in current subscription:"
             Get-AzResourceGroup | Select-Object ResourceGroupName, Location | Format-Table -AutoSize
             throw "Resource group validation failed"
         }}
-        Write-Host "✓ Resource group '$ResourceGroupName' found" -ForegroundColor Green
+        Write-Host "✓ Resource group '$ResourceGroupName' found"
         
         # Check if Azure Migrate project exists
-        Write-Host "Checking Azure Migrate project..." -ForegroundColor Cyan
+        Write-Host "Checking Azure Migrate project..."
         try {{
             $project = Get-AzResource -ResourceGroupName $ResourceGroupName -ResourceType "Microsoft.Migrate/MigrateProjects" -Name $ProjectName -ErrorAction SilentlyContinue
             if (-not $project) {{
                 Write-Error "Azure Migrate project '$ProjectName' not found in resource group '$ResourceGroupName'."
-                Write-Host "Available Migrate projects in resource group:" -ForegroundColor Yellow
+                Write-Host "Available Migrate projects in resource group:"
                 $migrateProjects = Get-AzResource -ResourceGroupName $ResourceGroupName -ResourceType "Microsoft.Migrate/MigrateProjects"
                 if ($migrateProjects) {{
                     $migrateProjects | Select-Object Name, Location | Format-Table -AutoSize
                 }} else {{
-                    Write-Host "No Azure Migrate projects found in this resource group." -ForegroundColor Red
-                    Write-Host "You may need to create an Azure Migrate project first." -ForegroundColor Yellow
+                    Write-Host "No Azure Migrate projects found in this resource group."
+                    Write-Host "You may need to create an Azure Migrate project first."
                 }}
                 throw "Azure Migrate project validation failed"
             }}
-            Write-Host "✓ Azure Migrate project '$ProjectName' found" -ForegroundColor Green
+            Write-Host "✓ Azure Migrate project '$ProjectName' found"
         }} catch {{
             Write-Error "Failed to validate Azure Migrate project: $($_.Exception.Message)"
             throw "Azure Migrate project validation failed"
         }}
         
         # Check for Server Discovery Solution
-        Write-Host "Checking Server Discovery Solution..." -ForegroundColor Cyan
+        Write-Host "Checking Server Discovery Solution..."
         try {{
             $solution = Get-AzMigrateSolution -SubscriptionId (Get-AzContext).Subscription.Id -ResourceGroupName $ResourceGroupName -MigrateProjectName $ProjectName -ErrorAction SilentlyContinue
             $serverDiscoverySolution = $solution | Where-Object {{ $_.Tool -eq "ServerDiscovery" }}
             if (-not $serverDiscoverySolution) {{
                 Write-Error "Server Discovery Solution not found in project '$ProjectName'."
-                Write-Host "Available solutions in project:" -ForegroundColor Yellow
+                Write-Host "Available solutions in project:"
                 if ($solution) {{
                     $solution | Select-Object Tool, Status | Format-Table -AutoSize
                 }} else {{
-                    Write-Host "No solutions found. Please configure discovery tools in Azure Migrate project." -ForegroundColor Red
+                    Write-Host "No solutions found. Please configure discovery tools in Azure Migrate project."
                 }}
                 throw "Server Discovery Solution not found"
             }}
-            Write-Host "✓ Server Discovery Solution found" -ForegroundColor Green
+            Write-Host "Server Discovery Solution found"
         }} catch {{
             Write-Error "Failed to check Server Discovery Solution: $($_.Exception.Message)"
             throw "Server Discovery Solution validation failed"
         }}
         
         # Execute the real PowerShell cmdlet - equivalent to your provided commands
-        Write-Host "Retrieving discovered servers..." -ForegroundColor Cyan
+        Write-Host "Retrieving discovered servers..."
         if ('{server_id}') {{
             $DiscoveredServers = Get-AzMigrateDiscoveredServer -ProjectName $ProjectName -ResourceGroupName $ResourceGroupName -SourceMachineType $SourceMachineType | Where-Object {{ $_.Id -eq '{server_id}' }}
         }} else {{
@@ -568,24 +566,24 @@ def get_discovered_server(cmd, resource_group_name, project_name, subscription_i
         }}
     }} catch {{
         $errorMessage = $_.Exception.Message
-        Write-Host "Error Details:" -ForegroundColor Red
-        Write-Host "  Error: $errorMessage" -ForegroundColor White
-        
+        Write-Host "Error Details:"
+        Write-Host "  Error: $errorMessage"
+
         # Provide troubleshooting guidance based on the error
         if ($errorMessage -like "*not found*" -or $errorMessage -like "*could not be found*") {{
             Write-Host ""
-            Write-Host "Troubleshooting Steps:" -ForegroundColor Yellow
-            Write-Host "1. Verify the resource group name: '$ResourceGroupName'" -ForegroundColor White
-            Write-Host "2. Verify the project name: '$ProjectName'" -ForegroundColor White
-            Write-Host "3. Check if you have proper permissions on the resource group" -ForegroundColor White
-            Write-Host "4. Ensure the Azure Migrate project exists and is properly configured" -ForegroundColor White
-            Write-Host "5. Check if discovery tools are configured in the Azure Migrate project" -ForegroundColor White
+            Write-Host "Troubleshooting Steps:"
+            Write-Host "1. Verify the resource group name: '$ResourceGroupName'"
+            Write-Host "2. Verify the project name: '$ProjectName'"
+            Write-Host "3. Check if you have proper permissions on the resource group"
+            Write-Host "4. Ensure the Azure Migrate project exists and is properly configured"
+            Write-Host "5. Check if discovery tools are configured in the Azure Migrate project"
             Write-Host ""
-            Write-Host "Current Context:" -ForegroundColor Cyan
+            Write-Host "Current Context:"
             $context = Get-AzContext
-            Write-Host "  Subscription: $($context.Subscription.Name) ($($context.Subscription.Id))" -ForegroundColor White
-            Write-Host "  Account: $($context.Account.Id)" -ForegroundColor White
-            Write-Host "  Tenant: $($context.Tenant.Id)" -ForegroundColor White
+            Write-Host "  Subscription: $($context.Subscription.Name) ($($context.Subscription.Id))"
+            Write-Host "  Account: $($context.Account.Id)"
+            Write-Host "  Tenant: $($context.Tenant.Id)"
         }}
         
         Write-Error "Failed to get discovered servers: $errorMessage"
@@ -1318,47 +1316,18 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
 
 def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None):
     """
-    Azure CLI equivalent of Get-InstalledModule -Name Az.Migrate
     Checks if the required PowerShell module is installed.
     """
     ps_executor = get_powershell_executor()
     
     module_check_script = f"""
     try {{
-        Write-Host "Checking PowerShell module: {module_name}" -ForegroundColor Cyan
+        Write-Host "Checking PowerShell module: {module_name}"
         
-        $Module = Get-InstalledModule -Name "{module_name}" -ErrorAction SilentlyContinue
-        
-        if ($Module) {{
-            Write-Host "Module found:"
-            Write-Host "   Name: $($Module.Name)" -ForegroundColor White
-            Write-Host "   Version: $($Module.Version)" -ForegroundColor White
-            Write-Host "   Author: $($Module.Author)" -ForegroundColor White
-            Write-Host "   Description: $($Module.Description)" -ForegroundColor White
-            Write-Host ""
-            
-            return @{{
-                'IsInstalled' = $true
-                'Name' = $Module.Name
-                'Version' = $Module.Version.ToString()
-                'Author' = $Module.Author
-                'Description' = $Module.Description
-            }}
-        }} else {{
-            Write-Host "Module '{module_name}' is not installed"
-            Write-Host "Install with: Install-Module -Name {module_name} -Force"
-            Write-Host ""
-            
-            return @{{
-                'IsInstalled' = $false
-                'Name' = '{module_name}'
-                'InstallCommand' = 'Install-Module -Name {module_name} -Force'
-            }}
-        }}
-        
+        Get-InstalledModule -Name "{module_name}" -ErrorAction SilentlyContinue
     }} catch {{
         Write-Host "Error checking module:"
-        Write-Host "   $($_.Exception.Message)" -ForegroundColor White
+        Write-Host "   $($_.Exception.Message)"
         throw
     }}
     """
@@ -1403,8 +1372,7 @@ def update_powershell_modules(cmd, modules=None, force=False, include_dependenci
     
     update_script = f"""
     try {{
-        Write-Host "Azure PowerShell Module Update Utility" -ForegroundColor Cyan
-        Write-Host "=" * 50 -ForegroundColor Cyan
+        Write-Host "Azure PowerShell Module Update Utility"
         Write-Host ""
         
         # Check PowerShell execution policy
@@ -1432,8 +1400,7 @@ def update_powershell_modules(cmd, modules=None, force=False, include_dependenci
         $updateResults = @()
         
         foreach ($moduleName in $modules) {{
-            Write-Host "Processing module: $moduleName" -ForegroundColor Cyan
-            Write-Host "-" * 30 -ForegroundColor Gray
+            Write-Host "Processing module: $moduleName"
             
             try {{
                 # Check if module is already installed
@@ -1462,8 +1429,8 @@ def update_powershell_modules(cmd, modules=None, force=False, include_dependenci
                 }}
                 
                 if ($installedModule) {{
-                    Write-Host "   Current version: $($installedModule.Version)" -ForegroundColor White
-                    Write-Host "   Available version: $($availableModule.Version)" -ForegroundColor White
+                    Write-Host "   Current version: $($installedModule.Version)"
+                    Write-Host "   Available version: $($availableModule.Version)"
                     
                     if ($installedModule.Version -lt $availableModule.Version -or {ps_force}) {{
                         Write-Host "   Updating module..."
@@ -1515,7 +1482,7 @@ def update_powershell_modules(cmd, modules=None, force=False, include_dependenci
         }}
         
         # Summary
-        Write-Host "Update Summary:" -ForegroundColor Cyan
+        Write-Host "Update Summary:"
         
         $updated = ($updateResults | Where-Object {{ $_.Status -eq "Updated" }}).Count
         $installed = ($updateResults | Where-Object {{ $_.Status -eq "Installed" }}).Count
@@ -1546,20 +1513,13 @@ def update_powershell_modules(cmd, modules=None, force=False, include_dependenci
         
     }} catch {{
         Write-Host "Error during module update process:"
-        Write-Host "   $($_.Exception.Message)" -ForegroundColor White
+        Write-Host "   $($_.Exception.Message)"
         throw
     }}
     """
     
     try:
-        result = ps_executor.execute_script_interactive(update_script)
-        return {
-            'message': 'PowerShell module update completed',
-            'modules_processed': len(modules),
-            'force_update': force,
-            'include_dependencies': include_dependencies,
-            'allow_prerelease': allow_prerelease
-        }
+        ps_executor.execute_script_interactive(update_script)
     except Exception as e:
         raise CLIError(f'Failed to update PowerShell modules: {str(e)}')
 
@@ -1589,20 +1549,20 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
     get_job_script = f"""
     # Azure CLI equivalent functionality for Get-AzMigrateLocalJob
     try {{
-        Write-Host "Getting Local Replication Job Details..." -ForegroundColor Cyan
+        Write-Host "Getting Local Replication Job Details..."
         Write-Host ""
         Write-Host "Configuration:"
-        Write-Host "   Resource Group: {resource_group_name}" -ForegroundColor White
-        Write-Host "   Project Name: {project_name}" -ForegroundColor White
-        Write-Host "   Job ID: {job_id or 'All jobs'}" -ForegroundColor White
+        Write-Host "   Resource Group: {resource_group_name}"
+        Write-Host "   Project Name: {project_name}"
+        Write-Host "   Job ID: {job_id or 'All jobs'}"
         Write-Host ""
         
         # First, let's check what parameters are available for Get-AzMigrateLocalJob
         Write-Host "Checking cmdlet parameters..."
         $cmdletInfo = Get-Command Get-AzMigrateLocalJob -ErrorAction SilentlyContinue
         if ($cmdletInfo) {{
-            Write-Host "Available parameters:" -ForegroundColor Cyan
-            $cmdletInfo.Parameters.Keys | ForEach-Object {{ Write-Host "   - $_" -ForegroundColor White }}
+            Write-Host "Available parameters:"
+            $cmdletInfo.Parameters.Keys | ForEach-Object {{ Write-Host "   - $_" }}
             Write-Host ""
         }}
         
@@ -1612,7 +1572,7 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
         $Job = $null
         
         if ("{job_id}" -ne "None" -and "{job_id}" -ne "") {{
-            Write-Host "Trying to get job with ID: {job_id}" -ForegroundColor Cyan
+            Write-Host "Trying to get job with ID: {job_id}"
             
             # Method 1: Try with -ID parameter (capital ID based on cmdlet info)
             try {{
@@ -1635,19 +1595,19 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
             # Method 3: Try listing all jobs and filtering if previous methods failed
             if (-not $Job) {{
                 try {{
-                    Write-Host "Getting all jobs and filtering..." -ForegroundColor Cyan
+                    Write-Host "Getting all jobs and filtering..."
                     $AllJobs = Get-AzMigrateLocalJob -ResourceGroupName "{resource_group_name}" -ProjectName "{project_name}"
                     
                     if ($AllJobs) {{
-                        Write-Host "Found $($AllJobs.Count) total jobs, searching for match..." -ForegroundColor Cyan
+                        Write-Host "Found $($AllJobs.Count) total jobs, searching for match..."
                         $Job = $AllJobs | Where-Object {{ $_.Id -like "*{job_id}*" -or $_.Name -like "*{job_id}*" }}
                         
                         if ($Job) {{
                             Write-Host "Found job by filtering all jobs"
                         }} else {{
                             Write-Host "No job found with ID containing: {job_id}"
-                            Write-Host "Available jobs:" -ForegroundColor Cyan
-                            $AllJobs | ForEach-Object {{ Write-Host "   - $($_.Id) ($($_.Name))" -ForegroundColor White }}
+                            Write-Host "Available jobs:"
+                            $AllJobs | ForEach-Object {{ Write-Host "   - $($_.Id) ($($_.Name))" }}
                         }}
                     }} else {{
                         Write-Host "No jobs found in project"
@@ -1658,7 +1618,7 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
             }}
         }} else {{
             # Get all jobs if no specific job ID provided
-            Write-Host "Getting all local replication jobs..." -ForegroundColor Cyan
+            Write-Host "Getting all local replication jobs..."
             $Job = Get-AzMigrateLocalJob -ResourceGroupName "{resource_group_name}" -ProjectName "{project_name}"
         }}
         
@@ -1668,24 +1628,24 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
             Write-Host "Job Details:"
             
             if ($Job -is [array] -and $Job.Count -gt 1) {{
-                Write-Host "   Found multiple jobs ($($Job.Count))" -ForegroundColor White
+                Write-Host "   Found multiple jobs ($($Job.Count))"
                 $Job | ForEach-Object {{
-                    Write-Host "   Job: $($_.Id)" -ForegroundColor White
-                    Write-Host "      State: $($_.Property.State)" -ForegroundColor White
-                    Write-Host "      Display Name: $($_.Property.DisplayName)" -ForegroundColor White
+                    Write-Host "   Job: $($_.Id)"
+                    Write-Host "      State: $($_.Property.State)"
+                    Write-Host "      Display Name: $($_.Property.DisplayName)"
                     Write-Host ""
                 }}
             }} else {{
                 if ($Job -is [array]) {{ $Job = $Job[0] }}
-                Write-Host "   Job ID: $($Job.Id)" -ForegroundColor White
-                Write-Host "   State: $($Job.Property.State)" -ForegroundColor White
-                Write-Host "   Start Time: $($Job.Property.StartTime)" -ForegroundColor White
+                Write-Host "   Job ID: $($Job.Id)"
+                Write-Host "   State: $($Job.Property.State)"
+                Write-Host "   Start Time: $($Job.Property.StartTime)"
                 if ($Job.Property.EndTime) {{
-                    Write-Host "   End Time: $($Job.Property.EndTime)" -ForegroundColor White
+                    Write-Host "   End Time: $($Job.Property.EndTime)"
                 }}
-                Write-Host "   Display Name: $($Job.Property.DisplayName)" -ForegroundColor White
+                Write-Host "   Display Name: $($Job.Property.DisplayName)"
                 Write-Host ""
-                Write-Host "Job State: $($Job.Property.State)" -ForegroundColor Cyan
+                Write-Host "Job State: $($Job.Property.State)" 
                 Write-Host ""
             }}
             
@@ -1704,12 +1664,12 @@ def get_local_replication_job(cmd, resource_group_name, project_name, job_id=Non
     }} catch {{
         Write-Host ""
         Write-Host "Failed to get job details:"
-        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host "   Error: $($_.Exception.Message)"
         Write-Host ""
         Write-Host "Troubleshooting:"
-        Write-Host "   1. Verify the job ID is correct" -ForegroundColor White
-        Write-Host "   2. Check if the job exists in the current project" -ForegroundColor White
-        Write-Host "   3. Ensure you have access to the job" -ForegroundColor White
+        Write-Host "   1. Verify the job ID is correct"
+        Write-Host "   2. Check if the job exists in the current project"
+        Write-Host "   3. Ensure you have access to the job"
         Write-Host ""
         throw
     }}
@@ -1741,7 +1701,7 @@ def initialize_local_replication_infrastructure(cmd, resource_group_name, projec
     }} catch {{
         Write-Host ""
         Write-Host "Failed to initialize local replication infrastructure:"
-        Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor White
+        Write-Host "   Error: $($_.Exception.Message)"
         Write-Host ""
         throw
     }}
@@ -1751,59 +1711,7 @@ def initialize_local_replication_infrastructure(cmd, resource_group_name, projec
         ps_executor.execute_script_interactive(initialize_script)
     except Exception as e:
         raise CLIError(f'Failed to initialize local replication infrastructure: {str(e)}')
-
-def check_powershell_module(cmd, module_name='Az.Migrate', subscription_id=None):
-    """
-    Azure CLI equivalent of Get-InstalledModule -Name Az.Migrate
-    Checks if the required PowerShell module is installed.
-    """
-    ps_executor = get_powershell_executor()
     
-    module_check_script = f"""
-    try {{
-        Write-Host "Checking PowerShell module: {module_name}" -ForegroundColor Cyan
-        
-        $Module = Get-InstalledModule -Name "{module_name}" -ErrorAction SilentlyContinue
-        
-        if ($Module) {{
-            Write-Host "Module found:"
-            Write-Host "   Name: $($Module.Name)" -ForegroundColor White
-            Write-Host "   Version: $($Module.Version)" -ForegroundColor White
-            Write-Host "   Author: $($Module.Author)" -ForegroundColor White
-            Write-Host "   Description: $($Module.Description)" -ForegroundColor White
-            Write-Host ""
-            
-            return @{{
-                'IsInstalled' = $true
-                'Name' = $Module.Name
-                'Version' = $Module.Version.ToString()
-                'Author' = $Module.Author
-                'Description' = $Module.Description
-            }}
-        }} else {{
-            Write-Host "Module '{module_name}' is not installed"
-            Write-Host "Install with: Install-Module -Name {module_name} -Force"
-            Write-Host ""
-            
-            return @{{
-                'IsInstalled' = $false
-                'Name' = '{module_name}'
-                'InstallCommand' = 'Install-Module -Name {module_name} -Force'
-            }}
-        }}
-        
-    }} catch {{
-        Write-Host "Error checking module:"
-        Write-Host "   $($_.Exception.Message)" -ForegroundColor White
-        throw
-    }}
-    """
-    
-    try:
-        ps_executor.execute_script_interactive(module_check_script)
-    except Exception as e:
-        raise CLIError(f'Failed to check PowerShell module {module_name}: {str(e)}')
-
 # --------------------------------------------------------------------------------------------
 # Cross-Platform Helper Functions
 # --------------------------------------------------------------------------------------------
