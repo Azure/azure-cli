@@ -376,7 +376,8 @@ def _upload_package_blob(ctx, package_file, url):
     """Upload the location file to storage url provided by autostorage"""
     BlobClient = get_sdk(ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
     blob_client = BlobClient.from_blob_url(url)
-    blob_client.upload_blob(package_file)
+    with open(package_file, "rb") as file:
+        blob_client.upload_blob(data=file.read(), overwrite=True)
 
 
 @transfer_doc(ApplicationPackageOperations.create)
