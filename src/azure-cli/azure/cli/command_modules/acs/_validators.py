@@ -68,12 +68,11 @@ def validate_ssh_key(namespace):
             if not content or str(content).strip() == "":
                 namespace.no_ssh_key = True
                 return
-            else:
-                raise CLIError(
-                    "The SSH key provided is not a valid RSA public key. "
-                    "Provide the contents of a valid SSH public key (for example, '~/.ssh/id_rsa.pub'), "
-                    "specify a path to a public key file, or add --generate-ssh-keys as a parameter to create a new key pair."
-                )
+            raise CLIError(
+                "The SSH key provided is not a valid RSA public key. "
+                "Provide the contents of a valid SSH public key (for example, '~/.ssh/id_rsa.pub'), "
+                "specify a path to a public key file, or add --generate-ssh-keys as a parameter to create a new key pair."
+            )
     namespace.ssh_key_value = content
 
 
