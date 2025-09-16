@@ -3173,7 +3173,7 @@ def _set_linux_user(cmd, vm_instance, resource_group_name, username,
 
     poller = _update_linux_access_extension(cmd, vm_instance, resource_group_name,
                                             protected_settings)
-    return LongRunningOperation(cmd.cli_ctx, 'setting user', 'done')(poller)
+    return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'setting user', 'done')(poller)
 
 
 def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, password, no_wait=False):
@@ -3205,7 +3205,7 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
     if no_wait:
         return poller
 
-    return LongRunningOperation(cmd.cli_ctx, 'resetting admin', 'done')(poller)
+    return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'resetting admin', 'done')(poller)
 
 
 def set_user(cmd, resource_group_name, vm_name, username, password=None, ssh_key_value=None,
@@ -3238,7 +3238,7 @@ def delete_user(cmd, resource_group_name, vm_name, username, no_wait=False):
 
     poller = _update_linux_access_extension(cmd, vm, resource_group_name,
                                             {'remove_user': username})
-    return LongRunningOperation(cmd.cli_ctx, 'deleting user', 'done')(poller)
+    return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'deleting user', 'done')(poller)
 
 
 def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
@@ -3256,7 +3256,7 @@ def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
 
     poller = _update_linux_access_extension(cmd, vm, resource_group_name,
                                             {'reset_ssh': True})
-    return LongRunningOperation(cmd.cli_ctx, 'resetting SSH', 'done')(poller)
+    return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'resetting SSH', 'done')(poller)
 # endregion
 
 
