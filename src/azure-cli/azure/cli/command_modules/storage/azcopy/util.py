@@ -146,8 +146,8 @@ def login_auth_for_azcopy(cmd):
 
 
 def client_auth_for_azcopy(cmd, client):
-    # prefer oauth mode
-    if client.credential:
+    # prefer oauth mode, if account-key is not provided
+    if client.credential and not hasattr(client.credential, "account_key"):
         raw_token = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)
         token_info = raw_token[0][2]
         try:
