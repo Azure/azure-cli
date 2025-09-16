@@ -82,44 +82,7 @@ def check_migration_prerequisites(cmd):
             logger.warning(f"  - {rec}")
     
     return prereqs
-
-def check_azure_authentication(cmd):
-    ps_executor = get_powershell_executor()
-    check_auth_script = """
-    try { 
-        $currentContext = Get-AzContext -ErrorAction SilentlyContinue
-        
-        if ($currentContext) {
-            Write-Host "Azure Authentication Status"
-            Write-Host ""
-            Write-Host "✓ Authenticated to Azure"
-            Write-Host ""
-            Write-Host "Account Details:"
-            Write-Host "  Account: $($currentContext.Account.Id)"
-            Write-Host "  Subscription: $($currentContext.Subscription.Name)"
-            Write-Host "  Subscription ID: $($currentContext.Subscription.Id)"
-            Write-Host "  Tenant ID: $($currentContext.Tenant.Id)"
-            Write-Host "  Environment: $($currentContext.Environment.Name)"
-        } else {
-            Write-Host "Azure Authentication Status"
-            Write-Host ""
-            Write-Host "✗ Not authenticated to Azure"
-            Write-Host ""
-            Write-Host "Please run 'az migrate auth login' to authenticate"
-        }
-    } catch {
-        Write-Host "Azure Authentication Status"
-        Write-Host ""
-        Write-Host "✗ Failed to check authentication status"
-        Write-Host "  Error: $($_.Exception.Message)"
-    }"""
-
-    try:
-        ps_executor.execute_script_interactive(check_auth_script)
-    except Exception as e:
-        raise CLIError(f'Failed to execute PowerShell commands: {str(e)}')
-            
-
+           
 def setup_migration_environment(cmd, install_powershell=False, check_only=False):
     """Configure the system environment for migration operations."""    
     logger = get_logger(__name__)
@@ -298,10 +261,6 @@ def _perform_platform_specific_checks(system):
         checks.append(f'Unsupported platform: {system}')
     
     return checks
-
-# --------------------------------------------------------------------------------------------
-# Authentication and Discovery Commands
-# --------------------------------------------------------------------------------------------
 
 def verify_migrate_setup(cmd, resource_group_name, project_name):
     """
@@ -706,11 +665,49 @@ def get_discovered_servers_by_display_name(cmd, resource_group_name, project_nam
         ps_executor.execute_script_interactive(search_script)
     except Exception as e:
         raise CLIError(f'Failed to search for servers: {str(e)}')
-    
+   
+# --------------------------------------------------------------------------------------------
+# Authentication and Discovery Commands
+# --------------------------------------------------------------------------------------------
+def check_azure_authentication(cmd):
+    ps_executor = get_powershell_executor()
+    check_auth_script = """
+    try { 
+        $currentContext = Get-AzContext -ErrorAction SilentlyContinue
+        
+        if ($currentContext) {
+            Write-Host "Azure Authentication Status"
+            Write-Host ""
+            Write-Host "Authenticated to Azure"
+            Write-Host ""
+            Write-Host "Account Details:"
+            Write-Host "  Account: $($currentContext.Account.Id)"
+            Write-Host "  Subscription: $($currentContext.Subscription.Name)"
+            Write-Host "  Subscription ID: $($currentContext.Subscription.Id)"
+            Write-Host "  Tenant ID: $($currentContext.Tenant.Id)"
+            Write-Host "  Environment: $($currentContext.Environment.Name)"
+        } else {
+            Write-Host "Azure Authentication Status"
+            Write-Host ""
+            Write-Host "Not authenticated to Azure"
+            Write-Host ""
+            Write-Host "Please run 'az migrate auth login' to authenticate"
+        }
+    } catch {
+        Write-Host "Azure Authentication Status"
+        Write-Host ""
+        Write-Host "Failed to check authentication status"
+        Write-Host "  Error: $($_.Exception.Message)"
+    }"""
+
+    try:
+        ps_executor.execute_script_interactive(check_auth_script)
+    except Exception as e:
+        raise CLIError(f'Failed to execute PowerShell commands: {str(e)}')
+
 def connect_azure_account(cmd, subscription_id=None, tenant_id=None, device_code=False, app_id=None, secret=None):
     """
-    Connect to Azure account using PowerShell Connect-AzAccount with enhanced visibility.
-    Azure CLI equivalent to Connect-AzAccount PowerShell cmdlet.
+    Connect to Azure account using PowerShell Connect-AzAccount.
     """
     ps_executor = get_powershell_executor()
     
@@ -770,15 +767,13 @@ def connect_azure_account(cmd, subscription_id=None, tenant_id=None, device_code
     """
     
     try:
-        # Use interactive execution to show real-time authentication progress with full visibility
         ps_executor.execute_script_interactive(connect_script)
     except Exception as e:
         raise CLIError(f'Failed to connect to Azure: {str(e)}')
 
 def disconnect_azure_account(cmd):
     """
-    Disconnect from Azure account using PowerShell Disconnect-AzAccount with enhanced visibility.
-    Azure CLI equivalent to Disconnect-AzAccount PowerShell cmdlet.
+    Disconnect from Azure account using PowerShell Disconnect-AzAccount.
     """
     ps_executor = get_powershell_executor()
     
@@ -813,8 +808,7 @@ def disconnect_azure_account(cmd):
 
 def set_azure_context(cmd, subscription_id=None, subscription_name=None, tenant_id=None):
     """
-    Set the current Azure context using PowerShell Set-AzContext with enhanced visibility.
-    Azure CLI equivalent to Set-AzContext PowerShell cmdlet.
+    Set the current Azure context using PowerShell Set-AzContext.
     """
     ps_executor = get_powershell_executor()
     
@@ -2296,70 +2290,3 @@ def new_azure_local_server_replication_with_mappings(cmd, resource_group_name, p
     except Exception as e:
         logger.error(f"Failed to create Azure Local server replication with mappings: {str(e)}")
         raise CLIError(f"Failed to create Azure Local server replication with mappings: {str(e)}")
-
-def get_azure_context(cmd):
-    """
-    Get the current Azure context using PowerShell Get-AzContext.
-    Azure CLI equivalent to Get-AzContext PowerShell cmdlet.
-    """
-    ps_executor = get_powershell_executor()
-    
-    get_context_script = """
-try { 
-    $currentContext = Get-AzContext -ErrorAction SilentlyContinue
-    if (-not $currentContext) {
-        Write-Host "Not currently connected to Azure"
-        return @{
-            IsAuthenticated = $false
-            Message = "No Azure context found"
-        }
-    }
-    
-    # Return context information
-    $contextInfo = @{
-        IsAuthenticated = $true
-        SubscriptionName = $currentContext.Subscription.Name
-        SubscriptionId = $currentContext.Subscription.Id
-        TenantId = $currentContext.Tenant.Id
-        Account = $currentContext.Account.Id
-        Environment = $currentContext.Environment.Name
-    }
-    
-    Write-Host "Current Azure Context:"
-    Write-Host "  Subscription: $($contextInfo.SubscriptionName) ($($contextInfo.SubscriptionId))"
-    Write-Host "  Tenant: $($contextInfo.TenantId)"
-    Write-Host "  Account: $($contextInfo.Account)"
-    Write-Host "  Environment: $($contextInfo.Environment)"
-    
-    return $contextInfo
-} catch {
-    Write-Error "Failed to get Azure context: $($_.Exception.Message)"
-    return @{
-        IsAuthenticated = $false
-        Message = "Error retrieving Azure context: $($_.Exception.Message)"
-    }
-}"""
-
-    try:
-        result = ps_executor.execute_ps_script(get_context_script)
-        
-        # Parse result if it's JSON
-        if isinstance(result, str):
-            try:
-                import json
-                parsed_result = json.loads(result)
-                return parsed_result
-            except json.JSONDecodeError:
-                # Return raw result if not JSON
-                return {
-                    'Status': 'Success',
-                    'Message': 'Azure context retrieved',
-                    'Result': result
-                }
-        
-        return result
-    except Exception as e:
-        return {
-            'IsAuthenticated': False,
-            'Message': f'Failed to get Azure context: {str(e)}'
-        }

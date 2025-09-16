@@ -39,10 +39,9 @@ def load_command_table(self, _):
 
     # Authentication commands
     with self.command_group('migrate auth') as g:
-        g.custom_command('check', 'check_azure_authentication')
-        g.custom_command('login', 'connect_azure_account')
-        g.custom_command('logout', 'disconnect_azure_account')
-        g.custom_command('set-context', 'set_azure_context')
-        g.custom_command('show-context', 'get_azure_context')
+        g.custom_command('check', 'check_azure_authentication') # Validated
+        g.custom_command('login', 'connect_azure_account') # Validated
+        g.custom_command('logout', 'disconnect_azure_account') # Validated
+        g.custom_command('set-context', 'set_azure_context') # Validated
 
 
