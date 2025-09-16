@@ -84,37 +84,41 @@ def check_migration_prerequisites(cmd):
     return prereqs
 
 def check_azure_authentication(cmd):
-    """Check Azure authentication status."""
+    ps_executor = get_powershell_executor()
+    check_auth_script = """
+    try { 
+        $currentContext = Get-AzContext -ErrorAction SilentlyContinue
+        
+        if ($currentContext) {
+            Write-Host "Azure Authentication Status"
+            Write-Host ""
+            Write-Host "✓ Authenticated to Azure"
+            Write-Host ""
+            Write-Host "Account Details:"
+            Write-Host "  Account: $($currentContext.Account.Id)"
+            Write-Host "  Subscription: $($currentContext.Subscription.Name)"
+            Write-Host "  Subscription ID: $($currentContext.Subscription.Id)"
+            Write-Host "  Tenant ID: $($currentContext.Tenant.Id)"
+            Write-Host "  Environment: $($currentContext.Environment.Name)"
+        } else {
+            Write-Host "Azure Authentication Status"
+            Write-Host ""
+            Write-Host "✗ Not authenticated to Azure"
+            Write-Host ""
+            Write-Host "Please run 'az migrate auth login' to authenticate"
+        }
+    } catch {
+        Write-Host "Azure Authentication Status"
+        Write-Host ""
+        Write-Host "✗ Failed to check authentication status"
+        Write-Host "  Error: $($_.Exception.Message)"
+    }"""
+
     try:
-        ps_executor = get_powershell_executor()
-        if not ps_executor:
-            raise CLIError('PowerShell is not available. Cannot check Azure authentication.')
-        
-        # Check if authenticated to Azure
-        auth_result = ps_executor.execute_script(
-            'if (Get-AzContext) { @{IsAuthenticated=$true; AccountId=(Get-AzContext).Account.Id} | ConvertTo-Json } else { @{IsAuthenticated=$false; Error="Not authenticated"} | ConvertTo-Json }'
-        )
-        
-        if auth_result.get('returncode') == 0:
-            try:
-                auth_data = json.loads(auth_result.get('stdout', '{}'))
-                if auth_data.get('IsAuthenticated'):
-                    logger.info(f"Authenticated as: {auth_data.get('AccountId', 'Unknown')}")
-                    return auth_data
-                else:
-                    logger.warning("Not authenticated to Azure")
-                    return auth_data
-            except json.JSONDecodeError:
-                logger.error("Failed to parse authentication status")
-                return {'IsAuthenticated': False, 'Error': 'Failed to parse response'}
-        else:
-            error_msg = auth_result.get('stderr', 'Unknown error')
-            logger.error(f"Authentication check failed: {error_msg}")
-            return {'IsAuthenticated': False, 'Error': error_msg}
-            
+        ps_executor.execute_script_interactive(check_auth_script)
     except Exception as e:
-        logger.error(f"Failed to check authentication: {str(e)}")
-        return {'IsAuthenticated': False, 'Error': str(e)}
+        raise CLIError(f'Failed to execute PowerShell commands: {str(e)}')
+            
 
 def setup_migration_environment(cmd, install_powershell=False, check_only=False):
     """Configure the system environment for migration operations."""    
