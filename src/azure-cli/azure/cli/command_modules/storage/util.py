@@ -44,10 +44,7 @@ def collect_blob_objects(blob_service, container, pattern=None):
             else:
                 blobs = container_client.list_blobs()
         for blob in blobs:
-            try:
-                blob_name = blob.name.encode('utf-8') if isinstance(blob.name, str) else blob.name
-            except NameError:
-                blob_name = blob.name
+            blob_name = blob.name
 
             if not pattern or _match_path(blob_name, pattern):
                 yield blob_name, blob

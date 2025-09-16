@@ -4,4 +4,4 @@ FROM mcr.microsoft.com/devcontainers/python:3.12
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Remove after production
-RUN pip install --no-cache-dir mcp
+RUN pip install --no-cache-dir fastmcp
