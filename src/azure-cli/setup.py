@@ -130,7 +130,7 @@ DEPENDENCIES = [
     'azure-multiapi-storage==1.5.0',
     'azure-storage-common~=1.4',
     'azure-synapse-accesscontrol~=0.5.0',
-    'azure-synapse-artifacts~=0.20.0',
+    'azure-synapse-artifacts~=0.21.0',
     'azure-synapse-managedprivateendpoints~=0.4.0',
     'azure-synapse-spark~=0.7.0',
     'chardet~=5.2.0',
