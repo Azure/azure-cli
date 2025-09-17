@@ -730,7 +730,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 )
             except Exception as ex:
                 # If what-if service fails, still show an informative message
-                return CommandResultItem(None, exit_code=1, error=CLIError('What-if preview failed: {str(ex)}\nNote: This was a preview operation. No actual changes were made.'))
+                return CommandResultItem(None, exit_code=1, error=CLIError(f'What-if preview failed: {str(ex)}\nNote: This was a preview operation. No actual changes were made.'))
 
     @staticmethod
     def _extract_parameter_names(args):
