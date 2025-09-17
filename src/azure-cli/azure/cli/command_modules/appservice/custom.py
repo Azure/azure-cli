@@ -514,6 +514,18 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     # pylint: disable=too-many-nested-blocks
     for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
         for s in src:
+            # Check if this looks like a simple key=value pair without JSON/dict syntax
+            # If so, parse it directly to avoid unnecessary warnings from ast.literal_eval
+            if ('=' in s and not s.lstrip().startswith(('{"', "[", "{")) and 
+                not s.startswith('@')):  # @ indicates file input
+                try:
+                    setting_name, value = s.split('=', 1)
+                    dest[setting_name] = value
+                    result.update(dest)
+                    continue
+                except ValueError:
+                    pass  # Fall back to JSON parsing if split fails
+            
             try:
                 temp = shell_safe_json_parse(s)
                 if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
