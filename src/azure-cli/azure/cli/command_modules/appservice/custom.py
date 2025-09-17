@@ -521,7 +521,6 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                 try:
                     setting_name, value = s.split('=', 1)
                     dest[setting_name] = value
-                    result.update(dest)
                     continue
                 except ValueError:
                     pass  # Fall back to JSON parsing if split fails
