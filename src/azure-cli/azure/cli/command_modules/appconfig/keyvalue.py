@@ -53,7 +53,7 @@ from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          JsonDiff, ImportMode)
 from ._featuremodels import map_keyvalue_to_featureflag
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
-from ._utils import get_appconfig_data_client, prep_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
+from ._utils import get_appconfig_data_client, prep_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type, strip_json_comments
 
 from ._diff_utils import print_preview, KVComparer
 from .feature import __list_features
@@ -507,9 +507,8 @@ def set_key(cmd,
         if retrieved_kv is None:
             if is_json_content_type(content_type):
                 try:
-                    # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
-                    value = 'null' if value is None else value
-                    json.loads(value)
+                    # Ensure that provided value is valid JSON and strip comments if needed.
+                    value = 'null' if value is None else __normalize_json_input(value)
                 except ValueError:
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
 
@@ -523,8 +522,8 @@ def set_key(cmd,
             content_type = retrieved_kv.content_type if content_type is None else content_type
             if is_json_content_type(content_type):
                 try:
-                    # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
-                    json.loads(value)
+                    # Ensure that provided value is valid JSON and strip comments if needed.
+                    value = __normalize_json_input(value)
                 except (TypeError, ValueError):
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}". Set the value again in valid JSON format.'.format(value, content_type))
             set_kv = ConfigurationSetting(key=key,
@@ -984,3 +983,16 @@ def list_revision(cmd,
         return retrieved_revisions
     except HttpResponseError as ex:
         raise CLIErrors.AzureResponseError('List revision operation failed.\n' + str(ex))
+
+
+def __normalize_json_input(json_string):
+    try:
+        json.loads(json_string)
+
+        return json_string
+
+    except json.JSONDecodeError:
+        string_without_comments = strip_json_comments(json_string)
+
+        json.loads(string_without_comments)
+        return string_without_comments

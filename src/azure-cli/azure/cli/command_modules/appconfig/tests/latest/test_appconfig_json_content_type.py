@@ -7,6 +7,7 @@
 
 import json
 import os
+from unittest import TestCase
 import yaml
 
 from knack.util import CLIError
@@ -272,6 +273,24 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Set the value again in valid JSON format."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --content-type {content_type} -y')
 
+        # Create a JSON value with both single-line and multiline comments and confirm it can be successfully set though sanitized
+        entry_key = "Key15"
+        
+        json_with_comments = "\"{\\\"key1\\\": \\\"value1\\\",// single-line comment\n\\\"key2\\\": \\\"value2\\\"\n/* multiline \n comment */}\"" # Double escaped as escaped string required in the CLI query
+
+        json_without_comments = "{{\"key1\": \"value1\",\n\"key2\": \"value2\"\n}}"
+
+        self.kwargs.update({
+            'key': entry_key,
+            'value': json_with_comments,
+            'content_type': json_content_type_01
+        })
+
+        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', json_without_comments),
+                         self.check('contentType', json_content_type_01)])
+
         """
         Test Scenario 2: AppConfig <--> AppConfig Import/Export
             - Add Feature Flag and Key vault Reference
@@ -450,3 +469,18 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         assert exported_yaml_file == exported_json_file
         os.remove(exported_yaml_file_path)
         os.remove(exported_file_path)
+
+class AppConfigJsonCommentsTest(TestCase):
+    def test_azconfig_strip_json_comments(self):
+        from azure.cli.command_modules.appconfig._utils import strip_json_comments
+
+        json_with_comments_file_path = os.path.join(TEST_DIR, 'json_with_comments.json')
+        clean_json_file_path = os.path.join(TEST_DIR, 'json_with_comments_stripped.json')
+
+        with open(json_with_comments_file_path) as json_file:
+            parsed_json = json.loads(strip_json_comments(json_file.read()))
+
+        with open(clean_json_file_path) as json_file:
+            expected_json = json.load(json_file)
+        
+        assert parsed_json == expected_json

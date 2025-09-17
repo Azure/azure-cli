@@ -20,6 +20,13 @@ from ._constants import HttpHeaders, FeatureFlagConstants
 
 logger = get_logger(__name__)
 
+DOUBLE_QUOTE = '\"'
+BACKSLASH = '\\'
+DOUBLE_SLASH = '//'
+MULTILINE_COMMENT_START = '/*'
+MULTILINE_COMMENT_END = '*/'
+NEW_LINE = '\n'
+
 
 def construct_connection_string(cmd, config_store_name):
     connection_string_template = 'Endpoint={};Id={};Secret={}'
@@ -254,3 +261,73 @@ def parse_tags_to_dict(tags):
                 tags_dict[tag_key] = tag_value
         return tags_dict
     return tags
+
+
+def strip_json_comments(json_string):
+    current_index = 0
+    length = len(json_string)
+    result = []
+
+    def __isEscaped(json_string, char_index):
+        backslash_count = 0
+        idx = char_index - 1
+        while idx >= 0 and json_string[idx] == '\\':
+            backslash_count += 1
+            idx -= 1
+
+        return backslash_count % 2 == 1
+
+    def __find_next_newline_index(json_string, start_index):
+        idx = start_index
+
+        while idx < length:
+            if json_string[idx] == NEW_LINE:
+                break
+
+            idx += 1
+
+        return idx
+
+    def __find_next_double_quote_index(json_string, start_index):
+        idx = start_index
+        while idx < length:
+            if json_string[idx] == DOUBLE_QUOTE and not __isEscaped(json_string, idx):
+                return idx
+
+            idx += 1
+
+        raise ValueError("Unterminated string literal")
+
+    def __find_next_multiline_comment_end(json_string, start_index):
+        idx = start_index
+        while idx < length - 1:
+            if json_string[idx:idx + 2] == MULTILINE_COMMENT_END:
+                return idx + 1
+
+            idx += 1
+
+        raise ValueError("Unterminated multi-line comment")
+
+    while current_index < length:
+        # Single line comment
+        if json_string[current_index:current_index + 2] == DOUBLE_SLASH:
+            current_index = __find_next_newline_index(json_string, current_index)
+            if current_index < length and json_string[current_index] == NEW_LINE:
+                result.append(NEW_LINE)
+
+        # Multi-line comment
+        elif json_string[current_index:current_index + 2] == MULTILINE_COMMENT_START:
+            current_index = __find_next_multiline_comment_end(json_string, current_index + 2)
+
+        # String literal
+        elif json_string[current_index] == DOUBLE_QUOTE:
+            literal_start_index = current_index
+            current_index = __find_next_double_quote_index(json_string, current_index + 1)
+
+            result.extend(json_string[literal_start_index:current_index + 1])
+        else:
+            result.append(json_string[current_index])
+
+        current_index += 1
+
+    return "".join(result)
