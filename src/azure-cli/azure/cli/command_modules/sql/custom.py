@@ -4369,6 +4369,7 @@ def server_create(
         external_admin_principal_type=None,
         external_admin_sid=None,
         external_admin_name=None,
+        what_if=None,
         **kwargs):
     '''
     Creates a server.
