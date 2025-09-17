@@ -7,6 +7,7 @@
 
 import json
 import os
+
 from unittest import TestCase
 import yaml
 
@@ -278,7 +279,9 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         
         json_with_comments = "\"{\\\"key1\\\": \\\"value1\\\",// single-line comment\n\\\"key2\\\": \\\"value2\\\"\n/* multiline \n comment */}\"" # Double escaped as escaped string required in the CLI query
 
-        json_without_comments = "{{\"key1\": \"value1\",\n\"key2\": \"value2\"\n}}"
+        json_without_comments = """{{"key1": "value1",
+"key2": "value2"
+}}"""
 
         self.kwargs.update({
             'key': entry_key,
@@ -483,4 +486,4 @@ class AppConfigJsonCommentsTest(TestCase):
         with open(clean_json_file_path) as json_file:
             expected_json = json.load(json_file)
         
-        assert parsed_json == expected_json
+        self.assertEqual(parsed_json, expected_json)
