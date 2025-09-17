@@ -516,8 +516,8 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         for s in src:
             # Check if this looks like a simple key=value pair without JSON/dict syntax
             # If so, parse it directly to avoid unnecessary warnings from ast.literal_eval
-            if ('=' in s and not s.lstrip().startswith(('{"', "[", "{")) and 
-                not s.startswith('@')):  # @ indicates file input
+            if ('=' in s and not s.lstrip().startswith(('{"', "[", "{")) and
+                    not s.startswith('@')):  # @ indicates file input
                 try:
                     setting_name, value = s.split('=', 1)
                     dest[setting_name] = value
@@ -525,7 +525,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                     continue
                 except ValueError:
                     pass  # Fall back to JSON parsing if split fails
-            
+
             try:
                 temp = shell_safe_json_parse(s)
                 if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
