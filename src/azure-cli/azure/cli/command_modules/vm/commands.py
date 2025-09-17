@@ -7,7 +7,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vm_ext, cf_vm_ext_image,
                                                           cf_vm_image, cf_vm_image_term, cf_usage,
                                                           cf_vmss, cf_disks, cf_snapshots,
-                                                          cf_images, cf_run_commands,
+                                                          cf_images,
                                                           cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
@@ -111,9 +111,8 @@ def load_command_table(self, _):
         client_factory=cf_usage
     )
 
-    compute_vm_run_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineRunCommandsOperations.{}',
-        client_factory=cf_run_commands
+    compute_vm_run_profile = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineRunCommandsOperations.{}'
     )
 
     compute_vmss_run_sdk = CliCommandType(
@@ -377,13 +376,12 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_nic')
         g.custom_command('list', 'list_vm_nics')
 
-    with self.command_group('vm run-command', compute_vm_run_sdk, client_factory=cf_run_commands, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
+    with self.command_group('vm run-command', compute_vm_run_profile, operation_group='virtual_machine_run_commands') as g:
         g.custom_command('invoke', 'vm_run_command_invoke', supports_no_wait=True)
         g.custom_command('list', 'vm_run_command_list')
         g.custom_show_command('show', 'vm_run_command_show')
         g.custom_command('create', 'vm_run_command_create', supports_no_wait=True)
         g.custom_command('update', 'vm_run_command_update', supports_no_wait=True)
-        g.custom_command('delete', 'vm_run_command_delete', supports_no_wait=True, confirmation=True)
         g.custom_wait_command('wait', 'vm_run_command_show')
 
     with self.command_group('vm secret', compute_vm_sdk) as g:
@@ -422,7 +420,6 @@ def load_command_table(self, _):
         g.custom_command('application list', 'list_vmss_applications', min_api='2021-07-01')
         g.custom_command('create', 'create_vmss', transform=DeploymentOutputLongRunningOperation(self.cli_ctx, 'Starting vmss create'), supports_no_wait=True, table_transformer=deployment_validate_table_format, validator=process_vmss_create_namespace, exception_handler=handle_template_based_exception)
         g.custom_command('deallocate', 'deallocate_vmss', supports_no_wait=True)
-        g.custom_command('delete-instances', 'delete_vmss_instances', supports_no_wait=True)
         g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
         g.custom_command('list-instance-connection-info', 'list_vmss_instance_connection_info')
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
@@ -430,7 +427,6 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
-        g.custom_command('start', 'start_vmss', supports_no_wait=True)
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
         g.generic_update_command('update', getter_name='get_vmss_modified', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)

@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2025-06-01"],
         ]
     }
 
@@ -222,7 +222,7 @@ class Update(AAZCommand):
             options=["service-level"],
             help="serviceLevel",
             nullable=True,
-            enum={"Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
+            enum={"Flexible": "Flexible", "Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
         )
         _element.smb_access_based_enumeration = AAZStrArg(
             options=["smb-access-based-enumeration"],
@@ -328,12 +328,6 @@ class Update(AAZCommand):
         )
 
         replication = cls._args_schema.volumes.Element.data_protection.replication
-        replication.endpoint_type = AAZStrArg(
-            options=["endpoint-type"],
-            help="Indicates whether the local volume is the source or destination for the Volume Replication",
-            nullable=True,
-            enum={"dst": "dst", "src": "src"},
-        )
         replication.remote_volume_region = AAZStrArg(
             options=["remote-volume-region"],
             help="The remote region for the other end of the Volume Replication.",
@@ -580,7 +574,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -683,7 +677,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -815,7 +809,6 @@ class Update(AAZCommand):
 
             replication = _builder.get(".properties.volumes[].properties.dataProtection.replication")
             if replication is not None:
-                replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
                 replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id")
                 replication.set_prop("replicationSchedule", AAZStrType, ".replication_schedule")
@@ -988,6 +981,9 @@ class _UpdateHelper:
         _element.zones = AAZListType()
 
         properties = _schema_volume_group_details_read.properties.volumes.Element.properties
+        properties.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrType(
+            serialized_name="acceptGrowCapacityPoolForShortTermCloneSplit",
+        )
         properties.actual_throughput_mibps = AAZFloatType(
             serialized_name="actualThroughputMibps",
             flags={"read_only": True},
@@ -1064,6 +1060,11 @@ class _UpdateHelper:
         )
         properties.file_system_id = AAZStrType(
             serialized_name="fileSystemId",
+            flags={"read_only": True},
+        )
+        properties.inherited_size_in_bytes = AAZIntType(
+            serialized_name="inheritedSizeInBytes",
+            nullable=True,
             flags={"read_only": True},
         )
         properties.is_default_quota_enabled = AAZBoolType(
@@ -1210,6 +1211,7 @@ class _UpdateHelper:
         )
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
+            flags={"read_only": True},
         )
         replication.remote_path = AAZObjectType(
             serialized_name="remotePath",

@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "search",
 )
 class __CMDGroup(AAZCommandGroup):
-    """Manage Azure Search services, admin keys and query keys
+    """Manage Search
     """
     pass
 

@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2025-06-01"],
         ]
     }
 
@@ -134,7 +134,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -231,6 +231,9 @@ class Wait(AAZWaitCommand):
             _element.zones = AAZListType()
 
             properties = cls._schema_on_200.properties.volumes.Element.properties
+            properties.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrType(
+                serialized_name="acceptGrowCapacityPoolForShortTermCloneSplit",
+            )
             properties.actual_throughput_mibps = AAZFloatType(
                 serialized_name="actualThroughputMibps",
                 flags={"read_only": True},
@@ -307,6 +310,11 @@ class Wait(AAZWaitCommand):
             )
             properties.file_system_id = AAZStrType(
                 serialized_name="fileSystemId",
+                flags={"read_only": True},
+            )
+            properties.inherited_size_in_bytes = AAZIntType(
+                serialized_name="inheritedSizeInBytes",
+                nullable=True,
                 flags={"read_only": True},
             )
             properties.is_default_quota_enabled = AAZBoolType(
@@ -453,6 +461,7 @@ class Wait(AAZWaitCommand):
             )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
+                flags={"read_only": True},
             )
             replication.remote_path = AAZObjectType(
                 serialized_name="remotePath",

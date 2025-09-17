@@ -1,0 +1,198 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - AZURECLI/2.73.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/somePolicyDefinition?api-version=2024-05-01
+  response:
+    body:
+      string: '{"error":{"code":"PolicyDefinitionNotFound","message":"The policy definition
+        ''somePolicyDefinition'' could not be found."}}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json
+      date:
+      - Thu, 22 May 2025 19:52:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - ''
+      x-msedge-ref:
+      - 'Ref A: 7B6CE64B8DAD4B09977EC0FA7E565D20 Ref B: CO6AA3150217045 Ref C: 2025-05-22T19:52:31Z'
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name
+      User-Agent:
+      - AZURECLI/2.73.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Authorization/policyDefinitions/somePolicyDefinition?api-version=2024-05-01
+  response:
+    body:
+      string: '{"error":{"code":"PolicyDefinitionNotFound","message":"The policy definition
+        ''somePolicyDefinition'' could not be found."}}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '122'
+      content-type:
+      - application/json
+      date:
+      - Thu, 22 May 2025 19:52:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=3d826307-2481-45a0-a271-bcf9333f914a/westus2/53f7c5dd-b73f-4fd4-8c8d-a331a41c343a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 29CD3A9D0A3441E3B6B51443F9BD4A0F Ref B: CO6AA3150217045 Ref C: 2025-05-22T19:52:31Z'
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n
+      User-Agent:
+      - AZURECLI/2.73.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Authorization/policyDefinitions/fee5cb2b-9d9b-410e-afe3-2902d90d0004?api-version=2024-05-01
+  response:
+    body:
+      string: '{"properties":{"displayName":"[Deprecated]: Show audit results from
+        Linux VMs that do not have the specified applications installed","policyType":"BuiltIn","mode":"All","description":"This
+        policy should only be used along with its corresponding deploy policy in an
+        initiative. This definition allows Azure Policy to process the results of
+        auditing Linux virtual machines that do not have the specified applications
+        installed. For more information on Guest Configuration policies, please visit
+        https://aka.ms/gcpol","metadata":{"version":"4.0.0-deprecated","category":"Guest
+        Configuration","deprecated":true},"version":"4.0.0","policyRule":{"if":{"anyOf":[{"allOf":[{"field":"type","equals":"Microsoft.Compute/virtualMachines"},{"anyOf":[{"field":"Microsoft.Compute/imagePublisher","in":["microsoft-aks","qubole-inc","datastax","couchbase","scalegrid","checkpoint","paloaltonetworks","debian"]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"OpenLogic"},{"field":"Microsoft.Compute/imageOffer","like":"CentOS*"},{"field":"Microsoft.Compute/imageSKU","notLike":"6*"}]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"Oracle"},{"field":"Microsoft.Compute/imageOffer","equals":"Oracle-Linux"},{"field":"Microsoft.Compute/imageSKU","notLike":"6*"}]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"RedHat"},{"field":"Microsoft.Compute/imageOffer","in":["RHEL","RHEL-HA","RHEL-SAP","RHEL-SAP-APPS","RHEL-SAP-HA","RHEL-SAP-HANA"]},{"field":"Microsoft.Compute/imageSKU","notLike":"6*"}]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"RedHat"},{"field":"Microsoft.Compute/imageOffer","in":["osa","rhel-byos"]}]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"center-for-internet-security-inc"},{"field":"Microsoft.Compute/imageOffer","in":["cis-centos-7-l1","cis-centos-7-v2-1-1-l1","cis-centos-8-l1","cis-debian-linux-8-l1","cis-debian-linux-9-l1","cis-nginx-centos-7-v1-1-0-l1","cis-oracle-linux-7-v2-0-0-l1","cis-oracle-linux-8-l1","cis-postgresql-11-centos-linux-7-level-1","cis-rhel-7-l2","cis-rhel-7-v2-2-0-l1","cis-rhel-8-l1","cis-suse-linux-12-v2-0-0-l1","cis-ubuntu-linux-1604-v1-0-0-l1","cis-ubuntu-linux-1804-l1"]}]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"credativ"},{"field":"Microsoft.Compute/imageOffer","equals":"Debian"},{"field":"Microsoft.Compute/imageSKU","notLike":"7*"}]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"Suse"},{"field":"Microsoft.Compute/imageOffer","like":"SLES*"},{"field":"Microsoft.Compute/imageSKU","notLike":"11*"}]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"Canonical"},{"field":"Microsoft.Compute/imageOffer","contains":"Ubuntu"},{"field":"Microsoft.Compute/imageSKU","notLike":"12*"}]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"microsoft-dsvm"},{"field":"Microsoft.Compute/imageOffer","in":["linux-data-science-vm-ubuntu","azureml","ubuntu-hpc","ubuntu-1804"]}]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"cloudera"},{"field":"Microsoft.Compute/imageOffer","equals":"cloudera-centos-os"},{"field":"Microsoft.Compute/imageSKU","notLike":"6*"}]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"cloudera"},{"field":"Microsoft.Compute/imageOffer","equals":"cloudera-altus-centos-os"}]},{"allOf":[{"field":"Microsoft.Compute/imagePublisher","equals":"microsoft-ads"},{"field":"Microsoft.Compute/imageOffer","like":"linux*"}]},{"allOf":[{"anyOf":[{"field":"Microsoft.Compute/virtualMachines/osProfile.linuxConfiguration","exists":"true"},{"field":"Microsoft.Compute/virtualMachines/storageProfile.osDisk.osType","like":"Linux*"}]},{"anyOf":[{"field":"Microsoft.Compute/imagePublisher","exists":"false"},{"field":"Microsoft.Compute/imagePublisher","notIn":["OpenLogic","RedHat","credativ","Suse","Canonical","microsoft-dsvm","cloudera","microsoft-ads","center-for-internet-security-inc","Oracle","AzureDatabricks","azureopenshift"]}]}]}]}]},{"allOf":[{"field":"type","equals":"Microsoft.HybridCompute/machines"},{"field":"Microsoft.HybridCompute/imageOffer","like":"linux*"}]}]},"then":{"effect":"auditIfNotExists","details":{"type":"Microsoft.GuestConfiguration/guestConfigurationAssignments","name":"installed_application_linux","existenceCondition":{"field":"Microsoft.GuestConfiguration/guestConfigurationAssignments/complianceStatus","equals":"Compliant"}}}},"versions":["4.0.0"]},"id":"/providers/Microsoft.Authorization/policyDefinitions/fee5cb2b-9d9b-410e-afe3-2902d90d0004","type":"Microsoft.Authorization/policyDefinitions","name":"fee5cb2b-9d9b-410e-afe3-2902d90d0004"}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '4617'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 22 May 2025 19:52:31 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - ''
+      x-msedge-ref:
+      - 'Ref A: 4E5051DBCD1A4DF29BF531DFC0AAD566 Ref B: CO6AA3150220039 Ref C: 2025-05-22T19:52:31Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - policy definition show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --name --management-group
+      User-Agent:
+      - AZURECLI/2.73.0 azsdk-python-core/1.31.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/providers/Microsoft.Management/managementGroups/fee5cb2b-9d9b-410e-afe3-2902d90d0004/providers/Microsoft.Authorization/policyDefinitions/fee5cb2b-9d9b-410e-afe3-2902d90d0004?api-version=2024-05-01
+  response:
+    body:
+      string: '{"error":{"code":"PolicyDefinitionNotFound","message":"The policy definition
+        ''fee5cb2b-9d9b-410e-afe3-2902d90d0004'' could not be found."}}'
+    headers:
+      cache-control:
+      - no-store, no-cache
+      content-length:
+      - '138'
+      content-type:
+      - application/json
+      date:
+      - Thu, 22 May 2025 19:52:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - ''
+      x-msedge-ref:
+      - 'Ref A: EB0208447711464FAF3C14B6303C6CA7 Ref B: MWH011020806060 Ref C: 2025-05-22T19:52:32Z'
+    status:
+      code: 404
+      message: Not Found
+version: 1
