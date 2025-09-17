@@ -268,43 +268,43 @@ def strip_json_comments(json_string):
     length = len(json_string)
     result = []
 
-    def __isEscaped(json_string, char_index):
+    def __is_escaped(json_string, char_index):
         backslash_count = 0
-        idx = char_index - 1
-        while idx >= 0 and json_string[idx] == '\\':
+        index = char_index - 1
+        while index >= 0 and json_string[index] == BACKSLASH:
             backslash_count += 1
-            idx -= 1
+            index -= 1
 
         return backslash_count % 2 == 1
 
     def __find_next_newline_index(json_string, start_index):
-        idx = start_index
+        index = start_index
 
-        while idx < length:
-            if json_string[idx] == NEW_LINE:
+        while index < length:
+            if json_string[index] == NEW_LINE:
                 break
 
-            idx += 1
+            index += 1
 
-        return idx
+        return index
 
     def __find_next_double_quote_index(json_string, start_index):
-        idx = start_index
-        while idx < length:
-            if json_string[idx] == DOUBLE_QUOTE and not __isEscaped(json_string, idx):
-                return idx
+        index = start_index
+        while index < length:
+            if json_string[index] == DOUBLE_QUOTE and not __is_escaped(json_string, index):
+                return index
 
-            idx += 1
+            index += 1
 
         raise ValueError("Unterminated string literal")
 
     def __find_next_multiline_comment_end(json_string, start_index):
-        idx = start_index
-        while idx < length - 1:
-            if json_string[idx:idx + 2] == MULTILINE_COMMENT_END:
-                return idx + 1
+        index = start_index
+        while index < length - 1:
+            if json_string[index:index + 2] == MULTILINE_COMMENT_END:
+                return index + 1
 
-            idx += 1
+            index += 1
 
         raise ValueError("Unterminated multi-line comment")
 

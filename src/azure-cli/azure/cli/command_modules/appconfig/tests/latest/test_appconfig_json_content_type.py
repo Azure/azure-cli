@@ -277,21 +277,22 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         # Create a JSON value with both single-line and multiline comments and confirm it can be successfully set though sanitized
         entry_key = "Key15"
         
-        json_with_comments = "\"{\\\"key1\\\": \\\"value1\\\",// single-line comment\n\\\"key2\\\": \\\"value2\\\"\n/* multiline \n comment */}\"" # Double escaped as escaped string required in the CLI query
+        escaped_json_with_comments = "\"{\\\"key1\\\": \\\"value1 is of the type \\\\\\\"string\\\\\\\"\\\",// single-line comment\n\\\"key2\\\": \\\"value2\\\"\n/* multiline \n comment */}\"" # Double escaped as escaped string required in the CLI query
 
-        json_without_comments = """{{"key1": "value1",
+        json_response = """{{"key1": "value1 is of the type \\"string\\"",// single-line comment
 "key2": "value2"
-}}"""
+/* multiline 
+ comment */}}"""
 
         self.kwargs.update({
             'key': entry_key,
-            'value': json_with_comments,
+            'value': escaped_json_with_comments,
             'content_type': json_content_type_01
         })
 
         self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
                  checks=[self.check('key', entry_key),
-                         self.check('value', json_without_comments),
+                         self.check('value', json_response),
                          self.check('contentType', json_content_type_01)])
 
         """

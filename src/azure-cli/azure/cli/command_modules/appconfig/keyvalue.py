@@ -508,7 +508,9 @@ def set_key(cmd,
             if is_json_content_type(content_type):
                 try:
                     # Ensure that provided value is valid JSON and strip comments if needed.
-                    value = 'null' if value is None else __normalize_json_input(value)
+                    value = 'null' if value is None else value
+
+                    __validate_json_input(value)
                 except ValueError:
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
 
@@ -523,7 +525,7 @@ def set_key(cmd,
             if is_json_content_type(content_type):
                 try:
                     # Ensure that provided value is valid JSON and strip comments if needed.
-                    value = __normalize_json_input(value)
+                    __validate_json_input(value)
                 except (TypeError, ValueError):
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}". Set the value again in valid JSON format.'.format(value, content_type))
             set_kv = ConfigurationSetting(key=key,
@@ -985,14 +987,10 @@ def list_revision(cmd,
         raise CLIErrors.AzureResponseError('List revision operation failed.\n' + str(ex))
 
 
-def __normalize_json_input(json_string):
+# Helper function to validate JSON input that may contain comments
+def __validate_json_input(json_string):
     try:
         json.loads(json_string)
 
-        return json_string
-
     except json.JSONDecodeError:
-        string_without_comments = strip_json_comments(json_string)
-
-        json.loads(string_without_comments)
-        return string_without_comments
+        json.loads(strip_json_comments(json_string))

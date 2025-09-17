@@ -1,4 +1,4 @@
-{// Test single-line backslash comment
+{ // Test single-line backslash comment
   "Array": [
     "StringBoolValue",
     "true",
@@ -7,13 +7,14 @@
     "StringNumberValue",
     "20.2"
   ],
-/* Test multi-line comment
+  /* Test multi-line comment
      spanning multiple lines
   */
   "ComplexSettings": {
     "MyHybridList": [
       1000,
       true,
+      "\"EscapedString\"",
       "AppConfig string value",
       [
         "NestedArray",
@@ -30,236 +31,46 @@
         }
       }
     ],
-    "MyListOfHybridLists": [
-      [
-        "NestedArray4",
-        34
-      ],
-      [
-        "NestedArray5",
-        true,
-        null
-      ],
-      [
-        "NestedArray6",
-        {
-          "MyNullValue": null,
-          "MyObject": {
-            "Property": {
-              "Name": {
-                "Name1": "Value1",
-                "Name2": "Value2"
-              }
+// Feature management settings
+    "FeatureManagement": {
+      "Beta": {
+        "EnabledFor": [
+          {
+            "Name": "1",
+            "Parameters": {
+              "q": true,
+              "w": 243,
+              "e": null,
+              "r": [
+                1,
+                2,
+                3
+              ],
+              "t": [
+                "a",
+                "b",
+                "c"
+              ],
+              "y": {
+                "Name": "Value"
+              },
+              "u": "string"
+            }
+          },
+          {
+            "Name": "1"
+          },
+          {
+            "Name": "2",
+            "Parameters": {
+              "a": "ss",
+              "s": 21
             }
           }
-        }
-      ]
-    ],
-    "MyListOfStringLists": [
-      [
-        "NestedArray1",
-        "12",
-        "false",
-        "null"
-      ],
-      [
-        "NestedArray2",
-        "text"
-      ],
-      [
-        "NestedArray3"
-      ]
-    ],
-    "MyNestedObjects": {
-      "Object1": "Value1",
-      "Object2": {
-        "Property": {
-          "Name": {
-            "Name1": "Value1",
-            "Name2": "Value2"
-          }
-        }
-      }
-    },
-    "MyNullValue": null,
-    "MyNumberList": [
-      10,
-      20,
-      30,
-      40,
-      55.5
-    ],
-    "MyObject": {
-      "ObjectSetting": {
-        "Logging": {
-          "Default": "Debug",
-          "LogLevel": "Information"
-        }
-      }
-    },
-    "MyStringList": [
-      "abc",
-      "def",
-      "ghi"
-    ]
-  },
-  "KeyVaultRef2": {
-    "uri": "https://keyvault-importexport.vault.azure.net/secrets/ManuallyCreatedSecret"
-  },
-  "KeyVaultRef": {
-    "uri": "https://keyvault-importexport.vault.azure.net/secrets/ManuallyCreatedCert"
-  },
-  "Object1": {
-    "Obj1": "null",
-    "Obj2": "true",
-    "Obj3": "33"
-  },
-  "Object2": {
-    "Obj1": null,
-    "Obj2": false,
-    "Obj3": 666
-  },
-  "SimpleSettings": {
-    "AppName": "Azure App Configuration Demo",
-    "BackgroundColor": "Yellow",
-    "FontSize": 50,
-    "Language": "English",
-    "Messages": "Hello There;You are reading this setting from Azure AppConfiguration store",
-    "MyBoolValue": true,
-    "MyDateTime": "2020-01-01T12:34:56.789Z",
-    "MyEmptyList": [],
-    "MyEmptyObject": {},
-    "MyNullValue": null,
-    "MyNumberList": [
-      10,
-      20,
-      30,
-      40,
-      55.5
-    ],
-    "MyObject": {
-      "ObjectSetting": {
-        "Logging": {
-          "Default": "Debug",
-          "LogLevel": "Information"
-        }
-      }
-    },
-    "MyStringList": [
-      "abc",
-      "def",
-      "ghi"
-    ],
-    "RefreshRate": 3000,
-    "Version": 1.1
-  },
-  "StringBoolValue": "true",
-  "StringNullValue": "null",
-  "StringNumberValue": "20.2",
-  "FeatureManagement": {
-    "Beta": {
-      "EnabledFor": [
-        {
-          "Name": "1",
-          "Parameters": {
-            "q": true,
-            "w": 243,
-            "e": null,
-            "r": [
-              1,
-              2,
-              3
-            ],
-            "t": [
-              "a",
-              "b",
-              "c"
-            ],
-            "y": {
-              "Name": "Value"
-            },
-            "u": "string"
-          }
-        },
-        {
-          "Name": "1"
-        },
-        {
-          "Name": "2",
-          "Parameters": {
-            "a": "ss",
-            "s": 21
-          }
-        }
-      ]
-    },
-    "DisabledFeature": false,
-    "EnabledFeature": true,
-    "Feature1": {
-      "EnabledFor": [
-        {
-          "Name": "Filter1",
-          "Parameters": {
-            "Name1": "Value1"
-          }
-        }
-      ]
-    },
-    "Feature2": {
-      "EnabledFor": [
-        {
-          "Name": "Filter2",
-          "Parameters": {
-            "Name2": "Value2"
-          }
-        }
-      ]
-    },
-    "level": {
-      "EnabledFor": [
-        {
-          "Name": "1",
-          "Parameters": {
-            "q": true,
-            "w": 243,
-            "e": null,
-            "r": [
-              1,
-              2,
-              3
-            ],
-            "t": [
-              "a",
-              "b",
-              "c"
-            ],
-            "y": {
-              "Name": "Value"
-            },
-            "u": "string"
-          }
-        },
-        {
-          "Name": "1"
-        },
-        {
-          "Name": "2",
-          "Parameters": {
-            "a": "ss",
-            "s": 21
-          }
-        }
-      ]
-    },
-    "testing": {
-      "EnabledFor": [
-        {
-          "Name": "sad",
-          "Parameters": {
-            "sdasd": "asdsad"
-          }
-        }
-      ]
+        ]
+      },
+      "DisabledFeature": false,
+      "EnabledFeature": true
     }
   }
 }
