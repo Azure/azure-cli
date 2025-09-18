@@ -14,8 +14,6 @@ from azure.cli.core.azclierror import (
 )
 # from azure.cli.core._profile import Profile
 from ._resource_config import (
-    SOURCE_RESOURCES_USERTOKEN,
-    TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
 from azure.cli.core import get_default_cli
@@ -126,8 +124,9 @@ def set_user_token_header(client, cli_ctx):
 
 def set_user_token_by_source_and_target(client, cli_ctx, source, target):
     '''Set user token header to work around OBO according to source and target'''
-    if source in SOURCE_RESOURCES_USERTOKEN or target in TARGET_RESOURCES_USERTOKEN:
-        return set_user_token_header(client, cli_ctx)
+    # deprecated
+    # if source in SOURCE_RESOURCES_USERTOKEN or target in TARGET_RESOURCES_USERTOKEN:
+    #     return set_user_token_header(client, cli_ctx)
     return client
 
 
@@ -582,13 +581,13 @@ def compare_properties_changed(new_props, existing_props):
     Returns True if there are differences that require an update.
     """
     def has_meaningful_changes(new_value, existing_value):
-        if new_value is None:
-            # If new value is None, no change needed
+        if new_value is None or new_value == "":
             return False
 
         if isinstance(new_value, dict) and isinstance(existing_value, dict):
-            # For nested dictionaries, check each key recursively
             for key, value in new_value.items():
+                if key == "mysql-identity-id" or key == 'user_object_id':
+                    continue
                 existing_props_key = key
                 if '_' in key:
                     existing_props_key = to_camel_case(key)
@@ -596,25 +595,15 @@ def compare_properties_changed(new_props, existing_props):
                 if has_meaningful_changes(value, existing_nested):
                     return True
             return False
-        elif isinstance(new_value, dict) and existing_value is None:
-            # If existing is None but new is a dict, check if any values in new dict are meaningful
+        if isinstance(new_value, dict) and existing_value is None:
             for value in new_value.values():
-                if value is not None:
+                if value is not None or value != "":
                     return True
             return False
-        else:
-            # For primitive values, compare directly
-            return new_value != existing_value
 
-    # Check if any property has meaningful changes
-    for key, new_value in new_props.items():
-        existing_props_key = key
-        if '_' in key:
-            existing_props_key = to_camel_case(key)
-        existing_value = existing_props.get(existing_props_key) if existing_props else None
-        if has_meaningful_changes(new_value, existing_value):
-            return True
-    return False
+        return new_value != existing_value
+
+    return has_meaningful_changes(new_props, existing_props)
 
 
 def to_camel_case(snake_str):
@@ -622,4 +611,3 @@ def to_camel_case(snake_str):
         return snake_str
     components = snake_str.split('_')
     return components[0] + ''.join(word.capitalize() for word in components[1:])
-
