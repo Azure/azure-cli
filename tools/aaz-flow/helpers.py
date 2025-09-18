@@ -77,10 +77,10 @@ async def validate_paths(ctx: Context) -> dict:
             raise FileNotFoundError(f"{key.replace('_', ' ')} path does not exist: {path}")
 
     await ctx.info("az_cli : Path validation completed.")
-    await ctx.report_progress(progress=25, total=100)
+    await ctx.report_progress(progress=35, total=100)
     return paths
 
-async def get_extension_name(ctx: Context) -> str:
+async def get_name(ctx: Context) -> str:
     """Get the extension or module name from user."""
     await ctx.info("az_cli : Fetching available services...")
     common_extensions = await fetch_available_services()
