@@ -398,12 +398,7 @@ def show_what_if(cmd, script_path):
     except Exception as ex:
         raise CLIError(f"Failed to connect to the what-if service: {ex}")
     
-    if response.status_code == 200:
-        try:
-            results = response.json()
-        except ValueError as ex:
-            raise CLIError(f"Failed to parse response from what-if service: {ex}")
-    else:
+    if response.status_code != 200:
         error_msg = f"HTTP {response.status_code}: Request failed"
         try:
             error_detail = response.text
@@ -413,4 +408,162 @@ def show_what_if(cmd, script_path):
             pass
         raise CLIError(error_msg)
     
-    return results
+    try:
+        raw_results = response.json()
+    except ValueError as ex:
+        raise CLIError(f"Failed to parse response from what-if service: {ex}")
+    
+    if not raw_results.get('success', True):
+        return raw_results
+    
+    what_if_result = raw_results.get('what_if_result', {})
+    changes = what_if_result.get('changes', [])
+    
+    from azure.cli.core.style import Style, print_styled_text
+    
+    print_styled_text([
+        (Style.HIGHLIGHT, "═" * 80),
+        (Style.HIGHLIGHT, "\n"),
+        (Style.ACTION, "  AZURE WHAT-IF ANALYSIS RESULTS\n"),
+        (Style.HIGHLIGHT, "═" * 80),
+        (Style.HIGHLIGHT, "\n\n")
+    ])
+
+    summary = what_if_result.get('summary', {})
+    status = what_if_result.get('status', 'Unknown')
+    
+    print_styled_text([
+        (Style.SUCCESS if status == 'Succeeded' else Style.WARNING, f"Status: {status}\n"),
+        (Style.PRIMARY, f"Total Changes: {len(changes)}\n\n")
+    ])
+    
+    if summary:
+        print_styled_text([(Style.IMPORTANT, "Summary:\n")])
+        for change_type, count in summary.items():
+            color = Style.SUCCESS if change_type == 'Create' else Style.WARNING if change_type == 'Modify' else Style.ERROR
+            print_styled_text([(Style.PRIMARY, f"  • "), (color, f"{change_type}: {count}\n")])
+        print_styled_text("\n")
+    
+    for i, change in enumerate(changes, 1):
+        change_type = change.get('changeType', 'Unknown')
+        resource_info = change.get('after') or change.get('before') or {}
+        
+        if change_type == 'Create':
+            change_color = Style.SUCCESS
+            symbol = "+"
+        elif change_type == 'Delete':
+            change_color = Style.ERROR
+            symbol = "-"
+        elif change_type in ['Modify', 'Update']:
+            change_color = Style.WARNING
+            symbol = "~"
+        else:
+            change_color = Style.SECONDARY
+            symbol = "?"
+        
+        print_styled_text([
+            (Style.HIGHLIGHT, f"[{i:02d}] "),
+            (change_color, f"{symbol} {change_type.upper()}\n"),
+            (Style.SECONDARY, "─" * 60 + "\n")
+        ])
+        
+        print_styled_text([
+            (Style.PRIMARY, "Resource: "),
+            (Style.ACTION, f"{resource_info.get('name', 'N/A')}\n"),
+            (Style.PRIMARY, "Type:     "),
+            (Style.SECONDARY, f"{resource_info.get('type', 'N/A')}\n"),
+            (Style.PRIMARY, "Location: "),
+            (Style.SECONDARY, f"{resource_info.get('location', 'N/A')}\n"),
+            (Style.PRIMARY, "Group:    "),
+            (Style.SECONDARY, f"{resource_info.get('resourceGroup', 'N/A')}\n")
+        ])
+        
+        if change_type in ['Modify', 'Update'] and change.get('before') and change.get('after'):
+            print_styled_text([
+                (Style.HIGHLIGHT, "\nComparison:\n"),
+                (Style.SECONDARY, "┌─ BEFORE " + "─" * 25 + "┬─ AFTER " + "─" * 26 + "┐\n")
+            ])
+            
+            before_props = change['before'].get('properties', {})
+            after_props = change['after'].get('properties', {})
+            
+            all_keys = set(before_props.keys()) | set(after_props.keys())
+            
+            for key in sorted(all_keys)[:5]:
+                before_val = str(before_props.get(key, 'N/A'))[:30]
+                after_val = str(after_props.get(key, 'N/A'))[:30]
+                
+                if before_props.get(key) != after_props.get(key):
+                    key_color = Style.WARNING
+                else:
+                    key_color = Style.SECONDARY
+                
+                print_styled_text([
+                    (Style.SECONDARY, "│ "),
+                    (key_color, f"{key:<10}: "),
+                    (Style.SECONDARY, f"{before_val:<18} │ "),
+                    (key_color, f"{key:<10}: "),
+                    (Style.SECONDARY, f"{after_val:<18} │\n")
+                ])
+            
+            print_styled_text([(Style.SECONDARY, "└" + "─" * 33 + "┴" + "─" * 33 + "┘\n")])
+        
+        elif change_type == 'Create' and change.get('after'):
+            after_props = change['after'].get('properties', {})
+            if after_props:
+                print_styled_text([(Style.HIGHLIGHT, "\nKey Properties:\n")])
+                for key, value in list(after_props.items())[:5]:
+                    if isinstance(value, (str, int, float, bool)):
+                        print_styled_text([
+                            (Style.PRIMARY, f"  {key}: "),
+                            (Style.SECONDARY, f"{str(value)[:50]}\n")
+                        ])
+        
+        print_styled_text("\n")
+    
+    if not changes:
+        print_styled_text([
+            (Style.SUCCESS, "✓ No changes detected!\n"),
+            (Style.SECONDARY, "Your script will not modify any existing resources.\n")
+        ])
+    
+    print_styled_text([
+        (Style.HIGHLIGHT, "═" * 80 + "\n"),
+        (Style.SECONDARY, "Analysis complete. Review the changes above before executing your script.\n"),
+        (Style.HIGHLIGHT, "═" * 80 + "\n")
+    ])
+    
+    processed_changes = []
+    for change in changes:
+        change_type = change.get('changeType', 'Unknown')
+        resource_id = change.get('resourceId', '')
+        resource_info = change.get('after') or change.get('before') or {}
+        
+        processed_change = {
+            'changeType': change_type,
+            'resourceId': resource_id,
+            'resourceType': resource_info.get('type', ''),
+            'resourceName': resource_info.get('name', ''),
+            'location': resource_info.get('location', ''),
+            'resourceGroup': resource_info.get('resourceGroup', ''),
+            'apiVersion': resource_info.get('apiVersion', '')
+        }
+        if change.get('before'):
+            processed_change['before'] = {
+                'exists': True,
+                'properties': change['before'].get('properties', {})
+            }
+        
+        if change.get('after'):
+            processed_change['after'] = {
+                'exists': True,
+                'properties': change['after'].get('properties', {})
+            }
+        
+        processed_changes.append(processed_change)
+    
+    return {
+        'status': what_if_result.get('status', 'Unknown'),
+        'summary': what_if_result.get('summary', {}),                                                                            
+        'totalChanges': len(processed_changes)
+    }
