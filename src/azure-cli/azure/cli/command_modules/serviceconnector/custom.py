@@ -536,7 +536,6 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
     validate_service_state(parameters)
     try:
         linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
-        logger.warning('provisioningState of existing connection: %s', linker.get('provisioningState'))
         if linker is not None and linker.get('provisioningState') == 'Accepted':
             logger.warning('Connection provisioningState is Accepted, please retry later to avoid conflict.')
             return linker
