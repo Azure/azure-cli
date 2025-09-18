@@ -944,10 +944,12 @@ def add_hsm_network_rule(cmd, client, resource_group_name, hsm_name,
     if not to_update:
         return hsm
 
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name=resource_group_name,
-                       name=hsm_name,
-                       parameters=hsm)
+    client.begin_create_or_update(resource_group_name=resource_group_name,
+                                  name=hsm_name,
+                                  parameters=hsm,
+                                  polling=not no_wait).result()
+    if not no_wait:
+        return client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
 def remove_network_rule_for_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None,
@@ -1029,10 +1031,12 @@ def remove_hsm_network_rule(cmd, client, resource_group_name, hsm_name,
         return hsm
 
     # otherwise update
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       resource_group_name=resource_group_name,
-                       name=hsm_name,
-                       parameters=hsm)
+    client.begin_create_or_update(resource_group_name=resource_group_name,
+                                  name=hsm_name,
+                                  parameters=hsm,
+                                  polling=not no_wait).result()
+    if not no_wait:
+        return client.get(resource_group_name=resource_group_name, name=hsm_name)
 
 
 def list_network_rules(cmd, client, resource_group_name, vault_name=None, hsm_name=None):  # pylint: disable=unused-argument
