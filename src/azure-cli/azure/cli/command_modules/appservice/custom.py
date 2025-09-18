@@ -6185,8 +6185,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
 
     disable_app_insights = disable_app_insights == "true"
 
-    settings = []
-    site_config = SiteConfig(app_settings=settings)
+    site_config = SiteConfig(app_settings=[])
     client = web_client_factory(cmd.cli_ctx)
 
     if vnet or subnet:
