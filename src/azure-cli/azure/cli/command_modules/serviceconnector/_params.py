@@ -194,7 +194,7 @@ def add_connstr_props_argument(context):
 def add_no_recreate_arguments(context):
     context.argument('no_recreate', options_list=['--no-recreate'],
                      arg_type=get_three_state_flag(), default=False,
-                     help='Skip executing creation operation when no updates to an existing connection')
+                     help='Skip executing creation operation when no updates to an existing connection.')
 
 
 def add_target_type_argument(context, source):

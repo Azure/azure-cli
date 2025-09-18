@@ -540,7 +540,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
             logger.warning('Connection provisioningState is Accepted, please retry later to avoid conflict.')
             return linker
         if linker is not None and linker.get('provisioningState') == 'Succeeded' and \
-                not compare_properties_changed(parameters, linker) and no_recreate is True:
+                not compare_properties_changed(parameters, linker) and no_recreate:
             logger.warning(
                 'Connection exists and no property to be updated, skip the update operation.')
             return linker

@@ -597,7 +597,7 @@ def compare_properties_changed(new_props, existing_props):
             return False
         if isinstance(new_value, dict) and existing_value is None:
             for value in new_value.values():
-                if value is not None or value != "":
+                if value is not None and value != "":
                     return True
             return False
 
