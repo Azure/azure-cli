@@ -3364,7 +3364,6 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             JMESPathCheck('length(@)', 0),
         ])
 
-    @unittest.skip("Skipping the test because of public network storage restriction.")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_consumption_disabled_public_network_access_storage(self, resource_group):
         functionapp_name = self.create_random_name('functionapp', 24)
@@ -3376,7 +3375,6 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             self.cmd('functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
 
-    @unittest.skip("Skipping the test because of public network storage restriction.")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_consumption_restricted_public_network_access_storage(self, resource_group):
         functionapp_name = self.create_random_name('functionapp', 24)
@@ -3388,7 +3386,6 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             self.cmd('functionapp create -g {} -n {} -s {} --consumption-plan-location {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, WINDOWS_ASP_LOCATION_FUNCTIONAPP))
 
 
-    @unittest.skip("Skipping the test because of public network storage restriction.")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_elastic_premium_restricted_public_network_access_storage_no_vnet(self, resource_group):
         functionapp_name = self.create_random_name('functionapp', 24)
@@ -3403,7 +3400,6 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
             self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4'.format(resource_group, functionapp_name, storage_account, ep_plan_name))
 
 
-    @unittest.skip("Skipping the test because of public network storage restriction.")
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_elastic_premium_restricted_public_network_access_storage_mutually_exclusive_flags(self, resource_group):
         functionapp_name = self.create_random_name('functionapp', 24)
