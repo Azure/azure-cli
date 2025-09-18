@@ -534,18 +534,19 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                                      'manually and then create the connection.'.format(str(e)))
 
     validate_service_state(parameters)
-    try:
-        linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
-        if linker is not None and linker.get('provisioningState') == 'Accepted':
-            logger.warning('Connection provisioningState is Accepted, please retry later to avoid conflict.')
-            return linker
-        if linker is not None and linker.get('provisioningState') == 'Succeeded' and \
-                not compare_properties_changed(parameters, linker) and no_recreate:
-            logger.warning(
-                'Connection exists and no property to be updated, skip the update operation.')
-            return linker
-    except Exception as e:
-        logger.debug('No existing connection, start creating a new one. Error: %s', e)
+    if no_recreate:
+        try:
+            linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
+            if linker is not None and linker.get('provisioningState') == 'Accepted':
+                logger.warning('Connection provisioningState is Accepted, please retry later to avoid conflict.')
+                return linker
+            if linker is not None and linker.get('provisioningState') == 'Succeeded' and \
+                    not compare_properties_changed(parameters, linker):
+                logger.warning(
+                    'Connection exists and no property to be updated, skip the update operation.')
+                return linker
+        except Exception as e:
+            logger.debug('No existing connection, start creating a new one. Error: %s', e)
 
     if enable_mi_for_db_linker and auth_action != 'optOutAllAuth':
         new_auth_info = enable_mi_for_db_linker(
