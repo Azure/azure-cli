@@ -3,6 +3,13 @@
 Release History
 ===============
 
+2.66.1
+++++++
+
+**Profile**
+
+* BREAKING CHANGE: `az login`: `--password` no longer accepts a service principal certificate. Use `--certificate` to pass a service principal certificate (#30540)
+
 2.66.0
 ++++++
 
