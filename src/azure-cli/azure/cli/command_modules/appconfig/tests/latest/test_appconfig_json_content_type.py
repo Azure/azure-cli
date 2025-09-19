@@ -483,5 +483,5 @@ class AppConfigJsonCommentsTest(TestCase):
 
         with open(clean_json_file_path) as json_file:
             expected_json = json.load(json_file)
-        
+
         self.assertEqual(parsed_json, expected_json)
