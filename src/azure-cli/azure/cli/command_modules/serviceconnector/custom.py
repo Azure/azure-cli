@@ -546,9 +546,9 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                 logger.warning(
                     'Connection exists and no property to be updated, skip the update operation.')
                 return linker
-        except ResourceNotFoundError as e:
+        except ResourceNotFoundError:
             logger.debug('No existing connection, continue to create it.')
-        
+
     if enable_mi_for_db_linker and auth_action != 'optOutAllAuth':
         new_auth_info = enable_mi_for_db_linker(
             cmd, source_id, target_id, auth_info, client_type, connection_name, connstr_props)
