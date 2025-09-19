@@ -13,12 +13,12 @@ def list_user_assigned_identities(cmd, resource_group_name=None):
 
 
 def create_identity(client, resource_group_name, resource_name, location, tags=None, isolation_scope=None):
-    parameters = {'properties': {}}
+    parameters = {}
     parameters['location'] = location
     if tags is not None:
         parameters['tags'] = tags
     if isolation_scope is not None:
-        parameters['properties']['isolationScope'] = isolation_scope
+        parameters['isolationScope'] = isolation_scope
     return client.create_or_update(resource_group_name=resource_group_name,
                                    resource_name=resource_name,
                                    parameters=parameters)
