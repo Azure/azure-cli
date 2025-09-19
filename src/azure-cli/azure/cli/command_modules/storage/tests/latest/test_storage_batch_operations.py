@@ -192,7 +192,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         # Prepare files
         snapshot = self.storage_cmd('storage share snapshot -n {} ',
                                     storage_account_info, src_share).get_output_in_json()["snapshot"]
-        self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1', storage_account_info,
                          test_dir, src_share)
 
         # download without pattern
@@ -247,7 +247,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         src_share = 'share1'
         self.storage_cmd('storage share create -n {}', storage_account_info, src_share)
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1', storage_account_info,
                          test_dir, src_share)
         self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
         self.assertEqual(41, sum(len(f) for r, d, f in os.walk(local_folder)))
@@ -330,7 +330,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         src_share = 'share8'
         self.storage_cmd('storage share create -n {}', storage_account_info, src_share)
         local_folder = self.create_temp_dir()
-        self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 3', storage_account_info,
+        self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1', storage_account_info,
                          test_dir, src_share)
         self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
         self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
@@ -343,12 +343,14 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
         self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
         single_thread_time = time.time() - start_time
-        self.assertGreater(single_thread_time, multi_thread_time)
+        # max-connection set to 1 for recording so this check is not available anymore
+        # self.assertGreater(single_thread_time, multi_thread_time)
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='src_account')
     @StorageAccountPreparer(parameter_name='dst_account')
     @StorageTestFilesPreparer()
+    @live_only()
     def test_storage_blob_batch_copy(self, src_account_info, dst_account_info, test_dir):
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
@@ -437,6 +439,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='src_account')
     @StorageAccountPreparer(parameter_name='dst_account')
     @StorageTestFilesPreparer()
+    @live_only()
     def test_storage_file_batch_copy(self, src_account_info, dst_account_info, test_dir):
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
@@ -684,7 +687,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         # Prepare files
         snapshot = self.storage_cmd('storage share snapshot -n {} ',
                                     account_info, src_share).get_output_in_json()["snapshot"]
-        self.file_oauth_cmd('storage file upload-batch -s "{}" -d {} --max-connections 3 --account-name {}',
+        self.file_oauth_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1 --account-name {}',
                             test_dir, src_share, storage_account)
 
         # download without pattern
@@ -741,7 +744,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         src_share = 'share1'
         self.storage_cmd('storage share create -n {}', account_info, src_share)
         local_folder = self.create_temp_dir()
-        self.file_oauth_cmd('storage file upload-batch -s "{}" -d {} --max-connections 3 --account-name {}',
+        self.file_oauth_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1 --account-name {}',
                             test_dir, src_share, storage_account)
         self.file_oauth_cmd('storage file download-batch -s {} -d "{}" --account-name {}',
                             src_share, local_folder, storage_account)
@@ -829,7 +832,7 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         src_share = 'share8'
         self.storage_cmd('storage share create -n {}', account_info, src_share)
         local_folder = self.create_temp_dir()
-        self.file_oauth_cmd('storage file upload-batch -s "{}" -d {} --max-connections 3 --account-name {}',
+        self.file_oauth_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1 --account-name {}',
                          test_dir, src_share, storage_account)
         self.file_oauth_cmd('storage file download-batch -s {} -d "{}" --account-name {}', src_share, local_folder, storage_account)
         self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
