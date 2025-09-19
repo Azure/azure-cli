@@ -3183,7 +3183,7 @@ def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, passwo
     publisher, version, auto_upgrade = _get_access_extension_upgrade_info_aaz(
         vm_instance.get('resources', []), _WINDOWS_ACCESS_EXT)
     # pylint: disable=no-member
-    instance_name = _get_extension_instance_name_aaz(vm_instance['instanceView'],
+    instance_name = _get_extension_instance_name_aaz(vm_instance.get('instanceView', {}),
                                                      publisher,
                                                      _WINDOWS_ACCESS_EXT,
                                                      _ACCESS_EXT_HANDLER_NAME)
