@@ -206,6 +206,7 @@ def load_arguments(self, _):
         c.argument('upload_type', arg_type=get_enum_type(['Upload', 'UploadWithSecurityData']), min_api='2018-09-30',
                    help="Create the disk for upload scenario. 'Upload' is for Standard disk only upload. 'UploadWithSecurityData' is for OS Disk upload along with VM Guest State. Please note the 'UploadWithSecurityData' is not valid for data disk upload, it only to be used for OS Disk upload at present.")
         c.argument('performance_plus', arg_type=get_three_state_flag(), min_api='2022-07-02', help='Set this flag to true to get a boost on the performance target of the disk deployed. This flag can only be set on disk creation time and cannot be disabled after enabled')
+        c.argument('security_metadata_uri', help='Specify the blob URI to be imported into VM metadata for Confidential VM')
     # endregion
 
     # region Snapshots
@@ -227,6 +228,7 @@ def load_arguments(self, _):
         c.argument('bandwidth_copy_speed', min_api='2023-10-02',
                    help='If this field is set on a snapshot and createOption is CopyStart, the snapshot will be copied at a quicker speed.',
                    arg_type=get_enum_type(["None", "Enhanced"]))
+        c.argument('instant_access_duration_minutes', options_list=['--instant-access-duration-minutes', '--ia-duration'], type=int, help='For snapshots created from Premium SSD v2 or Ultra disk, this property determines the time in minutes the snapshot is retained for instant access to enable faster restore. The disk sku should be UltraSSD_LRS or PremiumV2_LRS')
     # endregion
 
     # region Images
@@ -705,7 +707,7 @@ def load_arguments(self, _):
         c.argument('host_group', min_api='2020-06-01',
                    help='Name or ID of dedicated host group that the virtual machine scale set resides in')
 
-    for scope in ['vmss deallocate', 'vmss delete-instances', 'vmss restart', 'vmss start', 'vmss stop', 'vmss show', 'vmss update-instances', 'vmss simulate-eviction']:
+    for scope in ['vmss deallocate', 'vmss restart', 'vmss stop', 'vmss show', 'vmss update-instances', 'vmss simulate-eviction']:
         with self.argument_context(scope) as c:
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
@@ -875,7 +877,7 @@ def load_arguments(self, _):
     with self.argument_context('vmss wait') as c:
         c.argument('instance_id', id_part='child_name_1', help="Wait on the VM instance with this ID. If missing, wait on the VMSS.")
 
-    for scope in ['vmss update-instances', 'vmss delete-instances']:
+    for scope in ['vmss update-instances']:
         with self.argument_context(scope) as c:
             c.argument('instance_ids', multi_ids_type, help='Space-separated list of IDs (ex: 1 2 3 ...) or * for all instances.')
 
@@ -950,10 +952,6 @@ def load_arguments(self, _):
             c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
             c.argument('output_blob_uri', help='Specify the Azure storage blob (SAS URI) where script output stream will be uploaded.')
             c.argument('error_blob_uri', help='Specify the Azure storage blob where script error stream will be uploaded.')
-
-    with self.argument_context('vm run-command delete') as c:
-        c.argument('vm_name', run_cmd_vm_name)
-        c.argument('run_command_name', run_cmd_name_type)
 
     with self.argument_context('vm run-command list') as c:
         c.argument('vm_name', run_cmd_vm_name, id_part=None)

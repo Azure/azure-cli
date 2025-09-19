@@ -21,7 +21,13 @@ jobs:
       inputs:
         versionSpec: '3.12'
         displayName: "Use Python 3.12"
-    - bash: |
+    - task: AzureCLI@2
+      displayName: 'checkout branch'
+      inputs:
+        connectedServiceNameARM: $(azure-cli-live-test-msft-connected-service)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
           set -ev
           pwd
           git clone https://github.com/Azure/azure-cli-extensions.git
@@ -34,7 +40,6 @@ jobs:
           git remote add azclibot https://azclibot:${GITHUB_TOKEN}@github.com/azclibot/azure-cli-extensions.git
           git checkout -b regression_test_$(Build.BuildId)
           git push --set-upstream azclibot regression_test_$(Build.BuildId)
-      displayName: 'checkout branch'
 
 - job: CLIExtensionRegressionTest
   displayName: CLI Extension Regression Test
@@ -74,7 +79,13 @@ jobs:
     inputs:
       versionSpec: '3.12'
       displayName: "Use Python 3.12"
-  - bash: |
+  - task: AzureCLI@2
+    displayName: 'checkout cli and extension repo'
+    inputs:
+      connectedServiceNameARM: $(azure-cli-live-test-msft-connected-service)
+      scriptType: bash
+      scriptLocation: inlineScript
+      inlineScript: |
         set -ev
         pwd
         if [[ -n "$(CUSTOM_CLI_REPO)" && -n "$(CUSTOM_CLI_BRANCH)" ]]; then
@@ -94,7 +105,6 @@ jobs:
 
         git fetch azclibot
         git checkout -b regression_test_$(Build.BuildId) azclibot/regression_test_$(Build.BuildId)
-    displayName: 'checkout cli and extension repo'
   - template: ../../.azure-pipelines/templates/azdev_setup.yml
     parameters:
       CLIExtensionRepoPath: ./azure-cli-extensions
@@ -153,7 +163,13 @@ jobs:
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
-    - bash: |
+    - task: AzureCLI@2
+      displayName: 'Result Summary'
+      inputs:
+        connectedServiceNameARM: $(azure-cli-live-test-msft-connected-service)
+        scriptType: bash
+        scriptLocation: inlineScript
+        inlineScript: |
           set -ev
 
           # git config
@@ -195,4 +211,3 @@ jobs:
 
             sleep 5
           done
-      displayName: 'Result Summary'

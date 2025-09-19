@@ -490,6 +490,16 @@ class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
         else:
             self.assertEqual(ctx_4.get_node_vm_size(), CONST_DEFAULT_WINDOWS_NODE_VM_SIZE)
 
+        # if --node-vm-size is not specified, but --sku automatic is explicitly specified
+        ctx_5 = AKSAgentPoolContext(
+            self.cmd,
+            AKSAgentPoolParamDict({"sku": "automatic", "os_type": "Linux"}),
+            self.models,
+            DecoratorMode.CREATE,
+            self.agentpool_decorator_mode,
+        )
+        self.assertEqual(ctx_5.get_node_vm_size(), "")
+
     def common_get_vm_sizes(self):
         # linux default
         ctx_1 = AKSAgentPoolContext(

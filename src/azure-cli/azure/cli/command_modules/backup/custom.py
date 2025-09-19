@@ -71,6 +71,7 @@ secondary_region_map = {
     "eastasia": "southeastasia",
     "eastus": "westus",
     "eastus2": "centralus",
+    "eastus3": "westus3",
     "eastus2euap": "centraluseuap",
     "francecentral": "francesouth",
     "francesouth": "francecentral",

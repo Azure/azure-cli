@@ -266,7 +266,7 @@ class BreakingChange(abc.ABC):
                 if not arg:
                     continue
                 arg.deprecate_info = self.appended_status_tag(cli_ctx, arg.deprecate_info, self.to_tag(cli_ctx))
-                arg.action = _argument_breaking_change_action(cli_ctx, arg.deprecate_info, arg.options['action'])
+                arg.action = _argument_breaking_change_action(cli_ctx, arg.deprecate_info, arg.options.get('action'))
         elif self.is_command_group(cli_ctx):
             command_group = cli_ctx.invocation.commands_loader.command_group_table[self.command_name]
             if not command_group:

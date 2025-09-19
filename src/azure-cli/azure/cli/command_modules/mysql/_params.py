@@ -216,7 +216,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     )
 
     mysql_version_upgrade_arg_type = CLIArgumentType(
-        arg_type=get_enum_type(['8']),
+        arg_type=get_enum_type(['8', '8.4']),
         options_list=['--version', '-v'],
         help='Server major version.'
     )
