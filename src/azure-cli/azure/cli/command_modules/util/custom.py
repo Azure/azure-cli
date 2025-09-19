@@ -371,8 +371,14 @@ class AccessTokenCredential:  # pylint: disable=too-few-public-methods
         # Assume the access token expires in 1 year / 31536000 seconds
         return AccessToken(self.access_token, int(time.time()) + 31536000)
 
-def show_what_if(cmd, script_path):
-    FUNCTION_APP_URL = "https://azcli-script-insight.azurewebsites.net"
+def show_what_if(cmd, script_path, no_pretty_print=False):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.cli.core.util import send_raw_request
+    import json
+    from azure.cli.command_modules.resource._formatters import format_what_if_operation_result
+    import threading
+    import time
+    import sys
     
     try:
         with open(script_path, 'r', encoding='utf-8') as f:
@@ -382,188 +388,107 @@ def show_what_if(cmd, script_path):
     except Exception as ex:
         raise CLIError(f"Error reading script file: {ex}")
     
-    from azure.cli.core.commands.client_factory import get_subscription_id
     subscription_id = get_subscription_id(cmd.cli_ctx)
-
     payload = {
         "azcli_script": script_content,
         "subscription_id": subscription_id
     }
-    from azure.cli.core.util import send_raw_request
-    import json
+
+    request_completed = threading.Event()
+    
+    def rotating_progress():
+        """Simulate a rotating progress indicator for long running operation.
+        """
+        chars = ["|", "\\", "/", "-"]
+        idx = 0
+        while not request_completed.is_set():
+            sys.stderr.write(f"\r{chars[idx % len(chars)]} Running")
+            sys.stderr.flush()
+            idx += 1
+            time.sleep(0.2)
+        sys.stderr.write("\r" + " " * 20 + "\r")
+        sys.stderr.flush()
     
     try:
+        progress_thread = threading.Thread(target=rotating_progress)
+        progress_thread.daemon = True
+        progress_thread.start()
+        
+        FUNCTION_APP_URL = "https://azcli-script-insight.azurewebsites.net"
         response = send_raw_request(cmd.cli_ctx, "POST", f"{FUNCTION_APP_URL}/api/what_if_preview", 
                                    body=json.dumps(payload), resource="https://management.azure.com")
+        request_completed.set()
+        sys.stderr.write("Analysis completed\n")
+        sys.stderr.flush()
+        
     except Exception as ex:
+        request_completed.set()
         raise CLIError(f"Failed to connect to the what-if service: {ex}")
-    
-    if response.status_code != 200:
-        error_msg = f"HTTP {response.status_code}: Request failed"
-        try:
-            error_detail = response.text
-            if error_detail:
-                error_msg += f" - {error_detail}"
-        except Exception:
-            pass
-        raise CLIError(error_msg)
     
     try:
         raw_results = response.json()
     except ValueError as ex:
         raise CLIError(f"Failed to parse response from what-if service: {ex}")
     
-    if not raw_results.get('success', True):
-        return raw_results
-    
     what_if_result = raw_results.get('what_if_result', {})
-    changes = what_if_result.get('changes', [])
-    
-    from azure.cli.core.style import Style, print_styled_text
-    
-    print_styled_text([
-        (Style.HIGHLIGHT, "═" * 80),
-        (Style.HIGHLIGHT, "\n"),
-        (Style.ACTION, "  AZURE WHAT-IF ANALYSIS RESULTS\n"),
-        (Style.HIGHLIGHT, "═" * 80),
-        (Style.HIGHLIGHT, "\n\n")
-    ])
+    what_if_operation_result = _convert_json_to_what_if_result(what_if_result)
 
-    summary = what_if_result.get('summary', {})
-    status = what_if_result.get('status', 'Unknown')
+    if no_pretty_print:
+        return what_if_result
+
+    print(format_what_if_operation_result(what_if_operation_result, cmd.cli_ctx.enable_color))
+    return what_if_result
+
+
+def _convert_json_to_what_if_result(what_if_json_result):
+    from azure.cli.command_modules.resource._formatters import _change_type_to_weight
+    enum_keys = list(_change_type_to_weight.keys())
+    enum_mapping = {}
+    for enum_obj in enum_keys:
+        str_repr = str(enum_obj).lower()
+        if 'create' in str_repr:
+            enum_mapping['Create'] = enum_obj
+        elif 'delete' in str_repr:
+            enum_mapping['Delete'] = enum_obj
+        elif 'modify' in str_repr:
+            enum_mapping['Modify'] = enum_obj
+        elif 'deploy' in str_repr:
+            enum_mapping['Deploy'] = enum_obj
+        elif 'no_change' in str_repr or 'nochange' in str_repr:
+            enum_mapping['NoChange'] = enum_obj
+        elif 'ignore' in str_repr:
+            enum_mapping['Ignore'] = enum_obj
+        elif 'unsupported' in str_repr:
+            enum_mapping['Unsupported'] = enum_obj
     
-    print_styled_text([
-        (Style.SUCCESS if status == 'Succeeded' else Style.WARNING, f"Status: {status}\n"),
-        (Style.PRIMARY, f"Total Changes: {len(changes)}\n\n")
-    ])
+    class WhatIfOperationResult:
+        def __init__(self):
+            self.changes = []
+            self.potential_changes = []
+            self.diagnostics = []
     
-    if summary:
-        print_styled_text([(Style.IMPORTANT, "Summary:\n")])
-        for change_type, count in summary.items():
-            color = Style.SUCCESS if change_type == 'Create' else Style.WARNING if change_type == 'Modify' else Style.ERROR
-            print_styled_text([(Style.PRIMARY, f"  • "), (color, f"{change_type}: {count}\n")])
-        print_styled_text("\n")
+    class ResourceChange:
+        def __init__(self, change_data):
+            self.change_type = _map_change_type_string(change_data.get('changeType', 'Unknown'))
+            self.resource_id = change_data.get('resourceId', '')
+            self.before = change_data.get('before')
+            self.after = change_data.get('after')
+            self.delta = change_data.get('delta')
     
-    for i, change in enumerate(changes, 1):
-        change_type = change.get('changeType', 'Unknown')
-        resource_info = change.get('after') or change.get('before') or {}
-        
-        if change_type == 'Create':
-            change_color = Style.SUCCESS
-            symbol = "+"
-        elif change_type == 'Delete':
-            change_color = Style.ERROR
-            symbol = "-"
-        elif change_type in ['Modify', 'Update']:
-            change_color = Style.WARNING
-            symbol = "~"
-        else:
-            change_color = Style.SECONDARY
-            symbol = "?"
-        
-        print_styled_text([
-            (Style.HIGHLIGHT, f"[{i:02d}] "),
-            (change_color, f"{symbol} {change_type.upper()}\n"),
-            (Style.SECONDARY, "─" * 60 + "\n")
-        ])
-        
-        print_styled_text([
-            (Style.PRIMARY, "Resource: "),
-            (Style.ACTION, f"{resource_info.get('name', 'N/A')}\n"),
-            (Style.PRIMARY, "Type:     "),
-            (Style.SECONDARY, f"{resource_info.get('type', 'N/A')}\n"),
-            (Style.PRIMARY, "Location: "),
-            (Style.SECONDARY, f"{resource_info.get('location', 'N/A')}\n"),
-            (Style.PRIMARY, "Group:    "),
-            (Style.SECONDARY, f"{resource_info.get('resourceGroup', 'N/A')}\n")
-        ])
-        
-        if change_type in ['Modify', 'Update'] and change.get('before') and change.get('after'):
-            print_styled_text([
-                (Style.HIGHLIGHT, "\nComparison:\n"),
-                (Style.SECONDARY, "┌─ BEFORE " + "─" * 25 + "┬─ AFTER " + "─" * 26 + "┐\n")
-            ])
-            
-            before_props = change['before'].get('properties', {})
-            after_props = change['after'].get('properties', {})
-            
-            all_keys = set(before_props.keys()) | set(after_props.keys())
-            
-            for key in sorted(all_keys)[:5]:
-                before_val = str(before_props.get(key, 'N/A'))[:30]
-                after_val = str(after_props.get(key, 'N/A'))[:30]
-                
-                if before_props.get(key) != after_props.get(key):
-                    key_color = Style.WARNING
-                else:
-                    key_color = Style.SECONDARY
-                
-                print_styled_text([
-                    (Style.SECONDARY, "│ "),
-                    (key_color, f"{key:<10}: "),
-                    (Style.SECONDARY, f"{before_val:<18} │ "),
-                    (key_color, f"{key:<10}: "),
-                    (Style.SECONDARY, f"{after_val:<18} │\n")
-                ])
-            
-            print_styled_text([(Style.SECONDARY, "└" + "─" * 33 + "┴" + "─" * 33 + "┘\n")])
-        
-        elif change_type == 'Create' and change.get('after'):
-            after_props = change['after'].get('properties', {})
-            if after_props:
-                print_styled_text([(Style.HIGHLIGHT, "\nKey Properties:\n")])
-                for key, value in list(after_props.items())[:5]:
-                    if isinstance(value, (str, int, float, bool)):
-                        print_styled_text([
-                            (Style.PRIMARY, f"  {key}: "),
-                            (Style.SECONDARY, f"{str(value)[:50]}\n")
-                        ])
-        
-        print_styled_text("\n")
+    def _map_change_type_string(change_type_str):
+        result = enum_mapping.get(change_type_str)
+        return result
     
-    if not changes:
-        print_styled_text([
-            (Style.SUCCESS, "✓ No changes detected!\n"),
-            (Style.SECONDARY, "Your script will not modify any existing resources.\n")
-        ])
+    result = WhatIfOperationResult()
     
-    print_styled_text([
-        (Style.HIGHLIGHT, "═" * 80 + "\n"),
-        (Style.SECONDARY, "Analysis complete. Review the changes above before executing your script.\n"),
-        (Style.HIGHLIGHT, "═" * 80 + "\n")
-    ])
+    changes = what_if_json_result.get('changes', [])
+    for change_data in changes:
+        resource_change = ResourceChange(change_data)
+        result.changes.append(resource_change)
     
-    processed_changes = []
-    for change in changes:
-        change_type = change.get('changeType', 'Unknown')
-        resource_id = change.get('resourceId', '')
-        resource_info = change.get('after') or change.get('before') or {}
-        
-        processed_change = {
-            'changeType': change_type,
-            'resourceId': resource_id,
-            'resourceType': resource_info.get('type', ''),
-            'resourceName': resource_info.get('name', ''),
-            'location': resource_info.get('location', ''),
-            'resourceGroup': resource_info.get('resourceGroup', ''),
-            'apiVersion': resource_info.get('apiVersion', '')
-        }
-        if change.get('before'):
-            processed_change['before'] = {
-                'exists': True,
-                'properties': change['before'].get('properties', {})
-            }
-        
-        if change.get('after'):
-            processed_change['after'] = {
-                'exists': True,
-                'properties': change['after'].get('properties', {})
-            }
-        
-        processed_changes.append(processed_change)
+    potential_changes = what_if_json_result.get('potential_changes', [])
+    for change_data in potential_changes:
+        resource_change = ResourceChange(change_data)
+        result.potential_changes.append(resource_change)
     
-    return {
-        'status': what_if_result.get('status', 'Unknown'),
-        'summary': what_if_result.get('summary', {}),                                                                            
-        'totalChanges': len(processed_changes)
-    }
+    return result
