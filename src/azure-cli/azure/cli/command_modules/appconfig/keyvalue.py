@@ -52,8 +52,9 @@ from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          ImportExportProfiles, CompareFieldsMap,
                          JsonDiff, ImportMode)
 from ._featuremodels import map_keyvalue_to_featureflag
+from ._json import parse_json_with_comments
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
-from ._utils import get_appconfig_data_client, prep_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type, strip_json_comments
+from ._utils import get_appconfig_data_client, prep_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
 
 from ._diff_utils import print_preview, KVComparer
 from .feature import __list_features
@@ -510,7 +511,7 @@ def set_key(cmd,
                     # Ensure that provided value is valid JSON and strip comments if needed.
                     value = 'null' if value is None else value
 
-                    __validate_json_input(value)
+                    parse_json_with_comments(value)
                 except ValueError:
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
 
@@ -525,7 +526,7 @@ def set_key(cmd,
             if is_json_content_type(content_type):
                 try:
                     # Ensure that provided value is valid JSON and strip comments if needed.
-                    __validate_json_input(value)
+                    parse_json_with_comments(value)
                 except (TypeError, ValueError):
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}". Set the value again in valid JSON format.'.format(value, content_type))
             set_kv = ConfigurationSetting(key=key,
@@ -985,12 +986,3 @@ def list_revision(cmd,
         return retrieved_revisions
     except HttpResponseError as ex:
         raise CLIErrors.AzureResponseError('List revision operation failed.\n' + str(ex))
-
-
-# Helper function to validate JSON input that may contain comments
-def __validate_json_input(json_string):
-    try:
-        json.loads(json_string)
-
-    except json.JSONDecodeError:
-        json.loads(strip_json_comments(json_string))

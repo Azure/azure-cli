@@ -473,13 +473,13 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
 
 class AppConfigJsonCommentsTest(TestCase):
     def test_azconfig_strip_json_comments(self):
-        from azure.cli.command_modules.appconfig._utils import strip_json_comments
+        from azure.cli.command_modules.appconfig._json import parse_json_with_comments
 
         json_with_comments_file_path = os.path.join(TEST_DIR, 'json_with_comments.json')
         clean_json_file_path = os.path.join(TEST_DIR, 'json_with_comments_stripped.json')
 
         with open(json_with_comments_file_path) as json_file:
-            parsed_json = json.loads(strip_json_comments(json_file.read()))
+            parsed_json = parse_json_with_comments(json_file.read())
 
         with open(clean_json_file_path) as json_file:
             expected_json = json.load(json_file)
