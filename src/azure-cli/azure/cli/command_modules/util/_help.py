@@ -97,8 +97,8 @@ helps['what-if'] = """
 type: command
 short-summary: Create a sandboxed what-if simulation of Azure CLI scripts to visualize infrastructure changes before execution.
 examples:
-- name: Simulate a what-if scenario for a resource group deletion
+- name: Simulate a what-if scenario for a provided script
   text: az what-if --script-path "/path/to/your/script.sh"
 - name: Simulate a what-if scenario for a specific subscription
-  text: az what-if --script-path "/path/to/your/script.sh" --subscription "MySubscription"
+  text: az what-if --script-path "/path/to/your/script.sh" --subscription 00000000-0000-0000-0000-000000000000
 """
