@@ -3131,7 +3131,7 @@ def _update_linux_access_extension(cmd, vm_instance, resource_group_name, protec
     from .operations.vm_extension import VMExtensionCreate
 
     # pylint: disable=no-member
-    instance_name = _get_extension_instance_name_aaz(vm_instance['instanceView'],
+    instance_name = _get_extension_instance_name_aaz(vm_instance.get('instanceView', {}),
                                                      extension_mappings[_LINUX_ACCESS_EXT]['publisher'],
                                                      _LINUX_ACCESS_EXT,
                                                      _ACCESS_EXT_HANDLER_NAME)
