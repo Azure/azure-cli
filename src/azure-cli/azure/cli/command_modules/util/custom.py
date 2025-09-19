@@ -375,11 +375,12 @@ class AccessTokenCredential:  # pylint: disable=too-few-public-methods
 def show_what_if(cmd, script_path, no_pretty_print=False):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import send_raw_request
-    import json
     from azure.cli.command_modules.resource._formatters import format_what_if_operation_result
+    from azure.cli.core._profile import Profile
     import threading
     import time
     import sys
+    import json
 
     try:
         with open(script_path, 'r', encoding='utf-8') as f:
@@ -398,7 +399,7 @@ def show_what_if(cmd, script_path, no_pretty_print=False):
     request_completed = threading.Event()
 
     def rotating_progress():
-        """Simulate a rotating progress indicator for long running operation.
+        """Simulate a rotating progress indicator, similar to the one displayed during long-running operations.
         """
         chars = ["|", "\\", "/", "-"]
         idx = 0
@@ -407,20 +408,34 @@ def show_what_if(cmd, script_path, no_pretty_print=False):
             sys.stderr.flush()
             idx += 1
             time.sleep(0.2)
-        sys.stderr.write("\r" + " " * 20 + "\r")
+        sys.stderr.write("\r" + " " * 50 + "\r")
         sys.stderr.flush()
 
     try:
+        FUNCTION_APP_URL = "https://azcli-script-insight.azurewebsites.net"
+        resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
+        profile = Profile(cli_ctx=cmd.cli_ctx)
+
+        try:
+            token_result = profile.get_raw_token(resource, subscription=subscription_id)
+            token_info, _, _ = token_result
+            token_type, token, _ = token_info
+        except Exception as token_ex:
+            request_completed.set()
+            raise CLIError(f"Failed to get authentication token: {token_ex}")
+
+        headers = [
+            'Authorization={} {}'.format(token_type, token),
+            'Content-Type=application/json'
+        ]
+
         progress_thread = threading.Thread(target=rotating_progress)
         progress_thread.daemon = True
         progress_thread.start()
 
-        FUNCTION_APP_URL = "https://azcli-script-insight.azurewebsites.net"
-        response = send_raw_request(cmd.cli_ctx, "POST", f"{FUNCTION_APP_URL}/api/what_if_preview",
-                                    body=json.dumps(payload), resource="https://management.azure.com")
+        response = send_raw_request(cmd.cli_ctx, "POST", f"{FUNCTION_APP_URL}/api/what_if_preview", headers=headers,
+                                    body=json.dumps(payload))
         request_completed.set()
-        sys.stderr.write("Analysis completed\n")
-        sys.stderr.flush()
 
     except Exception as ex:
         request_completed.set()
