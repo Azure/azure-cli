@@ -371,6 +371,7 @@ class AccessTokenCredential:  # pylint: disable=too-few-public-methods
         # Assume the access token expires in 1 year / 31536000 seconds
         return AccessToken(self.access_token, int(time.time()) + 31536000)
 
+
 def show_what_if(cmd, script_path, no_pretty_print=False):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import send_raw_request
@@ -379,7 +380,7 @@ def show_what_if(cmd, script_path, no_pretty_print=False):
     import threading
     import time
     import sys
-    
+
     try:
         with open(script_path, 'r', encoding='utf-8') as f:
             script_content = f.read()
@@ -387,7 +388,7 @@ def show_what_if(cmd, script_path, no_pretty_print=False):
         raise CLIError(f"Script file not found: {script_path}")
     except Exception as ex:
         raise CLIError(f"Error reading script file: {ex}")
-    
+
     subscription_id = get_subscription_id(cmd.cli_ctx)
     payload = {
         "azcli_script": script_content,
@@ -395,7 +396,7 @@ def show_what_if(cmd, script_path, no_pretty_print=False):
     }
 
     request_completed = threading.Event()
-    
+
     def rotating_progress():
         """Simulate a rotating progress indicator for long running operation.
         """
@@ -408,28 +409,28 @@ def show_what_if(cmd, script_path, no_pretty_print=False):
             time.sleep(0.2)
         sys.stderr.write("\r" + " " * 20 + "\r")
         sys.stderr.flush()
-    
+
     try:
         progress_thread = threading.Thread(target=rotating_progress)
         progress_thread.daemon = True
         progress_thread.start()
-        
+
         FUNCTION_APP_URL = "https://azcli-script-insight.azurewebsites.net"
-        response = send_raw_request(cmd.cli_ctx, "POST", f"{FUNCTION_APP_URL}/api/what_if_preview", 
-                                   body=json.dumps(payload), resource="https://management.azure.com")
+        response = send_raw_request(cmd.cli_ctx, "POST", f"{FUNCTION_APP_URL}/api/what_if_preview",
+                                    body=json.dumps(payload), resource="https://management.azure.com")
         request_completed.set()
         sys.stderr.write("Analysis completed\n")
         sys.stderr.flush()
-        
+
     except Exception as ex:
         request_completed.set()
         raise CLIError(f"Failed to connect to the what-if service: {ex}")
-    
+
     try:
         raw_results = response.json()
     except ValueError as ex:
         raise CLIError(f"Failed to parse response from what-if service: {ex}")
-    
+
     what_if_result = raw_results.get('what_if_result', {})
     what_if_operation_result = _convert_json_to_what_if_result(what_if_result)
 
@@ -460,13 +461,13 @@ def _convert_json_to_what_if_result(what_if_json_result):
             enum_mapping['Ignore'] = enum_obj
         elif 'unsupported' in str_repr:
             enum_mapping['Unsupported'] = enum_obj
-    
+
     class WhatIfOperationResult:
         def __init__(self):
             self.changes = []
             self.potential_changes = []
             self.diagnostics = []
-    
+
     class ResourceChange:
         def __init__(self, change_data):
             self.change_type = _map_change_type_string(change_data.get('changeType', 'Unknown'))
@@ -474,21 +475,21 @@ def _convert_json_to_what_if_result(what_if_json_result):
             self.before = change_data.get('before')
             self.after = change_data.get('after')
             self.delta = change_data.get('delta')
-    
+
     def _map_change_type_string(change_type_str):
         result = enum_mapping.get(change_type_str)
         return result
-    
+
     result = WhatIfOperationResult()
-    
+
     changes = what_if_json_result.get('changes', [])
     for change_data in changes:
         resource_change = ResourceChange(change_data)
         result.changes.append(resource_change)
-    
+
     potential_changes = what_if_json_result.get('potential_changes', [])
     for change_data in potential_changes:
         resource_change = ResourceChange(change_data)
         result.potential_changes.append(resource_change)
-    
+
     return result
