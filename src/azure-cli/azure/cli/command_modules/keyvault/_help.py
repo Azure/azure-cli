@@ -581,9 +581,9 @@ examples:
         az keyvault network-rule add --ip-address 1.2.3.4 --name cli-mock-kv-nr --resource-group cli_mock_keyvault_network_rule
 """
 
-helps['keyvault network-rule add'] = """
+helps['keyvault network-rule remove'] = """
 type: command
-short-summary: Remove a network rule to the network ACLs for a Key Vault or a Managed HSM.
+short-summary: Remove a network rule from the network ACLs for a Key Vault or a Managed HSM.
 examples:
   - name: Remove a specific IP address to the network access rules of a Key Vault in a specified resource group.
     text: |
