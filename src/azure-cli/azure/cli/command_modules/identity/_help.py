@@ -27,7 +27,7 @@ examples:
 
 helps['identity update'] = """
 type: command
-short-summary: Update Identities.
+short-summary: Update an identity.
 examples:
   - name: Update an identity to restrict assignment within an Azure region.
     text: |
