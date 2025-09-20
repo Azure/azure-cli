@@ -20,6 +20,7 @@ import ssl
 import sys
 import uuid
 from functools import reduce
+from xmlrpc import client
 import invoke
 from nacl import encoding, public
 
@@ -41,6 +42,7 @@ from azure.mgmt.web import WebSiteManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
+from azure.cli.core.commands.progress import IndeterminateProgressBar
 from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, get_json_object, \
     ConfiguredDefaultSetter, sdk_no_wait
 from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
@@ -3967,6 +3969,63 @@ def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
     else:
         sku_def.capacity = max(3, number_of_workers)
 
+# Progress bar for serverfarm async scaling operations
+class PlanProgressBar(IndeterminateProgressBar):
+    def __init__(self, cli_ctx, resource_group_name, plan_name):
+        self.client = web_client_factory(cli_ctx).app_service_plans
+        self.rg = resource_group_name
+        self.plan_name = plan_name
+        self._last_msg = None
+        self._last_status_check = None
+        self._status_check_interval_seconds = 30
+        super().__init__(cli_ctx)
+
+    def _emit(self, msg):
+        if msg != self._last_msg:
+            logger.warning(msg)
+            self._last_msg = msg
+
+    def begin(self):
+        self._emit(f"Starting to scale App Service plan {self.plan_name}...")
+        super().begin()
+
+    def update_progress_with_msg(self, message):
+        super().update_progress()
+
+        # Only check real status periodically to avoid hammering API
+        now = time.time()
+        if (self._last_status_check is not None and
+            now - self._last_status_check > self._status_check_interval):
+            return
+
+        status = message or 'InProgress'
+
+        plan = self.client.get(self.rg, self.plan_name)
+        capacity = None
+        skuName = None
+        if getattr(plan, 'sku', None):
+            capacity = getattr(plan.sku, 'capacity', None)
+            skuName = getattr(plan.sku, 'name', None)
+
+        details = f"Status: {status} — Scaled to {capacity} workers of pricing tier {skuName}"
+        self._emit(details)
+
+    def end(self):
+        plan = self.client.get(self.rg, self.plan_name)
+        capacity = None
+        skuName = None
+
+        if getattr(plan, 'sku', None):
+            capacity = getattr(plan.sku, 'capacity', None)
+            skuName = getattr(plan.sku, 'name', None)
+
+        if capacity is not None and skuName is not None:
+            self._emit(f"Successfully scaled to {capacity} workers in pricing tier {skuName}.")
+            return
+
+        self._emit("Operation completed.")
+        super().end()
+
 
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
@@ -4023,8 +4082,36 @@ has been deployed ".format(app_service_environment)
     if zone_redundant:
         _enable_zone_redundant(plan_def, sku_def, number_of_workers)
 
-    return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
+    if no_wait:
+        return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
                        resource_group_name=resource_group_name, app_service_plan=plan_def)
+
+    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
+
+    # Only use progress bar for actual long-running operations (async scaling)
+    # Check if the operation is actually async by looking at the poller status
+    if poller.done():
+        # This completed synchronously (200 response), no need for progress bar
+        return poller.result()
+
+    # Asynchronous operation (202 response), use custom progress bar
+    progress_bar = PlanProgressBar(cmd.cli_ctx, resource_group_name, name)
+    return LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(poller)
+
+
+def update_app_service_plan_with_progress(cmd, resource_group_name, name, app_service_plan):
+    client = web_client_factory(cmd.cli_ctx)
+
+    # For regular execution, apply conditional progress logic
+    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, app_service_plan)
+
+    if poller.done():
+        # Synchronous operation (200 response), return result directly
+        return poller.result()
+
+    # Asynchronous operation (202 response), use custom progress bar
+    progress_bar = PlanProgressBar(cmd.cli_ctx, resource_group_name, name)
+    return LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(poller)
 
 
 def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, elastic_scale=None,
@@ -4034,10 +4121,10 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
     async_scaling_enabled is None):
         safe_params = cmd.cli_ctx.data['safe_params']
         if '--set' not in safe_params:
-            args = ["--number-of-workers", 
-                    "--sku", 
-                    "--elastic-scale", 
-                    "--max-elastic-worker-count", 
+            args = ["--number-of-workers",
+                    "--sku",
+                    "--elastic-scale",
+                    "--max-elastic-worker-count",
                     "--async-scaling-enabled"]
             logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
     sku_def = instance.sku

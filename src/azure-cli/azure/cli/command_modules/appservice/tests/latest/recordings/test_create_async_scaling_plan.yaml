@@ -1,0 +1,171 @@
+interactions:
+- request:
+    body: '{"location": "eastus2euap", "sku": {"name": "P0V3", "tier": "PREMIUM0V3",
+      "capacity": 30}, "properties": {"perSiteScaling": false, "isXenon": false, "zoneRedundant":
+      false, "asyncScalingEnabled": true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '202'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n -l --number-of-workers --async-scaling-enabled --sku
+      User-Agent:
+      - AZURECLI/2.77.0 (MSI) azsdk-python-core/1.35.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"eastus2euap","properties":{"serverFarmId":278800,"name":"plan000002","sku":{"name":"P0v3","tier":"Premium0V3","size":"P0v3","family":"Pv3","capacity":30},"workerSize":"XSmallV3","workerSizeId":18,"workerTierName":null,"numberOfWorkers":30,"currentWorkerSize":"XSmallV3","currentWorkerSizeId":18,"currentNumberOfWorkers":30,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
+        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":30,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-003_278800","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":3,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2025-09-18T17:39:45.2333333","asyncScalingEnabled":true,"isCustomMode":false,"powerState":"Running","eligibleLogCategories":""},"sku":{"name":"P0v3","tier":"Premium0V3","size":"P0v3","family":"Pv3","capacity":30}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1808'
+      content-type:
+      - application/json
+      date:
+      - Thu, 18 Sep 2025 17:39:46 GMT
+      etag:
+      - '"1DC28C339682815"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7338c4fc-37a1-4728-972b-2d0fafc043ea/westeurope/a10cb4eb-ba90-4f02-89fe-a1ba1a895a9b
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '11999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '799'
+      x-msedge-ref:
+      - 'Ref A: 6FDA8FEDA91642D5BD230D9A5A8D9AB2 Ref B: CO6AA3150220053 Ref C: 2025-09-18T17:39:43Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n
+      User-Agent:
+      - python/3.10.11 (Windows-10-10.0.26100-SP0) AZURECLI/2.77.0 (MSI)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002","name":"plan000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"East
+        US 2 EUAP","properties":{"serverFarmId":278800,"name":"plan000002","workerSize":"XSmallV3","workerSizeId":18,"workerTierName":null,"numberOfWorkers":30,"currentWorkerSize":"XSmallV3","currentWorkerSizeId":18,"currentNumberOfWorkers":30,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace","subscription":"50821c37-1271-4210-8e1f-568acc6ecc66","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
+        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":30,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-003_278800","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":3,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-09-18T17:39:45.2333333","asyncScalingEnabled":true,"isCustomMode":null,"powerState":null,"eligibleLogCategories":null},"sku":{"name":"P0v3","tier":"Premium0V3","size":"P0v3","family":"Pv3","capacity":30}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1717'
+      content-type:
+      - application/json
+      date:
+      - Thu, 18 Sep 2025 17:39:47 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 04008CEFFBB84893ADD783EBE5E210FD Ref B: MWH011020806042 Ref C: 2025-09-18T17:39:47Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - appservice plan delete
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -g -n --yes
+      User-Agent:
+      - AZURECLI/2.77.0 (MSI) azsdk-python-core/1.35.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: DELETE
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/plan000002?api-version=2024-11-01
+  response:
+    body:
+      string: ''
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '0'
+      date:
+      - Thu, 18 Sep 2025 17:39:56 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=7338c4fc-37a1-4728-972b-2d0fafc043ea/westeurope/6df928d7-e847-4e5c-bc26-f0e8f0b499b4
+      x-ms-ratelimit-remaining-subscription-deletes:
+      - '800'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '12000'
+      x-msedge-ref:
+      - 'Ref A: 1F288CCCFDD7468BA8D3808945075EF3 Ref B: MWH011020808023 Ref C: 2025-09-18T17:39:48Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1

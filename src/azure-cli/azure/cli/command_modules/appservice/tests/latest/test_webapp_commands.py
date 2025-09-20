@@ -608,6 +608,43 @@ class AppServicePlanScenarioTest(ScenarioTest):
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', False)])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_create_async_scaling_plan(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+
+        self.cmd(
+            'appservice plan create -g {} -n {} -l {} --number-of-workers 30 --async-scaling-enabled true --sku P0v3'.format(resource_group, plan, "eastus2euap"))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('properties.asyncScalingEnabled', True),
+            JMESPathCheck('properties.numberOfWorkers', 30),
+            JMESPathCheck('properties.status', 'Ready'),
+            JMESPathCheck('sku.name', 'P0v3')])
+
+        self.cmd('appservice plan delete -g {} -n {} --yes'.format(resource_group, plan))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_update_async_scaling_plan(self, resource_group):
+        plan = self.create_random_name('plan', 24)
+
+        self.cmd(
+            'appservice plan create -g {} -n {} -l {} --async-scaling-enabled true --sku P3v2'.format(resource_group, plan, "eastus2euap"))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('properties.asyncScalingEnabled', True),
+            JMESPathCheck('properties.numberOfWorkers', 1)])
+        
+        self.cmd('appservice plan update -g {} -n {} --number-of-workers 30'.format(resource_group, plan))
+
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
+            JMESPathCheck('properties.asyncScalingEnabled', True),
+            JMESPathCheck('properties.numberOfWorkers', 30),
+            JMESPathCheck('properties.status', 'Ready'),
+            JMESPathCheck('sku.name', 'P3v2')])
+        
+        self.cmd('appservice plan delete -g {} -n {} --yes'.format(resource_group, plan))
 
 class WebappElasticScaleTest(ScenarioTest):
     @AllowLargeResponse()
