@@ -131,6 +131,24 @@ def _get_access_extension_upgrade_info(extensions, name):
     return publisher, version, auto_upgrade
 
 
+# separated for aaz based implementation
+def _get_access_extension_upgrade_info_aaz(extensions, name):
+    version = extension_mappings[name]['version']
+    publisher = extension_mappings[name]['publisher']
+
+    auto_upgrade = None
+
+    if extensions:
+        extension = next((e for e in extensions if e.get('name', '') == name), None)
+        from packaging.version import parse  # pylint: disable=no-name-in-module,import-error
+        if extension and parse(extension['typeHandlerVersion']) < parse(version):
+            auto_upgrade = True
+        elif extension and parse(extension['typeHandlerVersion']) > parse(version):
+            version = extension['typeHandlerVersion']
+
+    return publisher, version, auto_upgrade
+
+
 def _get_extension_instance_name(instance_view, publisher, extension_type_name,
                                  suggested_name=None):
     extension_instance_name = suggested_name or extension_type_name
@@ -1633,6 +1651,30 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
     vm = kwargs['parameters']
 
+    if wire_server_access_control_profile_reference_id is not None or \
+            imds_access_control_profile_reference_id is not None:
+        from .aaz.latest.vm import Patch as VMPatchUpdate
+
+        class VMUpdateReferenceId(VMPatchUpdate):
+            def _output(self, *args, **kwargs):
+                result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+                return result
+
+        security_profile = {'proxy_agent_settings': {}}
+        if wire_server_access_control_profile_reference_id:
+            security_profile['proxy_agent_settings']['wire_server'] = {
+                'in_vm_access_control_profile_reference_id': wire_server_access_control_profile_reference_id}
+        if imds_access_control_profile_reference_id:
+            security_profile['proxy_agent_settings']['imds'] = {
+                'in_vm_access_control_profile_reference_id': imds_access_control_profile_reference_id}
+
+        LongRunningOperation(cmd.cli_ctx)(VMUpdateReferenceId(cli_ctx=cmd.cli_ctx)(command_args={
+            'vm_name': vm_name,
+            'resource_group': resource_group_name,
+            'security_profile': security_profile
+        }))
+        vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+
     disk_name = None
     if os_disk is not None:
         if is_valid_resource_id(os_disk):
@@ -1750,10 +1792,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm.security_profile.uefi_settings = UefiSettings(secure_boot_enabled=enable_secure_boot,
                                                          v_tpm_enabled=enable_vtpm)
 
-    proxy_agent_parameters = [
-        enable_proxy_agent, wire_server_mode, imds_mode, key_incarnation_id,
-        wire_server_access_control_profile_reference_id, imds_access_control_profile_reference_id
-    ]
+    proxy_agent_parameters = [enable_proxy_agent, wire_server_mode, imds_mode, key_incarnation_id]
     if any(parameter is not None for parameter in proxy_agent_parameters):
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
         HostEndpointSettings = cmd.get_models('HostEndpointSettings')
@@ -1776,14 +1815,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             vm.security_profile.proxy_agent_settings.key_incarnation_id = key_incarnation_id
         if wire_server_mode is not None:
             vm.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
-        if wire_server_access_control_profile_reference_id is not None:
-            vm.security_profile.proxy_agent_settings.wire_server.in_vm_access_control_profile_reference_id = \
-                wire_server_access_control_profile_reference_id
         if imds_mode is not None:
             vm.security_profile.proxy_agent_settings.imds.mode = imds_mode
-        if imds_access_control_profile_reference_id is not None:
-            vm.security_profile.proxy_agent_settings.imds.in_vm_access_control_profile_reference_id = \
-                imds_access_control_profile_reference_id
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -1858,6 +1891,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                     "automaticallyApprove": enable_user_reboot_scheduled_events
                 }
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
+    if wire_server_access_control_profile_reference_id is not None or \
+            imds_access_control_profile_reference_id is not None:
+        kwargs['parameters'] = vm
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
 
@@ -3140,28 +3176,31 @@ def list_unmanaged_disks(cmd, resource_group_name, vm_name):
 # region VirtualMachines Users
 def _update_linux_access_extension(cmd, vm_instance, resource_group_name, protected_settings,
                                    no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-
-    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
+    from .operations.vm_extension import VMExtensionCreate
 
     # pylint: disable=no-member
-    instance_name = _get_extension_instance_name(vm_instance.instance_view,
-                                                 extension_mappings[_LINUX_ACCESS_EXT]['publisher'],
-                                                 _LINUX_ACCESS_EXT,
-                                                 _ACCESS_EXT_HANDLER_NAME)
+    instance_name = _get_extension_instance_name_aaz(vm_instance.get('instanceView', {}),
+                                                     extension_mappings[_LINUX_ACCESS_EXT]['publisher'],
+                                                     _LINUX_ACCESS_EXT,
+                                                     _ACCESS_EXT_HANDLER_NAME)
 
-    publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vm_instance.resources, _LINUX_ACCESS_EXT)
+    publisher, version, auto_upgrade = _get_access_extension_upgrade_info_aaz(
+        vm_instance.get('resources', []), _LINUX_ACCESS_EXT)
 
-    ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
-                                  publisher=publisher,
-                                  type_properties_type=_LINUX_ACCESS_EXT,
-                                  protected_settings=protected_settings,
-                                  type_handler_version=version,
-                                  settings={},
-                                  auto_upgrade_minor_version=auto_upgrade)
-    return sdk_no_wait(no_wait, client.virtual_machine_extensions.begin_create_or_update,
-                       resource_group_name, vm_instance.name, instance_name, ext)
+    poller = VMExtensionCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_instance['name'],
+        'vm_extension_name': instance_name,
+        'location': vm_instance['location'],
+        'publisher': publisher,
+        'type': _LINUX_ACCESS_EXT,
+        'type_handler_version': version,
+        'settings': {},
+        'protected_settings': protected_settings,
+        'auto_upgrade_minor_version': auto_upgrade,
+        'no_wait': no_wait
+    })
+    return poller
 
 
 def _set_linux_user(cmd, vm_instance, resource_group_name, username,
@@ -3179,6 +3218,7 @@ def _set_linux_user(cmd, vm_instance, resource_group_name, username,
     if no_wait:
         return _update_linux_access_extension(cmd, vm_instance, resource_group_name,
                                               protected_settings, no_wait)
+
     poller = _update_linux_access_extension(cmd, vm_instance, resource_group_name,
                                             protected_settings)
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'setting user', 'done')(poller)
@@ -3186,37 +3226,45 @@ def _set_linux_user(cmd, vm_instance, resource_group_name, username,
 
 def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, password, no_wait=False):
     '''Update the password. You can only change the password. Adding a new user is not supported. '''
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
+    from .operations.vm_extension import VMExtensionCreate
 
-    publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vm_instance.resources, _WINDOWS_ACCESS_EXT)
+    publisher, version, auto_upgrade = _get_access_extension_upgrade_info_aaz(
+        vm_instance.get('resources', []), _WINDOWS_ACCESS_EXT)
     # pylint: disable=no-member
-    instance_name = _get_extension_instance_name(vm_instance.instance_view,
-                                                 publisher,
-                                                 _WINDOWS_ACCESS_EXT,
-                                                 _ACCESS_EXT_HANDLER_NAME)
+    instance_name = _get_extension_instance_name_aaz(vm_instance.get('instanceView', {}),
+                                                     publisher,
+                                                     _WINDOWS_ACCESS_EXT,
+                                                     _ACCESS_EXT_HANDLER_NAME)
 
-    ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
-                                  publisher=publisher,
-                                  type_properties_type=_WINDOWS_ACCESS_EXT,
-                                  protected_settings={'Password': password},
-                                  type_handler_version=version,
-                                  settings={'UserName': username},
-                                  auto_upgrade_minor_version=auto_upgrade)
+    poller = VMExtensionCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        'location': vm_instance['location'],
+        'resource_group': resource_group_name,
+        'vm_name': vm_instance['name'],
+        'vm_extension_name': instance_name,
+        'publisher': publisher,
+        'type': _WINDOWS_ACCESS_EXT,
+        'type_handler_version': version,
+        'auto_upgrade_minor_version': auto_upgrade,
+        'settings': {'UserName': username},
+        'protected_settings': {'Password': password},
+        'no_wait': no_wait
+    })
 
     if no_wait:
-        return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
-                           resource_group_name, vm_instance.name, instance_name, ext)
-    poller = client.virtual_machine_extensions.begin_create_or_update(
-        resource_group_name, vm_instance.name, instance_name, ext)
+        return poller
+
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'resetting admin', 'done')(poller)
 
 
 def set_user(cmd, resource_group_name, vm_name, username, password=None, ssh_key_value=None,
              no_wait=False):
-    vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if _is_linux_os(vm):
+    from .operations.vm import VMShow
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'expand': 'instanceView'
+    })
+    if _is_linux_os_aaz(vm):
         return _set_linux_user(cmd, vm, resource_group_name, username, password, ssh_key_value, no_wait)
     if ssh_key_value:
         raise CLIError('SSH key is not appliable on a Windows VM')
@@ -3224,24 +3272,36 @@ def set_user(cmd, resource_group_name, vm_name, username, password=None, ssh_key
 
 
 def delete_user(cmd, resource_group_name, vm_name, username, no_wait=False):
-    vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if not _is_linux_os(vm):
+    from .operations.vm import VMShow
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'expand': 'instanceView'
+    })
+    if not _is_linux_os_aaz(vm):
         raise CLIError('Deleting a user is not supported on Windows VM')
     if no_wait:
         return _update_linux_access_extension(cmd, vm, resource_group_name,
                                               {'remove_user': username}, no_wait)
+
     poller = _update_linux_access_extension(cmd, vm, resource_group_name,
                                             {'remove_user': username})
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'deleting user', 'done')(poller)
 
 
 def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
-    vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if not _is_linux_os(vm):
+    from .operations.vm import VMShow
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'expand': 'instanceView'
+    })
+    if not _is_linux_os_aaz(vm):
         raise CLIError('Resetting SSH is not supported in Windows VM')
     if no_wait:
         return _update_linux_access_extension(cmd, vm, resource_group_name,
                                               {'reset_ssh': True}, no_wait)
+
     poller = _update_linux_access_extension(cmd, vm, resource_group_name,
                                             {'reset_ssh': True})
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'resetting SSH', 'done')(poller)
@@ -4112,6 +4172,33 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
     vmss = kwargs['parameters']
+
+    if wire_server_access_control_profile_reference_id is not None or \
+            imds_access_control_profile_reference_id is not None:
+        from .aaz.latest.vmss import Patch as VMSSPatchUpdate
+
+        class VMSSUpdateReferenceId(VMSSPatchUpdate):
+            def _output(self, *args, **kwargs):
+                result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+                return result
+
+        security_profile = {'proxy_agent_settings': {}}
+        if wire_server_access_control_profile_reference_id:
+            security_profile['proxy_agent_settings']['wire_server'] = {
+                'in_vm_access_control_profile_reference_id': wire_server_access_control_profile_reference_id}
+        if imds_access_control_profile_reference_id:
+            security_profile['proxy_agent_settings']['imds'] = {
+                'in_vm_access_control_profile_reference_id': imds_access_control_profile_reference_id}
+
+        LongRunningOperation(cmd.cli_ctx)(VMSSUpdateReferenceId(cli_ctx=cmd.cli_ctx)(command_args={
+            'vm_scale_set_name': name,
+            'resource_group': resource_group_name,
+            'virtual_machine_profile': {
+                'security_profile': security_profile
+            }
+        }))
+        vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
+
     aux_subscriptions = None
     # pylint: disable=too-many-boolean-expressions
     if vmss and hasattr(vmss, 'virtual_machine_profile') and vmss.virtual_machine_profile and \
@@ -4273,9 +4360,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 'vTpmEnabled': enable_vtpm
             }}
 
-    if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None or \
-            wire_server_access_control_profile_reference_id is not None or \
-            imds_access_control_profile_reference_id is not None:
+    if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None:
         SecurityProfile = cmd.get_models('SecurityProfile')
         ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
         HostEndpointSettings = cmd.get_models('HostEndpointSettings')
@@ -4298,14 +4383,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
         if wire_server_mode is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
-        if wire_server_access_control_profile_reference_id is not None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server. \
-                in_vm_access_control_profile_reference_id = wire_server_access_control_profile_reference_id
         if imds_mode is not None:
             vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds.mode = imds_mode
-        if imds_access_control_profile_reference_id is not None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds. \
-                in_vm_access_control_profile_reference_id = imds_access_control_profile_reference_id
 
     if regular_priority_count is not None or regular_priority_percentage is not None:
         if vmss.orchestration_mode != 'Flexible':
@@ -4463,6 +4542,10 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if zone_balance is not None:
         vmss.zone_balance = zone_balance
+
+    if wire_server_access_control_profile_reference_id is not None or \
+            imds_access_control_profile_reference_id is not None:
+        kwargs['parameters'] = vmss
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
                        resource_group_name, name, **kwargs)

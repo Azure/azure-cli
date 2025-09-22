@@ -8825,7 +8825,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
             except Exception as ex:
                 raise UnknownError(
                     f"An error occurred while checking the version of Azure Container Storage"
-                    f"extension installed on the cluster: {str(ex)}"
+                    f" extension installed on the cluster: {str(ex)}"
                 ) from ex
 
             disable_azure_container_storage_v1 = disable_azure_container_storage_param is not None and is_container_storage_v1_extension_installed
