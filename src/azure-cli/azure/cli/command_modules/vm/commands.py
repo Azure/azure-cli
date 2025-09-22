@@ -7,7 +7,7 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vm_ext, cf_vm_ext_image,
                                                           cf_vm_image, cf_vm_image_term, cf_usage,
                                                           cf_vmss, cf_disks, cf_snapshots,
-                                                          cf_images, cf_run_commands,
+                                                          cf_images,
                                                           cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
@@ -111,9 +111,8 @@ def load_command_table(self, _):
         client_factory=cf_usage
     )
 
-    compute_vm_run_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineRunCommandsOperations.{}',
-        client_factory=cf_run_commands
+    compute_vm_run_profile = CliCommandType(
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineRunCommandsOperations.{}'
     )
 
     compute_vmss_run_sdk = CliCommandType(
@@ -377,13 +376,12 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_vm_nic')
         g.custom_command('list', 'list_vm_nics')
 
-    with self.command_group('vm run-command', compute_vm_run_sdk, client_factory=cf_run_commands, operation_group='virtual_machine_run_commands', min_api='2017-03-30') as g:
+    with self.command_group('vm run-command', compute_vm_run_profile, operation_group='virtual_machine_run_commands') as g:
         g.custom_command('invoke', 'vm_run_command_invoke', supports_no_wait=True)
         g.custom_command('list', 'vm_run_command_list')
         g.custom_show_command('show', 'vm_run_command_show')
         g.custom_command('create', 'vm_run_command_create', supports_no_wait=True)
         g.custom_command('update', 'vm_run_command_update', supports_no_wait=True)
-        g.custom_command('delete', 'vm_run_command_delete', supports_no_wait=True, confirmation=True)
         g.custom_wait_command('wait', 'vm_run_command_show')
 
     with self.command_group('vm secret', compute_vm_sdk) as g:
