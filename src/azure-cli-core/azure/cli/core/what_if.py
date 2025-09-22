@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 import threading
 import time
 import sys
@@ -22,11 +21,11 @@ def read_script_file(script_path):
         raise CLIError(f"Error reading script file: {ex}")
 
 
-def get_auth_headers(cmd, subscription_id):
+def _get_auth_headers(cli_ctx, subscription_id):
     from azure.cli.core._profile import Profile
 
-    resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
-    profile = Profile(cli_ctx=cmd.cli_ctx)
+    resource = cli_ctx.cloud.endpoints.active_directory_resource_id
+    profile = Profile(cli_ctx=cli_ctx)
 
     try:
         token_result = profile.get_raw_token(resource, subscription=subscription_id)
@@ -41,7 +40,7 @@ def get_auth_headers(cmd, subscription_id):
     }
 
 
-def make_what_if_request(payload, headers_dict):
+def _make_what_if_request(payload, headers_dict):
     request_completed = threading.Event()
 
     def _rotating_progress():
@@ -166,3 +165,35 @@ def convert_json_to_what_if_result(what_if_json_result):
         potential_changes.append(_create_resource_change(change_data))
 
     return WhatIfOperationResult(changes, potential_changes, [])
+
+def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pretty_print=False):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.cli.command_modules.resource._formatters import format_what_if_operation_result
+
+    if not subscription_id:
+        subscription_id = get_subscription_id(cli_ctx)
+
+    payload = {
+        "azcli_script": azcli_script,
+        "subscription_id": subscription_id
+    }
+
+    headers_dict = _get_auth_headers(cli_ctx, subscription_id)
+    response = _make_what_if_request(payload, headers_dict)
+
+    try:
+        raw_results = response.json()
+    except ValueError as ex:
+        raise CLIError(f"Failed to parse response from what-if service: {ex}")
+
+    success = raw_results.get('success')
+    if success is False:
+        return raw_results
+    if success is True:
+        what_if_result = raw_results.get('what_if_result', {})
+        what_if_operation_result = convert_json_to_what_if_result(what_if_result)
+        if no_pretty_print:
+            return what_if_result
+        print(format_what_if_operation_result(what_if_operation_result, cli_ctx.enable_color))
+        return what_if_result
+    raise CLIError(f"Unexpected response from what-if service, got: {raw_results}")
