@@ -506,6 +506,8 @@ class AzCliCommandInvoker(CommandInvoker):
 
     # pylint: disable=too-many-statements,too-many-locals,too-many-branches
     def execute(self, args):
+        args_copy = args[:]
+        
         from knack.events import (EVENT_INVOKER_PRE_CMD_TBL_CREATE, EVENT_INVOKER_POST_CMD_TBL_CREATE,
                                   EVENT_INVOKER_CMD_TBL_LOADED, EVENT_INVOKER_PRE_PARSE_ARGS,
                                   EVENT_INVOKER_POST_PARSE_ARGS,
@@ -586,7 +588,8 @@ class AzCliCommandInvoker(CommandInvoker):
             args[0] = '--help'
 
         self.parser.enable_autocomplete()
-
+        if '--what-if' in (args_copy):
+            return self._what_if(args_copy)
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_PARSE_ARGS, args=args)
         parsed_args = self.parser.parse_args(args)
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
@@ -690,6 +693,45 @@ class AzCliCommandInvoker(CommandInvoker):
             event_data['result'],
             table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
             is_query_active=self.data['query_active'])
+
+    def _what_if(self, args):
+        # DEBUG: Add logging to see if this method is called
+        print(f"DEBUG: _what_if called with command: {args}")
+        if '--what-if' in args:
+            print("DEBUG: Entering what-if mode")
+            from azure.cli.core.what_if import show_what_if
+            try:
+                # Get subscription ID with priority: --subscription parameter > current login subscription
+                if '--subscription' in args:
+                    index = args.index('--subscription')
+                    if index + 1 < len(args):
+                        subscription_value = args[index + 1]
+                        subscription_id = subscription_value    
+                else:
+                    from azure.cli.core.commands.client_factory import get_subscription_id
+                    subscription_id = get_subscription_id(self.cli_ctx)
+                    print(f"DEBUG: Using current login subscription ID: {subscription_id}")
+                
+                args = ["az"] + args if args[0] != 'az' else args
+                command = " ".join(args)
+                what_if_result = show_what_if(self.cli_ctx, command, subscription_id=subscription_id)
+
+                # Ensure output format is set for proper formatting
+                # Default to 'json' if not already set
+                if 'output' not in self.cli_ctx.invocation.data or self.cli_ctx.invocation.data['output'] is None:
+                    self.cli_ctx.invocation.data['output'] = 'json'
+
+                # Return the formatted what-if output as the result
+                # Similar to the normal flow in execute() method
+                return CommandResultItem(
+                    what_if_result, 
+                    table_transformer=None,
+                    is_query_active=self.data.get('query_active', False),
+                    exit_code=0
+                )
+            except Exception as ex:
+                # If what-if service fails, still show an informative message
+                return CommandResultItem(None, exit_code=1, error=CLIError(f'What-if preview failed: {str(ex)}\nNote: This was a preview operation. No actual changes were made.'))
 
     @staticmethod
     def _extract_parameter_names(args):

@@ -268,6 +268,16 @@ def get_location_type(cli_ctx):
     return location_type
 
 
+def get_what_if_type():
+    what_if_type = CLIArgumentType(
+        options_list=['--what-if'],
+        help="Preview the changes that will be made without actually executing the command. "
+             "This will call the what-if service to compare the current state with the expected state after execution.",
+        is_preview=True
+    )
+    return what_if_type
+
+
 deployment_name_type = CLIArgumentType(
     help=argparse.SUPPRESS,
     required=False,
