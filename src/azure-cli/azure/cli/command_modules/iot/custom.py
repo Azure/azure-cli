@@ -20,7 +20,6 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
 
 from azure.mgmt.iothub.models import (IotHubSku,
                                       AccessRights,
@@ -433,10 +432,8 @@ def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_p
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
     cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
 
-    if AZURE_API_PROFILES["latest"][ResourceType.MGMT_IOTHUB] in client.profile.label:
-        cert_description = CertificateDescription(properties=cert_properties)
-        return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
-    return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_properties)
+    cert_description = CertificateDescription(properties=cert_properties)
+    return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
 
 
 def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_path, etag, resource_group_name=None, is_verified=None):
@@ -449,10 +446,8 @@ def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_p
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
             cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
 
-            if AZURE_API_PROFILES["latest"][ResourceType.MGMT_IOTHUB] in client.profile.label:
-                cert_description = CertificateDescription(properties=cert_properties)
-                return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
-            return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_properties, etag)
+            cert_description = CertificateDescription(properties=cert_properties)
+            return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot hub certificate create' to create a new certificate."
                    .format(certificate_name))
 

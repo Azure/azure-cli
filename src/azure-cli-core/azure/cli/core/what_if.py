@@ -3,39 +3,49 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-"""
-Module for handling what-if functionality in Azure CLI.
-This module provides the core logic for preview mode execution without actually running commands.
 
-IMPORTANT: The what-if service requires client-side authentication to operate under the 
-caller's subscription and permissions. Server-side authentication is not supported for 
-what-if operations as it would not provide access to the caller's subscription.
-"""
-from typing import Dict, Any, Optional
-from knack.log import get_logger
-
-logger = get_logger(__name__)
+import threading
+import time
+import sys
+import json
+from requests import Request, Session
+from knack.util import CLIError
 
 
-def show_what_if(cli_ctx, azcli_script: str, subscription_id: Optional[str] = None, no_pretty_print: bool = False):
-    from azure.cli.command_modules.resource._formatters import format_what_if_operation_result
+def read_script_file(script_path):
+    try:
+        with open(script_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        raise CLIError(f"Script file not found: {script_path}")
+    except Exception as ex:
+        raise CLIError(f"Error reading script file: {ex}")
+
+
+def get_auth_headers(cmd, subscription_id):
     from azure.cli.core._profile import Profile
-    import threading
-    import time
-    import sys
-    import json
-    from requests import Request, Session
 
-    payload = {
-        "azcli_script": azcli_script,
-        "subscription_id": subscription_id
+    resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+
+    try:
+        token_result = profile.get_raw_token(resource, subscription=subscription_id)
+        token_info, _, _ = token_result
+        token_type, token, _ = token_info
+    except Exception as token_ex:
+        raise CLIError(f"Failed to get authentication token: {token_ex}")
+
+    return {
+        'Authorization': f'{token_type} {token}',
+        'Content-Type': 'application/json'
     }
 
+
+def make_what_if_request(payload, headers_dict):
     request_completed = threading.Event()
 
-    def rotating_progress():
-        """Simulate a rotating progress indicator, similar to the one displayed during long-running operations.
-        """
+    def _rotating_progress():
+        """Simulate a rotating progress indicator."""
         chars = ["|", "\\", "/", "-"]
         idx = 0
         while not request_completed.is_set():
@@ -47,34 +57,21 @@ def show_what_if(cli_ctx, azcli_script: str, subscription_id: Optional[str] = No
         sys.stderr.flush()
 
     try:
-        FUNCTION_APP_URL = "https://azcli-script-insight.azurewebsites.net"
-        resource = cli_ctx.cloud.endpoints.active_directory_resource_id
-        profile = Profile(cli_ctx=cli_ctx)
+        function_app_url = "https://azcli-script-insight.azurewebsites.net"
 
-        try:
-            token_result = profile.get_raw_token(resource, subscription=subscription_id)
-            token_info, _, _ = token_result
-            token_type, token, _ = token_info
-        except Exception as token_ex:
-            request_completed.set()
-            raise CLIError(f"Failed to get authentication token: {token_ex}")
-
-        headers_dict = {}
-        headers_dict['Authorization'] = '{} {}'.format(token_type, token)
-        headers_dict['Content-Type'] = 'application/json'
-
-        progress_thread = threading.Thread(target=rotating_progress)
+        progress_thread = threading.Thread(target=_rotating_progress)
         progress_thread.daemon = True
         progress_thread.start()
 
         session = Session()
-        req = Request(method="POST", url=f"{FUNCTION_APP_URL}/api/what_if_preview",
+        req = Request(method="POST", url=f"{function_app_url}/api/what_if_preview",
                       headers=headers_dict, data=json.dumps(payload))
         prepared = session.prepare_request(req)
         response = session.send(prepared)
         request_completed.set()
-
         progress_thread.join(timeout=0.5)
+
+        return response
 
     except Exception as ex:
         request_completed.set()
@@ -82,27 +79,10 @@ def show_what_if(cli_ctx, azcli_script: str, subscription_id: Optional[str] = No
             progress_thread.join(timeout=0.5)
         raise CLIError(f"Failed to connect to the what-if service: {ex}")
 
-    try:
-        raw_results = response.json()
-    except ValueError as ex:
-        raise CLIError(f"Failed to parse response from what-if service: {ex}")
 
-    success = raw_results.get('success')
-    if success is False:
-        return raw_results
-    elif success is True:
-        what_if_result = raw_results.get('what_if_result', {})
-        what_if_operation_result = _convert_json_to_what_if_result(what_if_result)
-        if no_pretty_print:
-            return what_if_result
-        print(format_what_if_operation_result(what_if_operation_result, cli_ctx.enable_color))
-        return what_if_result
-    else:
-        raise CLIError(f"Unexpected response from what-if service, got: {raw_results}")
-
-
-def _convert_json_to_what_if_result(what_if_json_result):
+def convert_json_to_what_if_result(what_if_json_result):
     from azure.cli.command_modules.resource._formatters import _change_type_to_weight, _property_change_type_to_weight
+    from collections import namedtuple
 
     enum_keys = list(_change_type_to_weight.keys())
     enum_mapping = {}
@@ -140,57 +120,49 @@ def _convert_json_to_what_if_result(what_if_json_result):
         elif 'no_effect' in str_repr or 'noeffect' in str_repr:
             property_enum_mapping['NoEffect'] = enum_obj
 
-    class WhatIfOperationResult:
-        def __init__(self):
-            self.changes = []
-            self.potential_changes = []
-            self.diagnostics = []
-
-    class ResourceChange:
-        def __init__(self, change_data):
-            self.change_type = _map_change_type_string(change_data.get('changeType', 'Unknown'))
-            self.resource_id = change_data.get('resourceId', '')
-            self.before = change_data.get('before')
-            self.after = change_data.get('after')
-            self.delta = []
-
-            delta_data = change_data.get('delta', [])
-            for property_data in delta_data:
-                property_change = PropertyChange(property_data)
-                self.delta.append(property_change)
-
-    class PropertyChange:
-        def __init__(self, change_data):
-            self.property_change_type = _map_property_change_type_string(
-                change_data.get('propertyChangeType', 'NoEffect'))
-            self.path = change_data.get('path', '')
-            self.before = change_data.get('before')
-            self.after = change_data.get('after')
-            self.children = []
-
-            children_data = change_data.get('children', [])
-            for child_data in children_data:
-                child_property_change = PropertyChange(child_data)
-                self.children.append(child_property_change)
+    WhatIfOperationResult = namedtuple('WhatIfOperationResult', ['changes', 'potential_changes', 'diagnostics'])
+    ResourceChange = namedtuple('ResourceChange', ['change_type', 'resource_id', 'before', 'after', 'delta'])
+    PropertyChange = namedtuple('PropertyChange', ['property_change_type', 'path', 'before', 'after', 'children'])
 
     def _map_change_type_string(change_type_str):
-        result = enum_mapping.get(change_type_str)
-        return result
+        return enum_mapping.get(change_type_str)
 
     def _map_property_change_type_string(property_change_type_str):
-        result = property_enum_mapping.get(property_change_type_str)
-        return result
+        return property_enum_mapping.get(property_change_type_str)
 
-    result = WhatIfOperationResult()
+    def _create_property_change(change_data):
+        property_change_type = _map_property_change_type_string(
+            change_data.get('propertyChangeType', 'NoEffect'))
+        path = change_data.get('path', '')
+        before = change_data.get('before')
+        after = change_data.get('after')
 
-    changes = what_if_json_result.get('changes', [])
-    for change_data in changes:
-        resource_change = ResourceChange(change_data)
-        result.changes.append(resource_change)
+        children = []
+        children_data = change_data.get('children', [])
+        for child_data in children_data:
+            children.append(_create_property_change(child_data))
 
-    potential_changes = what_if_json_result.get('potential_changes', [])
-    for change_data in potential_changes:
-        resource_change = ResourceChange(change_data)
-        result.potential_changes.append(resource_change)
+        return PropertyChange(property_change_type, path, before, after, children)
 
-    return result
+    def _create_resource_change(change_data):
+        change_type = _map_change_type_string(change_data.get('changeType', 'Unknown'))
+        resource_id = change_data.get('resourceId', '')
+        before = change_data.get('before')
+        after = change_data.get('after')
+
+        delta = []
+        delta_data = change_data.get('delta', [])
+        for property_data in delta_data:
+            delta.append(_create_property_change(property_data))
+
+        return ResourceChange(change_type, resource_id, before, after, delta)
+
+    changes = []
+    for change_data in what_if_json_result.get('changes', []):
+        changes.append(_create_resource_change(change_data))
+
+    potential_changes = []
+    for change_data in what_if_json_result.get('potential_changes', []):
+        potential_changes.append(_create_resource_change(change_data))
+
+    return WhatIfOperationResult(changes, potential_changes, [])

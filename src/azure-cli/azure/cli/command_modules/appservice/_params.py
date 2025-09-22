@@ -233,10 +233,10 @@ subscription than the app service environment, please use the resource ID for --
 
     with self.argument_context('functionapp list-flexconsumption-locations') as c:
         c.argument('zone_redundant', arg_type=get_three_state_flag(),
-                   help='Filter the list to return only locations which support zone redundancy.', is_preview=True)
+                   help='Filter the list to return only locations which support zone redundancy.')
         c.argument('show_details', options_list=['--show-details'], arg_type=get_three_state_flag(),
-                   help='Include the runtime details of the regions.', is_preview=True)
-        c.argument('runtime', help="limit the output to just the specified runtime", is_preview=True)
+                   help='Include the runtime details of the regions.')
+        c.argument('runtime', help="limit the output to just the specified runtime")
 
     with self.argument_context('functionapp flex-migration start') as c:
         c.argument('source_resource_group', help='The resource group of the source function app to migrate from.')
@@ -492,20 +492,20 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
         c.argument('workload_profile_name', help="The name of the workload profile to run the app on.", is_preview=True)
         c.argument('cpu', type=float, help="Required CPU in cores from 0.5 to 2.0.", is_preview=True)
-        c.argument('memory', help="Required momory from 1.0 to 4.0 ending with Gi e.g. 1.0Gi, ", is_preview=True)
+        c.argument('memory', help="Required memory from 1.0 to 4.0 ending with Gi e.g. 1.0Gi, ", is_preview=True)
 
     with self.argument_context('functionapp runtime config') as c:
-        c.argument('runtime_version', help='The version of the functions runtime stack. Use "az functionapp list-flexconsumption-runtimes" to check supported runtimes and versions', is_preview=True)
+        c.argument('runtime_version', help='The version of the functions runtime stack. Use "az functionapp list-flexconsumption-runtimes" to check supported runtimes and versions')
 
     with self.argument_context('functionapp scale config') as c:
-        c.argument('maximum_instance_count', type=int, help="The maximum number of instances.", is_preview=True)
-        c.argument('instance_memory', type=int, help="The instance memory size in MB.", is_preview=True)
-        c.argument('trigger_type', help="The type of trigger.", is_preview=True)
-        c.argument('trigger_settings', nargs='+', help="space-separated settings for the trigger type in the format `<name>=<value>`", is_preview=True)
+        c.argument('maximum_instance_count', type=int, help="The maximum number of instances.")
+        c.argument('instance_memory', type=int, help="The instance memory size in MB.")
+        c.argument('trigger_type', help="The type of trigger.")
+        c.argument('trigger_settings', nargs='+', help="space-separated settings for the trigger type in the format `<name>=<value>`")
 
     with self.argument_context('functionapp scale config always-ready') as c:
-        c.argument('setting_names', nargs='+', help="space-separated always-ready setting names", is_preview=True)
-        c.argument('settings', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`", is_preview=True)
+        c.argument('setting_names', nargs='+', help="space-separated always-ready setting names")
+        c.argument('settings', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`")
 
     with self.argument_context('webapp config connection-string list') as c:
         c.argument('name', arg_type=webapp_name_arg_type, id_part=None)
@@ -871,33 +871,33 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('dapr_http_read_buffer_size', type=int, options_list=['--dapr-http-read-buffer-size', '--dhrbs'], help="Max size of http header read buffer in KB to handle when sending multi-KB headers.")
         c.argument('dapr_log_level', help="The log level for the Dapr sidecar", arg_type=get_enum_type(DAPR_LOG_LEVELS))
         c.argument('dapr_enable_api_logging', options_list=['--dapr-enable-api-logging', '--dal'], help="Enable/Disable API logging for the Dapr sidecar.", arg_type=get_three_state_flag(return_label=True))
-        c.argument('always_ready_instances', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`", is_preview=True)
-        c.argument('maximum_instance_count', type=int, help="The maximum number of instances.", is_preview=True)
-        c.argument('instance_memory', type=int, help="The instance memory size in MB. See https://aka.ms/flex-instance-sizes for more information on the supported values.", is_preview=True)
+        c.argument('always_ready_instances', nargs='+', help="space-separated configuration for the number of pre-allocated instances in the format `<name>=<value>`")
+        c.argument('maximum_instance_count', type=int, help="The maximum number of instances.")
+        c.argument('instance_memory', type=int, help="The instance memory size in MB. See https://aka.ms/flex-instance-sizes for more information on the supported values.")
         c.argument('flexconsumption_location', options_list=['--flexconsumption-location', '-f'],
-                   help="Geographic location where function app will be hosted. Use `az functionapp list-flexconsumption-locations` to view available locations.", is_preview=True)
+                   help="Geographic location where function app will be hosted. Use `az functionapp list-flexconsumption-locations` to view available locations.")
         c.argument('workspace', help="Name of an existing log analytics workspace to be used for the application insights component")
         c.argument('workload_profile_name', help="The workload profile name to run the container app on.", is_preview=True)
         c.argument('cpu', type=float, help="The CPU in cores of the container app. e.g 0.75", is_preview=True)
         c.argument('memory', help="The memory size of the container app. e.g. 1.0Gi, ", is_preview=True)
-        c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.", is_preview=True)
-        c.argument('deployment_storage_container_name', options_list=['--deployment-storage-container-name', '--dscn'], help="The deployment storage account container name.", is_preview=True)
-        c.argument('deployment_storage_auth_type', options_list=['--deployment-storage-auth-type', '--dsat'], arg_type=get_enum_type(DEPLOYMENT_STORAGE_AUTH_TYPES), help="The deployment storage account authentication type.", is_preview=True)
+        c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.")
+        c.argument('deployment_storage_container_name', options_list=['--deployment-storage-container-name', '--dscn'], help="The deployment storage account container name.")
+        c.argument('deployment_storage_auth_type', options_list=['--deployment-storage-auth-type', '--dsat'], arg_type=get_enum_type(DEPLOYMENT_STORAGE_AUTH_TYPES), help="The deployment storage account authentication type.")
         c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. For the user-assigned managed identity authentication type, "
                    "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
-                   "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.", is_preview=True)
+                   "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.")
         c.argument('zone_redundant', arg_type=get_three_state_flag(),
-                   help='Enable zone redundancy for high availability. Applies to Flex Consumption SKU only.', is_preview=True)
+                   help='Enable zone redundancy for high availability. Applies to Flex Consumption SKU only.')
         c.argument('configure_networking_later', options_list=['--configure-networking-later', '--cnl'], arg_type=get_three_state_flag(),
                    help='Use this option if you want to configure networking later for an app using network-restricted storage.')
 
     with self.argument_context('functionapp deployment config set') as c:
-        c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.", is_preview=True)
-        c.argument('deployment_storage_container_name', options_list=['--deployment-storage-container-name', '--dscn'], help="The deployment storage account container name.", is_preview=True)
-        c.argument('deployment_storage_auth_type', options_list=['--deployment-storage-auth-type', '--dsat'], arg_type=get_enum_type(DEPLOYMENT_STORAGE_AUTH_TYPES), help="The deployment storage account authentication type.", is_preview=True)
+        c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.")
+        c.argument('deployment_storage_container_name', options_list=['--deployment-storage-container-name', '--dscn'], help="The deployment storage account container name.")
+        c.argument('deployment_storage_auth_type', options_list=['--deployment-storage-auth-type', '--dsat'], arg_type=get_enum_type(DEPLOYMENT_STORAGE_AUTH_TYPES), help="The deployment storage account authentication type.")
         c.argument('deployment_storage_auth_value', options_list=['--deployment-storage-auth-value', '--dsav'], help="The deployment storage account authentication value. For the user-assigned managed identity authentication type, "
                    "this should be the user assigned identity resource id. For the storage account connection string authentication type, this should be the name of the app setting that will contain the storage account connection "
-                   "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.", is_preview=True)
+                   "string. For the system assigned managed-identity authentication type, this parameter is not applicable and should be left empty.")
 
     with self.argument_context('functionapp cors credentials') as c:
         c.argument('enable', help='enable/disable access-control-allow-credentials', arg_type=get_three_state_flag())
