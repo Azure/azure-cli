@@ -6,12 +6,14 @@
 import unittest
 import time
 
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
 
 
 class CognitiveServicesModelTests(ScenarioTest):
     @serial_test()
+    @AllowLargeResponse()
     @ResourceGroupPreparer()
     def test_cognitiveservices_model(self, resource_group):
         sname = self.create_random_name(prefix='cs_cli_test_', length=16)

@@ -26,19 +26,26 @@ class SearchServiceCreate(_SearchServiceCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
+
         args_schema.ip_rules = AAZStrArg(
-            arg_group="Properties",
+            arg_group="NetworkRuleSet",
             options=['--ip-rules'],
-            help="Some help"
+            help="A list of IP defineing the inbound network(s) allowed to access to the search service endpoint.",
         )
+
         args_schema.auth_options = AAZStrArg(
             arg_group="Properties",
             options=['--auth-options'],
             help="Some Help",
             enum=["aadOrApiKey", "apiKeyOnly"],
         )
+
         args_schema.ip_rules_internal._registered = False
         args_schema.api_key_only._registered = False
+
+        args_schema.upgrade_available._registered = False
+        args_schema.endpoint._registered = False
+
         return args_schema
 
     def pre_operations(self):
@@ -81,26 +88,35 @@ class SearchServiceUpdate(_SearchServiceUpdate):
         from azure.cli.core.aaz import AAZStrArg
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.ip_rules = AAZStrArg(
-            arg_group="Properties",
+            arg_group="NetworkRuleSet",
             options=['--ip-rules'],
-            help="Some help",
+            help="A list of IP defineing the inbound network(s) allowed to access to the search service endpoint.",
             nullable=True,  # allow to remove all the value when it's assigned by null
         )
+
         args_schema.auth_options = AAZStrArg(
             arg_group="Properties",
             options=['--auth-options'],
             help="Some Help",
             enum=["aadOrApiKey", "apiKeyOnly"],
         )
-
         args_schema.ip_rules_internal._registered = False
         args_schema.api_key_only._registered = False
+
         return args_schema
 
     def pre_operations(self):
         from azure.cli.core.aaz import has_value
         import re
         args = self.ctx.args
+
+        if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialized_data() is True:
+            if has_value(args.auth_options):
+                raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AuthOptions parameters "
+                                                     "can't be given at the same time")
+            if has_value(args.aad_auth_failure_mode):
+                raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AadAuthFailureMode parameters "
+                                                     "can't be given at the same time")
 
         if has_value(args.ip_rules):
             if args.ip_rules.to_serialized_data() is None or args.ip_rules in [';', ',']:
@@ -110,13 +126,6 @@ class SearchServiceUpdate(_SearchServiceUpdate):
                 ip_rules = re.split(';|,', args.ip_rules.to_serialized_data())
                 args.ip_rules_internal = [{"value": ip_rule} for ip_rule in ip_rules]
 
-        if has_value(args.disable_local_auth) and args.disable_local_auth.to_serialized_data() is True:
-            if has_value(args.auth_options):
-                raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AuthOptions parameters "
-                                                     "can't be given at the same time")
-            if has_value(args.aad_auth_failure_mode):
-                raise MutuallyExclusiveArgumentError("Both the DisableLocalAuth and AadAuthFailureMode parameters "
-                                                     "can't be given at the same time")
         if has_value(args.auth_options):
             if args.auth_options == "apiKeyOnly":
                 if has_value(args.aad_auth_failure_mode):
