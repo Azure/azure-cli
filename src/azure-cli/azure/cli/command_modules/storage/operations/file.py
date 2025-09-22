@@ -233,7 +233,7 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
     Download files from file share to local directory in batch
     """
 
-    from azure.cli.command_modules.storage.util import glob_files_remotely_track2
+    from azure.cli.command_modules.storage.util import glob_files_remotely_track2, normalize_blob_file_path
 
     source_files = glob_files_remotely_track2(client, source, pattern, is_share_client=True)
 
@@ -255,12 +255,13 @@ def storage_file_download_batch(client, source, destination, pattern=None, dryru
     def _download_action(pair):
         path = os.path.join(*pair)
         local_path = os.path.join(destination, *pair)
+        path = normalize_blob_file_path(None, path)
         file_client = client.get_file_client(path)
 
         download_file(file_client, destination_path=local_path, max_connections=max_connections,
                       progress_callback=progress_callback, validate_content=validate_content)
 
-        return file_client.url.replace('%5C', '/')
+        return file_client.url
 
     return list(_download_action(f) for f in source_files)
 
@@ -358,9 +359,11 @@ def storage_file_delete_batch(client, source, pattern=None, dryrun=False, timeou
     """
     Delete files from file share in batch
     """
+    from azure.cli.command_modules.storage.util import normalize_blob_file_path
 
     def delete_action(pair):
         path = os.path.join(*pair)
+        path = normalize_blob_file_path(None, path)
         file_client = client.get_file_client(path)
         return file_client.delete_file(timeout=timeout)
 
@@ -381,6 +384,7 @@ def storage_file_delete_batch(client, source, pattern=None, dryrun=False, timeou
         delete_action(f)
 
 
+# pylint: disable=too-many-locals
 def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share, container, sas, blob_name,
                                          destination_dir=None, metadata=None, timeout=None, existing_dirs=None):
     """
@@ -394,7 +398,7 @@ def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share,
         t_generate_blob_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                                       '_shared_access_signature#generate_blob_sas')
         t_blob_permissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
-                                      '_models#BlobSasPermissions')
+                                     '_models#BlobSasPermissions')
         from datetime import datetime, timedelta
         start = datetime.utcnow()
         expiry = datetime.utcnow() + timedelta(days=1)
@@ -425,6 +429,7 @@ def _create_file_and_directory_from_blob(cmd, file_service, blob_service, share,
         raise CLIError(error_template.format(blob_name, share))
 
 
+# pylint: disable=too-many-locals
 def _create_file_and_directory_from_file(cmd, file_service, source_file_service, share, source_share, sas,
                                          source_file_dir, source_file_name, destination_dir=None, metadata=None,
                                          timeout=None, existing_dirs=None):
@@ -440,9 +445,9 @@ def _create_file_and_directory_from_file(cmd, file_service, source_file_service,
     t_file_client = cmd.get_models('_file_client#ShareFileClient', resource_type=ResourceType.DATA_STORAGE_FILESHARE)
     if sas is None:
         t_generate_share_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
-                                      '_shared_access_signature#generate_share_sas')
+                                       '_shared_access_signature#generate_share_sas')
         t_file_permissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
-                                      '_models#FileSasPermissions')
+                                     '_models#FileSasPermissions')
         from datetime import datetime, timedelta
         start = datetime.utcnow()
         expiry = datetime.utcnow() + timedelta(days=1)

@@ -13,7 +13,6 @@ from azure.cli.core.azclierror import AzureResponseError, FileOperationError
 from azure.cli.command_modules.storage.util import (filter_none, collect_blobs, collect_blob_objects,
                                                     collect_files_track2, mkdir_p, guess_content_type,
                                                     normalize_blob_file_path, check_precondition_success)
-from azure.cli.command_modules.storage._client_factory import cf_share_service
 from azure.core.exceptions import ResourceExistsError, ResourceModifiedError, HttpResponseError
 
 from knack.log import get_logger
@@ -377,6 +376,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
         # pylint: disable=inconsistent-return-statements
         if source_client is None:
             source_client = client
+
         def action_blob_copy(blob_name):
             if dryrun:
                 logger.warning('  - copy blob %s', blob_name)
@@ -407,6 +407,7 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
                 source_client = t_share_service(account_url=account_url, credential=credential)
             else:
                 source_client = t_share_service(account_url=account_url, credential=client.credential)
+
         def action_file_copy(file_info):
             dir_name, file_name = file_info
             if dryrun:
@@ -934,7 +935,8 @@ def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destina
             expiry = datetime.utcnow() + timedelta(days=1)
             source_user_delegation_key = source_blob_service.get_user_delegation_key(start, expiry)
             source_sas = create_short_lived_blob_sas_v2(cmd, source_blob_service.account_name, source_container,
-                                                        source_blob_name, user_delegation_key=source_user_delegation_key)
+                                                        source_blob_name,
+                                                        user_delegation_key=source_user_delegation_key)
         source_client = t_blob_client(account_url=source_blob_service.url, container_name=source_container,
                                       blob_name=source_blob_name, credential=source_sas)
     source_blob_url = source_client.url
@@ -957,12 +959,14 @@ def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destina
 def _copy_file_to_blob_container(cmd, blob_service, source_file_service, destination_container, destination_path,
                                  source_share, source_sas, source_file_dir, source_file_name):
     t_share_client = source_file_service.get_share_client(source_share)
-    t_file_client = t_share_client.get_file_client(os.path.join(source_file_dir, source_file_name))
+    source_path = os.path.join(source_file_dir, source_file_name) if source_file_dir else source_file_name
+    source_path = normalize_blob_file_path(None, source_path)
+    t_file_client = t_share_client.get_file_client(source_path)
     if source_sas is None:
         t_generate_share_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
-                                      '_shared_access_signature#generate_share_sas')
+                                       '_shared_access_signature#generate_share_sas')
         t_file_permissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
-                                      '_models#FileSasPermissions')
+                                     '_models#FileSasPermissions')
         start = datetime.utcnow()
         expiry = datetime.utcnow() + timedelta(days=1)
         source_sas = t_generate_share_sas(account_name=t_file_client.account_name, share_name=source_share,
@@ -976,7 +980,6 @@ def _copy_file_to_blob_container(cmd, blob_service, source_file_service, destina
     else:
         source_file_url = t_file_client.url
 
-    source_path = os.path.join(source_file_dir, source_file_name) if source_file_dir else source_file_name
     destination_blob_name = normalize_blob_file_path(destination_path, source_path)
     try:
         blob_client = blob_service.get_blob_client(container=destination_container, blob=destination_blob_name)

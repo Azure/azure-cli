@@ -335,14 +335,16 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
         self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
         multi_thread_time = time.time() - start_time
-        start_time = time.time()
-        src_share = 'share9'
-        self.storage_cmd('storage share create -n {}', storage_account_info, src_share)
-        self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1', storage_account_info,
-                         test_dir, src_share)
-        self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
-        self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
-        single_thread_time = time.time() - start_time
+
+        # max-connection set to 1 for recording so this check is not available anymore
+        # start_time = time.time()
+        # src_share = 'share9'
+        # self.storage_cmd('storage share create -n {}', storage_account_info, src_share)
+        # self.storage_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1', storage_account_info,
+        #                  test_dir, src_share)
+        # self.storage_cmd('storage file download-batch -s {} -d "{}"', storage_account_info, src_share, local_folder)
+        # self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
+        # single_thread_time = time.time() - start_time
         # max-connection set to 1 for recording so this check is not available anymore
         # self.assertGreater(single_thread_time, multi_thread_time)
 
@@ -350,7 +352,6 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='src_account')
     @StorageAccountPreparer(parameter_name='dst_account')
     @StorageTestFilesPreparer()
-    @live_only()
     def test_storage_blob_batch_copy(self, src_account_info, dst_account_info, test_dir):
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
@@ -373,16 +374,17 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
                          src_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 41))
 
         # from blob container to container with a sas between different accounts with pattern
-        dst_container = 'container3'
-        self.storage_cmd('storage container create -n {}', dst_account_info, dst_container)
-        sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions rl '
-                                     '--expiry {}', src_account_info, src_container, expiry).output
-        self.storage_cmd('storage blob copy start-batch --source-container {} '
-                         '--destination-container {} --source-sas {} --pattern apple/* '
-                         '--source-account-name {}', dst_account_info, src_container, dst_container, sas_token,
-                         src_account_info[0])
-        self.storage_cmd('storage blob list -c {}',
-                         dst_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 10))
+        if self.is_live:
+            dst_container = 'container3'
+            self.storage_cmd('storage container create -n {}', dst_account_info, dst_container)
+            sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions rl '
+                                         '--expiry {}', src_account_info, src_container, expiry).output
+            self.storage_cmd('storage blob copy start-batch --source-container {} '
+                             '--destination-container {} --source-sas {} --pattern apple/* '
+                             '--source-account-name {}', dst_account_info, src_container, dst_container, sas_token,
+                             src_account_info[0])
+            self.storage_cmd('storage blob list -c {}',
+                             dst_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 10))
 
         # from blob container to container without a sas between different accounts with pattern
         dst_container = 'container4'
@@ -404,16 +406,17 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
                          src_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 41))
 
         # from file share to blob container with a sas between different accounts with pattern
-        dst_container = 'container6'
-        self.storage_cmd('storage container create -n {}', dst_account_info, dst_container)
-        sas_token = self.storage_cmd('storage share generate-sas -n {} --permissions rl --expiry {} -otsv',
-                                     src_account_info, src_share, expiry).output.strip()
-        self.storage_cmd('storage blob copy start-batch --source-share {} '
-                         '--destination-container {} --source-sas {} --pattern apple/* '
-                         '--source-account-name {}', dst_account_info, src_share, dst_container, sas_token,
-                         src_account_info[0])
-        self.storage_cmd('storage blob list -c {}',
-                         dst_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 10))
+        if self.is_live:
+            dst_container = 'container6'
+            self.storage_cmd('storage container create -n {}', dst_account_info, dst_container)
+            sas_token = self.storage_cmd('storage share generate-sas -n {} --permissions rl --expiry {} -otsv',
+                                         src_account_info, src_share, expiry).output.strip()
+            self.storage_cmd('storage blob copy start-batch --source-share {} '
+                             '--destination-container {} --source-sas {} --pattern apple/* '
+                             '--source-account-name {}', dst_account_info, src_share, dst_container, sas_token,
+                             src_account_info[0])
+            self.storage_cmd('storage blob list -c {}',
+                             dst_account_info, dst_container).assert_with_checks(JMESPathCheck('length(@)', 10))
 
         # from file share to blob container without a sas between different accounts with pattern
         dst_container = 'container7'
@@ -439,7 +442,6 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
     @StorageAccountPreparer(parameter_name='src_account')
     @StorageAccountPreparer(parameter_name='dst_account')
     @StorageTestFilesPreparer()
-    @live_only()
     def test_storage_file_batch_copy(self, src_account_info, dst_account_info, test_dir):
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
@@ -461,15 +463,16 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         self.assert_share_file_count(src_account_info, dst_share, 41)
 
         # from blob container to file share with a sas between different accounts with pattern
-        dst_share = 'share3'
-        self.storage_cmd('storage share create -n {}', dst_account_info, dst_share)
-        sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions rl '
-                                     '--expiry {}', src_account_info, src_container, expiry).output
-        self.storage_cmd('storage file copy start-batch --source-container {} '
-                         '--destination-share {} --source-sas {} --pattern apple/* '
-                         '--source-account-name {}', dst_account_info, src_container, dst_share, sas_token,
-                         src_account_info[0])
-        self.assert_share_file_count(dst_account_info, dst_share, 10)
+        if self.is_live:
+            dst_share = 'share3'
+            self.storage_cmd('storage share create -n {}', dst_account_info, dst_share)
+            sas_token = self.storage_cmd('storage container generate-sas -n {} --permissions rl '
+                                         '--expiry {}', src_account_info, src_container, expiry).output
+            self.storage_cmd('storage file copy start-batch --source-container {} '
+                             '--destination-share {} --source-sas {} --pattern apple/* '
+                             '--source-account-name {}', dst_account_info, src_container, dst_share, sas_token,
+                             src_account_info[0])
+            self.assert_share_file_count(dst_account_info, dst_share, 10)
 
         # from blob container to file share without a sas between different accounts with pattern
         dst_share = 'share4'
@@ -489,15 +492,16 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         self.assert_share_file_count(src_account_info, dst_share, 41)
 
         # from file share to file share with a sas between different accounts with pattern
-        dst_share = 'share6'
-        self.storage_cmd('storage share create -n {}', dst_account_info, dst_share)
-        sas_token = self.storage_cmd('storage share generate-sas -n {} --permissions rl --expiry {} -otsv',
-                                     src_account_info, src_share, expiry).output.strip()
-        self.storage_cmd('storage file copy start-batch --source-share {} '
-                         '--destination-share {} --source-sas {} --pattern apple/* '
-                         '--source-account-name {}', dst_account_info, src_share, dst_share, sas_token,
-                         src_account_info[0])
-        self.assert_share_file_count(dst_account_info, dst_share, 10)
+        if self.is_live:
+            dst_share = 'share6'
+            self.storage_cmd('storage share create -n {}', dst_account_info, dst_share)
+            sas_token = self.storage_cmd('storage share generate-sas -n {} --permissions rl --expiry {} -otsv',
+                                         src_account_info, src_share, expiry).output.strip()
+            self.storage_cmd('storage file copy start-batch --source-share {} '
+                             '--destination-share {} --source-sas {} --pattern apple/* '
+                             '--source-account-name {}', dst_account_info, src_share, dst_share, sas_token,
+                             src_account_info[0])
+            self.assert_share_file_count(dst_account_info, dst_share, 10)
 
         # from file share to file share without a sas between different accounts with pattern
         dst_share = 'share7'
@@ -837,15 +841,17 @@ class StorageBatchOperationScenarios(StorageScenarioMixin, ScenarioTest):
         self.file_oauth_cmd('storage file download-batch -s {} -d "{}" --account-name {}', src_share, local_folder, storage_account)
         self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
         multi_thread_time = time.time() - start_time
-        start_time = time.time()
-        src_share = 'share9'
-        self.storage_cmd('storage share create -n {}', account_info, src_share)
-        self.file_oauth_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1 --account-name {}',
-                         test_dir, src_share, storage_account)
-        self.file_oauth_cmd('storage file download-batch -s {} -d "{}" --account-name {}', src_share, local_folder, storage_account)
-        self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
-        single_thread_time = time.time() - start_time
-        self.assertGreater(single_thread_time, multi_thread_time)
+
+        # max-connection set to 1 for recording so this check is not available anymore
+        # start_time = time.time()
+        # src_share = 'share9'
+        # self.storage_cmd('storage share create -n {}', account_info, src_share)
+        # self.file_oauth_cmd('storage file upload-batch -s "{}" -d {} --max-connections 1 --account-name {}',
+        #                  test_dir, src_share, storage_account)
+        # self.file_oauth_cmd('storage file download-batch -s {} -d "{}" --account-name {}', src_share, local_folder, storage_account)
+        # self.assertEqual(41, sum(len(f) for _, _, f in os.walk(local_folder)))
+        # single_thread_time = time.time() - start_time
+        # self.assertGreater(single_thread_time, multi_thread_time)
 
 if __name__ == '__main__':
     import unittest
