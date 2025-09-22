@@ -1916,7 +1916,7 @@ def load_arguments(self, _):
     with self.argument_context('sql server create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
-        c.argument('what_if', get_what_if_type(), help='Preview the changes that will be made without actually executing the command.')
+        c.argument('what_if', get_what_if_type())
 
         # Create args that will be used to build up the Server object
         create_args_for_complex_type(

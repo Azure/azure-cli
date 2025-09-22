@@ -699,7 +699,7 @@ class AzCliCommandInvoker(CommandInvoker):
         print(f"DEBUG: _what_if called with command: {args}")
         if '--what-if' in args:
             print("DEBUG: Entering what-if mode")
-            from azure.cli.core.what_if import what_if_preview
+            from azure.cli.core.what_if import show_what_if
             try:
                 # Get subscription ID with priority: --subscription parameter > current login subscription
                 if '--subscription' in args:
@@ -708,12 +708,13 @@ class AzCliCommandInvoker(CommandInvoker):
                         subscription_value = args[index + 1]
                         subscription_id = subscription_value    
                 else:
-                    # Fallback to current login subscription TODO
-                    subscription_id = self.cli_ctx.data.get("subscription_id", "6b085460-5f21-477e-ba44-1035046e9101")
+                    from azure.cli.core.commands.client_factory import get_subscription_id
+                    subscription_id = get_subscription_id(self.cli_ctx)
+                    print(f"DEBUG: Using current login subscription ID: {subscription_id}")
                 
                 args = ["az"] + args if args[0] != 'az' else args
                 command = " ".join(args)
-                what_if_result = what_if_preview(command, subscription_id=subscription_id)
+                what_if_result = show_what_if(self.cli_ctx, command, subscription_id=subscription_id)
 
                 # Ensure output format is set for proper formatting
                 # Default to 'json' if not already set
