@@ -433,8 +433,8 @@ def show_what_if(cmd, script_path, no_pretty_print=False):
         progress_thread.start()
 
         session = Session()
-        req = Request(method="POST", url=f"{FUNCTION_APP_URL}/api/what_if_preview", 
-                     headers=headers_dict, data=json.dumps(payload))
+        req = Request(method="POST", url=f"{FUNCTION_APP_URL}/api/what_if_preview",
+                      headers=headers_dict, data=json.dumps(payload))
         prepared = session.prepare_request(req)
         response = session.send(prepared)
         request_completed.set()
@@ -464,7 +464,7 @@ def show_what_if(cmd, script_path, no_pretty_print=False):
 
 def _convert_json_to_what_if_result(what_if_json_result):
     from azure.cli.command_modules.resource._formatters import _change_type_to_weight, _property_change_type_to_weight
-    
+
     enum_keys = list(_change_type_to_weight.keys())
     enum_mapping = {}
     for enum_obj in enum_keys:
@@ -519,10 +519,11 @@ def _convert_json_to_what_if_result(what_if_json_result):
             for property_data in delta_data:
                 property_change = PropertyChange(property_data)
                 self.delta.append(property_change)
-    
+
     class PropertyChange:
         def __init__(self, change_data):
-            self.property_change_type = _map_property_change_type_string(change_data.get('propertyChangeType', 'NoEffect'))
+            self.property_change_type = _map_property_change_type_string(
+                change_data.get('propertyChangeType', 'NoEffect'))
             self.path = change_data.get('path', '')
             self.before = change_data.get('before')
             self.after = change_data.get('after')
@@ -533,11 +534,9 @@ def _convert_json_to_what_if_result(what_if_json_result):
                 child_property_change = PropertyChange(child_data)
                 self.children.append(child_property_change)
 
-
     def _map_change_type_string(change_type_str):
         result = enum_mapping.get(change_type_str)
         return result
-    
 
     def _map_property_change_type_string(property_change_type_str):
         result = property_enum_mapping.get(property_change_type_str)

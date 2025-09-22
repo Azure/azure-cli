@@ -17,8 +17,8 @@ class WhatIfTest(ScenarioTest):
         super().setUp()
         self.test_script_path = os.path.join(TEST_DIR, 'test_whatif_script.sh')
 
-    @patch('azure.cli.core.util.send_raw_request')
-    def test_what_if_command_success(self, mock_send_raw_request):
+    @patch('requests.Session.send')
+    def test_what_if_command(self, mock_session_send):
         mock_response = Mock()
         mock_response.json.return_value = {
             "what_if_result": {
@@ -31,21 +31,22 @@ class WhatIfTest(ScenarioTest):
                             "name": "MyVM_01",
                             "type": "Microsoft.Compute/virtualMachines",
                             "location": "eastus"
-                        }
+                        },
+                        "delta": []
                     }
                 ],
                 "potential_changes": [],
                 "diagnostics": []
             }
         }
-        mock_send_raw_request.return_value = mock_response
+        mock_session_send.return_value = mock_response
         result = self.cmd('az what-if --script-path "{}" --no-pretty-print'.format(self.test_script_path))
         output = result.get_output_in_json()
         self.assertIsInstance(output, dict)
         self.assertIn("changes", output)
         self.assertEqual(len(output["changes"]), 1)
         self.assertEqual(output["changes"][0]["changeType"], "Create")
-        mock_send_raw_request.assert_called_once()
+        mock_session_send.assert_called_once()
 
 
 if __name__ == '__main__':
