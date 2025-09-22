@@ -10,11 +10,6 @@ This module provides the core logic for preview mode execution without actually 
 IMPORTANT: The what-if service requires client-side authentication to operate under the 
 caller's subscription and permissions. Server-side authentication is not supported for 
 what-if operations as it would not provide access to the caller's subscription.
-
-This client now uses AzureCliCredential to obtain an access token for the caller's subscription.
-    
-The what-if service will use your configured credentials to access your subscription
-and preview deployment changes under your permissions.
 """
 from typing import Dict, Any, Optional
 from knack.log import get_logger
