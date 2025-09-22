@@ -374,13 +374,13 @@ class AccessTokenCredential:  # pylint: disable=too-few-public-methods
 
 def show_what_if(cmd, script_path, no_pretty_print=False):
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.core.util import send_raw_request
     from azure.cli.command_modules.resource._formatters import format_what_if_operation_result
     from azure.cli.core._profile import Profile
     import threading
     import time
     import sys
     import json
+    from requests import Request, Session
 
     try:
         with open(script_path, 'r', encoding='utf-8') as f:
@@ -408,7 +408,7 @@ def show_what_if(cmd, script_path, no_pretty_print=False):
             sys.stderr.flush()
             idx += 1
             time.sleep(0.2)
-        sys.stderr.write("\r" + " " * 50 + "\r")
+        sys.stderr.write("\r" + " " * 20 + "\r")
         sys.stderr.flush()
 
     try:
@@ -424,21 +424,27 @@ def show_what_if(cmd, script_path, no_pretty_print=False):
             request_completed.set()
             raise CLIError(f"Failed to get authentication token: {token_ex}")
 
-        headers = [
-            'Authorization={} {}'.format(token_type, token),
-            'Content-Type=application/json'
-        ]
+        headers_dict = {}
+        headers_dict['Authorization'] = '{} {}'.format(token_type, token)
+        headers_dict['Content-Type'] = 'application/json'
 
         progress_thread = threading.Thread(target=rotating_progress)
         progress_thread.daemon = True
         progress_thread.start()
 
-        response = send_raw_request(cmd.cli_ctx, "POST", f"{FUNCTION_APP_URL}/api/what_if_preview", headers=headers,
-                                    body=json.dumps(payload))
+        session = Session()
+        req = Request(method="POST", url=f"{FUNCTION_APP_URL}/api/what_if_preview", 
+                     headers=headers_dict, data=json.dumps(payload))
+        prepared = session.prepare_request(req)
+        response = session.send(prepared)
         request_completed.set()
+
+        progress_thread.join(timeout=0.5)
 
     except Exception as ex:
         request_completed.set()
+        if 'progress_thread' in locals():
+            progress_thread.join(timeout=0.5)
         raise CLIError(f"Failed to connect to the what-if service: {ex}")
 
     try:
@@ -457,7 +463,8 @@ def show_what_if(cmd, script_path, no_pretty_print=False):
 
 
 def _convert_json_to_what_if_result(what_if_json_result):
-    from azure.cli.command_modules.resource._formatters import _change_type_to_weight
+    from azure.cli.command_modules.resource._formatters import _change_type_to_weight, _property_change_type_to_weight
+    
     enum_keys = list(_change_type_to_weight.keys())
     enum_mapping = {}
     for enum_obj in enum_keys:
@@ -476,6 +483,23 @@ def _convert_json_to_what_if_result(what_if_json_result):
             enum_mapping['Ignore'] = enum_obj
         elif 'unsupported' in str_repr:
             enum_mapping['Unsupported'] = enum_obj
+        elif 'no_effect' in str_repr or 'noeffect' in str_repr:
+            enum_mapping['NoEffect'] = enum_obj
+
+    property_enum_keys = list(_property_change_type_to_weight.keys())
+    property_enum_mapping = {}
+    for enum_obj in property_enum_keys:
+        str_repr = str(enum_obj).lower()
+        if 'create' in str_repr:
+            property_enum_mapping['Create'] = enum_obj
+        elif 'delete' in str_repr:
+            property_enum_mapping['Delete'] = enum_obj
+        elif 'modify' in str_repr:
+            property_enum_mapping['Modify'] = enum_obj
+        elif 'array' in str_repr:
+            property_enum_mapping['Array'] = enum_obj
+        elif 'no_effect' in str_repr or 'noeffect' in str_repr:
+            property_enum_mapping['NoEffect'] = enum_obj
 
     class WhatIfOperationResult:
         def __init__(self):
@@ -489,10 +513,34 @@ def _convert_json_to_what_if_result(what_if_json_result):
             self.resource_id = change_data.get('resourceId', '')
             self.before = change_data.get('before')
             self.after = change_data.get('after')
-            self.delta = change_data.get('delta')
+            self.delta = []
+
+            delta_data = change_data.get('delta', [])
+            for property_data in delta_data:
+                property_change = PropertyChange(property_data)
+                self.delta.append(property_change)
+    
+    class PropertyChange:
+        def __init__(self, change_data):
+            self.property_change_type = _map_property_change_type_string(change_data.get('propertyChangeType', 'NoEffect'))
+            self.path = change_data.get('path', '')
+            self.before = change_data.get('before')
+            self.after = change_data.get('after')
+            self.children = []
+
+            children_data = change_data.get('children', [])
+            for child_data in children_data:
+                child_property_change = PropertyChange(child_data)
+                self.children.append(child_property_change)
+
 
     def _map_change_type_string(change_type_str):
         result = enum_mapping.get(change_type_str)
+        return result
+    
+
+    def _map_property_change_type_string(property_change_type_str):
+        result = property_enum_mapping.get(property_change_type_str)
         return result
 
     result = WhatIfOperationResult()
