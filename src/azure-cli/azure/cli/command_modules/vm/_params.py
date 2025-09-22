@@ -953,10 +953,6 @@ def load_arguments(self, _):
             c.argument('output_blob_uri', help='Specify the Azure storage blob (SAS URI) where script output stream will be uploaded.')
             c.argument('error_blob_uri', help='Specify the Azure storage blob where script error stream will be uploaded.')
 
-    with self.argument_context('vm run-command delete') as c:
-        c.argument('vm_name', run_cmd_vm_name)
-        c.argument('run_command_name', run_cmd_name_type)
-
     with self.argument_context('vm run-command list') as c:
         c.argument('vm_name', run_cmd_vm_name, id_part=None)
         c.argument('expand', help='The expand expression to apply on the operation.')
