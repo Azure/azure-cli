@@ -3969,6 +3969,7 @@ def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
     else:
         sku_def.capacity = max(3, number_of_workers)
 
+
 # Progress bar for serverfarm async scaling operations
 class PlanProgressBar(IndeterminateProgressBar):
     def __init__(self, cli_ctx, resource_group_name, plan_name):
@@ -3994,8 +3995,7 @@ class PlanProgressBar(IndeterminateProgressBar):
 
         # Only check real status periodically to avoid hammering API
         now = time.time()
-        if (self._last_status_check is not None and
-            now - self._last_status_check > self._status_check_interval):
+        if (self._last_status_check is not None and now - self._last_status_check > self._status_check_interval):
             return
 
         status = message or 'InProgress'
@@ -4084,7 +4084,7 @@ has been deployed ".format(app_service_environment)
 
     if no_wait:
         return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
-                       resource_group_name=resource_group_name, app_service_plan=plan_def)
+                           resource_group_name=resource_group_name, app_service_plan=plan_def)
 
     poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
 
@@ -4117,8 +4117,7 @@ def update_app_service_plan_with_progress(cmd, resource_group_name, name, app_se
 def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, elastic_scale=None,
                             max_elastic_worker_count=None, async_scaling_enabled=None):
     if (number_of_workers is None and sku is None and
-    elastic_scale is None and max_elastic_worker_count is None and
-    async_scaling_enabled is None):
+            elastic_scale is None and max_elastic_worker_count is None and async_scaling_enabled is None):
         safe_params = cmd.cli_ctx.data['safe_params']
         if '--set' not in safe_params:
             args = ["--number-of-workers",
@@ -4166,6 +4165,7 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
 
     instance.sku = sku_def
     return instance
+
 
 def show_plan(cmd, resource_group_name, name):
     from azure.cli.core.commands.client_factory import get_subscription_id
