@@ -17,10 +17,15 @@ class WhatIfTest(ScenarioTest):
         super().setUp()
         self.test_script_path = os.path.join(TEST_DIR, 'test_whatif_script.sh')
 
-    @patch('requests.Session.send')
-    def test_what_if_command(self, mock_session_send):
+    @patch('azure.cli.core.commands.client_factory.get_subscription_id')
+    @patch('azure.cli.core.what_if.get_auth_headers')
+    @patch('azure.cli.core.what_if.make_what_if_request')
+    def test_what_if_command(self, mock_make_request, mock_get_headers, mock_get_subscription_id):
+        mock_get_subscription_id.return_value = 'test-subscription-id'
+        mock_get_headers.return_value = {'Authorization': 'Bearer test-token'}
         mock_response = Mock()
         mock_response.json.return_value = {
+            "success": True,
             "what_if_result": {
                 "changes": [
                     {
@@ -39,14 +44,19 @@ class WhatIfTest(ScenarioTest):
                 "diagnostics": []
             }
         }
-        mock_session_send.return_value = mock_response
+        mock_make_request.return_value = mock_response
+
         result = self.cmd('az what-if --script-path "{}" --no-pretty-print'.format(self.test_script_path))
         output = result.get_output_in_json()
+
         self.assertIsInstance(output, dict)
         self.assertIn("changes", output)
         self.assertEqual(len(output["changes"]), 1)
         self.assertEqual(output["changes"][0]["changeType"], "Create")
-        mock_session_send.assert_called_once()
+
+        mock_get_subscription_id.assert_called_once()
+        mock_get_headers.assert_called_once()
+        mock_make_request.assert_called_once()
 
 
 if __name__ == '__main__':

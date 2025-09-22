@@ -1,0 +1,167 @@
+# --------------------------------------------------------------------------------------------
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License. See License.txt in the project root for license information.
+# --------------------------------------------------------------------------------------------
+
+import threading
+import time
+import sys
+import json
+from requests import Request, Session
+from knack.util import CLIError
+
+
+def read_script_file(script_path):
+    try:
+        with open(script_path, 'r', encoding='utf-8') as f:
+            return f.read()
+    except FileNotFoundError:
+        raise CLIError(f"Script file not found: {script_path}")
+    except Exception as ex:
+        raise CLIError(f"Error reading script file: {ex}")
+
+
+def get_auth_headers(cmd, subscription_id):
+    from azure.cli.core._profile import Profile
+
+    resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+
+    try:
+        token_result = profile.get_raw_token(resource, subscription=subscription_id)
+        token_info, _, _ = token_result
+        token_type, token, _ = token_info
+    except Exception as token_ex:
+        raise CLIError(f"Failed to get authentication token: {token_ex}")
+
+    return {
+        'Authorization': f'{token_type} {token}',
+        'Content-Type': 'application/json'
+    }
+
+
+def make_what_if_request(payload, headers_dict):
+    request_completed = threading.Event()
+
+    def _rotating_progress():
+        """Simulate a rotating progress indicator."""
+        chars = ["|", "\\", "/", "-"]
+        idx = 0
+        while not request_completed.is_set():
+            sys.stderr.write(f"\r{chars[idx % len(chars)]} Running")
+            sys.stderr.flush()
+            idx += 1
+            time.sleep(0.2)
+        sys.stderr.write("\r" + " " * 20 + "\r")
+        sys.stderr.flush()
+
+    try:
+        function_app_url = "https://azcli-script-insight.azurewebsites.net"
+
+        progress_thread = threading.Thread(target=_rotating_progress)
+        progress_thread.daemon = True
+        progress_thread.start()
+
+        session = Session()
+        req = Request(method="POST", url=f"{function_app_url}/api/what_if_preview",
+                      headers=headers_dict, data=json.dumps(payload))
+        prepared = session.prepare_request(req)
+        response = session.send(prepared)
+        request_completed.set()
+        progress_thread.join(timeout=0.5)
+
+        return response
+
+    except Exception as ex:
+        request_completed.set()
+        if 'progress_thread' in locals():
+            progress_thread.join(timeout=0.5)
+        raise CLIError(f"Failed to connect to the what-if service: {ex}")
+
+
+def convert_json_to_what_if_result(what_if_json_result):
+    from azure.cli.command_modules.resource._formatters import _change_type_to_weight, _property_change_type_to_weight
+    from collections import namedtuple
+
+    enum_keys = list(_change_type_to_weight.keys())
+    enum_mapping = {}
+    for enum_obj in enum_keys:
+        str_repr = str(enum_obj).lower()
+        if 'create' in str_repr:
+            enum_mapping['Create'] = enum_obj
+        elif 'delete' in str_repr:
+            enum_mapping['Delete'] = enum_obj
+        elif 'modify' in str_repr:
+            enum_mapping['Modify'] = enum_obj
+        elif 'deploy' in str_repr:
+            enum_mapping['Deploy'] = enum_obj
+        elif 'no_change' in str_repr or 'nochange' in str_repr:
+            enum_mapping['NoChange'] = enum_obj
+        elif 'ignore' in str_repr:
+            enum_mapping['Ignore'] = enum_obj
+        elif 'unsupported' in str_repr:
+            enum_mapping['Unsupported'] = enum_obj
+        elif 'no_effect' in str_repr or 'noeffect' in str_repr:
+            enum_mapping['NoEffect'] = enum_obj
+
+    property_enum_keys = list(_property_change_type_to_weight.keys())
+    property_enum_mapping = {}
+    for enum_obj in property_enum_keys:
+        str_repr = str(enum_obj).lower()
+        if 'create' in str_repr:
+            property_enum_mapping['Create'] = enum_obj
+        elif 'delete' in str_repr:
+            property_enum_mapping['Delete'] = enum_obj
+        elif 'modify' in str_repr:
+            property_enum_mapping['Modify'] = enum_obj
+        elif 'array' in str_repr:
+            property_enum_mapping['Array'] = enum_obj
+        elif 'no_effect' in str_repr or 'noeffect' in str_repr:
+            property_enum_mapping['NoEffect'] = enum_obj
+
+    WhatIfOperationResult = namedtuple('WhatIfOperationResult', ['changes', 'potential_changes', 'diagnostics'])
+    ResourceChange = namedtuple('ResourceChange', ['change_type', 'resource_id', 'before', 'after', 'delta'])
+    PropertyChange = namedtuple('PropertyChange', ['property_change_type', 'path', 'before', 'after', 'children'])
+
+    def _map_change_type_string(change_type_str):
+        return enum_mapping.get(change_type_str)
+
+    def _map_property_change_type_string(property_change_type_str):
+        return property_enum_mapping.get(property_change_type_str)
+
+    def _create_property_change(change_data):
+        property_change_type = _map_property_change_type_string(
+            change_data.get('propertyChangeType', 'NoEffect'))
+        path = change_data.get('path', '')
+        before = change_data.get('before')
+        after = change_data.get('after')
+
+        children = []
+        children_data = change_data.get('children', [])
+        for child_data in children_data:
+            children.append(_create_property_change(child_data))
+
+        return PropertyChange(property_change_type, path, before, after, children)
+
+    def _create_resource_change(change_data):
+        change_type = _map_change_type_string(change_data.get('changeType', 'Unknown'))
+        resource_id = change_data.get('resourceId', '')
+        before = change_data.get('before')
+        after = change_data.get('after')
+
+        delta = []
+        delta_data = change_data.get('delta', [])
+        for property_data in delta_data:
+            delta.append(_create_property_change(property_data))
+
+        return ResourceChange(change_type, resource_id, before, after, delta)
+
+    changes = []
+    for change_data in what_if_json_result.get('changes', []):
+        changes.append(_create_resource_change(change_data))
+
+    potential_changes = []
+    for change_data in what_if_json_result.get('potential_changes', []):
+        potential_changes.append(_create_resource_change(change_data))
+
+    return WhatIfOperationResult(changes, potential_changes, [])
