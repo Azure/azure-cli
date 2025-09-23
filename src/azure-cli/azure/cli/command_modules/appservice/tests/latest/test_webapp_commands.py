@@ -614,13 +614,13 @@ class AppServicePlanScenarioTest(ScenarioTest):
         plan = self.create_random_name('plan', 24)
 
         self.cmd(
-            'appservice plan create -g {} -n {} -l {} --number-of-workers 30 --async-scaling-enabled true --sku P0v3'.format(resource_group, plan, "eastus2euap"))
+            'appservice plan create -g {} -n {} -l {} --number-of-workers 30 --async-scaling-enabled true --sku P3v2'.format(resource_group, plan, "eastus2euap"))
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[
             JMESPathCheck('properties.asyncScalingEnabled', True),
             JMESPathCheck('properties.numberOfWorkers', 30),
             JMESPathCheck('properties.status', 'Ready'),
-            JMESPathCheck('sku.name', 'P0v3')])
+            JMESPathCheck('sku.name', 'P3v2')])
 
         self.cmd('appservice plan delete -g {} -n {} --yes'.format(resource_group, plan))
 

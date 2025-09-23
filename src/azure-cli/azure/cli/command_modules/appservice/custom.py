@@ -20,7 +20,6 @@ import ssl
 import sys
 import uuid
 from functools import reduce
-from xmlrpc import client
 import invoke
 from nacl import encoding, public
 
