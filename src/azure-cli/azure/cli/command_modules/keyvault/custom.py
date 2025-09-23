@@ -957,7 +957,7 @@ def remove_network_rule_for_vault_or_hsm(cmd, client, resource_group_name, vault
         return remove_vault_network_rule(cmd, client, resource_group_name, vault_name,
                                          ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
     hsm_client = get_client_factory(ResourceType.MGMT_KEYVAULT, Clients.managed_hsms)(cmd.cli_ctx, None)
-    return remove_hsm_network_rule(cmd, hsm_client, resource_group_name, hsm_name,
+    return remove_hsm_network_rule(hsm_client, resource_group_name, hsm_name,
                                    ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
 
 
