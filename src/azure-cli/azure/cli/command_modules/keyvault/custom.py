@@ -855,7 +855,7 @@ def add_network_rule_for_vault_or_hsm(cmd, client, resource_group_name, vault_na
 
 
 def add_vault_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
-                           vnet_name=None, no_wait=False):
+                           vnet_name=None, no_wait=False):  # pylint: disable=unused-argument
     """ Add a network rule to the network ACLs for a Key Vault. """
     VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
     IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
@@ -1004,7 +1004,7 @@ def remove_vault_network_rule(cmd, client, resource_group_name, vault_name, ip_a
                            properties=vault.properties))
 
 
-def remove_hsm_network_rule(cmd, client, resource_group_name, hsm_name,
+def remove_hsm_network_rule(client, resource_group_name, hsm_name,
                             ip_address=None, subnet=None, vnet_name=None, no_wait=False):
     if subnet or vnet_name:
         raise InvalidArgumentValueError("--subnet and --vnet-name are not supported for MHSM yet")
