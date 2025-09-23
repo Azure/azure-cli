@@ -521,7 +521,7 @@ def create_hsm(cmd, client,
     ManagedHsmSku = cmd.get_models('ManagedHsmSku', resource_type=ResourceType.MGMT_KEYVAULT,
                                    operation_group='managed_hsms')
     MHSMIPRule = cmd.get_models('MHSMIPRule', resource_type=ResourceType.MGMT_KEYVAULT,
-                                   operation_group='managed_hsms')
+                                operation_group='managed_hsms')
 
     network_acls = _create_network_rule_set(cmd, bypass, default_action)
     network_acls.ip_rules = []
@@ -842,6 +842,7 @@ def set_policy(cmd, client, resource_group_name, vault_name,
                            tags=vault.tags,
                            properties=vault.properties))
 
+
 def add_network_rule_for_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None,
                                       ip_address=None, subnet=None, vnet_name=None, no_wait=False):
     if vault_name:
@@ -853,11 +854,9 @@ def add_network_rule_for_vault_or_hsm(cmd, client, resource_group_name, vault_na
                                     ip_address=ip_address, subnet=subnet, vnet_name=vnet_name, no_wait=no_wait)
 
 
-
 def add_vault_network_rule(cmd, client, resource_group_name, vault_name, ip_address=None, subnet=None,
-                     vnet_name=None, no_wait=False):  # pylint: disable=unused-argument
+                           vnet_name=None, no_wait=False):
     """ Add a network rule to the network ACLs for a Key Vault. """
-
     VirtualNetworkRule = cmd.get_models('VirtualNetworkRule', resource_type=ResourceType.MGMT_KEYVAULT)
     IPRule = cmd.get_models('IPRule', resource_type=ResourceType.MGMT_KEYVAULT)
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters',
