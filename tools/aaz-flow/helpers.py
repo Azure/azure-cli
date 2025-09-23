@@ -5,12 +5,11 @@
 
 import asyncio
 from pathlib import Path
-import sys
 from typing import Literal
 from fastmcp import Context
-import requests
 import os
-import subprocess as sp
+import shutil
+import sys
 from models import AAZRequest
 
 paths = {
@@ -53,7 +52,7 @@ async def validate_paths(ctx: Context) -> dict:
             response_type=Literal["yes", "no"]
         )
 
-        if check_result.action == "reject":
+        if check_result.action != "accept":
             return None
 
         if check_result.data == "no":
@@ -221,22 +220,72 @@ async def run_command(ctx: Context, command: str, step_name: str, progress_start
     await ctx.report_progress(progress_end, 100)
     await ctx.info(f"az_cli : Completed: {step_name}")
 
+
+def _resolve_python_candidates() -> list[str]:
+    candidates = []
+    venv = os.environ.get("VIRTUAL_ENV")
+    if venv:
+        candidates.append(str(Path(venv) / "bin" / "python"))
+    ws_venv_python = Path("/workspaces/.venv/bin/python")
+    if ws_venv_python.exists():
+        candidates.append(str(ws_venv_python))
+    if sys.executable:
+        candidates.append(sys.executable)
+    for name in ("python3", "python"):
+        p = shutil.which(name)
+        if p:
+            candidates.append(p)
+    deduped = []
+    seen = set()
+    for c in candidates:
+        if c not in seen:
+            deduped.append(c)
+            seen.add(c)
+    return deduped
+
+
+def _resolve_aaz_dev_prefix() -> str:
+    for py in _resolve_python_candidates():
+        try:
+            import subprocess
+            code = (
+                "import importlib.util, sys; "
+                "spec = importlib.util.find_spec('aaz_dev.__main__'); "
+                "sys.exit(0 if spec else 1)"
+            )
+            res = subprocess.run([py, "-c", code], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            if res.returncode == 0:
+                return f"{py} -m aaz_dev"
+        except Exception:
+            pass
+    for maybe in [
+        "/workspaces/.venv/bin/aaz-dev",
+        str(Path(os.environ.get("VIRTUAL_ENV", "")) / "bin" / "aaz-dev") if os.environ.get("VIRTUAL_ENV") else None,
+        shutil.which("aaz-dev")
+    ]:
+        if maybe and os.path.exists(maybe):
+            return maybe
+    return "aaz-dev"
+
 async def execute_commands(ctx: Context, paths: dict, request: AAZRequest):
+    aaz_dev = _resolve_aaz_dev_prefix()
+    await ctx.info(f"az_cli : Using aaz-dev invocation: {aaz_dev}")
+
     cmd1 = (
-        f"aaz-dev command-model generate-from-swagger "
+        f"{aaz_dev} command-model generate-from-swagger "
         f"-a {paths['aaz']} "
         f"--sm {request.swagger_module_path} "
-        f"-m {request.extension_or_module_name} "
+        f"-m {request.name} "
         f"--rp {request.resource_provider} "
         f"--swagger-tag {request.swagger_tag}"
     )
 
     cmd2 = (
-        f"aaz-dev cli generate-by-swagger-tag "
+        f"{aaz_dev} cli generate-by-swagger-tag "
         f"--aaz-path {paths['aaz']} "
         f"--cli-path {paths['cli']} "
         f"--cli-extension-path {paths['cli_extension']} "
-        f"--extension-or-module-name {request.extension_or_module_name} "
+        f"--extension-or-module-name {request.name} "
         f"--swagger-module-path {request.swagger_module_path} "
         f"--resource-provider {request.resource_provider} "
         f"--swagger-tag {request.swagger_tag} "
