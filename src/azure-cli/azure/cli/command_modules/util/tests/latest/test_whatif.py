@@ -18,8 +18,8 @@ class WhatIfTest(ScenarioTest):
         self.test_script_path = os.path.join(TEST_DIR, 'test_whatif_script.sh')
 
     @patch('azure.cli.core.commands.client_factory.get_subscription_id')
-    @patch('azure.cli.core.what_if.get_auth_headers')
-    @patch('azure.cli.core.what_if.make_what_if_request')
+    @patch('azure.cli.core.what_if._get_auth_headers')
+    @patch('azure.cli.core.what_if._make_what_if_request')
     def test_what_if_command(self, mock_make_request, mock_get_headers, mock_get_subscription_id):
         mock_get_subscription_id.return_value = 'test-subscription-id'
         mock_get_headers.return_value = {'Authorization': 'Bearer test-token'}

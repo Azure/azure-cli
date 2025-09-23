@@ -166,6 +166,7 @@ def convert_json_to_what_if_result(what_if_json_result):
 
     return WhatIfOperationResult(changes, potential_changes, [])
 
+
 def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pretty_print=False):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.command_modules.resource._formatters import format_what_if_operation_result
