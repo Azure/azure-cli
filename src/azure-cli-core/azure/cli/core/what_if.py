@@ -40,19 +40,67 @@ def _get_auth_headers(cli_ctx, subscription_id):
     }
 
 
-def _make_what_if_request(payload, headers_dict):
+def _make_what_if_request(payload, headers_dict, cli_ctx=None):
     request_completed = threading.Event()
 
     def _rotating_progress():
         """Simulate a rotating progress indicator."""
-        chars = ["|", "\\", "/", "-"]
+        spinner_chars = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+        fallback_chars = ["|", "\\", "/", "-"]
+
+        try:
+            "⠋".encode(sys.stderr.encoding or 'utf-8')
+            chars = spinner_chars
+        except (UnicodeEncodeError, UnicodeDecodeError, LookupError):
+            chars = fallback_chars
+
+        use_color = cli_ctx and getattr(cli_ctx, 'enable_color', False)
+        if use_color:
+            try:
+                CYAN = '\033[36m'
+                GREEN = '\033[32m'
+                YELLOW = '\033[33m'
+                BLUE = '\033[34m'
+                RESET = '\033[0m'
+                BOLD = '\033[1m'
+            except (UnicodeError, AttributeError):
+                use_color = False
+
+        if not use_color:
+            CYAN = GREEN = YELLOW = BLUE = RESET = BOLD = ''
+
         idx = 0
+        start_time = time.time()
+
+        # Simulate different stages, can be improved with real stages if available
         while not request_completed.is_set():
-            sys.stderr.write(f"\r{chars[idx % len(chars)]} Running")
+            elapsed = time.time() - start_time
+            if elapsed < 10:
+                status = f"{CYAN}Connecting to what-if service{RESET}"
+                spinner_color = CYAN
+            elif elapsed < 30:
+                status = f"{BLUE}Analyzing Azure CLI script{RESET}"
+                spinner_color = BLUE
+            elif elapsed < 60:
+                status = f"{YELLOW}Processing what-if analysis{RESET}"
+                spinner_color = YELLOW
+            else:
+                status = f"{GREEN}Finalizing results{RESET}"
+                spinner_color = GREEN
+            elapsed_str = f"{BOLD}({elapsed:.0f}s){RESET}"
+            spinner = f"{spinner_color}{chars[idx % len(chars)]}{RESET}"
+            progress_line = f"{spinner} {status}... {elapsed_str}"
+            visible_length = len(progress_line) - (progress_line.count('\033[') * 5)
+            max_width = 100
+            if visible_length > max_width:
+                truncated_status = status[:max_width-30] + "..."
+                progress_line = f"{spinner} {truncated_status} {elapsed_str}"
+            sys.stderr.write(f"\r{' ' * 120}\r{progress_line}")
             sys.stderr.flush()
             idx += 1
-            time.sleep(0.2)
-        sys.stderr.write("\r" + " " * 20 + "\r")
+            time.sleep(0.12)
+        clear_line = f"\r{' ' * 120}\r"
+        sys.stderr.write(clear_line)
         sys.stderr.flush()
 
     try:
@@ -180,7 +228,7 @@ def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pre
     }
 
     headers_dict = _get_auth_headers(cli_ctx, subscription_id)
-    response = _make_what_if_request(payload, headers_dict)
+    response = _make_what_if_request(payload, headers_dict, cli_ctx)
 
     try:
         raw_results = response.json()
