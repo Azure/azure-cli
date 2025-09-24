@@ -4011,8 +4011,8 @@ class PlanProgressBar(IndeterminateProgressBar):
     def _safe_update_progress_message(self):
         # Only check real status periodically to avoid hammering API
         now = time.monotonic()
-        if (self._last_status_check is not None
-            and now - self._last_status_check < PlanProgressBar.STATUS_CHECK_INTERVAL_SEC):
+        if (self._last_status_check is not None and
+                now - self._last_status_check < PlanProgressBar.STATUS_CHECK_INTERVAL_SEC):
             return
 
         try:
