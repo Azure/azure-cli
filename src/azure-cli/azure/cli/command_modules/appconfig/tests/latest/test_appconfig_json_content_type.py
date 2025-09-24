@@ -15,7 +15,7 @@ from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
-from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
+from azure.cli.command_modules.appconfig._constants import AIConfigConstants, FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -291,6 +291,32 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
                  checks=[self.check('key', entry_key),
                          self.check('value', f"{{{json_with_comments}}}"),
                          self.check('contentType', json_content_type_01)])
+        
+        # Ensure this request fails with keyvault content type
+        self.kwargs.update({
+            'content_type': KeyVaultConstants.KEYVAULT_CONTENT_TYPE
+        })
+
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+            self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
+
+        # Ensure this request fails with Feature flag content type
+        self.kwargs.update({
+            'content_type': FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
+        })
+
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+            self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
+        
+
+        # Ensure this request fails with AI Chat Completion content type
+        self.kwargs.update({
+            'content_type': AIConfigConstants.AI_CHAT_COMPLETION_CONTENT_TYPE
+        })
+
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+            self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
+
 
         """
         Test Scenario 2: AppConfig <--> AppConfig Import/Export
