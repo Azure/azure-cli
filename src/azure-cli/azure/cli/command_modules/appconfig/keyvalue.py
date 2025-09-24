@@ -49,7 +49,7 @@ import azure.cli.core.azclierror as CLIErrors
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          SearchFilterOptions, StatusCodes,
                          ImportExportProfiles, CompareFieldsMap,
-                         JsonDiff, ImportMode, 
+                         JsonDiff, ImportMode,
                          AIConfigConstants, HttpHeaders)
 from ._featuremodels import map_keyvalue_to_featureflag
 from ._json import parse_json_with_comments
@@ -992,6 +992,6 @@ def __validate_json_value(json_string, content_type):
     # We do not allow comments in keyvault references, feature flags, and AI chat completion configs
     if content_type in (FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE, KeyVaultConstants.KEYVAULT_CONTENT_TYPE, AIConfigConstants.AI_CHAT_COMPLETION_CONTENT_TYPE):
         json.loads(json_string)
-    
+
     else:
         parse_json_with_comments(json_string)
