@@ -3977,7 +3977,7 @@ class PlanProgressBar(IndeterminateProgressBar):
         self.plan_name = plan_name
         self._last_msg = None
         self._last_status_check = None
-        self._status_check_interval_seconds = 30
+        self._status_check_interval_sec = 60
         super().__init__(cli_ctx)
 
     def _emit(self, msg):
@@ -3989,41 +3989,45 @@ class PlanProgressBar(IndeterminateProgressBar):
         self._emit(f"Starting to scale App Service plan {self.plan_name}...")
         super().begin()
 
-    def update_progress_with_msg(self, message):
+    def update_progress(self):
+        self._safe_update_progress_message()
         super().update_progress()
-
-        # Only check real status periodically to avoid hammering API
-        now = time.time()
-        if (self._last_status_check is not None and now - self._last_status_check > self._status_check_interval):
-            return
-
-        status = message or 'InProgress'
-
-        plan = self.client.get(self.rg, self.plan_name)
-        capacity = None
-        skuName = None
-        if getattr(plan, 'sku', None):
-            capacity = getattr(plan.sku, 'capacity', None)
-            skuName = getattr(plan.sku, 'name', None)
-
-        details = f"Status: {status} — Scaled to {capacity} workers of pricing tier {skuName}"
-        self._emit(details)
 
     def end(self):
         plan = self.client.get(self.rg, self.plan_name)
         capacity = None
-        skuName = None
+        sku_name = None
 
         if getattr(plan, 'sku', None):
             capacity = getattr(plan.sku, 'capacity', None)
-            skuName = getattr(plan.sku, 'name', None)
+            sku_name = getattr(plan.sku, 'name', None)
 
-        if capacity is not None and skuName is not None:
-            self._emit(f"Successfully scaled to {capacity} workers in pricing tier {skuName}.")
+        if capacity is not None and sku_name is not None:
+            self._emit(f"Successfully scaled to {capacity} workers in pricing tier {sku_name}.")
             return
 
         self._emit("Operation completed.")
         super().end()
+
+    def _safe_update_progress_message(self):
+        # Only check real status periodically to avoid hammering API
+        now = time.monotonic()
+        if (self._last_status_check is not None and now - self._last_status_check > self._status_check_interval_sec):
+            return
+        self._last_status_check = now
+
+        try:
+            plan = self.client.get(self.rg, self.plan_name)
+            capacity = None
+            skuName = None
+            if getattr(plan, 'sku', None):
+                capacity = getattr(plan.sku, 'capacity', None)
+                skuName = getattr(plan.sku, 'name', None)
+
+            details = f"Scalied to {capacity} workers of pricing tier {skuName}"
+            self._emit(details)
+        except Exception:  # pylint: disable=broad-except
+            self._emit("Scaling in progress...")
 
 
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
