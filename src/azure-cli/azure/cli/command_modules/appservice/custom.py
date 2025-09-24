@@ -3971,13 +3971,14 @@ def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
 
 # Progress bar for serverfarm async scaling operations
 class PlanProgressBar(IndeterminateProgressBar):
+    STATUS_CHECK_INTERVAL_SEC = 60
+
     def __init__(self, cli_ctx, resource_group_name, plan_name):
         self.client = web_client_factory(cli_ctx).app_service_plans
         self.rg = resource_group_name
         self.plan_name = plan_name
         self._last_msg = None
         self._last_status_check = None
-        self._status_check_interval_sec = 60
         super().__init__(cli_ctx)
 
     def _emit(self, msg):
@@ -4004,17 +4005,15 @@ class PlanProgressBar(IndeterminateProgressBar):
 
         if capacity is not None and sku_name is not None:
             self._emit(f"Successfully scaled to {capacity} workers in pricing tier {sku_name}.")
-            return
 
-        self._emit("Operation completed.")
         super().end()
 
     def _safe_update_progress_message(self):
         # Only check real status periodically to avoid hammering API
         now = time.monotonic()
-        if (self._last_status_check is not None and now - self._last_status_check > self._status_check_interval_sec):
+        if (self._last_status_check is not None
+            and now - self._last_status_check < PlanProgressBar.STATUS_CHECK_INTERVAL_SEC):
             return
-        self._last_status_check = now
 
         try:
             plan = self.client.get(self.rg, self.plan_name)
@@ -4024,7 +4023,8 @@ class PlanProgressBar(IndeterminateProgressBar):
                 capacity = getattr(plan.sku, 'capacity', None)
                 skuName = getattr(plan.sku, 'name', None)
 
-            details = f"Scalied to {capacity} workers of pricing tier {skuName}"
+            details = f"Scaled to {capacity} workers of pricing tier {skuName}"
+            self._last_status_check = now
             self._emit(details)
         except Exception:  # pylint: disable=broad-except
             self._emit("Scaling in progress...")
