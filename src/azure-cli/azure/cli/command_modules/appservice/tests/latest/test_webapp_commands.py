@@ -608,6 +608,7 @@ class AppServicePlanScenarioTest(ScenarioTest):
 
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan), checks=[JMESPathCheck('properties.zoneRedundant', False)])
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_create_async_scaling_plan(self, resource_group):
@@ -624,6 +625,7 @@ class AppServicePlanScenarioTest(ScenarioTest):
 
         self.cmd('appservice plan delete -g {} -n {} --yes'.format(resource_group, plan))
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_update_async_scaling_plan(self, resource_group):

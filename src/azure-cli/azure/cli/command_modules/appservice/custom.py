@@ -3990,9 +3990,9 @@ class PlanProgressBar(IndeterminateProgressBar):
         self._emit(f"Starting to scale App Service plan {self.plan_name}...")
         super().begin()
 
-    def update_progress(self):
-        self._safe_update_progress_message()
-        super().update_progress()
+    def update_progress_with_msg(self, message):
+        self._safe_update_progress_message(message)
+        super().update_progress_with_msg(message)
 
     def end(self):
         plan = self.client.get(self.rg, self.plan_name)
@@ -4008,7 +4008,12 @@ class PlanProgressBar(IndeterminateProgressBar):
 
         super().end()
 
-    def _safe_update_progress_message(self):
+    def stop(self):
+        logger.error("Operation wait cancelled. The async scaling operation is still in progress. "
+                     "Please update the plan to stop scaling.")
+        super().stop()
+
+    def _safe_update_progress_message(self, message):
         # Only check real status periodically to avoid hammering API
         now = time.monotonic()
         if (self._last_status_check is not None and
@@ -4023,7 +4028,8 @@ class PlanProgressBar(IndeterminateProgressBar):
                 capacity = getattr(plan.sku, 'capacity', None)
                 skuName = getattr(plan.sku, 'name', None)
 
-            details = f"Scaled to {capacity} workers of pricing tier {skuName}"
+            status = message or "InProgress"
+            details = f"Status: {status} — Scaled to {capacity} workers of pricing tier {skuName}."
             self._last_status_check = now
             self._emit(details)
         except Exception:  # pylint: disable=broad-except
