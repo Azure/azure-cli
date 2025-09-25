@@ -890,6 +890,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='Enable zone redundancy for high availability. Applies to Flex Consumption SKU only.')
         c.argument('configure_networking_later', options_list=['--configure-networking-later', '--cnl'], arg_type=get_three_state_flag(),
                    help='Use this option if you want to configure networking later for an app using network-restricted storage.')
+        c.argument('auto_generated_domain_name_label_scope', options_list=['--domain-name-scope'], help="Specify the scope of uniqueness for the default hostname during resource creation. ", choices=['TenantReuse', 'SubscriptionReuse', 'ResourceGroupReuse', 'NoReuse'])
 
     with self.argument_context('functionapp deployment config set') as c:
         c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.")

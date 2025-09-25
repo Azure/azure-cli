@@ -6097,7 +6097,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                       deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None):
+                       deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None,
+                       auto_generated_domain_name_label_scope=None):
     # pylint: disable=too-many-statements, too-many-branches
 
     if functions_version is None and flexconsumption_location is None:
@@ -6229,7 +6230,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.http20_proxy_flag = None
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
-                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only)
+                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
+                           auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
 
     plan_info = None
     if runtime is not None:
