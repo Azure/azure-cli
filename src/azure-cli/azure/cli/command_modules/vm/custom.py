@@ -2124,7 +2124,8 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 # region VirtualMachines Disks (Managed)
 def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=None, disks=None, new=False, sku=None,
                              size_gb=None, lun=None, caching=None, enable_write_accelerator=False, disk_ids=None,
-                             source_snapshots_or_disks=None, source_disk_restore_point=None):
+                             source_snapshots_or_disks=None, source_disk_restore_point=None,
+                             new_names_of_source_snapshots_or_disks=None, new_names_of_source_disk_restore_point=None):
     # attach multiple managed disks using disk attach API
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
     if not new and not sku and not size_gb and disk_ids is not None:
@@ -2182,14 +2183,17 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
             vm.storage_profile.data_disks.append(data_disk)
         disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
         if source_snapshots_or_disks is not None:
-            for disk_item in source_snapshots_or_disks:
+            if new_names_of_source_snapshots_or_disks is None:
+                new_names_of_source_snapshots_or_disks = [None] * len(source_snapshots_or_disks)
+            for disk_id, disk_name in zip(source_snapshots_or_disks, new_names_of_source_snapshots_or_disks):
                 disk = {
+                    'name': disk_name,
                     'create_option': 'Copy',
                     'caching': caching,
                     'lun': disk_lun,
                     'writeAcceleratorEnabled': enable_write_accelerator,
                     "sourceResource": {
-                        "id": disk_item
+                        "id": disk_id
                     }
                 }
                 if size_gb is not None:
@@ -2205,14 +2209,17 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 disk_lun += 1
                 vm.storage_profile.data_disks.append(disk)
         if source_disk_restore_point is not None:
-            for disk_item in source_disk_restore_point:
+            if new_names_of_source_disk_restore_point is None:
+                new_names_of_source_disk_restore_point = [None] * len(source_disk_restore_point)
+            for disk_id, disk_name in zip(source_disk_restore_point, new_names_of_source_disk_restore_point):
                 disk = {
+                    'name': disk_name,
                     'create_option': 'Restore',
                     'caching': caching,
                     'lun': disk_lun,
                     'writeAcceleratorEnabled': enable_write_accelerator,
                     "sourceResource": {
-                        "id": disk_item
+                        "id": disk_id
                     }
                 }
                 if size_gb is not None:
