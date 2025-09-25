@@ -1675,15 +1675,10 @@ def uses_kubelogin_devicecode(kubeconfig: str) -> bool:
 
         for i, arg in enumerate(args):
             if arg == '--login' or arg == '-l':
-                has_login_flag = True
                 # Check if next arg is devicecode
                 if i + 1 < len(args) and args[i + 1] == 'devicecode':
-                    has_devicecode = True
-            elif arg == 'devicecode' and has_login_flag:
-                has_devicecode = True
-
-        return has_login_flag and has_devicecode
-
+                    return True
+        return False
     except (yaml.YAMLError, KeyError, TypeError, AttributeError) as e:
         # If there's any error parsing the kubeconfig, assume it doesn't require kubelogin
         logger.debug("Error parsing kubeconfig: %s", str(e))
