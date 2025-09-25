@@ -1633,19 +1633,24 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
             if which("kubelogin"):
                 try:
                     # Run kubelogin convert-kubeconfig -l azurecli
-                    subprocess.run(["kubelogin", "convert-kubeconfig", "-l", "azurecli"],
-                                 cwd=os.path.dirname(path), check=True)
+                    subprocess.run(
+                        ["kubelogin", "convert-kubeconfig", "-l", "azurecli"],
+                        cwd=os.path.dirname(path),
+                        check=True,
+                    )
                     logger.warning("Converted kubeconfig to use Azure CLI authentication.")
                 except subprocess.CalledProcessError as e:
                     logger.warning("Failed to convert kubeconfig with kubelogin: %s", str(e))
                 except Exception as e:  # pylint: disable=broad-except
                     logger.warning("Error running kubelogin: %s", str(e))
             else:
-                logger.warning("The kubeconfig uses devicecode authentication which requires kubelogin. "
-                             "Please install kubelogin from https://github.com/Azure/kubelogin or run "
-                             "'az aks install-cli' to install both kubectl and kubelogin. "
-                             "If devicecode login fails, try running "
-                             "'kubelogin convert-kubeconfig -l azurecli' to unblock yourself.")
+                logger.warning(
+                    "The kubeconfig uses devicecode authentication which requires kubelogin. "
+                    "Please install kubelogin from https://github.com/Azure/kubelogin or run "
+                    "'az aks install-cli' to install both kubectl and kubelogin. "
+                    "If devicecode login fails, try running "
+                    "'kubelogin convert-kubeconfig -l azurecli' to unblock yourself."
+                )
 
     except (IndexError, ValueError):
         raise CLIError("Fail to find kubeconfig file.")
