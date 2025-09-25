@@ -1638,7 +1638,7 @@ def aks_get_credentials(cmd, client, resource_group_name, name, admin=False,
                     logger.warning("Converted kubeconfig to use Azure CLI authentication.")
                 except subprocess.CalledProcessError as e:
                     logger.warning("Failed to convert kubeconfig with kubelogin: %s", str(e))
-                except Exception as e:
+                except Exception as e:  # pylint: disable=broad-except
                     logger.warning("Error running kubelogin: %s", str(e))
             else:
                 logger.warning("The kubeconfig uses devicecode authentication which requires kubelogin. "
