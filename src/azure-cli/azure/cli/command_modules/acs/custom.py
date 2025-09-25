@@ -1670,14 +1670,11 @@ def uses_kubelogin_devicecode(kubeconfig: str) -> bool:
 
         # Check if args contains --login and devicecode
         args = exec_info.get('args', [])
-        has_login_flag = False
-        has_devicecode = False
-
-        for i, arg in enumerate(args):
-            if arg == '--login' or arg == '-l':
-                # Check if next arg is devicecode
-                if i + 1 < len(args) and args[i + 1] == 'devicecode':
-                    return True
+        # Join args into a string for easier pattern matching
+        args_str = ' '.join(args)
+        # Check for '--login devicecode' or '-l devicecode'
+        if '--login devicecode' in args_str or '-l devicecode' in args_str:
+            return True
         return False
     except (yaml.YAMLError, KeyError, TypeError, AttributeError) as e:
         # If there's any error parsing the kubeconfig, assume it doesn't require kubelogin
