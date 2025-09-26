@@ -23,47 +23,61 @@ register_other_breaking_change('postgres server-logs',
                                message='Azure Database for PostgreSQL Single Server is deprecated. '
                                'Please migrate to Flexible Server for new deployments.')
 register_argument_deprecate(
-    'postgres flexible-server backup',
-    '--backup-name',
-    message='The argument "--backup-name" will be changed to "--name".'
-)
-register_argument_deprecate(
-    'postgres flexible-server backup',
-    '--name',
-    message='The argument "--name" will be changed to "--server-name".'
-)
-register_argument_deprecate(
-    'postgres flexible-server db',
-    '--database-name',
-    message='The argument "--database-name" will be changed to "--name".'
-)
-register_argument_deprecate(
-    'postgres flexible-server firewall-rule',
-    '--name',
-    message='The argument "--name" will be changed to "--server-name".'
-)
-register_argument_deprecate(
-    'postgres flexible-server firewall-rule',
-    '--rule-name',
-    message='The argument "--rule-name" will be changed to "--name".'
-)
-register_argument_deprecate(
-    'postgres flexible-server long-term-retention',
-    '--name',
-    message='The argument "--name" will be changed to "--server-name".'
-)
-register_argument_deprecate(
-    'postgres flexible-server migration',
-    '--migration-name',
-    message='The argument "--migration-name" will be changed to "--name".'
-)
-register_argument_deprecate(
-    'postgres flexible-server migration',
-    '--name',
-    message='The argument "--name" will be changed to "--server-name".'
-)
-register_argument_deprecate(
-    'postgres flexible-server replica',
+    'postgres flexible-server replica create',
     '--replica-name',
     message='The argument "--replica-name" will be changed to "--name".'
 )
+for action in ['create', 'delete', 'list', 'show']:
+    register_argument_deprecate(
+        f'postgres flexible-server db {action}',
+        '--database-name',
+        message='The argument "--database-name" will be changed to "--name".'
+    )
+for action in ['create', 'delete', 'list', 'show']:
+    register_argument_deprecate(
+        f'postgres flexible-server db {action}',
+        '-d',
+        message='The argument "-d" will be changed to "-n".'
+    )
+for action in ['list', 'show', 'start', 'pre-check']:
+    register_argument_deprecate(
+        f'postgres flexible-server long-term-retention {action}',
+        '--name',
+        message='The argument "--name" will be changed to "--server-name".'
+    )
+for action in ['list', 'show', 'start', 'pre-check']:
+    register_argument_deprecate(
+        f'postgres flexible-server long-term-retention {action}',
+        '-n',
+        message='The argument "-n" will be changed to "-s".'
+    )
+for action in ['create', 'show', 'list', 'delete']:
+    register_argument_deprecate(
+        f'postgres flexible-server backup {action}',
+        '--backup-name',
+        message='The argument "--backup-name" will be changed to "--name". The argument "--name" will be changed to "--server-name".'
+    )
+for action in ['create', 'show', 'list', 'delete']:
+    register_argument_deprecate(
+        f'postgres flexible-server backup {action}',
+        '-b',
+        message='The argument "--b" will be changed to "-n". The argument "-n" will be changed to "-s".'
+    )
+for action in ['create', 'delete', 'list', 'show', 'update']:
+    register_argument_deprecate(
+        f'postgres flexible-server firewall-rule {action}',
+        '--rule-name',
+        message='The argument "--rule-name" will be changed to "--name". The argument "--name" will be changed to "--server-name".'
+    )
+for action in ['create', 'delete', 'list', 'show', 'update']:
+    register_argument_deprecate(
+        f'postgres flexible-server firewall-rule {action}',
+        '-r',
+        message='The argument "-r" will be changed to "-n". The argument "-n" will be changed to "-s".'
+    )
+for action in ['create', 'show', 'list', 'update', 'check-name-availability']:
+    register_argument_deprecate(
+        f'postgres flexible-server migration {action}',
+        '--migration-name',
+        message='The argument "--migration-name" will be changed to "--name". The argument "--name" will be changed to "--server-name".'
+    )
