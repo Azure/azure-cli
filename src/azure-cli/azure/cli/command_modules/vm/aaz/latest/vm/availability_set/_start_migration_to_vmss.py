@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class StartMigrationToVmss(AAZCommand):
     """Start migration operation on an Availability Set to move its Virtual Machines to a Virtual Machine Scale Set. This should be followed by a migrate operation on each Virtual Machine that triggers a downtime on the Virtual Machine.
+
+    :example: Start migration to vmss
+        az vm availability-set start-migration-to-vmss --resource-group rgcompute --availability-set-name myAvailabilitySet --vmss-flexible-id /subscriptions/{subscription-id}/resourceGroups/rgcompute/providers/Microsoft.Compute/virtualMachineScaleSets/{vmss-name}
     """
 
     _aaz_info = {

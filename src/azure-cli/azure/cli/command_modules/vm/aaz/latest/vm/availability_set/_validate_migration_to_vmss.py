@@ -15,7 +15,10 @@ from azure.cli.core.aaz import *
     "vm availability-set validate-migration-to-vmss",
 )
 class ValidateMigrationToVmss(AAZCommand):
-    """Validates that the Virtual Machines in the Availability Set can be migrated to the provided Virtual Machine Scale Set.
+    """Validate that the Virtual Machines in the Availability Set can be migrated to the provided Virtual Machine Scale Set.
+
+    :example: Validate migration to vmss
+        az vm availability-set validate-migration-to-vmss --resource-group rgcompute --availability-set-name myAvailabilitySet --vmss-flexible-id /subscriptions/{subscription-id}/resourceGroups/rgcompute/providers/Microsoft.Compute/virtualMachineScaleSets/{vmss-name}
     """
 
     _aaz_info = {

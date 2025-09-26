@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class MigrateToVmss(AAZCommand):
     """Migrate a virtual machine from availability set to Flexible Virtual Machine Scale Set.
+
+    :example: Migrate a vm to flexible vmss
+        az vm migrate-to-vmss --resource-group myResourceGroup --vm-name myVMName --target-fault-domain 0 --target-vm-size Standard_D1_v2
     """
 
     _aaz_info = {

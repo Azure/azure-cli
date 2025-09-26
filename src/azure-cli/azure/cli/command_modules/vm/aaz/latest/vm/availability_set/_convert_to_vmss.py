@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class ConvertToVmss(AAZCommand):
     """Create a new Flexible Virtual Machine Scale Set and migrate all the Virtual Machines in the Availability Set. This does not trigger a downtime on the Virtual Machines.
+
+    :example: Convert to vmss
+        az vm availability-set convert-to-vmss --resource-group rgcompute --availability-set-name myAvailabilitySet --vmss-name {vmss-name}
     """
 
     _aaz_info = {

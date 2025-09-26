@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class CancelMigrationToVmss(AAZCommand):
     """Cancel the migration operation on an Availability Set.
+
+    :example: Cancel migration to vmss
+        az vm availability-set cancel-migration-to-vmss --resource-group rgcompute --availability-set-name myAvailabilitySet
     """
 
     _aaz_info = {
