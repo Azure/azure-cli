@@ -62,7 +62,7 @@ for action in ['create', 'show', 'list', 'delete']:
     register_argument_deprecate(
         f'postgres flexible-server backup {action}',
         '-b',
-        message='The argument "--b" will be changed to "-n". The argument "-n" will be changed to "-s".'
+        message='The argument "-b" will be changed to "-n". The argument "-n" will be changed to "-s".'
     )
 for action in ['create', 'delete', 'list', 'show', 'update']:
     register_argument_deprecate(
