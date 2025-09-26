@@ -1793,6 +1793,40 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account update --access-tier Cold -n {sastoragecold} -g {rg} -y',
                  checks=[JMESPathCheck('accessTier', 'Cold')])
 
+    @ResourceGroupPreparer(location='eastus')
+    def test_storage_account_smb_oauth(self, resource_group):
+        self.kwargs.update({
+            'sasmboauth': self.create_random_name('sa', 24),
+            'sasmboauth2': self.create_random_name('sa', 24),
+            'sasmboauth3': self.create_random_name('sa', 24),
+            'sasmboauth4': self.create_random_name('sa', 24)
+        })
+
+        self.cmd('storage account create -n {sasmboauth} -g {rg} --enable-smb-oauth true', checks=[
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.smbOAuthSettings.isSmbOAuthEnabled', True)
+        ])
+        self.cmd('storage account update -n {sasmboauth} -g {rg} --enable-smb-oauth false', checks=[
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.smbOAuthSettings.isSmbOAuthEnabled', False)
+        ])
+        # make sure does not reset
+        self.cmd('storage account update -n {sasmboauth} -g {rg}', checks=[
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.smbOAuthSettings.isSmbOAuthEnabled', False)
+        ])
+
+        self.cmd('storage account create -n {sasmboauth2} -g {rg} --enable-smb-oauth false', checks=[
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.smbOAuthSettings.isSmbOAuthEnabled', False)
+        ])
+        self.cmd('storage account update -n {sasmboauth2} -g {rg} --enable-smb-oauth true', checks=[
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.smbOAuthSettings.isSmbOAuthEnabled', True)
+        ])
+        # make sure does not reset
+        self.cmd('storage account update -n {sasmboauth2} -g {rg}', checks=[
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.smbOAuthSettings.isSmbOAuthEnabled', True)
+        ])
+
+        self.cmd('storage account create -n {sasmboauth3} -g {rg} --enable-smb-oauth', checks=[
+            JMESPathCheck('azureFilesIdentityBasedAuthentication.smbOAuthSettings.isSmbOAuthEnabled', True)
+        ])
 
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
