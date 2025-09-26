@@ -77,7 +77,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None):
+                           allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
+                           enable_smb_oauth=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -197,6 +198,14 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='None')
         params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
+
+    if enable_smb_oauth is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+        params.azure_files_identity_based_authentication.smb_o_auth_settings = {
+            "is_smb_o_auth_enabled": enable_smb_oauth
+        }
 
     if enable_large_file_share:
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
@@ -398,7 +407,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
-                           yes=None):
+                           yes=None, enable_smb_oauth=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet', 'Kind')
@@ -609,6 +618,15 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 directory_service_options='None') if instance.azure_files_identity_based_authentication is None \
                 else instance.azure_files_identity_based_authentication
         params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
+
+    if enable_smb_oauth is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None') if instance.azure_files_identity_based_authentication is None \
+                else instance.azure_files_identity_based_authentication
+        params.azure_files_identity_based_authentication.smb_o_auth_settings = {
+            "is_smb_o_auth_enabled": enable_smb_oauth
+        }
 
     if assign_identity:
         params.identity = Identity(type='SystemAssigned')

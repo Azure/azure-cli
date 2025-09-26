@@ -131,6 +131,24 @@ def _get_access_extension_upgrade_info(extensions, name):
     return publisher, version, auto_upgrade
 
 
+# separated for aaz based implementation
+def _get_access_extension_upgrade_info_aaz(extensions, name):
+    version = extension_mappings[name]['version']
+    publisher = extension_mappings[name]['publisher']
+
+    auto_upgrade = None
+
+    if extensions:
+        extension = next((e for e in extensions if e.get('name', '') == name), None)
+        from packaging.version import parse  # pylint: disable=no-name-in-module,import-error
+        if extension and parse(extension['typeHandlerVersion']) < parse(version):
+            auto_upgrade = True
+        elif extension and parse(extension['typeHandlerVersion']) > parse(version):
+            version = extension['typeHandlerVersion']
+
+    return publisher, version, auto_upgrade
+
+
 def _get_extension_instance_name(instance_view, publisher, extension_type_name,
                                  suggested_name=None):
     extension_instance_name = suggested_name or extension_type_name
@@ -3158,28 +3176,31 @@ def list_unmanaged_disks(cmd, resource_group_name, vm_name):
 # region VirtualMachines Users
 def _update_linux_access_extension(cmd, vm_instance, resource_group_name, protected_settings,
                                    no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-
-    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
+    from .operations.vm_extension import VMExtensionCreate
 
     # pylint: disable=no-member
-    instance_name = _get_extension_instance_name(vm_instance.instance_view,
-                                                 extension_mappings[_LINUX_ACCESS_EXT]['publisher'],
-                                                 _LINUX_ACCESS_EXT,
-                                                 _ACCESS_EXT_HANDLER_NAME)
+    instance_name = _get_extension_instance_name_aaz(vm_instance.get('instanceView', {}),
+                                                     extension_mappings[_LINUX_ACCESS_EXT]['publisher'],
+                                                     _LINUX_ACCESS_EXT,
+                                                     _ACCESS_EXT_HANDLER_NAME)
 
-    publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vm_instance.resources, _LINUX_ACCESS_EXT)
+    publisher, version, auto_upgrade = _get_access_extension_upgrade_info_aaz(
+        vm_instance.get('resources', []), _LINUX_ACCESS_EXT)
 
-    ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
-                                  publisher=publisher,
-                                  type_properties_type=_LINUX_ACCESS_EXT,
-                                  protected_settings=protected_settings,
-                                  type_handler_version=version,
-                                  settings={},
-                                  auto_upgrade_minor_version=auto_upgrade)
-    return sdk_no_wait(no_wait, client.virtual_machine_extensions.begin_create_or_update,
-                       resource_group_name, vm_instance.name, instance_name, ext)
+    poller = VMExtensionCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_instance['name'],
+        'vm_extension_name': instance_name,
+        'location': vm_instance['location'],
+        'publisher': publisher,
+        'type': _LINUX_ACCESS_EXT,
+        'type_handler_version': version,
+        'settings': {},
+        'protected_settings': protected_settings,
+        'auto_upgrade_minor_version': auto_upgrade,
+        'no_wait': no_wait
+    })
+    return poller
 
 
 def _set_linux_user(cmd, vm_instance, resource_group_name, username,
@@ -3197,6 +3218,7 @@ def _set_linux_user(cmd, vm_instance, resource_group_name, username,
     if no_wait:
         return _update_linux_access_extension(cmd, vm_instance, resource_group_name,
                                               protected_settings, no_wait)
+
     poller = _update_linux_access_extension(cmd, vm_instance, resource_group_name,
                                             protected_settings)
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'setting user', 'done')(poller)
@@ -3204,37 +3226,45 @@ def _set_linux_user(cmd, vm_instance, resource_group_name, username,
 
 def _reset_windows_admin(cmd, vm_instance, resource_group_name, username, password, no_wait=False):
     '''Update the password. You can only change the password. Adding a new user is not supported. '''
-    client = _compute_client_factory(cmd.cli_ctx)
-    VirtualMachineExtension = cmd.get_models('VirtualMachineExtension')
+    from .operations.vm_extension import VMExtensionCreate
 
-    publisher, version, auto_upgrade = _get_access_extension_upgrade_info(
-        vm_instance.resources, _WINDOWS_ACCESS_EXT)
+    publisher, version, auto_upgrade = _get_access_extension_upgrade_info_aaz(
+        vm_instance.get('resources', []), _WINDOWS_ACCESS_EXT)
     # pylint: disable=no-member
-    instance_name = _get_extension_instance_name(vm_instance.instance_view,
-                                                 publisher,
-                                                 _WINDOWS_ACCESS_EXT,
-                                                 _ACCESS_EXT_HANDLER_NAME)
+    instance_name = _get_extension_instance_name_aaz(vm_instance.get('instanceView', {}),
+                                                     publisher,
+                                                     _WINDOWS_ACCESS_EXT,
+                                                     _ACCESS_EXT_HANDLER_NAME)
 
-    ext = VirtualMachineExtension(location=vm_instance.location,  # pylint: disable=no-member
-                                  publisher=publisher,
-                                  type_properties_type=_WINDOWS_ACCESS_EXT,
-                                  protected_settings={'Password': password},
-                                  type_handler_version=version,
-                                  settings={'UserName': username},
-                                  auto_upgrade_minor_version=auto_upgrade)
+    poller = VMExtensionCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        'location': vm_instance['location'],
+        'resource_group': resource_group_name,
+        'vm_name': vm_instance['name'],
+        'vm_extension_name': instance_name,
+        'publisher': publisher,
+        'type': _WINDOWS_ACCESS_EXT,
+        'type_handler_version': version,
+        'auto_upgrade_minor_version': auto_upgrade,
+        'settings': {'UserName': username},
+        'protected_settings': {'Password': password},
+        'no_wait': no_wait
+    })
 
     if no_wait:
-        return sdk_no_wait(no_wait, client.virtual_machine_extensions.create_or_update,
-                           resource_group_name, vm_instance.name, instance_name, ext)
-    poller = client.virtual_machine_extensions.begin_create_or_update(
-        resource_group_name, vm_instance.name, instance_name, ext)
+        return poller
+
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'resetting admin', 'done')(poller)
 
 
 def set_user(cmd, resource_group_name, vm_name, username, password=None, ssh_key_value=None,
              no_wait=False):
-    vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if _is_linux_os(vm):
+    from .operations.vm import VMShow
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'expand': 'instanceView'
+    })
+    if _is_linux_os_aaz(vm):
         return _set_linux_user(cmd, vm, resource_group_name, username, password, ssh_key_value, no_wait)
     if ssh_key_value:
         raise CLIError('SSH key is not appliable on a Windows VM')
@@ -3242,24 +3272,36 @@ def set_user(cmd, resource_group_name, vm_name, username, password=None, ssh_key
 
 
 def delete_user(cmd, resource_group_name, vm_name, username, no_wait=False):
-    vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if not _is_linux_os(vm):
+    from .operations.vm import VMShow
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'expand': 'instanceView'
+    })
+    if not _is_linux_os_aaz(vm):
         raise CLIError('Deleting a user is not supported on Windows VM')
     if no_wait:
         return _update_linux_access_extension(cmd, vm, resource_group_name,
                                               {'remove_user': username}, no_wait)
+
     poller = _update_linux_access_extension(cmd, vm, resource_group_name,
                                             {'remove_user': username})
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'deleting user', 'done')(poller)
 
 
 def reset_linux_ssh(cmd, resource_group_name, vm_name, no_wait=False):
-    vm = get_vm(cmd, resource_group_name, vm_name, 'instanceView')
-    if not _is_linux_os(vm):
+    from .operations.vm import VMShow
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'expand': 'instanceView'
+    })
+    if not _is_linux_os_aaz(vm):
         raise CLIError('Resetting SSH is not supported in Windows VM')
     if no_wait:
         return _update_linux_access_extension(cmd, vm, resource_group_name,
                                               {'reset_ssh': True}, no_wait)
+
     poller = _update_linux_access_extension(cmd, vm, resource_group_name,
                                             {'reset_ssh': True})
     return ExtensionUpdateLongRunningOperation(cmd.cli_ctx, 'resetting SSH', 'done')(poller)

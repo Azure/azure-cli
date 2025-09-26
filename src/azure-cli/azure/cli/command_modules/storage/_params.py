@@ -432,6 +432,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Allow you to specify the type of endpoint. Set this to AzureDNSZone to create a large number '
                         'of accounts in a single subscription, which creates accounts in an Azure DNS Zone and the '
                         'endpoint URL will have an alphanumeric DNS Zone identifier.')
+        c.argument('enable_smb_oauth', arg_type=get_three_state_flag(),
+                   arg_group='Azure Files Identity Based Authentication',
+                   help='Specifies if managed identities can access SMB shares using OAuth. '
+                        'The default interpretation is false for this property.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -523,6 +527,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('upgrade_to_storagev2', arg_type=get_three_state_flag(),
                    help='Upgrade Storage Account Kind to StorageV2.')
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
+        c.argument('enable_smb_oauth', arg_type=get_three_state_flag(),
+                   arg_group='Azure Files Identity Based Authentication',
+                   help='Specifies if managed identities can access SMB shares using OAuth. ')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key',

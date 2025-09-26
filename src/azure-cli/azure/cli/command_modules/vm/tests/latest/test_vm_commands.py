@@ -1941,7 +1941,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         # Expecting no results
         self.cmd('vm list --resource-group {rg}',
                  checks=self.is_empty())
-        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username azureuser --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --tags firsttag=1 secondtag=2 thirdtag --nsg {nsg} --public-ip-address {ip} --subnet {subnet} --vnet-name {vnet} --storage-account {sa} --use-unmanaged-disk --nsg-rule NONE')
+        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username azureuser --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --tags firsttag=1 secondtag=2 thirdtag --nsg {nsg} --public-ip-address {ip} --subnet {subnet} --vnet-name {vnet} --storage-account {sa} --use-unmanaged-disk --nsg-rule NONE --size Standard_B2s')
 
         # Disable default outbound access
         self.cmd(
@@ -2008,8 +2008,8 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
                 time.sleep(30)
         self.cmd('vm deallocate --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/deallocated')
-        self.cmd('vm resize -g {rg} -n {vm} --size Standard_DS2_v2',
-                 checks=self.check('hardwareProfile.vmSize', 'Standard_DS2_v2'))
+        self.cmd('vm resize -g {rg} -n {vm} --size Standard_B2ms',
+                 checks=self.check('hardwareProfile.vmSize', 'Standard_B2ms'))
         self.cmd('vm delete --resource-group {rg} --name {vm} --yes')
         # Expecting no results
         self.cmd('vm list --resource-group {rg}', checks=self.is_empty())
@@ -2022,7 +2022,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
         self.cmd('vm create -g {rg} -n vm --image Win2022Datacenter --admin-username AzureUser '
-                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd(
