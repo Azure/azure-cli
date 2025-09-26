@@ -55,7 +55,8 @@ for action in ['create', 'show', 'list', 'delete']:
     register_argument_deprecate(
         f'postgres flexible-server backup {action}',
         '--backup-name',
-        message='The argument "--backup-name" will be changed to "--name". The argument "--name" will be changed to "--server-name".'
+        message='The argument "--backup-name" will be changed to "--name". The argument '
+        '"--name" will be changed to "--server-name".'
     )
 for action in ['create', 'show', 'list', 'delete']:
     register_argument_deprecate(
@@ -67,7 +68,8 @@ for action in ['create', 'delete', 'list', 'show', 'update']:
     register_argument_deprecate(
         f'postgres flexible-server firewall-rule {action}',
         '--rule-name',
-        message='The argument "--rule-name" will be changed to "--name". The argument "--name" will be changed to "--server-name".'
+        message='The argument "--rule-name" will be changed to "--name". The argument "--name" will '
+        'be changed to "--server-name".'
     )
 for action in ['create', 'delete', 'list', 'show', 'update']:
     register_argument_deprecate(
@@ -79,5 +81,6 @@ for action in ['create', 'show', 'list', 'update', 'check-name-availability']:
     register_argument_deprecate(
         f'postgres flexible-server migration {action}',
         '--migration-name',
-        message='The argument "--migration-name" will be changed to "--name". The argument "--name" will be changed to "--server-name".'
+        message='The argument "--migration-name" will be changed to "--name". The argument "--name" '
+        'will be changed to "--server-name".'
     )
