@@ -6590,25 +6590,25 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
         r = requests.get('http://' + public_ip)
         self.assertTrue('Welcome to nginx' in str(r.content))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_w_params')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_w_params', location='eastus2')
     def test_vmss_run_command_with_parameters(self, resource_group):
         self.kwargs.update({'vmss': 'test-run-command-vmss2'})
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username clitest1 --generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username clitest1 --generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B2ms')
         self.kwargs['instance_ids'] = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
 
         for id in self.kwargs['instance_ids']:
             self.kwargs['id'] = id
             self.cmd('vmss run-command invoke -g {rg} -n {vmss} --instance-id {id} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_v2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_v2', location='eastus2')
     def test_vmss_run_command_v2(self, resource_group):
         self.kwargs.update({
             'vmss': self.create_random_name('vmss-', 10),
             'run_cmd': self.create_random_name('cmd_', 10),
             'user': self.create_random_name('user-', 10)
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --security-type Standard --admin-username {user} '
-                 '--generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:ubuntu-24_04-lts:server:latest --security-type Standard --admin-username {user} '
+                 '--generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B2ms')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('name', '{vmss}'),
             self.check('securityProfile', None),
