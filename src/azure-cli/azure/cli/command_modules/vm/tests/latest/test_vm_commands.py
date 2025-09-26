@@ -2243,6 +2243,37 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
             self.check('sku.name', 'Aligned')
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_avset_migrate', location='eastus2euap')
+    def test_vm_avset_migrate(self, resource_group):
+        self.kwargs.update({
+            'avset1': self.create_random_name('avset', 15),
+            'avset2': self.create_random_name('avset', 15),
+            'vm1': self.create_random_name('vm', 10),
+            'vm2': self.create_random_name('vm', 10),
+            'vmss': self.create_random_name('vms', 10),
+            'new_vmss': self.create_random_name('newvmss', 15),
+        })
+
+        self.cmd('vm availability-set create -g {rg} -n {avset1} --platform-fault-domain-count 2 --platform-update-domain-count 2', checks=[
+            self.check('name', '{avset1}'),
+            self.check('platformFaultDomainCount', 2)
+        ])
+        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --admin-username vmtest --nsg-rule NONE --size Standard_B2ms --availability-set {avset1}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username vmsstest --vm-sku Standard_B2ms')
+        vmss = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
+        self.kwargs.update({
+            'vmss_id': vmss['id'],
+        })
+        self.cmd('vm availability-set validate-migration-to-vmss -n {avset1} -g {rg} --vmss-flexible-id {vmss_id}')
+        self.cmd('vm availability-set start-migration-to-vmss -n {avset1} -g {rg} --vmss-flexible-id {vmss_id}')
+        self.cmd('vm availability-set cancel-migration-to-vmss -n {avset1} -g {rg}')
+
+        self.cmd('vm availability-set create -g {rg} -n {avset2} --platform-fault-domain-count 2 --platform-update-domain-count 2')
+        self.cmd('vm availability-set convert-to-vmss -n {avset2} -g {rg} --vmss-name {new_vmss}')
+        self.cmd('vmss show -n {new_vmss} -g {rg}', checks=[
+            self.check('name', '{new_vmss}')
+        ])
+
 
 class ComputeListSkusScenarioTest(ScenarioTest):
 
