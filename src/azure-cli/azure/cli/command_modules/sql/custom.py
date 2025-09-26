@@ -4802,21 +4802,35 @@ def _get_server_key_name_from_uri(uri):
     Gets the key's name to use as a SQL server key.
 
     The SQL server key API requires that the server key has a specific name
-    based on the vault, key and key version.
+    based on the vault, key and optionally key version (supports versionless keys).
     '''
     import re
 
-    match = re.match(r'https://(.)+\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|vault.cloudapi.eaglex.ic.gov|vault.cloudapi.microsoft.scloud)(:443)?\/keys/[^\/]+\/[0-9a-zA-Z]+$', uri)
+    # Updated regex pattern that supports both versioned and versionless keys
+    match = re.match(r'https://(.)+\.(managedhsm.azure.net|managedhsm-preview.azure.net|vault.azure.net|vault-int.azure-int.net|vault.azure.cn|managedhsm.azure.cn|vault.usgovcloudapi.net|managedhsm.usgovcloudapi.net|vault.microsoftazure.de|managedhsm.microsoftazure.de|vault.cloudapi.eaglex.ic.gov|vault.cloudapi.microsoft.scloud|mdep.azure.net)(:443)?\/keys/[^\/]+(\/[0-9a-zA-Z]+|\/|)$', uri)
 
     if match is None:
-        raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id.  For example: '
-                       '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901" '
+        raise CLIError('The provided uri is invalid. Please provide a valid Azure Key Vault key id. For example: '
+                       '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901" (versioned) '
+                       'or "https://YourVaultName.vault.azure.net/keys/YourKeyName" (versionless) '
                        'or "https://YourManagedHsmRegion.YourManagedHsmName.managedhsm.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
 
     vault = uri.split('.')[0].split('/')[-1]
-    key = uri.split('/')[-2]
-    version = uri.split('/')[-1]
-    return '{}_{}_{}'.format(vault, key, version)
+    
+    # Handle both versioned and versionless keys
+    uri_parts = uri.split('/')
+    key = uri_parts[-2] if len(uri_parts) > 4 else uri_parts[-1]
+    
+    # Check if this is a versionless key (no version or ends with '/')
+    if uri.endswith('/') or len(uri_parts) < 6 or uri_parts[-1] == '':
+        # Versionless key: format is vault_key
+        key = uri_parts[-2] if uri.endswith('/') else uri_parts[-1]
+        return '{}_{}'.format(vault, key)
+    else:
+        # Versioned key: format is vault_key_version  
+        key = uri_parts[-2]
+        version = uri_parts[-1]
+        return '{}_{}_{}'.format(vault, key, version)
 
 
 #####
