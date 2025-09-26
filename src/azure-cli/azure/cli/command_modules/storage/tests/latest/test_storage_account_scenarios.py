@@ -2873,3 +2873,10 @@ class StorageAccountLocalUserTests(StorageScenarioMixin, ScenarioTest):
         )
 
         self.cmd('{cmd} delete --account-name {sa} -g {rg} -n {username}')
+
+class StorageSkuTests(ScenarioTest):
+    @AllowLargeResponse(size_kb=10000)
+    def test_storage_sku_list(self):
+        sku_list = self.cmd('storage sku list').get_output_in_json()
+        assert sku_list is not None
+        assert len(sku_list) > 0
