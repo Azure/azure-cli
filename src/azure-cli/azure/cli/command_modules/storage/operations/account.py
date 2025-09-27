@@ -78,7 +78,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
-                           enable_smb_oauth=None):
+                           enable_smb_oauth=None, zones=None, zone_placement_policy=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -313,6 +313,13 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if dns_endpoint_type is not None:
         params.dns_endpoint_type = dns_endpoint_type
 
+    if zones is not None:
+        params.zones = zones
+
+    if zone_placement_policy is not None:
+        Placement = cmd.get_models('Placement')
+        params.placement = Placement(zone_placement_policy=zone_placement_policy)
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -407,7 +414,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
-                           yes=None, enable_smb_oauth=None):
+                           yes=None, enable_smb_oauth=None, zones=None, zone_placement_policy=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet', 'Kind')
@@ -709,6 +716,13 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         params.is_sftp_enabled = enable_sftp
     if enable_local_user is not None:
         params.is_local_user_enabled = enable_local_user
+
+    if zones is not None:
+        params.zones = zones
+
+    if zone_placement_policy is not None:
+        Placement = cmd.get_models('Placement')
+        params.placement = Placement(zone_placement_policy=zone_placement_policy)
 
     return params
 

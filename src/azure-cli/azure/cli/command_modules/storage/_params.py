@@ -322,8 +322,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_account_type, t_sku_name, t_kind, t_tls_version, t_dns_endpoint_type = \
+        t_account_type, t_sku_name, t_kind, t_tls_version, t_dns_endpoint_type, t_zone_placement_policy = \
             self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion', 'DnsEndpointType',
+                            'ZonePlacementPolicy',
                             resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
@@ -436,6 +437,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_group='Azure Files Identity Based Authentication',
                    help='Specifies if managed identities can access SMB shares using OAuth. '
                         'The default interpretation is false for this property.')
+        c.argument('zones', nargs='+',
+                   help='Describes the available zones for the product where storage account resource can be created.')
+        c.argument('zone_placement_policy', arg_type=get_enum_type(t_zone_placement_policy),
+                   help='The availability zone pinning policy for the storage account.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -530,6 +535,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_smb_oauth', arg_type=get_three_state_flag(),
                    arg_group='Azure Files Identity Based Authentication',
                    help='Specifies if managed identities can access SMB shares using OAuth. ')
+        c.argument('zones', nargs='+',
+                   help='Describes the available zones for the product where storage account resource can be created.')
+        c.argument('zone_placement_policy', arg_type=get_enum_type(t_zone_placement_policy),
+                   help='The availability zone pinning policy for the storage account.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key',
