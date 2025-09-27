@@ -75,7 +75,8 @@ from .utils import (_normalize_sku,
                     _remove_list_duplicates, get_raw_functionapp,
                     register_app_provider)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
-                           check_resource_group_exists, set_location, get_site_availability, get_regional_site_availability, get_profile_username,
+                           check_resource_group_exists, set_location, get_site_availability, 
+                           get_regional_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name,
                            get_or_create_default_workspace, get_or_create_default_resource_group,
@@ -167,9 +168,12 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
-
     if auto_generated_domain_name_label_scope:
-        name_validation = get_regional_site_availability(cmd, location, name, resource_group_name, auto_generated_domain_name_label_scope)
+        name_validation = get_regional_site_availability(cmd, 
+                                                         location, 
+                                                         name, 
+                                                         resource_group_name, 
+                                                         auto_generated_domain_name_label_scope)
     else:
         name_validation = get_site_availability(cmd, name)
 

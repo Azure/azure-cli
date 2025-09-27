@@ -334,9 +334,15 @@ def get_site_availability(cmd, name):
                                 "cannot start or end in a hyphen, and must be less than 64 chars.")
     return availability
 
+
 def get_regional_site_availability(cmd, location, name, resource_group_name, auto_generated_domain_name_label_scope):
+    """ This is used by az webapp up to verify if a site needs to be created or should just be deployed (regional check)"""
     client = web_client_factory(cmd.cli_ctx)
-    availability = client.regional_check_name_availability(location, name, "Site", resource_group_name, auto_generated_domain_name_label_scope)
+    availability = client.regional_check_name_availability(location, 
+                                                           name, 
+                                                           "Site", 
+                                                           resource_group_name, 
+                                                           auto_generated_domain_name_label_scope)
 
     # check for "." in app name. it is valid for hostnames to contain it, but not allowed for webapp names
     if "." in name:
