@@ -40,10 +40,37 @@ from ._sdk_enums import (
     LifecycleType,
     SessionNetworkStatus,
     ContainerType,
-    PoolManagementType
+    PoolManagementType,
+    CertificateProvisioningState,
+    ConnectedEnvironmentProvisioningState,
+    ConnectedEnvironmentStorageProvisioningState,
+    ContainerAppRunningStatus,
+    ContainerAppProvisioningState,
+    DnsVerificationTestResult,
+    DaprComponentProvisioningState,
+    HttpRouteProvisioningState,
+    JavaComponentProvisioningState,
+    JobProvisioningState,
+    EnvironmentProvisioningState,
+    JobExecutionRunningState,
+    PublicNetworkAccess,
+    PrivateEndpointConnectionProvisioningState,
+    PrivateEndpointServiceConnectionStatus,
+    ContainerAppReplicaRunningState,
+    ContainerAppContainerRunningState,
+    RevisionHealthState,
+    RevisionProvisioningState,
+    RevisionRunningState,
+    WeekDay,
+    SessionPoolProvisioningState,
+    SourceControlOperationState,
+    WorkflowKind,
+    WorkflowState,
+    WorkflowHealthState
 )
 
 JSON = MutableMapping[str, Any]
+
 
 class AllowedAudiencesValidation(_serialization.Model):
     """The configuration settings of the Allowed Audiences validation flow.
@@ -117,8 +144,8 @@ class Apple(_serialization.Model):
         self,
         *,
         enabled: Optional[bool] = None,
-        registration: Optional["_models.AppleRegistration"] = None,
-        login: Optional["_models.LoginScopes"] = None,
+        registration: Optional["AppleRegistration"] = None,
+        login: Optional["LoginScopes"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -184,7 +211,7 @@ class AppLogsConfiguration(_serialization.Model):
         self,
         *,
         destination: Optional[str] = None,
-        log_analytics_configuration: Optional["_models.LogAnalyticsConfiguration"] = None,
+        log_analytics_configuration: Optional["LogAnalyticsConfiguration"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -267,7 +294,7 @@ class Resource(_serialization.Model):
         self.id: Optional[str] = None
         self.name: Optional[str] = None
         self.type: Optional[str] = None
-        self.system_data: Optional["_models.SystemData"] = None
+        self.system_data: Optional["SystemData"] = None
 
 
 class ProxyResource(Resource):
@@ -350,12 +377,12 @@ class AuthConfig(ProxyResource):
     def __init__(
         self,
         *,
-        platform: Optional["_models.AuthPlatform"] = None,
-        global_validation: Optional["_models.GlobalValidation"] = None,
-        identity_providers: Optional["_models.IdentityProviders"] = None,
-        login: Optional["_models.Login"] = None,
-        http_settings: Optional["_models.HttpSettings"] = None,
-        encryption_settings: Optional["_models.EncryptionSettings"] = None,
+        platform: Optional["AuthPlatform"] = None,
+        global_validation: Optional["GlobalValidation"] = None,
+        identity_providers: Optional["IdentityProviders"] = None,
+        login: Optional["Login"] = None,
+        http_settings: Optional["HttpSettings"] = None,
+        encryption_settings: Optional["EncryptionSettings"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -410,7 +437,7 @@ class AuthConfigCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.AuthConfig"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["AuthConfig"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.AuthConfig]
@@ -471,7 +498,7 @@ class AvailableOperations(_serialization.Model):
     }
 
     def __init__(
-        self, *, value: Optional[list["_models.OperationDetail"]] = None, next_link: Optional[str] = None, **kwargs: Any
+        self, *, value: Optional[list["OperationDetail"]] = None, next_link: Optional[str] = None, **kwargs: Any
     ) -> None:
         """
         :keyword value: Collection of available operation details.
@@ -527,7 +554,7 @@ class AvailableWorkloadProfile(ProxyResource):
         self,
         *,
         location: Optional[str] = None,
-        properties: Optional["_models.AvailableWorkloadProfileProperties"] = None,
+        properties: Optional["AvailableWorkloadProfileProperties"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -572,7 +599,7 @@ class AvailableWorkloadProfileProperties(_serialization.Model):
         self,
         *,
         category: Optional[str] = None,
-        applicability: Optional[Union[str, "_models.Applicability"]] = None,
+        applicability: Optional[Union[str, "Applicability"]] = None,
         cores: Optional[int] = None,
         memory_gi_b: Optional[int] = None,
         gpus: Optional[int] = None,
@@ -626,7 +653,7 @@ class AvailableWorkloadProfilesCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.AvailableWorkloadProfile"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["AvailableWorkloadProfile"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of workload profiles. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.AvailableWorkloadProfile]
@@ -669,9 +696,9 @@ class AzureActiveDirectory(_serialization.Model):
         self,
         *,
         enabled: Optional[bool] = None,
-        registration: Optional["_models.AzureActiveDirectoryRegistration"] = None,
-        login: Optional["_models.AzureActiveDirectoryLogin"] = None,
-        validation: Optional["_models.AzureActiveDirectoryValidation"] = None,
+        registration: Optional["AzureActiveDirectoryRegistration"] = None,
+        login: Optional["AzureActiveDirectoryLogin"] = None,
+        validation: Optional["AzureActiveDirectoryValidation"] = None,
         is_auto_provisioned: Optional[bool] = None,
         **kwargs: Any
     ) -> None:
@@ -863,9 +890,9 @@ class AzureActiveDirectoryValidation(_serialization.Model):
     def __init__(
         self,
         *,
-        jwt_claim_checks: Optional["_models.JwtClaimChecks"] = None,
+        jwt_claim_checks: Optional["JwtClaimChecks"] = None,
         allowed_audiences: Optional[list[str]] = None,
-        default_authorization_policy: Optional["_models.DefaultAuthorizationPolicy"] = None,
+        default_authorization_policy: Optional["DefaultAuthorizationPolicy"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -968,8 +995,8 @@ class AzureFileProperties(_serialization.Model):
         *,
         account_name: Optional[str] = None,
         account_key: Optional[str] = None,
-        account_key_vault_properties: Optional["_models.SecretKeyVaultProperties"] = None,
-        access_mode: Optional[Union[str, "_models.AccessMode"]] = None,
+        account_key_vault_properties: Optional["SecretKeyVaultProperties"] = None,
+        access_mode: Optional[Union[str, "AccessMode"]] = None,
         share_name: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -1013,7 +1040,7 @@ class AzureStaticWebApps(_serialization.Model):
         self,
         *,
         enabled: Optional[bool] = None,
-        registration: Optional["_models.AzureStaticWebAppsRegistration"] = None,
+        registration: Optional["AzureStaticWebAppsRegistration"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -1084,9 +1111,9 @@ class BaseContainer(_serialization.Model):
         name: Optional[str] = None,
         command: Optional[list[str]] = None,
         args: Optional[list[str]] = None,
-        env: Optional[list["_models.EnvironmentVar"]] = None,
-        resources: Optional["_models.ContainerResources"] = None,
-        volume_mounts: Optional[list["_models.VolumeMount"]] = None,
+        env: Optional[list["EnvironmentVar"]] = None,
+        resources: Optional["ContainerResources"] = None,
+        volume_mounts: Optional[list["VolumeMount"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -1157,7 +1184,7 @@ class BillingMeter(ProxyResource):
         self,
         *,
         location: Optional[str] = None,
-        properties: Optional["_models.BillingMeterProperties"] = None,
+        properties: Optional["BillingMeterProperties"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -1188,7 +1215,7 @@ class BillingMeterCollection(_serialization.Model):
         "value": {"key": "value", "type": "[BillingMeter]"},
     }
 
-    def __init__(self, *, value: list["_models.BillingMeter"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["BillingMeter"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of billing meters. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.BillingMeter]
@@ -1367,7 +1394,7 @@ class Certificate(TrackedResource):
         *,
         location: str,
         tags: Optional[dict[str, str]] = None,
-        properties: Optional["_models.CertificateProperties"] = None,
+        properties: Optional["CertificateProperties"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -1405,7 +1432,7 @@ class CertificateCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.Certificate"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["Certificate"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.Certificate]
@@ -1534,7 +1561,7 @@ class CertificateProperties(_serialization.Model):
     def __init__(
         self,
         *,
-        certificate_key_vault_properties: Optional["_models.CertificateKeyVaultProperties"] = None,
+        certificate_key_vault_properties: Optional["CertificateKeyVaultProperties"] = None,
         password: Optional[str] = None,
         value: Optional[bytes] = None,
         **kwargs: Any
@@ -1549,7 +1576,7 @@ class CertificateProperties(_serialization.Model):
         :paramtype value: bytes
         """
         super().__init__(**kwargs)
-        self.provisioning_state: Optional[Union[str, "_models.CertificateProvisioningState"]] = None
+        self.provisioning_state: Optional[Union[str, "CertificateProvisioningState"]] = None
         self.deployment_errors: Optional[str] = None
         self.certificate_key_vault_properties = certificate_key_vault_properties
         self.password = password
@@ -1612,7 +1639,7 @@ class CheckNameAvailabilityResponse(_serialization.Model):
         self,
         *,
         name_available: Optional[bool] = None,
-        reason: Optional[Union[str, "_models.CheckNameAvailabilityReason"]] = None,
+        reason: Optional[Union[str, "CheckNameAvailabilityReason"]] = None,
         message: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -1709,15 +1736,15 @@ class Configuration(_serialization.Model):
     def __init__(
         self,
         *,
-        secrets: Optional[list["_models.Secret"]] = None,
-        active_revisions_mode: Union[str, "_models.ActiveRevisionsMode"] = "Single",
-        ingress: Optional["_models.Ingress"] = None,
-        registries: Optional[list["_models.RegistryCredentials"]] = None,
-        dapr: Optional["_models.Dapr"] = None,
-        runtime: Optional["_models.Runtime"] = None,
+        secrets: Optional[list["Secret"]] = None,
+        active_revisions_mode: Union[str, "ActiveRevisionsMode"] = "Single",
+        ingress: Optional["Ingress"] = None,
+        registries: Optional[list["RegistryCredentials"]] = None,
+        dapr: Optional["Dapr"] = None,
+        runtime: Optional["Runtime"] = None,
         max_inactive_revisions: Optional[int] = None,
-        service: Optional["_models.Service"] = None,
-        identity_settings: Optional[list["_models.IdentitySettings"]] = None,
+        service: Optional["Service"] = None,
+        identity_settings: Optional[list["IdentitySettings"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -1840,10 +1867,10 @@ class ConnectedEnvironment(TrackedResource):
         *,
         location: str,
         tags: Optional[dict[str, str]] = None,
-        extended_location: Optional["_models.ExtendedLocation"] = None,
+        extended_location: Optional["ExtendedLocation"] = None,
         static_ip: Optional[str] = None,
         dapr_ai_connection_string: Optional[str] = None,
-        custom_domain_configuration: Optional["_models.CustomDomainConfiguration"] = None,
+        custom_domain_configuration: Optional["CustomDomainConfiguration"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -1864,7 +1891,7 @@ class ConnectedEnvironment(TrackedResource):
         """
         super().__init__(tags=tags, location=location, **kwargs)
         self.extended_location = extended_location
-        self.provisioning_state: Optional[Union[str, "_models.ConnectedEnvironmentProvisioningState"]] = None
+        self.provisioning_state: Optional[Union[str, "ConnectedEnvironmentProvisioningState"]] = None
         self.deployment_errors: Optional[str] = None
         self.default_domain: Optional[str] = None
         self.static_ip = static_ip
@@ -1892,7 +1919,7 @@ class ConnectedEnvironmentCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: Optional[list["_models.ConnectedEnvironment"]] = None, **kwargs: Any) -> None:
+    def __init__(self, *, value: Optional[list["ConnectedEnvironment"]] = None, **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources.
         :paramtype value: list[~azure.mgmt.appcontainers.models.ConnectedEnvironment]
@@ -1966,7 +1993,7 @@ class ConnectedEnvironmentStorage(ProxyResource):
     }
 
     def __init__(
-        self, *, properties: Optional["_models.ConnectedEnvironmentStorageProperties"] = None, **kwargs: Any
+        self, *, properties: Optional["ConnectedEnvironmentStorageProperties"] = None, **kwargs: Any
     ) -> None:
         """
         :keyword properties: Storage properties.
@@ -2002,14 +2029,14 @@ class ConnectedEnvironmentStorageProperties(_serialization.Model):
         "deployment_errors": {"key": "deploymentErrors", "type": "str"},
     }
 
-    def __init__(self, *, azure_file: Optional["_models.AzureFileProperties"] = None, **kwargs: Any) -> None:
+    def __init__(self, *, azure_file: Optional["AzureFileProperties"] = None, **kwargs: Any) -> None:
         """
         :keyword azure_file: Azure file properties.
         :paramtype azure_file: ~azure.mgmt.appcontainers.models.AzureFileProperties
         """
         super().__init__(**kwargs)
         self.azure_file = azure_file
-        self.provisioning_state: Optional[Union[str, "_models.ConnectedEnvironmentStorageProvisioningState"]] = None
+        self.provisioning_state: Optional[Union[str, "ConnectedEnvironmentStorageProvisioningState"]] = None
         self.deployment_errors: Optional[str] = None
 
 
@@ -2030,7 +2057,7 @@ class ConnectedEnvironmentStoragesCollection(_serialization.Model):
         "value": {"key": "value", "type": "[ConnectedEnvironmentStorage]"},
     }
 
-    def __init__(self, *, value: list["_models.ConnectedEnvironmentStorage"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["ConnectedEnvironmentStorage"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of storage resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.ConnectedEnvironmentStorage]
@@ -2078,10 +2105,10 @@ class Container(BaseContainer):
         name: Optional[str] = None,
         command: Optional[list[str]] = None,
         args: Optional[list[str]] = None,
-        env: Optional[list["_models.EnvironmentVar"]] = None,
-        resources: Optional["_models.ContainerResources"] = None,
-        volume_mounts: Optional[list["_models.VolumeMount"]] = None,
-        probes: Optional[list["_models.ContainerAppProbe"]] = None,
+        env: Optional[list["EnvironmentVar"]] = None,
+        resources: Optional["ContainerResources"] = None,
+        volume_mounts: Optional[list["VolumeMount"]] = None,
+        probes: Optional[list["ContainerAppProbe"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -2229,15 +2256,15 @@ class ContainerApp(TrackedResource):
         *,
         location: str,
         tags: Optional[dict[str, str]] = None,
-        extended_location: Optional["_models.ExtendedLocation"] = None,
-        identity: Optional["_models.ManagedServiceIdentity"] = None,
+        extended_location: Optional["ExtendedLocation"] = None,
+        identity: Optional["ManagedServiceIdentity"] = None,
         managed_by: Optional[str] = None,
-        kind: Optional[Union[str, "_models.Kind"]] = None,
+        kind: Optional[Union[str, "Kind"]] = None,
         managed_environment_id: Optional[str] = None,
         environment_id: Optional[str] = None,
         workload_profile_name: Optional[str] = None,
-        configuration: Optional["_models.Configuration"] = None,
-        template: Optional["_models.Template"] = None,
+        configuration: Optional["Configuration"] = None,
+        template: Optional["Template"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -2274,8 +2301,8 @@ class ContainerApp(TrackedResource):
         self.identity = identity
         self.managed_by = managed_by
         self.kind = kind
-        self.provisioning_state: Optional[Union[str, "_models.ContainerAppProvisioningState"]] = None
-        self.running_status: Optional[Union[str, "_models.ContainerAppRunningStatus"]] = None
+        self.provisioning_state: Optional[Union[str, "ContainerAppProvisioningState"]] = None
+        self.running_status: Optional[Union[str, "ContainerAppRunningStatus"]] = None
         self.managed_environment_id = managed_environment_id
         self.environment_id = environment_id
         self.workload_profile_name = workload_profile_name
@@ -2373,7 +2400,7 @@ class ContainerAppCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.ContainerApp"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["ContainerApp"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.ContainerApp]
@@ -2406,7 +2433,7 @@ class ContainerAppJobExecutions(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.JobExecution"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["JobExecution"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.JobExecution]
@@ -2471,14 +2498,14 @@ class ContainerAppProbe(_serialization.Model):
         self,
         *,
         failure_threshold: Optional[int] = None,
-        http_get: Optional["_models.ContainerAppProbeHttpGet"] = None,
+        http_get: Optional["ContainerAppProbeHttpGet"] = None,
         initial_delay_seconds: Optional[int] = None,
         period_seconds: Optional[int] = None,
         success_threshold: Optional[int] = None,
-        tcp_socket: Optional["_models.ContainerAppProbeTcpSocket"] = None,
+        tcp_socket: Optional["ContainerAppProbeTcpSocket"] = None,
         termination_grace_period_seconds: Optional[int] = None,
         timeout_seconds: Optional[int] = None,
-        type: Optional[Union[str, "_models.Type"]] = None,
+        type: Optional[Union[str, "Type"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -2566,9 +2593,9 @@ class ContainerAppProbeHttpGet(_serialization.Model):
         *,
         port: int,
         host: Optional[str] = None,
-        http_headers: Optional[list["_models.ContainerAppProbeHttpGetHttpHeadersItem"]] = None,
+        http_headers: Optional[list["ContainerAppProbeHttpGetHttpHeadersItem"]] = None,
         path: Optional[str] = None,
-        scheme: Optional[Union[str, "_models.Scheme"]] = None,
+        scheme: Optional[Union[str, "Scheme"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -2757,7 +2784,7 @@ class CookieExpiration(_serialization.Model):
     def __init__(
         self,
         *,
-        convention: Optional[Union[str, "_models.CookieExpirationConvention"]] = None,
+        convention: Optional[Union[str, "CookieExpirationConvention"]] = None,
         time_to_expiration: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -2863,9 +2890,9 @@ class CustomContainerTemplate(_serialization.Model):
     def __init__(
         self,
         *,
-        registry_credentials: Optional["_models.SessionRegistryCredentials"] = None,
-        containers: Optional[list["_models.SessionContainer"]] = None,
-        ingress: Optional["_models.SessionIngress"] = None,
+        registry_credentials: Optional["SessionRegistryCredentials"] = None,
+        containers: Optional[list["SessionContainer"]] = None,
+        ingress: Optional["SessionIngress"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -2912,7 +2939,7 @@ class CustomDomain(_serialization.Model):
         self,
         *,
         name: str,
-        binding_type: Optional[Union[str, "_models.BindingType"]] = None,
+        binding_type: Optional[Union[str, "BindingType"]] = None,
         certificate_id: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -2981,7 +3008,7 @@ class CustomDomainConfiguration(_serialization.Model):
         self,
         *,
         dns_suffix: Optional[str] = None,
-        certificate_key_vault_properties: Optional["_models.CertificateKeyVaultProperties"] = None,
+        certificate_key_vault_properties: Optional["CertificateKeyVaultProperties"] = None,
         certificate_value: Optional[bytes] = None,
         certificate_password: Optional[str] = None,
         **kwargs: Any
@@ -3101,9 +3128,9 @@ class CustomHostnameAnalysisResult(_serialization.Model):
         super().__init__(**kwargs)
         self.host_name: Optional[str] = None
         self.is_hostname_already_verified: Optional[bool] = None
-        self.custom_domain_verification_test: Optional[Union[str, "_models.DnsVerificationTestResult"]] = None
+        self.custom_domain_verification_test: Optional[Union[str, "DnsVerificationTestResult"]] = None
         self.custom_domain_verification_failure_info: Optional[
-            "_models.CustomHostnameAnalysisResultCustomDomainVerificationFailureInfo"
+            "CustomHostnameAnalysisResultCustomDomainVerificationFailureInfo"
         ] = None
         self.has_conflict_on_managed_environment: Optional[bool] = None
         self.conflict_with_environment_custom_domain: Optional[bool] = None
@@ -3153,7 +3180,7 @@ class CustomHostnameAnalysisResultCustomDomainVerificationFailureInfo(
         self,
         *,
         details: Optional[
-            list["_models.CustomHostnameAnalysisResultCustomDomainVerificationFailureInfoDetailsItem"]
+            list["CustomHostnameAnalysisResultCustomDomainVerificationFailureInfoDetailsItem"]
         ] = None,
         **kwargs: Any
     ) -> None:
@@ -3228,8 +3255,8 @@ class CustomOpenIdConnectProvider(_serialization.Model):
         self,
         *,
         enabled: Optional[bool] = None,
-        registration: Optional["_models.OpenIdConnectRegistration"] = None,
-        login: Optional["_models.OpenIdConnectLogin"] = None,
+        registration: Optional["OpenIdConnectRegistration"] = None,
+        login: Optional["OpenIdConnectLogin"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -3276,7 +3303,7 @@ class CustomScaleRule(_serialization.Model):
         *,
         type: Optional[str] = None,
         metadata: Optional[dict[str, str]] = None,
-        auth: Optional[list["_models.ScaleRuleAuth"]] = None,
+        auth: Optional[list["ScaleRuleAuth"]] = None,
         identity: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -3347,13 +3374,13 @@ class Dapr(_serialization.Model):
         *,
         enabled: bool = False,
         app_id: Optional[str] = None,
-        app_protocol: Union[str, "_models.AppProtocol"] = "http",
+        app_protocol: Union[str, "AppProtocol"] = "http",
         app_port: Optional[int] = None,
         http_read_buffer_size: Optional[int] = None,
         http_max_request_size: Optional[int] = None,
-        log_level: Optional[Union[str, "_models.LogLevel"]] = None,
+        log_level: Optional[Union[str, "LogLevel"]] = None,
         enable_api_logging: Optional[bool] = None,
-        app_health: Optional["_models.DaprAppHealth"] = None,
+        app_health: Optional["DaprAppHealth"] = None,
         max_concurrency: Optional[int] = None,
         **kwargs: Any
     ) -> None:
@@ -3529,9 +3556,9 @@ class DaprComponent(ProxyResource):
         version: Optional[str] = None,
         ignore_errors: bool = False,
         init_timeout: Optional[str] = None,
-        secrets: Optional[list["_models.Secret"]] = None,
+        secrets: Optional[list["Secret"]] = None,
         secret_store_component: Optional[str] = None,
-        metadata: Optional[list["_models.DaprMetadata"]] = None,
+        metadata: Optional[list["DaprMetadata"]] = None,
         scopes: Optional[list[str]] = None,
         **kwargs: Any
     ) -> None:
@@ -3562,7 +3589,7 @@ class DaprComponent(ProxyResource):
         self.secret_store_component = secret_store_component
         self.metadata = metadata
         self.scopes = scopes
-        self.provisioning_state: Optional[Union[str, "_models.DaprComponentProvisioningState"]] = None
+        self.provisioning_state: Optional[Union[str, "DaprComponentProvisioningState"]] = None
         self.deployment_errors: Optional[str] = None
 
 
@@ -3589,7 +3616,7 @@ class DaprComponentsCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.DaprComponent"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["DaprComponent"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.DaprComponent]
@@ -3708,7 +3735,7 @@ class DaprSecretsCollection(_serialization.Model):
         "value": {"key": "value", "type": "[DaprSecret]"},
     }
 
-    def __init__(self, *, value: list["_models.DaprSecret"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["DaprSecret"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of secrets used by a Dapr component. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.DaprSecret]
@@ -3736,7 +3763,7 @@ class DefaultAuthorizationPolicy(_serialization.Model):
     def __init__(
         self,
         *,
-        allowed_principals: Optional["_models.AllowedPrincipals"] = None,
+        allowed_principals: Optional["AllowedPrincipals"] = None,
         allowed_applications: Optional[list[str]] = None,
         **kwargs: Any
     ) -> None:
@@ -3773,7 +3800,7 @@ class DefaultErrorResponse(_serialization.Model):
     def __init__(self, **kwargs: Any) -> None:
         """ """
         super().__init__(**kwargs)
-        self.error: Optional["_models.DefaultErrorResponseError"] = None
+        self.error: Optional["DefaultErrorResponseError"] = None
 
 
 class DefaultErrorResponseError(_serialization.Model):
@@ -3809,7 +3836,7 @@ class DefaultErrorResponseError(_serialization.Model):
     }
 
     def __init__(
-        self, *, details: Optional[list["_models.DefaultErrorResponseErrorDetailsItem"]] = None, **kwargs: Any
+        self, *, details: Optional[list["DefaultErrorResponseErrorDetailsItem"]] = None, **kwargs: Any
     ) -> None:
         """
         :keyword details: Details or the error.
@@ -3875,7 +3902,7 @@ class DiagnosticDataProviderMetadata(_serialization.Model):
         self,
         *,
         provider_name: Optional[str] = None,
-        property_bag: Optional[list["_models.DiagnosticDataProviderMetadataPropertyBagItem"]] = None,
+        property_bag: Optional[list["DiagnosticDataProviderMetadataPropertyBagItem"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -3976,7 +4003,7 @@ class DiagnosticDataTableResponseObject(_serialization.Model):
         self,
         *,
         table_name: Optional[str] = None,
-        columns: Optional[list["_models.DiagnosticDataTableResponseColumn"]] = None,
+        columns: Optional[list["DiagnosticDataTableResponseColumn"]] = None,
         rows: Optional[list[JSON]] = None,
         **kwargs: Any
     ) -> None:
@@ -4075,7 +4102,7 @@ class Diagnostics(ProxyResource):
         "properties": {"key": "properties", "type": "DiagnosticsProperties"},
     }
 
-    def __init__(self, *, properties: Optional["_models.DiagnosticsProperties"] = None, **kwargs: Any) -> None:
+    def __init__(self, *, properties: Optional["DiagnosticsProperties"] = None, **kwargs: Any) -> None:
         """
         :keyword properties: Diagnostics resource specific properties.
         :paramtype properties: ~azure.mgmt.appcontainers.models.DiagnosticsProperties
@@ -4107,7 +4134,7 @@ class DiagnosticsCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.Diagnostics"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["Diagnostics"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of diagnostic data. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.Diagnostics]
@@ -4134,8 +4161,8 @@ class DiagnosticsDataApiResponse(_serialization.Model):
     def __init__(
         self,
         *,
-        table: Optional["_models.DiagnosticDataTableResponseObject"] = None,
-        rendering_properties: Optional["_models.DiagnosticRendering"] = None,
+        table: Optional["DiagnosticDataTableResponseObject"] = None,
+        rendering_properties: Optional["DiagnosticRendering"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -4199,7 +4226,7 @@ class DiagnosticsDefinition(_serialization.Model):
     def __init__(
         self,
         *,
-        support_topic_list: Optional[list["_models.DiagnosticSupportTopic"]] = None,
+        support_topic_list: Optional[list["DiagnosticSupportTopic"]] = None,
         analysis_types: Optional[list[str]] = None,
         **kwargs: Any
     ) -> None:
@@ -4245,10 +4272,10 @@ class DiagnosticsProperties(_serialization.Model):
     def __init__(
         self,
         *,
-        metadata: Optional["_models.DiagnosticsDefinition"] = None,
-        dataset: Optional[list["_models.DiagnosticsDataApiResponse"]] = None,
-        status: Optional["_models.DiagnosticsStatus"] = None,
-        data_provider_metadata: Optional["_models.DiagnosticDataProviderMetadata"] = None,
+        metadata: Optional["DiagnosticsDefinition"] = None,
+        dataset: Optional[list["DiagnosticsDataApiResponse"]] = None,
+        status: Optional["DiagnosticsStatus"] = None,
+        data_provider_metadata: Optional["DiagnosticDataProviderMetadata"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -4336,7 +4363,7 @@ class DynamicPoolConfiguration(_serialization.Model):
     }
 
     def __init__(
-        self, *, lifecycle_configuration: Optional["_models.LifecycleConfiguration"] = None, **kwargs: Any
+        self, *, lifecycle_configuration: Optional["LifecycleConfiguration"] = None, **kwargs: Any
     ) -> None:
         """
         :keyword lifecycle_configuration: The lifecycle configuration of a session in the dynamic
@@ -4553,8 +4580,8 @@ class ErrorDetail(_serialization.Model):
         self.code: Optional[str] = None
         self.message: Optional[str] = None
         self.target: Optional[str] = None
-        self.details: Optional[list["_models.ErrorDetail"]] = None
-        self.additional_info: Optional[list["_models.ErrorAdditionalInfo"]] = None
+        self.details: Optional[list["ErrorDetail"]] = None
+        self.additional_info: Optional[list["ErrorAdditionalInfo"]] = None
 
 
 class ErrorEntity(_serialization.Model):
@@ -4595,8 +4622,8 @@ class ErrorEntity(_serialization.Model):
         extended_code: Optional[str] = None,
         message_template: Optional[str] = None,
         parameters: Optional[list[str]] = None,
-        inner_errors: Optional[list["_models.ErrorEntity"]] = None,
-        details: Optional[list["_models.ErrorEntity"]] = None,
+        inner_errors: Optional[list["ErrorEntity"]] = None,
+        details: Optional[list["ErrorEntity"]] = None,
         target: Optional[str] = None,
         code: Optional[str] = None,
         message: Optional[str] = None,
@@ -4643,7 +4670,7 @@ class ErrorResponse(_serialization.Model):
         "error": {"key": "error", "type": "ErrorDetail"},
     }
 
-    def __init__(self, *, error: Optional["_models.ErrorDetail"] = None, **kwargs: Any) -> None:
+    def __init__(self, *, error: Optional["ErrorDetail"] = None, **kwargs: Any) -> None:
         """
         :keyword error: The error object.
         :paramtype error: ~azure.mgmt.appcontainers.models.ErrorDetail
@@ -4670,7 +4697,7 @@ class ExtendedLocation(_serialization.Model):
         self,
         *,
         name: Optional[str] = None,
-        type: Optional[Union[str, "_models.ExtendedLocationTypes"]] = None,
+        type: Optional[Union[str, "ExtendedLocationTypes"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -4710,9 +4737,9 @@ class Facebook(_serialization.Model):
         self,
         *,
         enabled: Optional[bool] = None,
-        registration: Optional["_models.AppRegistration"] = None,
+        registration: Optional["AppRegistration"] = None,
         graph_api_version: Optional[str] = None,
-        login: Optional["_models.LoginScopes"] = None,
+        login: Optional["LoginScopes"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -4755,7 +4782,7 @@ class ForwardProxy(_serialization.Model):
     def __init__(
         self,
         *,
-        convention: Optional[Union[str, "_models.ForwardProxyConvention"]] = None,
+        convention: Optional[Union[str, "ForwardProxyConvention"]] = None,
         custom_host_header_name: Optional[str] = None,
         custom_proto_header_name: Optional[str] = None,
         **kwargs: Any
@@ -4797,8 +4824,8 @@ class GitHub(_serialization.Model):
         self,
         *,
         enabled: Optional[bool] = None,
-        registration: Optional["_models.ClientRegistration"] = None,
-        login: Optional["_models.LoginScopes"] = None,
+        registration: Optional["ClientRegistration"] = None,
+        login: Optional["LoginScopes"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -4855,8 +4882,8 @@ class GithubActionConfiguration(_serialization.Model):
     def __init__(
         self,
         *,
-        registry_info: Optional["_models.RegistryInfo"] = None,
-        azure_credentials: Optional["_models.AzureCredentials"] = None,
+        registry_info: Optional["RegistryInfo"] = None,
+        azure_credentials: Optional["AzureCredentials"] = None,
         context_path: Optional[str] = None,
         github_personal_access_token: Optional[str] = None,
         image: Optional[str] = None,
@@ -4926,7 +4953,7 @@ class GlobalValidation(_serialization.Model):
     def __init__(
         self,
         *,
-        unauthenticated_client_action: Optional[Union[str, "_models.UnauthenticatedClientActionV2"]] = None,
+        unauthenticated_client_action: Optional[Union[str, "UnauthenticatedClientActionV2"]] = None,
         redirect_to_provider: Optional[str] = None,
         excluded_paths: Optional[list[str]] = None,
         **kwargs: Any
@@ -4978,9 +5005,9 @@ class Google(_serialization.Model):
         self,
         *,
         enabled: Optional[bool] = None,
-        registration: Optional["_models.ClientRegistration"] = None,
-        login: Optional["_models.LoginScopes"] = None,
-        validation: Optional["_models.AllowedAudiencesValidation"] = None,
+        registration: Optional["ClientRegistration"] = None,
+        login: Optional["LoginScopes"] = None,
+        validation: Optional["AllowedAudiencesValidation"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -5020,8 +5047,8 @@ class HttpRoute(_serialization.Model):
     def __init__(
         self,
         *,
-        match: Optional["_models.HttpRouteMatch"] = None,
-        action: Optional["_models.HttpRouteAction"] = None,
+        match: Optional["HttpRouteMatch"] = None,
+        action: Optional["HttpRouteAction"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -5090,7 +5117,7 @@ class HttpRouteConfig(ProxyResource):
         "properties": {"key": "properties", "type": "HttpRouteConfigProperties"},
     }
 
-    def __init__(self, *, properties: Optional["_models.HttpRouteConfigProperties"] = None, **kwargs: Any) -> None:
+    def __init__(self, *, properties: Optional["HttpRouteConfigProperties"] = None, **kwargs: Any) -> None:
         """
         :keyword properties: Http Route Config properties.
         :paramtype properties: ~azure.mgmt.appcontainers.models.HttpRouteConfigProperties
@@ -5122,7 +5149,7 @@ class HttpRouteConfigCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.HttpRouteConfig"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["HttpRouteConfig"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.HttpRouteConfig]
@@ -5168,8 +5195,8 @@ class HttpRouteConfigProperties(_serialization.Model):
     def __init__(
         self,
         *,
-        custom_domains: Optional[list["_models.CustomDomain"]] = None,
-        rules: Optional[list["_models.HttpRouteRule"]] = None,
+        custom_domains: Optional[list["CustomDomain"]] = None,
+        rules: Optional[list["HttpRouteRule"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -5179,8 +5206,8 @@ class HttpRouteConfigProperties(_serialization.Model):
         :paramtype rules: list[~azure.mgmt.appcontainers.models.HttpRouteRule]
         """
         super().__init__(**kwargs)
-        self.provisioning_state: Optional[Union[str, "_models.HttpRouteProvisioningState"]] = None
-        self.provisioning_errors: Optional[list["_models.HttpRouteProvisioningErrors"]] = None
+        self.provisioning_state: Optional[Union[str, "HttpRouteProvisioningState"]] = None
+        self.provisioning_errors: Optional[list["HttpRouteProvisioningErrors"]] = None
         self.fqdn: Optional[str] = None
         self.custom_domains = custom_domains
         self.rules = rules
@@ -5280,8 +5307,8 @@ class HttpRouteRule(_serialization.Model):
     def __init__(
         self,
         *,
-        targets: Optional[list["_models.HttpRouteTarget"]] = None,
-        routes: Optional[list["_models.HttpRoute"]] = None,
+        targets: Optional[list["HttpRouteTarget"]] = None,
+        routes: Optional[list["HttpRoute"]] = None,
         description: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -5361,7 +5388,7 @@ class HttpScaleRule(_serialization.Model):
         self,
         *,
         metadata: Optional[dict[str, str]] = None,
-        auth: Optional[list["_models.ScaleRuleAuth"]] = None,
+        auth: Optional[list["ScaleRuleAuth"]] = None,
         identity: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -5403,8 +5430,8 @@ class HttpSettings(_serialization.Model):
         self,
         *,
         require_https: Optional[bool] = None,
-        routes: Optional["_models.HttpSettingsRoutes"] = None,
-        forward_proxy: Optional["_models.ForwardProxy"] = None,
+        routes: Optional["HttpSettingsRoutes"] = None,
+        forward_proxy: Optional["ForwardProxy"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -5486,14 +5513,14 @@ class IdentityProviders(_serialization.Model):
     def __init__(
         self,
         *,
-        azure_active_directory: Optional["_models.AzureActiveDirectory"] = None,
-        facebook: Optional["_models.Facebook"] = None,
-        git_hub: Optional["_models.GitHub"] = None,
-        google: Optional["_models.Google"] = None,
-        twitter: Optional["_models.Twitter"] = None,
-        apple: Optional["_models.Apple"] = None,
-        azure_static_web_apps: Optional["_models.AzureStaticWebApps"] = None,
-        custom_open_id_connect_providers: Optional[dict[str, "_models.CustomOpenIdConnectProvider"]] = None,
+        azure_active_directory: Optional["AzureActiveDirectory"] = None,
+        facebook: Optional["Facebook"] = None,
+        git_hub: Optional["GitHub"] = None,
+        google: Optional["Google"] = None,
+        twitter: Optional["Twitter"] = None,
+        apple: Optional["Apple"] = None,
+        azure_static_web_apps: Optional["AzureStaticWebApps"] = None,
+        custom_open_id_connect_providers: Optional[dict[str, "CustomOpenIdConnectProvider"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -5556,7 +5583,7 @@ class IdentitySettings(_serialization.Model):
         self,
         *,
         identity: str,
-        lifecycle: Optional[Union[str, "_models.IdentitySettingsLifeCycle"]] = None,
+        lifecycle: Optional[Union[str, "IdentitySettingsLifeCycle"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -5638,15 +5665,15 @@ class Ingress(_serialization.Model):
         external: bool = False,
         target_port: Optional[int] = None,
         exposed_port: Optional[int] = None,
-        transport: Union[str, "_models.IngressTransportMethod"] = "auto",
-        traffic: Optional[list["_models.TrafficWeight"]] = None,
-        custom_domains: Optional[list["_models.CustomDomain"]] = None,
+        transport: Union[str, "IngressTransportMethod"] = "auto",
+        traffic: Optional[list["TrafficWeight"]] = None,
+        custom_domains: Optional[list["CustomDomain"]] = None,
         allow_insecure: bool = False,
-        ip_security_restrictions: Optional[list["_models.IpSecurityRestrictionRule"]] = None,
-        sticky_sessions: Optional["_models.IngressStickySessions"] = None,
-        client_certificate_mode: Optional[Union[str, "_models.IngressClientCertificateMode"]] = None,
-        cors_policy: Optional["_models.CorsPolicy"] = None,
-        additional_port_mappings: Optional[list["_models.IngressPortMapping"]] = None,
+        ip_security_restrictions: Optional[list["IpSecurityRestrictionRule"]] = None,
+        sticky_sessions: Optional["IngressStickySessions"] = None,
+        client_certificate_mode: Optional[Union[str, "IngressClientCertificateMode"]] = None,
+        cors_policy: Optional["CorsPolicy"] = None,
+        additional_port_mappings: Optional[list["IngressPortMapping"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -5807,7 +5834,7 @@ class IngressStickySessions(_serialization.Model):
         "affinity": {"key": "affinity", "type": "str"},
     }
 
-    def __init__(self, *, affinity: Optional[Union[str, "_models.Affinity"]] = None, **kwargs: Any) -> None:
+    def __init__(self, *, affinity: Optional[Union[str, "Affinity"]] = None, **kwargs: Any) -> None:
         """
         :keyword affinity: Sticky Session Affinity. Known values are: "sticky" and "none".
         :paramtype affinity: str or ~azure.mgmt.appcontainers.models.Affinity
@@ -5871,7 +5898,7 @@ class IpSecurityRestrictionRule(_serialization.Model):
         *,
         name: str,
         ip_address_range: str,
-        action: Union[str, "_models.Action"],
+        action: Union[str, "Action"],
         description: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -5929,7 +5956,7 @@ class JavaComponent(ProxyResource):
         "properties": {"key": "properties", "type": "JavaComponentProperties"},
     }
 
-    def __init__(self, *, properties: Optional["_models.JavaComponentProperties"] = None, **kwargs: Any) -> None:
+    def __init__(self, *, properties: Optional["JavaComponentProperties"] = None, **kwargs: Any) -> None:
         """
         :keyword properties: Java Component resource specific properties.
         :paramtype properties: ~azure.mgmt.appcontainers.models.JavaComponentProperties
@@ -6037,9 +6064,9 @@ class JavaComponentProperties(_serialization.Model):
     def __init__(
         self,
         *,
-        configurations: Optional[list["_models.JavaComponentConfigurationProperty"]] = None,
-        scale: Optional["_models.JavaComponentPropertiesScale"] = None,
-        service_binds: Optional[list["_models.JavaComponentServiceBind"]] = None,
+        configurations: Optional[list["JavaComponentConfigurationProperty"]] = None,
+        scale: Optional["JavaComponentPropertiesScale"] = None,
+        service_binds: Optional[list["JavaComponentServiceBind"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -6053,7 +6080,7 @@ class JavaComponentProperties(_serialization.Model):
         """
         super().__init__(**kwargs)
         self.component_type: Optional[str] = None
-        self.provisioning_state: Optional[Union[str, "_models.JavaComponentProvisioningState"]] = None
+        self.provisioning_state: Optional[Union[str, "JavaComponentProvisioningState"]] = None
         self.configurations = configurations
         self.scale = scale
         self.service_binds = service_binds
@@ -6112,7 +6139,7 @@ class JavaComponentsCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.JavaComponent"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["JavaComponent"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.JavaComponent]
@@ -6222,11 +6249,11 @@ class ContainerAppsJob(TrackedResource):
         *,
         location: str,
         tags: Optional[dict[str, str]] = None,
-        identity: Optional["_models.ManagedServiceIdentity"] = None,
+        identity: Optional["ManagedServiceIdentity"] = None,
         environment_id: Optional[str] = None,
         workload_profile_name: Optional[str] = None,
-        configuration: Optional["_models.JobConfiguration"] = None,
-        template: Optional["_models.JobTemplate"] = None,
+        configuration: Optional["JobConfiguration"] = None,
+        template: Optional["JobTemplate"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -6248,7 +6275,7 @@ class ContainerAppsJob(TrackedResource):
         """
         super().__init__(tags=tags, location=location, **kwargs)
         self.identity = identity
-        self.provisioning_state: Optional[Union[str, "_models.JobProvisioningState"]] = None
+        self.provisioning_state: Optional[Union[str, "JobProvisioningState"]] = None
         self.environment_id = environment_id
         self.workload_profile_name = workload_profile_name
         self.configuration = configuration
@@ -6331,11 +6358,11 @@ class Job(TrackedResource):
         *,
         location: str,
         tags: Optional[dict[str, str]] = None,
-        identity: Optional["_models.ManagedServiceIdentity"] = None,
+        identity: Optional["ManagedServiceIdentity"] = None,
         environment_id: Optional[str] = None,
         workload_profile_name: Optional[str] = None,
-        configuration: Optional["_models.JobConfiguration"] = None,
-        template: Optional["_models.JobTemplate"] = None,
+        configuration: Optional["JobConfiguration"] = None,
+        template: Optional["JobTemplate"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -6357,7 +6384,7 @@ class Job(TrackedResource):
         """
         super().__init__(tags=tags, location=location, **kwargs)
         self.identity = identity
-        self.provisioning_state: Optional[Union[str, "_models.JobProvisioningState"]] = None
+        self.provisioning_state: Optional[Union[str, "JobProvisioningState"]] = None
         self.environment_id = environment_id
         self.workload_profile_name = workload_profile_name
         self.configuration = configuration
@@ -6419,15 +6446,15 @@ class JobConfiguration(_serialization.Model):
     def __init__(
         self,
         *,
-        trigger_type: Union[str, "_models.TriggerType"] = "Manual",
+        trigger_type: Union[str, "TriggerType"] = "Manual",
         replica_timeout: int,
-        secrets: Optional[list["_models.Secret"]] = None,
+        secrets: Optional[list["Secret"]] = None,
         replica_retry_limit: Optional[int] = None,
-        manual_trigger_config: Optional["_models.JobConfigurationManualTriggerConfig"] = None,
-        schedule_trigger_config: Optional["_models.JobConfigurationScheduleTriggerConfig"] = None,
-        event_trigger_config: Optional["_models.JobConfigurationEventTriggerConfig"] = None,
-        registries: Optional[list["_models.RegistryCredentials"]] = None,
-        identity_settings: Optional[list["_models.IdentitySettings"]] = None,
+        manual_trigger_config: Optional["JobConfigurationManualTriggerConfig"] = None,
+        schedule_trigger_config: Optional["JobConfigurationScheduleTriggerConfig"] = None,
+        event_trigger_config: Optional["JobConfigurationEventTriggerConfig"] = None,
+        registries: Optional[list["RegistryCredentials"]] = None,
+        identity_settings: Optional[list["IdentitySettings"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -6493,7 +6520,7 @@ class JobConfigurationEventTriggerConfig(_serialization.Model):
         *,
         replica_completion_count: Optional[int] = None,
         parallelism: Optional[int] = None,
-        scale: Optional["_models.JobScale"] = None,
+        scale: Optional["JobScale"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -6636,7 +6663,7 @@ class JobExecution(_serialization.Model):
         type: Optional[str] = None,
         start_time: Optional[datetime.datetime] = None,
         end_time: Optional[datetime.datetime] = None,
-        template: Optional["_models.JobExecutionTemplate"] = None,
+        template: Optional["JobExecutionTemplate"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -6657,7 +6684,7 @@ class JobExecution(_serialization.Model):
         self.name = name
         self.id = id
         self.type = type
-        self.status: Optional[Union[str, "_models.JobExecutionRunningState"]] = None
+        self.status: Optional[Union[str, "JobExecutionRunningState"]] = None
         self.start_time = start_time
         self.end_time = end_time
         self.template = template
@@ -6728,8 +6755,8 @@ class JobExecutionContainer(_serialization.Model):
         name: Optional[str] = None,
         command: Optional[list[str]] = None,
         args: Optional[list[str]] = None,
-        env: Optional[list["_models.EnvironmentVar"]] = None,
-        resources: Optional["_models.ContainerResources"] = None,
+        env: Optional[list["EnvironmentVar"]] = None,
+        resources: Optional["ContainerResources"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -6772,7 +6799,7 @@ class JobExecutionNamesCollection(_serialization.Model):
         "value": {"key": "value", "type": "[JobExecutionBase]"},
     }
 
-    def __init__(self, *, value: list["_models.JobExecutionBase"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["JobExecutionBase"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.JobExecutionBase]
@@ -6798,8 +6825,8 @@ class JobExecutionTemplate(_serialization.Model):
     def __init__(
         self,
         *,
-        containers: Optional[list["_models.JobExecutionContainer"]] = None,
-        init_containers: Optional[list["_models.JobExecutionContainer"]] = None,
+        containers: Optional[list["JobExecutionContainer"]] = None,
+        init_containers: Optional[list["JobExecutionContainer"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -6834,9 +6861,9 @@ class JobPatchProperties(_serialization.Model):
     def __init__(
         self,
         *,
-        identity: Optional["_models.ManagedServiceIdentity"] = None,
+        identity: Optional["ManagedServiceIdentity"] = None,
         tags: Optional[dict[str, str]] = None,
-        properties: Optional["_models.JobPatchPropertiesProperties"] = None,
+        properties: Optional["JobPatchPropertiesProperties"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -6881,8 +6908,8 @@ class JobPatchPropertiesProperties(_serialization.Model):
         self,
         *,
         environment_id: Optional[str] = None,
-        configuration: Optional["_models.JobConfiguration"] = None,
-        template: Optional["_models.JobTemplate"] = None,
+        configuration: Optional["JobConfiguration"] = None,
+        template: Optional["JobTemplate"] = None,
         outbound_ip_addresses: Optional[list[str]] = None,
         event_stream_endpoint: Optional[str] = None,
         **kwargs: Any
@@ -6935,7 +6962,7 @@ class JobScale(_serialization.Model):
         polling_interval: Optional[int] = None,
         min_executions: int = 0,
         max_executions: int = 100,
-        rules: Optional[list["_models.JobScaleRule"]] = None,
+        rules: Optional[list["JobScaleRule"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -6988,7 +7015,7 @@ class JobScaleRule(_serialization.Model):
         name: Optional[str] = None,
         type: Optional[str] = None,
         metadata: Optional[JSON] = None,
-        auth: Optional[list["_models.ScaleRuleAuth"]] = None,
+        auth: Optional[list["ScaleRuleAuth"]] = None,
         identity: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -7037,7 +7064,7 @@ class JobsCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.Job"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["Job"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.Job]
@@ -7064,7 +7091,7 @@ class JobSecretsCollection(_serialization.Model):
         "value": {"key": "value", "type": "[Secret]"},
     }
 
-    def __init__(self, *, value: list["_models.Secret"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["Secret"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.Secret]
@@ -7094,9 +7121,9 @@ class JobTemplate(_serialization.Model):
     def __init__(
         self,
         *,
-        init_containers: Optional[list["_models.InitContainer"]] = None,
-        containers: Optional[list["_models.Container"]] = None,
-        volumes: Optional[list["_models.Volume"]] = None,
+        init_containers: Optional[list["InitContainer"]] = None,
+        containers: Optional[list["Container"]] = None,
+        volumes: Optional[list["Volume"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -7191,7 +7218,7 @@ class LifecycleConfiguration(_serialization.Model):
     def __init__(
         self,
         *,
-        lifecycle_type: Optional[Union[str, "_models.LifecycleType"]] = None,
+        lifecycle_type: Optional[Union[str, "LifecycleType"]] = None,
         cooldown_period_in_seconds: Optional[int] = None,
         max_alive_period_in_seconds: Optional[int] = None,
         **kwargs: Any
@@ -7229,7 +7256,7 @@ class ListUsagesResult(_serialization.Model):
     }
 
     def __init__(
-        self, *, value: Optional[list["_models.Usage"]] = None, next_link: Optional[str] = None, **kwargs: Any
+        self, *, value: Optional[list["Usage"]] = None, next_link: Optional[str] = None, **kwargs: Any
     ) -> None:
         """
         :keyword value: The list of compute resource usages.
@@ -7323,12 +7350,12 @@ class Login(_serialization.Model):
     def __init__(
         self,
         *,
-        routes: Optional["_models.LoginRoutes"] = None,
-        token_store: Optional["_models.TokenStore"] = None,
+        routes: Optional["LoginRoutes"] = None,
+        token_store: Optional["TokenStore"] = None,
         preserve_url_fragments_for_logins: Optional[bool] = None,
         allowed_external_redirect_urls: Optional[list[str]] = None,
-        cookie_expiration: Optional["_models.CookieExpiration"] = None,
-        nonce: Optional["_models.Nonce"] = None,
+        cookie_expiration: Optional["CookieExpiration"] = None,
+        nonce: Optional["Nonce"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -7419,7 +7446,7 @@ class MaintenanceConfigurationCollection(_serialization.Model):
     }
 
     def __init__(
-        self, *, value: Optional[list["_models.MaintenanceConfigurationResource"]] = None, **kwargs: Any
+        self, *, value: Optional[list["MaintenanceConfigurationResource"]] = None, **kwargs: Any
     ) -> None:
         """
         :keyword value: Results of the list maintenance configuration resources.
@@ -7465,7 +7492,7 @@ class MaintenanceConfigurationResource(ProxyResource):
         "scheduled_entries": {"key": "properties.scheduledEntries", "type": "[ScheduledEntry]"},
     }
 
-    def __init__(self, *, scheduled_entries: Optional[list["_models.ScheduledEntry"]] = None, **kwargs: Any) -> None:
+    def __init__(self, *, scheduled_entries: Optional[list["ScheduledEntry"]] = None, **kwargs: Any) -> None:
         """
         :keyword scheduled_entries: List of maintenance schedules for a managed environment.
         :paramtype scheduled_entries: list[~azure.mgmt.appcontainers.models.ScheduledEntry]
@@ -7524,7 +7551,7 @@ class ManagedCertificate(TrackedResource):
         *,
         location: str,
         tags: Optional[dict[str, str]] = None,
-        properties: Optional["_models.ManagedCertificateProperties"] = None,
+        properties: Optional["ManagedCertificateProperties"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -7562,7 +7589,7 @@ class ManagedCertificateCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.ManagedCertificate"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["ManagedCertificate"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.ManagedCertificate]
@@ -7632,7 +7659,7 @@ class ManagedCertificateProperties(_serialization.Model):
         self,
         *,
         subject_name: Optional[str] = None,
-        domain_control_validation: Optional[Union[str, "_models.ManagedCertificateDomainControlValidation"]] = None,
+        domain_control_validation: Optional[Union[str, "ManagedCertificateDomainControlValidation"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -7644,7 +7671,7 @@ class ManagedCertificateProperties(_serialization.Model):
          ~azure.mgmt.appcontainers.models.ManagedCertificateDomainControlValidation
         """
         super().__init__(**kwargs)
-        self.provisioning_state: Optional[Union[str, "_models.CertificateProvisioningState"]] = None
+        self.provisioning_state: Optional[Union[str, "CertificateProvisioningState"]] = None
         self.subject_name = subject_name
         self.error: Optional[str] = None
         self.domain_control_validation = domain_control_validation
@@ -7796,21 +7823,21 @@ class ManagedEnvironment(TrackedResource):
         location: str,
         tags: Optional[dict[str, str]] = None,
         kind: Optional[str] = None,
-        identity: Optional["_models.ManagedServiceIdentity"] = None,
+        identity: Optional["ManagedServiceIdentity"] = None,
         dapr_ai_instrumentation_key: Optional[str] = None,
         dapr_ai_connection_string: Optional[str] = None,
-        vnet_configuration: Optional["_models.VnetConfiguration"] = None,
-        app_logs_configuration: Optional["_models.AppLogsConfiguration"] = None,
+        vnet_configuration: Optional["VnetConfiguration"] = None,
+        app_logs_configuration: Optional["AppLogsConfiguration"] = None,
         zone_redundant: Optional[bool] = None,
-        custom_domain_configuration: Optional["_models.CustomDomainConfiguration"] = None,
-        workload_profiles: Optional[list["_models.WorkloadProfile"]] = None,
-        keda_configuration: Optional["_models.KedaConfiguration"] = None,
-        dapr_configuration: Optional["_models.DaprConfiguration"] = None,
+        custom_domain_configuration: Optional["CustomDomainConfiguration"] = None,
+        workload_profiles: Optional[list["WorkloadProfile"]] = None,
+        keda_configuration: Optional["KedaConfiguration"] = None,
+        dapr_configuration: Optional["DaprConfiguration"] = None,
         infrastructure_resource_group: Optional[str] = None,
-        peer_authentication: Optional["_models.ManagedEnvironmentPropertiesPeerAuthentication"] = None,
-        peer_traffic_configuration: Optional["_models.ManagedEnvironmentPropertiesPeerTrafficConfiguration"] = None,
-        ingress_configuration: Optional["_models.IngressConfiguration"] = None,
-        public_network_access: Optional[Union[str, "_models.PublicNetworkAccess"]] = None,
+        peer_authentication: Optional["ManagedEnvironmentPropertiesPeerAuthentication"] = None,
+        peer_traffic_configuration: Optional["ManagedEnvironmentPropertiesPeerTrafficConfiguration"] = None,
+        ingress_configuration: Optional["IngressConfiguration"] = None,
+        public_network_access: Optional[Union[str, "PublicNetworkAccess"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -7864,7 +7891,7 @@ class ManagedEnvironment(TrackedResource):
         super().__init__(tags=tags, location=location, **kwargs)
         self.kind = kind
         self.identity = identity
-        self.provisioning_state: Optional[Union[str, "_models.EnvironmentProvisioningState"]] = None
+        self.provisioning_state: Optional[Union[str, "EnvironmentProvisioningState"]] = None
         self.dapr_ai_instrumentation_key = dapr_ai_instrumentation_key
         self.dapr_ai_connection_string = dapr_ai_connection_string
         self.vnet_configuration = vnet_configuration
@@ -7882,7 +7909,7 @@ class ManagedEnvironment(TrackedResource):
         self.peer_authentication = peer_authentication
         self.peer_traffic_configuration = peer_traffic_configuration
         self.ingress_configuration = ingress_configuration
-        self.private_endpoint_connections: Optional[list["_models.PrivateEndpointConnection"]] = None
+        self.private_endpoint_connections: Optional[list["PrivateEndpointConnection"]] = None
         self.public_network_access = public_network_access
 
 
@@ -7897,7 +7924,7 @@ class ManagedEnvironmentPropertiesPeerAuthentication(_serialization.Model):  # p
         "mtls": {"key": "mtls", "type": "Mtls"},
     }
 
-    def __init__(self, *, mtls: Optional["_models.Mtls"] = None, **kwargs: Any) -> None:
+    def __init__(self, *, mtls: Optional["Mtls"] = None, **kwargs: Any) -> None:
         """
         :keyword mtls: Mutual TLS authentication settings for the Managed Environment.
         :paramtype mtls: ~azure.mgmt.appcontainers.models.Mtls
@@ -7921,7 +7948,7 @@ class ManagedEnvironmentPropertiesPeerTrafficConfiguration(_serialization.Model)
     def __init__(
         self,
         *,
-        encryption: Optional["_models.ManagedEnvironmentPropertiesPeerTrafficConfigurationEncryption"] = None,
+        encryption: Optional["ManagedEnvironmentPropertiesPeerTrafficConfigurationEncryption"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -7978,7 +8005,7 @@ class ManagedEnvironmentsCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.ManagedEnvironment"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["ManagedEnvironment"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.ManagedEnvironment]
@@ -8024,7 +8051,7 @@ class ManagedEnvironmentStorage(ProxyResource):
     }
 
     def __init__(
-        self, *, properties: Optional["_models.ManagedEnvironmentStorageProperties"] = None, **kwargs: Any
+        self, *, properties: Optional["ManagedEnvironmentStorageProperties"] = None, **kwargs: Any
     ) -> None:
         """
         :keyword properties: Storage properties.
@@ -8051,8 +8078,8 @@ class ManagedEnvironmentStorageProperties(_serialization.Model):
     def __init__(
         self,
         *,
-        azure_file: Optional["_models.AzureFileProperties"] = None,
-        nfs_azure_file: Optional["_models.NfsAzureFileProperties"] = None,
+        azure_file: Optional["AzureFileProperties"] = None,
+        nfs_azure_file: Optional["NfsAzureFileProperties"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -8083,7 +8110,7 @@ class ManagedEnvironmentStoragesCollection(_serialization.Model):
         "value": {"key": "value", "type": "[ManagedEnvironmentStorage]"},
     }
 
-    def __init__(self, *, value: list["_models.ManagedEnvironmentStorage"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["ManagedEnvironmentStorage"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of storage resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.ManagedEnvironmentStorage]
@@ -8118,7 +8145,7 @@ class ManagedIdentitySetting(_serialization.Model):
         self,
         *,
         identity: str,
-        lifecycle: Optional[Union[str, "_models.IdentitySettingsLifeCycle"]] = None,
+        lifecycle: Optional[Union[str, "IdentitySettingsLifeCycle"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -8175,8 +8202,8 @@ class ManagedServiceIdentity(_serialization.Model):
     def __init__(
         self,
         *,
-        type: Union[str, "_models.ManagedServiceIdentityType"],
-        user_assigned_identities: Optional[dict[str, "_models.UserAssignedIdentity"]] = None,
+        type: Union[str, "ManagedServiceIdentityType"],
+        user_assigned_identities: Optional[dict[str, "UserAssignedIdentity"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -8239,7 +8266,7 @@ class NfsAzureFileProperties(_serialization.Model):
         self,
         *,
         server: Optional[str] = None,
-        access_mode: Optional[Union[str, "_models.AccessMode"]] = None,
+        access_mode: Optional[Union[str, "AccessMode"]] = None,
         share_name: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -8431,8 +8458,8 @@ class OpenIdConnectRegistration(_serialization.Model):
         self,
         *,
         client_id: Optional[str] = None,
-        client_credential: Optional["_models.OpenIdConnectClientCredential"] = None,
-        open_id_connect_configuration: Optional["_models.OpenIdConnectConfig"] = None,
+        client_credential: Optional["OpenIdConnectClientCredential"] = None,
+        open_id_connect_configuration: Optional["OpenIdConnectConfig"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -8476,7 +8503,7 @@ class OperationDetail(_serialization.Model):
         *,
         name: Optional[str] = None,
         is_data_action: Optional[bool] = None,
-        display: Optional["_models.OperationDisplay"] = None,
+        display: Optional["OperationDisplay"] = None,
         origin: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -8623,8 +8650,8 @@ class PrivateEndpointConnection(Resource):
     def __init__(
         self,
         *,
-        private_endpoint: Optional["_models.PrivateEndpoint"] = None,
-        private_link_service_connection_state: Optional["_models.PrivateLinkServiceConnectionState"] = None,
+        private_endpoint: Optional["PrivateEndpoint"] = None,
+        private_link_service_connection_state: Optional["PrivateLinkServiceConnectionState"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -8639,7 +8666,7 @@ class PrivateEndpointConnection(Resource):
         self.group_ids: Optional[list[str]] = None
         self.private_endpoint = private_endpoint
         self.private_link_service_connection_state = private_link_service_connection_state
-        self.provisioning_state: Optional[Union[str, "_models.PrivateEndpointConnectionProvisioningState"]] = None
+        self.provisioning_state: Optional[Union[str, "PrivateEndpointConnectionProvisioningState"]] = None
 
 
 class PrivateEndpointConnectionListResult(_serialization.Model):
@@ -8662,7 +8689,7 @@ class PrivateEndpointConnectionListResult(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: Optional[list["_models.PrivateEndpointConnection"]] = None, **kwargs: Any) -> None:
+    def __init__(self, *, value: Optional[list["PrivateEndpointConnection"]] = None, **kwargs: Any) -> None:
         """
         :keyword value: Array of private endpoint connections.
         :paramtype value: list[~azure.mgmt.appcontainers.models.PrivateEndpointConnection]
@@ -8746,7 +8773,7 @@ class PrivateLinkResourceListResult(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: Optional[list["_models.PrivateLinkResource"]] = None, **kwargs: Any) -> None:
+    def __init__(self, *, value: Optional[list["PrivateLinkResource"]] = None, **kwargs: Any) -> None:
         """
         :keyword value: Array of private link resources.
         :paramtype value: list[~azure.mgmt.appcontainers.models.PrivateLinkResource]
@@ -8779,7 +8806,7 @@ class PrivateLinkServiceConnectionState(_serialization.Model):
     def __init__(
         self,
         *,
-        status: Optional[Union[str, "_models.PrivateEndpointServiceConnectionStatus"]] = None,
+        status: Optional[Union[str, "PrivateEndpointServiceConnectionStatus"]] = None,
         description: Optional[str] = None,
         actions_required: Optional[str] = None,
         **kwargs: Any
@@ -8831,7 +8858,7 @@ class QueueScaleRule(_serialization.Model):
         account_name: Optional[str] = None,
         queue_name: Optional[str] = None,
         queue_length: Optional[int] = None,
-        auth: Optional[list["_models.ScaleRuleAuth"]] = None,
+        auth: Optional[list["ScaleRuleAuth"]] = None,
         identity: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -9000,8 +9027,8 @@ class Replica(ProxyResource):
     def __init__(
         self,
         *,
-        containers: Optional[list["_models.ReplicaContainer"]] = None,
-        init_containers: Optional[list["_models.ReplicaContainer"]] = None,
+        containers: Optional[list["ReplicaContainer"]] = None,
+        init_containers: Optional[list["ReplicaContainer"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -9012,7 +9039,7 @@ class Replica(ProxyResource):
         """
         super().__init__(**kwargs)
         self.created_time: Optional[datetime.datetime] = None
-        self.running_state: Optional[Union[str, "_models.ContainerAppReplicaRunningState"]] = None
+        self.running_state: Optional[Union[str, "ContainerAppReplicaRunningState"]] = None
         self.running_state_details: Optional[str] = None
         self.containers = containers
         self.init_containers = init_containers
@@ -9035,7 +9062,7 @@ class ReplicaCollection(_serialization.Model):
         "value": {"key": "value", "type": "[Replica]"},
     }
 
-    def __init__(self, *, value: list["_models.Replica"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["Replica"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.Replica]
@@ -9118,7 +9145,7 @@ class ReplicaContainer(_serialization.Model):
         self.ready = ready
         self.started = started
         self.restart_count = restart_count
-        self.running_state: Optional[Union[str, "_models.ContainerAppContainerRunningState"]] = None
+        self.running_state: Optional[Union[str, "ContainerAppContainerRunningState"]] = None
         self.running_state_details: Optional[str] = None
         self.log_stream_endpoint: Optional[str] = None
         self.exec_endpoint: Optional[str] = None
@@ -9213,14 +9240,14 @@ class Revision(ProxyResource):
         self.created_time: Optional[datetime.datetime] = None
         self.last_active_time: Optional[datetime.datetime] = None
         self.fqdn: Optional[str] = None
-        self.template: Optional["_models.Template"] = None
+        self.template: Optional["Template"] = None
         self.active: Optional[bool] = None
         self.replicas: Optional[int] = None
         self.traffic_weight: Optional[int] = None
         self.provisioning_error: Optional[str] = None
-        self.health_state: Optional[Union[str, "_models.RevisionHealthState"]] = None
-        self.provisioning_state: Optional[Union[str, "_models.RevisionProvisioningState"]] = None
-        self.running_state: Optional[Union[str, "_models.RevisionRunningState"]] = None
+        self.health_state: Optional[Union[str, "RevisionHealthState"]] = None
+        self.provisioning_state: Optional[Union[str, "RevisionProvisioningState"]] = None
+        self.running_state: Optional[Union[str, "RevisionRunningState"]] = None
 
 
 class RevisionCollection(_serialization.Model):
@@ -9246,7 +9273,7 @@ class RevisionCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.Revision"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["Revision"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.Revision]
@@ -9267,7 +9294,7 @@ class Runtime(_serialization.Model):
         "java": {"key": "java", "type": "RuntimeJava"},
     }
 
-    def __init__(self, *, java: Optional["_models.RuntimeJava"] = None, **kwargs: Any) -> None:
+    def __init__(self, *, java: Optional["RuntimeJava"] = None, **kwargs: Any) -> None:
         """
         :keyword java: Java app configuration.
         :paramtype java: ~azure.mgmt.appcontainers.models.RuntimeJava
@@ -9328,7 +9355,7 @@ class Scale(_serialization.Model):
         max_replicas: int = 10,
         cooldown_period: Optional[int] = None,
         polling_interval: Optional[int] = None,
-        rules: Optional[list["_models.ScaleRule"]] = None,
+        rules: Optional[list["ScaleRule"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -9413,10 +9440,10 @@ class ScaleRule(_serialization.Model):
         self,
         *,
         name: Optional[str] = None,
-        azure_queue: Optional["_models.QueueScaleRule"] = None,
-        custom: Optional["_models.CustomScaleRule"] = None,
-        http: Optional["_models.HttpScaleRule"] = None,
-        tcp: Optional["_models.TcpScaleRule"] = None,
+        azure_queue: Optional["QueueScaleRule"] = None,
+        custom: Optional["CustomScaleRule"] = None,
+        http: Optional["HttpScaleRule"] = None,
+        tcp: Optional["TcpScaleRule"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -9495,7 +9522,7 @@ class ScheduledEntry(_serialization.Model):
     }
 
     def __init__(
-        self, *, week_day: Union[str, "_models.WeekDay"], start_hour_utc: int, duration_hours: int, **kwargs: Any
+        self, *, week_day: Union[str, "WeekDay"], start_hour_utc: int, duration_hours: int, **kwargs: Any
     ) -> None:
         """
         :keyword week_day: Day of the week when a managed environment can be patched. Required. Known
@@ -9608,7 +9635,7 @@ class SecretsCollection(_serialization.Model):
         "value": {"key": "value", "type": "[ContainerAppSecret]"},
     }
 
-    def __init__(self, *, value: list["_models.ContainerAppSecret"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["ContainerAppSecret"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.ContainerAppSecret]
@@ -9730,8 +9757,8 @@ class SessionContainer(_serialization.Model):
         name: Optional[str] = None,
         command: Optional[list[str]] = None,
         args: Optional[list[str]] = None,
-        env: Optional[list["_models.EnvironmentVar"]] = None,
-        resources: Optional["_models.SessionContainerResources"] = None,
+        env: Optional[list["EnvironmentVar"]] = None,
+        resources: Optional["SessionContainerResources"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -9815,7 +9842,7 @@ class SessionNetworkConfiguration(_serialization.Model):
         "status": {"key": "status", "type": "str"},
     }
 
-    def __init__(self, *, status: Optional[Union[str, "_models.SessionNetworkStatus"]] = None, **kwargs: Any) -> None:
+    def __init__(self, *, status: Optional[Union[str, "SessionNetworkStatus"]] = None, **kwargs: Any) -> None:
         """
         :keyword status: Network status for the sessions. Known values are: "EgressEnabled" and
          "EgressDisabled".
@@ -9929,16 +9956,16 @@ class SessionPool(TrackedResource):
         *,
         location: str,
         tags: Optional[dict[str, str]] = None,
-        identity: Optional["_models.ManagedServiceIdentity"] = None,
+        identity: Optional["ManagedServiceIdentity"] = None,
         environment_id: Optional[str] = None,
-        container_type: Optional[Union[str, "_models.ContainerType"]] = None,
-        pool_management_type: Optional[Union[str, "_models.PoolManagementType"]] = None,
-        scale_configuration: Optional["_models.ScaleConfiguration"] = None,
-        secrets: Optional[list["_models.SessionPoolSecret"]] = None,
-        dynamic_pool_configuration: Optional["_models.DynamicPoolConfiguration"] = None,
-        custom_container_template: Optional["_models.CustomContainerTemplate"] = None,
-        session_network_configuration: Optional["_models.SessionNetworkConfiguration"] = None,
-        managed_identity_settings: Optional[list["_models.ManagedIdentitySetting"]] = None,
+        container_type: Optional[Union[str, "ContainerType"]] = None,
+        pool_management_type: Optional[Union[str, "PoolManagementType"]] = None,
+        scale_configuration: Optional["ScaleConfiguration"] = None,
+        secrets: Optional[list["SessionPoolSecret"]] = None,
+        dynamic_pool_configuration: Optional["DynamicPoolConfiguration"] = None,
+        custom_container_template: Optional["CustomContainerTemplate"] = None,
+        session_network_configuration: Optional["SessionNetworkConfiguration"] = None,
+        managed_identity_settings: Optional[list["ManagedIdentitySetting"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -9989,7 +10016,7 @@ class SessionPool(TrackedResource):
         self.custom_container_template = custom_container_template
         self.session_network_configuration = session_network_configuration
         self.pool_management_endpoint: Optional[str] = None
-        self.provisioning_state: Optional[Union[str, "_models.SessionPoolProvisioningState"]] = None
+        self.provisioning_state: Optional[Union[str, "SessionPoolProvisioningState"]] = None
         self.managed_identity_settings = managed_identity_settings
 
 
@@ -10016,7 +10043,7 @@ class SessionPoolCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.SessionPool"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["SessionPool"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.SessionPool]
@@ -10095,12 +10122,12 @@ class SessionPoolUpdatableProperties(_serialization.Model):
         self,
         *,
         tags: Optional[dict[str, str]] = None,
-        identity: Optional["_models.ManagedServiceIdentity"] = None,
-        scale_configuration: Optional["_models.ScaleConfiguration"] = None,
-        secrets: Optional[list["_models.SessionPoolSecret"]] = None,
-        dynamic_pool_configuration: Optional["_models.DynamicPoolConfiguration"] = None,
-        custom_container_template: Optional["_models.CustomContainerTemplate"] = None,
-        session_network_configuration: Optional["_models.SessionNetworkConfiguration"] = None,
+        identity: Optional["ManagedServiceIdentity"] = None,
+        scale_configuration: Optional["ScaleConfiguration"] = None,
+        secrets: Optional[list["SessionPoolSecret"]] = None,
+        dynamic_pool_configuration: Optional["DynamicPoolConfiguration"] = None,
+        custom_container_template: Optional["CustomContainerTemplate"] = None,
+        session_network_configuration: Optional["SessionNetworkConfiguration"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -10243,7 +10270,7 @@ class SourceControl(ProxyResource):
         *,
         repo_url: Optional[str] = None,
         branch: Optional[str] = None,
-        github_action_configuration: Optional["_models.GithubActionConfiguration"] = None,
+        github_action_configuration: Optional["GithubActionConfiguration"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -10259,7 +10286,7 @@ class SourceControl(ProxyResource):
          ~azure.mgmt.appcontainers.models.GithubActionConfiguration
         """
         super().__init__(**kwargs)
-        self.operation_state: Optional[Union[str, "_models.SourceControlOperationState"]] = None
+        self.operation_state: Optional[Union[str, "SourceControlOperationState"]] = None
         self.repo_url = repo_url
         self.branch = branch
         self.github_action_configuration = github_action_configuration
@@ -10288,7 +10315,7 @@ class SourceControlCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.SourceControl"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["SourceControl"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.SourceControl]
@@ -10340,10 +10367,10 @@ class SpringBootAdminComponent(JavaComponentProperties):
     def __init__(
         self,
         *,
-        configurations: Optional[list["_models.JavaComponentConfigurationProperty"]] = None,
-        scale: Optional["_models.JavaComponentPropertiesScale"] = None,
-        service_binds: Optional[list["_models.JavaComponentServiceBind"]] = None,
-        ingress: Optional["_models.JavaComponentIngress"] = None,
+        configurations: Optional[list["JavaComponentConfigurationProperty"]] = None,
+        scale: Optional["JavaComponentPropertiesScale"] = None,
+        service_binds: Optional[list["JavaComponentServiceBind"]] = None,
+        ingress: Optional["JavaComponentIngress"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -10401,9 +10428,9 @@ class SpringCloudConfigComponent(JavaComponentProperties):
     def __init__(
         self,
         *,
-        configurations: Optional[list["_models.JavaComponentConfigurationProperty"]] = None,
-        scale: Optional["_models.JavaComponentPropertiesScale"] = None,
-        service_binds: Optional[list["_models.JavaComponentServiceBind"]] = None,
+        configurations: Optional[list["JavaComponentConfigurationProperty"]] = None,
+        scale: Optional["JavaComponentPropertiesScale"] = None,
+        service_binds: Optional[list["JavaComponentServiceBind"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -10461,10 +10488,10 @@ class SpringCloudEurekaComponent(JavaComponentProperties):
     def __init__(
         self,
         *,
-        configurations: Optional[list["_models.JavaComponentConfigurationProperty"]] = None,
-        scale: Optional["_models.JavaComponentPropertiesScale"] = None,
-        service_binds: Optional[list["_models.JavaComponentServiceBind"]] = None,
-        ingress: Optional["_models.JavaComponentIngress"] = None,
+        configurations: Optional[list["JavaComponentConfigurationProperty"]] = None,
+        scale: Optional["JavaComponentPropertiesScale"] = None,
+        service_binds: Optional[list["JavaComponentServiceBind"]] = None,
+        ingress: Optional["JavaComponentIngress"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -10515,10 +10542,10 @@ class SystemData(_serialization.Model):
         self,
         *,
         created_by: Optional[str] = None,
-        created_by_type: Optional[Union[str, "_models.CreatedByType"]] = None,
+        created_by_type: Optional[Union[str, "CreatedByType"]] = None,
         created_at: Optional[datetime.datetime] = None,
         last_modified_by: Optional[str] = None,
-        last_modified_by_type: Optional[Union[str, "_models.CreatedByType"]] = None,
+        last_modified_by_type: Optional[Union[str, "CreatedByType"]] = None,
         last_modified_at: Optional[datetime.datetime] = None,
         **kwargs: Any
     ) -> None:
@@ -10569,7 +10596,7 @@ class TcpScaleRule(_serialization.Model):
         self,
         *,
         metadata: Optional[dict[str, str]] = None,
-        auth: Optional[list["_models.ScaleRuleAuth"]] = None,
+        auth: Optional[list["ScaleRuleAuth"]] = None,
         identity: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -10628,11 +10655,11 @@ class Template(_serialization.Model):
         *,
         revision_suffix: Optional[str] = None,
         termination_grace_period_seconds: Optional[int] = None,
-        init_containers: Optional[list["_models.InitContainer"]] = None,
-        containers: Optional[list["_models.Container"]] = None,
-        scale: Optional["_models.Scale"] = None,
-        volumes: Optional[list["_models.Volume"]] = None,
-        service_binds: Optional[list["_models.ServiceBind"]] = None,
+        init_containers: Optional[list["InitContainer"]] = None,
+        containers: Optional[list["Container"]] = None,
+        scale: Optional["Scale"] = None,
+        volumes: Optional[list["Volume"]] = None,
+        service_binds: Optional[list["ServiceBind"]] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -10692,7 +10719,7 @@ class TokenStore(_serialization.Model):
         *,
         enabled: Optional[bool] = None,
         token_refresh_extension_hours: Optional[float] = None,
-        azure_blob_storage: Optional["_models.BlobStorageTokenStore"] = None,
+        azure_blob_storage: Optional["BlobStorageTokenStore"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -10781,7 +10808,7 @@ class Twitter(_serialization.Model):
         self,
         *,
         enabled: Optional[bool] = None,
-        registration: Optional["_models.TwitterRegistration"] = None,
+        registration: Optional["TwitterRegistration"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -10867,7 +10894,7 @@ class Usage(_serialization.Model):
 
     unit = "Count"
 
-    def __init__(self, *, current_value: float, limit: float, name: "_models.UsageName", **kwargs: Any) -> None:
+    def __init__(self, *, current_value: float, limit: float, name: "UsageName", **kwargs: Any) -> None:
         """
         :keyword current_value: The current usage of the resource. Required.
         :paramtype current_value: float
@@ -11031,9 +11058,9 @@ class Volume(_serialization.Model):
         self,
         *,
         name: Optional[str] = None,
-        storage_type: Optional[Union[str, "_models.StorageType"]] = None,
+        storage_type: Optional[Union[str, "StorageType"]] = None,
         storage_name: Optional[str] = None,
-        secrets: Optional[list["_models.SecretVolumeItem"]] = None,
+        secrets: Optional[list["SecretVolumeItem"]] = None,
         mount_options: Optional[str] = None,
         **kwargs: Any
     ) -> None:
@@ -11145,8 +11172,8 @@ class WorkflowEnvelope(ProxyResource):
     def __init__(
         self,
         *,
-        kind: Optional[Union[str, "_models.WorkflowKind"]] = None,
-        properties: Optional["_models.WorkflowEnvelopeProperties"] = None,
+        kind: Optional[Union[str, "WorkflowKind"]] = None,
+        properties: Optional["WorkflowEnvelopeProperties"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -11184,7 +11211,7 @@ class WorkflowEnvelopeCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.WorkflowEnvelope"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["WorkflowEnvelope"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.WorkflowEnvelope]
@@ -11216,8 +11243,8 @@ class WorkflowEnvelopeProperties(_serialization.Model):
         self,
         *,
         files: Optional[JSON] = None,
-        flow_state: Optional[Union[str, "_models.WorkflowState"]] = None,
-        health: Optional["_models.WorkflowHealth"] = None,
+        flow_state: Optional[Union[str, "WorkflowState"]] = None,
+        health: Optional["WorkflowHealth"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -11259,8 +11286,8 @@ class WorkflowHealth(_serialization.Model):
     def __init__(
         self,
         *,
-        state: Union[str, "_models.WorkflowHealthState"],
-        error: Optional["_models.ErrorEntity"] = None,
+        state: Union[str, "WorkflowHealthState"],
+        error: Optional["ErrorEntity"] = None,
         **kwargs: Any
     ) -> None:
         """
@@ -11364,7 +11391,7 @@ class WorkloadProfileStates(ProxyResource):
     }
 
     def __init__(
-        self, *, properties: Optional["_models.WorkloadProfileStatesProperties"] = None, **kwargs: Any
+        self, *, properties: Optional["WorkloadProfileStatesProperties"] = None, **kwargs: Any
     ) -> None:
         """
         :keyword properties: Workload Profile resource specific properties.
@@ -11397,7 +11424,7 @@ class WorkloadProfileStatesCollection(_serialization.Model):
         "next_link": {"key": "nextLink", "type": "str"},
     }
 
-    def __init__(self, *, value: list["_models.WorkloadProfileStates"], **kwargs: Any) -> None:
+    def __init__(self, *, value: list["WorkloadProfileStates"], **kwargs: Any) -> None:
         """
         :keyword value: Collection of resources. Required.
         :paramtype value: list[~azure.mgmt.appcontainers.models.WorkloadProfileStates]
