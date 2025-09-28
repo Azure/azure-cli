@@ -77,7 +77,8 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None):
+                           allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
+                           enable_smb_oauth=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -197,6 +198,14 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
             params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
                 directory_service_options='None')
         params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
+
+    if enable_smb_oauth is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+        params.azure_files_identity_based_authentication.smb_o_auth_settings = {
+            "is_smb_o_auth_enabled": enable_smb_oauth
+        }
 
     if enable_large_file_share:
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
@@ -398,7 +407,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
-                           yes=None):
+                           yes=None, enable_smb_oauth=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet', 'Kind')
@@ -609,6 +618,15 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 directory_service_options='None') if instance.azure_files_identity_based_authentication is None \
                 else instance.azure_files_identity_based_authentication
         params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
+
+    if enable_smb_oauth is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None') if instance.azure_files_identity_based_authentication is None \
+                else instance.azure_files_identity_based_authentication
+        params.azure_files_identity_based_authentication.smb_o_auth_settings = {
+            "is_smb_o_auth_enabled": enable_smb_oauth
+        }
 
     if assign_identity:
         params.identity = Identity(type='SystemAssigned')
@@ -988,14 +1006,15 @@ def list_encryption_scope(client, resource_group_name, account_name,
 # pylint: disable=no-member
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
-                     destination_container=None, min_creation_time=None, prefix_match=None):
+                     destination_container=None, min_creation_time=None, prefix_match=None, enable_metrics=None):
     from azure.core.exceptions import HttpResponseError
     ObjectReplicationPolicy = cmd.get_models('ObjectReplicationPolicy')
 
     if properties is None:
         rules = []
-        ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter = \
-            cmd.get_models('ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter')
+        ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter, ObjectReplicationPolicyPropertiesMetrics = \
+            cmd.get_models('ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter',
+                           'ObjectReplicationPolicyPropertiesMetrics')
         if source_container and destination_container:
             rule = ObjectReplicationPolicyRule(
                 rule_id=rule_id,
@@ -1006,7 +1025,8 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
             rules.append(rule)
         or_policy = ObjectReplicationPolicy(source_account=source_account,
                                             destination_account=destination_account,
-                                            rules=rules)
+                                            rules=rules,
+                                            metrics=ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics))
     else:
         or_policy = properties
     try:
@@ -1021,8 +1041,8 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
         raise ex
 
 
-def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
-                     properties=None, source_account=None, destination_account=None, ):
+def update_or_policy(cmd, client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
+                     properties=None, source_account=None, destination_account=None, enable_metrics=None):
 
     if source_account is not None:
         parameters.source_account = source_account
@@ -1033,6 +1053,10 @@ def update_or_policy(client, parameters, resource_group_name, account_name, obje
         parameters = properties
         if "policyId" in properties.keys() and properties["policyId"]:
             object_replication_policy_id = properties["policyId"]
+
+    if enable_metrics is not None:
+        ObjectReplicationPolicyPropertiesMetrics = cmd.get_models('ObjectReplicationPolicyPropertiesMetrics')
+        parameters.metrics = ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics)
 
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    object_replication_policy_id=object_replication_policy_id, properties=parameters)

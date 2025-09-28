@@ -15,13 +15,13 @@ from azure.cli.core.aaz import *
     "search service update",
 )
 class Update(AAZCommand):
-    """Update a search service in the given resource group. If the search service already exists, all properties will be updated with the given values.
+    """Update an existing search service in the given resource group.
     """
 
     _aaz_info = {
-        "version": "2022-09-01",
+        "version": "2025-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2022-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2025-05-01"],
         ]
     }
 
@@ -49,7 +49,7 @@ class Update(AAZCommand):
         )
         _args_schema.search_service_name = AAZStrArg(
             options=["-n", "--name", "--search-service-name"],
-            help="The name of the Azure Cognitive Search service associated with the specified resource group.",
+            help="The name of the Azure AI Search service to update.",
             required=True,
             id_part="name",
         )
@@ -107,11 +107,21 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.data_exfiltration_protections = AAZListArg(
+            options=["--data-exfiltration-protections", "--data--protections"],
+            arg_group="Properties",
+            help="A list of data exfiltration scenarios that are explicitly disallowed for the search service. Currently, the only supported value is 'All' to disable all possible data export scenarios with more fine grained controls planned for the future.",
+        )
         _args_schema.disable_local_auth = AAZBoolArg(
             options=["--disable-local-auth"],
             arg_group="Properties",
             help="When set to true, calls to the search service will not be permitted to utilize API keys for authentication. This cannot be set to true if 'dataPlaneAuthOptions' are defined.",
             nullable=True,
+        )
+        _args_schema.encryption_with_cmk = AAZObjectArg(
+            options=["--encryption-with-cmk"],
+            arg_group="Properties",
+            help="Specifies any policy regarding encryption of resources (such as indexes) using customer manager keys within a search service.",
         )
         _args_schema.partition_count = AAZIntArg(
             options=["--partition-count"],
@@ -148,9 +158,27 @@ class Update(AAZCommand):
             enum={"disabled": "disabled", "free": "free", "standard": "standard"},
         )
 
+        data_exfiltration_protections = cls._args_schema.data_exfiltration_protections
+        data_exfiltration_protections.Element = AAZStrArg(
+            enum={"BlockAll": "BlockAll"},
+        )
+
+        encryption_with_cmk = cls._args_schema.encryption_with_cmk
+        encryption_with_cmk.enforcement = AAZStrArg(
+            options=["enforcement"],
+            help="Describes how a search service should enforce compliance if it finds objects that aren't encrypted with the customer-managed key.",
+            enum={"Disabled": "Disabled", "Enabled": "Enabled", "Unspecified": "Unspecified"},
+        )
+
         # define Arg Group "Service"
 
         _args_schema = cls._args_schema
+        _args_schema.sku = AAZStrArg(
+            options=["--sku"],
+            arg_group="Service",
+            help="The SKU of the search service. Valid values include: 'free': Shared service. 'basic': Dedicated service with up to 3 replicas. 'standard': Dedicated service with up to 12 partitions and 12 replicas. 'standard2': Similar to standard, but with more capacity per search unit. 'standard3': The largest Standard offering with up to 12 partitions and 12 replicas (or up to 3 partitions with more indexes if you also set the hostingMode property to 'highDensity'). 'storage_optimized_l1': Supports 1TB per partition, up to 12 partitions. 'storage_optimized_l2': Supports 2TB per partition, up to 12 partitions.'",
+            enum={"basic": "basic", "free": "free", "standard": "standard", "standard2": "standard2", "standard3": "standard3", "storage_optimized_l1": "storage_optimized_l1", "storage_optimized_l2": "storage_optimized_l2"},
+        )
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             arg_group="Service",
@@ -244,7 +272,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-09-01",
+                    "api-version", "2025-05-01",
                     required=True,
                 ),
             }
@@ -343,7 +371,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-09-01",
+                    "api-version", "2025-05-01",
                     required=True,
                 ),
             }
@@ -413,7 +441,9 @@ class Update(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("authOptions", AAZObjectType)
+                properties.set_prop("dataExfiltrationProtections", AAZListType, ".data_exfiltration_protections")
                 properties.set_prop("disableLocalAuth", AAZBoolType, ".disable_local_auth", typ_kwargs={"nullable": True})
+                properties.set_prop("encryptionWithCmk", AAZObjectType, ".encryption_with_cmk")
                 properties.set_prop("networkRuleSet", AAZObjectType)
                 properties.set_prop("partitionCount", AAZIntType, ".partition_count")
                 properties.set_prop("publicNetworkAccess", AAZStrType, ".public_network_access")
@@ -428,6 +458,14 @@ class Update(AAZCommand):
             aad_or_api_key = _builder.get(".properties.authOptions.aadOrApiKey")
             if aad_or_api_key is not None:
                 aad_or_api_key.set_prop("aadAuthFailureMode", AAZStrType, ".aad_auth_failure_mode")
+            
+            data_exfiltration_protections = _builder.get(".properties.dataExfiltrationProtections")
+            if data_exfiltration_protections is not None:
+                data_exfiltration_protections.set_elements(AAZStrType, ".")
+
+            encryption_with_cmk = _builder.get(".properties.encryptionWithCmk")
+            if encryption_with_cmk is not None:
+                encryption_with_cmk.set_prop("enforcement", AAZStrType, ".enforcement")
 
             network_rule_set = _builder.get(".properties.networkRuleSet")
             if network_rule_set is not None:
@@ -440,6 +478,10 @@ class Update(AAZCommand):
             _elements = _builder.get(".properties.networkRuleSet.ipRules[]")
             if _elements is not None:
                 _elements.set_prop("value", AAZStrType, ".value")
+
+            sku = _builder.get(".sku")
+            if sku is not None:
+                sku.set_prop("name", AAZStrType, ".sku", typ_kwargs={"flags": {"required": True}})
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -460,6 +502,7 @@ class _UpdateHelper:
     """Helper class for Update"""
 
     _schema_search_service_read = None
+    _schema_system_data_read = None
 
     @classmethod
     def _build_schema_search_service_read(cls, _schema):
@@ -493,6 +536,11 @@ class _UpdateHelper:
         search_service_read.sku = AAZObjectType(
             flags={"required": True},
         )
+        search_service_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        _UpdateHelper._build_schema_system_data_read(search_service_read.system_data)
         search_service_read.tags = AAZDictType()
         search_service_read.type = AAZStrType(
             flags={"read_only": True},
@@ -515,9 +563,16 @@ class _UpdateHelper:
         properties.auth_options = AAZObjectType(
             serialized_name="authOptions",
         )
+        properties.data_exfiltration_protections = AAZListType(
+            serialized_name="dataExfiltrationProtections",
+        )
         properties.disable_local_auth = AAZBoolType(
             serialized_name="disableLocalAuth",
             nullable=True,
+        )
+        properties.e_tag = AAZStrType(
+            serialized_name="eTag",
+            flags={"read_only": True},
         )
         properties.encryption_with_cmk = AAZObjectType(
             serialized_name="encryptionWithCmk",
@@ -560,6 +615,9 @@ class _UpdateHelper:
             serialized_name="statusDetails",
             flags={"read_only": True},
         )
+        properties.upgrade_available = AAZStrType(
+            serialized_name="upgradeAvailable",
+        )
 
         auth_options = _schema_search_service_read.properties.auth_options
         auth_options.aad_or_api_key = AAZObjectType(
@@ -573,6 +631,9 @@ class _UpdateHelper:
         aad_or_api_key.aad_auth_failure_mode = AAZStrType(
             serialized_name="aadAuthFailureMode",
         )
+
+        data_exfiltration_protections = _schema_search_service_read.properties.data_exfiltration_protections
+        data_exfiltration_protections.Element = AAZStrType()
 
         encryption_with_cmk = _schema_search_service_read.properties.encryption_with_cmk
         encryption_with_cmk.encryption_compliance_status = AAZStrType(
@@ -603,6 +664,11 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         _element.properties = AAZObjectType()
+        _element.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        _UpdateHelper._build_schema_system_data_read(_element.system_data)
         _element.type = AAZStrType(
             flags={"read_only": True},
         )
@@ -642,6 +708,11 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         _element.properties = AAZObjectType()
+        _element.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        _UpdateHelper._build_schema_system_data_read(_element.system_data)
         _element.type = AAZStrType(
             flags={"read_only": True},
         )
@@ -680,6 +751,49 @@ class _UpdateHelper:
         _schema.sku = cls._schema_search_service_read.sku
         _schema.tags = cls._schema_search_service_read.tags
         _schema.type = cls._schema_search_service_read.type
+    
+    @classmethod
+    def _build_schema_system_data_read(cls, _schema):
+        if cls._schema_system_data_read is not None:
+            _schema.created_at = cls._schema_system_data_read.created_at
+            _schema.created_by = cls._schema_system_data_read.created_by
+            _schema.created_by_type = cls._schema_system_data_read.created_by_type
+            _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+            _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+            _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
+            return
+
+        cls._schema_system_data_read = _schema_system_data_read = AAZObjectType(
+            flags={"read_only": True}
+        )
+
+        system_data_read = _schema_system_data_read
+        system_data_read.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data_read.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data_read.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data_read.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data_read.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data_read.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        _schema.created_at = cls._schema_system_data_read.created_at
+        _schema.created_by = cls._schema_system_data_read.created_by
+        _schema.created_by_type = cls._schema_system_data_read.created_by_type
+        _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+        _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+        _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
+
 
 
 __all__ = ["Update"]

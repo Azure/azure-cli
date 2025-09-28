@@ -1957,16 +1957,6 @@ examples:
 "https://mystorageaccount.blob.core.windows.net/mycontainer/RuncommandOutput.txt?sp=racw&st=2022-10-17T19:02:15Z&se=2022-10-18T03:02:15Z&spr=https&sv=2021-06-08&sr=b&sig=3BxtEasfdasdfasdfdYki9yvYsqc60V0%3D"
 """
 
-helps['vm run-command delete'] = """
-type: command
-short-summary: "The operation to delete the run command."
-examples:
-  - name: Delete a run command.
-    text: |-
-           az vm run-command delete --resource-group "myResourceGroup" --run-command-name \
-"myRunCommand" --vm-name "myVM"
-"""
-
 helps['vm run-command wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the res virtual-machine-run-command is met.

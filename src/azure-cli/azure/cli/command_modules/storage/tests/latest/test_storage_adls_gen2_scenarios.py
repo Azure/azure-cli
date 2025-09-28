@@ -53,7 +53,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('permissions', permissions))
 
     @unittest.skip('AssertionError: 0 != 1')
-    @ResourceGroupPreparer(name_prefix='clitest', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='clitest', location='eastus2')
     @RoleBasedServicePrincipalPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_adls_access_recursive_scenarios(self, resource_group, sp_name, sp_password, storage_account):
@@ -266,7 +266,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage fs delete -n {} -y', account_info, filesystem3)
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(kind="StorageV2", hns=True, location="eastus2euap")
+    @StorageAccountPreparer(kind="StorageV2", hns=True, location="eastus2")
     def test_adls_fs_soft_delete(self, resource_group, storage_account_info):
         account_info = storage_account_info
         container = self.create_file_system(account_info)

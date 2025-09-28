@@ -550,6 +550,8 @@ def load_arguments(self, _):
         c.argument('disk_ids', nargs='+', min_api='2024-03-01', help='The disk IDs of the managed disk (space-delimited).')
         c.argument('source_snapshots_or_disks', options_list=['--source-snapshots-or-disks', '--source-resource'], nargs='+', min_api='2024-11-01', help='Create a data disk from a snapshot or another disk. Can use the ID of a disk or snapshot.')
         c.argument('source_disk_restore_point', options_list=['--source-disk-restore-point', '--source-disk-rp'], nargs='+', min_api='2024-11-01', help='create a data disk from a disk restore point. Can use the ID of a disk restore point.')
+        c.argument('new_names_of_source_snapshots_or_disks', options_list=['--new-names-of-source-snapshots-or-disks', '--new-names-of-sr'], nargs='+', min_api='2024-11-01', help='The name of create new data disk from a snapshot or another disk.')
+        c.argument('new_names_of_source_disk_restore_point', options_list=['--new-names-of-source-disk-restore-point', '--new-names-of-rp'], nargs='+', min_api='2024-11-01', help='The name of create new data disk from a disk restore point.')
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
@@ -954,10 +956,6 @@ def load_arguments(self, _):
             c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
             c.argument('output_blob_uri', help='Specify the Azure storage blob (SAS URI) where script output stream will be uploaded.')
             c.argument('error_blob_uri', help='Specify the Azure storage blob where script error stream will be uploaded.')
-
-    with self.argument_context('vm run-command delete') as c:
-        c.argument('vm_name', run_cmd_vm_name)
-        c.argument('run_command_name', run_cmd_name_type)
 
     with self.argument_context('vm run-command list') as c:
         c.argument('vm_name', run_cmd_vm_name, id_part=None)
