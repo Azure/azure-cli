@@ -188,7 +188,7 @@ class Update(AAZCommand):
             enum={"Arm64": "Arm64", "x64": "x64"},
         )
         _args_schema.supported_security_option = AAZStrArg(
-            options=["--supported-security-option"],
+            options=["--security-option", "--supported-security-option"],
             arg_group="SupportedCapabilities",
             help="Refer to the security capability of the disk supported to create a Trusted launch or Confidential VM",
             nullable=True,

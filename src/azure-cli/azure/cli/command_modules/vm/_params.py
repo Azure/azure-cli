@@ -208,7 +208,7 @@ def load_arguments(self, _):
         c.argument('performance_plus', arg_type=get_three_state_flag(), min_api='2022-07-02', help='Set this flag to true to get a boost on the performance target of the disk deployed. This flag can only be set on disk creation time and cannot be disabled after enabled')
         c.argument('security_metadata_uri', help='Specify the blob URI to be imported into VM metadata for Confidential VM')
         c.argument('action_on_disk_delay', arg_type=get_enum_type(['AutomaticReattach']), help='Determine on how to handle disks with slow I/O.')
-        c.argument('supported_security_option', arg_type=get_enum_type(['TrustedLaunchAndConfidentialVMSupported', 'TrustedLaunchSupported']), help='Refer to the security capability of the disk supported to create a Trusted launch or Confidential VM')
+        c.argument('supported_security_option', options_list=['--supported-security-option', '--security-option'], arg_type=get_enum_type(['TrustedLaunchAndConfidentialVMSupported', 'TrustedLaunchSupported']), help='Refer to the security capability of the disk supported to create a Trusted launch or Confidential VM')
     # endregion
 
     # region Snapshots

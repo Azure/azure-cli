@@ -4144,6 +4144,39 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('additionalCapabilities.hibernationEnabled', False)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_supported_security_option', location='eastus2euap')
+    def test_vm_disk_supported_security_option(self, resource_group):
+        self.kwargs.update({
+            'disk1': self.create_random_name('disk', 10),
+            'disk2': self.create_random_name('disk', 10)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk1} --sku PremiumV2_LRS --size-gb 10 --supported-security-option TrustedLaunchSupported', checks=[
+            self.check('supportedCapabilities.supportedSecurityOption', 'TrustedLaunchSupported')
+        ])
+        self.cmd('disk update -g {rg} -n {disk1} --supported-security-option TrustedLaunchAndConfidentialVMSupported', checks=[
+            self.check('supportedCapabilities.supportedSecurityOption', 'TrustedLaunchAndConfidentialVMSupported')
+        ])
+        self.cmd('disk create -g {rg} -n {disk1} --sku PremiumV2_LRS --size-gb 10')
+        self.cmd('disk update -g {rg} -n {disk1} --supported-security-option TrustedLaunchAndConfidentialVMSupported', checks=[
+            self.check('supportedCapabilities.supportedSecurityOption', 'TrustedLaunchAndConfidentialVMSupported')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_availability_policy', location='eastus2euap')
+    def test_vm_disk_availability_policy(self, resource_group):
+        self.kwargs.update({
+            'disk1': self.create_random_name('disk', 10),
+            'disk2': self.create_random_name('disk', 10)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk1} --sku PremiumV2_LRS --size-gb 10 --action-on-disk-delay AutomaticReattach', checks=[
+            self.check('availabilityPolicy.actionOnDiskDelay', 'AutomaticReattach')
+        ])
+        self.cmd('disk create -g {rg} -n {disk1} --sku PremiumV2_LRS --size-gb 10')
+        self.cmd('disk update -g {rg} -n {disk1} --action-on-disk-delay AutomaticReattach', checks=[
+            self.check('availabilityPolicy.actionOnDiskDelay', 'AutomaticReattach')
+        ])
+
 
 class VMUnmanagedDataDiskTest(ScenarioTest):
 
