@@ -782,7 +782,7 @@ class ContainerappEnvScenarioTest(ScenarioTest):
 
         result = self.cmd('containerapp list-usages').get_output_in_json()
         usages = result["value"]
-        # self.assertEqual(len(usages), 1)
+        self.assertEqual(len(usages), 1)
         self.assertEqual(usages[0]["name"]["value"], "ManagedEnvironmentCount")
         self.assertGreater(usages[0]["limit"], 0)
         self.assertGreaterEqual(usages[0]["usage"], 0)
