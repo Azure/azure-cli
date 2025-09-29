@@ -169,10 +169,10 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
     if auto_generated_domain_name_label_scope:
-        name_validation = get_regional_site_availability(cmd, 
-                                                         location, 
-                                                         name, 
-                                                         resource_group_name, 
+        name_validation = get_regional_site_availability(cmd,
+                                                         location,
+                                                         name,
+                                                         resource_group_name,
                                                          auto_generated_domain_name_label_scope)
     else:
         name_validation = get_site_availability(cmd, name)
