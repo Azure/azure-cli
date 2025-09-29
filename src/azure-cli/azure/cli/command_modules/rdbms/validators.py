@@ -340,7 +340,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     else:
         supported_storageV2_size = None
     _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier,
-                               supported_storageV2_size, iops, throughput, instance)
+                               tier, supported_storageV2_size, iops, throughput, instance)
     _pg_storage_performance_tier_validator(performance_tier,
                                            sku_info,
                                            tier,
@@ -905,7 +905,7 @@ def validate_identities(cmd, namespace):
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
 
 
-def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier,
+def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier, tier,
                                supported_storageV2_size, iops, throughput, instance):
     is_create_ssdv2 = storage_type == "PremiumV2_LRS"
     is_update_ssdv2 = instance is not None and instance.storage.type == "PremiumV2_LRS"
@@ -928,11 +928,20 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
             raise ValidationError("Geo-redundancy is not supported for servers with Premium SSD V2.")
         if performance_tier:
             raise ValidationError("Performance tier is not supported for servers with Premium SSD V2.")
+        if tier and tier.lower() == 'burstable':
+            raise ValidationError("Burstable tier is not supported for servers with Premium SSD V2.")
     else:
         if throughput is not None:
             raise CLIError('Updating throughput is only capable for server created with Premium SSD v2.')
         if iops is not None:
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
+
+
+def pg_restore_validator(compute_tier, **args):
+    is_ssdv2_enabled = args.get('storage_type', None) == "PremiumV2_LRS"
+
+    if is_ssdv2_enabled and compute_tier.lower() == 'burstable':
+        raise ValidationError("Burstable tier is not supported for servers with Premium SSD V2.")
 
 
 def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,

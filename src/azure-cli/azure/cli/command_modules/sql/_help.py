@@ -242,7 +242,9 @@ type: command
 short-summary: Update long term retention settings for a database.
 examples:
   - name: Set long term retention for a database.
-    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --make-backups-immutable true
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --make-backups-immutable Enabled
+  - name: Set long term retention for a database with time based immutability enabled and immutability mode locked.
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P0W" --monthly-retention "P0M" --yearly-retention "P0Y" --tb-immutability Enabled --tb-immutability-mode Locked
 """
 
 helps['sql db ltr-policy show'] = """
@@ -304,6 +306,38 @@ examples:
 helps['sql db ltr-backup wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the database is met.
+"""
+
+helps['sql db ltr-backup set-legal-hold-immutability'] = """
+type: command
+short-summary: Set a legal hold on the long term retention backup database.
+examples:
+  - name: Set legal hold on a long term retention backup for a database.
+    text: az sql db ltr-backup set-legal-hold-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup remove-legal-hold-immutability'] = """
+type: command
+short-summary: Remove a legal hold on the long term retention backup database.
+examples:
+  - name: remove a legal hold on a long term retention backup for a database.
+    text: az sql db ltr-backup remove-legal-hold-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup lock-time-based-immutability'] = """
+type: command
+short-summary: Lock the time based immutability on a long term retention backup to prevent deletion.
+examples:
+  - name: lock the long term retention backup for a database.
+    text: az sql db ltr-backup lock-time-based-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
+"""
+
+helps['sql db ltr-backup remove-time-based-immutability'] = """
+type: command
+short-summary: disable the time based immutability on a long term retention backup.
+examples:
+  - name: disable a time based immutability on a long term retention backup for a database.
+    text: az sql db ltr-backup remove-time-based-immutability -g mygroup -l southeastasia -s myserver -d mydb -n "3214b3fb-fba9-43e7-96a3-09e35ffcb336;132292152080000000"
 """
 
 helps['sql db geo-backup'] = """
@@ -1563,6 +1597,8 @@ short-summary: Create a server.
 examples:
   - name: Create a server.
     text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword
+  - name: Create a server with tags.
+    text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword --tags key1=value1 key2=value2
   - name: Create a server with disabled public network access to server.
     text: az sql server create -l westus -g mygroup -n myserver -u myadminuser -p myadminpassword -e false
   - name: Create a server without SQL Admin, with AD admin and AD Only enabled.

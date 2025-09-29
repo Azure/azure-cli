@@ -14,6 +14,7 @@ from azure.cli.core.azclierror import (
     ValidationError,
     AzureResponseError
 )
+from azure.core.exceptions import ResourceNotFoundError
 from ._resource_config import (
     CLIENT_TYPE,
     SUPPORTED_AUTH_TYPE,
@@ -31,6 +32,7 @@ from ._validators import (
 )
 from ._addon_factory import AddonFactory
 from ._utils import (
+    compare_properties_changed,
     set_user_token_by_source_and_target,
     set_user_token_header,
     auto_register,
@@ -43,7 +45,7 @@ from ._utils import (
     get_secret_type_for_update
 )
 from ._credential_free import is_passwordless_command
-# pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test,too-many-statements,too-many-locals
+# pylint: disable=unused-argument,unsubscriptable-object,unsupported-membership-test,too-many-statements,too-many-locals,broad-exception-caught
 
 
 logger = get_logger(__name__)
@@ -317,7 +319,8 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                       target_app_name=None,                                  # Resource.ContainerApp
                       connstr_props=None,                                    # Resource.FabricSql
                       fabric_workspace_uuid=None,
-                      fabric_sql_db_uuid=None
+                      fabric_sql_db_uuid=None,
+                      no_recreate=False,
                       ):
     auth_action = 'optOutAllAuth' if (opt_out_list is not None and
                                       OPT_OUT_OPTION.AUTHENTICATION.value in opt_out_list) else None
@@ -370,12 +373,13 @@ def connection_create(cmd, client,  # pylint: disable=too-many-locals,too-many-s
                                   app_config_id=app_config_id,
                                   enable_appconfig_extension=enable_appconfig_extension,
                                   server=server, database=database,
-                                  connstr_props=connstr_props
+                                  connstr_props=connstr_props,
+                                  no_recreate=no_recreate,
                                   )
 
 
 # The function is used in extension, new feature must be added in the end for backward compatibility
-def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-many-statements
+def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-many-statements,too-many-branches
                            connection_name=None, client_type=None,
                            source_resource_group=None, source_id=None,
                            target_resource_group=None, target_id=None,
@@ -406,6 +410,7 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                            target_app_name=None,                                  # Resource.ContainerApp
                            enable_appconfig_extension=False,
                            connstr_props=None,                                    # Resource.FabricSql
+                           no_recreate=False,
                            **kwargs,
                            ):
     if not source_id:
@@ -530,6 +535,20 @@ def connection_create_func(cmd, client,  # pylint: disable=too-many-locals,too-m
                                      'manually and then create the connection.'.format(str(e)))
 
     validate_service_state(parameters)
+    if no_recreate:
+        try:
+            linker = todict(client.get(resource_uri=source_id, linker_name=connection_name))
+            if linker is not None and linker.get('provisioningState') == 'Accepted':
+                logger.warning('Connection provisioningState is Accepted, please retry later to avoid conflict.')
+                return linker
+            if linker is not None and linker.get('provisioningState') == 'Succeeded' and \
+                    not compare_properties_changed(parameters, linker):
+                logger.warning(
+                    'Connection exists and no property to be updated, skip the update operation.')
+                return linker
+        except ResourceNotFoundError:
+            logger.debug('No existing connection, continue to create it.')
+
     if enable_mi_for_db_linker and auth_action != 'optOutAllAuth':
         new_auth_info = enable_mi_for_db_linker(
             cmd, source_id, target_id, auth_info, client_type, connection_name, connstr_props)

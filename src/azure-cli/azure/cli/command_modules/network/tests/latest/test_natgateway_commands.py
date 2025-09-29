@@ -13,6 +13,7 @@ class NatGatewayScenarioTests(ScenarioTest):
 
         self.kwargs.update({
             'name': "ng1",
+            'name2': "ng2",
             'idle_timeout': 4,
             'sku': "Standard",
             'ip_addr': "pip",
@@ -28,7 +29,7 @@ class NatGatewayScenarioTests(ScenarioTest):
         self.cmd('az network public-ip create -g {rg} -n {ip_addr} --location {location} --zone {zone} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
 
         # create public ip prefix
-        self.cmd('az network public-ip prefix create --length 29 --location {location} --name {ip_prefix} --resource-group {rg} --zone {zone}')
+        self.cmd('az network public-ip prefix create --length 29 --location {location} --name {ip_prefix} --resource-group {rg} --zone {zone} --ip-tags FirstPartyUsage=/NonProd')
 
         self.cmd('az network nat gateway create --resource-group {rg} --public-ip-prefixes {ip_prefix} --name {name} --location {location} --public-ip-addresses {ip_addr} --idle-timeout {idle_timeout} --zone {zone} --tags {tags}', checks=[
             self.check('resourceGroup', '{rg}'),
@@ -51,6 +52,12 @@ class NatGatewayScenarioTests(ScenarioTest):
         self.cmd('az network nat gateway delete --resource-group {rg} --name {name}')
         self.cmd('az network nat gateway list -g {rg}',
                  checks=self.check('length(@)', 0))
+
+        # test standardv2 sku
+        self.cmd('az network nat gateway create -g {rg} -n {name2} --sku StandardV2', checks=[
+            self.check('sku.name', 'StandardV2')
+        ])
+        self.cmd('az network nat gateway delete -g {rg} -n {name2}')
 
     @ResourceGroupPreparer(location='eastus2')
     def test_natgateway_empty_create(self, resource_group, resource_group_location):

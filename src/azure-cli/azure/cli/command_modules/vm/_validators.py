@@ -822,7 +822,8 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
             raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
 
         subnet_exists = \
-            check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets', vnet, 'virtualNetworks')
+            check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets', vnet, 'virtualNetworks',
+                            static_version="2024-07-01")
 
         if subnet_is_id and not subnet_exists:
             raise CLIError("Subnet '{}' does not exist.".format(subnet))
@@ -1890,6 +1891,21 @@ def process_vm_disk_attach_namespace(cmd, namespace):
             not namespace.source_snapshots_or_disks and not namespace.source_disk_restore_point:
         raise RequiredArgumentMissingError("Please use at least one of --name, --disks, --disk-ids,"
                                            " --source-snapshots-or-disks and --source-disk-restore-point")
+
+    if namespace.new_names_of_source_snapshots_or_disks and not namespace.source_snapshots_or_disks:
+        raise RequiredArgumentMissingError("Please use --source-snapshots-or-disks when using"
+                                           " --new-names-of-source-snapshots-or-disks")
+    if namespace.new_names_of_source_disk_restore_point and not namespace.source_disk_restore_point:
+        raise RequiredArgumentMissingError("Please use --source-disk-restore-point when using"
+                                           " --new-names-of-source-disk-restore-point")
+    if namespace.new_names_of_source_snapshots_or_disks and \
+            (len(namespace.new_names_of_source_snapshots_or_disks) != len(namespace.source_snapshots_or_disks)):
+        raise ArgumentUsageError("The number of --new-names-of-source-snapshots-or-disks must be the same as the number"
+                                 " of --source-snapshots-or-disks")
+    if namespace.new_names_of_source_disk_restore_point and \
+            (len(namespace.new_names_of_source_disk_restore_point) != len(namespace.source_disk_restore_point)):
+        raise ArgumentUsageError("The number of --new-names-of-source-disk-restore-point must be the same as the number"
+                                 " of --source-disk-restore-point")
 
     if namespace.disk and namespace.disks:
         raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disks")

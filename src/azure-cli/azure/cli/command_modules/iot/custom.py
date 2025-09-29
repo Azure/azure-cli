@@ -20,7 +20,6 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
 
 from azure.mgmt.iothub.models import (IotHubSku,
                                       AccessRights,
@@ -433,10 +432,8 @@ def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_p
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
     cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
 
-    if AZURE_API_PROFILES["latest"][ResourceType.MGMT_IOTHUB] in client.profile.label:
-        cert_description = CertificateDescription(properties=cert_properties)
-        return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
-    return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_properties)
+    cert_description = CertificateDescription(properties=cert_properties)
+    return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
 
 
 def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_path, etag, resource_group_name=None, is_verified=None):
@@ -449,10 +446,8 @@ def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_p
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
             cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
 
-            if AZURE_API_PROFILES["latest"][ResourceType.MGMT_IOTHUB] in client.profile.label:
-                cert_description = CertificateDescription(properties=cert_properties)
-                return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
-            return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_properties, etag)
+            cert_description = CertificateDescription(properties=cert_properties)
+            return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot hub certificate create' to create a new certificate."
                    .format(certificate_name))
 
@@ -1208,15 +1203,6 @@ def iot_message_enrichment_list(cmd, client, hub_name, resource_group_name=None)
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     return hub.properties.routing.enrichments
-
-
-def iot_hub_devicestream_show(cmd, client, hub_name, resource_group_name=None):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
-    # DeviceStreams property is still in preview, so until GA we need to use a preview API-version
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_IOTHUB, api_version='2019-07-01-preview')
-    hub = client.iot_hub_resource.get(resource_group_name, hub_name)
-    return hub.properties.device_streams
 
 
 def iot_hub_manual_failover(cmd, client, hub_name, resource_group_name=None, no_wait=False):

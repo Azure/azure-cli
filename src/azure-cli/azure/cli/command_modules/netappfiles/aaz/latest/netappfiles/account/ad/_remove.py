@@ -23,9 +23,9 @@ class Remove(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-01-01", "properties.activeDirectories[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-06-01", "properties.activeDirectories[]"],
         ]
     }
 
@@ -164,7 +164,7 @@ class Remove(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -263,7 +263,7 @@ class Remove(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }
@@ -344,7 +344,7 @@ class _RemoveHelper:
         net_app_account_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        net_app_account_read.identity = AAZObjectType()
+        net_app_account_read.identity = AAZIdentityObjectType()
         net_app_account_read.location = AAZStrType(
             flags={"required": True},
         )

@@ -521,8 +521,11 @@ def _configure_auto_storage(cli_ctx, location):
     :return (str, str): a tuple with auto storage account name and key.
     """
     ResourceGroup = get_sdk(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES, 'ResourceGroup', mod='models')
-    BlockBlobService, FileService = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
-                                            'blob#BlockBlobService', 'file#FileService')
+    BlobServiceClient = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                '_blob_service_client#BlobServiceClient')
+    ShareServiceClient = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                 '_share_service_client#ShareServiceClient')
+
     resource_group = _get_auto_storage_resource_group()
     resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     if resource_client.resource_groups.check_existence(resource_group):
@@ -534,19 +537,23 @@ def _configure_auto_storage(cli_ctx, location):
             resource_group, ResourceGroup(location=location))
     storage_client = _get_storage_management_client(cli_ctx)
     account = None
+    share_account_url = None
+    blob_account_url = None
     for a in storage_client.storage_accounts.list_by_resource_group(resource_group):
         if a.primary_location == location.lower().replace(' ', ''):
             account = a.name
+            share_account_url = a.primary_endpoints.file
+            blob_account_url = a.primary_endpoints.blob
             logger.warning('Using existing %s storage account as an auto-storage account', account)
             break
     if account is None:
-        account = _create_auto_storage_account(storage_client, resource_group, location)
+        share_account_url, blob_account_url = _create_auto_storage_account(storage_client, resource_group, location)
         logger.warning('Created auto storage account %s', account)
     key = _get_storage_account_key(cli_ctx, account, None)
-    file_service = FileService(account, key)
-    file_service.create_share(AUTO_STORAGE_SHARE_NAME, fail_on_exist=False)
-    blob_service = BlockBlobService(account, key)
-    blob_service.create_container(AUTO_STORAGE_CONTAINER_NAME, fail_on_exist=False)
+    share_service_client = ShareServiceClient(share_account_url, credential=key)
+    share_service_client.create_share(AUTO_STORAGE_SHARE_NAME)
+    blob_service_client = BlobServiceClient(blob_account_url, credential=key)
+    blob_service_client.create_container(AUTO_STORAGE_CONTAINER_NAME)
     return account, key
 
 
@@ -571,11 +578,11 @@ def _create_auto_storage_account(storage_client, resource_group, location):
     while not check.name_available:
         name = _generate_auto_storage_account_name()
         check = storage_client.storage_accounts.check_name_availability(name).name_available
-    storage_client.storage_accounts.create(resource_group, name, {
+    account_obj = storage_client.storage_accounts.create(resource_group, name, {
         'sku': Sku(name=SkuName.standard_lrs),
         'kind': Kind.storage,
         'location': location}).result()
-    return name
+    return account_obj.primary_endpoints.file, account_obj.primary_endpoints.blob
 
 
 def _add_setup_task(cmd_line, output, cluster):
@@ -763,23 +770,32 @@ def _get_files_from_bfs(cli_ctx, bfs, path, expiry):
     :param str path: path to list files from.
     :param int expiry: SAS expiration time in minutes.
     """
-    BlockBlobService = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
-    Blob = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'blob#Blob')
-    BlobPermissions = get_sdk(cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlobPermissions')
+    ContainerClient = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_container_client#ContainerClient')
+    BlobSasPermissions = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_models#BlobSasPermissions')
+    BlobSharedAccessSignature = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                        '_shared_access_signature#BlobSharedAccessSignature')
+    storage_client = _get_storage_management_client(cli_ctx)
+    blob_account_url = [a.primary_endpoints.blob for a in list(storage_client.storage_accounts.list())
+                        if a.name == bfs.account_name]
+
+    key = _get_storage_account_key(cli_ctx, bfs.account_name, None)
+
     result = []
-    service = BlockBlobService(bfs.account_name, _get_storage_account_key(cli_ctx, bfs.account_name, None))
+    container_client = ContainerClient(blob_account_url, bfs.container_name, credential=key)
+    sas_client = BlobSharedAccessSignature(bfs.account_name, account_key=key)
     effective_path = _get_path_for_storage(path)
     folders = set()
-    for b in service.list_blobs(bfs.container_name, effective_path + '/', delimiter='/'):
-        if isinstance(b, Blob):
+    for b in container_client.list_blobs(name_starts_with=effective_path + '/'):
+        if b.properties.content_settings.contentMd5 is not None:
             name = os.path.basename(b.name)
-            sas = service.generate_blob_shared_access_signature(
-                bfs.container_name, b.name, BlobPermissions(read=True),
-                expiry=datetime.datetime.utcnow() + datetime.timedelta(minutes=expiry))
+            sas = sas_client.generate_blob(bfs.container_name, b.name, permission=BlobSasPermissions(read=True),
+                                           expiry=datetime.datetime.utcnow() + datetime.timedelta(minutes=expiry))
+            blob_url = b.url
+            if '?' not in blob_url:
+                blob_url += '?' + sas
             result.append(
                 LogFile(
-                    name, service.make_blob_url(bfs.container_name, b.name, 'https', sas),
-                    False, b.properties.content_length))
+                    name, blob_url, False, b.properties.size))
         else:
             name = b.name.split('/')[-2]
             folders.add(name)
@@ -803,23 +819,32 @@ def _get_files_from_afs(cli_ctx, afs, path, expiry):
     :param str path: path to list files from.
     :param int expiry: SAS expiration time in minutes.
     """
-    FileService, File, FilePermissions = get_sdk(cli_ctx, ResourceType.DATA_STORAGE,
-                                                 'file#FileService', 'file.models#File', 'file.models#FilePermissions')
-    result = []
-    service = FileService(afs.account_name, _get_storage_account_key(cli_ctx, afs.account_name, None))
-    share_name = afs.azure_file_url.split('/')[-1]
+    ShareClient = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                          '_share_client#ShareClient')
+    FileSasPermissions = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE, '_models#FileSasPermissions')
+    FileSharedAccessSignature = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                        '_shared_access_signature#FileSharedAccessSignature')
+    url_split = afs.azure_file_url.split('/')
+    share_account_url = ('/').join(url_split[:-1])
+    account_name = url_split[2].split('.')[0]
+    key = _get_storage_account_key(cli_ctx, account_name, None)
+    share_name = url_split[-1]
+    share_client = ShareClient(share_account_url, share_name, credential=key)
+    sas_client = FileSharedAccessSignature(account_name, account_key=key)
     effective_path = _get_path_for_storage(path)
-    if not service.exists(share_name, effective_path):
-        return result
-    for f in service.list_directories_and_files(share_name, effective_path):
-        if isinstance(f, File):
-            sas = service.generate_file_shared_access_signature(
-                share_name, effective_path, f.name, permission=FilePermissions(read=True),
-                expiry=datetime.datetime.utcnow() + datetime.timedelta(minutes=expiry))
+
+    result = []
+    for f in share_client.list_directories_and_files(name_starts_with=effective_path):
+        if not f.is_directory:
+            sas = sas_client.generate_file(share_name, directory_name=effective_path, file_name=f.name,
+                                           permission=FileSasPermissions(read=True),
+                                           expiry=datetime.datetime.utcnow() + datetime.timedelta(minutes=expiry))
+            file_url = share_client.url + '/' + effective_path + '/' + f.name
+            if '?' not in file_url:
+                file_url += '?' + sas
             result.append(
                 LogFile(
-                    f.name, service.make_file_url(share_name, effective_path, f.name, 'https', sas),
-                    False, f.properties.content_length))
+                    f.name, file_url, False, f.properties.content_length))
         else:
             result.append(LogFile(f.name, None, True, None))
     return result
