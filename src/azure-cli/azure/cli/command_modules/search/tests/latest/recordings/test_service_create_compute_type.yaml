@@ -1,0 +1,1150 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/azure_search_cli_test000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001","name":"azure_search_cli_test000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","test":"test_service_create_compute_type","date":"2025-09-12T01:18:50Z","module":"search"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '397'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:18:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-throttling-version:
+      - v2
+      x-msedge-ref:
+      - 'Ref A: 89CB328C0E484160B684C9CDDF15E47B Ref B: CO6AA3150218049 Ref C: 2025-09-12T01:18:54Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "eastus2euap", "properties": {"computeType": "default", "hostingMode":
+      "default", "partitionCount": 1, "publicNetworkAccess": "enabled", "replicaCount":
+      1}, "sku": {"name": "basic"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '195'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:19:02 GMT
+      elapsed-time:
+      - '7227'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=36c383ff-e0fb-4818-8b53-3e88239797c1/eastus2euap/096dcb08-bdf4-448f-9057-6917095b41e1
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '800'
+      x-ms-throttling-version:
+      - v2
+      x-msedge-ref:
+      - 'Ref A: 018D3B1A7EC4404E9BCF265C0F6F4F7F Ref B: CO6AA3150219035 Ref C: 2025-09-12T01:18:54Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:19:03 GMT
+      elapsed-time:
+      - '94'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: FB8C79E57E964C3B9FCEC990AE7985A4 Ref B: MWH011020808040 Ref C: 2025-09-12T01:19:03Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:19:33 GMT
+      elapsed-time:
+      - '61'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 7EA60D2F36684E5BB1D12EC00AF439BA Ref B: CO6AA3150220019 Ref C: 2025-09-12T01:19:34Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:20:04 GMT
+      elapsed-time:
+      - '67'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-throttling-version:
+      - v2
+      x-msedge-ref:
+      - 'Ref A: 428646801BAC44C38A6936CDFCB45258 Ref B: MWH011020806023 Ref C: 2025-09-12T01:20:04Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:20:34 GMT
+      elapsed-time:
+      - '60'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-throttling-version:
+      - v2
+      x-msedge-ref:
+      - 'Ref A: 6B5FBC4057FA46E382CA3128DAA65705 Ref B: MWH011020806023 Ref C: 2025-09-12T01:20:35Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:21:05 GMT
+      elapsed-time:
+      - '64'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: D2A418B9EE5F4AAF977A9090D37C7F75 Ref B: CO6AA3150220031 Ref C: 2025-09-12T01:21:05Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:21:35 GMT
+      elapsed-time:
+      - '64'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-throttling-version:
+      - v2
+      x-msedge-ref:
+      - 'Ref A: 10C4B6F202794E9A8AA7E3794CCA1B38 Ref B: CO6AA3150220051 Ref C: 2025-09-12T01:21:36Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:22:05 GMT
+      elapsed-time:
+      - '63'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-throttling-version:
+      - v2
+      x-msedge-ref:
+      - 'Ref A: E22BE85DA0CD49B894902C5AB4242426 Ref B: MWH011020807036 Ref C: 2025-09-12T01:22:06Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:22:36 GMT
+      elapsed-time:
+      - '65'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 8B4D563CE14B44058E043C9078C279D0 Ref B: MWH011020807042 Ref C: 2025-09-12T01:22:36Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:23:06 GMT
+      elapsed-time:
+      - '75'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: BEAF73E66AA449C082F57A313F300DB9 Ref B: CO6AA3150218027 Ref C: 2025-09-12T01:23:07Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:23:37 GMT
+      elapsed-time:
+      - '83'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: C4D77A430F814635A458B55AB95328F7 Ref B: CO6AA3150217025 Ref C: 2025-09-12T01:23:37Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:24:08 GMT
+      elapsed-time:
+      - '67'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-throttling-version:
+      - v2
+      x-msedge-ref:
+      - 'Ref A: 13F318590CC144C3A0D9C208FDEE3B1E Ref B: CO6AA3150220021 Ref C: 2025-09-12T01:24:08Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:24:38 GMT
+      elapsed-time:
+      - '63'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: FF2B68E63B23436EA7634908FD95D371 Ref B: MWH011020807025 Ref C: 2025-09-12T01:24:38Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:25:09 GMT
+      elapsed-time:
+      - '63'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 30BE5FA844304A5883639C0B9DB748D4 Ref B: MWH011020808034 Ref C: 2025-09-12T01:25:09Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:25:40 GMT
+      elapsed-time:
+      - '63'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: AB2CDCD74FDE4CE0A3AB729183B7B5E4 Ref B: CO6AA3150218045 Ref C: 2025-09-12T01:25:39Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:26:10 GMT
+      elapsed-time:
+      - '60'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 8ED8A8D177584F7B8E624F37CBA4A3FA Ref B: CO6AA3150219047 Ref C: 2025-09-12T01:26:10Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:26:40 GMT
+      elapsed-time:
+      - '64'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 283E619A6CCE4E93BAC82F89E26DD59B Ref B: MWH011020808042 Ref C: 2025-09-12T01:26:41Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:27:11 GMT
+      elapsed-time:
+      - '85'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-throttling-version:
+      - v2
+      x-msedge-ref:
+      - 'Ref A: 7F6ABD3F43ED426ABDA9057B0C3011D8 Ref B: CO6AA3150218023 Ref C: 2025-09-12T01:27:11Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:39:51 GMT
+      elapsed-time:
+      - '65'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: 1D149870F0934AF19CCFB4BB2AACD00A Ref B: MWH011020809042 Ref C: 2025-09-12T01:39:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"provisioning","statusDetails":"","provisioningState":"provisioning","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '968'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 01:40:22 GMT
+      elapsed-time:
+      - '68'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: CA037019563146D8B4909675C534F12E Ref B: CO6AA3150217031 Ref C: 2025-09-12T01:40:22Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - search service create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n -g --sku --replica-count --partition-count --compute-type
+      User-Agent:
+      - AZURECLI/2.76.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-11-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002?api-version=2025-05-01
+  response:
+    body:
+      string: '{"location":"East US 2 EUAP","tags":{},"properties":{"replicaCount":1,"partitionCount":1,"endpoint":"https://test000002.search.windows.net","status":"running","statusDetails":"","provisioningState":"succeeded","hostingMode":"default","computeType":"default","publicNetworkAccess":"Enabled","networkRuleSet":{"ipRules":[],"bypass":"None"},"privateEndpointConnections":[],"sharedPrivateLinkResources":[],"encryptionWithCmk":{"enforcement":"Unspecified","encryptionComplianceStatus":"Compliant"},"disableLocalAuth":false,"authOptions":{"apiKeyOnly":{}},"dataExfiltrationProtections":[],"semanticSearch":"free","upgradeAvailable":"notAvailable","serviceUpgradedAt":null},"systemData":{"createdAt":"2025-09-12T01:19:03.259Z"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/azure_search_cli_test000001/providers/Microsoft.Search/searchServices/test000002","name":"test000002","type":"Microsoft.Search/searchServices","sku":{"name":"basic"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '960'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 12 Sep 2025 06:28:34 GMT
+      elapsed-time:
+      - '85'
+      etag:
+      - W/"datetime'2025-09-12T01%3A19%3A03.2654546Z'"
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      request-id:
+      - 72796f86-8f76-11f0-868c-683421896a24
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: F5B838A25DE14DFE998BAB0FBE4D096B Ref B: CO6AA3150220011 Ref C: 2025-09-12T06:28:34Z'
+    status:
+      code: 200
+      message: OK
+version: 1

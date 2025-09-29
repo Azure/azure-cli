@@ -259,6 +259,11 @@ ingress_gateway_types = [
 ]
 
 # azure container storage
+container_storage_versions = [
+    "1",
+    "2"
+]
+
 storage_pool_types = [
     CONST_STORAGE_POOL_TYPE_AZURE_DISK,
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
@@ -516,6 +521,7 @@ def load_arguments(self, _):
         )
         c.argument(
             "container_storage_version",
+            arg_type=get_enum_type(container_storage_versions),
             help="set azure container storage version, the latest version will be installed by default",
         )
         c.argument(
@@ -724,6 +730,7 @@ def load_arguments(self, _):
         )
         c.argument(
             "container_storage_version",
+            arg_type=get_enum_type(container_storage_versions),
             help="set azure container storage version, the latest version will be installed by default",
         )
         c.argument(

@@ -884,6 +884,7 @@ class BicepTemplateSizeOptimizationScenarioTest(ScenarioTest):
     correctly in real deployment scenarios and generates recordings for CI/CD.
     """
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_bicep_size_opt')
     def test_bicep_deployment_size_optimization(self, resource_group):
         """Test that bicep deployments work correctly with size optimization.
@@ -955,6 +956,7 @@ output keyVaultId string = keyVault.id
             if os.path.exists(bicep_file_path):
                 os.unlink(bicep_file_path)
 
+    @live_only()
     @ResourceGroupPreparer(name_prefix='cli_test_bicep_vs_arm_opt')  
     def test_bicep_vs_arm_template_deployment(self, resource_group):
         """Test both bicep and ARM template deployments work correctly.

@@ -613,7 +613,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
-        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard"]), default="Standard")
+        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard", "StandardV2"]), default="Standard")
         c.argument('tier', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(["Regional", "Global"]))
         c.ignore('dns_name_type')
         c.argument('edge_zone', edge_zone)

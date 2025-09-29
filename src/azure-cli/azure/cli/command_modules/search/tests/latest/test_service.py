@@ -14,7 +14,7 @@ class AzureSearchServicesTests(ScenarioTest):
         self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
         super().setUp()
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westcentralus')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_service_create_skus(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -120,7 +120,7 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service create -n {name} -g {rg} --sku {sku_name} --public-access {public_network_access}',
+            'az search service create -n {name} -g {rg} --sku {sku_name} --public-network-access {public_network_access}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
@@ -139,7 +139,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('sku.name', '{sku_name}'),
                     self.check('identity.type', '{identity_type}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westus')
     def test_service_update(self, resource_group):
         self.kwargs.update({
             'sku_name': 'standard',
@@ -227,7 +227,7 @@ class AzureSearchServicesTests(ScenarioTest):
                     self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
         self.assertTrue(len(_search_service['networkRuleSet']['ipRules']) == 0)
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westus')
     def test_service_update_private_endpoint(self, resource_group):
         self.kwargs.update({
             'sku_name': 'basic',
@@ -236,7 +236,7 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service create -n {name} -g {rg} --sku {sku_name} --public-access {public_network_access}',
+            'az search service create -n {name} -g {rg} --sku {sku_name} --public-network-access {public_network_access}',
             checks=[self.check('name', '{name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
@@ -246,7 +246,7 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service update -n {name} -g {rg} --public-access {public_network_access}',
+            'az search service update -n {name} -g {rg} --public-network-access {public_network_access}',
             checks=[self.check('name', '{name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
 
@@ -255,11 +255,11 @@ class AzureSearchServicesTests(ScenarioTest):
         })
 
         self.cmd(
-            'az search service update -n {name} -g {rg} --public-access {public_network_access}',
+            'az search service update -n {name} -g {rg} --public-network-access {public_network_access}',
             checks=[self.check('name', '{name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')])
 
-    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westcentralus')
     def test_service_update_msi(self, resource_group):
         self.kwargs.update({
             'sku_name': 'basic',
@@ -458,6 +458,47 @@ class AzureSearchServicesTests(ScenarioTest):
                          self.check('replicaCount', '{replica_count}'),
                          self.check('partitionCount', '{partition_count}'),
                          self.check('semanticSearch', '{semantic_search}')])
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
+    def test_service_create_compute_type(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'basic',
+            'name': self.create_random_name(prefix='test', length=24),
+            'replica_count': 1,
+            'partition_count': 1,
+            'compute_type': 'default'
+        })
+
+        self.cmd(
+            'az search service create -n {name} -g {rg} --sku {sku_name}'
+            ' --replica-count {replica_count} --partition-count {partition_count}'
+            ' --compute-type {compute_type}',
+            checks=[self.check('name', '{name}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('replicaCount', '{replica_count}'),
+                    self.check('partitionCount', '{partition_count}'),
+                    self.check('computeType', '{compute_type}')])
+
+    @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
+    def test_service_create_data_exfiltration_protections(self, resource_group):
+        self.kwargs.update({
+            'sku_name': 'basic',
+            'name': self.create_random_name(prefix='test', length=24),
+            'replica_count': 1,
+            'partition_count': 1,
+            'dataExfiltrationProtections': 'BlockAll'
+        })
+
+        _search_service = self.cmd(
+            'az search service create -n {name} -g {rg} --sku {sku_name}'
+            ' --replica-count {replica_count} --partition-count {partition_count}'
+            ' --data-exfiltration-protections {dataExfiltrationProtections}',
+            checks=[self.check('name', '{name}'),
+                    self.check('sku.name', '{sku_name}'),
+                    self.check('replicaCount', '{replica_count}'),
+                    self.check('partitionCount', '{partition_count}')]).get_output_in_json()
+        self.assertTrue(len(_search_service['dataExfiltrationProtections']) == 1)
+        self.assertTrue(_search_service['dataExfiltrationProtections'][0] == 'BlockAll')
 
 if __name__ == '__main__':
     unittest.main()

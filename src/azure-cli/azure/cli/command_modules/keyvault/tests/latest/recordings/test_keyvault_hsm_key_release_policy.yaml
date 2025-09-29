@@ -17,7 +17,7 @@ interactions:
       ParameterSetName:
       - --kty -n --exportable --policy --hsm-name
       User-Agent:
-      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: POST
     uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr1-000003/create?api-version=7.6-preview.2
   response:
@@ -35,7 +35,7 @@ interactions:
       strict-transport-security:
       - max-age=31536000; includeSubDomains
       www-authenticate:
-      - Bearer authorization="https://login.microsoftonline.com/b5ee6c06-c2c2-4e3c-8606-5f170cee077a",
+      - Bearer authorization="https://login.microsoftonline.com/7b31ddc4-9101-4ef0-a387-79ce181cacdb",
         resource="https://managedhsm.azure.net"
       x-content-type-options:
       - nosniff
@@ -65,12 +65,12 @@ interactions:
       ParameterSetName:
       - --kty -n --exportable --policy --hsm-name
       User-Agent:
-      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: POST
     uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr1-000003/create?api-version=7.6-preview.2
   response:
     body:
-      string: '{"attributes":{"created":1745290435,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1745290435},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr1-000003/db7ce8b256bf4e162b3991ed2b1f4263","kty":"EC-HSM","x":"PPONCYFUlSFacbQbn2tVYo11_I56sT4fwLj3LXA1HWE","y":"S9jwA2tmOlruWoKFNvv6RSYAjCBSHON6z8cnpOAMBO4"},"release_policy":{"contentType":"application/json;
+      string: '{"attributes":{"created":1757395623,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1757395623},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr1-000003/74c7f2e63b7045599319b091833e5f8c","kty":"EC-HSM","x":"JpLoxHziM4D0WUdLPChAEgXttWONLI-Po-jBCjPPLTE","y":"atL80p7gEzMVwxSRDyrxtge3srmnJOVR4ABf1q2QqNI"},"release_policy":{"contentType":"application/json;
         charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1zZ3gtaXMtZGVidWdnYWJsZSIsImVxdWFscyI6ImZhbHNlIn1dLCJhdXRob3JpdHkiOiJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8ifV0sInZlcnNpb24iOiIxLjAuMCJ9","immutable":false}}'
     headers:
       cache-control:
@@ -88,11 +88,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.44;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=167.220.255.3;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - uksouth
       x-ms-server-latency:
-      - '518'
+      - '188'
     status:
       code: 200
       message: OK
@@ -110,24 +110,23 @@ interactions:
       ParameterSetName:
       - --kty -n --exportable --default-cvm-policy --hsm-name
       User-Agent:
-      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/managedHSMs?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.KeyVault/managedHSMs?api-version=2025-05-01
   response:
     body:
-      string: '{"value":[{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_krp000001/providers/Microsoft.KeyVault/managedHSMs/clitesthsmkrp000002","name":"clitesthsmkrp000002","type":"Microsoft.KeyVault/managedHSMs","location":"uksouth","tags":{},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2025-04-22T02:41:25.559Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2025-04-22T02:41:25.559Z"},"properties":{"tenantId":"b5ee6c06-c2c2-4e3c-8606-5f170cee077a","hsmUri":"https://clitesthsmkrp000002.managedhsm.azure.net/","initialAdminObjectIds":["9aec9bf7-7066-4c57-bc6d-3bc7935e826d"],"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":false,"provisioningState":"Succeeded","statusMessage":"The
-        Managed HSM is provisioned and ready to use.","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[]},"publicNetworkAccess":"Enabled","regions":[],"securityDomainProperties":{"activationStatus":"NotActivated","activationStatusMessage":"Your
-        HSM has been provisioned, but cannot be used for cryptographic operations
-        until it is activated. To activate the HSM, download the security domain."}}}]}'
+      string: '{"value":[{"sku":{"family":"B","name":"Standard_B1"},"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_hsm_krp000001/providers/Microsoft.KeyVault/managedHSMs/clitesthsmkrp000002","name":"clitesthsmkrp000002","type":"Microsoft.KeyVault/managedHSMs","location":"uksouth","tags":{},"systemData":{"createdBy":"test@example.com","createdByType":"User","createdAt":"2025-09-09T05:13:09.929Z","lastModifiedBy":"test@example.com","lastModifiedByType":"User","lastModifiedAt":"2025-09-09T05:13:09.929Z"},"properties":{"tenantId":"7b31ddc4-9101-4ef0-a387-79ce181cacdb","hsmUri":"https://clitesthsmkrp000002.managedhsm.azure.net/","initialAdminObjectIds":["cfd63e61-7aec-4d54-ba2c-394c6d10df25"],"enableSoftDelete":true,"softDeleteRetentionInDays":7,"enablePurgeProtection":false,"provisioningState":"Succeeded","statusMessage":"The
+        Managed HSM is provisioned and ready to use.","networkAcls":{"bypass":"AzureServices","defaultAction":"Allow","ipRules":[],"virtualNetworkRules":[],"serviceTags":[]},"publicNetworkAccess":"Enabled","regions":[],"securityDomainProperties":{"activationStatus":"Active","activationStatusMessage":"Your
+        HSM has been activated and can be used for cryptographic operations."}}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1295'
+      - '1227'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Apr 2025 02:53:56 GMT
+      - Tue, 09 Sep 2025 05:27:06 GMT
       pragma:
       - no-cache
       strict-transport-security:
@@ -139,13 +138,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-keyvault-service-version:
-      - 2.2.66.0
+      - 2.2.317.0
       x-ms-original-request-ids:
-      - a5d88dd3-6039-436f-a0e9-b3a6ffb8c0d8
+      - 855aaa72-0af7-4e05-aadc-220d320ba5a5
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: 76BF18E788484516A0E8678E72205BA7 Ref B: MAA201060515045 Ref C: 2025-04-22T02:53:56Z'
+      - 'Ref A: 18BAE414A4F24B96A3935C0F9FA44A4A Ref B: MAA201060515045 Ref C: 2025-09-09T05:27:04Z'
     status:
       code: 200
       message: OK
@@ -163,7 +162,7 @@ interactions:
       ParameterSetName:
       - --kty -n --exportable --default-cvm-policy --hsm-name
       User-Agent:
-      - python/3.11.9 (Windows-10-10.0.26100-SP0) AZURECLI/2.71.0
+      - python/3.11.9 (Windows-10-10.0.26100-SP0) AZURECLI/2.77.0
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.Attestation/Locations/uksouth/defaultProvider?api-version=2020-10-01
   response:
@@ -178,7 +177,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 22 Apr 2025 02:53:58 GMT
+      - Tue, 09 Sep 2025 05:27:06 GMT
       expires:
       - '-1'
       pragma:
@@ -190,13 +189,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-maa-service-version:
-      - 1.11.03004.4066
+      - 1.11.03158.4740
       x-ms-operation-identifier:
-      - tenantId=b5ee6c06-c2c2-4e3c-8606-5f170cee077a,objectId=9aec9bf7-7066-4c57-bc6d-3bc7935e826d/southeastasia/ffed6f57-fe08-486b-9620-077428ee6f50
+      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=cfd63e61-7aec-4d54-ba2c-394c6d10df25/indonesiacentral/432ce89f-0fbd-4fa9-8080-f20e22fd890c
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '3749'
       x-msedge-ref:
-      - 'Ref A: 09F9AB46FC594F75B4F7788E932F7B5C Ref B: MAA201060513025 Ref C: 2025-04-22T02:53:58Z'
+      - 'Ref A: A03A439FF0D3442C83447E9369B58623 Ref B: MAA201060516035 Ref C: 2025-09-09T05:27:06Z'
     status:
       code: 200
       message: OK
@@ -219,12 +218,12 @@ interactions:
       ParameterSetName:
       - --kty -n --exportable --default-cvm-policy --hsm-name
       User-Agent:
-      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: POST
     uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/create?api-version=7.6-preview.2
   response:
     body:
-      string: '{"attributes":{"created":1745290439,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1745290439},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/469f11482537405bad10217484f5efb4","kty":"EC-HSM","x":"azjMVagtpEYUdw5KDwDsfWKMgTpuw8Ro5_qC56HekBg","y":"XugycqKmVdTe-gY9tQHzr01SE_uRcxbqeuztcXC-Oh0"},"release_policy":{"contentType":"application/json;
+      string: '{"attributes":{"created":1757395628,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1757395628},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/3d5e692ca5410ca90b50a4eacb30b680","kty":"EC-HSM","x":"2oasDqyK_LI9PK3XUpFbSCOfob-yQxQrdAw7mofkoxE","y":"YoKuCqfAZ1YBaearuxU-iq-fpJ96D8Db-4ch6_XHOpI"},"release_policy":{"contentType":"application/json;
         charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1jb21wbGlhbmNlLXN0YXR1cyIsImVxdWFscyI6ImF6dXJlLWNvbXBsaWFudC1jdm0ifV0sImF1dGhvcml0eSI6Imh0dHBzOi8vc2hhcmVkdWtzLnVrcy5hdHRlc3QuYXp1cmUubmV0LyJ9XSwidmVyc2lvbiI6IjEuMC4wIn0","immutable":false}}'
     headers:
       cache-control:
@@ -242,11 +241,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.44;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=167.220.255.3;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - uksouth
       x-ms-server-latency:
-      - '125'
+      - '130'
     status:
       code: 200
       message: OK
@@ -269,12 +268,12 @@ interactions:
       ParameterSetName:
       - --policy --immutable -n --hsm-name
       User-Agent:
-      - AZURECLI/2.71.0 azsdk-python-core/1.31.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
+      - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26100-SP0)
     method: PATCH
     uri: https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/?api-version=7.6-preview.2
   response:
     body:
-      string: '{"attributes":{"created":1745290439,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1745290441},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/469f11482537405bad10217484f5efb4","kty":"EC-HSM","x":"azjMVagtpEYUdw5KDwDsfWKMgTpuw8Ro5_qC56HekBg","y":"XugycqKmVdTe-gY9tQHzr01SE_uRcxbqeuztcXC-Oh0"},"release_policy":{"contentType":"application/json;
+      string: '{"attributes":{"created":1757395628,"enabled":true,"exportable":true,"recoverableDays":7,"recoveryLevel":"CustomizedRecoverable+Purgeable","updated":1757395630},"key":{"crv":"P-256","key_ops":["verify","deriveKey","sign"],"kid":"https://clitesthsmkrp000002.managedhsm.azure.net/keys/skr2-000004/3d5e692ca5410ca90b50a4eacb30b680","kty":"EC-HSM","x":"2oasDqyK_LI9PK3XUpFbSCOfob-yQxQrdAw7mofkoxE","y":"YoKuCqfAZ1YBaearuxU-iq-fpJ96D8Db-4ch6_XHOpI"},"release_policy":{"contentType":"application/json;
         charset=utf-8","data":"eyJhbnlPZiI6W3siYWxsT2YiOlt7ImNsYWltIjoieC1tcy1zZ3gtaXMtZGVidWdnYWJsZSIsImVxdWFscyI6ImZhbHNlIn1dLCJhdXRob3JpdHkiOiJodHRwczovL3NoYXJlZGV1cy5ldXMuYXR0ZXN0LmF6dXJlLm5ldC8ifV0sInZlcnNpb24iOiIxLjAuMCJ9","immutable":true}}'
     headers:
       cache-control:
@@ -292,11 +291,11 @@ interactions:
       x-frame-options:
       - SAMEORIGIN
       x-ms-keyvault-network-info:
-      - conn_type=Ipv4;addr=167.220.255.44;act_addr_fam=Ipv4;
+      - conn_type=Ipv4;addr=167.220.255.3;act_addr_fam=Ipv4;
       x-ms-keyvault-region:
       - uksouth
       x-ms-server-latency:
-      - '893'
+      - '937'
     status:
       code: 200
       message: OK

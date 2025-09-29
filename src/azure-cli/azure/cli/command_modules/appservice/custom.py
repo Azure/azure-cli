@@ -1666,7 +1666,12 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
         progress_message = 'Uploading {} {}%'.format(progress_bar, percents)
         cmd.cli_ctx.get_progress_controller().add(message=progress_message)
 
-    blob_client = container_client.upload_blob(blob_name, src, validate_content=True, progress_hook=progress_callback)
+    blob_client = None
+    import os
+    with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
+        zip_content = fs.read()
+        blob_client = container_client.upload_blob(blob_name, zip_content, validate_content=True,
+                                                   progress_hook=progress_callback)
 
     now = datetime.datetime.utcnow()
     blob_start = now - datetime.timedelta(minutes=10)
@@ -6092,7 +6097,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                       deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None):
+                       deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None,
+                       auto_generated_domain_name_label_scope=None):
     # pylint: disable=too-many-statements, too-many-branches
 
     if functions_version is None and flexconsumption_location is None:
@@ -6224,7 +6230,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         site_config.http20_proxy_flag = None
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
-                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only)
+                           virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
+                           auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
 
     plan_info = None
     if runtime is not None:

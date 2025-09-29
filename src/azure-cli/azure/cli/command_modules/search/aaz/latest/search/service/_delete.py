@@ -20,9 +20,9 @@ class Delete(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-09-01",
+        "version": "2025-05-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2022-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.search/searchservices/{}", "2025-05-01"],
         ]
     }
 
@@ -47,9 +47,12 @@ class Delete(AAZCommand):
         )
         _args_schema.search_service_name = AAZStrArg(
             options=["-n", "--name", "--search-service-name"],
-            help="The name of the Azure Cognitive Search service associated with the specified resource group.",
+            help="The name of the Azure AI Search service associated with the specified resource group.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^(?=.{2,60}$)[a-z0-9][a-z0-9]+(-[a-z0-9]+)*$",
+            ),
         )
         return cls._args_schema
 
@@ -116,7 +119,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-09-01",
+                    "api-version", "2025-05-01",
                     required=True,
                 ),
             }

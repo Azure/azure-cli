@@ -596,7 +596,7 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('exists', True))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(location='eastus2euap', kind='FileStorage', sku='Premium_LRS')
+    @StorageAccountPreparer(location='eastus2', kind='FileStorage', sku='Premium_LRS')
     def test_storage_file_share_nfs_scenario(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         share_name = self.create_random_name('share', 24)
