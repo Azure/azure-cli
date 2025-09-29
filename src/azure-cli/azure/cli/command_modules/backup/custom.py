@@ -1948,17 +1948,17 @@ def reconfigure_vm_protection(cmd, item, source_vault_name, source_vault_resourc
     """
     logger.warning("(VM) Starting backup protection reconfiguration from source vault '%s' to destination vault '%s'...",
                    source_vault_name, new_vault_name)
-    
+
     # Step 1: Stop protection in old vault (retain data)
     logger.warning("Step 1: Stopping protection in old vault...")
-    disable_opstat = _disable_protection_in_old_vault(cmd, source_vault_resource_group, source_vault_name,
-                                                      item, retain_as_per_policy, tenant_id)
-    
+    _disable_protection_in_old_vault(cmd, source_vault_resource_group, source_vault_name,
+                                     item, retain_as_per_policy, tenant_id)
+
     # Step 2: Enable protection in new vault
     logger.warning("Step 2: Enabling protection in new vault...")
     enable_result = _enable_vm_protection_in_new_vault(cmd, new_vault_resource_group, new_vault_name,
                                                        item, new_policy_name)
-    
+
     logger.warning("(VM) Backup protection reconfiguration completed successfully.")
     return enable_result
 
@@ -1966,7 +1966,7 @@ def reconfigure_vm_protection(cmd, item, source_vault_name, source_vault_resourc
 def _disable_protection_in_old_vault(cmd, vault_resource_group, vault_name, item, retain_as_per_policy, tenant_id):
     """Stop protection in the old vault"""
     protected_items_client = protected_items_cf(cmd.cli_ctx)
-    
+
     # Use the existing disable_protection function
     return disable_protection(cmd, protected_items_client, vault_resource_group, vault_name, item,
                               retain_as_per_policy, tenant_id)
@@ -1974,12 +1974,12 @@ def _disable_protection_in_old_vault(cmd, vault_resource_group, vault_name, item
 
 def _enable_vm_protection_in_new_vault(cmd, vault_resource_group, vault_name, old_item, policy_name):
     """Enable VM protection in new vault"""
-    
+
     # Extract VM information from the protected item
     vm_id = _extract_vm_id_from_protected_item(old_item)
-    
+
     diskslist = _extract_disk_list_from_protected_item(old_item)
-    
+
     # Use the existing enable_protection_for_vm function
     protected_items_client = protected_items_cf(cmd.cli_ctx)
     return enable_protection_for_vm(cmd, protected_items_client, vault_resource_group, vault_name,
@@ -1991,26 +1991,26 @@ def _extract_vm_id_from_protected_item(protected_item):
     # The VM ID is typically in the sourceResourceId property
     if hasattr(protected_item.properties, 'source_resource_id'):
         return protected_item.properties.source_resource_id
-    
+
     # Fallback: try to extract from the virtual machine id property
     if hasattr(protected_item.properties, 'virtual_machine_id'):
         return protected_item.properties.virtual_machine_id
-    
+
     raise CLIError("Could not extract VM resource ID from protected item")
 
 
 def _extract_disk_list_from_protected_item(protected_item):
     """Extract the list of protected disks from the protected item"""
     if (hasattr(protected_item.properties, 'extended_info') and
-        protected_item.properties.extended_info and
-        hasattr(protected_item.properties.extended_info, 'disk_exclusion_properties') and
-        protected_item.properties.extended_info.disk_exclusion_properties):
-        
+            protected_item.properties.extended_info and
+            hasattr(protected_item.properties.extended_info, 'disk_exclusion_properties') and
+            protected_item.properties.extended_info.disk_exclusion_properties):
+
         disk_props = protected_item.properties.extended_info.disk_exclusion_properties
-        
+
         # Return the list of LUNs that were originally protected
         if hasattr(disk_props, 'disk_lun_list'):
             return disk_props.disk_lun_list
-    
+
     # If we can't extract disk info, return None to protect all disks
     return None

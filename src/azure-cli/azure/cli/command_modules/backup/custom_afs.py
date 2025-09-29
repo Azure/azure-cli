@@ -19,7 +19,7 @@ from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
     resources_cf, backup_protected_items_cf
-from azure.cli.core.azclierror import ArgumentUsageError
+from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -44,14 +44,17 @@ def reconfigure_afs_protection(cmd, item, source_vault_name, source_vault_rg,
     4. Enable protection for the same file share name in destination vault with new policy.
     5. Return the newly protected item from destination vault.
     """
-    logger.warning("For Storage reconfigure protection, all backup items within the container must have protection disabled first.")
+    logger.warning("For Storage reconfigure protection, all backup items within the "
+                   "container must have protection disabled first.")
 
     # 1. Disable in old vault (retain as per policy if requested)
     items_client = backup_protected_items_cf(cmd.cli_ctx)
-    disable_protection(cmd, items_client, source_vault_rg, source_vault_name, item, retain_as_per_policy, tenant_id)
+    disable_protection(cmd, items_client, source_vault_rg, source_vault_name, item,
+                       retain_as_per_policy, tenant_id)
 
     # 2. Unregister container in old vault only if this was the last protected item for that storage account
-    _maybe_unregister_storage_account(cmd, items_client, source_vault_rg, source_vault_name, item.properties.container_name)
+    _maybe_unregister_storage_account(cmd, items_client, source_vault_rg, source_vault_name,
+                                      item.properties.container_name)
 
     # 3. Enable protection in destination vault - also registers storage account in destination vault
     new_item = enable_for_AzureFileShare(cmd, items_client, new_vault_rg, new_vault_name, item.name,

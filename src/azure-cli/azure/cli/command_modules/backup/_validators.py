@@ -137,14 +137,14 @@ def validate_archive_restore(recovery_point, rehydration_priority):
 
 
 def validate_reconfigure_cli_parameters(source_vault_name, source_vault_resource_group, new_vault_name, new_vault_resource_group,
-                                        backup_management_type, workload_type, new_policy_name):
+                                        backup_management_type, workload_type):
     """Top-level CLI validation for backup reconfiguration (name / type sanity checks).
 
     Note: Source vault is always the vault specified by --vault-name / --resource-group in the command context."""
 
     # Ensure old and new vaults are different
-    if (source_vault_name.lower() == new_vault_name.lower() and 
-        source_vault_resource_group.lower() == new_vault_resource_group.lower()):
+    if (source_vault_name.lower() == new_vault_name.lower() and
+            source_vault_resource_group.lower() == new_vault_resource_group.lower()):
         raise InvalidArgumentValueError("Source and destination vaults cannot be the same")
 
     # Validate workload type is provided for Azure workloads

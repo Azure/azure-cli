@@ -32,12 +32,10 @@ def reconfigure_backup_protection(cmd, client, resource_group_name, vault_name, 
     # Common CLI-level validation (different vaults, workload type rules etc.)
     validate_reconfigure_cli_parameters(vault_name, resource_group_name,
                                         new_vault_name, new_vault_resource_group,
-                                        backup_management_type, workload_type,
-                                        new_policy_name)
+                                        backup_management_type, workload_type)
 
     # Fetch the protected item from old vault (use existing show_item logic)
-    items_client = backup_protected_items_cf(cmd.cli_ctx)
-    item = show_item(cmd, items_client, resource_group_name, vault_name,
+    item = show_item(cmd, client, resource_group_name, vault_name,
                      container_name, item_name, backup_management_type, workload_type)
     custom_help.validate_item(item)
     if isinstance(item, list):  # Ambiguous friendly name
@@ -45,8 +43,11 @@ def reconfigure_backup_protection(cmd, client, resource_group_name, vault_name, 
 
     # Item-level validation (state, workload specifics)
     from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectionState
-    if item.properties.protection_state not in [ProtectionState.protected, ProtectionState.protection_stopped]:
-        raise ValidationError(f"Reconfiguration only supported for items in states: Protected or ProtectionStopped. Current state: {item.properties.protection_state}")
+    if item.properties.protection_state not in [ProtectionState.protected,
+                                                ProtectionState.protection_stopped]:
+        raise ValidationError(f"Reconfiguration only supported for items in states: Protected or "
+                              f"ProtectionStopped. Current state: "
+                              f"{item.properties.protection_state}")
 
     # Dispatch by backup management type
     dispatch_type = backup_management_type.lower()
@@ -55,7 +56,7 @@ def reconfigure_backup_protection(cmd, client, resource_group_name, vault_name, 
                                                 new_vault_name, new_vault_resource_group,
                                                 new_policy_name, retain_as_per_policy, tenant_id)
     if dispatch_type == 'azurestorage':
-        return custom_afs.reconfigure_afs_protection(cmd, item,vault_name, resource_group_name,
+        return custom_afs.reconfigure_afs_protection(cmd, item, vault_name, resource_group_name,
                                                      new_vault_name, new_vault_resource_group,
                                                      new_policy_name, retain_as_per_policy, tenant_id)
     if dispatch_type == 'azureworkload':

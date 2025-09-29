@@ -332,8 +332,8 @@ def load_arguments(self, _):
         c.argument('backup_management_type', backup_management_type)
         c.argument('workload_type', workload_type)
         c.argument('new_vault_name', help='Name of the destination Recovery Services vault.')
-        c.argument('new_vault_resource_group', help='Resource group name of the destination Recovery Services vault.')
-        c.argument('new_policy_name', policy_name_type, help='Name of the backup policy in the destination vault.')
+        c.argument('new_vault_resource_group', options_list=['--new-vault-resource-group', '--new-rg'], help='Resource group name of the destination Recovery Services vault.')
+        c.argument('new_policy_name', options_list=['--new-policy-name'], help='Name of the backup policy in the destination vault.')
         c.argument('retain_as_per_policy', arg_type=get_three_state_flag(), help='Retain existing recovery points as per current backup policy when stopping protection in the source vault (the source vault is always the one specified by --vault-name/--resource-group).')
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the source vault exists in a different tenant.')
 

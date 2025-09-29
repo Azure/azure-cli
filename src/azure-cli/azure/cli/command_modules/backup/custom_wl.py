@@ -62,11 +62,13 @@ def reconfigure_wl_protection(cmd, item, source_vault_name, source_vault_rg,
     4. Discover protectable item in destination vault and enable protection with new policy.
     5. Return newly protected item.
     """
-    logger.warning("For Workload reconfigure protection, all backup items within the container must have protection disabled first.")
+    logger.warning("For Workload reconfigure protection, all backup items within the "
+                   "container must have protection disabled first.")
 
     # 1. Disable in source vault
     items_client = backup_protected_items_cf(cmd.cli_ctx)
-    disable_protection(cmd, items_client, source_vault_rg, source_vault_name, item, retain_as_per_policy, tenant_id)
+    disable_protection(cmd, items_client, source_vault_rg, source_vault_name, item,
+                       retain_as_per_policy, tenant_id)
 
     # 2. Unregister container if last item
     _maybe_unregister_wl_container(cmd, items_client, source_vault_rg, source_vault_name,
@@ -74,11 +76,13 @@ def reconfigure_wl_protection(cmd, item, source_vault_name, source_vault_rg,
 
     # 3. Register workload container in destination vault.
     _register_wl_container_in_new_vault(cmd, item, new_vault_rg, new_vault_name, workload_type)
-    
+
     # 4. Discover protectable item in destination vault and enable
-    new_item = custom_base.enable_protection_for_azure_wl(cmd, items_client, new_vault_rg, new_vault_name,
-                                                          new_policy_name, protectable_item_type=item.properties.protected_item_type,
-                                                          protectable_item_name=item.name, server_name=item.properties.container_name,
+    new_item = custom_base.enable_protection_for_azure_wl(cmd, items_client, new_vault_rg,
+                                                          new_vault_name, new_policy_name,
+                                                          protectable_item_type=item.properties.protected_item_type,
+                                                          protectable_item_name=item.name,
+                                                          server_name=item.properties.container_name,
                                                           workload_type=workload_type)
     return new_item
 
@@ -93,9 +97,11 @@ def _register_wl_container_in_new_vault(cmd, item, resource_group_name, vault_na
     containers_client = backup_protection_containers_cf(cmd.cli_ctx)
     # Attempt register (if already registered enable step will proceed)
     try:
-        register_wl_container(cmd, containers_client, vault_name, resource_group_name, workload_type, resource_id, "AzureWorkload")
+        register_wl_container(cmd, containers_client, vault_name, resource_group_name,
+                              workload_type, resource_id, "AzureWorkload")
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning('Skipping container registration in new vault (may already exist): %s', str(ex))
+
 
 def _maybe_unregister_wl_container(cmd, items_client, resource_group_name, vault_name, container_name, workload_type):
     """Unregister workload container if no protected items remain."""
@@ -109,11 +115,13 @@ def _maybe_unregister_wl_container(cmd, items_client, resource_group_name, vault
 
     try:
         containers_client = backup_protection_containers_cf(cmd.cli_ctx)
-        return custom_base.unregister_container(cmd, containers_client, vault_name, resource_group_name, container_name, "AzureWorkload")
+        return custom_base.unregister_container(cmd, containers_client, vault_name, resource_group_name,
+                                                container_name, "AzureWorkload")
     except Exception as ex:  # pylint: disable=broad-except
         logger.warning('Skipping unregister workload container of container %s due to a failure: %s.'
                        ' Continuing the operation, but if the container is still registered, it may need to be '
                        'unregistered manually for the operation to succeed.', container_name, str(ex))
+
 
 # Mapping of workload type
 workload_type_map = {'MSSQL': 'SQLDataBase',
