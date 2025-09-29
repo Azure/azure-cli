@@ -62,7 +62,7 @@ def reconfigure_wl_protection(cmd, item, source_vault_name, source_vault_rg,
     4. Discover protectable item in destination vault and enable protection with new policy.
     5. Return newly protected item.
     """
-    logger.warning("For Workload reconfigure protection, all backup items within the container must be have protection disabled first.")
+    logger.warning("For Workload reconfigure protection, all backup items within the container must have protection disabled first.")
 
     # 1. Disable in source vault
     items_client = backup_protected_items_cf(cmd.cli_ctx)
