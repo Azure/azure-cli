@@ -44,14 +44,14 @@ def reconfigure_afs_protection(cmd, item, source_vault_name, source_vault_rg,
     4. Enable protection for the same file share name in destination vault with new policy.
     5. Return the newly protected item from destination vault.
     """
-    logger.warning("For Storage reconfigure protection, all backup items within the container must be have protection disabled first.")
+    logger.warning("For Storage reconfigure protection, all backup items within the container must have protection disabled first.")
 
     # 1. Disable in old vault (retain as per policy if requested)
     items_client = backup_protected_items_cf(cmd.cli_ctx)
     disable_protection(cmd, items_client, source_vault_rg, source_vault_name, item, retain_as_per_policy, tenant_id)
 
     # 2. Unregister container in old vault only if this was the last protected item for that storage account
-    _maybe_unregister_storage_account(cmd, client, source_vault_rg, source_vault_name, item.properties.container_name)
+    _maybe_unregister_storage_account(cmd, items_client, source_vault_rg, source_vault_name, item.properties.container_name)
 
     # 3. Enable protection in destination vault - also registers storage account in destination vault
     new_item = enable_for_AzureFileShare(cmd, items_client, new_vault_rg, new_vault_name, item.name,
@@ -73,9 +73,9 @@ def _maybe_unregister_storage_account(cmd, client, resource_group_name, vault_na
         containers_client = backup_protection_containers_cf(cmd.cli_ctx)
         unregister_afs_container(cmd, containers_client, vault_name, resource_group_name, container_name)
     except Exception as ex:  # pylint: disable=broad-except
-        raise logger.warning('Skipping unregister workload container of container %s due to a failure: %s.'
-                             ' Continuing the operation, but if the container is still registered, it may need to be '
-                             'unregistered manually for the operation to succeed.', container_name, str(ex))
+        logger.warning('Skipping unregister workload container of container %s due to a failure: %s.'
+                       ' Continuing the operation, but if the container is still registered, it may need to be '
+                       'unregistered manually for the operation to succeed.', container_name, str(ex))
 
 
 def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_name,

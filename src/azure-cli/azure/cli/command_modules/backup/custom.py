@@ -1963,10 +1963,6 @@ def reconfigure_vm_protection(cmd, item, source_vault_name, source_vault_resourc
     return enable_result
 
 
-
-    # Validation for VM handled upstream; keeping function removed after refactor
-
-
 def _disable_protection_in_old_vault(cmd, vault_resource_group, vault_name, item, retain_as_per_policy, tenant_id):
     """Stop protection in the old vault"""
     protected_items_client = protected_items_cf(cmd.cli_ctx)

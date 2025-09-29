@@ -111,9 +111,9 @@ def _maybe_unregister_wl_container(cmd, items_client, resource_group_name, vault
         containers_client = backup_protection_containers_cf(cmd.cli_ctx)
         return custom_base.unregister_container(cmd, containers_client, vault_name, resource_group_name, container_name, "AzureWorkload")
     except Exception as ex:  # pylint: disable=broad-except
-        raise logger.warning('Skipping unregister workload container of container %s due to a failure: %s.'
-                             ' Continuing the operation, but if the container is still registered, it may need to be '
-                             'unregistered manually for the operation to succeed.', container_name, str(ex))
+        logger.warning('Skipping unregister workload container of container %s due to a failure: %s.'
+                       ' Continuing the operation, but if the container is still registered, it may need to be '
+                       'unregistered manually for the operation to succeed.', container_name, str(ex))
 
 # Mapping of workload type
 workload_type_map = {'MSSQL': 'SQLDataBase',
