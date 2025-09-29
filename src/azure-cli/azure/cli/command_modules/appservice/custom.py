@@ -75,7 +75,7 @@ from .utils import (_normalize_sku,
                     _remove_list_duplicates, get_raw_functionapp,
                     register_app_provider)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
-                           check_resource_group_exists, set_location, get_site_availability, 
+                           check_resource_group_exists, set_location, get_site_availability,
                            get_regional_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name,

@@ -336,9 +336,10 @@ def get_site_availability(cmd, name):
 
 
 def get_regional_site_availability(cmd, location, name, resource_group_name, auto_generated_domain_name_label_scope):
-    """ This is used by az webapp up to verify if a site needs to be created or should just be deployed (regional check)"""
+    """ This is used by az webapp up to verify if a site needs to be created or should just be deployed
+      (regional check)"""
     client = web_client_factory(cmd.cli_ctx)
-    availability = client.regional_check_name_availability(location, 
+    availability = client.regional_check_name_availability(location,
                                                            name,
                                                            "Site",
                                                            resource_group_name,
