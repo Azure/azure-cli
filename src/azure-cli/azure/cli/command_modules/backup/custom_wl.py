@@ -33,7 +33,8 @@ from azure.cli.command_modules.backup._validators import datetime_type, validate
 from azure.cli.command_modules.backup._client_factory import protectable_containers_cf, \
     backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
     _backup_client_factory, recovery_points_cf, vaults_cf, aad_properties_cf, cross_region_restore_cf, \
-    backup_protection_intent_cf, recovery_points_passive_cf, protection_containers_cf, protection_policies_cf
+    backup_protection_intent_cf, recovery_points_passive_cf, protection_containers_cf, protection_policies_cf, \
+    protected_items_cf
 
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
@@ -66,12 +67,12 @@ def reconfigure_wl_protection(cmd, item, source_vault_name, source_vault_rg,
                    "container must have protection disabled first.")
 
     # 1. Disable in source vault
-    items_client = backup_protected_items_cf(cmd.cli_ctx)
+    items_client = protected_items_cf(cmd.cli_ctx)
     disable_protection(cmd, items_client, source_vault_rg, source_vault_name, item,
                        retain_as_per_policy, tenant_id)
 
     # 2. Unregister container if last item
-    _maybe_unregister_wl_container(cmd, items_client, source_vault_rg, source_vault_name,
+    _maybe_unregister_wl_container(cmd, backup_protected_items_cf(cmd.cli_ctx), source_vault_rg, source_vault_name,
                                    item.properties.container_name, workload_type)
 
     # 3. Register workload container in destination vault.
@@ -80,9 +81,9 @@ def reconfigure_wl_protection(cmd, item, source_vault_name, source_vault_rg,
     # 4. Discover protectable item in destination vault and enable
     new_item = custom_base.enable_protection_for_azure_wl(cmd, items_client, new_vault_rg,
                                                           new_vault_name, new_policy_name,
-                                                          protectable_item_type=item.properties.protected_item_type,
-                                                          protectable_item_name=item.name,
-                                                          server_name=item.properties.container_name,
+                                                          protectable_item_type="SQLDatabase",
+                                                          protectable_item_name=item.properties.friendly_name,
+                                                          server_name=item.properties.server_name,
                                                           workload_type=workload_type)
     return new_item
 
@@ -94,7 +95,7 @@ def _register_wl_container_in_new_vault(cmd, item, resource_group_name, vault_na
     if resource_id is None:
         raise CLIError('Cannot derive source resource id from workload item for reconfiguration.')
 
-    containers_client = backup_protection_containers_cf(cmd.cli_ctx)
+    containers_client = protection_containers_cf(cmd.cli_ctx)
     # Attempt register (if already registered enable step will proceed)
     try:
         register_wl_container(cmd, containers_client, vault_name, resource_group_name,
@@ -114,7 +115,7 @@ def _maybe_unregister_wl_container(cmd, items_client, resource_group_name, vault
         raise ValidationError('Cannot unregister container as other items are still protected.')
 
     try:
-        containers_client = backup_protection_containers_cf(cmd.cli_ctx)
+        containers_client = protection_containers_cf(cmd.cli_ctx)
         return custom_base.unregister_container(cmd, containers_client, vault_name, resource_group_name,
                                                 container_name, "AzureWorkload")
     except Exception as ex:  # pylint: disable=broad-except
