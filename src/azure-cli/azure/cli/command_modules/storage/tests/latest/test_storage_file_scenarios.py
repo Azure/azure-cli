@@ -656,3 +656,22 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             assert_with_checks(JMESPathCheck('mode', '0664'),
                                JMESPathCheck('owner', '3'),
                                JMESPathCheck('group', '4'))
+
+        # symbolic link
+        link_path = dir_name + '/' + 'link1'
+        target_path = 'target1/file1'
+        metadata = 'meta1=value1 meta2=value2'
+        owner = '6'
+        group = '7'
+
+        self.storage_cmd('storage file symbolic-link create --share-name {} --path {} --target {} '
+                         '--metadata {} --file-creation-time now --file-last-write-time now --owner {} --group {}',
+                         account_info, share_name, link_path, target_path, metadata, owner, group). \
+            assert_with_checks(JMESPathCheck('owner', '6'),
+                               JMESPathCheck('group', '7'))
+
+        from urllib.parse import quote
+        link_text = quote(target_path, safe=[])
+        self.storage_cmd('storage file symbolic-link show --share-name {} --path {}',
+                         account_info, share_name, link_path). \
+            assert_with_checks(JMESPathCheck('link_text', link_text))

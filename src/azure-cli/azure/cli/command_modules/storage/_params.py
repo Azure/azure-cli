@@ -2798,3 +2798,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                      'same share and the same storage account.')
         c.extra('lease',
                 help='Lease id, required if the file has an active lease.')
+
+    with self.argument_context('storage file symbolic-link create') as c:
+        c.extra('share_name', share_name_type, required=True)
+        c.register_path_argument()
+        c.argument('target', required=True,
+                help='Specifies the file path the symbolic link will point to. '
+                     'The file path can be either relative or absolute.')
+        c.extra('metadata', nargs='+',
+                help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
+                validator=validate_metadata)
+        c.extra('file_creation_time', help='Creation time for the file.')
+        c.extra('file_last_write_time', help='Last write time for the file.')
+        c.extra('owner', help='The owner of the file.')
+        c.extra('group', help='The owning group of the file.')
+        c.extra('lease',
+                help='Lease id, required if the file has an active lease. ')
+
+    with self.argument_context('storage file symbolic-link show') as c:
+        c.extra('share_name', share_name_type, required=True)
+        c.register_path_argument()
