@@ -591,7 +591,7 @@ short-summary: Manage protection of items in a Recovery Services vault.
 
 helps['backup protection reconfigure'] = """
 type: command
-short-summary: Reconfigure backup protection from an old vault to a new vault.
+short-summary: Reconfigures backup protection from an old vault to a new vault.
 examples:
   - name: Reconfigure VM backup from one vault to another
     text: |
