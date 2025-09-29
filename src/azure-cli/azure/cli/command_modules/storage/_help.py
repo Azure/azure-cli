@@ -3202,7 +3202,9 @@ helps['storage file symbolic-link create'] = """
     examples:
       - name: Create a symbolic link to an NFS file specified by path.
         text: |
-            az storage file symbolic-link create --account-name MyAccount --share-name share --path link_path --target original_path
+            az storage file symbolic-link create --account-name MyAccount --share-name share --path link_path 
+            --target target_path --metadata meta1=value1 meta2=value2 --file-creation-time now 
+            --file-last-write-time now --owner 6 --group 7
 """
 
 helps['storage file symbolic-link show'] = """
@@ -3211,5 +3213,5 @@ helps['storage file symbolic-link show'] = """
     examples:
       - name: Show the symbolic link to an NFS file specified by path.
         text: |
-            az storage file symbolic-link show --account-name MyAccount --share-name share --path link_path --target original_path
+            az storage file symbolic-link show --account-name MyAccount --share-name share --path link_path
 """

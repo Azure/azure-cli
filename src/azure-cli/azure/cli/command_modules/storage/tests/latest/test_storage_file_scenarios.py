@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from urllib.parse import quote
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, NoneCheck, StringCheck, StringContainCheck, JMESPathCheckExists)
 from ..storage_test_util import StorageScenarioMixin
@@ -670,7 +671,6 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             assert_with_checks(JMESPathCheck('owner', '6'),
                                JMESPathCheck('group', '7'))
 
-        from urllib.parse import quote
         link_text = quote(target_path, safe=[])
         self.storage_cmd('storage file symbolic-link show --share-name {} --path {}',
                          account_info, share_name, link_path). \
