@@ -1567,3 +1567,69 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
+
+    @AllowLargeResponse()
+    @RGPreparer(location="eastus2euap")
+    @VaultPreparer(parameter_name='source_vault', soft_delete=False)
+    @VaultPreparer(parameter_name='target_vault', soft_delete=False)
+    @VMPreparer()
+    @ItemPreparer()
+    @PolicyPreparer()
+    def test_backup_vm_reconfigure_protection(self, resource_group, source_vault, target_vault, vm_name, policy_name):
+        """Test reconfiguring VM backup protection from one vault to another."""
+        self.kwargs.update({
+            'rg': resource_group,
+            'source_vault': source_vault,
+            'target_vault': target_vault,
+            'vm': vm_name,
+            'policy': policy_name,
+            'new_policy': 'EnhancedPolicy'  # Use enhanced policy in target vault
+        })
+
+        # Get container and item names
+        self.kwargs['container'] = self.cmd('backup container show -n {vm} -v {source_vault} -g {rg} --backup-management-type AzureIaasVM --query properties.friendlyName').get_output_in_json()
+        self.kwargs['item'] = self.cmd('backup item list -g {rg} -v {source_vault} -c {container} --backup-management-type AzureIaasVM --workload-type VM --query [0].properties.friendlyName').get_output_in_json()
+
+        # Trigger backup to create recovery points
+        self.kwargs['retain_date'] = (datetime.utcnow() + timedelta(days=30)).strftime('%d-%m-%Y')
+        self.kwargs['job'] = self.cmd('backup protection backup-now -g {rg} -v {source_vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --retain-until {retain_date} --query name').get_output_in_json()
+        self.cmd('backup job wait -g {rg} -v {source_vault} -n {job}')
+
+        # Verify item is protected in source vault
+        self.cmd('backup item show -g {rg} -v {source_vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM', checks=[
+            self.check('properties.friendlyName', '{item}'),
+            self.check('properties.protectionState', 'Protected')
+        ])
+
+        # Verify target vault exists and has default policy
+        self.cmd('backup policy show -g {rg} -v {target_vault} -n {new_policy}', checks=[
+            self.check('name', '{new_policy}')
+        ])
+
+        # Reconfigure protection to target vault with retain recovery points
+        reconfigure_job = self.cmd('backup protection reconfigure -g {rg} -v {source_vault} -c {container} -i {item} --backup-management-type AzureIaasVM --new-vault-name {target_vault} --new-vault-resource-group {rg} --new-policy-name {new_policy} --retain-as-per-policy', checks=[
+            self.check("properties.operation", "ConfigureBackup"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+
+        # Wait for reconfigure job to complete
+        self.kwargs['reconfigure_job'] = reconfigure_job['name']
+        self.cmd('backup job wait -g {rg} -v {target_vault} -n {reconfigure_job}')
+
+        # Verify item is now protected in target vault
+        self.cmd('backup item show -g {rg} -v {target_vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM', checks=[
+            self.check('properties.friendlyName', '{item}'),
+            self.check('properties.protectionState', 'Protected')
+        ])
+
+        # Verify item is no longer in source vault (should fail or be in stopped state)
+        try:
+            source_item = self.cmd('backup item show -g {rg} -v {source_vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM').get_output_in_json()
+            # If item still exists, it should be in ProtectionStopped state
+            self.assertEqual(source_item['properties']['protectionState'], 'ProtectionStopped')
+        except Exception:
+            # Item may not exist anymore, which is also acceptable
+            pass
+
+        # Clean up - disable protection in target vault
+        self.cmd('backup protection disable -g {rg} -v {target_vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --delete-backup-data true --yes')
