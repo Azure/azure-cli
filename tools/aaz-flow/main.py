@@ -3,11 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import os
-from pathlib import Path
 from fastmcp import FastMCP, Context
 from models import AAZRequest
-from helpers import generate_tests, execute_commands, validate_paths, get_name, get_swagger_config
+from helpers import execute_commands, validate_paths, get_name, get_swagger_config
+from testgen import generate_tests
 
 mcp = FastMCP("AAZ Flow")
 
@@ -65,7 +64,7 @@ async def generate_code(ctx: Context):
 
     await ctx.info("Automatically generating tests for the newly generated module...")
     try:
-        test_result = await generate_tests(ctx)
+        test_result = await generate_tests(ctx, paths)
         await ctx.info(f"Automatic test generation result: {test_result}")
     except Exception as e:
         await ctx.info(f"Automatic test generation failed: {str(e)}")

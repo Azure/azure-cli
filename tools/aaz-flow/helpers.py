@@ -90,7 +90,7 @@ async def get_name(ctx: Context) -> str:
         "This list is fetched directly from the Azure REST API Specs repository. " \
         "Ask the user in a professional manner to select a module/extension from the list. " \
         "The list is provided when they click on the Respond button so do not give them any options in the questions itself. " \
-        "The result of this option selection will determine which module's code will be generated using AAZ."
+        "The result of this option selection will determine which module's code will be generated for Azure CLI."
     )
     extension_choice = await ctx.elicit(
         message=choice_prompt.text,
@@ -142,7 +142,6 @@ async def browse_specs(ctx: Context, base_path: str):
         dirs = [e for e in entries if os.path.isdir(os.path.join(current_path, e))]
         files = [e for e in entries if os.path.isfile(os.path.join(current_path, e)) and e.endswith((".json", ".yaml", ".yml"))]
 
-        # Labels shown to the user vs actual values
         labels = [".."] + [f"> {d}" for d in dirs] + files
         mapping = dict(zip(labels, [".."] + dirs + files))
 
@@ -164,11 +163,9 @@ async def browse_specs(ctx: Context, base_path: str):
             current_path = os.path.join(current_path, selected)
             await ctx.info(f"az_cli : Entered directory: {selected}")
         else:
-            # A spec file was chosen
             selected_file_path = os.path.join(current_path, selected)
             await ctx.info(f"az_cli : Selected spec file: {selected_file_path}")
 
-            # Relative path for extracting metadata
             rel_path = os.path.relpath(selected_file_path, base_path)
             parts = rel_path.split(os.sep)
 
@@ -282,59 +279,30 @@ async def execute_commands(ctx: Context, paths: dict, request: AAZRequest):
 
     cmd2 = (
         f"{aaz_dev} cli generate-by-swagger-tag "
-        f"--aaz-path {paths['aaz']} "
-        f"--cli-path {paths['cli']} "
-        f"--cli-extension-path {paths['cli_extension']} "
-        f"--extension-or-module-name {request.name} "
-        f"--swagger-module-path {request.swagger_module_path} "
-        f"--resource-provider {request.resource_provider} "
-        f"--swagger-tag {request.swagger_tag} "
+        f"-a {paths['aaz']} "
+        f"-e {paths['cli_extension']} "
+        f"--name {request.name} "
+        f"--sm {request.swagger_module_path} "
+        f"--rp {request.resource_provider} "
+        f"--tag {request.swagger_tag} "
         f"--profile latest"
     )
 
     try:
         await run_command(ctx, cmd1, "Generate command model from Swagger", 50, 80)
+        generated_init_path = f"{paths['cli']}/src/azure-cli/azure/cli/command_modules/{request.name}/aaz/__init__.py"
+        max_wait = 30
+        waited = 0
+        while not os.path.exists(generated_init_path) and waited < max_wait:
+            await ctx.info(f"az_cli : Waiting for {generated_init_path} to be created...")
+            await asyncio.sleep(1)
+            waited += 1
+        if not os.path.exists(generated_init_path):
+            await ctx.info(f"az_cli : Timed out waiting for {generated_init_path}")
+            return f"Code generation failed: {generated_init_path} was not created."
         await run_command(ctx, cmd2, "Generate CLI from Swagger tag", 80, 100)
     except Exception as e:
         await ctx.info(f"az_cli : Code generation failed: {str(e)}")
         return f"Code generation failed: {str(e)}"
 
     return "Azure CLI code generation completed successfully!"
-
-async def generate_tests(ctx: "Context"):
-    await ctx.info("Starting test generation workflow.")
-
-    module_name = getattr(ctx, "generated_module", None)
-    if not module_name:
-        response = await ctx.elicit("Enter the module/extension name to generate tests for:")
-        if response.action != "accept" or not response.data:
-            return "Test generation cancelled."
-        module_name = response.data
-    else:
-        await ctx.info(f"Detected generated module: {module_name}")
-
-    aaz_path = Path(f"{paths['cli']}/src/azure-cli/azure/cli/command_modules/{module_name}/aaz")
-    if not aaz_path.exists():
-        return f"AAZ path not found for module '{module_name}'"
-
-    commands = []
-    for file in aaz_path.rglob("*.py"):
-        with open(file, "r", encoding="utf-8") as f:
-            for line in f:
-                if line.strip().startswith("def "):
-                    commands.append(line.strip().replace("def ", "").split("(")[0])
-
-    test_dir = Path(f"{paths['cli']}/src/azure-cli/azure/cli/command_modules/{module_name}/tests/latest")
-    test_dir.mkdir(parents=True, exist_ok=True)
-    test_file = test_dir / f"test_{module_name}.py"
-
-    with open(test_file, "w", encoding="utf-8") as f:
-        f.write("import unittest\n")
-        f.write("from azure.cli.testsdk import ScenarioTest\n\n")
-        f.write(f"class {module_name.capitalize()}ScenarioTest(ScenarioTest):\n\n")
-        for cmd in commands:
-            f.write(f"    def test_{cmd}(self):\n")
-            f.write(f"        self.cmd('az {module_name} {cmd} --resource-name test-resource')\n\n")
-
-    await ctx.info(f"Generated test file: {test_file}")
-    return f"Test generation completed for module '{module_name}'."
