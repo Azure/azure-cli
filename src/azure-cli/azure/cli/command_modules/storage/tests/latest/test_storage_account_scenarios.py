@@ -1828,44 +1828,48 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('azureFilesIdentityBasedAuthentication.smbOAuthSettings.isSmbOAuthEnabled', True)
         ])
 
-    @ResourceGroupPreparer(location='eastus2')
-    def test_storage_account_zone_with_placement(self, resource_group):
+    def test_storage_account_zone_with_placement(self):
         self.kwargs.update({
+            'rg': 'yifantestzp',
             'sazones': self.create_random_name('sa', 24),
             'sazones2': self.create_random_name('sa', 24),
             'sazoneplacement': self.create_random_name('sa', 24),
             'sazoneplacement2': self.create_random_name('sa', 24),
         })
 
-        self.cmd('storage account create -n {sazones} -g {rg} --zones 1', checks=[
+        self.cmd('storage account create -n {sazones} -g {rg} --sku Premium_LRS --kind FileStorage '
+                 '--zones 1', checks=[
             JMESPathCheck('zones', ['1'])
         ])
-        self.cmd('storage account create -n {sazones2} -g {rg}', checks=[
+        self.cmd('storage account create -n {sazones2} -g {rg} --sku Premium_LRS --kind FileStorage', checks=[
             JMESPathCheck('zones', None)
         ])
-        # self.cmd('storage account update -n {sazones2} -g {rg} --zones 1', checks=[
-        #     JMESPathCheck('zones', ['1'])
-        # ])
+        self.cmd('storage account update -n {sazones2} -g {rg} '
+                 '--zones 1', checks=[
+            JMESPathCheck('zones', ['1'])
+        ])
 
-        # self.cmd('storage account create -n {sazoneplacement2} -g {rg} --zone-placement-policy Any', checks=[
-        #     JMESPathCheck('placement.zonePlacementPolicy', 'Any')
-        # ])
-        # self.cmd('storage account update -n {sazoneplacement2} -g {rg} --zone-placement-policy None', checks=[
-        #     JMESPathCheck('placement.zonePlacementPolicy', 'None')
-        # ])
-        # self.cmd('storage account update -n {sazoneplacement2} -g {rg}', checks=[
-        #     JMESPathCheck('placement.zonePlacementPolicy', 'None')
-        # ])
-        #
-        # self.cmd('storage account create -n {sazoneplacement} -g {rg} --zone-placement-policy None', checks=[
-        #     JMESPathCheck('placement.zonePlacementPolicy', 'None')
-        # ])
-        # self.cmd('storage account update -n {sazoneplacement} -g {rg} --zone-placement-policy Any', checks=[
-        #     JMESPathCheck('placement.zonePlacementPolicy', 'Any')
-        # ])
-        # self.cmd('storage account update -n {sazoneplacement} -g {rg}', checks=[
-        #     JMESPathCheck('placement.zonePlacementPolicy', 'Any')
-        # ])
+        self.cmd('storage account create -n {sazoneplacement} -g {rg} --sku Premium_LRS --kind FileStorage '
+                 '--location centraluseuap --zone-placement-policy Any', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'Any')
+        ])
+        self.cmd('storage account update -n {sazoneplacement} -g {rg}  --zone-placement-policy None', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'None')
+        ])
+        self.cmd('storage account update -n {sazoneplacement} -g {rg}', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'None')
+        ])
+
+        self.cmd('storage account create -n {sazoneplacement2} -g {rg} --sku Premium_LRS --kind FileStorage '
+                 '--location centraluseuap --zone-placement-policy None', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'None')
+        ])
+        self.cmd('storage account update -n {sazoneplacement2} -g {rg} --zone-placement-policy Any', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'Any')
+        ])
+        self.cmd('storage account update -n {sazoneplacement2} -g {rg}', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'Any')
+        ])
 
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
