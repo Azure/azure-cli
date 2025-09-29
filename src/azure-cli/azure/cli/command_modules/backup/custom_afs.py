@@ -32,6 +32,52 @@ backup_management_type = "AzureStorage"
 workload_type = "AzureFileShare"
 
 
+def reconfigure_afs_protection(cmd, item, source_vault_name, source_vault_rg,
+                               new_vault_name, new_vault_rg,
+                               new_policy_name, retain_as_per_policy, tenant_id):
+    """Reconfigure Azure File Share protection to a new vault and policy.
+
+    Steps:
+    1. Disable protection (retain or stop based on flag) in source vault.
+    2. Unregister storage account container (if no remaining protected items) from source vault.
+    3. Ensure storage account is registered / refreshed in destination vault.
+    4. Enable protection for the same file share name in destination vault with new policy.
+    5. Return the newly protected item from destination vault.
+    """
+    logger.warning("For Storage reconfigure protection, all backup items within the container must be have protection disabled first.")
+
+    # 1. Disable in old vault (retain as per policy if requested)
+    items_client = backup_protected_items_cf(cmd.cli_ctx)
+    disable_protection(cmd, items_client, source_vault_rg, source_vault_name, item, retain_as_per_policy, tenant_id)
+
+    # 2. Unregister container in old vault only if this was the last protected item for that storage account
+    _maybe_unregister_storage_account(cmd, client, source_vault_rg, source_vault_name, item.properties.container_name)
+
+    # 3. Enable protection in destination vault - also registers storage account in destination vault
+    new_item = enable_for_AzureFileShare(cmd, items_client, new_vault_rg, new_vault_name, item.name,
+                                         item.properties.container_name, new_policy_name)
+    return new_item
+
+
+def _maybe_unregister_storage_account(cmd, client, resource_group_name, vault_name, container_name):
+    """Unregister the storage account container if no more protected items exist in the source vault."""
+    items = common.list_items(cmd, client, resource_group_name, vault_name,
+                              workload_type=workload_type, container_name=container_name,
+                              container_type=backup_management_type)
+    remaining = [pi for pi in items if pi.properties.protection_state.lower() == 'protected']
+    if remaining:
+        raise ValidationError('Cannot unregister container as other items are still protected.')
+
+    # Attempt unregister
+    try:
+        containers_client = backup_protection_containers_cf(cmd.cli_ctx)
+        unregister_afs_container(cmd, containers_client, vault_name, resource_group_name, container_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        raise logger.warning('Skipping unregister workload container of container %s due to a failure: %s.'
+                             ' Continuing the operation, but if the container is still registered, it may need to be '
+                             'unregistered manually for the operation to succeed.', container_name, str(ex))
+
+
 def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_name,
                               storage_account_name, policy_name):
 
