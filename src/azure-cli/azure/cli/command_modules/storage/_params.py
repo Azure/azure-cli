@@ -2803,8 +2803,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('share_name', share_name_type, required=True)
         c.register_path_argument()
         c.argument('target', required=True,
-                help='Specifies the file path the symbolic link will point to. '
-                     'The file path can be either relative or absolute.')
+                   help='Specifies the file path the symbolic link will point to. '
+                        'The file path can be either relative or absolute.')
         c.extra('metadata', nargs='+',
                 help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
                 validator=validate_metadata)
