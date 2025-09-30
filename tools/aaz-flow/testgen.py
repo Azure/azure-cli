@@ -8,7 +8,7 @@ import os
 import asyncio
 import random
 from fastmcp import Context
-from prompt_templates import get_testgen_static_instructions, REF_STYLE_LABEL
+from prompt_templates import get_testgen_static_instructions, REF_STYLE_LABEL, IDEAL_STYLE
 
 
 async def check_module_status(ctx: Context, paths: dict):
@@ -120,6 +120,8 @@ def build_testgen_prompt(
 
     if reference_snippet:
         parts.append(REF_STYLE_LABEL + reference_snippet)
+    
+    parts.append("Here is the ideal test style example to follow:\n" + IDEAL_STYLE)
 
     return "\n\n".join(parts)
 
@@ -147,6 +149,11 @@ def strip_code_fences(text: str) -> str:
         return max(blocks, key=len)
     return text.strip()
 
+def strip_shebang(text: str) -> str:
+    lines = text.strip().splitlines()
+    if lines and lines[0].startswith("#!"):
+        return "\n".join(lines[1:]).strip()
+    return text.strip()
 
 async def generate_tests(ctx: Context, paths: dict):
     module_name, commands, test_file = await check_path_status(ctx, paths)
@@ -171,7 +178,6 @@ async def generate_tests(ctx: Context, paths: dict):
     sampling_prompt = build_testgen_prompt(
         module_name, commands, reference_snippet, extracted_examples
     )
-    await ctx.info("Constructed test generation prompt as follows:\n" + sampling_prompt)
     max_retries = int(os.getenv("TESTGEN_RETRIES", "5"))
     base_delay = float(os.getenv("TESTGEN_RETRY_BASE_DELAY", "2"))
 
@@ -186,7 +192,7 @@ async def generate_tests(ctx: Context, paths: dict):
                 )
             sampled = await ctx.sample(sampling_prompt)
             raw_content = (getattr(sampled, "text", "") or "").strip()
-            content = strip_code_fences(raw_content)
+            content = strip_shebang(strip_code_fences(raw_content))
             if content:
                 break
             last_err = RuntimeError("Empty content returned from provider")
