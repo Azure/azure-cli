@@ -66,7 +66,8 @@ from ._sdk_enums import (
     SourceControlOperationState,
     WorkflowKind,
     WorkflowState,
-    WorkflowHealthState
+    WorkflowHealthState,
+    Kind
 )
 
 JSON = MutableMapping[str, Any]
@@ -6174,6 +6175,7 @@ class JavaComponentServiceBind(_serialization.Model):
         self.name = name
         self.service_id = service_id
 
+
 class ContainerAppsJob(TrackedResource):
     """Container App Job.
 
@@ -6282,6 +6284,7 @@ class ContainerAppsJob(TrackedResource):
         self.template = template
         self.outbound_ip_addresses: Optional[list[str]] = None
         self.event_stream_endpoint: Optional[str] = None
+
 
 class Job(TrackedResource):
     """Container App Job.
