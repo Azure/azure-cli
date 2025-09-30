@@ -5,6 +5,7 @@
 
 """Prompt templates and static guidance for AAZ Flow tools."""
 
+
 def get_testgen_static_instructions() -> str:
     return (
         "You are generating Azure CLI scenario tests for a new module.\n"
@@ -17,9 +18,10 @@ def get_testgen_static_instructions() -> str:
         "- Use ResourceGroupPreparer if a resource group is implied.\n"
         "- Add minimal checks (e.g., self.check) where sensible.\n"
         "- Keep tests safe-by-default; avoid destructive operations unless clearly required.\n"
+        "- Ensure tests can run in parallel without conflicts.\n"
+        "- If tests are large and can be safely and logically split, create multiple test methods (i.e. avoid a single CRUD test if possible, split it into multiple tests if logically and safely separable).\n"
         "- Output only valid Python code for the test file, nothing else."
     )
 
-REF_STYLE_LABEL = (
-    "Read and reference the following test files (do not copy verbatim, just follow structure):\n"
-)
+
+REF_STYLE_LABEL = "Read and reference the following test files (do not copy verbatim, just follow structure):\n"

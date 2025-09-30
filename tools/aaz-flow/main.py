@@ -10,23 +10,25 @@ from testgen import generate_tests
 
 mcp = FastMCP("AAZ Flow")
 
+
 @mcp.tool(
     name="az_cli_generate_help",
-    description="Explains how to correctly call the az_cli_generate tool."
+    description="Explains how to correctly call the az_cli_generate tool.",
 )
 async def generate_help(ctx: Context):
     help_message = {
         "tool": "az_cli_generate",
         "description": "Generate Azure CLI commands from Swagger specs.",
         "parameters": {},
-        "usage": "Call with no parameters, e.g. {}"
+        "usage": "Call with no parameters, e.g. {}",
     }
     await ctx.info("az_cli_generate_help retrieved.")
     return help_message
 
+
 @mcp.tool(
     name="az_cli_generate",
-    description="Generate Azure CLI commands from Swagger specs."
+    description="Generate Azure CLI commands from Swagger specs.",
 )
 async def generate_code(ctx: Context):
     await ctx.info("Initiating Azure CLI code generation workflow.")
@@ -53,7 +55,7 @@ async def generate_code(ctx: Context):
         name=name,
         swagger_module_path=swagger_config["file"],
         resource_provider=swagger_config["resource_provider"],
-        swagger_tag=swagger_config["swagger_tag"]
+        swagger_tag=swagger_config["swagger_tag"],
     )
 
     await execute_commands(ctx, paths, request)
@@ -69,7 +71,10 @@ async def generate_code(ctx: Context):
     except Exception as e:
         await ctx.info(f"Automatic test generation failed: {str(e)}")
 
-    return f"Code generation and test generation completed for extension/module '{name}'."
+    return (
+        f"Code generation and test generation completed for extension/module '{name}'."
+    )
+
 
 if __name__ == "__main__":
     mcp.run(transport="stdio")
