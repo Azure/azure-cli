@@ -6019,6 +6019,12 @@ class VnetGatewayCreate(_VnetGatewayCreate):
                                            'private_ip_allocation_method': 'Dynamic',
                                            'name': 'vnetGatewayConfig{}'.format(i)}
                     args.ip_configurations.append(ip_configuration[i])
+            else:
+                ip_configuration = {'subnet': subnet,
+                                    'private_ip_allocation_method': 'Dynamic',
+                                    'name': 'vnetGatewayConfig'}
+                args.ip_configurations.append(ip_configuration)
+
         else:
             args.vpn_type = None
             args.sku = None

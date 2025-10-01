@@ -326,6 +326,17 @@ def load_arguments(self, _):
         c.argument('workload_type', workload_type)
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
+    with self.argument_context('backup protection reconfigure') as c:
+        c.argument('container_name', container_name_type, id_part='child_name_2')
+        c.argument('item_name', item_name_type, id_part='child_name_3')
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('workload_type', workload_type)
+        c.argument('new_vault_name', help='Name of the destination Recovery Services vault.')
+        c.argument('new_vault_resource_group', options_list=['--new-vault-resource-group', '--new-rg'], help='Resource group name of the destination Recovery Services vault.')
+        c.argument('new_policy_name', options_list=['--new-policy-name'], help='Name of the backup policy in the destination vault.')
+        c.argument('retain_as_per_policy', arg_type=get_three_state_flag(), help='Retain existing recovery points as per current backup policy when stopping protection in the source vault (the source vault is always the one specified by --vault-name/--resource-group).')
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the source vault exists in a different tenant.')
+
     with self.argument_context('backup protection check-vm') as c:
         c.argument('vm_id', help='ID of the virtual machine to be checked for protection.', deprecate_info=c.deprecate(redirect='--vm', hide=True))
 
