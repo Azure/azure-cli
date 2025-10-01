@@ -516,7 +516,7 @@ def apim_api_import(
         parameters=parameters)
 
 
-def apim_api_export(client, resource_group_name, service_name, api_id, export_format, file_path=None):
+def apim_api_export(client, resource_group_name, service_name, api_id, export_format, file_path=None, file_name=None,):
     """Gets the details of the API specified by its identifier in the format specified """
 
     import json
@@ -572,7 +572,8 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
 
     # Remove '-link' from the mappedFormat and create the file name with full path
     exportType = mappedFormat.replace('-link', '')
-    file_name = f"{api_id}_{exportType}{file_extension}"
+    if file_name is None:
+        file_name = f"{api_id}_{exportType}{file_extension}"
     full_path = os.path.join(file_path, file_name)
 
     # Get the results from the link where the API Export Results are stored
