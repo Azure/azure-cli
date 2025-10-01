@@ -99,10 +99,14 @@ class Identity:  # pylint: disable=too-many-instance-attributes
         if self._use_msal_http_cache and not Identity._msal_http_cache:
             Identity._msal_http_cache = self._load_msal_http_cache()
 
+        # Import here to avoid circular dependency
+        from azure.cli.core._debug import get_msal_http_client
+
         return {
             "authority": self._msal_authority,
             "token_cache": Identity._msal_token_cache,
             "http_cache": Identity._msal_http_cache,
+            "http_client": get_msal_http_client(),
             "instance_discovery": self._instance_discovery,
             # CP1 means we can handle claims challenges (CAE)
             "client_capabilities": None if "AZURE_IDENTITY_DISABLE_CP1" in os.environ else ["CP1"]

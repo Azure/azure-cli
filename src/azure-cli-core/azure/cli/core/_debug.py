@@ -45,3 +45,32 @@ def change_ssl_cert_verification_track2():
         logger.debug("Using CA bundle file at '%s'.", ca_bundle_file)
         client_kwargs['connection_verify'] = ca_bundle_file
     return client_kwargs
+
+
+def get_msal_http_client():
+    """
+    Create an HTTP client (requests.Session) for MSAL that respects certificate verification settings.
+
+    This ensures MSAL applications use the same certificate verification settings as the rest of Azure CLI,
+    including custom CA bundles specified via REQUESTS_CA_BUNDLE environment variable.
+
+    Returns:
+        requests.Session: A configured Session object with appropriate certificate verification settings.
+    """
+    import requests
+
+    session = requests.Session()
+
+    if should_disable_connection_verify():
+        logger.warning("Connection verification disabled by environment variable %s",
+                       DISABLE_VERIFY_VARIABLE_NAME)
+        os.environ[ADAL_PYTHON_SSL_NO_VERIFY] = '1'
+        session.verify = False
+    elif REQUESTS_CA_BUNDLE in os.environ:
+        ca_bundle_file = os.environ[REQUESTS_CA_BUNDLE]
+        if not os.path.isfile(ca_bundle_file):
+            raise CLIError('REQUESTS_CA_BUNDLE environment variable is specified with an invalid file path')
+        logger.debug("MSAL: Using CA bundle file at '%s'.", ca_bundle_file)
+        session.verify = ca_bundle_file
+
+    return session
