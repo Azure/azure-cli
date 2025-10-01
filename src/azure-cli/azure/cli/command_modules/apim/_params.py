@@ -313,6 +313,8 @@ def load_arguments(self, _):
                    help='Specify the format of the exporting API.')
         c.argument('file_path', options_list=['--file-path', '-f'],
                    help='File path specified to export the API.')
+        c.argument('file_name', options_list=['--file-name'],
+                   help='File name specified to export the API.')
 
     with self.argument_context('apim product api list') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
