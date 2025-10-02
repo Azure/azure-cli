@@ -28,3 +28,15 @@ def load_arguments(self, _):
 
     with self.argument_context('migrate local get-protected-item') as c:
         c.argument('protected_item_id', help='Full ARM resource ID of the protected item to retrieve.', required=True)
+
+    with self.argument_context('migrate local get-discovered-server') as c:
+        c.argument('project_name', project_name_type, required=True)
+        c.argument('resource_group_name', 
+                   options_list=['--resource-group-name', '--resource-group', '-g'], 
+                   help='Name of the resource group containing the Azure Migrate project.', 
+                   required=True)
+        c.argument('display_name', help='Display name of the source machine to filter by.')
+        c.argument('source_machine_type', arg_type=get_enum_type(['VMware', 'HyperV']), help='Type of the source machine.')
+        c.argument('subscription_id', subscription_id_type)
+        c.argument('name', help='Internal name of the specific source machine to retrieve.')
+        c.argument('appliance_name', help='Name of the appliance (site) containing the machines.')
