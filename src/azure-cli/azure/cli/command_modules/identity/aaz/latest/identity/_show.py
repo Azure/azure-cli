@@ -174,6 +174,7 @@ class Show(AAZCommand):
             properties = cls._schema_on_200.properties
             properties.assignment_restrictions = AAZObjectType(
                 serialized_name="assignmentRestrictions",
+                flags={"required": True},
             )
             properties.client_id = AAZStrType(
                 serialized_name="clientId",
@@ -181,6 +182,7 @@ class Show(AAZCommand):
             )
             properties.isolation_scope = AAZStrType(
                 serialized_name="isolationScope",
+                flags={"required": True},
             )
             properties.principal_id = AAZStrType(
                 serialized_name="principalId",

@@ -75,13 +75,11 @@ class Update(AAZCommand):
             options=["--assignment-restrictions"],
             arg_group="Properties",
             help="Restrictions on which resource providers this identity can be assigned to.",
-            nullable=True,
         )
         _args_schema.isolation_scope = AAZStrArg(
             options=["--isolation-scope"],
             arg_group="Properties",
             help="Enum to configure regional restrictions on identity assignment, as necessary.",
-            nullable=True,
             enum={"None": "None", "Regional": "Regional"},
         )
 
@@ -325,8 +323,8 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("assignmentRestrictions", AAZObjectType, ".assignment_restrictions")
-                properties.set_prop("isolationScope", AAZStrType, ".isolation_scope")
+                properties.set_prop("assignmentRestrictions", AAZObjectType, ".assignment_restrictions", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("isolationScope", AAZStrType, ".isolation_scope", typ_kwargs={"flags": {"required": True}})
 
             assignment_restrictions = _builder.get(".properties.assignmentRestrictions")
             if assignment_restrictions is not None:
@@ -395,6 +393,7 @@ class _UpdateHelper:
         properties = _schema_identity_read.properties
         properties.assignment_restrictions = AAZObjectType(
             serialized_name="assignmentRestrictions",
+            flags={"required": True},
         )
         properties.client_id = AAZStrType(
             serialized_name="clientId",
@@ -402,6 +401,7 @@ class _UpdateHelper:
         )
         properties.isolation_scope = AAZStrType(
             serialized_name="isolationScope",
+            flags={"required": True},
         )
         properties.principal_id = AAZStrType(
             serialized_name="principalId",

@@ -194,8 +194,8 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("assignmentRestrictions", AAZObjectType, ".assignment_restrictions")
-                properties.set_prop("isolationScope", AAZStrType, ".isolation_scope")
+                properties.set_prop("assignmentRestrictions", AAZObjectType, ".assignment_restrictions", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("isolationScope", AAZStrType, ".isolation_scope", typ_kwargs={"flags": {"required": True}})
 
             assignment_restrictions = _builder.get(".properties.assignmentRestrictions")
             if assignment_restrictions is not None:
@@ -253,6 +253,7 @@ class Create(AAZCommand):
             properties = cls._schema_on_200_201.properties
             properties.assignment_restrictions = AAZObjectType(
                 serialized_name="assignmentRestrictions",
+                flags={"required": True},
             )
             properties.client_id = AAZStrType(
                 serialized_name="clientId",
@@ -260,6 +261,7 @@ class Create(AAZCommand):
             )
             properties.isolation_scope = AAZStrType(
                 serialized_name="isolationScope",
+                flags={"required": True},
             )
             properties.principal_id = AAZStrType(
                 serialized_name="principalId",
