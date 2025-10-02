@@ -10,6 +10,7 @@ import time
 from knack.util import CLIError
 from knack.log import get_logger
 from azure.cli.core.util import send_raw_request
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.command_modules.migrate._powershell_utils import get_powershell_executor
 from enum import Enum
 
@@ -263,14 +264,14 @@ def initialize_replication_infrastructure(cmd,
         # Use current subscription if not provided
         if not subscription_id:
             subscription_id = get_subscription_id(cmd.cli_ctx)
-        logger.info(f"Selected Subscription Id: '{subscription_id}'")
+        print(f"Selected Subscription Id: '{subscription_id}'")
 
         # Get resource group
         rg_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}"
         resource_group = get_resource_by_id(cmd, rg_uri, APIVersion.Microsoft_Resources.value)
         if not resource_group:
             raise CLIError(f"Resource group '{resource_group_name}' does not exist in the subscription.")
-        logger.info(f"Selected Resource Group: '{resource_group_name}'")
+        print(f"Selected Resource Group: '{resource_group_name}'")
         
         # Get Migrate Project
         project_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Migrate/migrateprojects/{project_name}"
@@ -309,36 +310,64 @@ def initialize_replication_infrastructure(cmd,
         # Get Appliances Mapping
         app_map = {}
         extended_details = discovery_solution.get('properties', {}).get('details', {}).get('extendedDetails', {})
-        
+                
         # Process applianceNameToSiteIdMapV2
         if 'applianceNameToSiteIdMapV2' in extended_details:
             try:
                 app_map_v2 = json.loads(extended_details['applianceNameToSiteIdMapV2'])
-                for item in app_map_v2:
-                    app_map[item['ApplianceName'].lower()] = item['SiteId']
-            except (json.JSONDecodeError, KeyError):
-                pass
+                if isinstance(app_map_v2, list):
+                    for item in app_map_v2:
+                        if isinstance(item, dict) and 'ApplianceName' in item and 'SiteId' in item:
+                            app_map[item['ApplianceName'].lower()] = item['SiteId']
+            except (json.JSONDecodeError, KeyError, TypeError) as e:
+                logger.warning(f"Failed to parse applianceNameToSiteIdMapV2: {str(e)}")
         
         # Process applianceNameToSiteIdMapV3
         if 'applianceNameToSiteIdMapV3' in extended_details:
             try:
                 app_map_v3 = json.loads(extended_details['applianceNameToSiteIdMapV3'])
-                for appliance_name, site_info in app_map_v3.items():
-                    app_map[appliance_name.lower()] = site_info.get('SiteId')
-            except (json.JSONDecodeError, KeyError):
-                pass
+                if isinstance(app_map_v3, dict):
+                    # V3 is a dictionary format
+                    for appliance_name, site_info in app_map_v3.items():
+                        if isinstance(site_info, dict) and 'SiteId' in site_info:
+                            app_map[appliance_name.lower()] = site_info['SiteId']
+                        elif isinstance(site_info, str):
+                            # Sometimes the value might be the SiteId directly
+                            app_map[appliance_name.lower()] = site_info
+                elif isinstance(app_map_v3, list):
+                    # V3 might also be in list format
+                    for item in app_map_v3:
+                        if isinstance(item, dict):
+                            # Check if it has ApplianceName/SiteId structure
+                            if 'ApplianceName' in item and 'SiteId' in item:
+                                app_map[item['ApplianceName'].lower()] = item['SiteId']
+                            else:
+                                # Or it might be a single key-value pair
+                                for key, value in item.items():
+                                    if isinstance(value, dict) and 'SiteId' in value:
+                                        app_map[key.lower()] = value['SiteId']
+                                    elif isinstance(value, str):
+                                        app_map[key.lower()] = value
+            except (json.JSONDecodeError, KeyError, TypeError) as e:
+                logger.warning(f"Failed to parse applianceNameToSiteIdMapV3: {str(e)}")
         
         if not app_map:
             raise CLIError("Server Discovery Solution missing Appliance Details. Invalid Solution.")
         
+
         # Validate Source and Target Appliances
         source_site_id = app_map.get(source_appliance_name.lower())
         target_site_id = app_map.get(target_appliance_name.lower())
         
         if not source_site_id:
-            raise CLIError(f"Source appliance '{source_appliance_name}' not found in discovery solution.")
+            available_appliances = ', '.join(app_map.keys())
+            raise CLIError(f"Source appliance '{source_appliance_name}' not found in discovery solution. Available appliances: {available_appliances}")
         if not target_site_id:
-            raise CLIError(f"Target appliance '{target_appliance_name}' not found in discovery solution.")
+            available_appliances = ', '.join(app_map.keys())
+            raise CLIError(f"Target appliance '{target_appliance_name}' not found in discovery solution. Available appliances: {available_appliances}")
+        
+        print(f"Source site ID for '{source_appliance_name}': {source_site_id}")
+        print(f"Target site ID for '{target_appliance_name}': {target_site_id}")
         
         # Determine instance types based on site IDs
         hyperv_site_pattern = "/Microsoft.OffAzure/HyperVSites/"
@@ -351,29 +380,116 @@ def initialize_replication_infrastructure(cmd,
             instance_type = AzLocalInstanceTypes.VMwareToAzLocal.value
             fabric_instance_type = FabricInstanceTypes.VMwareInstance.value
         else:
-            raise CLIError(f"Error matching source '{source_appliance_name}' and target '{target_appliance_name}' appliances.")
+            raise CLIError(f"Error matching source '{source_appliance_name}' and target '{target_appliance_name}' appliances. Source is {'VMware' if vmware_site_pattern in source_site_id else 'HyperV' if hyperv_site_pattern in source_site_id else 'Unknown'}, Target is {'VMware' if vmware_site_pattern in target_site_id else 'HyperV' if hyperv_site_pattern in target_site_id else 'Unknown'}")
+        
+        print(f"Instance type: {instance_type}, Fabric instance type: {fabric_instance_type}")
         
         # Get healthy fabrics in the resource group
         fabrics_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics"
         fabrics_response = batch_call(cmd, f"{fabrics_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
         all_fabrics = fabrics_response.json().get('value', [])
         
-        # Filter for source fabric
-        source_fabric = None
         for fabric in all_fabrics:
             props = fabric.get('properties', {})
             custom_props = props.get('customProperties', {})
-            if (props.get('provisioningState') == ProvisioningState.Succeeded.value and
-                custom_props.get('migrationSolutionId') == amh_solution.get('id') and
-                custom_props.get('instanceType') == fabric_instance_type and
-                fabric.get('name', '').lower().startswith(source_appliance_name.lower())):
+            print(f"Fabric: {fabric.get('name')}")
+            print(f"  - State: {props.get('provisioningState')}")
+            print(f"  - Type: {custom_props.get('instanceType')}")
+            print(f"  - Solution ID: {custom_props.get('migrationSolutionId')}")
+            print(f"  - Custom Properties: {json.dumps(custom_props, indent=2)}")
+
+        # If no fabrics exist at all, provide helpful message
+        if not all_fabrics:
+            raise CLIError(
+                f"No replication fabrics found in resource group '{resource_group_name}'. "
+                f"Please ensure that:\n"
+                f"1. The source appliance '{source_appliance_name}' is deployed and connected\n"
+                f"2. The target appliance '{target_appliance_name}' is deployed and connected\n"
+                f"3. Both appliances are registered with the Azure Migrate project '{project_name}'"
+            )
+        
+        # Filter for source fabric - make matching more flexible and diagnostic
+        source_fabric = None
+        source_fabric_candidates = []
+        
+        for fabric in all_fabrics:
+            props = fabric.get('properties', {})
+            custom_props = props.get('customProperties', {})
+            fabric_name = fabric.get('name', '')
+            
+            # Check if this fabric matches our criteria
+            is_succeeded = props.get('provisioningState') == ProvisioningState.Succeeded.value
+            
+            # Check solution ID match - handle case differences and trailing slashes
+            fabric_solution_id = custom_props.get('migrationSolutionId', '').rstrip('/')
+            expected_solution_id = amh_solution.get('id', '').rstrip('/')
+            is_correct_solution = fabric_solution_id.lower() == expected_solution_id.lower()
+            
+            is_correct_instance = custom_props.get('instanceType') == fabric_instance_type
+            
+            # More flexible name matching - check if fabric name contains appliance name or vice versa
+            name_matches = (
+                fabric_name.lower().startswith(source_appliance_name.lower()) or
+                source_appliance_name.lower() in fabric_name.lower() or
+                fabric_name.lower() in source_appliance_name.lower() or
+                # Also check if the fabric name matches the site name pattern
+                f"{source_appliance_name.lower()}-" in fabric_name.lower()
+            )
+            
+            print(f"Checking source fabric '{fabric_name}':")
+            print(f"  - succeeded={is_succeeded}")
+            print(f"  - solution_match={is_correct_solution} (fabric: '{fabric_solution_id}' vs expected: '{expected_solution_id}')")
+            print(f"  - instance_match={is_correct_instance} (fabric: '{custom_props.get('instanceType')}' vs expected: '{fabric_instance_type}')")
+            print(f"  - name_match={name_matches}")
+            
+            # Collect potential candidates even if they don't fully match
+            if custom_props.get('instanceType') == fabric_instance_type:
+                source_fabric_candidates.append({
+                    'name': fabric_name,
+                    'state': props.get('provisioningState'),
+                    'solution_match': is_correct_solution,
+                    'name_match': name_matches
+                })
+            
+            if is_succeeded and is_correct_instance and name_matches:
+                # If solution doesn't match, log warning but still consider it
+                if not is_correct_solution:
+                    logger.warning(f"Fabric '{fabric_name}' matches name and type but has different solution ID")
                 source_fabric = fabric
                 break
         
         if not source_fabric:
-            raise CLIError(f"Couldn't find connected source appliance '{source_appliance_name}'.")
+            # Provide more detailed error message
+            error_msg = f"Couldn't find connected source appliance '{source_appliance_name}'.\n"
+            
+            if source_fabric_candidates:
+                error_msg += f"Found {len(source_fabric_candidates)} fabric(s) with matching type '{fabric_instance_type}':\n"
+                for candidate in source_fabric_candidates:
+                    error_msg += f"  - {candidate['name']} (state: {candidate['state']}, "
+                    error_msg += f"solution_match: {candidate['solution_match']}, "
+                    error_msg += f"name_match: {candidate['name_match']})\n"
+                error_msg += "\nPlease verify:\n"
+                error_msg += "1. The appliance name matches exactly\n"
+                error_msg += "2. The fabric is in 'Succeeded' state\n"
+                error_msg += "3. The fabric belongs to the correct migration solution"
+            else:
+                error_msg += f"No fabrics found with instance type '{fabric_instance_type}'.\n"
+                error_msg += "\nThis usually means:\n"
+                error_msg += f"1. The source appliance '{source_appliance_name}' is not properly configured\n"
+                error_msg += f"2. The appliance type doesn't match (expecting {'VMware' if fabric_instance_type == FabricInstanceTypes.VMwareInstance.value else 'HyperV'})\n"
+                error_msg += "3. The fabric creation is still in progress - wait a few minutes and retry"
+                
+                # List all available fabrics for debugging
+                if all_fabrics:
+                    error_msg += f"\n\nAvailable fabrics in resource group:\n"
+                    for fabric in all_fabrics:
+                        props = fabric.get('properties', {})
+                        custom_props = props.get('customProperties', {})
+                        error_msg += f"  - {fabric.get('name')} (type: {custom_props.get('instanceType')})\n"
+            
+            raise CLIError(error_msg)
         
-        logger.info(f"Selected Source Fabric: '{source_fabric.get('name')}'")
+        print(f"Selected Source Fabric: '{source_fabric.get('name')}'")
         
         # Get source fabric agent (DRA)
         source_fabric_name = source_fabric.get('name')
@@ -394,25 +510,77 @@ def initialize_replication_infrastructure(cmd,
         if not source_dra:
             raise CLIError(f"The source appliance '{source_appliance_name}' is in a disconnected state.")
         
-        logger.info(f"Selected Source Fabric Agent: '{source_dra.get('name')}'")
+        print(f"Selected Source Fabric Agent: '{source_dra.get('name')}'")
         
-        # Filter for target fabric
+        # Filter for target fabric - make matching more flexible and diagnostic
         target_fabric_instance_type = FabricInstanceTypes.AzLocalInstance.value
         target_fabric = None
+        target_fabric_candidates = []
+        
         for fabric in all_fabrics:
             props = fabric.get('properties', {})
             custom_props = props.get('customProperties', {})
-            if (props.get('provisioningState') == ProvisioningState.Succeeded.value and
-                custom_props.get('migrationSolutionId') == amh_solution.get('id') and
-                custom_props.get('instanceType') == target_fabric_instance_type and
-                fabric.get('name', '').lower().startswith(target_appliance_name.lower())):
+            fabric_name = fabric.get('name', '')
+            
+            # Check if this fabric matches our criteria
+            is_succeeded = props.get('provisioningState') == ProvisioningState.Succeeded.value
+            
+            # Check solution ID match - handle case differences and trailing slashes
+            fabric_solution_id = custom_props.get('migrationSolutionId', '').rstrip('/')
+            expected_solution_id = amh_solution.get('id', '').rstrip('/')
+            is_correct_solution = fabric_solution_id.lower() == expected_solution_id.lower()
+            
+            is_correct_instance = custom_props.get('instanceType') == target_fabric_instance_type
+            
+            # More flexible name matching
+            name_matches = (
+                fabric_name.lower().startswith(target_appliance_name.lower()) or
+                target_appliance_name.lower() in fabric_name.lower() or
+                fabric_name.lower() in target_appliance_name.lower() or
+                f"{target_appliance_name.lower()}-" in fabric_name.lower()
+            )
+            
+            print(f"Checking target fabric '{fabric_name}':")
+            print(f"  - succeeded={is_succeeded}")
+            print(f"  - solution_match={is_correct_solution}")
+            print(f"  - instance_match={is_correct_instance} (fabric: '{custom_props.get('instanceType')}' vs expected: '{target_fabric_instance_type}')")
+            print(f"  - name_match={name_matches}")
+            
+            # Collect potential candidates
+            if custom_props.get('instanceType') == target_fabric_instance_type:
+                target_fabric_candidates.append({
+                    'name': fabric_name,
+                    'state': props.get('provisioningState'),
+                    'solution_match': is_correct_solution,
+                    'name_match': name_matches
+                })
+            
+            if is_succeeded and is_correct_instance and name_matches:
+                if not is_correct_solution:
+                    logger.warning(f"Fabric '{fabric_name}' matches name and type but has different solution ID")
                 target_fabric = fabric
                 break
         
         if not target_fabric:
-            raise CLIError(f"Couldn't find connected target appliance '{target_appliance_name}'.")
+            # Provide more detailed error message
+            error_msg = f"Couldn't find connected target appliance '{target_appliance_name}'.\n"
+            
+            if target_fabric_candidates:
+                error_msg += f"Found {len(target_fabric_candidates)} fabric(s) with matching type '{target_fabric_instance_type}':\n"
+                for candidate in target_fabric_candidates:
+                    error_msg += f"  - {candidate['name']} (state: {candidate['state']}, "
+                    error_msg += f"solution_match: {candidate['solution_match']}, "
+                    error_msg += f"name_match: {candidate['name_match']})\n"
+            else:
+                error_msg += f"No fabrics found with instance type '{target_fabric_instance_type}'.\n"
+                error_msg += "\nThis usually means:\n"
+                error_msg += f"1. The target appliance '{target_appliance_name}' is not properly configured for Azure Local\n"
+                error_msg += "2. The fabric creation is still in progress - wait a few minutes and retry\n"
+                error_msg += "3. The target appliance is not connected to the Azure Local cluster"
+            
+            raise CLIError(error_msg)
         
-        logger.info(f"Selected Target Fabric: '{target_fabric.get('name')}'")
+        print(f"Selected Target Fabric: '{target_fabric.get('name')}'")
         
         # Get target fabric agent (DRA)
         target_fabric_name = target_fabric.get('name')
@@ -433,7 +601,7 @@ def initialize_replication_infrastructure(cmd,
         if not target_dra:
             raise CLIError(f"The target appliance '{target_appliance_name}' is in a disconnected state.")
         
-        logger.info(f"Selected Target Fabric Agent: '{target_dra.get('name')}'")
+        print(f"Selected Target Fabric Agent: '{target_dra.get('name')}'")
         
         # Setup Policy
         policy_name = f"{replication_vault_name}{instance_type}policy"
@@ -447,7 +615,7 @@ def initialize_replication_infrastructure(cmd,
             
             # Wait for creating/updating to complete
             if provisioning_state in [ProvisioningState.Creating.value, ProvisioningState.Updating.value]:
-                logger.info(f"Policy '{policy_name}' found in Provisioning State '{provisioning_state}'.")
+                print(f"Policy '{policy_name}' found in Provisioning State '{provisioning_state}'.")
                 for i in range(20):
                     time.sleep(30)
                     policy = get_resource_by_id(cmd, policy_uri, APIVersion.Microsoft_DataReplication.value)
@@ -458,14 +626,14 @@ def initialize_replication_infrastructure(cmd,
             
             # Remove policy if in bad state
             if provisioning_state in [ProvisioningState.Canceled.value, ProvisioningState.Failed.value]:
-                logger.info(f"Policy '{policy_name}' found in unusable state '{provisioning_state}'. Removing...")
+                print(f"Policy '{policy_name}' found in unusable state '{provisioning_state}'. Removing...")
                 delete_resource(cmd, policy_uri, APIVersion.Microsoft_DataReplication.value)
                 time.sleep(30)
                 policy = None
         
         # Create policy if needed
         if not policy or policy.get('properties', {}).get('provisioningState') == ProvisioningState.Deleted.value:
-            logger.info(f"Creating Policy '{policy_name}'...")
+            print(f"Creating Policy '{policy_name}'...")
             
             policy_body = {
                 "properties": {
@@ -493,7 +661,7 @@ def initialize_replication_infrastructure(cmd,
         if not policy or policy.get('properties', {}).get('provisioningState') != ProvisioningState.Succeeded.value:
             raise CLIError(f"Policy '{policy_name}' is not in Succeeded state.")
         
-        logger.info(f"Selected Policy: '{policy_name}'")
+        print(f"Selected Policy: '{policy_name}'")
         
         # Setup Cache Storage Account
         amh_stored_storage_account_id = amh_solution.get('properties', {}).get('details', {}).get('extendedDetails', {}).get('replicationStorageAccountId')
@@ -528,7 +696,7 @@ def initialize_replication_infrastructure(cmd,
                 suffix_hash = suffix_hash[:14]
             storage_account_name = f"migratersa{suffix_hash}"
             
-            logger.info(f"Creating Cache Storage Account '{storage_account_name}'...")
+            print(f"Creating Cache Storage Account '{storage_account_name}'...")
             
             storage_body = {
                 "location": migrate_project.get('location'),
@@ -559,14 +727,13 @@ def initialize_replication_infrastructure(cmd,
         if not cache_storage_account or cache_storage_account.get('properties', {}).get('provisioningState') != StorageAccountProvisioningState.Succeeded.value:
             raise CLIError("Failed to setup Cache Storage Account.")
         
-        logger.info(f"Selected Cache Storage Account: '{cache_storage_account.get('name')}'")
+        print(f"Selected Cache Storage Account: '{cache_storage_account.get('name')}'")
         
         # Grant permissions (Role Assignments)
-        from azure.cli.core.commands import LongRunningOperation
-        from azure.cli.core.profiles import ResourceType
+        from azure.mgmt.authorization import AuthorizationManagementClient
         
-        # Get role assignment client
-        auth_client = cmd.cli_ctx.get_client(ResourceType.MGMT_AUTHORIZATION)
+        # Get role assignment client using the correct method for Azure CLI
+        auth_client = get_mgmt_service_client(cmd.cli_ctx, AuthorizationManagementClient)
         
         source_dra_object_id = source_dra.get('properties', {}).get('resourceAccessIdentity', {}).get('objectId')
         target_dra_object_id = target_dra.get('properties', {}).get('resourceAccessIdentity', {}).get('objectId')
@@ -653,14 +820,14 @@ def initialize_replication_infrastructure(cmd,
         if replication_extension:
             existing_storage_id = replication_extension.get('properties', {}).get('customProperties', {}).get('storageAccountId')
             if existing_storage_id != storage_account_id:
-                logger.info(f"Removing Replication Extension linked to different storage account...")
+                print(f"Removing Replication Extension linked to different storage account...")
                 delete_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value)
                 time.sleep(120)
                 replication_extension = None
         
         # Create replication extension if needed
         if not replication_extension or replication_extension.get('properties', {}).get('provisioningState') == ProvisioningState.Deleted.value:
-            logger.info(f"Creating Replication Extension '{replication_extension_name}'...")
+            print(f"Creating Replication Extension '{replication_extension_name}'...")
             time.sleep(120)  # Wait for permissions to sync
             
             extension_body = {
@@ -696,9 +863,9 @@ def initialize_replication_infrastructure(cmd,
         if not replication_extension or replication_extension.get('properties', {}).get('provisioningState') != ProvisioningState.Succeeded.value:
             raise CLIError(f"Replication Extension '{replication_extension_name}' is not in Succeeded state.")
         
-        logger.info(f"Selected Replication Extension: '{replication_extension_name}'")
+        print(f"Selected Replication Extension: '{replication_extension_name}'")
         
-        logger.info("Successfully initialized replication infrastructure")
+        print("Successfully initialized replication infrastructure")
         
         if pass_thru:
             return True

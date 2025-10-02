@@ -40,3 +40,26 @@ def load_arguments(self, _):
         c.argument('subscription_id', subscription_id_type)
         c.argument('name', help='Internal name of the specific source machine to retrieve.')
         c.argument('appliance_name', help='Name of the appliance (site) containing the machines.')
+
+    with self.argument_context('migrate local replication init') as c:
+        c.argument('resource_group_name', 
+                   options_list=['--resource-group-name', '--resource-group', '-g'], 
+                   help='Specifies the Resource Group of the Azure Migrate Project.', 
+                   required=True)
+        c.argument('project_name', project_name_type, required=True, help='Specifies the name of the Azure Migrate project to be used for server migration.')
+        c.argument('source_appliance_name', 
+                   options_list=['--source-appliance-name'], 
+                   help='Specifies the source appliance name for the AzLocal scenario.', 
+                   required=True)
+        c.argument('target_appliance_name', 
+                   options_list=['--target-appliance-name'], 
+                   help='Specifies the target appliance name for the AzLocal scenario.', 
+                   required=True)
+        c.argument('cache_storage_account_id', 
+                   options_list=['--cache-storage-account-id'], 
+                   help='Specifies the Storage Account ARM Id to be used for private endpoint scenario.')
+        c.argument('subscription_id', subscription_id_type)
+        c.argument('pass_thru', 
+                   options_list=['--pass-thru'], 
+                   arg_type=get_three_state_flag(), 
+                   help='Returns true when the command succeeds.')
