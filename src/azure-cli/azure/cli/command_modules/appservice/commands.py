@@ -314,8 +314,8 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
         g.custom_show_command('show', 'show_plan')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_app_service_plan',
-                                 setter_arg_name='app_service_plan', supports_no_wait=True,
+        g.generic_update_command('update', setter_name='update_app_service_plan_with_progress', custom_func_name='update_app_service_plan',
+                                 setter_arg_name='app_service_plan', setter_type=appservice_custom, supports_no_wait=True,
                                  exception_handler=ex_handler_factory())
 
     with self.command_group('appservice') as g:

@@ -287,7 +287,7 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.pageRanges', None))
 
     @ResourceGroupPreparer(name_prefix='clitest')
-    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2euap')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2')
     def test_storage_container_soft_delete_oauth(self, resource_group, storage_account):
         import time
         account_info = self.get_account_info(resource_group, storage_account)

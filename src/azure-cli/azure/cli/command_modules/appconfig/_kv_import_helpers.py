@@ -47,6 +47,7 @@ from ._constants import (
     ImportMode,
 )
 from ._diff_utils import KVComparer, print_preview
+from ._json import parse_json_with_comments
 from ._utils import (
     is_json_content_type,
     validate_feature_flag_name,
@@ -87,7 +88,7 @@ def __read_with_appropriate_encoding(file_path, format_):
     try:
         with io.open(file_path, "r", encoding=default_encoding) as config_file:
             if format_ == "json":
-                config_data = json.load(config_file)
+                config_data = parse_json_with_comments(config_file.read())
                 # Only accept json objects
                 if not isinstance(config_data, (dict, list)):
                     raise ValueError(
@@ -112,7 +113,7 @@ def __read_with_appropriate_encoding(file_path, format_):
 
         with io.open(file_path, "r", encoding=detected_encoding) as config_file:
             if format_ == "json":
-                config_data = json.load(config_file)
+                config_data = parse_json_with_comments(config_file.read())
 
             elif format_ == "yaml":
                 for yaml_data in list(yaml.safe_load_all(config_file)):
