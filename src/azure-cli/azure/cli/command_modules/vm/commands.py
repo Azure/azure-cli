@@ -13,7 +13,6 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
-                                                          cf_vmss_run_commands,
                                                           cf_restore_point,
                                                           cf_restore_point_collection, cf_community_gallery)
 from azure.cli.command_modules.vm._format import (
@@ -116,8 +115,7 @@ def load_command_table(self, _):
     )
 
     compute_vmss_run_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetVmRunCommandsOperations.{}',
-        client_factory=cf_vmss_run_commands
+        operations_tmpl='azure.mgmt.compute.operations#VirtualMachineScaleSetVmRunCommandsOperations.{}'
     )
 
     compute_vmss_sdk = CliCommandType(
@@ -463,13 +461,11 @@ def load_command_table(self, _):
     with self.command_group('vmss extension image', compute_vm_extension_image_sdk) as g:
         g.custom_command('list', 'list_vm_extension_images')
 
-    with self.command_group('vmss run-command', compute_vmss_run_sdk, client_factory=cf_vmss_run_commands, min_api='2018-04-01') as g:
+    with self.command_group('vmss run-command', compute_vmss_run_sdk) as g:
         g.custom_command('invoke', 'vmss_run_command_invoke')
-        g.custom_command('list', 'vmss_run_command_list')
         g.custom_show_command('show', 'vmss_run_command_show')
         g.custom_command('create', 'vmss_run_command_create', supports_no_wait=True)
         g.custom_command('update', 'vmss_run_command_update', supports_no_wait=True)
-        g.custom_command('delete', 'vmss_run_command_delete', supports_no_wait=True, confirmation=True)
 
     with self.command_group('sig', compute_galleries_sdk, operation_group='galleries') as g:
         from .operations.sig import SigCreate, SigUpdate, SigShow

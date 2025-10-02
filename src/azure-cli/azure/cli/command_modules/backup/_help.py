@@ -583,6 +583,43 @@ examples:
   - name: Create/Update resource guard mapping of the Recovery Services vault.
     text: az backup vault resource-guard-mapping update --resource-group MyResourceGroup --name MyVault --resource-guard-id MyResourceGuardId
 """
+
+helps['backup protection'] = """
+type: group
+short-summary: Manage protection of items in a Recovery Services vault.
+"""
+
+helps['backup protection reconfigure'] = """
+type: command
+short-summary: Reconfigures backup protection from an old vault to a new vault.
+examples:
+  - name: Reconfigure VM backup from one vault to another
+    text: |
+        az backup protection reconfigure \\
+            --vault-name OldVault \\
+            --resource-group OldVaultRG \\
+            --container-name myVM \\
+            --item-name myVM \\
+            --backup-management-type AzureIaasVM \\
+            --new-vault-name NewVault \\
+            --new-vault-resource-group NewVaultRG \\
+            --new-policy-name DailyPolicy \\
+            --retain-as-per-policy
+  - name: Reconfigure VM backup with cross-tenant MUA scenario
+    text: |
+        az backup protection reconfigure \\
+            --vault-name OldVault \\
+            --resource-group OldVaultRG \\
+            --container-name myVM \\
+            --item-name myVM \\
+            --backup-management-type AzureIaasVM \\
+            --new-vault-name NewVault \\
+            --new-vault-resource-group NewVaultRG \\
+            --new-policy-name DailyPolicy \\
+            --retain-as-per-policy \\
+            --tenant-id 12345678-1234-1234-1234-123456789012
+"""
+
 helps['backup vault resource-guard-mapping show'] = """
 type: command
 short-summary: Get resource guard mapping of the Recovery Services vault.

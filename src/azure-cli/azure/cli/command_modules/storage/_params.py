@@ -322,8 +322,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, options_list=['--name', '-n'], local_context_attribute=None)
 
     with self.argument_context('storage account create', resource_type=ResourceType.MGMT_STORAGE) as c:
-        t_account_type, t_sku_name, t_kind, t_tls_version, t_dns_endpoint_type = \
+        t_account_type, t_sku_name, t_kind, t_tls_version, t_dns_endpoint_type, t_zone_placement_policy = \
             self.get_models('AccountType', 'SkuName', 'Kind', 'MinimumTlsVersion', 'DnsEndpointType',
+                            'ZonePlacementPolicy',
                             resource_type=ResourceType.MGMT_STORAGE)
         t_identity_type = self.get_models('IdentityType', resource_type=ResourceType.MGMT_STORAGE)
         c.register_common_storage_account_options()
@@ -436,6 +437,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    arg_group='Azure Files Identity Based Authentication',
                    help='Specifies if managed identities can access SMB shares using OAuth. '
                         'The default interpretation is false for this property.')
+        c.argument('zones', nargs='+',
+                   help='Describes the available zones for the product where storage account resource can be created.')
+        c.argument('zone_placement_policy', arg_type=get_enum_type(t_zone_placement_policy),
+                   help='The availability zone pinning policy for the storage account.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -530,6 +535,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_smb_oauth', arg_type=get_three_state_flag(),
                    arg_group='Azure Files Identity Based Authentication',
                    help='Specifies if managed identities can access SMB shares using OAuth. ')
+        c.argument('zones', nargs='+',
+                   help='Describes the available zones for the product where storage account resource can be created.')
+        c.argument('zone_placement_policy', arg_type=get_enum_type(t_zone_placement_policy),
+                   help='The availability zone pinning policy for the storage account.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key',
@@ -2798,3 +2807,23 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                      'same share and the same storage account.')
         c.extra('lease',
                 help='Lease id, required if the file has an active lease.')
+
+    with self.argument_context('storage file symbolic-link create') as c:
+        c.extra('share_name', share_name_type, required=True)
+        c.register_path_argument()
+        c.argument('target', required=True,
+                   help='Specifies the file path the symbolic link will point to. '
+                        'The file path can be either relative or absolute.')
+        c.extra('metadata', nargs='+',
+                help='Metadata in space-separated key=value pairs. This overwrites any existing metadata.',
+                validator=validate_metadata)
+        c.extra('file_creation_time', help='Creation time for the file.')
+        c.extra('file_last_write_time', help='Last write time for the file.')
+        c.extra('owner', help='The owner of the file.')
+        c.extra('group', help='The owning group of the file.')
+        c.extra('lease',
+                help='Lease id, required if the file has an active lease. ')
+
+    with self.argument_context('storage file symbolic-link show') as c:
+        c.extra('share_name', share_name_type, required=True)
+        c.register_path_argument()
