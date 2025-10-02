@@ -27,6 +27,26 @@ class APIVersion(Enum):
 # Protected Item Commands
 # --------------------------------------------------------------------------------------------
 
+def _batch_call(cmd, request_uri):
+    response = send_raw_request(
+            cmd.cli_ctx,
+            method='GET',
+            url=request_uri,
+        )
+        
+    if response.status_code >= 400:
+        error_message = f"Failed to retrieve discovered servers. Status: {response.status_code}"
+        try:
+            error_body = response.json()
+            if 'error' in error_body:
+                error_details = error_body['error']
+                error_message += f", Code: {error_details.get('code', 'Unknown')}"
+                error_message += f", Message: {error_details.get('message', 'No message provided')}"
+        except (ValueError, KeyError):
+            error_message += f", Response: {response.text}"
+        raise CLIError(error_message)
+    return response
+
 def get_protected_item(cmd, protected_item_id):
     """
     Retrieve a protected item from the Data Replication service.
@@ -157,26 +177,20 @@ def get_discovered_server(cmd,
     request_uri = cmd.cli_ctx.cloud.endpoints.resource_manager + uri
     
     try:
-        response = send_raw_request(
-            cmd.cli_ctx,
-            method='GET',
-            url=request_uri,
-        )
-        
-        if response.status_code >= 400:
-            error_message = f"Failed to retrieve discovered servers. Status: {response.status_code}"
-            try:
-                error_body = response.json()
-                if 'error' in error_body:
-                    error_details = error_body['error']
-                    error_message += f", Code: {error_details.get('code', 'Unknown')}"
-                    error_message += f", Message: {error_details.get('message', 'No message provided')}"
-            except (ValueError, KeyError):
-                error_message += f", Response: {response.text}"
-            raise CLIError(error_message)
+        response = _batch_call(cmd, request_uri)
         
         discovered_servers_data = response.json()
-        
+        values = discovered_servers_data.get('value', [])
+
+        # Fetch all discovered servers
+        while discovered_servers_data.get('nextLink'):
+            nextLink = discovered_servers_data.get('nextLink')
+            response = _batch_call(cmd, nextLink)
+
+            discovered_servers_data = response.json()
+            values += discovered_servers_data.get('value', [])
+            
+
         # Apply client-side filtering for display_name when using site endpoints
         if appliance_name and display_name and 'value' in discovered_servers_data:
             filtered_servers = []
@@ -187,8 +201,47 @@ def get_discovered_server(cmd,
                     filtered_servers.append(server)
             discovered_servers_data['value'] = filtered_servers
         
-        return discovered_servers_data
+        # Format and display the discovered servers information
+        formatted_output = []
+        for index, server in enumerate(values, 1):
+            properties = server.get('properties', {})
+            discovery_data = properties.get('discoveryData', [])
+            
+            # Extract information from the latest discovery data
+            machine_name = "N/A"
+            ip_addresses = []
+            os_name = "N/A"
+            boot_type = "N/A"
+            
+            if discovery_data:
+                latest_discovery = discovery_data[0]  # Most recent discovery data
+                machine_name = latest_discovery.get('machineName', 'N/A')
+                ip_addresses = latest_discovery.get('ipAddresses', [])
+                os_name = latest_discovery.get('osName', 'N/A')
+                
+                extended_info = latest_discovery.get('extendedInfo', {})
+                boot_type = extended_info.get('bootType', 'N/A')
+            
+            ip_addresses_str = ', '.join(ip_addresses) if ip_addresses else 'N/A'
+            
+            server_info = {
+                'index': index,
+                'machine_name': machine_name,
+                'ip_addresses': ip_addresses_str,
+                'operating_system': os_name,
+                'boot_type': boot_type
+            }
+            formatted_output.append(server_info)
         
+        # Print formatted output
+        for server in formatted_output:
+            index_str = f"{server['index']}."
+            print(f"{index_str} Machine Name: {server['machine_name']}")
+            print(f"{' ' * len(index_str)} IP Addresses: {server['ip_addresses']}")
+            print(f"{' ' * len(index_str)} Operating System: {server['operating_system']}")
+            print(f"{' ' * len(index_str)} Boot Type: {server['boot_type']}")
+            print()
+            
     except Exception as e:
         logger.error(f"Error retrieving discovered servers: {str(e)}")
         raise CLIError(f"Failed to retrieve discovered servers: {str(e)}")
