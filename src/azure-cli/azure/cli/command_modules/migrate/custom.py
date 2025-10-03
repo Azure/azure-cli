@@ -194,7 +194,7 @@ def get_discovered_server(cmd,
         
         # Print formatted output
         for server in formatted_output:
-            index_str = f"{server['index']}."
+            index_str = f"[{server['index']}]"
             print(f"{index_str} Machine Name: {server['machine_name']}")
             print(f"{' ' * len(index_str)} IP Addresses: {server['ip_addresses']}")
             print(f"{' ' * len(index_str)} Operating System: {server['operating_system']}")
