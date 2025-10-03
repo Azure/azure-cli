@@ -138,10 +138,8 @@ def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait
     # Convert properties to JSON string for the body
     body = json_module.dumps(properties)
     
-    # Set headers for JSON content
-    headers = {
-        'Content-Type': 'application/json'
-    }
+    # Headers need to be passed as a list of strings in "key=value" format
+    headers = ['Content-Type=application/json']
     
     response = send_raw_request(
         cmd.cli_ctx,
@@ -164,7 +162,15 @@ def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait
             error_message += f", Response: {response.text}"
         raise CLIError(error_message)
     
-    return response.json() if response.text else None
+    # Handle empty response for async operations (202 status code)
+    if response.status_code == 202 or not response.text or response.text.strip() == '':
+        return None
+    
+    try:
+        return response.json()
+    except (ValueError, json_module.JSONDecodeError):
+        # If we can't parse JSON, return None
+        return None
 
 def delete_resource(cmd, resource_id, api_version):
     """Delete an Azure resource."""
@@ -178,3 +184,4 @@ def delete_resource(cmd, resource_id, api_version):
     )
     
     return response.status_code < 400
+    

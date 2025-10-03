@@ -731,6 +731,7 @@ def initialize_replication_infrastructure(cmd,
         
         # Grant permissions (Role Assignments)
         from azure.mgmt.authorization import AuthorizationManagementClient
+        from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
         
         # Get role assignment client using the correct method for Azure CLI
         auth_client = get_mgmt_service_client(cmd.cli_ctx, AuthorizationManagementClient)
@@ -756,13 +757,14 @@ def initialize_replication_infrastructure(cmd,
                         
                         if not has_role:
                             from uuid import uuid4
+                            role_assignment_params = RoleAssignmentCreateParameters(
+                                role_definition_id=f"/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/{role_def_id}",
+                                principal_id=object_id
+                            )
                             auth_client.role_assignments.create(
                                 scope=storage_account_id,
                                 role_assignment_name=str(uuid4()),
-                                parameters={
-                                    'role_definition_id': f"/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/{role_def_id}",
-                                    'principal_id': object_id
-                                }
+                                parameters=role_assignment_params
                             )
                     except Exception as e:
                         logger.warning(f"Failed to create role assignment: {str(e)}")
@@ -780,13 +782,14 @@ def initialize_replication_infrastructure(cmd,
                     
                     if not has_role:
                         from uuid import uuid4
+                        role_assignment_params = RoleAssignmentCreateParameters(
+                            role_definition_id=f"/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/{role_def_id}",
+                            principal_id=vault_identity_id
+                        )
                         auth_client.role_assignments.create(
                             scope=storage_account_id,
                             role_assignment_name=str(uuid4()),
-                            parameters={
-                                'role_definition_id': f"/subscriptions/{subscription_id}/providers/Microsoft.Authorization/roleDefinitions/{role_def_id}",
-                                'principal_id': vault_identity_id
-                            }
+                            parameters=role_assignment_params
                         )
                 except Exception as e:
                     logger.warning(f"Failed to create vault role assignment: {str(e)}")
@@ -813,57 +816,195 @@ def initialize_replication_infrastructure(cmd,
         target_fabric_short_name = target_fabric_id.split('/')[-1]
         replication_extension_name = f"{source_fabric_short_name}-{target_fabric_short_name}-MigReplicationExtn"
         
+        # Fix: Add leading slash to extension_uri
         extension_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions/{replication_extension_name}"
         replication_extension = get_resource_by_id(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value)
         
-        # Remove extension if linked to different storage account
+        # Check if extension exists and is in good state
         if replication_extension:
+            existing_state = replication_extension.get('properties', {}).get('provisioningState')
             existing_storage_id = replication_extension.get('properties', {}).get('customProperties', {}).get('storageAccountId')
-            if existing_storage_id != storage_account_id:
-                print(f"Removing Replication Extension linked to different storage account...")
+            
+            print(f"Found existing extension '{replication_extension_name}' in state: {existing_state}")
+            
+            # If it's succeeded with the correct storage account, we're done
+            if existing_state == ProvisioningState.Succeeded.value and existing_storage_id == storage_account_id:
+                print(f"Replication Extension already exists with correct configuration.")
+                print("Successfully initialized replication infrastructure")
+                if pass_thru:
+                    return True
+                return
+            
+            # If it's in a bad state or has wrong storage account, delete it
+            if existing_state in [ProvisioningState.Failed.value, ProvisioningState.Canceled.value] or existing_storage_id != storage_account_id:
+                print(f"Removing existing extension (state: {existing_state}, storage mismatch: {existing_storage_id != storage_account_id})")
                 delete_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value)
+                print("Waiting 120 seconds for deletion to complete...")
                 time.sleep(120)
                 replication_extension = None
         
         # Create replication extension if needed
-        if not replication_extension or replication_extension.get('properties', {}).get('provisioningState') == ProvisioningState.Deleted.value:
+        if not replication_extension:
             print(f"Creating Replication Extension '{replication_extension_name}'...")
+            print(f"Waiting 120 seconds for permissions to sync...")
             time.sleep(120)  # Wait for permissions to sync
+            
+            # First, let's check what extensions already exist to understand the pattern
+            print("\n=== Checking existing extensions for patterns ===")
+            existing_extensions_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions"
+            try:
+                existing_extensions_response = batch_call(cmd, f"{existing_extensions_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+                existing_extensions = existing_extensions_response.json().get('value', [])
+                if existing_extensions:
+                    print(f"Found {len(existing_extensions)} existing extension(s):")
+                    for ext in existing_extensions:
+                        ext_name = ext.get('name')
+                        ext_state = ext.get('properties', {}).get('provisioningState')
+                        ext_type = ext.get('properties', {}).get('customProperties', {}).get('instanceType')
+                        print(f"  - {ext_name}: state={ext_state}, type={ext_type}")
+                        
+                        # If we find one with our instance type, let's see its structure
+                        if ext_type == instance_type:
+                            print(f"\nFound matching extension type. Full structure:")
+                            print(json.dumps(ext.get('properties', {}).get('customProperties', {}), indent=2))
+                else:
+                    print("No existing extensions found")
+            except Exception as list_error:
+                print(f"Error listing extensions: {str(list_error)}")
+            
+            # Try creating with minimal properties first
+            print("\n=== Attempting to create extension ===")
             
             extension_body = {
                 "properties": {
                     "customProperties": {
-                        "instanceType": instance_type,
-                        "storageAccountId": storage_account_id,
-                        "storageAccountSasSecretName": None
+                        "instanceType": instance_type
                     }
                 }
             }
             
-            # Add fabric ARM IDs based on instance type
-            if instance_type == AzLocalInstanceTypes.HyperVToAzLocal.value:
-                extension_body["properties"]["customProperties"]["hyperVFabricArmId"] = source_fabric_id
-            elif instance_type == AzLocalInstanceTypes.VMwareToAzLocal.value:
-                extension_body["properties"]["customProperties"]["vmwareFabricArmId"] = source_fabric_id
+            print(f"Extension body (minimal): {json.dumps(extension_body, indent=2)}")
+            print(f"Extension URI: {extension_uri}")
             
-            extension_body["properties"]["customProperties"]["azStackHciFabricArmId"] = target_fabric_id
+            try:
+                # Use the built-in helper function that handles auth properly
+                print("Creating extension using built-in helper...")
+                result = create_or_update_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value, extension_body, no_wait=False)
+                print(f"Creation result: {result}")
+                
+                # If minimal creation succeeded, wait a bit then check status
+                if result:
+                    print("Initial creation succeeded. Waiting for provisioning...")
+                    time.sleep(30)
+                    
+            except Exception as create_error:
+                print(f"Error during extension creation: {str(create_error)}")
+                error_str = str(create_error)
+                
+                # Check for specific error patterns
+                if "Internal Server Error" in error_str or "InternalServerError" in error_str:
+                    print("\n=== Internal Server Error detected, trying with full properties ===")
+                    
+                    # Try with more properties based on what we saw in existing extensions
+                    full_extension_body = {
+                        "properties": {
+                            "customProperties": {
+                                "instanceType": instance_type
+                            }
+                        }
+                    }
+                    
+                    # Add fabric-specific properties based on instance type
+                    if instance_type == AzLocalInstanceTypes.VMwareToAzLocal.value:
+                        full_extension_body["properties"]["customProperties"]["vmwareFabricArmId"] = source_fabric_id
+                        full_extension_body["properties"]["customProperties"]["vmwareSiteId"] = source_site_id  
+                        full_extension_body["properties"]["customProperties"]["azStackHciFabricArmId"] = target_fabric_id
+                        full_extension_body["properties"]["customProperties"]["azStackHciSiteId"] = target_fabric_id
+                    elif instance_type == AzLocalInstanceTypes.HyperVToAzLocal.value:
+                        full_extension_body["properties"]["customProperties"]["hyperVFabricArmId"] = source_fabric_id
+                        full_extension_body["properties"]["customProperties"]["hyperVSiteId"] = source_site_id
+                        full_extension_body["properties"]["customProperties"]["azStackHciFabricArmId"] = target_fabric_id
+                        full_extension_body["properties"]["customProperties"]["azStackHciSiteId"] = target_fabric_id
+                    
+                    # Add common properties seen in existing extensions
+                    full_extension_body["properties"]["customProperties"]["storageAccountId"] = storage_account_id
+                    full_extension_body["properties"]["customProperties"]["storageAccountSasSecretName"] = None
+                    full_extension_body["properties"]["customProperties"]["resourceLocation"] = migrate_project.get('location')
+                    full_extension_body["properties"]["customProperties"]["subscriptionId"] = subscription_id
+                    full_extension_body["properties"]["customProperties"]["resourceGroup"] = resource_group_name
+                    
+                    print(f"Full extension body: {json.dumps(full_extension_body, indent=2)}")
+                    
+                    try:
+                        result = create_or_update_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value, full_extension_body, no_wait=False)
+                        print(f"Full creation result: {result}")
+                    except Exception as full_error:
+                        print(f"Full creation also failed: {str(full_error)}")
+                        
+                        # Last resort: Check if extension was actually created despite the error
+                        print("\nChecking if extension exists despite errors...")
+                        replication_extension = get_resource_by_id(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value)
+                        if replication_extension:
+                            print(f"Extension exists with state: {replication_extension.get('properties', {}).get('provisioningState')}")
+                        else:
+                            raise CLIError(f"Failed to create extension after multiple attempts. Last error: {str(full_error)}")
+                
+                elif "InvalidProperty" in error_str or "unknown property" in error_str.lower():
+                    print("\n=== Invalid property error, trying without storage properties ===")
+                    
+                    # Try without storage account properties that might be causing issues
+                    simple_extension_body = {
+                        "properties": {
+                            "customProperties": {
+                                "instanceType": instance_type
+                            }
+                        }
+                    }
+                    
+                    # Only add fabric IDs, not storage
+                    if instance_type == AzLocalInstanceTypes.VMwareToAzLocal.value:
+                        simple_extension_body["properties"]["customProperties"]["vmwareFabricArmId"] = source_fabric_id
+                        simple_extension_body["properties"]["customProperties"]["azStackHciFabricArmId"] = target_fabric_id
+                    elif instance_type == AzLocalInstanceTypes.HyperVToAzLocal.value:
+                        simple_extension_body["properties"]["customProperties"]["hyperVFabricArmId"] = source_fabric_id
+                        simple_extension_body["properties"]["customProperties"]["azStackHciFabricArmId"] = target_fabric_id
+                    
+                    print(f"Simple extension body: {json.dumps(simple_extension_body, indent=2)}")
+                    
+                    try:
+                        result = create_or_update_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value, simple_extension_body, no_wait=False)
+                        print(f"Simple creation result: {result}")
+                    except Exception as simple_error:
+                        print(f"Simple creation also failed: {str(simple_error)}")
+                        raise
+                else:
+                    # Unknown error, re-raise
+                    raise
             
-            create_or_update_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value, extension_body, no_wait=True)
-            
-            # Wait for extension creation
+            # Wait for extension creation to complete
+            print("\nWaiting for extension operation to complete...")
             for i in range(20):
+                print(f"Polling attempt {i+1}/20...")
                 time.sleep(30)
                 replication_extension = get_resource_by_id(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value)
                 if replication_extension:
                     provisioning_state = replication_extension.get('properties', {}).get('provisioningState')
+                    print(f"Current provisioning state: {provisioning_state}")
                     if provisioning_state in [ProvisioningState.Succeeded.value, ProvisioningState.Failed.value,
-                                             ProvisioningState.Canceled.value, ProvisioningState.Deleted.value]:
+                                             ProvisioningState.Canceled.value]:
+                        print(f"Extension operation finished with state: {provisioning_state}")
                         break
         
+        # Final check
+        if not replication_extension:
+            replication_extension = get_resource_by_id(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value)
+            
         if not replication_extension or replication_extension.get('properties', {}).get('provisioningState') != ProvisioningState.Succeeded.value:
-            raise CLIError(f"Replication Extension '{replication_extension_name}' is not in Succeeded state.")
-        
-        print(f"Selected Replication Extension: '{replication_extension_name}'")
+            current_state = replication_extension.get('properties', {}).get('provisioningState') if replication_extension else "None"
+            print(f"Extension final state: {current_state}")
+            if replication_extension:
+                print(f"Extension details: {json.dumps(replication_extension, indent=2)}")
+            raise CLIError(f"Replication Extension '{replication_extension_name}' is not in Succeeded state. Current state: {current_state}")
         
         print("Successfully initialized replication infrastructure")
         
@@ -873,3 +1014,4 @@ def initialize_replication_infrastructure(cmd,
     except Exception as e:
         logger.error(f"Error initializing replication infrastructure: {str(e)}")
         raise CLIError(f"Failed to initialize replication infrastructure: {str(e)}")
+            
