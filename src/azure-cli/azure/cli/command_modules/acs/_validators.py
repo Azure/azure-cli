@@ -65,8 +65,8 @@ def validate_ssh_key(namespace):
                            "file share, back up your keys to a safe location",
                            private_key_filepath, public_key_filepath)
         else:
-            if (not content or str(content).strip() == "" or 
-                (content == os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))):
+            if (not content or str(content).strip() == "" or
+                    (content == os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))):
                 namespace.no_ssh_key = True
                 return
             raise CLIError(
