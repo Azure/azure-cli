@@ -6,6 +6,7 @@ import json
 import unittest
 from unittest import mock
 import os
+import re
 import time
 import tempfile
 import requests
@@ -2064,6 +2065,24 @@ class FunctionAppOnWindowsWithRuntime(ScenarioTest):
 
         self.cmd(
             'functionapp delete -g {} -n {}'.format(resource_group, functionapp_name))
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    @StorageAccountPreparer()
+    def test_functionapp_unique_domain_name(self, resource_group, storage_account):
+        functionapp_name = self.create_random_name(
+            'functionappudom', 24)
+
+        result = self.cmd('functionapp create -g {} -n {} -c {} -s {} --os-type Windows --functions-version 4 --runtime node --runtime-version 22 --domain-name-scope SubscriptionReuse'
+                 .format(resource_group, functionapp_name, WINDOWS_ASP_LOCATION_FUNCTIONAPP, storage_account)).get_output_in_json()
+        
+        default_hostname = result.get('defaultHostName')
+        pattern = r'^([a-zA-Z0-9\-]+)-([a-z0-9]{16})\.([a-z]+-\d{2})\.azurewebsites\.net$'
+        match = re.match(pattern, default_hostname)
+        self.assertIsNotNone(match, "defaultHostName '{}' does not match expected pattern".format(default_hostname))
+        app_name, hash_part, region = match.groups()
+        self.assertTrue(len(hash_part) == 16 and hash_part.islower(), "Hash is not 16 chars or not lowercase.")
+        self.assertIn('-', region, "Region part does not have '-' separator.")
+        self.assertEqual(app_name, functionapp_name, "App name and defaultHostName app name do not match.")
 
 
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)

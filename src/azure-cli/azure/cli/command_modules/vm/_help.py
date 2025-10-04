@@ -2726,25 +2726,6 @@ helps['vmss run-command update'] = """
 --run-command-name "myRunCommand" --vmss-name "myVMSS"
 """
 
-helps['vmss run-command delete'] = """
-    type: command
-    short-summary: "The operation to delete the run command."
-    examples:
-      - name: The operation to delete the VMSS run command..
-        text: |-
-               az vmss run-command delete --resource-group "myResourceGroup" --instance-id "0" --run-command-name \
-"myRunCommand" --vmss-name "myVMSS"
-"""
-
-helps['vmss run-command list'] = """
-    type: command
-    short-summary: "The operation to get all run commands of an instance in Virtual Machine Scaleset."
-    examples:
-      - name: List run commands in Vmss instance.
-        text: |-
-               az vmss run-command list --resource-group "myResourceGroup" --vmss-name "myVMSS" --instance-id "0"
-"""
-
 helps['vmss run-command show'] = """
     type: command
     short-summary: "The operation to get the VMSS run command."

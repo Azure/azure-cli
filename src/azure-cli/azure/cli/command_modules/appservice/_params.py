@@ -126,6 +126,7 @@ subscription than the app service environment, please use the resource ID for --
                                                                                  'the App Service plan that hosts it.')
         c.argument('zone_redundant', options_list=['--zone-redundant', '-z'], help='Enable zone redundancy for high availability. Minimum instance count is 2.')
         c.argument('tags', arg_type=tags_type)
+        c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
 
     with self.argument_context('appservice plan update') as c:
         c.argument('sku', arg_type=sku_arg_type)
@@ -133,6 +134,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('max_elastic_worker_count', options_list=['--max-elastic-worker-count', '-m'], type=int, is_preview=True, help='Maximum number of instances that the plan can scale out to. The plan must be an elastic scale plan.')
         c.argument('number_of_workers', type=int, help='Number of workers to be allocated.')
         c.ignore('allow_pending_state')
+        c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
 
     with self.argument_context('appservice plan delete') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
@@ -890,6 +892,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='Enable zone redundancy for high availability. Applies to Flex Consumption SKU only.')
         c.argument('configure_networking_later', options_list=['--configure-networking-later', '--cnl'], arg_type=get_three_state_flag(),
                    help='Use this option if you want to configure networking later for an app using network-restricted storage.')
+        c.argument('auto_generated_domain_name_label_scope', options_list=['--domain-name-scope'], help="Specify the scope of uniqueness for the default hostname during resource creation. ", choices=['TenantReuse', 'SubscriptionReuse', 'ResourceGroupReuse', 'NoReuse'])
 
     with self.argument_context('functionapp deployment config set') as c:
         c.argument('deployment_storage_name', options_list=['--deployment-storage-name', '--dsn'], help="The deployment storage account name.")
