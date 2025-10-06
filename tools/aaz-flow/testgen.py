@@ -11,7 +11,7 @@ from fastmcp import Context
 from prompt_templates import get_testgen_static_instructions, REF_STYLE_LABEL, IDEAL_STYLE
 
 
-async def check_module_status(ctx: Context, paths: dict):
+async def check_module_status(ctx: Context):
     await ctx.info("Starting test generation workflow.")
 
     module_name = getattr(ctx, "generated_module", None)
@@ -76,7 +76,7 @@ def extract_generated_examples(module_path: Path) -> dict[str, str]:
 
 
 async def check_path_status(ctx: Context, paths: dict):
-    module_name = await check_module_status(ctx, paths)
+    module_name = await check_module_status(ctx)
     if not module_name or "cancelled" in str(module_name).lower():
         return str(module_name), [], None
 
