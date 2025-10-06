@@ -22,12 +22,32 @@ class TestIdentity(ScenarioTest):
 
         self.cmd('identity create -n {identity} -g {rg}', checks=[
             self.check('name', '{identity}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('assignmentRestrictions', '{providers: []}')
         ])
+
+        self.cmd('identity update -n {identity} -g {rg} --assignment-restrictions {providers: ['Microsoft.Compute']}', checks=[
+            self.check('name', '{identity}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('assignmentRestrictions', '{providers: [Microsoft.Compute]}')
+        ])
+
         self.cmd('identity list-resources -g {rg} -n {identity}')
 
         self.cmd('identity list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('identity delete -n {identity} -g {rg}')
+
+        self.cmd('identity create -n {identity} -g {rg} --assignment-restrictions {providers: [Microsoft.Compute]}', checks=[
+            self.check('name', '{identity}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('assignmentRestrictions', '{providers: [Microsoft.Compute]}')
+        ])
+
+        self.cmd('identity update -n {identity} -g {rg} --assignment-restrictions {providers: []}', checks=[
+            self.check('name', '{identity}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('assignmentRestrictions', '{providers: []}')
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_federated_identity_credential_', location='centraluseuap')
     def test_federated_identity_credential(self, resource_group):
