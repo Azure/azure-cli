@@ -4,29 +4,86 @@
 # --------------------------------------------------------------------------------------------
 
 import asyncio
-from pathlib import Path
-from typing import Literal
-from fastmcp import Context
 import os
 import shutil
 import sys
+from pathlib import Path
+from typing import Literal
+
+from fastmcp import Context
 from models import AAZRequest
 
 paths = {
     "aaz": os.getenv("AAZ_PATH", "/workspaces/aaz"),
     "cli": os.getenv("CLI_PATH", "/workspaces/azure-cli"),
-    "cli_extension": os.getenv(
-        "CLI_EXTENSION_PATH", "/workspaces/azure-cli-extensions"
-    ),
+    "cli_extension": os.getenv("CLI_EXTENSION_PATH", "/workspaces/azure-cli-extensions"),
     "swagger_path": os.getenv("SWAGGER_PATH", "/workspaces/azure-rest-api-specs"),
 }
 
 
+def _resolve_python_candidates() -> list[str]:
+    """Find available Python executables in order of preference."""
+    candidates = []
+    venv = os.environ.get("VIRTUAL_ENV")
+    if venv:
+        candidates.append(str(Path(venv) / "bin" / "python"))
+    ws_venv_python = Path("/workspaces/.venv/bin/python")
+    if ws_venv_python.exists():
+        candidates.append(str(ws_venv_python))
+    if sys.executable:
+        candidates.append(sys.executable)
+    for name in ("python3", "python"):
+        p = shutil.which(name)
+        if p:
+            candidates.append(p)
+    deduped = []
+    seen = set()
+    for c in candidates:
+        if c not in seen:
+            deduped.append(c)
+            seen.add(c)
+    return deduped
+
+
+def _resolve_aaz_dev_prefix() -> str:
+    """Find the correct aaz-dev command to use."""
+    for py in _resolve_python_candidates():
+        try:
+            import subprocess
+
+            code = (
+                "import importlib.util, sys; "
+                "spec = importlib.util.find_spec('aaz_dev.__main__'); "
+                "sys.exit(0 if spec else 1)"
+            )
+            res = subprocess.run(
+                [py, "-c", code],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            if res.returncode == 0:
+                return f"{py} -m aaz_dev"
+        except Exception:
+            pass
+    for maybe in [
+        "/workspaces/.venv/bin/aaz-dev",
+        (
+            str(Path(os.environ.get("VIRTUAL_ENV", "")) / "bin" / "aaz-dev")
+            if os.environ.get("VIRTUAL_ENV")
+            else None
+        ),
+        shutil.which("aaz-dev"),
+    ]:
+        if maybe and os.path.exists(maybe):
+            return maybe
+    return "aaz-dev"
+
+
 async def fetch_available_services():
-    """Retrieve available services by parsing local azure-rest-api-specs/specification directory"""
+    """Retrieve available services by parsing local azure-rest-api-specs/specification directory."""
     spec_path = os.path.join(paths["swagger_path"], "specification")
     if not os.path.exists(spec_path):
-        # Fallback to common services if local path is missing
         return ["storage", "compute", "network", "keyvault", "monitor"]
 
     try:
@@ -41,9 +98,73 @@ async def fetch_available_services():
         return ["storage", "compute", "network", "keyvault", "monitor"]
 
 
+def fetch_tag_and_rp(module_name: str) -> list:
+    """Extract tags and resource providers from swagger readme.md file."""
+    read_me = os.path.join(
+        paths["swagger_path"], "specification", module_name, "resource-manager", "readme.md"
+    )
+    if not os.path.exists(read_me):
+        return []
+    
+    tags = []
+    try:
+        with open(read_me, 'r') as f:
+            for line in f:
+                line = line.strip()
+                if line.startswith('### Tag:'):
+                    tag = line.split('### Tag:')[1].strip()
+                    tags.append(tag)
+    except Exception:
+        tags = []
+
+    resource_providers = []
+    try:
+        with open(read_me, 'r') as f:
+            lines = f.readlines()
+            for idx, line in enumerate(lines):
+                if line.strip().startswith('input-file:'):
+                    for next_line in lines[idx+1:]:
+                        next_line = next_line.strip()
+                        if next_line.startswith('-'):
+                            path = next_line.lstrip('-').strip()
+                            parts = path.split('/')
+                            if parts:
+                                resource_providers.append(parts[0])
+                        elif next_line == "" or next_line.startswith("#"):
+                            continue
+                        else:
+                            break
+                    break
+    except Exception:
+        resource_providers = []
+
+    return [resource_providers, tags]
+
+
+async def _select_option(ctx: Context, options: list, option_type: str) -> str:
+    if len(options) == 1:
+        selected = options[0]
+        await ctx.info(f"Using single {option_type}: {selected}")
+        return selected
+    
+    choice_prompt = await ctx.sample(
+        f"When the user clicks on the Respond button, the user will receive a list of {option_type}s to choose from."
+        f"Ask the user in a professional manner to select one {option_type} from the list. "
+        "The list is provided when they click on the Respond button so do not give any options in the questions itself."
+    )
+    
+    choice = await ctx.elicit(
+        message=choice_prompt.text, 
+        response_type=Literal[*options] if options else str
+    )
+    
+    if choice.action != "accept":
+        return None
+    return choice.data
+
+
 async def validate_paths(ctx: Context) -> dict:
     """Validate and get correct paths for required directories."""
-
     await ctx.info("az_cli : Validating local paths...")
     await ctx.report_progress(progress=5, total=100)
 
@@ -117,9 +238,11 @@ async def get_name(ctx: Context) -> str:
         "Ask the user in a professional manner to select a module/extension from the list. "
         "The list is provided when they click on the Respond button so do not give them any options in the questions itself. "
         "The result of this option selection will determine which module's code will be generated for Azure CLI."
+        "The request to the user should start from Please as the first word."
     )
     extension_choice = await ctx.elicit(
-        message=choice_prompt.text, response_type=Literal[tuple(common_extensions)]
+        message=choice_prompt.text, response_type=Literal[tuple(
+            common_extensions)]
     )
 
     if extension_choice.action != "accept":
@@ -136,97 +259,56 @@ async def get_name(ctx: Context) -> str:
     return extension_choice.data
 
 
-async def get_swagger_config(
-    ctx: Context, paths: dict, service_name: str = None
-) -> dict:
-    """Get Swagger configuration details from user."""
-    await ctx.info("az_cli : Browsing Swagger specifications...")
-    await ctx.report_progress(progress=60, total=100)
-
-    spec_result = await browse_specs(
-        ctx,
-        os.path.join(
-            paths["swagger_path"], "specification", service_name, "resource-manager"
-        ),
+async def _select_option(ctx: Context, options: list, option_type: str) -> str:
+    """Helper function to select from options or use single option directly."""
+    if len(options) == 1:
+        selected = options[0]
+        await ctx.info(f"Using single {option_type}: {selected}")
+        return selected
+    
+    choice_prompt = await ctx.sample(
+        f"When the user clicks on the Respond button, the user will receive a list of {option_type}s to choose from."
+        f"Ask the user in a professional manner to select one {option_type} from the list. "
+        "The list is provided when they click on the Respond button so do not give any options in the questions itself."
     )
-    if not spec_result:
+    
+    choice = await ctx.elicit(
+        message=choice_prompt.text, 
+        response_type=Literal[*options] if options else str
+    )
+    
+    if choice.action != "accept":
         return None
-    else:
-        return spec_result
+    return choice.data
 
 
-async def browse_specs(ctx: Context, base_path: str):
-    """Interactive browser for Swagger specifications with clean labels and correct metadata extraction."""
-    await ctx.info("az_cli : Starting specification browser...")
+async def construct_config(ctx: Context, name: str, resource_providers: list, tags: list) -> dict:
+    """Construct configuration by selecting resource provider and tag."""
+    await ctx.info(f"Found resource providers: {resource_providers}")
+    await ctx.info(f"Found tags: {tags}")
 
-    current_path = base_path
-    navigation_count = 0
+    if not resource_providers or not tags:
+        await ctx.info("Invalid configuration. Code generation cancelled.")
+        return {}
 
-    while True:
-        navigation_count += 1
-        await ctx.info(f"az_cli : Browsing {current_path} (step {navigation_count})")
+    resource_provider = await _select_option(ctx, resource_providers, "resource provider")
+    if resource_provider is None:
+        return None
 
-        try:
-            entries = sorted(os.listdir(current_path))
-        except FileNotFoundError:
-            await ctx.info(f"az_cli : Directory not found: {current_path}")
-            return None
+    swagger_tag = await _select_option(ctx, tags, "swagger tag")
+    if swagger_tag is None:
+        return None
 
-        dirs = [e for e in entries if os.path.isdir(os.path.join(current_path, e))]
-        files = [
-            e
-            for e in entries
-            if os.path.isfile(os.path.join(current_path, e))
-            and e.endswith((".json", ".yaml", ".yml"))
-        ]
+    await ctx.info(
+        f"Selected resource provider: {resource_provider}, tag: {swagger_tag}")
 
-        labels = [".."] + [f"> {d}" for d in dirs] + files
-        mapping = dict(zip(labels, [".."] + dirs + files))
-
-        choice = await ctx.elicit(
-            message="Click on the respond button to browse through the sub-folders of the chosen service and select the appropriate spec file.",
-            response_type=Literal[tuple(labels)],
-        )
-
-        if choice.action != "accept":
-            await ctx.info("az_cli : Specification browsing cancelled")
-            return None
-
-        selected = mapping[choice.data]
-
-        if selected == "..":
-            current_path = os.path.dirname(current_path)
-            await ctx.info(f"az_cli : Moved up to: {current_path}")
-        elif selected in dirs:
-            current_path = os.path.join(current_path, selected)
-            await ctx.info(f"az_cli : Entered directory: {selected}")
-        else:
-            selected_file_path = os.path.join(current_path, selected)
-            await ctx.info(f"az_cli : Selected spec file: {selected_file_path}")
-
-            rel_path = os.path.relpath(selected_file_path, base_path)
-            parts = rel_path.split(os.sep)
-
-            resource_provider = parts[0] if len(parts) > 0 else None
-            release = parts[2] if len(parts) > 2 else None
-            swagger_tag = f"package-{release}" if release else None
-
-            result = {
-                "file": os.path.dirname(base_path),
-                "resource_provider": resource_provider,
-                "release": release,
-                "swagger_tag": swagger_tag,
-            }
-
-            await ctx.info(
-                f"az_cli : Extracted: Resource Provider={resource_provider}, Release={release}, Tag={swagger_tag}"
-            )
-            return result
+    return [resource_provider, swagger_tag]
 
 
 async def run_command(
     ctx: Context, command: str, step_name: str, progress_start: int, progress_end: int
 ):
+    """Execute a shell command with progress tracking and output logging."""
     await ctx.info(f"az_cli : Starting: {step_name}")
     process = await asyncio.create_subprocess_shell(
         command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT
@@ -246,7 +328,8 @@ async def run_command(
         lines_count += 1
         await ctx.info(f"az_cli : {line.decode().rstrip()}")
         progress = progress_start + min(
-            progress_range, int((lines_count / total_lines_estimate) * progress_range)
+            progress_range, int(
+                (lines_count / total_lines_estimate) * progress_range)
         )
         await ctx.report_progress(progress, 100)
 
@@ -259,64 +342,8 @@ async def run_command(
     await ctx.info(f"az_cli : Completed: {step_name}")
 
 
-def _resolve_python_candidates() -> list[str]:
-    candidates = []
-    venv = os.environ.get("VIRTUAL_ENV")
-    if venv:
-        candidates.append(str(Path(venv) / "bin" / "python"))
-    ws_venv_python = Path("/workspaces/.venv/bin/python")
-    if ws_venv_python.exists():
-        candidates.append(str(ws_venv_python))
-    if sys.executable:
-        candidates.append(sys.executable)
-    for name in ("python3", "python"):
-        p = shutil.which(name)
-        if p:
-            candidates.append(p)
-    deduped = []
-    seen = set()
-    for c in candidates:
-        if c not in seen:
-            deduped.append(c)
-            seen.add(c)
-    return deduped
-
-
-def _resolve_aaz_dev_prefix() -> str:
-    for py in _resolve_python_candidates():
-        try:
-            import subprocess
-
-            code = (
-                "import importlib.util, sys; "
-                "spec = importlib.util.find_spec('aaz_dev.__main__'); "
-                "sys.exit(0 if spec else 1)"
-            )
-            res = subprocess.run(
-                [py, "-c", code],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-            )
-            if res.returncode == 0:
-                return f"{py} -m aaz_dev"
-        except Exception:
-            pass
-    for maybe in [
-        "/workspaces/.venv/bin/aaz-dev",
-        (
-            str(Path(os.environ.get("VIRTUAL_ENV", "")) / "bin" / "aaz-dev")
-            if os.environ.get("VIRTUAL_ENV")
-            else None
-        ),
-        shutil.which("aaz-dev"),
-    ]:
-        if maybe and os.path.exists(maybe):
-            return maybe
-    return "aaz-dev"
-
-
 async def execute_commands(ctx: Context, paths: dict, request: AAZRequest):
+    """Execute the AAZ development commands for code generation."""
     aaz_dev = _resolve_aaz_dev_prefix()
     await ctx.info(f"az_cli : Using aaz-dev invocation: {aaz_dev}")
 
@@ -333,6 +360,7 @@ async def execute_commands(ctx: Context, paths: dict, request: AAZRequest):
         f"{aaz_dev} cli generate-by-swagger-tag "
         f"-a {paths['aaz']} "
         f"-e {paths['cli_extension']} "
+        f"--cli-path {paths['cli']} "
         f"--name {request.name} "
         f"--sm {request.swagger_module_path} "
         f"--rp {request.resource_provider} "
@@ -348,3 +376,50 @@ async def execute_commands(ctx: Context, paths: dict, request: AAZRequest):
         return f"Code generation failed: {str(e)}"
 
     return "Azure CLI code generation completed successfully!"
+
+
+async def run_code_generation(ctx: Context, name: str, paths: dict):
+    """Run the complete code generation workflow."""
+    resource_providers, tags = fetch_tag_and_rp(name)
+    if not resource_providers or not tags:
+        return None, "Code generation cancelled."
+
+    resource_provider, swagger_tag = await construct_config(ctx, name, resource_providers, tags)
+
+    request = AAZRequest(
+        name=name,
+        swagger_module_path=os.path.join(paths['swagger_path'], 'specification', name),
+        resource_provider=resource_provider,
+        swagger_tag=swagger_tag,
+    )
+
+    await execute_commands(ctx, paths, request)
+    ctx.generated_module = name
+
+    await ctx.info(f"Code generation completed for extension/module '{name}'.")
+    return name, None
+
+
+async def get_validated_paths(ctx: Context):
+    """Get and validate all required paths."""
+    paths = await validate_paths(ctx)
+    if not paths:
+        await ctx.info("Operation cancelled due to invalid paths.")
+        return None
+    return paths
+
+
+async def get_module_name(ctx: Context, module_name: str | None = None):
+    """Get module name from parameter or user input."""
+    if not module_name:
+        response = await ctx.elicit(
+            "Enter the module/extension name to generate tests for:"
+        )
+        if response.action != "accept" or not response.data:
+            await ctx.info("Operation cancelled due to missing module name.")
+            return None
+        module_name = response.data
+    else:
+        await ctx.info(f"Detected generated module: {module_name}")
+    ctx.generated_module = module_name
+    return module_name
