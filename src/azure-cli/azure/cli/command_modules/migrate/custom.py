@@ -1964,11 +1964,6 @@ def new_local_server_replication(cmd,
                 }
                 disks.append(disk_obj)
                 print(f"DEBUG: Added disk object {i+1}: {disk_obj}")
-                
-                print(f"DEBUG: OS disk found in discovered disks: {os_disk_found}")
-                if not os_disk_found:
-                    print(f"DEBUG: Available disk IDs: {[disk.get('instanceId' if site_type == SiteTypes.HyperVSites.value else 'uuid') for disk in machine_disks]}")
-                    raise CLIError(f"OS disk with ID '{os_disk_id}' not found in discovered machine disks.")
             
             # Process all NICs
             print(f"DEBUG: Processing {len(machine_nics)} discovered NICs")
@@ -2075,35 +2070,75 @@ def new_local_server_replication(cmd,
         print(f"DEBUG: RAM validation passed")
         
         print(f"DEBUG: Final configuration - Generation: {hyperv_generation}, CPU: {target_vm_cpu_core}, RAM: {target_vm_ram} MB, Dynamic Memory: {is_source_dynamic_memory}")
-        # Construct protected item properties
+        
+        # Construct protected item properties with only the essential properties
+        # The API schema varies by instance type, so we'll use a minimal approach
+        custom_properties = {
+            "instanceType": instance_type
+        }
+        
+        # Add the machine ID using the instance-type-specific property name
+        if instance_type == AzLocalInstanceTypes.VMwareToAzLocal.value:
+            custom_properties["vmwareMachineId"] = machine_id
+        elif instance_type == AzLocalInstanceTypes.HyperVToAzLocal.value:
+            custom_properties["hyperVMachineId"] = machine_id
+        
+        # Add basic VM configuration
+        custom_properties["targetVmName"] = target_vm_name
+        custom_properties["targetResourceGroupId"] = target_resource_group_id
+        custom_properties["storageContainerId"] = target_storage_path_id
+        custom_properties["hyperVGeneration"] = hyperv_generation
+        custom_properties["targetCpuCores"] = target_vm_cpu_core
+        custom_properties["sourceCpuCores"] = source_cpu_cores
+        custom_properties["targetMemoryInMegaBytes"] = int(target_vm_ram)
+        custom_properties["sourceMemoryInMegaBytes"] = int(source_memory_mb)
+        custom_properties["isDynamicRam"] = is_dynamic_ram_enabled if is_dynamic_ram_enabled is not None else is_source_dynamic_memory
+        
+        # Add disks and NICs with proper casing
+        custom_properties["disksToInclude"] = [
+            {
+                "diskId": disk["diskId"],
+                "diskSizeGB": disk["diskSizeGb"],
+                "diskFileFormat": disk["diskFileFormat"],
+                "isOsDisk": disk["isOSDisk"],
+                "isDynamic": disk["isDynamic"],
+                "diskPhysicalSectorSize": 512,
+                "storageContainerId": target_storage_path_id
+            }
+            for disk in disks
+        ]
+        
+        custom_properties["nicsToInclude"] = [
+            {
+                "nicId": nic["nicId"],
+                "selectionTypeForFailover": nic["selectionTypeForFailover"],
+                "networkName": "",
+                "targetNetworkId": nic["targetNetworkId"],
+                "testNetworkId": nic["testNetworkId"]
+            }
+            for nic in nics
+        ]
+        
+        # Add dynamic memory configuration
+        custom_properties["dynamicMemoryConfig"] = {
+            "minimumMemoryInMegaBytes": min(int(target_vm_ram), 2048),
+            "maximumMemoryInMegaBytes": max(int(target_vm_ram), 8192),
+            "targetMemoryBufferPercentage": 20
+        }
+        
+        # Add required identifiers
+        custom_properties["runAsAccountId"] = run_as_account_id
+        custom_properties["sourceFabricAgentName"] = source_dra.get('name')
+        custom_properties["targetFabricAgentName"] = target_dra.get('name')
+        custom_properties["targetHCIClusterId"] = target_cluster_id
+        custom_properties["targetArcClusterCustomLocationId"] = custom_location_id or ""
+        custom_properties["customLocationRegion"] = custom_location_region
+        
         protected_item_body = {
             "properties": {
                 "policyName": policy_name,
                 "replicationExtensionName": replication_extension_name,
-                "customProperties": {
-                    "instanceType": instance_type,
-                    "fabricDiscoveryMachineId": machine_id,
-                    "disksToInclude": disks,
-                    "nicsToInclude": nics,
-                    "targetVmName": target_vm_name,
-                    "targetResourceGroupId": target_resource_group_id,
-                    "hyperVGeneration": hyperv_generation,
-                    "targetCpuCores": target_vm_cpu_core,
-                    "targetMemoryInMegaBytes": target_vm_ram,
-                    "isDynamicRam": is_dynamic_ram_enabled if is_dynamic_ram_enabled is not None else is_source_dynamic_memory,
-                    "dynamicMemoryConfig": {
-                        "minimumMemoryInMegaBytes": min(target_vm_ram, 2048),
-                        "maximumMemoryInMegaBytes": max(target_vm_ram, 8192),
-                        "targetMemoryBufferPercentage": 20
-                    },
-                    "runAsAccountId": run_as_account_id,
-                    "sourceFabricAgentName": source_dra.get('name'),
-                    "targetFabricAgentName": target_dra.get('name'),
-                    "storageContainerId": target_storage_path_id,
-                    "targetHciClusterId": target_cluster_id,
-                    "targetArcClusterCustomLocationId": custom_location_id or "",
-                    "customLocationRegion": custom_location_region
-                }
+                "customProperties": custom_properties
             }
         }
         
@@ -2112,6 +2147,11 @@ def new_local_server_replication(cmd,
         print(f"Target resource group: {target_resource_group_id}")
         print(f"Disks to include: {len(disks)}")
         print(f"NICs to include: {len(nics)}")
+        
+        # Debug: Print the request body to see what we're sending
+        print(f"\n=== DEBUG: Protected Item Request Body ===")
+        print(json.dumps(protected_item_body, indent=2))
+        print("=== END DEBUG ===\n")
         
         # Create the protected item (this will trigger a long-running operation)
         result = create_or_update_resource(cmd, protected_item_uri, APIVersion.Microsoft_DataReplication.value, protected_item_body, no_wait=True)
