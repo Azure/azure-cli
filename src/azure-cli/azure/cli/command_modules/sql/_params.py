@@ -283,8 +283,9 @@ managed_instance_param_type = CLIArgumentType(
 
 kid_param_type = CLIArgumentType(
     options_list=['--kid', '-k'],
-    help='The Azure Key Vault key identifier of the server key. An example key identifier is '
-    '"https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
+    help='The Azure Key Vault key identifier of the server key. Supports versioned and versionless key IDs. '
+         'Examples: "https://YourVaultName.vault.azure.net/keys/YourKeyName/01234567890123456789012345678901" '
+         'or "https://YourVaultName.vault.azure.net/keys/YourKeyName"')
 
 server_key_type_param_type = CLIArgumentType(
     options_list=['--server-key-type', '-t'],
