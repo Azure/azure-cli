@@ -19,9 +19,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-04-02",
+        "version": "2025-01-02",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}", "2023-04-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/disks/{}", "2025-01-02"],
         ]
     }
 
@@ -93,7 +93,7 @@ class Show(AAZCommand):
 
         @property
         def error_format(self):
-            return "MgmtErrorFormat"
+            return "ODataV4Format"
 
         @property
         def url_parameters(self):
@@ -117,7 +117,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-04-02",
+                    "api-version", "2025-01-02",
                     required=True,
                 ),
             }
@@ -174,6 +174,10 @@ class Show(AAZCommand):
                 flags={"client_flatten": True},
             )
             _schema_on_200.sku = AAZObjectType()
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
@@ -191,6 +195,9 @@ class Show(AAZCommand):
             properties.last_ownership_update_time = AAZStrType(
                 serialized_name="LastOwnershipUpdateTime",
                 flags={"read_only": True},
+            )
+            properties.availability_policy = AAZObjectType(
+                serialized_name="availabilityPolicy",
             )
             properties.bursting_enabled = AAZBoolType(
                 serialized_name="burstingEnabled",
@@ -291,6 +298,11 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
 
+            availability_policy = cls._schema_on_200.properties.availability_policy
+            availability_policy.action_on_disk_delay = AAZStrType(
+                serialized_name="actionOnDiskDelay",
+            )
+
             creation_data = cls._schema_on_200.properties.creation_data
             creation_data.create_option = AAZStrType(
                 serialized_name="createOption",
@@ -307,14 +319,23 @@ class Show(AAZCommand):
                 serialized_name="imageReference",
             )
             _ShowHelper._build_schema_image_disk_reference_read(creation_data.image_reference)
+            creation_data.instant_access_duration_minutes = AAZIntType(
+                serialized_name="instantAccessDurationMinutes",
+            )
             creation_data.logical_sector_size = AAZIntType(
                 serialized_name="logicalSectorSize",
             )
             creation_data.performance_plus = AAZBoolType(
                 serialized_name="performancePlus",
             )
+            creation_data.provisioned_bandwidth_copy_speed = AAZStrType(
+                serialized_name="provisionedBandwidthCopySpeed",
+            )
             creation_data.security_data_uri = AAZStrType(
                 serialized_name="securityDataUri",
+            )
+            creation_data.security_metadata_uri = AAZStrType(
+                serialized_name="securityMetadataUri",
             )
             creation_data.source_resource_id = AAZStrType(
                 serialized_name="sourceResourceId",
@@ -427,11 +448,34 @@ class Show(AAZCommand):
             supported_capabilities.disk_controller_types = AAZStrType(
                 serialized_name="diskControllerTypes",
             )
+            supported_capabilities.supported_security_option = AAZStrType(
+                serialized_name="supportedSecurityOption",
+            )
 
             sku = cls._schema_on_200.sku
             sku.name = AAZStrType()
             sku.tier = AAZStrType(
                 flags={"read_only": True},
+            )
+
+            system_data = cls._schema_on_200.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
             )
 
             tags = cls._schema_on_200.tags
