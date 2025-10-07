@@ -1758,7 +1758,7 @@ def new_local_server_replication(cmd,
         if not target_dra:
             raise CLIError(f"The target appliance '{target_appliance_name}' is in a disconnected state.")
         
-        print(f"Selected Target Fabric Agent: '{target_dra.get('name')}'")
+        print(f"Selected Target Fabric Agent 2: '{target_dra.get('name')}'")
         
         # 2. Validate Replication Extension
         source_fabric_id = source_fabric['id']
@@ -1767,59 +1767,138 @@ def new_local_server_replication(cmd,
         target_fabric_short_name = target_fabric_id.split('/')[-1]
         replication_extension_name = f"{source_fabric_short_name}-{target_fabric_short_name}-MigReplicationExtn"
         
+        print(f"DEBUG: Source fabric ID: {source_fabric_id}")
+        print(f"DEBUG: Target fabric ID: {target_fabric_id}")
+        print(f"DEBUG: Expected replication extension name: {replication_extension_name}")
+        
         extension_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions/{replication_extension_name}"
+        print(f"DEBUG: Extension URI: {extension_uri}")
+        
         replication_extension = get_resource_by_id(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value)
         
         if not replication_extension:
+            print(f"DEBUG: Replication extension not found. Checking all existing extensions...")
+            # List all extensions for debugging
+            extensions_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions"
+            try:
+                extensions_response = batch_call(cmd, f"{extensions_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+                existing_extensions = extensions_response.json().get('value', [])
+                print(f"DEBUG: Found {len(existing_extensions)} existing extension(s):")
+                for ext in existing_extensions:
+                    print(f"  - Name: {ext.get('name')}")
+                    print(f"    State: {ext.get('properties', {}).get('provisioningState')}")
+                    print(f"    Type: {ext.get('properties', {}).get('customProperties', {}).get('instanceType')}")
+            except Exception as list_error:
+                print(f"DEBUG: Error listing extensions: {str(list_error)}")
+            
             raise CLIError(f"The replication extension '{replication_extension_name}' not found. Run 'az migrate local-replication-infrastructure initialize' first.")
-        if replication_extension.get('properties', {}).get('provisioningState') != ProvisioningState.Succeeded.value:
-            raise CLIError(f"The replication extension '{replication_extension_name}' is not ready. State: '{replication_extension.get('properties', {}).get('provisioningState')}'")
+        
+        extension_state = replication_extension.get('properties', {}).get('provisioningState')
+        print(f"DEBUG: Replication extension state: {extension_state}")
+        print(f"DEBUG: Expected state: {ProvisioningState.Succeeded.value}")
+        
+        if extension_state != ProvisioningState.Succeeded.value:
+            print(f"DEBUG: Extension properties: {json.dumps(replication_extension.get('properties', {}), indent=2)}")
+            raise CLIError(f"The replication extension '{replication_extension_name}' is not ready. State: '{extension_state}'")
+        
+        print(f"DEBUG: Replication extension validation successful")
         
         # 3. Get ARC Resource Bridge info (placeholder - needs Azure Resource Graph implementation)
         # For now, we'll construct the required values based on the target fabric
-        target_cluster_id = target_fabric.get('properties', {}).get('customProperties', {}).get('cluster', {}).get('resourceName', '')
+        target_fabric_custom_props = target_fabric.get('properties', {}).get('customProperties', {})
+        print(f"DEBUG: Target fabric custom properties keys: {list(target_fabric_custom_props.keys())}")
+        
+        target_cluster_id = target_fabric_custom_props.get('cluster', {}).get('resourceName', '')
+        print(f"DEBUG: Target cluster ID from fabric: '{target_cluster_id}'")
+        
+        # Try alternative property paths for cluster ID
+        if not target_cluster_id:
+            target_cluster_id = target_fabric_custom_props.get('azStackHciClusterName', '')
+            print(f"DEBUG: Target cluster ID from azStackHciClusterName: '{target_cluster_id}'")
+        
+        if not target_cluster_id:
+            target_cluster_id = target_fabric_custom_props.get('clusterName', '')
+            print(f"DEBUG: Target cluster ID from clusterName: '{target_cluster_id}'")
         
         # Extract custom location from target fabric
-        custom_location_id = target_fabric.get('properties', {}).get('customProperties', {}).get('customLocationRegion', '')
+        custom_location_id = target_fabric_custom_props.get('customLocationRegion', '')
+        print(f"DEBUG: Custom location ID from customLocationRegion: '{custom_location_id}'")
+        
+        if not custom_location_id:
+            custom_location_id = target_fabric_custom_props.get('customLocationId', '')
+            print(f"DEBUG: Custom location ID from customLocationId: '{custom_location_id}'")
+        
         if not custom_location_id:
             # Try to construct it from cluster ID
             if target_cluster_id:
+                print(f"DEBUG: Attempting to construct custom location from cluster ID")
                 # This is a simplified placeholder - real implementation would query ARG
                 cluster_parts = target_cluster_id.split('/')
+                print(f"DEBUG: Cluster ID parts: {cluster_parts}")
                 if len(cluster_parts) >= 5:
                     custom_location_region = migrate_project.get('location', 'eastus')
                     custom_location_id = f"/subscriptions/{cluster_parts[2]}/resourceGroups/{cluster_parts[4]}/providers/Microsoft.ExtendedLocation/customLocations/{cluster_parts[-1]}-customLocation"
+                    print(f"DEBUG: Constructed custom location ID: '{custom_location_id}'")
+                    print(f"DEBUG: Custom location region: '{custom_location_region}'")
                 else:
                     custom_location_region = migrate_project.get('location', 'eastus')
+                    print(f"DEBUG: Insufficient cluster parts, using default region: '{custom_location_region}'")
             else:
                 custom_location_region = migrate_project.get('location', 'eastus')
+                print(f"DEBUG: No cluster ID found, using default region: '{custom_location_region}'")
         else:
             custom_location_region = migrate_project.get('location', 'eastus')
+            print(f"DEBUG: Using existing custom location, region: '{custom_location_region}'")
         
+        print(f"DEBUG: Final target cluster ID: '{target_cluster_id}'")
+        print(f"DEBUG: Final custom location ID: '{custom_location_id}'")
+        print(f"DEBUG: Final custom location region: '{custom_location_region}'")
         # 4. Validate target VM name
         import re
+        print(f"DEBUG: Validating target VM name: '{target_vm_name}'")
+        print(f"DEBUG: Target VM name length: {len(target_vm_name)}")
+        
         if len(target_vm_name) == 0 or len(target_vm_name) > 64:
             raise CLIError("The target virtual machine name must be between 1 and 64 characters long.")
         
-        if not re.match(r"^[^_\W][a-zA-Z0-9\-]{0,63}(?<![-._])$", target_vm_name):
+        vm_name_pattern = r"^[^_\W][a-zA-Z0-9\-]{0,63}(?<![-._])$"
+        print(f"DEBUG: Target VM name pattern: {vm_name_pattern}")
+        print(f"DEBUG: Target VM name regex match: {bool(re.match(vm_name_pattern, target_vm_name))}")
+        
+        if not re.match(vm_name_pattern, target_vm_name):
             raise CLIError("The target VM name must begin with a letter or number, contain only letters, numbers, or hyphens, and not end with '.' or '-'.")
+        
+        print(f"DEBUG: Target VM name validation passed")
         
         # 5. Construct disk and NIC mappings
         disks = []
         nics = []
         
+        print(f"DEBUG: Power user mode: {is_power_user_mode}")
+        print(f"DEBUG: Default user mode: {is_default_user_mode}")
+        
         if is_power_user_mode:
+            print(f"DEBUG: Using power user mode for disk and NIC configuration")
             # Power user mode - use provided disk and NIC mappings
+            print(f"DEBUG: Disk to include count: {len(disk_to_include) if disk_to_include else 0}")
+            print(f"DEBUG: NIC to include count: {len(nic_to_include) if nic_to_include else 0}")
+            
             if not disk_to_include or len(disk_to_include) == 0:
                 raise CLIError("At least one disk must be included for replication.")
             
             # Validate that exactly one disk is marked as OS disk
             os_disks = [d for d in disk_to_include if d.get('isOSDisk', False)]
-            if len(os_disks) != 1:
-                raise CLIError("Exactly one disk must be designated as the OS disk.")
-            
+            print(f"DEBUG: OS disks found in power user mode: {len(os_disks)}")
+            for i, os_disk in enumerate(os_disks):
+                print(f"DEBUG: OS disk {i+1}: {os_disk.get('diskId')}")
+                
+                if len(os_disks) != 1:
+                    raise CLIError("Exactly one disk must be designated as the OS disk.")
+                
             # Process disks
-            for disk in disk_to_include:
+            print(f"DEBUG: Processing {len(disk_to_include)} disks in power user mode")
+            for i, disk in enumerate(disk_to_include):
+                print(f"DEBUG: Processing disk {i+1}: ID={disk.get('diskId')}, Size={disk.get('diskSizeGb')}GB, OS={disk.get('isOSDisk', False)}")
                 disk_obj = {
                     'diskId': disk.get('diskId'),
                     'diskSizeGb': disk.get('diskSizeGb'),
@@ -1828,9 +1907,12 @@ def new_local_server_replication(cmd,
                     'isOSDisk': disk.get('isOSDisk', False)
                 }
                 disks.append(disk_obj)
+                print(f"DEBUG: Added disk object: {disk_obj}")
             
             # Process NICs
-            for nic in nic_to_include:
+            print(f"DEBUG: Processing {len(nic_to_include)} NICs in power user mode")
+            for i, nic in enumerate(nic_to_include):
+                print(f"DEBUG: Processing NIC {i+1}: ID={nic.get('nicId')}, Target={nic.get('targetNetworkId')}")
                 nic_obj = {
                     'nicId': nic.get('nicId'),
                     'targetNetworkId': nic.get('targetNetworkId'),
@@ -1838,85 +1920,161 @@ def new_local_server_replication(cmd,
                     'selectionTypeForFailover': nic.get('selectionTypeForFailover', VMNicSelection.SelectedByUser.value)
                 }
                 nics.append(nic_obj)
+                print(f"DEBUG: Added NIC object: {nic_obj}")
         else:
+            print(f"DEBUG: Using default user mode for disk and NIC configuration")
             # Default user mode - create mappings from discovered machine data
             machine_disks = machine_props.get('disks', [])
             machine_nics = machine_props.get('networkAdapters', [])
             
+            print(f"DEBUG: Machine disks count: {len(machine_disks)}")
+            print(f"DEBUG: Machine NICs count: {len(machine_nics)}")
+            print(f"DEBUG: Site type: {site_type}")
+            print(f"DEBUG: OS disk ID to find: '{os_disk_id}'")
+            
             # Find OS disk
             os_disk_found = False
-            for disk in machine_disks:
+            print(f"DEBUG: Processing {len(machine_disks)} discovered disks")
+            for i, disk in enumerate(machine_disks):
                 if site_type == SiteTypes.HyperVSites.value:
                     disk_id = disk.get('instanceId')
                     disk_size = disk.get('maxSizeInBytes', 0)
+                    print(f"DEBUG: HyperV disk {i+1}: instanceId='{disk_id}', size={disk_size} bytes")
                 else:  # VMware
                     disk_id = disk.get('uuid')
                     disk_size = disk.get('maxSizeInBytes', 0)
-                
+                    print(f"DEBUG: VMware disk {i+1}: uuid='{disk_id}', size={disk_size} bytes")
+            
                 is_os_disk = disk_id == os_disk_id
+                print(f"DEBUG: Disk {i+1} is OS disk: {is_os_disk} (comparing '{disk_id}' == '{os_disk_id}')")
+                
                 if is_os_disk:
                     os_disk_found = True
+                    print(f"DEBUG: Found OS disk at index {i+1}")
+                
+                disk_size_gb = (disk_size + (1024**3 - 1)) // (1024**3)  # Round up to GB
+                print(f"DEBUG: Disk {i+1} size converted to GB: {disk_size_gb}")
                 
                 disk_obj = {
                     'diskId': disk_id,
-                    'diskSizeGb': (disk_size + (1024**3 - 1)) // (1024**3),  # Round up to GB
+                    'diskSizeGb': disk_size_gb,
                     'diskFileFormat': 'VHDX',
                     'isDynamic': True,
                     'isOSDisk': is_os_disk
                 }
                 disks.append(disk_obj)
-            
-            if not os_disk_found:
-                raise CLIError(f"OS disk with ID '{os_disk_id}' not found in discovered machine disks.")
+                print(f"DEBUG: Added disk object {i+1}: {disk_obj}")
+                
+                print(f"DEBUG: OS disk found in discovered disks: {os_disk_found}")
+                if not os_disk_found:
+                    print(f"DEBUG: Available disk IDs: {[disk.get('instanceId' if site_type == SiteTypes.HyperVSites.value else 'uuid') for disk in machine_disks]}")
+                    raise CLIError(f"OS disk with ID '{os_disk_id}' not found in discovered machine disks.")
             
             # Process all NICs
-            for nic in machine_nics:
+            print(f"DEBUG: Processing {len(machine_nics)} discovered NICs")
+            print(f"DEBUG: Target virtual switch ID: '{target_virtual_switch_id}'")
+            print(f"DEBUG: Target test virtual switch ID: '{target_test_virtual_switch_id}'")
+            
+            for i, nic in enumerate(machine_nics):
+                nic_id = nic.get('nicId')
+                print(f"DEBUG: Processing NIC {i+1}: ID='{nic_id}'")
+                
+                test_network_id = target_test_virtual_switch_id or target_virtual_switch_id
+                print(f"DEBUG: NIC {i+1} test network ID: '{test_network_id}'")
+                
                 nic_obj = {
-                    'nicId': nic.get('nicId'),
+                    'nicId': nic_id,
                     'targetNetworkId': target_virtual_switch_id,
-                    'testNetworkId': target_test_virtual_switch_id or target_virtual_switch_id,
+                    'testNetworkId': test_network_id,
                     'selectionTypeForFailover': VMNicSelection.SelectedByUser.value
                 }
                 nics.append(nic_obj)
+                print(f"DEBUG: Added NIC object {i+1}: {nic_obj}")
+        
+        print(f"DEBUG: Final disk count: {len(disks)}")
+        print(f"DEBUG: Final NIC count: {len(nics)}")
+        print(f"DEBUG: Final disks: {disks}")
+        print(f"DEBUG: Final NICs: {nics}")
         
         # 6. Create the protected item
         # Use the original machine name as protected item name (matching PowerShell behavior)
         protected_item_name = machine_name
         
+        print(f"DEBUG: Using protected item name: '{protected_item_name}'")
+        
         protected_item_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/protectedItems/{protected_item_name}"
         
+        print(f"DEBUG: Protected item URI: '{protected_item_uri}'")
+        
         # Check if protected item already exists
-        existing_item = get_resource_by_id(cmd, protected_item_uri, APIVersion.Microsoft_DataReplication.value)
-        if existing_item:
-            raise CLIError(f"A replication already exists for machine '{machine_name}'. Remove it first before creating a new one.")
+        print(f"DEBUG: Checking if protected item already exists...")
+        try:
+            existing_item = get_resource_by_id(cmd, protected_item_uri, APIVersion.Microsoft_DataReplication.value)
+            print(f"DEBUG: Existing item found: {existing_item is not None}")
+            if existing_item:
+                print(f"DEBUG: Existing item state: {existing_item.get('properties', {}).get('provisioningState')}")
+                raise CLIError(f"A replication already exists for machine '{machine_name}'. Remove it first before creating a new one.")
+        except Exception as e:
+            # Check if it's a 404 Not Found error - that's expected and fine
+            error_str = str(e)
+            if "ResourceNotFound" in error_str or "404" in error_str or "Not Found" in error_str:
+                print(f"DEBUG: Protected item does not exist (expected), proceeding with creation")
+                existing_item = None
+            else:
+                # Some other error occurred, re-raise it
+                print(f"DEBUG: Unexpected error checking for existing item: {error_str}")
+                raise
         
         # Determine Hyper-V generation
+        print(f"DEBUG: Determining Hyper-V generation for site type: '{site_type}'")
         if site_type == SiteTypes.HyperVSites.value:
             hyperv_generation = machine_props.get('generation', '1')
             is_source_dynamic_memory = machine_props.get('isDynamicMemoryEnabled', False)
+            print(f"DEBUG: HyperV machine - generation: '{hyperv_generation}', dynamic memory: {is_source_dynamic_memory}")
         else:  # VMware
             firmware = machine_props.get('firmware', 'BIOS')
             hyperv_generation = '2' if firmware != 'BIOS' else '1'
             is_source_dynamic_memory = False
+            print(f"DEBUG: VMware machine - firmware: '{firmware}', mapped generation: '{hyperv_generation}', dynamic memory: {is_source_dynamic_memory}")
         
         # Determine target CPU and RAM
+        print(f"DEBUG: Determining target CPU and RAM...")
+        source_cpu_cores = machine_props.get('numberOfProcessorCore', 2)
+        source_memory_mb = machine_props.get('allocatedMemoryInMB', 4096)
+        print(f"DEBUG: Source machine - CPU cores: {source_cpu_cores}, RAM: {source_memory_mb} MB")
+        
         if not target_vm_cpu_core:
-            target_vm_cpu_core = machine_props.get('numberOfProcessorCore', 2)
+            target_vm_cpu_core = source_cpu_cores
+            print(f"DEBUG: Using source CPU cores for target: {target_vm_cpu_core}")
+        else:
+            print(f"DEBUG: Using provided target CPU cores: {target_vm_cpu_core}")
         
         if not target_vm_ram:
-            target_vm_ram = max(machine_props.get('allocatedMemoryInMB', 4096), 512)  # Minimum 512MB
+            target_vm_ram = max(source_memory_mb, 512)  # Minimum 512MB
+            print(f"DEBUG: Using source RAM for target (min 512MB): {target_vm_ram} MB")
+        else:
+            print(f"DEBUG: Using provided target RAM: {target_vm_ram} MB")
         
         # Validate CPU and RAM based on generation
+        print(f"DEBUG: Validating CPU and RAM for generation {hyperv_generation}...")
+        print(f"DEBUG: Target CPU cores to validate: {target_vm_cpu_core}")
+        print(f"DEBUG: Target RAM to validate: {target_vm_ram} MB")
+        
         if target_vm_cpu_core < 1 or target_vm_cpu_core > 240:
             raise CLIError("Target VM CPU cores must be between 1 and 240.")
+        print(f"DEBUG: CPU validation passed")
         
         if hyperv_generation == '1':
+            print(f"DEBUG: Validating RAM for Generation 1 VM (512 MB - 1048576 MB)")
             if target_vm_ram < 512 or target_vm_ram > 1048576:  # 1TB
                 raise CLIError("Target VM RAM must be between 512 MB and 1048576 MB (1 TB) for Generation 1 VMs.")
         else:
+            print(f"DEBUG: Validating RAM for Generation 2 VM (32 MB - 12582912 MB)")
             if target_vm_ram < 32 or target_vm_ram > 12582912:  # 12TB
                 raise CLIError("Target VM RAM must be between 32 MB and 12582912 MB (12 TB) for Generation 2 VMs.")
+        print(f"DEBUG: RAM validation passed")
         
+        print(f"DEBUG: Final configuration - Generation: {hyperv_generation}, CPU: {target_vm_cpu_core}, RAM: {target_vm_ram} MB, Dynamic Memory: {is_source_dynamic_memory}")
         # Construct protected item properties
         protected_item_body = {
             "properties": {
