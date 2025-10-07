@@ -356,12 +356,23 @@ async def execute_commands(ctx: Context, paths: dict, request: AAZRequest):
         f"--swagger-tag {request.swagger_tag}"
     )
 
+    prompt = await ctx.sample(
+        "Ask the user to provide a name for the generated module/extension. "
+        "To use the default name, they can simply press Cancel."
+    )
+    module_name_response = await ctx.elicit(prompt.text, response_type=str)
+    if module_name_response.action != "accept" or not module_name_response.data:
+        await ctx.info("No module name provided. The default name will be used.")
+        module_name = request.name
+    else:
+        module_name = module_name_response.data
+
     cmd2 = (
         f"{aaz_dev} cli generate-by-swagger-tag "
         f"-a {paths['aaz']} "
         f"-e {paths['cli_extension']} "
         f"--cli-path {paths['cli']} "
-        f"--name {request.name} "
+        f"--name {module_name} "
         f"--sm {request.swagger_module_path} "
         f"--rp {request.resource_provider} "
         f"--tag {request.swagger_tag} "
