@@ -12,7 +12,7 @@ With Codespace, all pre-requisites are installed for you, including the [AAZ Flo
 Once codespace is created (takes a couple of minutes), you will see the following prompt in the integrated terminal:
 ![](./assets/codespace_login.png)
 
-It helps us login GitHub account interactively, after logged, you won't need to do it again in a fresh terminal:
+It helps login to your GitHub account interactively; after logging in, you won't need to do it again in a fresh terminal:
 ![](./assets/codespace_logged.png)
 
 Furthermore, all dependencies will be installed automatically, and once a similar prompt appears, you can start development:
@@ -59,7 +59,7 @@ While the codegen tool provides some initial examples, their quality directly im
 Once everything is ready, you can raise pull requests in [Azure/azure-cli-extensions](https://github.com/Azure/azure-cli-extensions) and [Azure/aaz](https://github.com/Azure/aaz).
 
 ## Introduction to AAZ Flow
-AAZ Flow is the MCP server for the AAZ APIs, enabling prune command-line interface, implement custom logic, generate test cases, and more.
+AAZ Flow is the MCP server for the AAZ APIs, enabling pruning of command-line interfaces, implementing custom logic, generating test cases, and more.
 
 Please note that AAZ Flow is currently in early development. The functionality and available tools are subject to change and expansion as we continue to develop and improve the server.
 
