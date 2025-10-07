@@ -45,6 +45,21 @@ class FabricInstanceTypes(Enum):
     VMwareInstance = "VMwareMigrate"
     AzLocalInstance = "AzStackHCI"
 
+class SiteTypes(Enum):
+    HyperVSites = "HyperVSites"
+    VMwareSites = "VMwareSites"
+
+class VMNicSelection(Enum):
+    SelectedByDefault = "SelectedByDefault"
+    SelectedByUser = "SelectedByUser"
+    NotSelected = "NotSelected"
+
+class IdFormats:
+    MachineArmIdTemplate = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OffAzure/{siteType}/{siteName}/machines/{machineName}"
+    StoragePathArmIdTemplate = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureStackHCI/storagecontainers/{storagePathName}"
+    ResourceGroupArmIdTemplate = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
+    LogicalNetworkArmIdTemplate = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureStackHCI/logicalnetworks/{logicalNetworkName}"
+
 class RoleDefinitionIds:
     ContributorId = "b24988ac-6180-42a0-ab88-20f7382dd24c"
     StorageBlobDataContributorId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe"
@@ -184,4 +199,35 @@ def delete_resource(cmd, resource_id, api_version):
     )
     
     return response.status_code < 400
+
+def validate_arm_id_format(arm_id, template):
+    """
+    Validate if an ARM ID matches the expected template format.
     
+    Args:
+        arm_id (str): The ARM ID to validate
+        template (str): The template format to match against
+    
+    Returns:
+        bool: True if the ARM ID matches the template format
+    """
+    import re
+    
+    if not arm_id or not arm_id.startswith('/'):
+        return False
+    
+    # Convert template to regex pattern
+    # Replace {variableName} with a pattern that matches valid Azure resource names
+    pattern = template
+    pattern = pattern.replace('{subscriptionId}', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+    pattern = pattern.replace('{resourceGroupName}', '[a-zA-Z0-9._-]+')
+    pattern = pattern.replace('{siteType}', '(HyperVSites|VMwareSites)')
+    pattern = pattern.replace('{siteName}', '[a-zA-Z0-9._-]+')
+    pattern = pattern.replace('{machineName}', '[a-zA-Z0-9._-]+')
+    pattern = pattern.replace('{storagePathName}', '[a-zA-Z0-9._-]+')
+    pattern = pattern.replace('{logicalNetworkName}', '[a-zA-Z0-9._-]+')
+    
+    # Make the pattern case-insensitive and match the whole string
+    pattern = f'^{pattern}$'
+    
+    return bool(re.match(pattern, arm_id, re.IGNORECASE))

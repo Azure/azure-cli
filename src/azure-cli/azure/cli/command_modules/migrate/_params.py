@@ -67,8 +67,19 @@ def load_arguments(self, _):
     with self.argument_context('migrate local replication new') as c:
         c.argument('machine_id', 
                    options_list=['--machine-id'], 
-                   help='Specifies the machine ARM ID of the discovered server to be migrated.', 
-                   required=True)
+                   help='Specifies the machine ARM ID of the discovered server to be migrated. Required if --machine-index is not provided.', 
+                   required=False)
+        c.argument('machine_index', 
+                   options_list=['--machine-index'], 
+                   type=int,
+                   help='Specifies the index (1-based) of the discovered server from the list. Required if --machine-id is not provided.')
+        c.argument('project_name', 
+                   project_name_type, 
+                   required=False,
+                   help='Name of the Azure Migrate project. Required when using --machine-index.')
+        c.argument('resource_group_name', 
+                   options_list=['--resource-group-name', '--resource-group', '-g'], 
+                   help='Name of the resource group containing the Azure Migrate project. Required when using --machine-index.')
         c.argument('target_storage_path_id', 
                    options_list=['--target-storage-path-id'], 
                    help='Specifies the storage path ARM ID where the VMs will be stored.', 

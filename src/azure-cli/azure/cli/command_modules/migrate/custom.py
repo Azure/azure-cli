@@ -171,12 +171,15 @@ def get_discovered_server(cmd,
             ip_addresses = []
             os_name = "N/A"
             boot_type = "N/A"
+            os_disk_id = {}
             
             if discovery_data:
                 latest_discovery = discovery_data[0]  # Most recent discovery data
                 machine_name = latest_discovery.get('machineName', 'N/A')
                 ip_addresses = latest_discovery.get('ipAddresses', [])
                 os_name = latest_discovery.get('osName', 'N/A')
+                disk_details = json.loads(latest_discovery.get('extendedInfo', {}).get('diskDetails', []))[0]
+                os_disk_id = disk_details.get("InstanceId", "N/A")
                 
                 extended_info = latest_discovery.get('extendedInfo', {})
                 boot_type = extended_info.get('bootType', 'N/A')
@@ -188,7 +191,8 @@ def get_discovered_server(cmd,
                 'machine_name': machine_name,
                 'ip_addresses': ip_addresses_str,
                 'operating_system': os_name,
-                'boot_type': boot_type
+                'boot_type': boot_type,
+                'os_disk_id': os_disk_id
             }
             formatted_output.append(server_info)
         
@@ -199,6 +203,7 @@ def get_discovered_server(cmd,
             print(f"{' ' * len(index_str)} IP Addresses: {server['ip_addresses']}")
             print(f"{' ' * len(index_str)} Operating System: {server['operating_system']}")
             print(f"{' ' * len(index_str)} Boot Type: {server['boot_type']}")
+            print(f"{' ' * len(index_str)} OS Disk ID: {server['os_disk_id']}")
             print()
             
     except Exception as e:
@@ -1016,12 +1021,15 @@ def initialize_replication_infrastructure(cmd,
         raise CLIError(f"Failed to initialize replication infrastructure: {str(e)}")
 
 def new_local_server_replication(cmd,
-                                 machine_id,
                                  target_storage_path_id,
                                  target_resource_group_id,
                                  target_vm_name,
                                  source_appliance_name,
                                  target_appliance_name,
+                                 machine_id=None,
+                                 machine_index=None,
+                                 project_name=None,
+                                 resource_group_name=None,
                                  target_vm_cpu_core=None,
                                  target_virtual_switch_id=None,
                                  target_test_virtual_switch_id=None,
@@ -1038,12 +1046,15 @@ def new_local_server_replication(cmd,
     
     Args:
         cmd: The CLI command context
-        machine_id (str): Specifies the machine ARM ID of the discovered server to be migrated (required)
         target_storage_path_id (str): Specifies the storage path ARM ID where the VMs will be stored (required)
         target_resource_group_id (str): Specifies the target resource group ARM ID where the migrated VM resources will reside (required)
         target_vm_name (str): Specifies the name of the VM to be created (required)
         source_appliance_name (str): Specifies the source appliance name for the AzLocal scenario (required)
         target_appliance_name (str): Specifies the target appliance name for the AzLocal scenario (required)
+        machine_id (str, optional): Specifies the machine ARM ID of the discovered server to be migrated (required if machine_index not provided)
+        machine_index (int, optional): Specifies the index of the discovered server from the list (1-based, required if machine_id not provided)
+        project_name (str, optional): Specifies the migrate project name (required when using machine_index)
+        resource_group_name (str, optional): Specifies the resource group name (required when using machine_index)
         target_vm_cpu_core (int, optional): Specifies the number of CPU cores
         target_virtual_switch_id (str, optional): Specifies the logical network ARM ID that the VMs will use (required for default user mode)
         target_test_virtual_switch_id (str, optional): Specifies the test logical network ARM ID that the VMs will use
@@ -1077,9 +1088,118 @@ def new_local_server_replication(cmd,
     import re
     import math
     
+    # Validate that either machine_id or machine_index is provided, but not both
+    if not machine_id and not machine_index:
+        raise CLIError("Either machine_id or machine_index must be provided.")
+    if machine_id and machine_index:
+        raise CLIError("Only one of machine_id or machine_index should be provided, not both.")
+    
+    # If machine_index is provided, resolve it to machine_id
+    if machine_index:
+        if not project_name:
+            raise CLIError("project_name is required when using machine_index.")
+        if not resource_group_name:
+            raise CLIError("resource_group_name is required when using machine_index.")
+        
+        # Validate machine_index is a positive integer
+        if not isinstance(machine_index, int) or machine_index < 1:
+            raise CLIError("machine_index must be a positive integer (1-based index).")
+        
+        # Use current subscription if not provided
+        if not subscription_id:
+            subscription_id = get_subscription_id(cmd.cli_ctx)
+        
+        # Get discovered servers from the project
+        logger.info(f"Resolving machine index {machine_index} to machine ID...")
+        
+        # Determine the correct endpoint based on source appliance name
+        # First, need to get the discovery solution to find appliance mapping
+        discovery_solution_name = "Servers-Discovery-ServerDiscovery"
+        discovery_solution_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Migrate/migrateprojects/{project_name}/solutions/{discovery_solution_name}"
+        discovery_solution = get_resource_by_id(cmd, discovery_solution_uri, APIVersion.Microsoft_Migrate.value)
+        
+        if not discovery_solution:
+            raise CLIError(f"Server Discovery Solution '{discovery_solution_name}' not found in project '{project_name}'.")
+        
+        # Get appliance mapping to determine site type
+        app_map = {}
+        extended_details = discovery_solution.get('properties', {}).get('details', {}).get('extendedDetails', {})
+        
+        # Process applianceNameToSiteIdMapV2 and V3
+        if 'applianceNameToSiteIdMapV2' in extended_details:
+            try:
+                app_map_v2 = json.loads(extended_details['applianceNameToSiteIdMapV2'])
+                if isinstance(app_map_v2, list):
+                    for item in app_map_v2:
+                        if isinstance(item, dict) and 'ApplianceName' in item and 'SiteId' in item:
+                            app_map[item['ApplianceName'].lower()] = item['SiteId']
+            except (json.JSONDecodeError, KeyError, TypeError):
+                pass
+        
+        if 'applianceNameToSiteIdMapV3' in extended_details:
+            try:
+                app_map_v3 = json.loads(extended_details['applianceNameToSiteIdMapV3'])
+                if isinstance(app_map_v3, dict):
+                    for appliance_name, site_info in app_map_v3.items():
+                        if isinstance(site_info, dict) and 'SiteId' in site_info:
+                            app_map[appliance_name.lower()] = site_info['SiteId']
+                        elif isinstance(site_info, str):
+                            app_map[appliance_name.lower()] = site_info
+            except (json.JSONDecodeError, KeyError, TypeError):
+                pass
+        
+        # Get source site ID
+        source_site_id = app_map.get(source_appliance_name.lower())
+        if not source_site_id:
+            raise CLIError(f"Source appliance '{source_appliance_name}' not found in discovery solution.")
+        
+        # Determine site type from source site ID
+        hyperv_site_pattern = "/Microsoft.OffAzure/HyperVSites/"
+        vmware_site_pattern = "/Microsoft.OffAzure/VMwareSites/"
+        
+        if hyperv_site_pattern in source_site_id:
+            site_name = source_site_id.split('/')[-1]
+            machines_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.OffAzure/HyperVSites/{site_name}/machines"
+        elif vmware_site_pattern in source_site_id:
+            site_name = source_site_id.split('/')[-1]
+            machines_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.OffAzure/VMwareSites/{site_name}/machines"
+        else:
+            raise CLIError(f"Unable to determine site type for source appliance '{source_appliance_name}'.")
+        
+        # Get all machines from the site
+        query_string = f"api-version={APIVersion.Microsoft_OffAzure.value}"
+        request_uri = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{machines_uri}?{query_string}"
+        
+        response = batch_call(cmd, request_uri)
+        machines_data = response.json()
+        machines = machines_data.get('value', [])
+        
+        # Fetch all pages if there are more
+        while machines_data.get('nextLink'):
+            response = batch_call(cmd, machines_data.get('nextLink'))
+            machines_data = response.json()
+            machines.extend(machines_data.get('value', []))
+        
+        # Check if the index is valid
+        if machine_index > len(machines):
+            raise CLIError(f"Invalid machine_index {machine_index}. Only {len(machines)} machines found in site '{site_name}'.")
+        
+        # Get the machine at the specified index (convert 1-based to 0-based)
+        selected_machine = machines[machine_index - 1]
+        machine_id = selected_machine.get('id')
+        
+        logger.info(f"Resolved machine index {machine_index} to machine ID: {machine_id}")
+        
+        # Extract machine name for logging
+        machine_name_from_index = selected_machine.get('name', 'Unknown')
+        properties = selected_machine.get('properties', {})
+        display_name = properties.get('displayName', machine_name_from_index)
+        
+        print(f"Selected machine [{machine_index}]: {display_name} (ID: {machine_name_from_index})")
+    
     # Validate required parameters
     if not machine_id:
-        raise CLIError("machine_id is required.")
+        raise CLIError("machine_id could not be determined.")
     if not target_storage_path_id:
         raise CLIError("target_storage_path_id is required.")
     if not target_resource_group_id:
