@@ -1,14 +1,15 @@
-## AAZ MCP Server
-MCP Server for the AAZ API, enabling prune command-line interface, implement custom logic, generate meaningful example, and more.
+## AAZ Flow
+AAZ Flow is the MCP server for the AAZ APIs, enabling pruning of command-line interfaces, implementing custom logic, generating test cases, and more.
 
 Please note that AAZ Flow is currently in early development. The functionality and available tools are subject to change and expansion as we continue to develop and improve the server.
 
 ### Tools
-`generate_code`
+You can easily start the MCP server within your codespace environment:
+![](./assets/codespace_mcp_start.png)
 
-## Implementation
-1. Performs elicitation for user input to perform workflow
-2. Generates content using llm sampling
-3. Executes AAZ Flow commands directly
-4. Generates tests using llm sampling
-5. Uses tool transformation to make the internal tooling more friendly for llms
+Please setup your Copilot to use the AI features (**Ctrl** + **Alt** + **I** to open a chat):
+![](./assets/codespace_copilot.png)
+
+After that, set the mode to `Agent` and the model to `Claude Sonnet`. The following is the usage sample of the tools along with their signature:
+1. "generate code for azure cli" to generate models and codes.
+2. "generate test for chaos module" to generate test cases in chaos module.
