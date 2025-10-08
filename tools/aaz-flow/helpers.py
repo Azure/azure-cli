@@ -233,9 +233,9 @@ async def get_name(ctx: Context) -> str:
     await ctx.report_progress(progress=40, total=100)
 
     choice_prompt = await ctx.sample(
-        "When the user clicks on the Respond button, the user will receive a list of Azure CLI modules and extensions to choose from."
+        "When the user clicks on the Respond button, the user will receive a list openapi specification resources to choose from."
         "This list is fetched directly from the Azure REST API Specs repository. "
-        "Ask the user in a professional manner to select a module/extension from the list. "
+        "Ask the user in a professional manner to select an openapi specification resource from the list. "
         "The list is provided when they click on the Respond button so do not give them any options in the questions itself. "
         "The result of this option selection will determine which module's code will be generated for Azure CLI."
         "The request to the user should start from Please as the first word."
@@ -347,19 +347,11 @@ async def execute_commands(ctx: Context, paths: dict, request: AAZRequest):
     aaz_dev = _resolve_aaz_dev_prefix()
     await ctx.info(f"az_cli : Using aaz-dev invocation: {aaz_dev}")
 
-    cmd1 = (
-        f"{aaz_dev} command-model generate-from-swagger "
-        f"-a {paths['aaz']} "
-        f"--sm {request.swagger_module_path} "
-        f"-m {request.name} "
-        f"--rp {request.resource_provider} "
-        f"--swagger-tag {request.swagger_tag}"
-    )
-
     prompt = await ctx.sample(
         "Ask the user to provide a name for the generated module/extension. "
         "To use the default name, they can simply press Cancel."
     )
+
     module_name_response = await ctx.elicit(prompt.text, response_type=str)
     if module_name_response.action != "accept" or not module_name_response.data:
         await ctx.info("No module name provided. The default name will be used.")
@@ -367,21 +359,14 @@ async def execute_commands(ctx: Context, paths: dict, request: AAZRequest):
     else:
         module_name = module_name_response.data
 
-    cmd2 = (
-        f"{aaz_dev} cli generate-by-swagger-tag "
-        f"-a {paths['aaz']} "
-        f"-e {paths['cli_extension']} "
-        f"--cli-path {paths['cli']} "
-        f"--name {module_name} "
-        f"--sm {request.swagger_module_path} "
-        f"--rp {request.resource_provider} "
-        f"--tag {request.swagger_tag} "
-        f"--profile latest"
+    cmd = (
+        f"{aaz_dev} cli generate "
+        f"-s {request.name} "
+        f"-m {module_name}"
     )
 
     try:
-        await run_command(ctx, cmd1, "Generate command model from Swagger", 50, 80)
-        await run_command(ctx, cmd2, "Generate CLI from Swagger tag", 80, 100)
+        await run_command(ctx, cmd, "Generate CLI code", 80, 100)
     except Exception as e:
         await ctx.info(f"az_cli : Code generation failed: {str(e)}")
         return f"Code generation failed: {str(e)}"
