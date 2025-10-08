@@ -4816,21 +4816,21 @@ def _get_server_key_name_from_uri(uri):
                        'or "https://YourManagedHsmRegion.YourManagedHsmName.managedhsm.azure.net/keys/YourKeyName/01234567890123456789012345678901"')
 
     vault = uri.split('.')[0].split('/')[-1]
-    
+
     # Handle both versioned and versionless keys
     uri_parts = uri.split('/')
     key = uri_parts[-2] if len(uri_parts) > 4 else uri_parts[-1]
-    
+
     # Check if this is a versionless key (no version or ends with '/')
     if uri.endswith('/') or len(uri_parts) < 6 or uri_parts[-1] == '':
         # Versionless key: format is vault_key
         key = uri_parts[-2] if uri.endswith('/') else uri_parts[-1]
         return '{}_{}'.format(vault, key)
-    else:
-        # Versioned key: format is vault_key_version  
-        key = uri_parts[-2]
-        version = uri_parts[-1]
-        return '{}_{}_{}'.format(vault, key, version)
+
+    # Versioned key: format is vault_key_version
+    key = uri_parts[-2]
+    version = uri_parts[-1]
+    return '{}_{}_{}'.format(vault, key, version)
 
 
 #####
