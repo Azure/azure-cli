@@ -11,40 +11,6 @@ import time
 
 logger = get_logger(__name__)
 
-# --------------------------------------------------------------------------------------------
-# Protected Item Commands
-# --------------------------------------------------------------------------------------------
-
-def get_protected_item(cmd, protected_item_id):
-    """
-    Retrieve a protected item from the Data Replication service.
-    
-    Args:
-        cmd: The CLI command context
-        protected_item_id (str): Full ARM resource ID of the protected item
-    
-    Returns:
-        dict: The protected item content from the API response
-    
-    Raises:
-        CLIError: If the API request fails or returns an error response
-    """
-    from azure.cli.core.commands.arm import get_arm_resource_by_id
-    from azure.cli.command_modules.migrate._helpers import batch_call
-    # Validate the protected item ID format
-    if not protected_item_id or not protected_item_id.startswith('/'):
-        raise CLIError("Invalid protected_item_id. Must be a full ARM resource ID starting with '/'.")
-    
-    # Construct the ARM URI with API version for Microsoft.DataReplication
-    uri = f"{protected_item_id}?api-version=2024-09-01"
-    request_uri = cmd.cli_ctx.cloud.endpoints.resource_manager + uri
-    
-    response = batch_call(cmd, request_uri)
-    
-    protected_item_data = response.json()
-    
-    return protected_item_data
-
 def get_discovered_server(cmd, 
                           project_name, 
                           resource_group_name, 

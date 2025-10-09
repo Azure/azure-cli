@@ -26,9 +26,6 @@ def load_arguments(self, _):
     with self.argument_context('migrate') as c:
         c.argument('subscription_id', subscription_id_type)
 
-    with self.argument_context('migrate local get-protected-item') as c:
-        c.argument('protected_item_id', help='Full ARM resource ID of the protected item to retrieve.', required=True)
-
     with self.argument_context('migrate local get-discovered-server') as c:
         c.argument('project_name', project_name_type, required=True)
         c.argument('resource_group_name', 

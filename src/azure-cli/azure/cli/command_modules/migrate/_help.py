@@ -24,20 +24,6 @@ helps['migrate local'] = """
         environments.
 """
 
-helps['migrate local get-protected-item'] = """
-    type: command
-    short-summary: Retrieve a protected item from the Data Replication service.
-    long-summary: |
-        Get detailed information about a protected item (server being replicated) using its
-        full ARM resource ID. This command is useful for checking the status and configuration
-        of servers that are being replicated to Azure Local or Azure Stack HCI.
-    examples:
-        - name: Get a protected item by its ARM resource ID
-          text: |
-            az migrate local get-protected-item \\
-                --protected-item-id "/subscriptions/12345678-1234-1234-1234-123456789012/resourceGroups/myRG/providers/Microsoft.DataReplication/replicationVaults/myVault/protectedItems/myProtectedItem"
-"""
-
 helps['migrate local get-discovered-server'] = """
     type: command
     short-summary: Retrieve discovered servers from an Azure Migrate project.
