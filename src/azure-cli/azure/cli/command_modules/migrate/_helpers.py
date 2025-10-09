@@ -70,9 +70,9 @@ class ReplicationDetails:
         DefaultCrashConsistentFrequencyInMinutes = 60  # 1 hour
         DefaultAppConsistentFrequencyInMinutes = 240  # 4 hours
 
-def batch_call(cmd, request_uri):
+def send_get_request(cmd, request_uri):
     """
-    Make a batch API call and handle errors properly.
+    Make a GET API call and handle errors properly.
     """
     response = send_raw_request(
         cmd.cli_ctx,

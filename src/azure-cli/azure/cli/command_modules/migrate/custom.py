@@ -38,15 +38,15 @@ def get_discovered_server(cmd,
     Raises:
         CLIError: If required parameters are missing or the API request fails
     """
-    from azure.cli.command_modules.migrate._helpers import batch_call, APIVersion
+    from azure.cli.command_modules.migrate._helpers import send_get_request, APIVersion
 
     # Validate required parameters
     if not project_name:
         raise CLIError("project_name is required.")
+
     if not resource_group_name:
         raise CLIError("resource_group_name is required.")
-    
-    # Validate source_machine_type if provided
+      
     if source_machine_type and source_machine_type not in ["VMware", "HyperV"]:
         raise CLIError("source_machine_type must be either 'VMware' or 'HyperV'.")
     
@@ -97,7 +97,7 @@ def get_discovered_server(cmd,
     request_uri = cmd.cli_ctx.cloud.endpoints.resource_manager + uri
     
     try:
-        response = batch_call(cmd, request_uri)
+        response = send_get_request(cmd, request_uri)
         
         discovered_servers_data = response.json()
         values = discovered_servers_data.get('value', [])
@@ -105,7 +105,7 @@ def get_discovered_server(cmd,
         # Fetch all discovered servers
         while discovered_servers_data.get('nextLink'):
             nextLink = discovered_servers_data.get('nextLink')
-            response = batch_call(cmd, nextLink)
+            response = send_get_request(cmd, nextLink)
 
             discovered_servers_data = response.json()
             values += discovered_servers_data.get('value', [])
@@ -201,7 +201,7 @@ def initialize_replication_infrastructure(cmd,
         CLIError: If required parameters are missing or the API request fails
     """
     from azure.cli.command_modules.migrate._helpers import (
-        batch_call, 
+        send_get_request, 
         get_resource_by_id, 
         delete_resource,
         create_or_update_resource,
@@ -229,6 +229,7 @@ def initialize_replication_infrastructure(cmd,
     try:
         # Use current subscription if not provided
         if not subscription_id:
+            from azure.cli.core.commands.client_factory import get_subscription_id
             subscription_id = get_subscription_id(cmd.cli_ctx)
         print(f"Selected Subscription Id: '{subscription_id}'")
 
@@ -370,7 +371,7 @@ def initialize_replication_infrastructure(cmd,
         
         # Get healthy fabrics in the resource group
         fabrics_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics"
-        fabrics_response = batch_call(cmd, f"{fabrics_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+        fabrics_response = send_get_request(cmd, f"{fabrics_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
         all_fabrics = fabrics_response.json().get('value', [])
         
         for fabric in all_fabrics:
@@ -478,7 +479,7 @@ def initialize_replication_infrastructure(cmd,
         # Get source fabric agent (DRA)
         source_fabric_name = source_fabric.get('name')
         dras_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics/{source_fabric_name}/fabricAgents"
-        source_dras_response = batch_call(cmd, f"{dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+        source_dras_response = send_get_request(cmd, f"{dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
         source_dras = source_dras_response.json().get('value', [])
         
         source_dra = None
@@ -569,7 +570,7 @@ def initialize_replication_infrastructure(cmd,
         # Get target fabric agent (DRA)
         target_fabric_name = target_fabric.get('name')
         target_dras_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics/{target_fabric_name}/fabricAgents"
-        target_dras_response = batch_call(cmd, f"{target_dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+        target_dras_response = send_get_request(cmd, f"{target_dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
         target_dras = target_dras_response.json().get('value', [])
         
         target_dra = None
@@ -837,7 +838,7 @@ def initialize_replication_infrastructure(cmd,
             print("\n=== Checking existing extensions for patterns ===")
             existing_extensions_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions"
             try:
-                existing_extensions_response = batch_call(cmd, f"{existing_extensions_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+                existing_extensions_response = send_get_request(cmd, f"{existing_extensions_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
                 existing_extensions = existing_extensions_response.json().get('value', [])
                 if existing_extensions:
                     print(f"Found {len(existing_extensions)} existing extension(s):")
@@ -1052,7 +1053,7 @@ def new_local_server_replication(cmd,
     """
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.command_modules.migrate._helpers import (
-        batch_call,
+        send_get_request,
         get_resource_by_id,
         create_or_update_resource,
         APIVersion,
@@ -1168,13 +1169,13 @@ def new_local_server_replication(cmd,
         query_string = f"api-version={APIVersion.Microsoft_OffAzure.value}"
         request_uri = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{machines_uri}?{query_string}"
         
-        response = batch_call(cmd, request_uri)
+        response = send_get_request(cmd, request_uri)
         machines_data = response.json()
         machines = machines_data.get('value', [])
         
         # Fetch all pages if there are more
         while machines_data.get('nextLink'):
-            response = batch_call(cmd, machines_data.get('nextLink'))
+            response = send_get_request(cmd, machines_data.get('nextLink'))
             machines_data = response.json()
             machines.extend(machines_data.get('value', []))
         
@@ -1506,7 +1507,7 @@ def new_local_server_replication(cmd,
         
         # Get healthy fabrics in the resource group
         fabrics_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics"
-        fabrics_response = batch_call(cmd, f"{fabrics_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+        fabrics_response = send_get_request(cmd, f"{fabrics_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
         all_fabrics = fabrics_response.json().get('value', [])
         
         for fabric in all_fabrics:
@@ -1614,7 +1615,7 @@ def new_local_server_replication(cmd,
         # Get source fabric agent (DRA)
         source_fabric_name = source_fabric.get('name')
         dras_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics/{source_fabric_name}/fabricAgents"
-        source_dras_response = batch_call(cmd, f"{dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+        source_dras_response = send_get_request(cmd, f"{dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
         source_dras = source_dras_response.json().get('value', [])
         
         source_dra = None
@@ -1705,7 +1706,7 @@ def new_local_server_replication(cmd,
         # Get target fabric agent (DRA)
         target_fabric_name = target_fabric.get('name')
         target_dras_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics/{target_fabric_name}/fabricAgents"
-        target_dras_response = batch_call(cmd, f"{target_dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+        target_dras_response = send_get_request(cmd, f"{target_dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
         target_dras = target_dras_response.json().get('value', [])
         
         target_dra = None
@@ -1744,7 +1745,7 @@ def new_local_server_replication(cmd,
             # List all extensions for debugging
             extensions_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions"
             try:
-                extensions_response = batch_call(cmd, f"{extensions_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+                extensions_response = send_get_request(cmd, f"{extensions_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
                 existing_extensions = extensions_response.json().get('value', [])
                 print(f"DEBUG: Found {len(existing_extensions)} existing extension(s):")
                 for ext in existing_extensions:
