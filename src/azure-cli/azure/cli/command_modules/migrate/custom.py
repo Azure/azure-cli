@@ -1997,8 +1997,7 @@ def new_local_server_replication(cmd,
         
         print(f"DEBUG: Using protected item name: '{protected_item_name}'")
         
-        protected_item_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/protectedItems/{protected_item_name}"
-        
+        protected_item_uri = f"subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/protectedItems/{protected_item_name}"
         print(f"DEBUG: Protected item URI: '{protected_item_uri}'")
         
         # Check if protected item already exists
@@ -2074,65 +2073,49 @@ def new_local_server_replication(cmd,
         # Construct protected item properties with only the essential properties
         # The API schema varies by instance type, so we'll use a minimal approach
         custom_properties = {
-            "instanceType": instance_type
+            "instanceType": instance_type,
+            "targetArcClusterCustomLocationId": custom_location_id or "",
+            "customLocationRegion": custom_location_region,
+            "fabricDiscoveryMachineId": machine_id,
+            "disksToInclude": [
+                {
+                    "diskId": disk["diskId"],
+                    "diskSizeGB": disk["diskSizeGb"],
+                    "diskFileFormat": disk["diskFileFormat"],
+                    "isOsDisk": disk["isOSDisk"],
+                    "isDynamic": disk["isDynamic"],
+                    "diskPhysicalSectorSize": 512
+                }
+                for disk in disks
+            ],
+            "targetVmName": target_vm_name,
+            "targetResourceGroupId": target_resource_group_id,
+            "storageContainerId": target_storage_path_id,
+            "hyperVGeneration": hyperv_generation,
+            "targetCpuCores": target_vm_cpu_core,
+            "sourceCpuCores": source_cpu_cores,
+            "isDynamicRam": is_dynamic_ram_enabled if is_dynamic_ram_enabled is not None else is_source_dynamic_memory,
+            "sourceMemoryInMegaBytes": float(source_memory_mb),
+            "targetMemoryInMegaBytes": int(target_vm_ram),
+            "nicsToInclude": [
+                {
+                    "nicId": nic["nicId"],
+                    "selectionTypeForFailover": nic["selectionTypeForFailover"],
+                    "targetNetworkId": nic["targetNetworkId"],
+                    "testNetworkId": nic.get("testNetworkId", "")
+                }
+                for nic in nics
+            ],
+            "dynamicMemoryConfig": {
+                "maximumMemoryInMegaBytes": 1048576,  # Max for Gen 1
+                "minimumMemoryInMegaBytes": 512,       # Min for Gen 1
+                "targetMemoryBufferPercentage": 20
+            },
+            "sourceFabricAgentName": source_dra.get('name'),
+            "targetFabricAgentName": target_dra.get('name'),
+            "runAsAccountId": run_as_account_id,
+            "targetHCIClusterId": target_cluster_id  # Changed from targetHciClusterId
         }
-        
-        # Add the machine ID using the instance-type-specific property name
-        if instance_type == AzLocalInstanceTypes.VMwareToAzLocal.value:
-            custom_properties["vmwareMachineId"] = machine_id
-        elif instance_type == AzLocalInstanceTypes.HyperVToAzLocal.value:
-            custom_properties["hyperVMachineId"] = machine_id
-        
-        # Add basic VM configuration
-        custom_properties["targetVmName"] = target_vm_name
-        custom_properties["targetResourceGroupId"] = target_resource_group_id
-        custom_properties["storageContainerId"] = target_storage_path_id
-        custom_properties["hyperVGeneration"] = hyperv_generation
-        custom_properties["targetCpuCores"] = target_vm_cpu_core
-        custom_properties["sourceCpuCores"] = source_cpu_cores
-        custom_properties["targetMemoryInMegaBytes"] = int(target_vm_ram)
-        custom_properties["sourceMemoryInMegaBytes"] = int(source_memory_mb)
-        custom_properties["isDynamicRam"] = is_dynamic_ram_enabled if is_dynamic_ram_enabled is not None else is_source_dynamic_memory
-        
-        # Add disks and NICs with proper casing
-        custom_properties["disksToInclude"] = [
-            {
-                "diskId": disk["diskId"],
-                "diskSizeGB": disk["diskSizeGb"],
-                "diskFileFormat": disk["diskFileFormat"],
-                "isOsDisk": disk["isOSDisk"],
-                "isDynamic": disk["isDynamic"],
-                "diskPhysicalSectorSize": 512,
-                "storageContainerId": target_storage_path_id
-            }
-            for disk in disks
-        ]
-        
-        custom_properties["nicsToInclude"] = [
-            {
-                "nicId": nic["nicId"],
-                "selectionTypeForFailover": nic["selectionTypeForFailover"],
-                "networkName": "",
-                "targetNetworkId": nic["targetNetworkId"],
-                "testNetworkId": nic["testNetworkId"]
-            }
-            for nic in nics
-        ]
-        
-        # Add dynamic memory configuration
-        custom_properties["dynamicMemoryConfig"] = {
-            "minimumMemoryInMegaBytes": min(int(target_vm_ram), 2048),
-            "maximumMemoryInMegaBytes": max(int(target_vm_ram), 8192),
-            "targetMemoryBufferPercentage": 20
-        }
-        
-        # Add required identifiers
-        custom_properties["runAsAccountId"] = run_as_account_id
-        custom_properties["sourceFabricAgentName"] = source_dra.get('name')
-        custom_properties["targetFabricAgentName"] = target_dra.get('name')
-        custom_properties["targetHCIClusterId"] = target_cluster_id
-        custom_properties["targetArcClusterCustomLocationId"] = custom_location_id or ""
-        custom_properties["customLocationRegion"] = custom_location_region
         
         protected_item_body = {
             "properties": {
