@@ -9,7 +9,7 @@ With Codespace, all pre-requisites are installed for you, including the [AAZ Flo
 ![](./assets/codespace_mcp.png)
 
 ## Authenticate with GitHub
-Once codespace is created (takes a couple of minutes), you will see the following prompt in the integrated terminal:
+Once codespace is created (takes a while), you will see the following prompt in the integrated terminal:
 ![](./assets/codespace_login.png)
 
 It helps login to your GitHub account interactively; after logging in, you won't need to do it again in a fresh terminal:
@@ -17,7 +17,7 @@ It helps login to your GitHub account interactively; after logging in, you won't
 
 Furthermore, all dependencies will be installed automatically, and once a similar prompt appears, you can start development:
 ```commandline
-Elapsed time: 3m 21s.
+Elapsed time: 3m 26s.
 
 Finished setup! Please launch the codegen tool via: aaz-dev run
 ```
@@ -27,7 +27,7 @@ Once the environment is set up, you can proceed with the standard development pr
 
 **Generate Azure CLI module in seconds!** E.g.,
 ```bash
-aaz-dev cli generate -s chaos -m chaos
+aaz-dev cli generate --spec chaos --module chaos
 ```
 It will convert the specification from https://github.com/Azure/azure-rest-api-specs/tree/main/specification/chaos
  into an Azure CLI module named `chaos`.
@@ -70,6 +70,6 @@ You can easily start the MCP server within your codespace environment:
 Please setup your Copilot to use the AI features (**Ctrl** + **Alt** + **I** to open a chat):
 ![](./assets/codespace_copilot.png)
 
-After that, set the mode to `Agent` and the model to `Claude Sonnet`. The following is the usage sample of the tools along with their signature:
-1. "generate code for azure cli" to generate models and codes.
-2. "generate test for chaos module" to generate test cases in chaos module.
+After that, set the mode to `Agent` and the model to `Claude Sonnet`. The following is the usage scenario of the tools:
+1. "generate test for chaos module" to generate test cases in `chaos` module.
+2. "generate code for azure cli" to generate models and codes.
