@@ -9,7 +9,6 @@ Release History
 **ACS**
 
 * `az aks create`: Pre-announce `--no-ssh-key` default behaviour breaking change (#32205)
-* `az aks create`: Make `--no-ssh-key` default behaviour (#32115)
 
 **AKS**
 
@@ -41,7 +40,7 @@ Release History
 
 **Backup**
 
-* `backup protection reconfigure`: Add new command to support reconfiguring backup to an alternate vault (#32193)
+* `az backup protection reconfigure`: Add new command to support reconfiguring backup to an alternate vault (#32193)
 
 **Batch**
 
@@ -58,10 +57,10 @@ Release History
 * Fix #31929: Fix `az vm/vmss update` cannot update `--wire-server-profile-id` and `--imds-profile-id` (#32129)
 * `az vm disk attach`: Add new parameter `--new-names-of-source-snapshots-or-disks` to support setting the name of create new disk from a snapshot or another disk (#32172)
 * `az vm disk attach`: Add new parameter `--new-names-of-source-disk-restore-point` to support setting the name of create new disk from a disk restore point (#32172)
-* `az vm availability-set`: Add new command `validate-migration-to-vmss` to support validating migration from availability sets to VMSS (#32180)
-* `az vm availability-set`: Add new command `start-migration-to-vmss` to support starting migration from availability sets to VMSS (#32180)
-* `az vm availability-set`: Add new command `cancel-migration-to-vmss` to support canceling migration from availability sets to VMSS (#32180)
-* `az vm availability-set`: Add new command `convert-to-vmss` to support converting availability sets to VMSS (#32180)
+* `az vm availability-set`: Add new command to support validating migration from availability sets to VMSS (#32180)
+* `az vm availability-set`: Add new command to support starting migration from availability sets to VMSS (#32180)
+* `az vm availability-set`: Add new command to support canceling migration from availability sets to VMSS (#32180)
+* `az vm availability-set`: Add new command to support converting availability sets to VMSS (#32180)
 * `az vm`: Add new command `migrate-to-vmss` to support migratiing VM to VMSS (#32180)
 * `az disk create/update`: Add new parameter `--supported-security-option` to support setting supported security option (#32186)
 * `az disk create/update`: Add new parameter `--action-on-disk-delay` to support setting disk availability policy (#32186)
