@@ -920,8 +920,13 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: List[str] or None
         """
         custom_ca_certs_file_path = self.raw_param.get("custom_ca_trust_certificates")
-        if not custom_ca_certs_file_path:
+        if custom_ca_certs_file_path is None:
             return None
+        # Reject empty string - user must provide a valid file path
+        if custom_ca_certs_file_path == "":
+            raise InvalidArgumentValueError(
+                "custom_ca_trust_certificates cannot be an empty string. Please provide a valid file path."
+            )
         if not os.path.isfile(custom_ca_certs_file_path):
             raise InvalidArgumentValueError(
                 "{} is not valid file, or not accessible.".format(
