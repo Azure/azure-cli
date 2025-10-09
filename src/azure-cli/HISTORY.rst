@@ -54,7 +54,7 @@ Release History
 **Compute**
 
 * Fix #31198: `az sig image-version`: Fix `--no-wait` not working (#32078)
-* Fix #31929: Fix `az vm/vmss update` cannot update `--wire-server-profile-id` and `--imds-profile-id` (#32129)
+* Fix #31929: `az vm/vmss update`: Fix `--wire-server-profile-id` and `--imds-profile-id` update (#32129)
 * `az vm disk attach`: Add new parameter `--new-names-of-source-snapshots-or-disks` to support setting the name of create new disk from a snapshot or another disk (#32172)
 * `az vm disk attach`: Add new parameter `--new-names-of-source-disk-restore-point` to support setting the name of create new disk from a disk restore point (#32172)
 * `az vm availability-set`: Add new command to support validating migration from availability sets to VMSS (#32180)
