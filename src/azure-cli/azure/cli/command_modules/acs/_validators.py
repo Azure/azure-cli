@@ -65,16 +65,8 @@ def validate_ssh_key(namespace):
                            "file share, back up your keys to a safe location",
                            private_key_filepath, public_key_filepath)
         else:
-            if (not content or str(content).strip() == "" or
-                    (content == os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))):
-                namespace.no_ssh_key = True
-                return
-            raise CLIError(
-                "The SSH key provided is not a valid RSA public key. "
-                "Provide the contents of a valid SSH public key (for example, '~/.ssh/id_rsa.pub'), "
-                "specify a path to a public key file, "
-                "or add --generate-ssh-keys as a parameter to create a new key pair."
-            )
+            raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
+                           'You can use --generate-ssh-keys to let CLI generate one for you')
     namespace.ssh_key_value = content
 
 

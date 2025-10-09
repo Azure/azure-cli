@@ -223,52 +223,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_no_ssh_key(self, resource_group, resource_group_location):
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        tags = "key1=value1"
-        nodepool_labels = "label1=value1 label2=value2"
-        nodepool_tags = "tag1=tv1 tag2=tv2"
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'location': resource_group_location,
-            'tags': tags,
-            'nodepool_labels': nodepool_labels,
-            'nodepool_tags': nodepool_tags,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
-        })
-
-        # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--node-count=1 ' \
-                     '--tags {tags} --nodepool-labels {nodepool_labels} --nodepool-tags {nodepool_tags}'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-        ])
-        
-        # show
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('type', '{resource_type}'),
-            self.check('resourceGroup', '{resource_group}'),
-            self.check('name', '{name}'),
-            self.exists('nodeResourceGroup'),
-            self.exists('kubernetesVersion'),
-            self.exists('fqdn'),
-            self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].nodeLabels.label1', 'value1'),
-            self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
-            self.check('agentPoolProfiles[0].tags.tag1', 'tv1'),
-            self.check('agentPoolProfiles[0].tags.tag2', 'tv2'),
-            self.check('agentPoolProfiles[0].maxPods', 250),  # default maxPods is 250 now as default network plugin has been changed to azure
-        ])
-
-        # delete
-        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default(self, resource_group, resource_group_location):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)

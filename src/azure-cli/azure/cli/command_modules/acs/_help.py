@@ -95,10 +95,6 @@ parameters:
   - name: --ssh-key-value
     type: string
     short-summary: Public key path or key contents to install on node VMs for SSH access. For example, 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'.
-    long-summary: |-
-      If omitted:
-          - The CLI will use '~/.ssh/id_rsa.pub' when present
-          - If that file is not present the CLI will default to server-side generated keys (equivalent to using --no-ssh-key)
   - name: --admin-username -u
     type: string
     short-summary: User account to create on node VMs for SSH access.
@@ -267,7 +263,7 @@ parameters:
   - name: --no-ssh-key -x
     type: string
     short-summary: Do not use or create a local SSH key.
-    long-summary: If omitted and no local public key exists, the CLI will default to this behavior. To access nodes after creating a cluster with this option, use the Azure Portal.
+    long-summary: To access nodes after creating a cluster with this option, use the Azure Portal.
   - name: --pod-cidr
     type: string
     short-summary: A CIDR notation IP range from which to assign pod IPs when Azure CNI Overlay or Kubenet is used (On 31 March 2028, Kubenet will be retired).
