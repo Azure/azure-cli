@@ -3,6 +3,10 @@
 Release History
 ===============
 
+2.78.0
+++++++
+* Minor fixes
+
 2.77.0
 ++++++
 * Resolve CVE-2025-4517 (#31928)
