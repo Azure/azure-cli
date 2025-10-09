@@ -4,9 +4,11 @@ MCP Server for the AAZ API, enabling prune command-line interface, implement cus
 Please note that AAZ Flow is currently in early development. The functionality and available tools are subject to change and expansion as we continue to develop and improve the server.
 
 ### Tools
-1. `generate_code`
-   - xx
-   - Inputs:
-     - xx
-     - xx
-   - Returns:
+`generate_code`
+
+## Implementation
+1. Performs elicitation for user input to perform workflow
+2. Generates content using llm sampling
+3. Executes AAZ Flow commands directly
+4. Generates tests using llm sampling
+5. Uses tool transformation to make the internal tooling more friendly for llms
