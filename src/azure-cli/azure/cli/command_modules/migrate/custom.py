@@ -5,10 +5,7 @@
 
 from knack.util import CLIError
 from knack.log import get_logger
-from azure.cli.core.util import send_raw_request
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.command_modules.migrate._powershell_utils import get_powershell_executor
-from enum import Enum
 import json
 import time
 
