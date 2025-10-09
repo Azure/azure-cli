@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+[1.0.0] - 2025-10-10
+- Applied `hatchling` as build backend.
+- Refined the project structure.
+
 [0.1.0] - 2025-10-08
-- Added `generate_test` tool.
-- Added `generate_code` tool.
+- Added tool for code generation.
+- Added tool for test generation.
 - Initialized MCP server.
