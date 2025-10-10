@@ -1546,4 +1546,3 @@ class HttpRouteConfigClient:
         send_raw_request(cmd.cli_ctx, "DELETE", request_url, body=None)
         # API doesn't return JSON (it returns no content)
         return
-    
