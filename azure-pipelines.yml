@@ -568,7 +568,7 @@ jobs:
 
 - job: TestExtensionsLoading
   displayName: Test Extensions Loading
-  condition: and(not(startswith(variables['Build.SourceBranch'], 'refs/heads/dev-lts')), not(startswith(variables['System.PullRequest.TargetBranch'], 'dev-lts')))
+  condition: and(not(contains(variables['Build.SourceBranch'], 'lts')), not(contains(variables['System.PullRequest.TargetBranch'], 'lts')))
   timeoutInMinutes: 80
 
   pool:
