@@ -66,6 +66,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         "active_directory_resource_id": "authentication.audiences[0]",
         "app_insights_resource_id": "appInsightsResourceId",
         "app_insights_telemetry_channel_resource_id": "appInsightsTelemetryChannelResourceId",
+        "app_service_resource_id": "appServiceResourceId",
         "attestation_resource_id": "attestationResourceId",
         "azmirror_storage_account_resource_id": "azmirrorStorageAccountResourceId",
         "batch_resource_id": "batch",
@@ -89,6 +90,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
                  active_directory_resource_id=None,
                  app_insights_resource_id=None,
                  app_insights_telemetry_channel_resource_id=None,
+                 app_service_resource_id=None,
                  attestation_resource_id=None,
                  azmirror_storage_account_resource_id=None,
                  batch_resource_id=None,
@@ -111,6 +113,7 @@ class CloudEndpoints:  # pylint: disable=too-few-public-methods,too-many-instanc
         self.active_directory_resource_id = active_directory_resource_id
         self.app_insights_resource_id = app_insights_resource_id
         self.app_insights_telemetry_channel_resource_id = app_insights_telemetry_channel_resource_id
+        self.app_service_resource_id = app_service_resource_id
         self.attestation_resource_id = attestation_resource_id
         self.azmirror_storage_account_resource_id = azmirror_storage_account_resource_id
         self.batch_resource_id = batch_resource_id
@@ -272,6 +275,7 @@ def _arm_to_cli_mapper(arm_dict):
                                                   fallback_value=get_endpoint_fallback_value('app_insights_resource_id')),
             app_insights_telemetry_channel_resource_id=get_endpoint('appInsightsTelemetryChannelResourceId',
                                                                     fallback_value=get_endpoint_fallback_value('app_insights_telemetry_channel_resource_id')),
+            app_service_resource_id=get_endpoint('appServiceResourceId', fallback_value=get_endpoint_fallback_value('app_service_resource_id')),
             attestation_resource_id=get_endpoint('attestationResourceId',
                                                  fallback_value=get_endpoint_fallback_value('attestation_resource_id')),
             azmirror_storage_account_resource_id=get_endpoint('azmirrorStorageAccountResourceId'),
@@ -377,6 +381,7 @@ AZURE_PUBLIC_CLOUD = Cloud(
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.com/v2/track',
         synapse_analytics_resource_id='https://dev.azuresynapse.net',
         attestation_resource_id='https://attest.azure.net',
+        app_service_resource_id='https://appservice.azure.com',
         portal='https://portal.azure.com'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.windows.net',
@@ -412,6 +417,9 @@ AZURE_CHINA_CLOUD = Cloud(
         log_analytics_resource_id='https://api.loganalytics.azure.cn',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.azure.cn/v2/track',
         synapse_analytics_resource_id='https://dev.azuresynapse.azure.cn',
+        # App Service Audience is currently not available in Mooncake,
+        # Using the management endpoint until the App Service audience is enabled
+        app_service_resource_id='https://management.core.chinacloudapi.cn/',
         portal='https://portal.azure.cn'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.chinacloudapi.cn',
@@ -443,6 +451,9 @@ AZURE_US_GOV_CLOUD = Cloud(
         log_analytics_resource_id='https://api.loganalytics.us',
         app_insights_telemetry_channel_resource_id='https://dc.applicationinsights.us/v2/track',
         synapse_analytics_resource_id='https://dev.azuresynapse.usgovcloudapi.net',
+        # App Service Audience is currently not available in US Government cloud,
+        # Using the management endpoint until the App Service audience is enabled
+        app_service_resource_id='https://management.core.usgovcloudapi.net/',
         portal='https://portal.azure.us'),
     suffixes=CloudSuffixes(
         storage_endpoint='core.usgovcloudapi.net',

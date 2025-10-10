@@ -374,6 +374,9 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
     if source_container:
         # copy blobs for blob container, skip empty dir
         # pylint: disable=inconsistent-return-statements
+        if source_client is None:
+            source_client = client
+
         def action_blob_copy(blob_name):
             if dryrun:
                 logger.warning('  - copy blob %s', blob_name)
@@ -392,12 +395,25 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
     if source_share:
         # copy blob from file share, skip empty dir
         # pylint: disable=inconsistent-return-statements
+        if source_client is None:
+            t_share_service = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                      '_share_service_client#ShareServiceClient')
+            account_url = client.url.replace('blob', 'file')
+            if client.credential and client.credential.account_key:
+                credential = {
+                    "account_name": client.credential.account_name,
+                    "account_key": client.credential.account_key
+                }
+                source_client = t_share_service(account_url=account_url, credential=credential)
+            else:
+                source_client = t_share_service(account_url=account_url, credential=client.credential)
+
         def action_file_copy(file_info):
             dir_name, file_name = file_info
             if dryrun:
-                logger.warning('  - copy file %s', os.path.join(dir_name, file_name))
+                logger.warning('  - copy file %s', '/'.join(dir_name, file_name))
             else:
-                return _copy_file_to_blob_container(client, source_client, container_name, destination_path,
+                return _copy_file_to_blob_container(cmd, client, source_client, container_name, destination_path,
                                                     source_share, source_sas, dir_name, file_name)
 
         return list(filter_none(action_file_copy(file) for file in collect_files_track2(source_client,
@@ -908,16 +924,21 @@ def create_blob_url(client, container_name, blob_name, snapshot, protocol='https
 def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destination_container, destination_path,
                                  source_container, source_blob_name, source_sas, **kwargs):
     t_blob_client = cmd.get_models('_blob_client#BlobClient')
-    # generate sas for oauth copy source
-    if not source_sas:
-        from ..util import create_short_lived_blob_sas_v2
-        start = datetime.utcnow()
-        expiry = datetime.utcnow() + timedelta(hours=1)
-        source_user_delegation_key = source_blob_service.get_user_delegation_key(start, expiry)
-        source_sas = create_short_lived_blob_sas_v2(cmd, source_blob_service.account_name, source_container,
-                                                    source_blob_name, user_delegation_key=source_user_delegation_key)
-    source_client = t_blob_client(account_url=source_blob_service.url, container_name=source_container,
-                                  blob_name=source_blob_name, credential=source_sas)
+    # if blob_service and source_blob_service are the same
+    if blob_service == source_blob_service:
+        source_client = source_blob_service.get_blob_client(container=source_container, blob=source_blob_name)
+    else:
+        # generate sas for oauth copy source
+        if not source_sas:
+            from ..util import create_short_lived_blob_sas_v2
+            start = datetime.utcnow()
+            expiry = datetime.utcnow() + timedelta(days=1)
+            source_user_delegation_key = source_blob_service.get_user_delegation_key(start, expiry)
+            source_sas = create_short_lived_blob_sas_v2(cmd, source_blob_service.account_name, source_container,
+                                                        source_blob_name,
+                                                        user_delegation_key=source_user_delegation_key)
+        source_client = t_blob_client(account_url=source_blob_service.url, container_name=source_container,
+                                      blob_name=source_blob_name, credential=source_sas)
     source_blob_url = source_client.url
 
     destination_blob_name = normalize_blob_file_path(destination_path, source_blob_name)
@@ -935,16 +956,30 @@ def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destina
             raise CLIError(error_template.format(source_blob_name, destination_container, ex))
 
 
-def _copy_file_to_blob_container(blob_service, source_file_service, destination_container, destination_path,
+def _copy_file_to_blob_container(cmd, blob_service, source_file_service, destination_container, destination_path,
                                  source_share, source_sas, source_file_dir, source_file_name):
     t_share_client = source_file_service.get_share_client(source_share)
-    t_file_client = t_share_client.get_file_client(os.path.join(source_file_dir, source_file_name))
+    source_path = os.path.join(source_file_dir, source_file_name) if source_file_dir else source_file_name
+    source_path = normalize_blob_file_path(None, source_path)
+    t_file_client = t_share_client.get_file_client(source_path)
+    if source_sas is None:
+        t_generate_share_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                       '_shared_access_signature#generate_share_sas')
+        t_file_permissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                     '_models#FileSasPermissions')
+        start = datetime.utcnow()
+        expiry = datetime.utcnow() + timedelta(days=1)
+        source_sas = t_generate_share_sas(account_name=t_file_client.account_name, share_name=source_share,
+                                          account_key=t_file_client.credential.account_key,
+                                          permission=t_file_permissions(read=True),
+                                          expiry=expiry, start=start)
+        from urllib.parse import quote
+        source_sas = quote(source_sas, safe='&%()$=\',~')
     if '?' not in t_file_client.url:
         source_file_url = '{}?{}'.format(t_file_client.url, source_sas)
     else:
         source_file_url = t_file_client.url
 
-    source_path = os.path.join(source_file_dir, source_file_name) if source_file_dir else source_file_name
     destination_blob_name = normalize_blob_file_path(destination_path, source_path)
     try:
         blob_client = blob_service.get_blob_client(container=destination_container, blob=destination_blob_name)

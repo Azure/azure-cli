@@ -699,6 +699,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        transform=transform_file_show_result)
         g.storage_custom_command_oauth('download-batch', 'storage_file_download_batch', client_factory=cf_share_client)
         g.storage_command_oauth('hard-link create', 'create_hardlink')
+        g.storage_command_oauth('symbolic-link create', 'create_symlink')
+        g.storage_command_oauth('symbolic-link show', 'get_symlink')
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:
         from ._transformers import transform_cors_list_output

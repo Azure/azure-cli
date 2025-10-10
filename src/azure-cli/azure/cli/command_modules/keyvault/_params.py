@@ -104,7 +104,7 @@ def load_arguments(self, _):
     # region vault (management)
     with self.argument_context('keyvault') as c:
         c.argument('resource_group_name', resource_group_name_type, id_part=None, required=False,
-                   help='Proceed only if Key Vault belongs to the specified resource group.',
+                   help='Name of resource group.',
                    validator=validate_resource_group_name)
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'])
         c.argument('object_id', help='a GUID that identifies the principal that will receive permissions')
@@ -244,6 +244,7 @@ def load_arguments(self, _):
                    help='Space-separated list of storage permissions to assign.')
 
     with self.argument_context('keyvault network-rule') as c:
+        c.argument('hsm_name', mgmt_plane_hsm_name_type)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)

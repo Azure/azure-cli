@@ -3,6 +3,105 @@
 Release History
 ===============
 
+2.78.0
+++++++
+
+**ACS**
+
+* `az aks create`: Pre-announce `--no-ssh-key` default behaviour breaking change (#32205)
+
+**AKS**
+
+* `az aks nodepool add/update`: Add option `AzureLinux3` to `--os-sku` parameter (#31979)
+* `az aks create/update`: Fix handling for `--container-storage-version` parameter (#32015)
+* `az aks create`: Fix the issue where enabling v1 container storage does not fail if the VM SKU field is left empty (#32109)
+* `az aks get-credentials`: Convert device code mode kubeconfig to Azure CLI token format to bypass conditional access login blocks (#32167)
+
+**App Config**
+
+* `az appconfig kv export`: Escape keys only when exporting to properties file (#32010)
+* `az appconfig kv set/import`: Add support for JSON comments (#32130)
+
+**App Service**
+
+* Fix #32044: `az functionapp deployment source config-zip`: Fix uploaded blob not containing content (#32119)
+* `az functionapp create`: Remove preview from Flex Consumption parameters (#32122)
+* `az functionapp create`: Add the `--domain-name-scope` support (#32110)
+* `az webapp config appsettings set`: Fix SyntaxWarning invalid decimal literal (#32136)
+* `az appservice plan create/update`: Add async scaling parameter `--async-scaling-enabled` (#32123)
+* `az webapp deploy`: Encode target path parameter (#32049)
+* `az webapp deploy`: Change the token retrieval function to use the App Service Audience (#31988)
+* `az webapp create`: Include regional site name availability check for DNL site creations (#32184)
+
+**ARM**
+
+* `az deployment`: Fix bicep template size inflation with differential template handling (#31990)
+* Fix #31581: `az deployment group create`: Fix error message being hidden when template validation fails (#31965)
+
+**Backup**
+
+* `az backup protection reconfigure`: Add new command to support reconfiguring backup to an alternate vault (#32193)
+
+**Batch**
+
+* Fix #32086, #32090: `az batch application package create`: Fix blob not being uploaded (#32106)
+
+**Cognitive Services**
+
+* `az cognitiveservices account create`: Add `--allow-project-management` argument (#32089)
+* `az cognitiveservices account update`: Add `--kind` argument for OpenAI<->AIServices account (#32089)
+
+**Compute**
+
+* Fix #31198: `az sig image-version`: Fix `--no-wait` not working (#32078)
+* Fix #31929: `az vm/vmss update`: Fix `--wire-server-profile-id` and `--imds-profile-id` update (#32129)
+* `az vm disk attach`: Add new parameter `--new-names-of-source-snapshots-or-disks` to support setting the name of create new disk from a snapshot or another disk (#32172)
+* `az vm disk attach`: Add new parameter `--new-names-of-source-disk-restore-point` to support setting the name of create new disk from a disk restore point (#32172)
+* `az vm availability-set`: Add new command to support validating migration from availability sets to VMSS (#32180)
+* `az vm availability-set`: Add new command to support starting migration from availability sets to VMSS (#32180)
+* `az vm availability-set`: Add new command to support canceling migration from availability sets to VMSS (#32180)
+* `az vm availability-set`: Add new command to support converting availability sets to VMSS (#32180)
+* `az vm`: Add new command `migrate-to-vmss` to support migratiing VM to VMSS (#32180)
+* `az disk create/update`: Add new parameter `--supported-security-option` to support setting supported security option (#32186)
+* `az disk create/update`: Add new parameter `--action-on-disk-delay` to support setting disk availability policy (#32186)
+
+**Key Vault**
+
+* `az keyvault create`: Support `--network-acls-ips` while creating Managed HSM (#32142)
+* `az keyvault network-rule add/remove/list/wait`: Support ip rule configuration for Managed HSM (#32142)
+
+**MySQL**
+
+* `az mysql flexible-server create/update`: Support Accelerated Logs for GeneralPurpose (#32175)
+
+**NetAppFiles**
+
+* `az netappfiles volume splitclonefromparent`: Add new command to split clone volume from parent volume (#31933)
+* `az netappfiles volume create`: Add parameter `--grow-pool-clone-split` (#31933)
+* `az netappfiles pool create`: Add new Enum value `Flexible` for `ServiceLevel` (#31933)
+* `az netappfiles volume create`: Add new Enum value `Flexible` for `ServiceLevel` (#31933)
+* `az netappfiles pool create`: Add parameter `--custom-throughput-mibps` (#31933)
+
+**Network**
+
+* `az network nat gateway create`: Support `--sku` to accept `standardv2` (#32050)
+* `az network public-ip create`: Support `--sku` to accept `standardv2` (#32050)
+* `az network vnet-gateway create`: Remove public IP requirement in gateway creation (#32161)
+
+**SQL**
+
+* `az sql server create`: Add `--tags` parameter to supply tags (#31983)
+* `az sql db ltr-backup`: Add new commands for LTR immutability support (#32018)
+
+**Storage**
+
+* `az storage account or-policy create/update`: Add `--enable-metrics` to support object replication metrics (#32082)
+* Fix #32048: `az storage blob sync`: Fix using azcopy with account-key without login into azcli (#32127)
+* `az storage account create/update`: Support `--enable-smb-oauth` to allow managed identities to access SMB shares using OAuth (#32177)
+* `az storage sku list`: Support listing storage skus (#32182)
+* `az storage file symoblic-link create/show`: Support NFS fileshare symbolic link (#32187)
+* `az storage account create/update`: Add `--zones` and `--zone-placement-policy` to support setting zones and availability zone pinning policy (#32192)
+
 2.77.0
 ++++++
 

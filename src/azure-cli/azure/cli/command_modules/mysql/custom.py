@@ -1676,7 +1676,7 @@ def _determine_acceleratedLogs(accelerated_logs, tier):
             accelerated_logs = "Enabled"
         else:
             accelerated_logs = "Disabled"
-    if tier != "MemoryOptimized" and accelerated_logs.lower() == "enabled":
+    if tier == "Burstable" and accelerated_logs.lower() == "enabled":
         accelerated_logs = "Disabled"
     return accelerated_logs
 

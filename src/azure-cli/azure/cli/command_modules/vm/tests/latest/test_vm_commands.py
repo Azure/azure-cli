@@ -1561,6 +1561,9 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk_name3': self.create_random_name('disk_', length=15),
             'disk_name4': self.create_random_name('disk_', length=15),
             'disk_name5': self.create_random_name('disk_', length=15),
+            'disk_name6': self.create_random_name('disk_', length=15),
+            'disk_name7': self.create_random_name('disk_', length=15),
+            'disk_name8': self.create_random_name('disk_', length=15),
             'subnet': self.create_random_name('subnet', length=15),
             'vnet': self.create_random_name('vnet', length=15)
         })
@@ -1589,22 +1592,33 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'copy_resource1_id': copy_disk['id'],
             'copy_resource2_id': copy_snapshot['id']
         })
-        self.cmd('vm disk attach -g {rg} --size 20 --sku Standard_LRS --vm-name {vm_name} --source-resource {copy_resource1_id} {copy_resource2_id} '
-                 ' --source-disk-rp {disk_restore_point_id}')
+        self.cmd('vm disk attach -g {rg} --size 20 --sku Standard_LRS --vm-name {vm_name} --source-resource {copy_resource1_id} {copy_resource2_id} --new-names-of-sr {disk_name6} {disk_name7}'
+                 ' --source-disk-rp {disk_restore_point_id} --new-names-of-rp {disk_name8}')
         self.cmd('vm show -g {rg} -n {vm_name}', checks=[
             self.check('storageProfile.dataDisks[1].sourceResource.id', '{copy_resource1_id}'),
             self.check('storageProfile.dataDisks[1].createOption', 'Copy'),
             self.check('storageProfile.dataDisks[1].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[1].name', '{disk_name6}'),
             self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
             self.check('storageProfile.dataDisks[2].sourceResource.id', '{copy_resource2_id}'),
             self.check('storageProfile.dataDisks[2].createOption', 'Copy'),
             self.check('storageProfile.dataDisks[2].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[2].name', '{disk_name7}'),
             self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'Standard_LRS'),
             self.check('storageProfile.dataDisks[3].sourceResource.id', '{disk_restore_point_id}'),
             self.check('storageProfile.dataDisks[3].createOption', 'Restore'),
             self.check('storageProfile.dataDisks[3].diskSizeGb', 20),
+            self.check('storageProfile.dataDisks[3].name', '{disk_name8}'),
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'Standard_LRS')
         ])
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use --source-disk-restore-point when using --new-names-of-source-disk-restore-point'):
+            self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --disks disk1 --new-names-of-rp {disk_name8}')
+        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use --source-snapshots-or-disks when using --new-names-of-source-snapshots-or-disks'):
+            self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --disks disk1 --new-names-of-sr {disk_name8}')
+        with self.assertRaisesRegex(ArgumentUsageError, 'The number of --new-names-of-source-snapshots-or-disks must be the same as the number of --source-snapshots-or-disks'):
+            self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --source-resource {copy_resource1_id} --new-names-of-sr {disk_name6} {disk_name7}')
+        with self.assertRaisesRegex(ArgumentUsageError, 'The number of --new-names-of-source-disk-restore-point must be the same as the number of --source-disk-restore-point'):
+            self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --source-disk-rp {disk_restore_point_id} --new-names-of-rp {disk_name7} {disk_name8}')
 
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
@@ -1941,7 +1955,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
         # Expecting no results
         self.cmd('vm list --resource-group {rg}',
                  checks=self.is_empty())
-        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username azureuser --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --tags firsttag=1 secondtag=2 thirdtag --nsg {nsg} --public-ip-address {ip} --subnet {subnet} --vnet-name {vnet} --storage-account {sa} --use-unmanaged-disk --nsg-rule NONE')
+        self.cmd('vm create --resource-group {rg} --location {loc} --name {vm} --admin-username azureuser --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --tags firsttag=1 secondtag=2 thirdtag --nsg {nsg} --public-ip-address {ip} --subnet {subnet} --vnet-name {vnet} --storage-account {sa} --use-unmanaged-disk --nsg-rule NONE --size Standard_B2s')
 
         # Disable default outbound access
         self.cmd(
@@ -2008,8 +2022,8 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
                 time.sleep(30)
         self.cmd('vm deallocate --resource-group {rg} --name {vm}')
         self._check_vm_power_state('PowerState/deallocated')
-        self.cmd('vm resize -g {rg} -n {vm} --size Standard_DS2_v2',
-                 checks=self.check('hardwareProfile.vmSize', 'Standard_DS2_v2'))
+        self.cmd('vm resize -g {rg} -n {vm} --size Standard_B2ms',
+                 checks=self.check('hardwareProfile.vmSize', 'Standard_B2ms'))
         self.cmd('vm delete --resource-group {rg} --name {vm} --yes')
         # Expecting no results
         self.cmd('vm list --resource-group {rg}', checks=self.is_empty())
@@ -2022,7 +2036,7 @@ class VMCreateAndStateModificationsScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
         self.cmd('vm create -g {rg} -n vm --image Win2022Datacenter --admin-username AzureUser '
-                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd(
@@ -2241,6 +2255,37 @@ class VMAvailSetLiveScenarioTest(ScenarioTest):
         self.cmd('vm availability-set convert -g {rg} -n {availset}', checks=[
             self.check('name', '{availset}'),
             self.check('sku.name', 'Aligned')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_avset_migrate', location='eastus2euap')
+    def test_vm_avset_migrate(self, resource_group):
+        self.kwargs.update({
+            'avset1': self.create_random_name('avset', 15),
+            'avset2': self.create_random_name('avset', 15),
+            'vm1': self.create_random_name('vm', 10),
+            'vm2': self.create_random_name('vm', 10),
+            'vmss': self.create_random_name('vms', 10),
+            'new_vmss': self.create_random_name('newvmss', 15),
+        })
+
+        self.cmd('vm availability-set create -g {rg} -n {avset1} --platform-fault-domain-count 2 --platform-update-domain-count 2', checks=[
+            self.check('name', '{avset1}'),
+            self.check('platformFaultDomainCount', 2)
+        ])
+        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --admin-username vmtest --nsg-rule NONE --size Standard_B2ms --availability-set {avset1}')
+        self.cmd('vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --admin-username vmsstest --vm-sku Standard_B2ms')
+        vmss = self.cmd('vmss show -g {rg} -n {vmss}').get_output_in_json()
+        self.kwargs.update({
+            'vmss_id': vmss['id'],
+        })
+        self.cmd('vm availability-set validate-migration-to-vmss -n {avset1} -g {rg} --vmss-flexible-id {vmss_id}')
+        self.cmd('vm availability-set start-migration-to-vmss -n {avset1} -g {rg} --vmss-flexible-id {vmss_id}')
+        self.cmd('vm availability-set cancel-migration-to-vmss -n {avset1} -g {rg}')
+
+        self.cmd('vm availability-set create -g {rg} -n {avset2} --platform-fault-domain-count 2 --platform-update-domain-count 2')
+        self.cmd('vm availability-set convert-to-vmss -n {avset2} -g {rg} --vmss-name {new_vmss}')
+        self.cmd('vmss show -n {new_vmss} -g {rg}', checks=[
+            self.check('name', '{new_vmss}')
         ])
 
 
@@ -4142,6 +4187,38 @@ class VMDiskAttachDetachTest(ScenarioTest):
         self.cmd('vm deallocate -g {rg} -n {vm}')
         self.cmd('vm update -g {rg} -n {vm} --enable-hibernation False', checks=[
             self.check('additionalCapabilities.hibernationEnabled', False)
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_supported_security_option', location='eastus2euap')
+    def test_vm_disk_supported_security_option(self, resource_group):
+        self.kwargs.update({
+            'disk1': self.create_random_name('disk', 10),
+            'disk2': self.create_random_name('disk', 10)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk1} --sku PremiumV2_LRS --size-gb 10 --supported-security-option TrustedLaunchSupported', checks=[
+            self.check('supportedCapabilities.supportedSecurityOption', 'TrustedLaunchSupported')
+        ])
+        self.cmd('disk update -g {rg} -n {disk1} --supported-security-option TrustedLaunchAndConfidentialVMSupported', checks=[
+            self.check('supportedCapabilities.supportedSecurityOption', 'TrustedLaunchAndConfidentialVMSupported')
+        ])
+        self.cmd('disk create -g {rg} -n {disk2} --sku PremiumV2_LRS --size-gb 10')
+        self.cmd('disk update -g {rg} -n {disk2} --supported-security-option TrustedLaunchAndConfidentialVMSupported', checks=[
+            self.check('supportedCapabilities.supportedSecurityOption', 'TrustedLaunchAndConfidentialVMSupported')
+        ])
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_availability_policy', location='eastus2euap')
+    def test_vm_disk_availability_policy(self, resource_group):
+        self.kwargs.update({
+            'disk1': self.create_random_name('disk', 10)
+        })
+
+        self.cmd('disk create -g {rg} -n {disk1} --sku PremiumV2_LRS --size-gb 10 --action-on-disk-delay AutomaticReattach', checks=[
+            self.check('availabilityPolicy.actionOnDiskDelay', 'AutomaticReattach')
+        ])
+        self.cmd('disk create -g {rg} -n {disk1} --sku PremiumV2_LRS --size-gb 10')
+        self.cmd('disk update -g {rg} -n {disk1} --action-on-disk-delay AutomaticReattach', checks=[
+            self.check('availabilityPolicy.actionOnDiskDelay', 'AutomaticReattach')
         ])
 
 
@@ -6483,7 +6560,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
         self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest --admin-username clitest1 --admin-password Test12345678!! '
-                 '--generate-ssh-keys --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--generate-ssh-keys --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd(
@@ -6500,7 +6577,7 @@ class VMRunCommandScenarioTest(ScenarioTest):
             'subnet': 'subnet1',
             'vnet': 'vnet1'
         })
-        self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Canonical:ubuntu-24_04-lts:server:latest --admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
 
         # Disable default outbound access
         self.cmd(
@@ -6590,25 +6667,25 @@ class VMSSRunCommandScenarioTest(ScenarioTest):
         r = requests.get('http://' + public_ip)
         self.assertTrue('Welcome to nginx' in str(r.content))
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_w_params')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_w_params', location='eastus2')
     def test_vmss_run_command_with_parameters(self, resource_group):
         self.kwargs.update({'vmss': 'test-run-command-vmss2'})
-        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username clitest1 --generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Debian:debian-10:10:latest --admin-username clitest1 --generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B2ms')
         self.kwargs['instance_ids'] = self.cmd('vmss list-instances --resource-group {rg} --name {vmss} --query "[].instanceId"').get_output_in_json()
 
         for id in self.kwargs['instance_ids']:
             self.kwargs['id'] = id
             self.cmd('vmss run-command invoke -g {rg} -n {vmss} --instance-id {id} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_v2')
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_run_command_v2', location='eastus2')
     def test_vmss_run_command_v2(self, resource_group):
         self.kwargs.update({
             'vmss': self.create_random_name('vmss-', 10),
             'run_cmd': self.create_random_name('cmd_', 10),
             'user': self.create_random_name('user-', 10)
         })
-        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --security-type Standard --admin-username {user} '
-                 '--generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard')
+        self.cmd('vmss create -g {rg} -n {vmss} --image Canonical:ubuntu-24_04-lts:server:latest --security-type Standard --admin-username {user} '
+                 '--generate-ssh-keys --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B2ms')
         self.cmd('vmss show -g {rg} -n {vmss}', checks=[
             self.check('name', '{vmss}'),
             self.check('securityProfile', None),
@@ -12316,7 +12393,6 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus2euap')
     def test_vm_vmss_proxy_agent(self, resource_group):
-        from azure.core.exceptions import HttpResponseError
         self.kwargs.update({
             'nsg1': self.create_random_name('nsg', 10),
             'nsg2': self.create_random_name('nsg', 10),
@@ -12339,8 +12415,6 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
             self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
         ])
-        with self.assertRaises(HttpResponseError):
-            self.cmd('vm update -g {rg} -n {vm1} --wire-server-profile-id profileid')
 
         self.cmd('vm update -g {rg} -n {vm1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 2', checks=[
             self.check('securityProfile.proxyAgentSettings.enabled', False),
@@ -12377,8 +12451,6 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
         ])
-        with self.assertRaises(HttpResponseError):
-            self.cmd('vmss update -g {rg} -n {vmss1} --wire-server-profile-id profileid')
 
         self.cmd('vmss update -g {rg} -n {vmss1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
@@ -12387,7 +12459,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network nsg create -g {rg} -n {nsg2}')
-        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --nsg {nsg2} --admin-password Password001!')
+        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --nsg {nsg2} --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!')
         self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --wire-server-mode Audit --imds-mode Audit', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
@@ -12397,6 +12469,62 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit')
+        ])
+
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_control_profile_reference', location='eastus2euap')
+    def test_vm_vmss_proxy_agent_control_profile_reference(self, resource_group):
+        self.kwargs.update({
+            'nsg1': self.create_random_name('nsg', 10),
+            'nsg2': self.create_random_name('nsg', 10),
+            'vm1': self.create_random_name('vm', 10),
+            'vmss1': self.create_random_name('vmss', 15),
+            'subnet': self.create_random_name('subnet', 15),
+            'vnet': self.create_random_name('vnet', 15),
+            'gallery': self.create_random_name('gallery', 15),
+            'profile1': self.create_random_name('profile', 15),
+            'profile2': self.create_random_name('profile', 15)
+        })
+        self.cmd('network nsg create -g {rg} -n {nsg1}')
+        self.cmd('vm create -g {rg} -n {vm1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
+        # Disable default outbound access
+        self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
+
+        self.cmd('vm show -g {rg} -n {vm1}', checks=[
+            self.check('securityProfile.proxyAgentSettings.enabled', True),
+            self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
+            self.check('securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
+        ])
+        self.cmd('sig create -g {rg} --gallery-name {gallery}')
+        self.cmd('sig in-vm-access-control-profile create -g {rg} --gallery-name {gallery} --name {profile1} --os-type Windows --applicable-host-endpoint WireServer')
+        wireseriver_prifile = self.cmd('sig in-vm-access-control-profile-version create -g {rg}  --gallery-name {gallery} --profile-name {profile1} --profile-version 1.0.0 --default-access Allow --mode Audit').get_output_in_json()
+        self.cmd('az sig in-vm-access-control-profile create -g {rg} --gallery-name {gallery} --name {profile2} --os-type Windows --applicable-host-endpoint IMDS')
+        imds_prifile = self.cmd('sig in-vm-access-control-profile-version create -g {rg}  --gallery-name {gallery} --profile-name {profile2} --profile-version 1.0.0 --default-access Allow --mode Audit').get_output_in_json()
+
+        self.kwargs.update({
+            'wireserver_profileid': wireseriver_prifile['id'],
+            'imds_profileid': imds_prifile['id']
+        })
+        self.cmd('vm update -g {rg} -n {vm1} --wire-server-profile-id {wireserver_profileid}', checks=[
+            self.check('securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}')
+        ])
+        self.cmd('vm update -g {rg} -n {vm1} --imds-profile-id {imds_profileid}', checks=[
+            self.check('securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}'),
+            self.check('securityProfile.proxyAgentSettings.imds.inVmAccessControlProfileReferenceId', '{imds_profileid}')
+        ])
+
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg1} --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!', checks=[
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
+            self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss1} --wire-server-profile-id {wireserver_profileid}', checks=[
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}')
+        ])
+        self.cmd('vmss update -g {rg} -n {vmss1} --imds-profile-id {imds_profileid}', checks=[
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.inVmAccessControlProfileReferenceId', '{imds_profileid}'),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.inVmAccessControlProfileReferenceId', '{wireserver_profileid}'),
         ])
 
 class DiskHibernationScenarioTest(ScenarioTest):

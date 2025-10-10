@@ -1,26 +1,4 @@
 {
-  "inputs": [
-    {
-      "type": "promptString",
-      "id": "extension_or_module_name",
-      "description": "The name of the Azure CLI extension or module to generate commands for."
-    },
-    {
-      "type": "promptString",
-      "id": "swagger_module_path",
-      "description": "The file path to the Swagger module."
-    },
-    {
-      "type": "promptString",
-      "id": "resource_provider",
-      "description": "The Azure resource provider for which to generate commands."
-    },
-    {
-      "type": "promptString",
-      "id": "swagger_tag",
-      "description": "The Swagger tag to use for command generation."
-    }
-  ],
   "servers": {
     "AAZ Flow": {
       "command": "python",
@@ -28,10 +6,10 @@
         "azure-cli/tools/aaz-flow/main.py"
       ],
       "env": {
-        "AAZ_PATH": "/workspaces/aaz",
-        "CLI_PATH": "/workspaces/azure-cli",
-        "CLI_EXTENSION_PATH": "/workspaces/azure-cli-extensions",
-        "SWAGGER_PATH": "/workspaces/azure-rest-api-specs"
+          "AAZ_PATH": "/workspaces/aaz",
+          "CLI_PATH": "/workspaces/azure-cli",
+          "CLI_EXTENSION_PATH": "/workspaces/azure-cli-extensions",
+          "SWAGGER_PATH": "/workspaces/azure-rest-api-specs"
       }
     }
   }
