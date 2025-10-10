@@ -5090,7 +5090,7 @@ def delete_workload_profile(cmd, resource_group_name, env_name, workload_profile
     except Exception as e:
         handle_raw_exception(e)
 
-        
+
 def create_http_route_config(cmd, resource_group_name, name, http_route_config_name, yaml):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
     yaml_http_route_config = load_yaml_file(yaml)
@@ -5143,6 +5143,7 @@ def delete_http_route_config(cmd, resource_group_name, name, http_route_config_n
         return HttpRouteConfigClient.delete(cmd, resource_group_name, name, http_route_config_name)
     except Exception as e:
         handle_raw_exception(e)
+
 
 def show_environment_premium_ingress(cmd, name, resource_group_name):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)

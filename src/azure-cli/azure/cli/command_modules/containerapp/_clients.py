@@ -1459,6 +1459,7 @@ class SubscriptionClient:
         r = send_raw_request(cmd.cli_ctx, "GET", request_url)
         return r.json()
 
+
 class HttpRouteConfigClient:
     api_version = CURRENT_API_VERSION
 
@@ -1545,3 +1546,4 @@ class HttpRouteConfigClient:
         send_raw_request(cmd.cli_ctx, "DELETE", request_url, body=None)
         # API doesn't return JSON (it returns no content)
         return
+    
