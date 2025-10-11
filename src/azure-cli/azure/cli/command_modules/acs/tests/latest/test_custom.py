@@ -611,17 +611,56 @@ class AcsCustomCommandTest(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
-    def test_k8s_install_kubectl_emit_warnings(self, logger_mock, mock_url_retrieve):
+    @mock.patch('azure.cli.command_modules.acs.custom.platform.system')
+    def test_k8s_install_kubectl_emit_warnings(self, mock_platform_system, logger_mock, mock_url_retrieve):
         mock_url_retrieve.side_effect = lambda _, install_location: open(install_location, 'a').close()
+        
+        # Test for non-Linux systems (macOS) - uses Google Storage directly
+        mock_platform_system.return_value = 'Darwin'
         try:
             temp_dir = tempfile.mkdtemp()  # tempfile.TemporaryDirectory() is no available on 2.7
             test_location = os.path.join(temp_dir, 'kubectl')
             k8s_install_kubectl(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
             self.assertEqual(mock_url_retrieve.call_count, 1)
-            # 3 warnings, 1st for arch, 2nd for download result, 3rd for updating PATH
-            self.assertEqual(logger_mock.warning.call_count, 3)  # 3 warnings, one for download result
+            # 3 warnings for non-Linux: 1st for arch, 2nd for download result, 3rd for updating PATH
+            self.assertEqual(logger_mock.warning.call_count, 3)
         finally:
             shutil.rmtree(temp_dir)
+            
+        # Reset mocks for Windows test
+        logger_mock.reset_mock()
+        mock_url_retrieve.reset_mock()
+        
+        # Test for Windows systems - uses Google Storage directly (same as macOS)
+        mock_platform_system.return_value = 'Windows'
+        try:
+            temp_dir = tempfile.mkdtemp()
+            test_location = os.path.join(temp_dir, 'kubectl')
+            k8s_install_kubectl(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
+            self.assertEqual(mock_url_retrieve.call_count, 1)
+            # 3 warnings for Windows: 1st for arch, 2nd for download result, 3rd for updating PATH
+            self.assertEqual(logger_mock.warning.call_count, 3)
+        finally:
+            shutil.rmtree(temp_dir)
+            
+        # Reset mocks for Linux test
+        logger_mock.reset_mock()
+        mock_url_retrieve.reset_mock()
+        
+        # Test for Linux systems - tries Microsoft packages first, but will fail in test env and fallback
+        mock_platform_system.return_value = 'Linux'
+        with mock.patch('azure.cli.command_modules.acs.custom._k8s_install_kubectl_from_microsoft_packages') as mock_ms_packages:
+            # Make Microsoft packages fail to test fallback behavior
+            mock_ms_packages.side_effect = Exception("Microsoft packages not available in test")
+            try:
+                temp_dir = tempfile.mkdtemp()
+                test_location = os.path.join(temp_dir, 'kubectl')
+                k8s_install_kubectl(mock.MagicMock(), client_version='1.2.3', install_location=test_location)
+                self.assertEqual(mock_url_retrieve.call_count, 1)
+                # 4 warnings for Linux with fallback: 1st for fallback warning, 2nd for arch, 3rd for download, 4th for PATH
+                self.assertEqual(logger_mock.warning.call_count, 4)
+            finally:
+                shutil.rmtree(temp_dir)
 
     @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
     @mock.patch('azure.cli.command_modules.acs.custom.logger')
