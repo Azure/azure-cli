@@ -205,6 +205,6 @@ jobs:
         docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
         
         echo "== Run unit test =="
-        docker run --rm -e -v $(pwd):/azure-cli $IMAGE_NAME /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
+        docker run --rm -v $(pwd):/azure-cli $IMAGE_NAME /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
         
       displayName: 'Bash Script'
