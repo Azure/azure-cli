@@ -2147,10 +2147,19 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     """
 
     if not source_url:
-        source_url = "https://dl.k8s.io/release"
         cloud_name = cmd.cli_ctx.cloud.name
         if cloud_name.lower() == 'azurechinacloud':
             source_url = 'https://mirror.azure.cn/kubernetes/kubectl'
+        else:
+            # Only try Microsoft packages for Linux systems (packages are Linux-only)
+            system = platform.system()
+            if system == 'Linux':
+                try:
+                    return _k8s_install_kubectl_from_microsoft_packages(cmd, client_version, install_location, arch)
+                except Exception as e:
+                    logger.warning("Failed to install from Microsoft packages, falling back to Google Storage: %s", str(e))
+            # For non-Linux systems or fallback, use Google Storage
+            source_url = "https://storage.googleapis.com/kubernetes-release/release"
 
     if client_version == 'latest':
         latest_version_url = source_url + '/stable.txt'
@@ -2203,6 +2212,244 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
     else:
         logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
                        install_dir, cli)
+
+
+def _k8s_install_kubectl_from_microsoft_packages(cmd, client_version='latest', install_location=None, arch=None):
+    """
+    Install kubectl from Microsoft packages repository by downloading and extracting .deb package.
+    Note: This method is only supported on Linux systems as Microsoft packages contain Linux binaries.
+    """
+    system = platform.system()
+    if system != 'Linux':
+        raise CLIError(f"Microsoft packages method is only supported on Linux (current system: {system}). Use '--source-url' to specify an alternative source.")
+    
+    if arch is None:
+        arch = get_arch_for_cli_binary()
+    
+    # Map architecture to package architecture
+    if arch == 'amd64':
+        pkg_arch = 'amd64'
+    elif arch == 'arm64':
+        pkg_arch = 'arm64'
+    else:
+        raise CLIError(f"Unsupported architecture '{arch}' for Microsoft packages")
+
+    # Get available kubectl packages from Microsoft
+    packages_url = f"https://packages.microsoft.com/ubuntu/22.04/prod/dists/jammy/main/binary-{pkg_arch}/Packages.gz"
+    
+    logger.warning('Fetching kubectl package information from Microsoft packages repository...')
+    try:
+        packages_data = _urlopen_read(packages_url)
+        import gzip
+        packages_text = gzip.decompress(packages_data).decode('utf-8')
+    except Exception as e:
+        raise CLIError(f'Failed to fetch package information from Microsoft: {e}')
+
+    # Parse packages and find kubectl
+    kubectl_packages = []
+    current_package = {}
+    
+    for line in packages_text.split('\n'):
+        if line.startswith('Package: '):
+            if current_package.get('Package') == 'kubectl':
+                kubectl_packages.append(current_package)
+            current_package = {'Package': line.split(': ', 1)[1]}
+        elif line.startswith('Version: '):
+            current_package['Version'] = line.split(': ', 1)[1]
+        elif line.startswith('Filename: '):
+            current_package['Filename'] = line.split(': ', 1)[1]
+        elif line.startswith('SHA256: '):
+            current_package['SHA256'] = line.split(': ', 1)[1]
+        elif line == '':
+            if current_package.get('Package') == 'kubectl':
+                kubectl_packages.append(current_package)
+            current_package = {}
+    
+    if not kubectl_packages:
+        raise CLIError('No kubectl packages found in Microsoft repository')
+
+    # Select package version
+    if client_version == 'latest':
+        # Sort by version and get latest (simple string sort should work for semver)
+        kubectl_packages.sort(key=lambda x: x.get('Version', ''), reverse=True)
+        selected_package = kubectl_packages[0]
+        logger.warning('Using latest kubectl version from Microsoft packages: %s', selected_package['Version'])
+    else:
+        # Find specific version
+        version_to_find = client_version.lstrip('v')  # Remove 'v' prefix if present
+        selected_package = None
+        for pkg in kubectl_packages:
+            if pkg.get('Version', '').startswith(version_to_find):
+                selected_package = pkg
+                break
+        if not selected_package:
+            raise CLIError(f'kubectl version {client_version} not found in Microsoft packages')
+
+    # Download the .deb package
+    base_url = "https://packages.microsoft.com/ubuntu/22.04/prod/"
+    package_url = base_url + selected_package['Filename']
+    
+    logger.warning('Downloading kubectl package from Microsoft: %s', package_url)
+
+    # Create temporary directory for package extraction
+    with tempfile.TemporaryDirectory() as temp_dir:
+        deb_path = os.path.join(temp_dir, 'kubectl.deb')
+        
+        try:
+            _urlretrieve(package_url, deb_path)
+        except Exception as e:
+            raise CLIError(f'Failed to download kubectl package: {e}')
+
+        # Extract .deb package using ar and tar
+        try:
+            _extract_kubectl_from_deb(deb_path, temp_dir, install_location, system)
+        except Exception as e:
+            raise CLIError(f'Failed to extract kubectl from package: {e}')
+
+    # Handle post-installation
+    install_dir, cli = os.path.dirname(install_location), os.path.basename(install_location)
+    if system == 'Windows':
+        handle_windows_post_install(install_dir, cli)
+    else:
+        logger.warning('Please ensure that %s is in your search PATH, so the `%s` command can be found.',
+                       install_dir, cli)
+
+    logger.warning('Successfully installed kubectl from Microsoft packages')
+
+
+def _extract_kubectl_from_deb(deb_path, temp_dir, install_location, system):
+    """
+    Extract kubectl binary from .deb package.
+    """
+    import subprocess
+    
+    # Ensure installation directory exists
+    install_dir = os.path.dirname(install_location)
+    if not os.path.exists(install_dir):
+        os.makedirs(install_dir)
+
+    # Determine binary name
+    if system == 'Windows':
+        binary_name = 'kubectl.exe'
+    else:
+        binary_name = 'kubectl'
+
+    # validate install location
+    validate_install_location(install_location, binary_name)
+
+    # Extract .deb using ar command or dpkg-deb if available
+    try:
+        # Try using dpkg-deb first (handles all compression formats)
+        if shutil.which('dpkg-deb'):
+            subprocess.run(['dpkg-deb', '-x', deb_path, temp_dir], check=True, capture_output=True)
+        elif shutil.which('ar'):
+            # Extract using ar command
+            subprocess.run(['ar', 'x', deb_path], cwd=temp_dir, check=True, capture_output=True)
+            
+            # Find and extract the data archive
+            data_files = [f for f in os.listdir(temp_dir) if f.startswith('data.tar')]
+            if not data_files:
+                raise CLIError('No data archive found in .deb package')
+            
+            data_file = os.path.join(temp_dir, data_files[0])
+            
+            # Handle different compression formats
+            if data_files[0].endswith('.xz'):
+                import lzma
+                with lzma.open(data_file, 'rb') as f_in:
+                    with open(os.path.join(temp_dir, 'data.tar'), 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+                data_file = os.path.join(temp_dir, 'data.tar')
+            elif data_files[0].endswith('.gz'):
+                import gzip
+                with gzip.open(data_file, 'rb') as f_in:
+                    with open(os.path.join(temp_dir, 'data.tar'), 'wb') as f_out:
+                        shutil.copyfileobj(f_in, f_out)
+                data_file = os.path.join(temp_dir, 'data.tar')
+            elif data_files[0].endswith('.zst'):
+                # Try using zstd command if available
+                if shutil.which('zstd'):
+                    uncompressed_file = os.path.join(temp_dir, 'data.tar')
+                    subprocess.run(['zstd', '-d', data_file, '-o', uncompressed_file], check=True, capture_output=True)
+                    data_file = uncompressed_file
+                else:
+                    logger.warning('zstd compression detected but zstd command not found. Please install zstd: brew install zstd (macOS) or apt install zstd (Ubuntu)')
+                    raise CLIError('zstd compression not supported (zstd command not found)')
+            
+            # Extract tar archive
+            import tarfile
+            with tarfile.open(data_file, 'r') as tar:
+                tar.extractall(temp_dir)
+        else:
+            # Fallback: Use Python to extract .deb (it's an ar archive)
+            _extract_ar_archive(deb_path, temp_dir)
+            
+            # This method is complex for newer compression formats, so we'll try a simpler approach
+            raise CLIError('No suitable extraction tool found (dpkg-deb, ar). Please install dpkg-deb or ar.')
+        
+        # Find kubectl binary in extracted files
+        kubectl_path = None
+        for root, dirs, files in os.walk(temp_dir):
+            for file in files:
+                if file == 'kubectl' and os.access(os.path.join(root, file), os.X_OK):
+                    kubectl_path = os.path.join(root, file)
+                    break
+            if kubectl_path:
+                break
+        
+        if not kubectl_path:
+            raise CLIError('kubectl binary not found in extracted package')
+        
+        # Copy to final location
+        shutil.copy2(kubectl_path, install_location)
+        
+        # Set executable permissions
+        os.chmod(install_location,
+                 os.stat(install_location).st_mode | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
+        
+    except subprocess.CalledProcessError as e:
+        stderr = e.stderr.decode('utf-8') if e.stderr else str(e)
+        raise CLIError(f'Failed to extract .deb package: {stderr}')
+    except Exception as e:
+        raise CLIError(f'Error during package extraction: {e}')
+
+
+def _extract_ar_archive(ar_path, extract_dir):
+    """
+    Simple Python implementation to extract .deb (ar archive) files.
+    """
+    with open(ar_path, 'rb') as f:
+        # Check for ar archive signature
+        signature = f.read(8)
+        if signature != b'!<arch>\n':
+            raise CLIError('Invalid .deb file format')
+        
+        while True:
+            # Read file header (60 bytes)
+            header = f.read(60)
+            if len(header) < 60:
+                break
+                
+            # Parse header
+            filename = header[0:16].decode('ascii').strip()
+            size = int(header[48:58].decode('ascii').strip())
+            
+            # Skip debian-binary
+            if filename == 'debian-binary':
+                f.read(size)
+                if size % 2:  # ar archives are padded to even boundaries
+                    f.read(1)
+                continue
+            
+            # Read file content
+            content = f.read(size)
+            if size % 2:  # ar archives are padded to even boundaries
+                f.read(1)
+            
+            # Write to extract directory
+            output_path = os.path.join(extract_dir, filename.rstrip('/'))
+            with open(output_path, 'wb') as out_f:
+                out_f.write(content)
 
 
 # install kubelogin
