@@ -1,0 +1,210 @@
+variables:
+- template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
+- name: Codeql.Enabled
+  value: false
+- name: ComponentDetection.ForceScan
+  value: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+
+parameters:
+- name: architectures
+  type: object
+  default:
+  - name: AMD64
+    value: amd64
+    pool: pool-ubuntu-latest-multi-core
+  - name: ARM64
+    value: arm64
+    pool: pool-ubuntu-latest-arm64
+
+jobs:
+
+- job: ExtractMetadata
+  displayName: Extract Metadata
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - task: Bash@3
+    displayName: 'Extract Version'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/get_version.sh
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: metadata'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: metadata
+
+- job: BuildRpmPackagesAzureLinux
+  displayName: Build Rpm Package
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Azure Linux 3.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/azurelinux/base/core:3.0
+          artifact: rpm-azurelinux3.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
+  pool:
+    name: $(pool)
+  steps:
+  - bash: ./scripts/ci/install_docker.sh
+    displayName: Install Docker
+
+  - task: PipAuthenticate@1
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
+    displayName: 'Pip Authenticate'
+    inputs:
+      artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
+
+  - task: Bash@3
+    displayName: 'Build Rpm Package: Azure Linux'
+    inputs:
+      targetType: 'filePath'
+      filePath: scripts/release/rpm/pipeline_azurelinux.sh
+
+  - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+    displayName: 'SBOM'
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
+    inputs:
+      BuildDropPath: $(Build.ArtifactStagingDirectory)
+
+  - task: PublishPipelineArtifact@0
+    displayName: 'Publish Artifact: rpm-azurelinux'
+    inputs:
+      TargetPath: $(Build.ArtifactStagingDirectory)
+      ArtifactName: $(artifact)
+
+- job: BuildDockerImageAzureLinux
+  displayName: Build Docker Image Azure Linux
+  dependsOn: BuildRpmPackagesAzureLinux
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Azure Linux 3.0 ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-azurelinux3.0-${{ arch.value }}
+          dockerfile: azure-linux.dockerfile
+          packageArtifactName: rpm-azurelinux3.0-${{ arch.value }}
+          image: mcr.microsoft.com/azurelinux/base/core:3.0
+  pool:
+    name: $(pool)
+  steps:
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Build Artifacts'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+        artifactName: $(packageArtifactName)
+    - bash: |
+        set -ex
+        mkdir docker-temp
+        mv $(Build.ArtifactStagingDirectory)/docker/*.rpm ./docker-temp/azure-cli.rpm
+        
+        bash scripts/release/docker/pipeline.sh
+      displayName: 'Build Docker'
+
+    - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+      displayName: 'SBOM'
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
+      inputs:
+        BuildDropPath: $(Build.ArtifactStagingDirectory)
+        DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
+
+    - task: PublishPipelineArtifact@0
+      inputs:
+        TargetPath: $(Build.ArtifactStagingDirectory)
+        ArtifactName: $(artifactName)
+
+- job: TestRpmPackagesAzureLinux
+  displayName: Test Rpm Package
+  timeoutInMinutes: 180
+  dependsOn:
+  - BuildRpmPackagesAzureLinux
+  - ExtractMetadata
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  pool:
+    name: $(pool)
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Azure Linux 3.0 ${{ arch.name }}:
+          image: mcr.microsoft.com/azurelinux/base/core:3.0
+          artifact: rpm-azurelinux3.0-${{ arch.value }}
+          pool: ${{ arch.pool }}
+  steps:
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Metadata'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+      artifactName: metadata
+
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Build Artifacts'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
+      artifactName: $(artifact)
+
+  - bash: ./scripts/ci/install_docker.sh
+    displayName: Install Docker
+
+  - bash: |
+      set -ex
+
+      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.*.rpm" -printf '%f\n')
+
+      echo "== Test rpm package on ${IMAGE} =="
+      docker pull $IMAGE
+      docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash "/azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh"
+
+    displayName: 'Test Rpm Package Azure Linux'
+
+- job: TestDockerImageAzureLinux
+  displayName: Test Docker Image Azure Linux
+  dependsOn:
+    - BuildDockerImageAzureLinux
+    - ExtractMetadata
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Azure Linux 3.0 ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-azurelinux3.0-${{ arch.value }}
+  pool:
+    name: $(pool)
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Metadata'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
+        artifactName: metadata
+
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Docker Image'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+        artifactName: $(artifactName)
+
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+
+    - bash: |
+        set -exv
+        
+        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
+        IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
+        TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
+        
+        echo "== Test docker image =="
+        
+        docker load < $TAR_FILE
+        
+        echo "== Run az self-test  =="
+        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+        
+        echo "== Run unit test =="
+        docker run --rm -e -v $(pwd):/azure-cli $IMAGE_NAME /bin/bash "/azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false"
+        
+      displayName: 'Bash Script'
