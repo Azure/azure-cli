@@ -5,11 +5,11 @@ Please note that AAZ Flow is currently in early development. The functionality a
 
 ### Tools
 You can easily start the MCP server within your codespace environment:
-![](./assets/codespace_mcp_start.png)
+![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_mcp_start.png)
 
 Please setup your Copilot to use the AI features (**Ctrl** + **Alt** + **I** to open a chat):
-![](./assets/codespace_copilot.png)
+![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_copilot.png)
 
 After that, set the mode to `Agent` and the model to `Claude Sonnet`. The following is the usage scenario of the tools:
-1. "generate test for chaos module" to generate test cases in `chaos` module.
-2. "generate code for azure cli" to generate models and codes.
+1. "generate test for chaos module" to generate test cases in _chaos_ module.
+2. "generate code for azure cli" to generate models AND codes.
