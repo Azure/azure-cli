@@ -93,7 +93,7 @@ def _make_what_if_request(payload, headers_dict, cli_ctx=None):
             visible_length = len(progress_line) - (progress_line.count('\033[') * 5)
             max_width = 100
             if visible_length > max_width:
-                truncated_status = status[:max_width-30] + "..."
+                truncated_status = status[:max_width - 30] + "..."
                 progress_line = f"{spinner} {truncated_status} {elapsed_str}"
             sys.stderr.write(f"\r{' ' * 120}\r{progress_line}")
             sys.stderr.flush()
@@ -233,11 +233,11 @@ def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pre
     try:
         raw_results = response.json()
     except ValueError as ex:
-        raise CLIError(f"Failed to parse response from what-if service: {ex}")
+        raise CLIError(f"Failed to parse response from what-if service: {ex}, raw response: {response.text}")
 
     success = raw_results.get('success')
     if success is False:
-        return raw_results
+        raise CLIError(f"Errors from what-if service: {raw_results}")
     if success is True:
         what_if_result = raw_results.get('what_if_result', {})
         what_if_operation_result = convert_json_to_what_if_result(what_if_result)
