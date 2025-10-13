@@ -511,5 +511,5 @@ def load_arguments(self, _):
         c.argument('name', options_list=['--name', '-n'], help="The name of the managed environment.")
         c.argument('workload_profile_name', options_list=['--workload-profile-name', '-w'], help="The workload profile to run ingress replicas on. This profile must not be shared with any container app or job.")
         c.argument('termination_grace_period', options_list=['--termination-grace-period', '-t'], type=int, help="Time in seconds to drain requests during ingress shutdown. Default 500, minimum 0, maximum 3600.")
-        c.argument('request_idle_timeout', options_list=['--request-idle-timeout'], type=int, help="Timeout in minutes for idle requests. Default 4, minimum 4, maximum 30.")
-        c.argument('header_count_limit', options_list=['--header-count-limit'], type=int, help="Limit of http headers per request. Default 100, minimum 1.")
+        c.argument('request_idle_timeout', type=int, help="Timeout in minutes for idle requests. Default 4, minimum 4, maximum 30.")
+        c.argument('header_count_limit', type=int, help="Limit of http headers per request. Default 100, minimum 1.")
