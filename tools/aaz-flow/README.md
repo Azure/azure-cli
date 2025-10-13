@@ -10,6 +10,6 @@ You can easily start the MCP server within your codespace environment:
 Please setup your Copilot to use the AI features (**Ctrl** + **Alt** + **I** to open a chat):
 ![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_copilot.png)
 
-After that, set the mode to `Agent` and the model to `Claude Sonnet`. The following is the usage scenario of the tools:
+After that, set the mode to `Agent` and the model to `Claude Sonnet`. The following is the use case of the tools:
 1. "generate test for chaos module" to generate test cases in _chaos_ module.
 2. "generate code for azure cli" to generate models AND codes.
