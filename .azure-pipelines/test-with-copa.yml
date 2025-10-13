@@ -15,6 +15,10 @@ parameters:
   - name: ARM64
     value: arm64
     pool: pool-ubuntu-latest-arm64
+  - name: ShouldTest
+    displayName: Test?
+    type: boolean
+    default: false
 
 jobs:
 
@@ -123,7 +127,7 @@ jobs:
   dependsOn:
   - BuildRpmPackagesAzureLinux
   - ExtractMetadata
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
+  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'), eq(${{parameters.ShouldTest}}, true))
   pool:
     name: $(pool)
   strategy:
@@ -163,6 +167,7 @@ jobs:
 
 - job: TestDockerImageAzureLinux
   displayName: Test Docker Image Azure Linux
+  condition: and(succeeded(), eq(${{parameters.ShouldTest}}, true))
   timeoutInMinutes: 180
   dependsOn:
     - BuildDockerImageAzureLinux
@@ -208,4 +213,42 @@ jobs:
         echo "== Run unit test =="
         docker run --rm -v $(pwd):/azure-cli $IMAGE_NAME /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
         
+      displayName: 'Bash Script'
+
+- job: BuildCopaPatchedDockerImageAzureLinux
+  displayName: Build Copa Patched Docker Image Azure Linux
+  timeoutInMinutes: 180
+  dependsOn:
+    - BuildDockerImageAzureLinux
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Azure Linux 3.0 ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: docker-azurelinux3.0-${{ arch.value }}
+  pool:
+    name: $(pool)
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Docker Image'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+        artifactName: $(artifactName)
+
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+
+    - bash: |
+        set -exv
+        
+        IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
+        TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
+        
+        echo "== Test docker image =="
+        
+        docker load < $TAR_FILE
+        echo "== docker image =="
+        docker images
+        echo "== docker container =="
+        docker ps
       displayName: 'Bash Script'
