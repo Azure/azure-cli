@@ -3,17 +3,17 @@ GitHub Codespace is a great option for developers who prefer to work in containe
 ## Create a codespace
 1. In your browser, navigate to the [Official Repository of Azure CLI](https://github.com/Azure/azure-cli).
 2. Above the file list, click **Code** > **Codespaces** > **Create codespace on dev**.
-![](./assets/codespace_entry.png)
+![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_entry.png)
 
 With Codespace, all pre-requisites are installed for you, including the [AAZ Flow MCP server](https://github.com/Azure/azure-cli/tree/dev/tools/aaz-flow).
-![](./assets/codespace_mcp.png)
+![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_mcp.png)
 
 ## Authenticate with GitHub
 Once codespace is created (takes a while), you will see the following prompt in the integrated terminal:
-![](./assets/codespace_login.png)
+![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_login.png)
 
 It helps login to your GitHub account interactively; after logging in, you won't need to do it again in a fresh terminal:
-![](./assets/codespace_logged.png)
+![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_logged.png)
 
 Furthermore, all dependencies will be installed automatically, and once a similar prompt appears, you can start development:
 ```commandline
@@ -36,16 +36,16 @@ It will convert the specification from https://github.com/Azure/azure-rest-api-s
 
 ### Prune command-line interface
 Typically, the interface generated directly from the specification isn’t ideal. You can refine it in the [Workspace Editor](https://azure.github.io/aaz-dev-tools/pages/usage/workspace-editor/) to make it meet our requirements. You can open or create a workspace at:
-![](./assets/codespace_workspace_editor_1.png)
+![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_workspace_editor_1.png)
 
 If everything is selected correctly, you will be redirected to the following UI. You can interactively edit our ideal command line interface based on that:
-![](./assets/codespace_workspace_editor_2.png)
+![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_workspace_editor_2.png)
 
 When you have completed all the editing in Workspace Editor and clicked EXPORT in its upper right corner. It's ready to switch to [CLI Generator](https://azure.github.io/aaz-dev-tools/pages/usage/cli-generator/) to generate code of Azure CLI:
 1. You need to select the target for generating code. If you don't know where to generate the code, usually Azure CLI Extension is all you need:
-    ![](./assets/codespace_cli_generator_1.png)
+    ![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_cli_generator_1.png)
 2. You can find the commands that you modified before in the following UI. Check the corresponding checkboxes, then click GENERATE in the upper right corner, and the code will be generated:
-    ![](./assets/codespace_cli_generator_2.png)
+    ![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_cli_generator_2.png)
 
 ### Implement custom logic (optional)
 Sometimes, the generated code may not fully meet the requirements. In such cases, you'll need to make some customizations based on it. This process can be relatively complex, so please refer to the [relevant documentation](https://azure.github.io/aaz-dev-tools/pages/usage/customization/).
@@ -65,11 +65,11 @@ Please note that AAZ Flow is currently in early development. The functionality a
 
 ### Tools
 You can easily start the MCP server within your codespace environment:
-![](./assets/codespace_mcp_start.png)
+![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_mcp_start.png)
 
 Please setup your Copilot to use the AI features (**Ctrl** + **Alt** + **I** to open a chat):
-![](./assets/codespace_copilot.png)
+![](https://raw.githubusercontent.com/Azure/azure-cli/refs/heads/dev/doc/assets/codespace_copilot.png)
 
-After that, set the mode to `Agent` and the model to `Claude Sonnet`. The following is the usage scenario of the tools:
-1. "generate test for chaos module" to generate test cases in `chaos` module.
-2. "generate code for azure cli" to generate models and codes.
+After that, set the mode to `Agent` and the model to `Claude Sonnet`. The following is the use case of the tools:
+1. "generate test for chaos module" to generate test cases in _chaos_ module.
+2. "generate code for azure cli" to generate models AND codes.
