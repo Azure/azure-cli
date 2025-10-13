@@ -14,7 +14,7 @@ parameters:
     pool: pool-ubuntu-latest-multi-core
   - name: ARM64
     value: arm64
-    pool: pool-ubuntu-latest-arm64
+    pool: pool-ubuntu-arm64-temp
 - name: ShouldTest
   displayName: Test?
   type: boolean
@@ -237,6 +237,14 @@ jobs:
 
     - bash: ./scripts/ci/install_docker.sh
       displayName: Install Docker
+
+    - task: Bash@3
+      displayName: Install make and go for ARM64 Agent
+      condition: eq(variables['artifactName'], 'arm64')
+      inputs:
+        targetType: 'inline'
+        script: |
+          sudo apt update && sudo apt install make && sudo apt install -y golang-go
 
     - bash: |
         set -exv
