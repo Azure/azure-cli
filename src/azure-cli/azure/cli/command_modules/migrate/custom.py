@@ -229,7 +229,6 @@ def initialize_replication_infrastructure(cmd,
     try:
         # Use current subscription if not provided
         if not subscription_id:
-            from azure.cli.core.commands.client_factory import get_subscription_id
             subscription_id = get_subscription_id(cmd.cli_ctx)
         print(f"Selected Subscription Id: '{subscription_id}'")
 
@@ -241,7 +240,7 @@ def initialize_replication_infrastructure(cmd,
         print(f"Selected Resource Group: '{resource_group_name}'")
         
         # Get Migrate Project
-        project_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Migrate/migrateprojects/{project_name}"
+        project_uri = f"{rg_uri}/providers/Microsoft.Migrate/migrateprojects/{project_name}"
         migrate_project = get_resource_by_id(cmd, project_uri, APIVersion.Microsoft_Migrate.value)
         if not migrate_project:
             raise CLIError(f"Migrate project '{project_name}' not found.")
@@ -262,7 +261,7 @@ def initialize_replication_infrastructure(cmd,
             raise CLIError("No Replication Vault found. Please verify your Azure Migrate project setup.")
         
         replication_vault_name = vault_id.split("/")[8]
-        vault_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}"
+        vault_uri = f"{rg_uri}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}"
         replication_vault = get_resource_by_id(cmd, vault_uri, APIVersion.Microsoft_DataReplication.value)
         if not replication_vault:
             raise CLIError(f"No Replication Vault '{replication_vault_name}' found.")
@@ -327,11 +326,7 @@ def initialize_replication_infrastructure(cmd,
         
         if not app_map:
             raise CLIError("Server Discovery Solution missing Appliance Details. Invalid Solution.")
-        
-        # Debug: Print what we have in the app_map
-        logger.info(f"Available appliances in app_map: {list(app_map.keys())}")
-        print(f"DEBUG: Available appliances in discovery solution: {list(set(k for k in app_map.keys() if not k.islower()))}")
-        
+                
         # Validate SourceApplianceName & TargetApplianceName - try both original and lowercase
         source_site_id = app_map.get(source_appliance_name) or app_map.get(source_appliance_name.lower())
         target_site_id = app_map.get(target_appliance_name) or app_map.get(target_appliance_name.lower())
@@ -350,10 +345,7 @@ def initialize_replication_infrastructure(cmd,
                 # If all keys are lowercase, show them
                 available_appliances = list(set(app_map.keys()))
             raise CLIError(f"Target appliance '{target_appliance_name}' not found in discovery solution. Available appliances: {', '.join(available_appliances)}")
-        
-        print(f"Source site ID for '{source_appliance_name}': {source_site_id}")
-        print(f"Target site ID for '{target_appliance_name}': {target_site_id}")
-        
+
         # Determine instance types based on site IDs
         hyperv_site_pattern = "/Microsoft.OffAzure/HyperVSites/"
         vmware_site_pattern = "/Microsoft.OffAzure/VMwareSites/"
@@ -366,22 +358,16 @@ def initialize_replication_infrastructure(cmd,
             fabric_instance_type = FabricInstanceTypes.VMwareInstance.value
         else:
             raise CLIError(f"Error matching source '{source_appliance_name}' and target '{target_appliance_name}' appliances. Source is {'VMware' if vmware_site_pattern in source_site_id else 'HyperV' if hyperv_site_pattern in source_site_id else 'Unknown'}, Target is {'VMware' if vmware_site_pattern in target_site_id else 'HyperV' if hyperv_site_pattern in target_site_id else 'Unknown'}")
-        
-        print(f"Instance type: {instance_type}, Fabric instance type: {fabric_instance_type}")
-        
+                
         # Get healthy fabrics in the resource group
-        fabrics_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics"
-        fabrics_response = send_get_request(cmd, f"{fabrics_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+        replication_fabrics_uri = f"{rg_uri}/providers/Microsoft.DataReplication/replicationFabrics"
+        fabrics_uri = f"{replication_fabrics_uri}?api-version={APIVersion.Microsoft_DataReplication.value}"
+        fabrics_response = send_get_request(cmd, fabrics_uri)
         all_fabrics = fabrics_response.json().get('value', [])
         
         for fabric in all_fabrics:
             props = fabric.get('properties', {})
             custom_props = props.get('customProperties', {})
-            print(f"Fabric: {fabric.get('name')}")
-            print(f"  - State: {props.get('provisioningState')}")
-            print(f"  - Type: {custom_props.get('instanceType')}")
-            print(f"  - Solution ID: {custom_props.get('migrationSolutionId')}")
-            print(f"  - Custom Properties: {json.dumps(custom_props, indent=2)}")
 
         # If no fabrics exist at all, provide helpful message
         if not all_fabrics:
@@ -412,21 +398,14 @@ def initialize_replication_infrastructure(cmd,
             
             is_correct_instance = custom_props.get('instanceType') == fabric_instance_type
             
-            # More flexible name matching - check if fabric name contains appliance name or vice versa
+            # Check if fabric name contains appliance name or vice versa
             name_matches = (
                 fabric_name.lower().startswith(source_appliance_name.lower()) or
                 source_appliance_name.lower() in fabric_name.lower() or
                 fabric_name.lower() in source_appliance_name.lower() or
-                # Also check if the fabric name matches the site name pattern
                 f"{source_appliance_name.lower()}-" in fabric_name.lower()
             )
-            
-            print(f"Checking source fabric '{fabric_name}':")
-            print(f"  - succeeded={is_succeeded}")
-            print(f"  - solution_match={is_correct_solution} (fabric: '{fabric_solution_id}' vs expected: '{expected_solution_id}')")
-            print(f"  - instance_match={is_correct_instance} (fabric: '{custom_props.get('instanceType')}' vs expected: '{fabric_instance_type}')")
-            print(f"  - name_match={name_matches}")
-            
+
             # Collect potential candidates even if they don't fully match
             if custom_props.get('instanceType') == fabric_instance_type:
                 source_fabric_candidates.append({
@@ -444,7 +423,6 @@ def initialize_replication_infrastructure(cmd,
                 break
         
         if not source_fabric:
-            # Provide more detailed error message
             error_msg = f"Couldn't find connected source appliance '{source_appliance_name}'.\n"
             
             if source_fabric_candidates:
@@ -464,7 +442,6 @@ def initialize_replication_infrastructure(cmd,
                 error_msg += f"2. The appliance type doesn't match (expecting {'VMware' if fabric_instance_type == FabricInstanceTypes.VMwareInstance.value else 'HyperV'})\n"
                 error_msg += "3. The fabric creation is still in progress - wait a few minutes and retry"
                 
-                # List all available fabrics for debugging
                 if all_fabrics:
                     error_msg += f"\n\nAvailable fabrics in resource group:\n"
                     for fabric in all_fabrics:
@@ -473,13 +450,11 @@ def initialize_replication_infrastructure(cmd,
                         error_msg += f"  - {fabric.get('name')} (type: {custom_props.get('instanceType')})\n"
             
             raise CLIError(error_msg)
-        
-        print(f"Selected Source Fabric: '{source_fabric.get('name')}'")
-        
+                
         # Get source fabric agent (DRA)
         source_fabric_name = source_fabric.get('name')
-        dras_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics/{source_fabric_name}/fabricAgents"
-        source_dras_response = send_get_request(cmd, f"{dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+        dras_uri = f"{replication_fabrics_uri}/{source_fabric_name}/fabricAgents?api-version={APIVersion.Microsoft_DataReplication.value}"
+        source_dras_response = send_get_request(cmd, dras_uri)
         source_dras = source_dras_response.json().get('value', [])
         
         source_dra = None
@@ -494,9 +469,7 @@ def initialize_replication_infrastructure(cmd,
         
         if not source_dra:
             raise CLIError(f"The source appliance '{source_appliance_name}' is in a disconnected state.")
-        
-        print(f"Selected Source Fabric Agent: '{source_dra.get('name')}'")
-        
+                
         # Filter for target fabric - make matching more flexible and diagnostic
         target_fabric_instance_type = FabricInstanceTypes.AzLocalInstance.value
         target_fabric = None
@@ -507,29 +480,18 @@ def initialize_replication_infrastructure(cmd,
             custom_props = props.get('customProperties', {})
             fabric_name = fabric.get('name', '')
             
-            # Check if this fabric matches our criteria
-            is_succeeded = props.get('provisioningState') == ProvisioningState.Succeeded.value
-            
-            # Check solution ID match - handle case differences and trailing slashes
+            is_succeeded = props.get('provisioningState') == ProvisioningState.Succeeded.value            
             fabric_solution_id = custom_props.get('migrationSolutionId', '').rstrip('/')
             expected_solution_id = amh_solution.get('id', '').rstrip('/')
             is_correct_solution = fabric_solution_id.lower() == expected_solution_id.lower()
-            
             is_correct_instance = custom_props.get('instanceType') == target_fabric_instance_type
             
-            # More flexible name matching
             name_matches = (
                 fabric_name.lower().startswith(target_appliance_name.lower()) or
                 target_appliance_name.lower() in fabric_name.lower() or
                 fabric_name.lower() in target_appliance_name.lower() or
                 f"{target_appliance_name.lower()}-" in fabric_name.lower()
             )
-            
-            print(f"Checking target fabric '{fabric_name}':")
-            print(f"  - succeeded={is_succeeded}")
-            print(f"  - solution_match={is_correct_solution}")
-            print(f"  - instance_match={is_correct_instance} (fabric: '{custom_props.get('instanceType')}' vs expected: '{target_fabric_instance_type}')")
-            print(f"  - name_match={name_matches}")
             
             # Collect potential candidates
             if custom_props.get('instanceType') == target_fabric_instance_type:
@@ -564,13 +526,11 @@ def initialize_replication_infrastructure(cmd,
                 error_msg += "3. The target appliance is not connected to the Azure Local cluster"
             
             raise CLIError(error_msg)
-        
-        print(f"Selected Target Fabric: '{target_fabric.get('name')}'")
-        
+                
         # Get target fabric agent (DRA)
         target_fabric_name = target_fabric.get('name')
-        target_dras_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics/{target_fabric_name}/fabricAgents"
-        target_dras_response = send_get_request(cmd, f"{target_dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
+        target_dras_uri = f"{replication_fabrics_uri}/{target_fabric_name}/fabricAgents?api-version={APIVersion.Microsoft_DataReplication.value}"
+        target_dras_response = send_get_request(cmd, target_dras_uri)
         target_dras = target_dras_response.json().get('value', [])
         
         target_dra = None
@@ -585,12 +545,10 @@ def initialize_replication_infrastructure(cmd,
         
         if not target_dra:
             raise CLIError(f"The target appliance '{target_appliance_name}' is in a disconnected state.")
-        
-        print(f"Selected Target Fabric Agent: '{target_dra.get('name')}'")
-        
+                
         # Setup Policy
         policy_name = f"{replication_vault_name}{instance_type}policy"
-        policy_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationPolicies/{policy_name}"
+        policy_uri = f"{rg_uri}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationPolicies/{policy_name}"
         
         policy = get_resource_by_id(cmd, policy_uri, APIVersion.Microsoft_DataReplication.value)
         
@@ -617,9 +575,7 @@ def initialize_replication_infrastructure(cmd,
                 policy = None
         
         # Create policy if needed
-        if not policy or policy.get('properties', {}).get('provisioningState') == ProvisioningState.Deleted.value:
-            print(f"Creating Policy '{policy_name}'...")
-            
+        if not policy or policy.get('properties', {}).get('provisioningState') == ProvisioningState.Deleted.value:            
             policy_body = {
                 "properties": {
                     "customProperties": {
@@ -645,9 +601,7 @@ def initialize_replication_infrastructure(cmd,
         
         if not policy or policy.get('properties', {}).get('provisioningState') != ProvisioningState.Succeeded.value:
             raise CLIError(f"Policy '{policy_name}' is not in Succeeded state.")
-        
-        print(f"Selected Policy: '{policy_name}'")
-        
+                
         # Setup Cache Storage Account
         amh_stored_storage_account_id = amh_solution.get('properties', {}).get('details', {}).get('extendedDetails', {}).get('replicationStorageAccountId')
         cache_storage_account = None
@@ -655,7 +609,7 @@ def initialize_replication_infrastructure(cmd,
         if amh_stored_storage_account_id:
             # Check existing storage account
             storage_account_name = amh_stored_storage_account_id.split("/")[8]
-            storage_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage/storageAccounts/{storage_account_name}"
+            storage_uri = f"{rg_uri}/providers/Microsoft.Storage/storageAccounts/{storage_account_name}"
             storage_account = get_resource_by_id(cmd, storage_uri, APIVersion.Microsoft_Storage.value)
             
             if storage_account and storage_account.get('properties', {}).get('provisioningState') == StorageAccountProvisioningState.Succeeded.value:
@@ -666,7 +620,7 @@ def initialize_replication_infrastructure(cmd,
         # Use user-provided storage account if no existing one
         if not cache_storage_account and cache_storage_account_id:
             storage_account_name = cache_storage_account_id.split("/")[8].lower()
-            storage_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage/storageAccounts/{storage_account_name}"
+            storage_uri = f"{rg_uri}/providers/Microsoft.Storage/storageAccounts/{storage_account_name}"
             user_storage_account = get_resource_by_id(cmd, storage_uri, APIVersion.Microsoft_Storage.value)
             
             if user_storage_account and user_storage_account.get('properties', {}).get('provisioningState') == StorageAccountProvisioningState.Succeeded.value:
@@ -699,10 +653,9 @@ def initialize_replication_infrastructure(cmd,
                 }
             }
             
-            storage_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Storage/storageAccounts/{storage_account_name}"
+            storage_uri = f"{rg_uri}/providers/Microsoft.Storage/storageAccounts/{storage_account_name}"
             cache_storage_account = create_or_update_resource(cmd, storage_uri, APIVersion.Microsoft_Storage.value, storage_body)
             
-            # Wait for storage account creation
             for i in range(20):
                 time.sleep(30)
                 cache_storage_account = get_resource_by_id(cmd, storage_uri, APIVersion.Microsoft_Storage.value)
@@ -711,9 +664,7 @@ def initialize_replication_infrastructure(cmd,
         
         if not cache_storage_account or cache_storage_account.get('properties', {}).get('provisioningState') != StorageAccountProvisioningState.Succeeded.value:
             raise CLIError("Failed to setup Cache Storage Account.")
-        
-        print(f"Selected Cache Storage Account: '{cache_storage_account.get('name')}'")
-        
+                
         # Grant permissions (Role Assignments)
         from azure.mgmt.authorization import AuthorizationManagementClient
         from azure.mgmt.authorization.models import RoleAssignmentCreateParameters
@@ -800,9 +751,8 @@ def initialize_replication_infrastructure(cmd,
         source_fabric_short_name = source_fabric_id.split('/')[-1]
         target_fabric_short_name = target_fabric_id.split('/')[-1]
         replication_extension_name = f"{source_fabric_short_name}-{target_fabric_short_name}-MigReplicationExtn"
-        
-        # Fix: Add leading slash to extension_uri
-        extension_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions/{replication_extension_name}"
+
+        extension_uri = f"{rg_uri}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions/{replication_extension_name}"
         replication_extension = get_resource_by_id(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value)
         
         # Check if extension exists and is in good state
@@ -831,12 +781,9 @@ def initialize_replication_infrastructure(cmd,
         # Create replication extension if needed
         if not replication_extension:
             print(f"Creating Replication Extension '{replication_extension_name}'...")
-            print(f"Waiting 120 seconds for permissions to sync...")
-            time.sleep(120)  # Wait for permissions to sync
+            time.sleep(120)
             
-            # First, let's check what extensions already exist to understand the pattern
-            print("\n=== Checking existing extensions for patterns ===")
-            existing_extensions_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions"
+            existing_extensions_uri = f"{rg_uri}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions"
             try:
                 existing_extensions_response = send_get_request(cmd, f"{existing_extensions_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
                 existing_extensions = existing_extensions_response.json().get('value', [])
@@ -848,7 +795,6 @@ def initialize_replication_infrastructure(cmd,
                         ext_type = ext.get('properties', {}).get('customProperties', {}).get('instanceType')
                         print(f"  - {ext_name}: state={ext_state}, type={ext_type}")
                         
-                        # If we find one with our instance type, let's see its structure
                         if ext_type == instance_type:
                             print(f"\nFound matching extension type. Full structure:")
                             print(json.dumps(ext.get('properties', {}).get('customProperties', {}), indent=2))
@@ -857,7 +803,6 @@ def initialize_replication_infrastructure(cmd,
             except Exception as list_error:
                 print(f"Error listing extensions: {str(list_error)}")
             
-            # Try creating with minimal properties first
             print("\n=== Attempting to create extension ===")
             
             extension_body = {
@@ -868,29 +813,15 @@ def initialize_replication_infrastructure(cmd,
                 }
             }
             
-            print(f"Extension body (minimal): {json.dumps(extension_body, indent=2)}")
-            print(f"Extension URI: {extension_uri}")
-            
             try:
-                # Use the built-in helper function that handles auth properly
-                print("Creating extension using built-in helper...")
-                result = create_or_update_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value, extension_body, no_wait=False)
-                print(f"Creation result: {result}")
-                
-                # If minimal creation succeeded, wait a bit then check status
+                result = create_or_update_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value, extension_body, no_wait=False)                
                 if result:
-                    print("Initial creation succeeded. Waiting for provisioning...")
                     time.sleep(30)
-                    
             except Exception as create_error:
                 print(f"Error during extension creation: {str(create_error)}")
                 error_str = str(create_error)
                 
-                # Check for specific error patterns
-                if "Internal Server Error" in error_str or "InternalServerError" in error_str:
-                    print("\n=== Internal Server Error detected, trying with full properties ===")
-                    
-                    # Try with more properties based on what we saw in existing extensions
+                if "Internal Server Error" in error_str or "InternalServerError" in error_str:                    
                     full_extension_body = {
                         "properties": {
                             "customProperties": {
@@ -899,7 +830,6 @@ def initialize_replication_infrastructure(cmd,
                         }
                     }
                     
-                    # Add fabric-specific properties based on instance type
                     if instance_type == AzLocalInstanceTypes.VMwareToAzLocal.value:
                         full_extension_body["properties"]["customProperties"]["vmwareFabricArmId"] = source_fabric_id
                         full_extension_body["properties"]["customProperties"]["vmwareSiteId"] = source_site_id  
@@ -911,15 +841,12 @@ def initialize_replication_infrastructure(cmd,
                         full_extension_body["properties"]["customProperties"]["azStackHciFabricArmId"] = target_fabric_id
                         full_extension_body["properties"]["customProperties"]["azStackHciSiteId"] = target_fabric_id
                     
-                    # Add common properties seen in existing extensions
                     full_extension_body["properties"]["customProperties"]["storageAccountId"] = storage_account_id
                     full_extension_body["properties"]["customProperties"]["storageAccountSasSecretName"] = None
                     full_extension_body["properties"]["customProperties"]["resourceLocation"] = migrate_project.get('location')
                     full_extension_body["properties"]["customProperties"]["subscriptionId"] = subscription_id
                     full_extension_body["properties"]["customProperties"]["resourceGroup"] = resource_group_name
-                    
-                    print(f"Full extension body: {json.dumps(full_extension_body, indent=2)}")
-                    
+                                        
                     try:
                         result = create_or_update_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value, full_extension_body, no_wait=False)
                         print(f"Full creation result: {result}")
@@ -946,35 +873,24 @@ def initialize_replication_infrastructure(cmd,
                         }
                     }
                     
-                    # Only add fabric IDs, not storage
                     if instance_type == AzLocalInstanceTypes.VMwareToAzLocal.value:
                         simple_extension_body["properties"]["customProperties"]["vmwareFabricArmId"] = source_fabric_id
                         simple_extension_body["properties"]["customProperties"]["azStackHciFabricArmId"] = target_fabric_id
                     elif instance_type == AzLocalInstanceTypes.HyperVToAzLocal.value:
                         simple_extension_body["properties"]["customProperties"]["hyperVFabricArmId"] = source_fabric_id
                         simple_extension_body["properties"]["customProperties"]["azStackHciFabricArmId"] = target_fabric_id
-                    
-                    print(f"Simple extension body: {json.dumps(simple_extension_body, indent=2)}")
-                    
-                    try:
-                        result = create_or_update_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value, simple_extension_body, no_wait=False)
-                        print(f"Simple creation result: {result}")
-                    except Exception as simple_error:
-                        print(f"Simple creation also failed: {str(simple_error)}")
-                        raise
+                                        
+                    result = create_or_update_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value, simple_extension_body, no_wait=False)
                 else:
                     # Unknown error, re-raise
                     raise
             
-            # Wait for extension creation to complete
             print("\nWaiting for extension operation to complete...")
-            for i in range(20):
-                print(f"Polling attempt {i+1}/20...")
+            for _ in range(20):
                 time.sleep(30)
                 replication_extension = get_resource_by_id(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value)
                 if replication_extension:
                     provisioning_state = replication_extension.get('properties', {}).get('provisioningState')
-                    print(f"Current provisioning state: {provisioning_state}")
                     if provisioning_state in [ProvisioningState.Succeeded.value, ProvisioningState.Failed.value,
                                              ProvisioningState.Canceled.value]:
                         print(f"Extension operation finished with state: {provisioning_state}")
@@ -986,9 +902,6 @@ def initialize_replication_infrastructure(cmd,
             
         if not replication_extension or replication_extension.get('properties', {}).get('provisioningState') != ProvisioningState.Succeeded.value:
             current_state = replication_extension.get('properties', {}).get('provisioningState') if replication_extension else "None"
-            print(f"Extension final state: {current_state}")
-            if replication_extension:
-                print(f"Extension details: {json.dumps(replication_extension, indent=2)}")
             raise CLIError(f"Replication Extension '{replication_extension_name}' is not in Succeeded state. Current state: {current_state}")
         
         print("Successfully initialized replication infrastructure")
