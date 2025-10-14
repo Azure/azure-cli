@@ -978,6 +978,7 @@ def new_local_server_replication(cmd,
         validate_arm_id_format,
         IdFormats
     )
+    import re
     
     # Validate that either machine_id or machine_index is provided, but not both
     if not machine_id and not machine_index:
@@ -985,28 +986,21 @@ def new_local_server_replication(cmd,
     if machine_id and machine_index:
         raise CLIError("Only one of machine_id or machine_index should be provided, not both.")
     
-    # Use current subscription if not provided
     if not subscription_id:
         subscription_id = get_subscription_id(cmd.cli_ctx)
     
-    # If machine_index is provided, resolve it to machine_id
     if machine_index:
         if not project_name:
             raise CLIError("project_name is required when using machine_index.")
         if not resource_group_name:
             raise CLIError("resource_group_name is required when using machine_index.")
         
-        # Validate machine_index is a positive integer
         if not isinstance(machine_index, int) or machine_index < 1:
             raise CLIError("machine_index must be a positive integer (1-based index).")
-        
-        # Get discovered servers from the project
-        logger.info(f"Resolving machine index {machine_index} to machine ID...")
-        
-        # Determine the correct endpoint based on source appliance name
-        # First, need to get the discovery solution to find appliance mapping
+                
+        rg_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}"
         discovery_solution_name = "Servers-Discovery-ServerDiscovery"
-        discovery_solution_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Migrate/migrateprojects/{project_name}/solutions/{discovery_solution_name}"
+        discovery_solution_uri = f"{rg_uri}/providers/Microsoft.Migrate/migrateprojects/{project_name}/solutions/{discovery_solution_name}"
         discovery_solution = get_resource_by_id(cmd, discovery_solution_uri, APIVersion.Microsoft_Migrate.value)
         
         if not discovery_solution:
@@ -1071,16 +1065,15 @@ def new_local_server_replication(cmd,
         
         if hyperv_site_pattern in source_site_id:
             site_name = source_site_id.split('/')[-1]
-            machines_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.OffAzure/HyperVSites/{site_name}/machines"
+            machines_uri = f"{rg_uri}/providers/Microsoft.OffAzure/HyperVSites/{site_name}/machines"
         elif vmware_site_pattern in source_site_id:
             site_name = source_site_id.split('/')[-1]
-            machines_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.OffAzure/VMwareSites/{site_name}/machines"
+            machines_uri = f"{rg_uri}/providers/Microsoft.OffAzure/VMwareSites/{site_name}/machines"
         else:
             raise CLIError(f"Unable to determine site type for source appliance '{source_appliance_name}'.")
         
         # Get all machines from the site
-        query_string = f"api-version={APIVersion.Microsoft_OffAzure.value}"
-        request_uri = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{machines_uri}?{query_string}"
+        request_uri = cmd.cli_ctx.cloud.endpoints.resource_manager + f"{machines_uri}?api-version={APIVersion.Microsoft_OffAzure.value}"
         
         response = send_get_request(cmd, request_uri)
         machines_data = response.json()
@@ -1099,15 +1092,12 @@ def new_local_server_replication(cmd,
         # Get the machine at the specified index (convert 1-based to 0-based)
         selected_machine = machines[machine_index - 1]
         machine_id = selected_machine.get('id')
-        
-        logger.info(f"Resolved machine index {machine_index} to machine ID: {machine_id}")
-        
+                
         # Extract machine name for logging
         machine_name_from_index = selected_machine.get('name', 'Unknown')
         properties = selected_machine.get('properties', {})
         display_name = properties.get('displayName', machine_name_from_index)
         
-        print(f"Selected machine [{machine_index}]: {display_name} (ID: {machine_name_from_index})")
     
     # Validate required parameters
     if not machine_id:
@@ -1143,7 +1133,6 @@ def new_local_server_replication(cmd,
         if not os_disk_id:
             raise CLIError("os_disk_id is required when using default user mode.")
     
-    # Validate is_dynamic_memory_enabled values
     is_dynamic_ram_enabled = None
     if is_dynamic_memory_enabled:
         if is_dynamic_memory_enabled not in ['true', 'false']:
@@ -1167,19 +1156,16 @@ def new_local_server_replication(cmd,
         if target_test_virtual_switch_id and not validate_arm_id_format(target_test_virtual_switch_id, IdFormats.LogicalNetworkArmIdTemplate):
             raise CLIError(f"Invalid -target_test_virtual_switch_id '{target_test_virtual_switch_id}'. A valid logical network ARM ID should follow the format '{IdFormats.LogicalNetworkArmIdTemplate}'.")
         
-        # Parse machine_id
         machine_id_parts = machine_id.split("/")
         if len(machine_id_parts) < 11:
             raise CLIError(f"Invalid machine ARM ID format: '{machine_id}'")
         
-        # Extract resource group name from machine ID if not already set
         if not resource_group_name:
             resource_group_name = machine_id_parts[4]
         site_type = machine_id_parts[7]
         site_name = machine_id_parts[8]
         machine_name = machine_id_parts[10]
         
-        # Get the source site and discovered machine based on site type
         run_as_account_id = None
         instance_type = None
         
@@ -1187,13 +1173,13 @@ def new_local_server_replication(cmd,
             instance_type = AzLocalInstanceTypes.HyperVToAzLocal.value
             
             # Get HyperV machine
-            machine_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.OffAzure/HyperVSites/{site_name}/machines/{machine_name}"
+            machine_uri = f"{rg_uri}/providers/Microsoft.OffAzure/HyperVSites/{site_name}/machines/{machine_name}"
             machine = get_resource_by_id(cmd, machine_uri, APIVersion.Microsoft_OffAzure.value)
             if not machine:
                 raise CLIError(f"Machine '{machine_name}' not found in resource group '{resource_group_name}' and site '{site_name}'.")
             
             # Get HyperV site
-            site_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.OffAzure/HyperVSites/{site_name}"
+            site_uri = f"{rg_uri}/providers/Microsoft.OffAzure/HyperVSites/{site_name}"
             site_object = get_resource_by_id(cmd, site_uri, APIVersion.Microsoft_OffAzure.value)
             if not site_object:
                 raise CLIError(f"Machine site '{site_name}' with Type '{site_type}' not found.")
@@ -1238,13 +1224,13 @@ def new_local_server_replication(cmd,
             instance_type = AzLocalInstanceTypes.VMwareToAzLocal.value
             
             # Get VMware machine
-            machine_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.OffAzure/VMwareSites/{site_name}/machines/{machine_name}"
+            machine_uri = f"{rg_uri}/providers/Microsoft.OffAzure/VMwareSites/{site_name}/machines/{machine_name}"
             machine = get_resource_by_id(cmd, machine_uri, APIVersion.Microsoft_OffAzure.value)
             if not machine:
                 raise CLIError(f"Machine '{machine_name}' not found in resource group '{resource_group_name}' and site '{site_name}'.")
             
             # Get VMware site
-            site_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.OffAzure/VMwareSites/{site_name}"
+            site_uri = f"{rg_uri}/providers/Microsoft.OffAzure/VMwareSites/{site_name}"
             site_object = get_resource_by_id(cmd, site_uri, APIVersion.Microsoft_OffAzure.value)
             if not site_object:
                 raise CLIError(f"Machine site '{site_name}' with Type '{site_type}' not found.")
@@ -1287,14 +1273,14 @@ def new_local_server_replication(cmd,
             project_name = discovery_solution_id.split("/")[8]
         
         # Get the migrate project resource
-        migrate_project_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Migrate/migrateprojects/{project_name}"
+        migrate_project_uri = f"{rg_uri}/providers/Microsoft.Migrate/migrateprojects/{project_name}"
         migrate_project = get_resource_by_id(cmd, migrate_project_uri, APIVersion.Microsoft_Migrate.value)
         if not migrate_project:
             raise CLIError(f"Migrate project '{project_name}' not found.")
         
         # Get Data Replication Service (AMH solution)
         amh_solution_name = "Servers-Migration-ServerMigration_DataReplication"
-        amh_solution_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Migrate/migrateprojects/{project_name}/solutions/{amh_solution_name}"
+        amh_solution_uri = f"{rg_uri}/providers/Microsoft.Migrate/migrateprojects/{project_name}/solutions/{amh_solution_name}"
         amh_solution = get_resource_by_id(cmd, amh_solution_uri, APIVersion.Microsoft_Migrate.value)
         if not amh_solution:
             raise CLIError(f"No Data Replication Service Solution '{amh_solution_name}' found in resource group '{resource_group_name}' and project '{project_name}'. Please verify your appliance setup.")
@@ -1314,7 +1300,7 @@ def new_local_server_replication(cmd,
         
         # Validate Policy
         policy_name = f"{replication_vault_name}{instance_type}policy"
-        policy_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationPolicies/{policy_name}"
+        policy_uri = f"{rg_uri}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationPolicies/{policy_name}"
         policy = get_resource_by_id(cmd, policy_uri, APIVersion.Microsoft_DataReplication.value)
         
         if not policy:
@@ -1324,7 +1310,7 @@ def new_local_server_replication(cmd,
         
         # Access Discovery Solution to get appliance mapping
         discovery_solution_name = "Servers-Discovery-ServerDiscovery"
-        discovery_solution_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Migrate/migrateprojects/{project_name}/solutions/{discovery_solution_name}"
+        discovery_solution_uri = f"{rg_uri}/providers/Microsoft.Migrate/migrateprojects/{project_name}/solutions/{discovery_solution_name}"
         discovery_solution = get_resource_by_id(cmd, discovery_solution_uri, APIVersion.Microsoft_Migrate.value)
         
         if not discovery_solution:
@@ -1381,27 +1367,20 @@ def new_local_server_replication(cmd,
         if not app_map:
             raise CLIError("Server Discovery Solution missing Appliance Details. Invalid Solution.")
         
-        # Validate SourceApplianceName & TargetApplianceName - try both original and lowercase
         source_site_id = app_map.get(source_appliance_name) or app_map.get(source_appliance_name.lower())
         target_site_id = app_map.get(target_appliance_name) or app_map.get(target_appliance_name.lower())
         
         if not source_site_id:
-            # Provide helpful error message with available appliances (filter out duplicates)
             available_appliances = list(set(k for k in app_map.keys() if not k.islower()))
             if not available_appliances:
-                # If all keys are lowercase, show them
                 available_appliances = list(set(app_map.keys()))
             raise CLIError(f"Source appliance '{source_appliance_name}' not found in discovery solution. Available appliances: {', '.join(available_appliances)}")
+        
         if not target_site_id:
-            # Provide helpful error message with available appliances (filter out duplicates)
             available_appliances = list(set(k for k in app_map.keys() if not k.islower()))
             if not available_appliances:
-                # If all keys are lowercase, show them
                 available_appliances = list(set(app_map.keys()))
             raise CLIError(f"Target appliance '{target_appliance_name}' not found in discovery solution. Available appliances: {', '.join(available_appliances)}")
-        
-        print(f"Source site ID for '{source_appliance_name}': {source_site_id}")
-        print(f"Target site ID for '{target_appliance_name}': {target_site_id}")
         
         # Determine instance types based on site IDs
         hyperv_site_pattern = "/Microsoft.OffAzure/HyperVSites/"
@@ -1415,24 +1394,12 @@ def new_local_server_replication(cmd,
             fabric_instance_type = FabricInstanceTypes.VMwareInstance.value
         else:
             raise CLIError(f"Error matching source '{source_appliance_name}' and target '{target_appliance_name}' appliances. Source is {'VMware' if vmware_site_pattern in source_site_id else 'HyperV' if hyperv_site_pattern in source_site_id else 'Unknown'}, Target is {'VMware' if vmware_site_pattern in target_site_id else 'HyperV' if hyperv_site_pattern in target_site_id else 'Unknown'}")
-        
-        print(f"Instance type: {instance_type}, Fabric instance type: {fabric_instance_type}")
-        
+                
         # Get healthy fabrics in the resource group
-        fabrics_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics"
+        fabrics_uri = f"{rg_uri}/providers/Microsoft.DataReplication/replicationFabrics"
         fabrics_response = send_get_request(cmd, f"{fabrics_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
-        all_fabrics = fabrics_response.json().get('value', [])
-        
-        for fabric in all_fabrics:
-            props = fabric.get('properties', {})
-            custom_props = props.get('customProperties', {})
-            print(f"Fabric: {fabric.get('name')}")
-            print(f"  - State: {props.get('provisioningState')}")
-            print(f"  - Type: {custom_props.get('instanceType')}")
-            print(f"  - Solution ID: {custom_props.get('migrationSolutionId')}")
-            print(f"  - Custom Properties: {json.dumps(custom_props, indent=2)}")
+        all_fabrics = fabrics_response.json().get('value', [])   
 
-        # If no fabrics exist at all, provide helpful message
         if not all_fabrics:
             raise CLIError(
                 f"No replication fabrics found in resource group '{resource_group_name}'. "
@@ -1442,39 +1409,26 @@ def new_local_server_replication(cmd,
                 f"3. Both appliances are registered with the Azure Migrate project '{project_name}'"
             )
         
-        # Filter for source fabric - make matching more flexible and diagnostic
         source_fabric = None
         source_fabric_candidates = []
         
         for fabric in all_fabrics:
             props = fabric.get('properties', {})
             custom_props = props.get('customProperties', {})
-            fabric_name = fabric.get('name', '')
-            
-            # Check if this fabric matches our criteria
+            fabric_name = fabric.get('name', '')            
             is_succeeded = props.get('provisioningState') == ProvisioningState.Succeeded.value
             
-            # Check solution ID match - handle case differences and trailing slashes
             fabric_solution_id = custom_props.get('migrationSolutionId', '').rstrip('/')
             expected_solution_id = amh_solution.get('id', '').rstrip('/')
             is_correct_solution = fabric_solution_id.lower() == expected_solution_id.lower()
-            
             is_correct_instance = custom_props.get('instanceType') == fabric_instance_type
             
-            # More flexible name matching - check if fabric name contains appliance name or vice versa
             name_matches = (
                 fabric_name.lower().startswith(source_appliance_name.lower()) or
                 source_appliance_name.lower() in fabric_name.lower() or
                 fabric_name.lower() in source_appliance_name.lower() or
-                # Also check if the fabric name matches the site name pattern
                 f"{source_appliance_name.lower()}-" in fabric_name.lower()
             )
-            
-            print(f"Checking source fabric '{fabric_name}':")
-            print(f"  - succeeded={is_succeeded}")
-            print(f"  - solution_match={is_correct_solution} (fabric: '{fabric_solution_id}' vs expected: '{expected_solution_id}')")
-            print(f"  - instance_match={is_correct_instance} (fabric: '{custom_props.get('instanceType')}' vs expected: '{fabric_instance_type}')")
-            print(f"  - name_match={name_matches}")
             
             # Collect potential candidates even if they don't fully match
             if custom_props.get('instanceType') == fabric_instance_type:
@@ -1522,12 +1476,10 @@ def new_local_server_replication(cmd,
                         error_msg += f"  - {fabric.get('name')} (type: {custom_props.get('instanceType')})\n"
             
             raise CLIError(error_msg)
-        
-        print(f"Selected Source Fabric: '{source_fabric.get('name')}'")
-        
+                
         # Get source fabric agent (DRA)
         source_fabric_name = source_fabric.get('name')
-        dras_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics/{source_fabric_name}/fabricAgents"
+        dras_uri = f"{rg_uri}/providers/Microsoft.DataReplication/replicationFabrics/{source_fabric_name}/fabricAgents"
         source_dras_response = send_get_request(cmd, f"{dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
         source_dras = source_dras_response.json().get('value', [])
         
@@ -1543,9 +1495,7 @@ def new_local_server_replication(cmd,
         
         if not source_dra:
             raise CLIError(f"The source appliance '{source_appliance_name}' is in a disconnected state.")
-        
-        print(f"Selected Source Fabric Agent: '{source_dra.get('name')}'")
-        
+                
         # Filter for target fabric - make matching more flexible and diagnostic
         target_fabric_instance_type = FabricInstanceTypes.AzLocalInstance.value
         target_fabric = None
@@ -1554,31 +1504,20 @@ def new_local_server_replication(cmd,
         for fabric in all_fabrics:
             props = fabric.get('properties', {})
             custom_props = props.get('customProperties', {})
-            fabric_name = fabric.get('name', '')
-            
-            # Check if this fabric matches our criteria
+            fabric_name = fabric.get('name', '')            
             is_succeeded = props.get('provisioningState') == ProvisioningState.Succeeded.value
             
-            # Check solution ID match - handle case differences and trailing slashes
             fabric_solution_id = custom_props.get('migrationSolutionId', '').rstrip('/')
             expected_solution_id = amh_solution.get('id', '').rstrip('/')
             is_correct_solution = fabric_solution_id.lower() == expected_solution_id.lower()
-            
             is_correct_instance = custom_props.get('instanceType') == target_fabric_instance_type
             
-            # More flexible name matching
             name_matches = (
                 fabric_name.lower().startswith(target_appliance_name.lower()) or
                 target_appliance_name.lower() in fabric_name.lower() or
                 fabric_name.lower() in target_appliance_name.lower() or
                 f"{target_appliance_name.lower()}-" in fabric_name.lower()
             )
-            
-            print(f"Checking target fabric '{fabric_name}':")
-            print(f"  - succeeded={is_succeeded}")
-            print(f"  - solution_match={is_correct_solution}")
-            print(f"  - instance_match={is_correct_instance} (fabric: '{custom_props.get('instanceType')}' vs expected: '{target_fabric_instance_type}')")
-            print(f"  - name_match={name_matches}")
             
             # Collect potential candidates
             if custom_props.get('instanceType') == target_fabric_instance_type:
@@ -1613,12 +1552,10 @@ def new_local_server_replication(cmd,
                 error_msg += "3. The target appliance is not connected to the Azure Local cluster"
             
             raise CLIError(error_msg)
-        
-        print(f"Selected Target Fabric: '{target_fabric.get('name')}'")
-        
+                
         # Get target fabric agent (DRA)
         target_fabric_name = target_fabric.get('name')
-        target_dras_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationFabrics/{target_fabric_name}/fabricAgents"
+        target_dras_uri = f"{rg_uri}/providers/Microsoft.DataReplication/replicationFabrics/{target_fabric_name}/fabricAgents"
         target_dras_response = send_get_request(cmd, f"{target_dras_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
         target_dras = target_dras_response.json().get('value', [])
         
@@ -1634,148 +1571,78 @@ def new_local_server_replication(cmd,
         
         if not target_dra:
             raise CLIError(f"The target appliance '{target_appliance_name}' is in a disconnected state.")
-        
-        print(f"Selected Target Fabric Agent 2: '{target_dra.get('name')}'")
-        
+                
         # 2. Validate Replication Extension
         source_fabric_id = source_fabric['id']
         target_fabric_id = target_fabric['id']
         source_fabric_short_name = source_fabric_id.split('/')[-1]
         target_fabric_short_name = target_fabric_id.split('/')[-1]
         replication_extension_name = f"{source_fabric_short_name}-{target_fabric_short_name}-MigReplicationExtn"
-        
-        print(f"DEBUG: Source fabric ID: {source_fabric_id}")
-        print(f"DEBUG: Target fabric ID: {target_fabric_id}")
-        print(f"DEBUG: Expected replication extension name: {replication_extension_name}")
-        
-        extension_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions/{replication_extension_name}"
-        print(f"DEBUG: Extension URI: {extension_uri}")
-        
+        extension_uri = f"{rg_uri}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions/{replication_extension_name}"        
         replication_extension = get_resource_by_id(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value)
         
         if not replication_extension:
-            print(f"DEBUG: Replication extension not found. Checking all existing extensions...")
-            # List all extensions for debugging
-            extensions_uri = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/replicationExtensions"
-            try:
-                extensions_response = send_get_request(cmd, f"{extensions_uri}?api-version={APIVersion.Microsoft_DataReplication.value}")
-                existing_extensions = extensions_response.json().get('value', [])
-                print(f"DEBUG: Found {len(existing_extensions)} existing extension(s):")
-                for ext in existing_extensions:
-                    print(f"  - Name: {ext.get('name')}")
-                    print(f"    State: {ext.get('properties', {}).get('provisioningState')}")
-                    print(f"    Type: {ext.get('properties', {}).get('customProperties', {}).get('instanceType')}")
-            except Exception as list_error:
-                print(f"DEBUG: Error listing extensions: {str(list_error)}")
-            
             raise CLIError(f"The replication extension '{replication_extension_name}' not found. Run 'az migrate local-replication-infrastructure initialize' first.")
         
         extension_state = replication_extension.get('properties', {}).get('provisioningState')
-        print(f"DEBUG: Replication extension state: {extension_state}")
-        print(f"DEBUG: Expected state: {ProvisioningState.Succeeded.value}")
         
         if extension_state != ProvisioningState.Succeeded.value:
-            print(f"DEBUG: Extension properties: {json.dumps(replication_extension.get('properties', {}), indent=2)}")
             raise CLIError(f"The replication extension '{replication_extension_name}' is not ready. State: '{extension_state}'")
-        
-        print(f"DEBUG: Replication extension validation successful")
-        
-        # 3. Get ARC Resource Bridge info (placeholder - needs Azure Resource Graph implementation)
-        # For now, we'll construct the required values based on the target fabric
-        target_fabric_custom_props = target_fabric.get('properties', {}).get('customProperties', {})
-        print(f"DEBUG: Target fabric custom properties keys: {list(target_fabric_custom_props.keys())}")
-        
+                
+        # 3. Get ARC Resource Bridge info
+        target_fabric_custom_props = target_fabric.get('properties', {}).get('customProperties', {})        
         target_cluster_id = target_fabric_custom_props.get('cluster', {}).get('resourceName', '')
-        print(f"DEBUG: Target cluster ID from fabric: '{target_cluster_id}'")
         
-        # Try alternative property paths for cluster ID
         if not target_cluster_id:
             target_cluster_id = target_fabric_custom_props.get('azStackHciClusterName', '')
-            print(f"DEBUG: Target cluster ID from azStackHciClusterName: '{target_cluster_id}'")
         
         if not target_cluster_id:
             target_cluster_id = target_fabric_custom_props.get('clusterName', '')
-            print(f"DEBUG: Target cluster ID from clusterName: '{target_cluster_id}'")
         
         # Extract custom location from target fabric
         custom_location_id = target_fabric_custom_props.get('customLocationRegion', '')
-        print(f"DEBUG: Custom location ID from customLocationRegion: '{custom_location_id}'")
         
         if not custom_location_id:
             custom_location_id = target_fabric_custom_props.get('customLocationId', '')
-            print(f"DEBUG: Custom location ID from customLocationId: '{custom_location_id}'")
         
         if not custom_location_id:
-            # Try to construct it from cluster ID
             if target_cluster_id:
-                print(f"DEBUG: Attempting to construct custom location from cluster ID")
-                # This is a simplified placeholder - real implementation would query ARG
                 cluster_parts = target_cluster_id.split('/')
-                print(f"DEBUG: Cluster ID parts: {cluster_parts}")
                 if len(cluster_parts) >= 5:
                     custom_location_region = migrate_project.get('location', 'eastus')
                     custom_location_id = f"/subscriptions/{cluster_parts[2]}/resourceGroups/{cluster_parts[4]}/providers/Microsoft.ExtendedLocation/customLocations/{cluster_parts[-1]}-customLocation"
-                    print(f"DEBUG: Constructed custom location ID: '{custom_location_id}'")
-                    print(f"DEBUG: Custom location region: '{custom_location_region}'")
                 else:
                     custom_location_region = migrate_project.get('location', 'eastus')
-                    print(f"DEBUG: Insufficient cluster parts, using default region: '{custom_location_region}'")
             else:
                 custom_location_region = migrate_project.get('location', 'eastus')
-                print(f"DEBUG: No cluster ID found, using default region: '{custom_location_region}'")
         else:
             custom_location_region = migrate_project.get('location', 'eastus')
-            print(f"DEBUG: Using existing custom location, region: '{custom_location_region}'")
         
-        print(f"DEBUG: Final target cluster ID: '{target_cluster_id}'")
-        print(f"DEBUG: Final custom location ID: '{custom_location_id}'")
-        print(f"DEBUG: Final custom location region: '{custom_location_region}'")
-        # 4. Validate target VM name
-        import re
-        print(f"DEBUG: Validating target VM name: '{target_vm_name}'")
-        print(f"DEBUG: Target VM name length: {len(target_vm_name)}")
-        
+        # 4. Validate target VM name                
         if len(target_vm_name) == 0 or len(target_vm_name) > 64:
             raise CLIError("The target virtual machine name must be between 1 and 64 characters long.")
         
         vm_name_pattern = r"^[^_\W][a-zA-Z0-9\-]{0,63}(?<![-._])$"
-        print(f"DEBUG: Target VM name pattern: {vm_name_pattern}")
-        print(f"DEBUG: Target VM name regex match: {bool(re.match(vm_name_pattern, target_vm_name))}")
         
         if not re.match(vm_name_pattern, target_vm_name):
             raise CLIError("The target VM name must begin with a letter or number, contain only letters, numbers, or hyphens, and not end with '.' or '-'.")
-        
-        print(f"DEBUG: Target VM name validation passed")
-        
+                
         # 5. Construct disk and NIC mappings
         disks = []
         nics = []
-        
-        print(f"DEBUG: Power user mode: {is_power_user_mode}")
-        print(f"DEBUG: Default user mode: {is_default_user_mode}")
-        
+                
         if is_power_user_mode:
-            print(f"DEBUG: Using power user mode for disk and NIC configuration")
-            # Power user mode - use provided disk and NIC mappings
-            print(f"DEBUG: Disk to include count: {len(disk_to_include) if disk_to_include else 0}")
-            print(f"DEBUG: NIC to include count: {len(nic_to_include) if nic_to_include else 0}")
-            
             if not disk_to_include or len(disk_to_include) == 0:
                 raise CLIError("At least one disk must be included for replication.")
             
             # Validate that exactly one disk is marked as OS disk
             os_disks = [d for d in disk_to_include if d.get('isOSDisk', False)]
-            print(f"DEBUG: OS disks found in power user mode: {len(os_disks)}")
             for i, os_disk in enumerate(os_disks):
-                print(f"DEBUG: OS disk {i+1}: {os_disk.get('diskId')}")
-                
                 if len(os_disks) != 1:
                     raise CLIError("Exactly one disk must be designated as the OS disk.")
                 
             # Process disks
-            print(f"DEBUG: Processing {len(disk_to_include)} disks in power user mode")
             for i, disk in enumerate(disk_to_include):
-                print(f"DEBUG: Processing disk {i+1}: ID={disk.get('diskId')}, Size={disk.get('diskSizeGb')}GB, OS={disk.get('isOSDisk', False)}")
                 disk_obj = {
                     'diskId': disk.get('diskId'),
                     'diskSizeGb': disk.get('diskSizeGb'),
@@ -1784,7 +1651,6 @@ def new_local_server_replication(cmd,
                     'isOSDisk': disk.get('isOSDisk', False)
                 }
                 disks.append(disk_obj)
-                print(f"DEBUG: Added disk object: {disk_obj}")
             
             # Process NICs
             print(f"DEBUG: Processing {len(nic_to_include)} NICs in power user mode")
@@ -1797,40 +1663,26 @@ def new_local_server_replication(cmd,
                     'selectionTypeForFailover': nic.get('selectionTypeForFailover', VMNicSelection.SelectedByUser.value)
                 }
                 nics.append(nic_obj)
-                print(f"DEBUG: Added NIC object: {nic_obj}")
         else:
-            print(f"DEBUG: Using default user mode for disk and NIC configuration")
-            # Default user mode - create mappings from discovered machine data
             machine_disks = machine_props.get('disks', [])
             machine_nics = machine_props.get('networkAdapters', [])
             
-            print(f"DEBUG: Machine disks count: {len(machine_disks)}")
-            print(f"DEBUG: Machine NICs count: {len(machine_nics)}")
-            print(f"DEBUG: Site type: {site_type}")
-            print(f"DEBUG: OS disk ID to find: '{os_disk_id}'")
-            
             # Find OS disk
             os_disk_found = False
-            print(f"DEBUG: Processing {len(machine_disks)} discovered disks")
             for i, disk in enumerate(machine_disks):
                 if site_type == SiteTypes.HyperVSites.value:
                     disk_id = disk.get('instanceId')
                     disk_size = disk.get('maxSizeInBytes', 0)
-                    print(f"DEBUG: HyperV disk {i+1}: instanceId='{disk_id}', size={disk_size} bytes")
                 else:  # VMware
                     disk_id = disk.get('uuid')
                     disk_size = disk.get('maxSizeInBytes', 0)
-                    print(f"DEBUG: VMware disk {i+1}: uuid='{disk_id}', size={disk_size} bytes")
             
                 is_os_disk = disk_id == os_disk_id
-                print(f"DEBUG: Disk {i+1} is OS disk: {is_os_disk} (comparing '{disk_id}' == '{os_disk_id}')")
                 
                 if is_os_disk:
                     os_disk_found = True
-                    print(f"DEBUG: Found OS disk at index {i+1}")
                 
                 disk_size_gb = (disk_size + (1024**3 - 1)) // (1024**3)  # Round up to GB
-                print(f"DEBUG: Disk {i+1} size converted to GB: {disk_size_gb}")
                 
                 disk_obj = {
                     'diskId': disk_id,
@@ -1840,19 +1692,10 @@ def new_local_server_replication(cmd,
                     'isOSDisk': is_os_disk
                 }
                 disks.append(disk_obj)
-                print(f"DEBUG: Added disk object {i+1}: {disk_obj}")
-            
-            # Process all NICs
-            print(f"DEBUG: Processing {len(machine_nics)} discovered NICs")
-            print(f"DEBUG: Target virtual switch ID: '{target_virtual_switch_id}'")
-            print(f"DEBUG: Target test virtual switch ID: '{target_test_virtual_switch_id}'")
             
             for i, nic in enumerate(machine_nics):
-                nic_id = nic.get('nicId')
-                print(f"DEBUG: Processing NIC {i+1}: ID='{nic_id}'")
-                
+                nic_id = nic.get('nicId')                
                 test_network_id = target_test_virtual_switch_id or target_virtual_switch_id
-                print(f"DEBUG: NIC {i+1} test network ID: '{test_network_id}'")
                 
                 nic_obj = {
                     'nicId': nic_id,
@@ -1861,91 +1704,52 @@ def new_local_server_replication(cmd,
                     'selectionTypeForFailover': VMNicSelection.SelectedByUser.value
                 }
                 nics.append(nic_obj)
-                print(f"DEBUG: Added NIC object {i+1}: {nic_obj}")
-        
-        print(f"DEBUG: Final disk count: {len(disks)}")
-        print(f"DEBUG: Final NIC count: {len(nics)}")
-        print(f"DEBUG: Final disks: {disks}")
-        print(f"DEBUG: Final NICs: {nics}")
         
         # 6. Create the protected item
-        # Use the original machine name as protected item name (matching PowerShell behavior)
-        protected_item_name = machine_name
-        
-        print(f"DEBUG: Using protected item name: '{protected_item_name}'")
-        
+        protected_item_name = machine_name        
         protected_item_uri = f"subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.DataReplication/replicationVaults/{replication_vault_name}/protectedItems/{protected_item_name}"
-        print(f"DEBUG: Protected item URI: '{protected_item_uri}'")
-        
-        # Check if protected item already exists
-        print(f"DEBUG: Checking if protected item already exists...")
+
         try:
             existing_item = get_resource_by_id(cmd, protected_item_uri, APIVersion.Microsoft_DataReplication.value)
-            print(f"DEBUG: Existing item found: {existing_item is not None}")
             if existing_item:
-                print(f"DEBUG: Existing item state: {existing_item.get('properties', {}).get('provisioningState')}")
                 raise CLIError(f"A replication already exists for machine '{machine_name}'. Remove it first before creating a new one.")
         except Exception as e:
             # Check if it's a 404 Not Found error - that's expected and fine
             error_str = str(e)
             if "ResourceNotFound" in error_str or "404" in error_str or "Not Found" in error_str:
-                print(f"DEBUG: Protected item does not exist (expected), proceeding with creation")
                 existing_item = None
             else:
                 # Some other error occurred, re-raise it
-                print(f"DEBUG: Unexpected error checking for existing item: {error_str}")
                 raise
         
         # Determine Hyper-V generation
-        print(f"DEBUG: Determining Hyper-V generation for site type: '{site_type}'")
         if site_type == SiteTypes.HyperVSites.value:
             hyperv_generation = machine_props.get('generation', '1')
             is_source_dynamic_memory = machine_props.get('isDynamicMemoryEnabled', False)
-            print(f"DEBUG: HyperV machine - generation: '{hyperv_generation}', dynamic memory: {is_source_dynamic_memory}")
         else:  # VMware
             firmware = machine_props.get('firmware', 'BIOS')
             hyperv_generation = '2' if firmware != 'BIOS' else '1'
             is_source_dynamic_memory = False
-            print(f"DEBUG: VMware machine - firmware: '{firmware}', mapped generation: '{hyperv_generation}', dynamic memory: {is_source_dynamic_memory}")
         
         # Determine target CPU and RAM
-        print(f"DEBUG: Determining target CPU and RAM...")
         source_cpu_cores = machine_props.get('numberOfProcessorCore', 2)
         source_memory_mb = machine_props.get('allocatedMemoryInMB', 4096)
-        print(f"DEBUG: Source machine - CPU cores: {source_cpu_cores}, RAM: {source_memory_mb} MB")
         
         if not target_vm_cpu_core:
             target_vm_cpu_core = source_cpu_cores
-            print(f"DEBUG: Using source CPU cores for target: {target_vm_cpu_core}")
-        else:
-            print(f"DEBUG: Using provided target CPU cores: {target_vm_cpu_core}")
         
         if not target_vm_ram:
             target_vm_ram = max(source_memory_mb, 512)  # Minimum 512MB
-            print(f"DEBUG: Using source RAM for target (min 512MB): {target_vm_ram} MB")
-        else:
-            print(f"DEBUG: Using provided target RAM: {target_vm_ram} MB")
-        
-        # Validate CPU and RAM based on generation
-        print(f"DEBUG: Validating CPU and RAM for generation {hyperv_generation}...")
-        print(f"DEBUG: Target CPU cores to validate: {target_vm_cpu_core}")
-        print(f"DEBUG: Target RAM to validate: {target_vm_ram} MB")
         
         if target_vm_cpu_core < 1 or target_vm_cpu_core > 240:
             raise CLIError("Target VM CPU cores must be between 1 and 240.")
-        print(f"DEBUG: CPU validation passed")
         
         if hyperv_generation == '1':
-            print(f"DEBUG: Validating RAM for Generation 1 VM (512 MB - 1048576 MB)")
             if target_vm_ram < 512 or target_vm_ram > 1048576:  # 1TB
                 raise CLIError("Target VM RAM must be between 512 MB and 1048576 MB (1 TB) for Generation 1 VMs.")
         else:
-            print(f"DEBUG: Validating RAM for Generation 2 VM (32 MB - 12582912 MB)")
             if target_vm_ram < 32 or target_vm_ram > 12582912:  # 12TB
                 raise CLIError("Target VM RAM must be between 32 MB and 12582912 MB (12 TB) for Generation 2 VMs.")
-        print(f"DEBUG: RAM validation passed")
-        
-        print(f"DEBUG: Final configuration - Generation: {hyperv_generation}, CPU: {target_vm_cpu_core}, RAM: {target_vm_ram} MB, Dynamic Memory: {is_source_dynamic_memory}")
         
         # Construct protected item properties with only the essential properties
         # The API schema varies by instance type, so we'll use a minimal approach
@@ -1991,7 +1795,7 @@ def new_local_server_replication(cmd,
             "sourceFabricAgentName": source_dra.get('name'),
             "targetFabricAgentName": target_dra.get('name'),
             "runAsAccountId": run_as_account_id,
-            "targetHCIClusterId": target_cluster_id  # Changed from targetHciClusterId
+            "targetHCIClusterId": target_cluster_id
         }
         
         protected_item_body = {
@@ -2002,22 +1806,8 @@ def new_local_server_replication(cmd,
             }
         }
         
-        print(f"Creating protected item for machine '{machine_name}'...")
-        print(f"Target VM name: {target_vm_name}")
-        print(f"Target resource group: {target_resource_group_id}")
-        print(f"Disks to include: {len(disks)}")
-        print(f"NICs to include: {len(nics)}")
-        
-        # Debug: Print the request body to see what we're sending
-        print(f"\n=== DEBUG: Protected Item Request Body ===")
-        print(json.dumps(protected_item_body, indent=2))
-        print("=== END DEBUG ===\n")
-        
-        # Create the protected item (this will trigger a long-running operation)
         result = create_or_update_resource(cmd, protected_item_uri, APIVersion.Microsoft_DataReplication.value, protected_item_body, no_wait=True)
         
-        # The result should contain the operation status or location header
-        # For now, return a success message
         print(f"Successfully initiated replication for machine '{machine_name}'.")
         print("The replication setup is in progress. Use 'az migrate local-server-replication show' to check the status.")
         
