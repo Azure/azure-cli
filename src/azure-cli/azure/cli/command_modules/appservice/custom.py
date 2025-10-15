@@ -5757,7 +5757,7 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
     class Runtime:
         def __init__(self, name=None, version=None, is_preview=False, supported_func_versions=None, linux=False,
                      app_settings_dict=None, site_config_dict=None, app_insights=False, default=False,
-                     github_actions_properties=None, end_of_life_date=None, sku=None):
+                     github_actions_properties=None, end_of_life_date=None):
             self.name = name
             self.version = version
             self.is_preview = is_preview
@@ -5769,7 +5769,6 @@ class _FunctionAppStackRuntimeHelper(_AbstractStackRuntimeHelper):
             self.default = default
             self.github_actions_properties = github_actions_properties
             self.end_of_life_date = end_of_life_date
-            self.sku = sku
 
             self.display_name = "{}|{}".format(name, version) if version else name
             self.deprecation_link = LANGUAGE_EOL_DEPRECATION_NOTICES.get(self.display_name, '')
