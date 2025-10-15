@@ -14,7 +14,7 @@ parameters:
     pool: pool-ubuntu-latest-multi-core
   - name: ARM64
     value: arm64
-    pool: pool-ubuntu-arm64-temp
+    pool: pool-ubuntu-latest-arm64
 - name: ShouldTest
   displayName: Test?
   type: boolean
@@ -239,27 +239,75 @@ jobs:
       displayName: Install Docker
 
     - task: Bash@3
-      displayName: Install make and go for ARM64 Agent
-      condition: eq(variables['artifactName'], 'arm64')
+      displayName: Install PowerShell for ARM64 Agent
+      condition: and(succeeded(), eq(${{parameters.architectures.value}}, 'arm64'))
       inputs:
         targetType: 'inline'
         script: |
-          echo "-------------------------------------1"
-          sudo apt list -a golang-go
-          echo "-------------------------------------2"
-          sudo apt update && sudo apt install make && sudo apt install -y golang-go
+          curl -L -o /tmp/powershell.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.4.11/powershell-7.4.11-linux-arm64.tar.gz
+          sudo mkdir -p /opt/microsoft/powershell/7
+          sudo tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell/7
+          sudo chmod +x /opt/microsoft/powershell/7/pwsh
+          sudo ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
+          PATH=/usr/bin:/sbin:/usr/sbin:$PATH
 
-    - bash: |
-        set -exv
-        
-        IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
-        TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
-        
-        echo "== Test docker image =="
-        
-        docker load < $TAR_FILE
-        echo "== docker image =="
-        docker images
-        echo "== docker container =="
-        docker ps
-      displayName: 'Bash Script'
+    - task: Bash@3
+      displayName: Install Az.Accounts for ARM64 Agents
+      condition: and(succeeded(), eq(${{parameters.architectures.value}}, 'arm64'))
+      inputs:
+        targetType: 'inline'
+        script: |
+          pwsh -command 'Register-PSRepository -Default -InstallationPolicy Trusted'
+          pwsh -command 'Install-Module -Name Az.Accounts -Repository PSGallery -AllowClobber -Force'
+
+    - task: Bash@3
+      displayName: Install Trivy
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -eux
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+          echo "----------------------------------"
+          sudo trivy --version
+
+    - task: Bash@3
+      displayName: Install copacetic
+      inputs:
+        targetType: 'inline'
+        script: |
+          CopaDownloadUrl="https://github.com/project-copacetic/copacetic/releases/download/v$(CopaVersion)/copa_$(CopaVersion)_linux_amd64.tar.gz"
+          if [ "$(CPUArchitecture)" = "arm64" ]; then
+            CopaDownloadUrl="https://github.com/project-copacetic/copacetic/releases/download/v$(CopaVersion)/copa_$(CopaVersion)_linux_arm64.tar.gz"
+          fi
+          curl -L -o /tmp/copa.tar.gz $CopaDownloadUrl
+          sudo mkdir -p /opt/copacetic
+          sudo tar zxf /tmp/copa.tar.gz -C /opt/copacetic
+          sudo chmod +x /opt/copacetic/copa
+          sudo ln -s /opt/copacetic/copa /usr/bin/copa
+          PATH=/usr/bin:/sbin:/usr/sbin:$PATH
+          echo "----------------------------------"
+          sudo copa --version
+          echo "----------------------------------"
+          sudo copa --help
+          echo "----------------------------------"
+          sudo copa patch --help
+          echo "----------------------------------"
+
+    - task: Bash@3
+      displayName: Check Docker Image
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -exv
+          
+          IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
+          TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
+          
+          echo "== Test docker image =="
+          
+          docker load < $TAR_FILE
+          echo "== docker image =="
+          docker images
+          echo "== docker container =="
+          docker ps
+          
