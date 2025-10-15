@@ -226,6 +226,7 @@ jobs:
         Azure Linux 3.0 ${{ arch.name }}:
           pool: ${{ arch.pool }}
           artifactName: docker-azurelinux3.0-${{ arch.value }}
+          architecture: ${{ arch.value }}
   pool:
     name: $(pool)
   steps:
@@ -240,7 +241,7 @@ jobs:
 
     - task: Bash@3
       displayName: Install PowerShell for ARM64 Agent
-      condition: and(succeeded(), eq(${{parameters.architectures.value}}, 'arm64'))
+      condition: and(succeeded(), eq(variables['architecture'], 'arm64'))
       inputs:
         targetType: 'inline'
         script: |
@@ -253,7 +254,7 @@ jobs:
 
     - task: Bash@3
       displayName: Install Az.Accounts for ARM64 Agents
-      condition: and(succeeded(), eq(${{parameters.architectures.value}}, 'arm64'))
+      condition: and(succeeded(), eq(variables['architecture'], 'arm64'))
       inputs:
         targetType: 'inline'
         script: |
@@ -310,4 +311,3 @@ jobs:
           docker images
           echo "== docker container =="
           docker ps
-          
