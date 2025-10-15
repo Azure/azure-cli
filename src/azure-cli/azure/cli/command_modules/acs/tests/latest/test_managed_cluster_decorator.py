@@ -6144,6 +6144,48 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
             istio=self.models.IstioServiceMesh(revisions=["asm-1-17", "asm-1-18"]),
         ))
 
+    def test_get_custom_ca_trust_certificates(self):
+        # Test with None - should return None
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"custom_ca_trust_certificates": None}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_custom_ca_trust_certificates(), None)
+
+        # Test with empty string - should raise error
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"custom_ca_trust_certificates": ""}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        with self.assertRaises(InvalidArgumentValueError):
+            ctx_2.get_custom_ca_trust_certificates()
+
+        # Test with valid file path - should return certificates
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"custom_ca_trust_certificates": get_test_data_file_path("certs.txt")}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        certs = ctx_3.get_custom_ca_trust_certificates()
+        self.assertIsNotNone(certs)
+        self.assertEqual(len(certs), 2)
+
+        # Test with empty file - should return empty list (for removal)
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({"custom_ca_trust_certificates": get_test_data_file_path("certs_empty.txt")}),
+            self.models,
+            DecoratorMode.CREATE,
+        )
+        certs_empty = ctx_4.get_custom_ca_trust_certificates()
+        self.assertIsNotNone(certs_empty)
+        self.assertEqual(certs_empty, [])
+
 
 class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -13325,6 +13367,38 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
+        # test removing certificates by providing empty file
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "custom_ca_trust_certificates": get_test_data_file_path("certs_empty.txt"),
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        # Start with a cluster that has existing certificates
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                custom_ca_trust_certificates=[str.encode(CUSTOM_CA_TEST_CERT_STR) for _ in range(2)]
+            ),
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_3.context.set_intermediate(
+            "subscription_id", "test_subscription_id"
+        )
+
+        dec_mc_3 = dec_3.update_custom_ca_trust_certificates(mc_3)
+
+        # After update with empty file, certificates should be removed (empty list)
+        ground_truth_mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            security_profile=self.models.ManagedClusterSecurityProfile(
+                custom_ca_trust_certificates=[]
+            ),
+        )
+        self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
     def test_update_run_command(self):
         dec_1 = AKSManagedClusterUpdateDecorator(
