@@ -786,3 +786,49 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.status", "InProgress"),
             self.check("resourceGroup", '{rg}')
         ]).get_output_in_json()
+
+
+    def test_backup_wl_reconfigure(self):
+        self.kwargs.update({
+            'resource_group': 'zubairRG',
+            'vault1': 'zimmut-ccy-6',
+            'vault2': 'zimmut-ccy-5',
+            'container': 'sql-migration-vm2',
+            'item': 'model',
+            'policy_name': 'HourlyLogBackup'
+        })
+
+        self.cmd('backup vault show -g "{resource_group}" -n "{vault1}"', checks=[
+            self.check('name', '{vault1}'),
+            self.check('resourceGroup', '{resource_group}')
+        ])
+
+        self.cmd('backup vault show -g "{resource_group}" -n "{vault2}"', checks=[
+            self.check('name', '{vault2}'),
+            self.check('resourceGroup', '{resource_group}')
+        ])
+
+        # Verify container and items exist in vault1
+        self.cmd('backup container show -g "{resource_group}" -v "{vault1}" -n "{container}" --backup-management-type AzureWorkload', checks=[
+            self.check('properties.friendlyName', '{container}'),
+            self.check('properties.registrationStatus', 'Registered')
+        ])
+
+        self.cmd('backup item show -g "{resource_group}" -v "{vault1}" -c "{container}" -n "{item}" --backup-management-type AzureWorkload --workload-type MSSQL', checks=[
+            self.check('properties.friendlyName', '{item}'),
+            self.check('properties.protectionState', 'Protected')
+        ])
+
+        # Verify policy exists in vault2
+        self.cmd('backup policy show -g "{resource_group}" -v "{vault2}" -n "{policy_name}"', checks=[
+            self.check('name', '{policy_name}'),
+            self.check('resourceGroup', '{resource_group}')
+        ])
+
+        self.cmd('backup protection reconfigure -g "{resource_group}" -v "{vault1}" -c "{container}" -i "{item}" --backup-management-type "AzureWorkload" --workload-type "MSSQL" --new-rg "{resource_group}" --new-vault-name "{vault2}" --new-policy-name "{policy_name}"', checks=[
+            self.check('properties.operation', 'ConfigureBackup'),
+            self.check('properties.status', 'Completed')
+        ])
+
+        # Clean up - delete the backup item from vault2
+        self.cmd('backup protection disable -g "{resource_group}" -v "{vault2}" -c "{container}" -i "{item}" --backup-management-type AzureWorkload --workload-type MSSQL --delete-backup-data true --yes')

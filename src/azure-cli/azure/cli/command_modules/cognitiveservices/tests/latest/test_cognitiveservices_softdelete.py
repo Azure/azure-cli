@@ -11,7 +11,7 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from knack.util import CLIError
 
 
-class CognitiveServicesTests(ScenarioTest):
+class CognitiveServicesDeleteTests(ScenarioTest):
     @ResourceGroupPreparer()
     @AllowLargeResponse()
     def test_cognitiveservices_softdelete(self, resource_group):
@@ -56,10 +56,10 @@ class CognitiveServicesTests(ScenarioTest):
 
         self.cmd('az cognitiveservices account delete -n {sname} -g {rg}')
         self.cmd('az cognitiveservices account purge --location {location} -n {sname} -g {rg}')
-        deleted_accounts = self.cmd('az cognitiveservices account list-deleted').get_output_in_json()
+        deleted_accounts = self.cmd('az cognitiveservices account list-deleted --query "[?name==`{sname}`]"').get_output_in_json()
 
-        self.assertEqual(0, 0)
-
+        self.assertEqual(len(deleted_accounts), 0)
+        
 
 if __name__ == '__main__':
     unittest.main()
