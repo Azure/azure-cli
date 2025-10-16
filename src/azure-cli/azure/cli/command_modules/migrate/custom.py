@@ -282,7 +282,6 @@ def initialize_replication_infrastructure(cmd,
             replication_vault = create_or_update_resource(cmd, vault_uri, APIVersion.Microsoft_DataReplication.value, vault_update_body)
             
             # Wait for identity to be created
-            print("Waiting 30 seconds for managed identity to be created...")
             time.sleep(30)
             
             # Refresh vault to get the identity
@@ -751,7 +750,6 @@ def initialize_replication_infrastructure(cmd,
             create_or_update_resource(cmd, storage_uri, APIVersion.Microsoft_Storage.value, update_body)
             
             # Wait for network update to propagate
-            print("Waiting 30 seconds for network configuration update...")
             time.sleep(30)
                 
         # Grant permissions (Role Assignments)
@@ -860,7 +858,6 @@ def initialize_replication_infrastructure(cmd,
             raise CLIError(f"Failed to create {len(failed_assignments)} role assignment(s). The storage account may not have proper permissions.")
         
         # Add a wait after role assignments to ensure propagation
-        print("\nWaiting 120 seconds for role assignments to propagate...")
         time.sleep(120)
         
         # Verify role assignments were successful
@@ -898,7 +895,6 @@ def initialize_replication_infrastructure(cmd,
             create_or_update_resource(cmd, amh_solution_uri, APIVersion.Microsoft_Migrate.value, solution_body)
             
             # Wait for the AMH solution update to fully propagate
-            print("Waiting 60 seconds for AMH solution update to propagate...")
             time.sleep(60)
         
         # Setup Replication Extension
@@ -942,7 +938,6 @@ def initialize_replication_infrastructure(cmd,
             if existing_state in [ProvisioningState.Failed.value, ProvisioningState.Canceled.value] or existing_storage_id != storage_account_id:
                 print(f"Removing existing extension (state: {existing_state}, storage mismatch: {existing_storage_id != storage_account_id})")
                 delete_resource(cmd, extension_uri, APIVersion.Microsoft_DataReplication.value)
-                print("Waiting 120 seconds for deletion to complete...")
                 time.sleep(120)
                 replication_extension = None
         
@@ -1832,7 +1827,6 @@ def new_local_server_replication(cmd,
             machine_nics = machine_props.get('networkAdapters', [])
             
             # Find OS disk
-            os_disk_found = False
             for i, disk in enumerate(machine_disks):
                 if site_type == SiteTypes.HyperVSites.value:
                     disk_id = disk.get('instanceId')
@@ -1842,12 +1836,7 @@ def new_local_server_replication(cmd,
                     disk_size = disk.get('maxSizeInBytes', 0)
             
                 is_os_disk = disk_id == os_disk_id
-                
-                if is_os_disk:
-                    os_disk_found = True
-                
                 disk_size_gb = (disk_size + (1024**3 - 1)) // (1024**3)  # Round up to GB
-                
                 disk_obj = {
                     'diskId': disk_id,
                     'diskSizeGb': disk_size_gb,
@@ -1973,14 +1962,6 @@ def new_local_server_replication(cmd,
         result = create_or_update_resource(cmd, protected_item_uri, APIVersion.Microsoft_DataReplication.value, protected_item_body, no_wait=True)
         
         print(f"Successfully initiated replication for machine '{machine_name}'.")
-        print("The replication setup is in progress. Use 'az migrate local-server-replication show' to check the status.")
-        
-        return {
-            "message": f"Replication initiated for machine '{machine_name}'",
-            "protectedItemId": protected_item_uri,
-            "protectedItemName": protected_item_name,
-            "status": "InProgress"
-        }
             
     except Exception as e:
         logger.error(f"Error creating replication: {str(e)}")

@@ -149,12 +149,8 @@ def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait
     
     uri = f"{resource_id}?api-version={api_version}"
     request_uri = cmd.cli_ctx.cloud.endpoints.resource_manager + uri
-    print(f"FINAL URI: {request_uri}")
-
     # Convert properties to JSON string for the body
     body = json_module.dumps(properties)
-
-    print(f"DEBUG: Request body: {body}")
     
     # Headers need to be passed as a list of strings in "key=value" format
     headers = ['Content-Type=application/json']
@@ -167,8 +163,6 @@ def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait
         headers=headers
     )
     
-    print(f"DEBUG: Response status code: {response.status_code}")
-
     if response.status_code >= 400:
         error_message = f"Failed to create/update resource. Status: {response.status_code}"
         try:
