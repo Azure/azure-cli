@@ -2876,7 +2876,7 @@ def show_cors_policy(cmd, name, resource_group_name):
         raise ValidationError("CORS must be enabled to enable CORS policy. Try running `az containerapp ingress cors enable -h` for more info.") from e
 
 
-def show_registry(cmd, name, resource_group_name, server):
+def show_registryshow_registry(cmd, name, resource_group_name, server):
     _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
 
     containerapp_def = None
@@ -2894,6 +2894,8 @@ def show_registry(cmd, name, resource_group_name, server):
         raise ValidationError("The containerapp {} has no assigned registries.".format(name)) from e
 
     registries_def = containerapp_def["properties"]["configuration"]["registries"]
+    if registries_def is None or len(registries_def) == 0:
+        raise ValidationError("The containerapp job {} has no assigned registries.".format(name))
 
     for r in registries_def:
         if r['server'].lower() == server.lower():
