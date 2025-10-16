@@ -2894,12 +2894,11 @@ def show_registry(cmd, name, resource_group_name, server):
         raise ValidationError("The containerapp {} has no assigned registries.".format(name)) from e
 
     registries_def = containerapp_def["properties"]["configuration"]["registries"]
-    if registries_def is None or len(registries_def) == 0:
-        raise ValidationError("The containerapp {} has no assigned registries.".format(name))
 
-    for r in registries_def:
-        if r['server'].lower() == server.lower():
-            return r
+    if registries_def is not None:
+        for r in registries_def:
+            if r['server'].lower() == server.lower():
+                return r
     raise InvalidArgumentValueError("The containerapp {} does not have specified registry assigned.".format(name))
 
 
