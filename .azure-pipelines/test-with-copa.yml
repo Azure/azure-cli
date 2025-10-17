@@ -22,6 +22,20 @@ parameters:
 
 jobs:
 
+- job: Check
+  displayName: Get Azure CLI Version
+  pool:
+    name: ${{ variables.ubuntu_pool }}
+  steps:
+  - checkout: none
+  - task: Bash@3
+    name: Check
+    displayName: Check
+    inputs:
+      targetType: 'inline'
+      script: |
+        env | sort
+
 - job: GetAzCliVersion
   displayName: Get Azure CLI Version
   pool:
