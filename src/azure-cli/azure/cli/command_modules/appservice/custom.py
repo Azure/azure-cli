@@ -100,6 +100,7 @@ from .aaz.latest.relay.hyco import Show as HyCoShow
 from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
 from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
 from .aaz.latest.relay.namespace import List as NamespaceList
+from .aaz.latest.appservice.plan import Show as AppServicePlanShow, Update as AppServicePlanUpdate, Create as AppServicePlanCreate
 
 logger = get_logger(__name__)
 
@@ -4058,7 +4059,10 @@ class PlanProgressBar(IndeterminateProgressBar):
 
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
-                            tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None):
+                            tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
+                            is_custom_mode=None, assign_identities=None, plan_default_identity=None,
+                            rdp_enabled=None, vnet=None, subnet=None,
+                            registry_adapters=None, install_scripts=None, storage_mounts=None):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
 
@@ -4111,11 +4115,62 @@ has been deployed ".format(app_service_environment)
     if zone_redundant:
         _enable_zone_redundant(plan_def, sku_def, number_of_workers)
 
-    if no_wait:
-        return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
-                           resource_group_name=resource_group_name, app_service_plan=plan_def)
+    if subnet or vnet:
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=resource_group_name,
+                                       subnet=subnet,
+                                       vnet=vnet)
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+        vnet_route_all_enabled = True
+    else:
+        subnet_resource_id = None
+        vnet_route_all_enabled = None
 
-    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
+    if assign_identities is not None:
+        _, _, user_assigned_identities, enable_system_assigned_identity = _build_identities_info(assign_identities)
+    else:
+        user_assigned_identities = None
+        enable_system_assigned_identity = None
+
+    class AppServicePlanCreateWithNoWait(AppServicePlanCreate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
+
+    poller = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": name,
+        "resource_group": resource_group_name,
+        "location": location,
+        "tags": tags,
+        "sku": sku_def.__dict__,
+        "reserved": plan_def.reserved,
+        "hyper_v": plan_def.hyper_v,
+        "per_site_scaling": plan_def.per_site_scaling,
+        "hosting_environment_profile": plan_def.hosting_environment_profile,
+        "async_scaling_enabled": plan_def.async_scaling_enabled,
+        "is_custom_mode": is_custom_mode,
+        "network": {
+            "virtual_network_subnet_id": subnet_resource_id,
+        } if subnet_resource_id else None,
+        "rdp_enabled": rdp_enabled,
+        "mi_system_assigned": str(enable_system_assigned_identity) if enable_system_assigned_identity is not None else None,
+        "mi_user_assigned": user_assigned_identities,
+        "plan_default_identity": plan_default_identity,
+        "registry_adapters": registry_adapters,
+        "install_scripts": install_scripts,
+        "storage_mounts": storage_mounts,
+    })
+
+    if no_wait:
+        return poller
 
     # Only use progress bar for actual long-running operations (async scaling)
     # Check if the operation is actually async by looking at the poller status
@@ -4221,6 +4276,102 @@ def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_worke
         return update_flex_app_service_plan(instance)
 
     return update_app_service_plan(cmd, instance, sku, number_of_workers)
+
+
+def list_plan_managed_instance_registry_adapters(cmd, resource_group_name, name):
+    """List registry adapters for a managed instance app service plan."""
+    # Use AAZ-based approach to get the App Service Plan
+    
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    return plan_result.get('registryAdapters', [])
+
+
+def _patch_plan_registry_adapters(cmd, resource_group_name, name, adapters, location):
+    """Helper to PATCH registryAdapters for a managed instance app service plan using AAZ."""
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    current_plan = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    plan_update_cmd = AppServicePlanUpdate(cli_ctx=cmd.cli_ctx)
+    poller = plan_update_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': location,
+        'registry_adapters': adapters
+    })
+
+    # Wait for the operation to complete and get the result
+    plan_result = poller.result()
+    
+    # Return the updated registry adapters directly from the result
+    return plan_result.get('registryAdapters', [])
+
+
+def add_plan_managed_instance_registry_adapter(cmd, resource_group_name, name, registry_key, adapter_type, secret_uri):
+    """Add or update a registry adapter for a managed instance app service plan."""
+    # First get the current registry adapters using AAZ Show
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    # Extract current adapters directly from the plan result
+    existing_adapters = plan_result.get('registryAdapters', [])
+    updated_adapters = []
+    adapter_found = False
+
+    # New adapter
+    adapter_obj = {
+        'registryKey': registry_key,
+        'type': adapter_type,
+        'keyVaultSecretReference': {
+            'secretUri': secret_uri
+        }
+    }
+
+    for adapter in existing_adapters:
+        if adapter.get('registryKey', '').lower() == registry_key.lower():
+            # Replace the existing adapter in the same position
+            updated_adapters.append(adapter_obj)
+            adapter_found = True
+        else:
+            # Keep existing adapter
+            updated_adapters.append(adapter)    
+
+    if not adapter_found:
+        updated_adapters.append(adapter_obj)
+
+    location = plan_result.get('location')
+    # Update using AAZ
+    return _patch_plan_registry_adapters(cmd, resource_group_name, name, updated_adapters, location)
+
+
+def remove_plan_managed_instance_registry_adapter(cmd, resource_group_name, name, registry_key):
+    """Remove a registry adapter from a managed instance app service plan."""
+    # First get the current registry adapters using AAZ Show
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    # Extract current adapters directly from the plan result
+    adapters = plan_result.get('registryAdapters', [])
+    
+    # Remove adapter by case-insensitive registry key
+    adapters = [a for a in adapters if a.get('registryKey', '').lower() != registry_key.lower()]
+    
+    location = plan_result.get('location')
+    # Update using AAZ
+    return _patch_plan_registry_adapters(cmd, resource_group_name, name, adapters, location)
 
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):

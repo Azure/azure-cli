@@ -5,6 +5,7 @@
 
 from argcomplete.completers import FilesCompleter
 
+from azure.cli.command_modules.appservice.actions import RegistryAdapterAddAction, StorageMountAddAction, InstallScriptAddAction
 from knack.arguments import CLIArgumentType
 
 from azure.cli.core.commands.parameters import (resource_group_name_type, get_location_type,
@@ -40,6 +41,9 @@ ASE_KINDS = ['ASEv3']
 PUBLIC_NETWORK_ACCESS_MODES = ['Enabled', 'Disabled']
 BASIC_AUTH_TYPES = ['Enabled', 'Disabled']
 DAPR_LOG_LEVELS = ['debug', 'error', 'info', 'warn']
+INSTALL_SCRIPT_TYPES = ['RemoteAzureBlob', 'PlatformStorage']
+STORAGE_MOUNT_TYPES = ['AzureFiles', 'LocalStorage', 'FileShare']
+REGISTRY_ADAPTER_TYPES = ['Binary', 'String', 'Expand_String', 'Multi_String', 'DWord', 'QWord']
 
 
 # pylint: disable=too-many-statements, too-many-lines
@@ -127,6 +131,21 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('zone_redundant', options_list=['--zone-redundant', '-z'], help='Enable zone redundancy for high availability. Minimum instance count is 2.')
         c.argument('tags', arg_type=tags_type)
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
+        c.argument('is_custom_mode', action='store_true', is_preview=True, help='host web app on custom mode worker')
+        c.argument('assign_identities', nargs='*', options_list=['--assign-identity'], is_preview=True,
+                    help='accept system or user assigned identities separated by spaces. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples')
+        c.argument('default_identity', is_preview=True,
+                    help='accept system or user assigned identity separated. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
+        c.argument('rdp_enabled', action='store_true', is_preview=True,
+                   help='Enable RDP. Requires is-custom-mode to be true.')
+        c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
+        c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('registry_adapters', options_list=['--registry-adapter'], is_preview=True, action=RegistryAdapterAddAction, nargs='+',
+                   help="Registry adapter configurations.")
+        c.argument('install_scripts', options_list=['--install-script'], is_preview=True, action=InstallScriptAddAction, nargs='+',
+                   help="Install script configurations.")
+        c.argument('storage_mounts', options_list=['--storage-mount'], is_preview=True, action=StorageMountAddAction, nargs='+',
+                   help="Storage mount configurations.")
 
     with self.argument_context('appservice plan update') as c:
         c.argument('sku', arg_type=sku_arg_type)
@@ -140,6 +159,28 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name', local_context_attribute=None)
+
+    with self.argument_context('appservice plan managed-instance registry-adapter') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                    configured_default='appserviceplan', id_part='name',
+                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+
+    with self.argument_context('appservice plan managed-instance registry-adapter list') as c:
+        pass
+
+    with self.argument_context('appservice plan managed-instance registry-adapter add') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan')
+        c.argument('registry_key', options_list=['--registry-key'], help='Registry key for the adapter')
+        c.argument('adapter_type', options_list=['--type'], arg_type=get_enum_type(REGISTRY_ADAPTER_TYPES), help='Type of the registry adapter')
+        c.argument('secret_uri', options_list=['--secret-uri'], help='Key Vault secret URI for the value')
+
+    with self.argument_context('appservice plan managed-instance registry-adapter remove') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan')
+        c.argument('registry_key', options_list=['--registry-key'], help='Registry key for the adapter to remove')
 
     with self.argument_context('webapp create') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new web app. Web app name can contain only allow alphanumeric characters and hyphens, it cannot start or end in a hyphen, and must be less than 64 characters.',
