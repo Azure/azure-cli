@@ -84,13 +84,16 @@ def load_arguments(self, _):
                    help='HTTP username for the cluster.  Default: admin.')
         c.argument('http_password', options_list=['--http-password', '-p'], arg_group='HTTP',
                    help='HTTP password for the cluster. Will prompt if not given.')
-        c.argument('entra_user_identity', options_list=['--entra-user-identity','--entra-uid'], arg_group='HTTP', nargs='+',
-                   help='One or more Entra user identities (object ID or user principal name) to associate with the cluster. Multiple values can be separated by spaces or commas.')
-        c.argument('entra_user_full_info', options_list=['--entra-user-full-info','--entra-info'], arg_group='HTTP', completer=FilesCompleter(), type=shell_safe_json_parse,
+        c.argument('entra_user_identity', options_list=['--entra-user-identity', '--entra-uid'], arg_group='HTTP', nargs='+',
+                   help='One or more Entra user identities (object ID or user principal name) ' 
+                   'to associate with the cluster. Multiple values can be separated by spaces or commas.')
+        c.argument('entra_user_full_info', options_list=['--entra-user-full-info', '--entra-info'], 
+                   arg_group='HTTP', completer=FilesCompleter(), type=shell_safe_json_parse,
                    help='The Entra user information to associate with the cluster. '
                         'This can be provided as a JSON string or from a file using the `@{path}` syntax. '
                         'Each entry should include "objectID", "upn", and "displayName" fields. '
-                        'Please see: https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/azure/cli/command_modules/hdinsight/tests/latest/entrauserconfig.json')
+                        'Please see: `https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/azure/cli/' 
+                        'command_modules/hdinsight/tests/latest/entrauserconfig.json`')
 
         # SSH
         c.argument('ssh_username', options_list=['--ssh-user', '-U'], arg_group='SSH',
@@ -431,4 +434,5 @@ def load_arguments(self, _):
                    help='The Entra user information to associate with the cluster. '
                         'This can be provided as a JSON string or from a file using the `@{path}` syntax. '
                         'Each entry should include "objectID", "upn", and "displayName" fields. '
-                        'Please see: https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/azure/cli/command_modules/hdinsight/tests/latest/entrauserconfig.json')
+                        'Please see: `https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/azure/cli/' \
+                        'command_modules/hdinsight/tests/latest/entrauserconfig.json`')

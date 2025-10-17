@@ -168,6 +168,7 @@ def get_storage_account_endpoint(cmd, storage_account, is_wasb):
         host = extract_host(extract_endpoint(storage_account, is_wasb))
     return host
 
+
 def is_wasb_storage_account(cmd, storage_account):
     from ._client_factory import cf_storage
     from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
@@ -180,6 +181,7 @@ def is_wasb_storage_account(cmd, storage_account):
         properties = storage_client.storage_accounts.get_properties(resource_group_name, storage_account_name)
         is_wasb = not properties.is_hns_enabled
     return is_wasb
+
 
 def build_identities_info(identities):
     from azure.mgmt.hdinsight.models import ClusterIdentity, ResourceIdentityType
@@ -357,6 +359,7 @@ def get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, toJson=T
     import json
     from ._client_factory import cf_graph
     from azure.cli.core.azclierror import ResourceNotFoundError, InvalidArgumentValueError, AzureResponseError
+
     def is_email(value):
         return "@" in value and "." in value
     def normalize_keys(d):
@@ -374,20 +377,21 @@ def get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, toJson=T
                 user = graph_client.user_get(data)
                 if user is None:
                     filter_expr = f"id eq '{data}'"
-                    if(is_email(data)):
+                    if is_email(data):
                         filter_expr = f"userPrincipalName eq '{data}' or mail eq '{data}'"
                     user = graph_client.user_list(filter=filter_expr)
                     user = user[0]
                 if user is None:
                     raise ResourceNotFoundError(
-                            error_msg=f'No Entra user found for input: "{data}"',
-                            recommendation=[
-                                'Verify the user exists in Microsoft Entra ID',
-                                'Confirm the identifier (email, UPN, or object ID) is correct',
-                                'Try querying manually: az ad user show --id <identifier>'
-                            ]
-                        )
-                rest_auth_entra_users.append({'ObjectId': user['id'],'DisplayName': user['displayName'],'Upn': user['userPrincipalName']})
+                        error_msg=f'No Entra user found for input: "{data}"',
+                        recommendation=[
+                            'Verify the user exists in Microsoft Entra ID',
+                            'Confirm the identifier (email, UPN, or object ID) is correct',
+                            'Try querying manually: az ad user show --id <identifier>'
+                        ]
+                    )
+                rest_auth_entra_users.append({'ObjectId': user['id'], 
+                                              'DisplayName': user['displayName'], 'Upn': user['userPrincipalName']})
             except ResourceNotFoundError:
                 raise
             except Exception as ex:
@@ -413,5 +417,6 @@ def get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, toJson=T
                         'Example valid format: [{"ObjectId": "...", "DisplayName": "...", "Upn": "..."}]'
                     ]
                 )
-            rest_auth_entra_users.append({'ObjectId': user_normalized.get('objectid'), 'DisplayName': user_normalized.get('displayname'), 'Upn': user_normalized.get('upn')})
+            rest_auth_entra_users.append({'ObjectId': user_normalized.get('objectid'), 
+                                          'DisplayName': user_normalized.get('displayname'), 'Upn': user_normalized.get('upn')})
     return json.dumps(rest_auth_entra_users) if toJson else rest_auth_entra_users

@@ -673,18 +673,21 @@ class HDInsightClusterTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     def test_hdinsight_create_with_entra_user(self):
         storage_account_info = ("hdicli000002","")
+        msi = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msi'
         entra = '"00000000-0000-0000-0000-000000000000","test@example.com"'
         self._create_hdinsight_cluster(
-            HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._entra_arguments(entra),
+            HDInsightClusterTests._wasb_arguments(storage_account_info,msi=msi),
+            HDInsightClusterTests._entra_arguments(entra_user=entra),
             HDInsightClusterTests._vnet_arguments()
         )
         self.kwargs.update({
-            'config_path': os.path.join(TEST_DIR, 'entrauserconfig.json')
+            'config_path': os.path.join(TEST_DIR, 'entrauserconfig.json'),
+            'upn1':'test1@example.com',
+            'upn2':'test2@example.com'
         })
         self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} --entra-info @"{config_path}" --yes')
+        self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} --entra-uid {upn1} {upn2} --yes')
         self.cmd('az hdinsight credentials show -n {cluster} --resource-group {rg}')
-    
 
     def _create_hdinsight_cluster(self, *additional_create_arguments):
         self.kwargs.update({
