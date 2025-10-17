@@ -4,6 +4,8 @@ variables:
   value: false
 - name: ComponentDetection.ForceScan
   value: eq(variables['Build.SourceBranch'], 'refs/heads/release')
+- name: CopaVersion
+  value: 0.12.0-rc.1
 
 parameters:
 - name: architectures
@@ -22,24 +24,31 @@ parameters:
 
 jobs:
 
-- job: GetAzCliVersion
-  displayName: Get Azure CLI Version
+- job: PrepareAzCliVersion
+  displayName: Prepare Azure CLI Version
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - checkout: none
   - task: Bash@3
-    name: GetAzCliVersion
-    displayName: Get Azure CLI Version
+    name: PrepareAzCliVersion
+    displayName: Prepare Azure CLI Version
     inputs:
       targetType: 'inline'
       script: |
         curl -o __main__.py https://raw.githubusercontent.com/$BUILD_REPOSITORY_NAME/$BUILD_SOURCEBRANCH/src/azure-cli/azure/cli/__main__.py
-        ver=`cat __main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
+        AzCLI_VERSION=`cat __main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
+        
+        AzCLI_IMAGE_NAME="clibuild_$BUILD_BUILDNUMBER"
+        AzCLI_IMAGE_TAG="latest"
        
-        echo "Extracted Azure CLI version: $ver"
-        echo "##vso[task.setvariable variable=AzCliVersion]$ver"
-        echo "##vso[task.setvariable variable=AzCliVersion;isOutput=true]$ver"
+        echo "Azure CLI version: $AzCLI_VERSION"
+        echo "Azure CLI Image Name: $AzCLI_IMAGE_NAME"
+        echo "Azure CLI Image Tag: $AzCLI_IMAGE_TAG"
+        
+        echo "##vso[task.setvariable variable=AzCliVersion;isOutput=true]$AzCLI_VERSION"
+        echo "##vso[task.setvariable variable=AzCliImageName;isOutput=true]$AzCLI_IMAGE_NAME"
+        echo "##vso[task.setvariable variable=AzCliImageTag;isOutput=true]$AzCLI_IMAGE_TAG"
 
 - job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package
@@ -82,7 +91,9 @@ jobs:
 
 - job: BuildDockerImageAzureLinux
   displayName: Build Docker Image Azure Linux
-  dependsOn: BuildRpmPackagesAzureLinux
+  dependsOn: 
+  - PrepareAzCliVersion
+  - BuildRpmPackagesAzureLinux
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -94,6 +105,10 @@ jobs:
           image: mcr.microsoft.com/azurelinux/base/core:3.0
   pool:
     name: $(pool)
+  variables:
+    AzCliVersion: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
+    AzCliImageName: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
+    AzCliImageTag: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageTag'] ]
   steps:
     - bash: ./scripts/ci/install_docker.sh
       displayName: Install Docker
@@ -107,7 +122,14 @@ jobs:
         mkdir docker-temp
         mv $(Build.ArtifactStagingDirectory)/docker/*.rpm ./docker-temp/azure-cli.rpm
         
-        bash scripts/release/docker/pipeline.sh
+        docker build --no-cache \
+          --build-arg IMAGE=$IMAGE \
+          --tag $(AzCliImageName):$(AzCliImageTag) \
+          --file $DOCKERFILE \
+          $BUILD_SOURCESDIRECTORY
+
+        docker save -o "$BUILD_STAGINGDIRECTORY/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImageTag)
+        
       displayName: 'Build Docker'
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
@@ -115,7 +137,7 @@ jobs:
       condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
       inputs:
         BuildDropPath: $(Build.ArtifactStagingDirectory)
-        DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
+        DockerImagesToScan: $(AzCliDockerImageTag)
 
     - task: PublishPipelineArtifact@0
       inputs:
@@ -127,7 +149,7 @@ jobs:
   timeoutInMinutes: 180
   dependsOn:
   - BuildRpmPackagesAzureLinux
-  - GetAzCliVersion
+  - PrepareAzCliVersion
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'), eq(${{parameters.ShouldTest}}, true))
   pool:
     name: $(pool)
@@ -139,7 +161,7 @@ jobs:
           artifact: rpm-azurelinux3.0-${{ arch.value }}
           pool: ${{ arch.pool }}
   variables:
-    AzCliVersion: $[ dependencies.GetAzCliVersion.outputs['GetAzCliVersion.AzCliVersion'] ]
+    AzCliVersion: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -171,8 +193,8 @@ jobs:
   condition: and(succeeded(), eq(${{parameters.ShouldTest}}, true))
   timeoutInMinutes: 180
   dependsOn:
+    - PrepareAzCliVersion
     - BuildDockerImageAzureLinux
-    - GetAzCliVersion
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -182,7 +204,9 @@ jobs:
   pool:
     name: $(pool)
   variables:
-    AzCliVersion: $[ dependencies.GetAzCliVersion.outputs['GetAzCliVersion.AzCliVersion'] ]
+    AzCliVersion: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
+    AzCliImageName: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
+    AzCliImageTag: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageTag'] ]
   steps:
     - task: DownloadPipelineArtifact@1
       displayName: 'Download Metadata'
@@ -202,7 +226,6 @@ jobs:
     - bash: |
         set -exv
         
-        IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
         TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$(AzCliVersion).tar"
         
         echo "== Test docker image =="
@@ -210,19 +233,19 @@ jobs:
         docker load < $TAR_FILE
         
         echo "== Run az self-test  =="
-        docker run $IMAGE_NAME /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+        docker run $(AzCliImageName):$(AzCliImageTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
         
         echo "== Run unit test =="
-        docker run --rm -v $(pwd):/azure-cli $IMAGE_NAME /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
+        docker run --rm -v $(pwd):/azure-cli $(AzCliImageName):$(AzCliImageTag) /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
         
-      displayName: 'Bash Script'
+      displayName: 'Test Built Docker Image'
 
 - job: BuildCopaPatchedDockerImageAzureLinux
   displayName: Build Copa Patched Docker Image Azure Linux
   timeoutInMinutes: 180
   dependsOn:
     - BuildDockerImageAzureLinux
-    - GetAzCliVersion
+    - PrepareAzCliVersion
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -233,7 +256,9 @@ jobs:
   pool:
     name: $(pool)
   variables:
-    AzCliVersion: $[ dependencies.GetAzCliVersion.outputs['GetAzCliVersion.AzCliVersion'] ]
+    AzCliVersion: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
+    AzCliImageName: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
+    AzCliImageTag: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageTag'] ]
   steps:
     - task: DownloadPipelineArtifact@1
       displayName: 'Download Docker Image'
@@ -272,7 +297,7 @@ jobs:
         targetType: 'inline'
         script: |
           set -eux
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/local/bin
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/bin
           echo "----------------------------------"
           sudo trivy --version
 
@@ -282,7 +307,7 @@ jobs:
         targetType: 'inline'
         script: |
           CopaDownloadUrl="https://github.com/project-copacetic/copacetic/releases/download/v$(CopaVersion)/copa_$(CopaVersion)_linux_amd64.tar.gz"
-          if [ "$(CPUArchitecture)" = "arm64" ]; then
+          if [ "$(architecture)" = "arm64" ]; then
             CopaDownloadUrl="https://github.com/project-copacetic/copacetic/releases/download/v$(CopaVersion)/copa_$(CopaVersion)_linux_arm64.tar.gz"
           fi
           curl -L -o /tmp/copa.tar.gz $CopaDownloadUrl
@@ -290,29 +315,28 @@ jobs:
           sudo tar zxf /tmp/copa.tar.gz -C /opt/copacetic
           sudo chmod +x /opt/copacetic/copa
           sudo ln -s /opt/copacetic/copa /usr/bin/copa
-          PATH=/usr/bin:/sbin:/usr/sbin:$PATH
-          echo "----------------------------------"
+
           sudo copa --version
-          echo "----------------------------------"
           sudo copa --help
-          echo "----------------------------------"
           sudo copa patch --help
-          echo "----------------------------------"
 
     - task: Bash@3
       displayName: Check Docker Image
       inputs:
         targetType: 'inline'
         script: |
-          set -exv
+            set -exv
+            
+            TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$(AzCliVersion).tar"
+            docker load < $TAR_FILE
+            
+            echo "== Check Docker Images =="
+            docker images
+            
+            echo "== docker container =="
+            docker ps
+            
+            echo "== Run az self-test  =="
+            docker run $(AzCliImageName):$(AzCliImageTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+            
           
-          IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
-          TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$(AzCliVersion).tar
-          
-          echo "== Test docker image =="
-          
-          docker load < $TAR_FILE
-          echo "== docker image =="
-          docker images
-          echo "== docker container =="
-          docker ps
