@@ -477,6 +477,11 @@ type: command
 short-summary: Place the CLI in a waiting state until an operation is complete.
 """
 
+helps['hdinsight credentials'] = """
+type: group
+short-summary: Manage credentials for an existing HDInsight cluster, including Entra ID users and HTTP password.
+"""
+
 helps['hdinsight credentials update'] = """
 type: command
 short-summary: Update credentials for an existing HDInsight cluster, including Entra ID users and HTTP password.
@@ -514,4 +519,9 @@ examples:
 helps['hdinsight credentials show'] = """
 type: command
 short-summary: Show credential configuration of an existing HDInsight cluster, including HTTP username, password, and Entra ID user settings
+"""
+
+helps['hdinsight credentials wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until an operation is complete.
 """

@@ -689,6 +689,16 @@ class HDInsightClusterTests(ScenarioTest):
         self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} --entra-uid {upn1} {upn2} --yes')
         self.cmd('az hdinsight credentials show -n {cluster} --resource-group {rg}')
 
+    @AllowLargeResponse()
+    def test_hdinsight_credentials_update(self):
+        self.kwargs.update({
+            'cluster': 'cli-test-cluster',
+            'rg': 'cli-test-rg',
+            'http_password': 'Password1!'
+        })
+        self.cmd('az hdinsight credentials wait --name {cluster} --resource-group {rg} --exists')
+        self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} --http-password {http_password} --yes')
+
     def _create_hdinsight_cluster(self, *additional_create_arguments):
         self.kwargs.update({
             'loc': self.location,
