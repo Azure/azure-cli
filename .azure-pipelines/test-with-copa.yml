@@ -188,7 +188,6 @@ stages:
           TargetPath: $(Build.ArtifactStagingDirectory)
           ArtifactName: $(artifactName)
 
-
 - stage: Test1
   displayName: 1st Test - for Original Image
   dependsOn: 
@@ -212,12 +211,6 @@ stages:
       AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
     steps:
     - task: DownloadPipelineArtifact@1
-      displayName: 'Download Metadata'
-      inputs:
-        TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-        artifactName: metadata
-
-    - task: DownloadPipelineArtifact@1
       displayName: 'Download Build Artifacts'
       inputs:
         TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
@@ -236,8 +229,122 @@ stages:
 
       displayName: 'Test Rpm Package Azure Linux'
 
-  - job: TestDockerImageAzureLinux
-    displayName: Test Docker Image
+  - job: TestDockerImageSmokeTest
+    displayName: Test Docker Image - Smoke Test
+    condition: and(succeeded(), eq(${{parameters.ShouldTest}}, true))
+    timeoutInMinutes: 100
+    strategy:
+      matrix:
+        ${{ each arch in parameters.architectures }}:
+          Azure Linux 3.0 ${{ arch.name }}:
+            pool: ${{ arch.pool }}
+            artifactName: docker-azurelinux3.0-${{ arch.value }}
+    pool:
+      name: $(pool)
+    variables:
+      AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
+      AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
+      AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageTag'] ]
+    steps:
+      - task: DownloadPipelineArtifact@1
+        displayName: 'Download Docker Image'
+        inputs:
+          TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+          artifactName: $(artifactName)
+
+      - bash: ./scripts/ci/install_docker.sh
+        displayName: Install Docker
+
+      - task: Bash@3
+        displayName: Prepare Test and Output Folders
+        inputs:
+          targetType: 'inline'
+          script: |
+            mkdir output
+            chmod +x ./scripts/release/docker/test_az_cli_in_pipeline.sh
+            ls ./.azure-pipelines
+
+      - task: Bash@3
+        displayName: 🚀 Self Test
+        inputs:
+          targetType: 'inline'
+          script: |
+            echo "== Load docker image =="
+            TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$(AzCliVersion).tar"
+            docker load < $TAR_FILE
+
+            echo "== Docker Images =="
+            docker images
+            
+            echo "== Run az self-test  =="
+            docker run $(AzCliImageName):$(AzCliImageTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+
+            #sudo docker run $(TestImage):$(TestImageTag) /bin/bash -c "time az self-test && time az --version && (tdnf list --installed || true) "
+
+      - task: AzurePowerShell@5
+        displayName: Get Azure Service Connection Info
+        inputs:
+          pwsh: true
+          azureSubscription: '$(TestAzureSubscription)'
+          ScriptType: 'InlineScript'
+          azurePowerShellVersion: 'LatestVersion'
+          Inline: |
+            $PSVersionTable
+            $AzAccessToken = (Get-AzAccessToken -AsSecureString).Token
+            $AzGraphToken = (Get-AzAccessToken -ResourceTypeName MSGraph -AsSecureString).Token
+            $ssPtr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($AzAccessToken)
+            $ssPtrGraph = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($AzGraphToken)
+            try {
+              $AzAccessToken = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ssPtr)
+              $AzGraphToken = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ssPtrGraph)
+            }
+            finally {
+              [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ssPtr)
+              [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ssPtrGraph)
+            }
+            
+            $AzUserId = (Get-AzAccessToken).UserId
+            $AzSubscription = (Get-AzContext).Subscription
+            $AzTenant = (Get-AzContext).Tenant
+
+            Write-Host "##vso[task.setvariable variable=AzAccessToken;issecret=true]$AzAccessToken"
+            Write-Host "##vso[task.setvariable variable=AzUserId;issecret=true]$AzUserId"
+            Write-Host "##vso[task.setvariable variable=AzSubscription;issecret=true]$AzSubscription"
+            Write-Host "##vso[task.setvariable variable=AzTenant;issecret=true]$AzTenant"
+            Write-Host "##vso[task.setvariable variable=AzGraphToken;issecret=true]$AzGraphToken"
+
+      - task: PowerShell@2
+        displayName: Get OIDC Token
+        inputs:
+          targetType: inline
+          pwsh: true
+          script: |
+            $token = "$(System.AccessToken)"
+            $header = @{authorization = "Bearer $token"}
+            $scUrl = "${env:SYSTEM_OIDCREQUESTURI}?api-version=7.1&serviceConnectionId=75a6a794-72e5-4618-b576-deea04f8b21d"
+            $result = Invoke-RestMethod -Uri $scUrl -Method Post -ContentType "application/json" -Headers $header
+            $OidcToken = $result.oidcToken
+            Write-Host "##vso[task.setvariable variable=OidcToken;issecret=true]$OidcToken"
+            
+      - task: Bash@3
+        displayName: 🚀🚀 Smoke Test
+        inputs:
+          targetType: 'inline'
+          script: |
+            sudo docker run -v $(System.DefaultWorkingDirectory)/scripts/docker:/test $(AzCliImageName):$(AzCliImageTag) /bin/bash -c "az login --service-principal --username $(AzUserId) --tenant $(AzTenant) --federated-token $(OidcToken) && az account set --subscription $(AzSubscription) && /test/test_az_cli_in_pipeline.sh"
+
+            echo "--------------------------------------------"
+
+            mv $(System.DefaultWorkingDirectory)/scripts/docker/azure_cli_test_output.log $(System.DefaultWorkingDirectory)/output/azure_cli_test_output_before.log
+            mv $(System.DefaultWorkingDirectory)/scripts/docker/azure_cli_test_result.csv $(System.DefaultWorkingDirectory)/output/azure_cli_test_result_before.csv
+            ls $(System.DefaultWorkingDirectory)/output
+
+      - publish: $(System.DefaultWorkingDirectory)/output
+        artifact: $(AzCliVersion)-$(architecture)-smoke-test
+        displayName: Publish Artifact
+
+  - job: TestDockerImageUnitTest
+    displayName: Test Docker Image - Unit Test
     condition: and(succeeded(), eq(${{parameters.ShouldTest}}, true))
     timeoutInMinutes: 180
     strategy:
@@ -253,12 +360,6 @@ stages:
       AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
       AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageTag'] ]
     steps:
-      - task: DownloadPipelineArtifact@1
-        displayName: 'Download Metadata'
-        inputs:
-          TargetPath: '$(Build.ArtifactStagingDirectory)/metadata'
-          artifactName: metadata
-
       - task: DownloadPipelineArtifact@1
         displayName: 'Download Docker Image'
         inputs:
@@ -297,7 +398,6 @@ stages:
           docker run --rm -v $(pwd):/azure-cli $(AzCliImageName):$(AzCliImageTag) /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
           
         displayName: 'Run Unit Test'
-
 
 - stage: UseCopaToPatch
   displayName: Patch with Copacetic
@@ -403,18 +503,11 @@ stages:
               docker run $(AzCliImageName):$(AzCliImageTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
 
       - task: Bash@3
-        displayName: Create Output Folders
-        inputs:
-          targetType: 'inline'
-          script: |
-            pwd
-            mkdir output
-
-      - task: Bash@3
         displayName: Scan with Trivy
         inputs:
           targetType: 'inline'
           script: |
+            mkdir output
             export IMAGE=$(AzCliImageName):$(AzCliImageTag)
             OutputFile="trivy-scan-before.json"
             sudo trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
@@ -469,6 +562,21 @@ stages:
 
               echo "== Run az self-test  =="
               docker run $(AzCliImageName):$(AzCliImagePatchedTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+
+      - task: Bash@3
+        displayName: Scan with Trivy again
+        inputs:
+          targetType: 'inline'
+          script: |
+            mkdir output
+            export IMAGE=$(AzCliImageName):$(AzCliImagePatchedTag)
+            OutputFile="trivy-scan-after.json"
+            sudo trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
+            cp $OutputFile ./output/
+
+      - publish: $(System.DefaultWorkingDirectory)/output
+        artifact: $(AzCliVersion)-$(architecture)-copa
+        displayName: Publish Artifact
 
 - stage: Test2
   displayName: 2nd Test - for Copa Patched Image
