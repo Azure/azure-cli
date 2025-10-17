@@ -479,17 +479,19 @@ stages:
             sudo chmod +x /opt/copacetic/copa
             sudo ln -s /opt/copacetic/copa /usr/bin/copa
 
+            echo "----------------------------------"
             sudo copa --version
+            echo "----------------------------------"
             sudo copa --help
+            echo "----------------------------------"
             sudo copa patch --help
+            echo "----------------------------------"
 
       - task: Bash@3
         displayName: Check Docker Image
         inputs:
           targetType: 'inline'
           script: |
-              set -exv
-              
               TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$(AzCliVersion).tar"
               docker load < $TAR_FILE
               
@@ -540,7 +542,6 @@ stages:
         inputs:
           targetType: 'inline'
           script: |
-            set -eux
             export DOCKER_BUILDKIT=1
             export BUILDKIT_PROGRESS=plain
 
