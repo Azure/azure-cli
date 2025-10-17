@@ -34,13 +34,19 @@ jobs:
     inputs:
       targetType: 'inline'
       script: |
-        env | sort
         curl -o __main__.py $BUILD_REPOSITORY_URI/blob/$BUILD_SOURCEBRANCHNAME/src/azure-cli/azure/cli/__main__.py
+        echo "----------------------------------1"
+        cat __main__.py
+        echo "----------------------------------2"
+
         ver=`cat __main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
         echo "Extracted Azure CLI version: $ver"
         echo "##vso[task.setvariable variable=AzCliVersion]$ver"
         echo "##vso[task.setvariable variable=AzCliVersion;isOutput=true]$ver"
-        
+        echo "----------------------------------3"
+
+        env | sort
+
 - job: GetAzCliVersion
   displayName: Get Azure CLI Version
   pool:
