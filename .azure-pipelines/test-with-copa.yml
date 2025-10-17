@@ -22,26 +22,24 @@ parameters:
 
 jobs:
 
-- job: ExtractMetadata
-  displayName: Extract Metadata
+- job: GetAzCliVersion
+  displayName: Get Azure CLI Version
   pool:
     name: ${{ variables.ubuntu_pool }}
   steps:
   - task: Bash@3
-    displayName: 'Extract Version'
+    name: GetAzCliVersion
+    displayName: Get CLI Version
     inputs:
-      targetType: 'filePath'
-      filePath: scripts/release/get_version.sh
-
-  - task: PublishPipelineArtifact@0
-    displayName: 'Publish Artifact: metadata'
-    inputs:
-      TargetPath: $(Build.ArtifactStagingDirectory)
-      ArtifactName: metadata
+      targetType: 'inline'
+      script: |
+        ver=`cat src/azure-cli/azure/cli/__main__.py | grep __version__ | sed s/' '//g | sed s/'__version__='// |  sed s/\"//g`
+        echo "Extracted Azure CLI version: $ver"
+        echo "##vso[task.setvariable variable=AzCliVersion]$ver"
+        echo "##vso[task.setvariable variable=AzCliVersion;isOutput=true]$ver"
 
 - job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package
-  condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'))
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -126,7 +124,7 @@ jobs:
   timeoutInMinutes: 180
   dependsOn:
   - BuildRpmPackagesAzureLinux
-  - ExtractMetadata
+  - GetAzCliVersion
   condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'), eq(${{parameters.ShouldTest}}, true))
   pool:
     name: $(pool)
@@ -137,6 +135,8 @@ jobs:
           image: mcr.microsoft.com/azurelinux/base/core:3.0
           artifact: rpm-azurelinux3.0-${{ arch.value }}
           pool: ${{ arch.pool }}
+  variables:
+    AzCliVersion: $[ dependencies.GetAzCliVersion.outputs['GetAzCliVersion.AzCliVersion'] ]
   steps:
   - task: DownloadPipelineArtifact@1
     displayName: 'Download Metadata'
@@ -155,9 +155,7 @@ jobs:
 
   - bash: |
       set -ex
-
-      CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
-      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$CLI_VERSION-1.*.rpm" -printf '%f\n')
+      RPM_NAME=$(find $SYSTEM_ARTIFACTSDIRECTORY/rpm/ -type f -name "azure-cli-$(AzCliVersion)-1.*.rpm" -printf '%f\n')
 
       echo "== Test rpm package on ${IMAGE} =="
       docker pull $IMAGE
@@ -171,7 +169,7 @@ jobs:
   timeoutInMinutes: 180
   dependsOn:
     - BuildDockerImageAzureLinux
-    - ExtractMetadata
+    - GetAzCliVersion
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -180,6 +178,8 @@ jobs:
           artifactName: docker-azurelinux3.0-${{ arch.value }}
   pool:
     name: $(pool)
+  variables:
+    AzCliVersion: $[ dependencies.GetAzCliVersion.outputs['GetAzCliVersion.AzCliVersion'] ]
   steps:
     - task: DownloadPipelineArtifact@1
       displayName: 'Download Metadata'
@@ -199,9 +199,8 @@ jobs:
     - bash: |
         set -exv
         
-        CLI_VERSION=`cat $SYSTEM_ARTIFACTSDIRECTORY/metadata/version`
         IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
-        TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
+        TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$(AzCliVersion).tar"
         
         echo "== Test docker image =="
         
@@ -220,6 +219,7 @@ jobs:
   timeoutInMinutes: 180
   dependsOn:
     - BuildDockerImageAzureLinux
+    - GetAzCliVersion
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
@@ -229,6 +229,8 @@ jobs:
           architecture: ${{ arch.value }}
   pool:
     name: $(pool)
+  variables:
+    AzCliVersion: $[ dependencies.GetAzCliVersion.outputs['GetAzCliVersion.AzCliVersion'] ]
   steps:
     - task: DownloadPipelineArtifact@1
       displayName: 'Download Docker Image'
@@ -302,7 +304,7 @@ jobs:
           set -exv
           
           IMAGE_NAME=clibuild$BUILD_BUILDNUMBER:latest
-          TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$CLI_VERSION.tar
+          TAR_FILE=$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$(AzCliVersion).tar
           
           echo "== Test docker image =="
           
