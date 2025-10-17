@@ -21,6 +21,13 @@ parameters:
   displayName: Test?
   type: boolean
   default: false
+- name: PatchLevel
+  displayName: library-patch-level?
+  default: "patch"
+  values:
+    - patch
+    - minor
+    - major
 
 jobs:
 
@@ -41,14 +48,45 @@ jobs:
         
         AzCLI_IMAGE_NAME="clibuild_$BUILD_BUILDNUMBER"
         AzCLI_IMAGE_TAG="latest"
+        AzCLI_IMAGE_PATCHED_TAG="latest-patched"
        
         echo "Azure CLI version: $AzCLI_VERSION"
         echo "Azure CLI Image Name: $AzCLI_IMAGE_NAME"
         echo "Azure CLI Image Tag: $AzCLI_IMAGE_TAG"
-        
+        echo "Azure CLI Image Patched Tag: $AzCLI_IMAGE_PATCHED_TAG"
+
+        echo "##vso[task.setvariable variable=AzCliVersion]$AzCLI_VERSION"
+
         echo "##vso[task.setvariable variable=AzCliVersion;isOutput=true]$AzCLI_VERSION"
         echo "##vso[task.setvariable variable=AzCliImageName;isOutput=true]$AzCLI_IMAGE_NAME"
         echo "##vso[task.setvariable variable=AzCliImageTag;isOutput=true]$AzCLI_IMAGE_TAG"
+        echo "##vso[task.setvariable variable=AzCliImagePatchedTag;isOutput=true]$AzCLI_IMAGE_PATCHED_TAG"
+
+  - task: PowerShell@2
+    displayName: Set Build name
+    inputs:
+      targetType: inline
+      pwsh: true
+      script: |
+        # build name has 2 limitations
+        # - The maximum length of a build name is 255 characters.
+        # - Characters which are not allowed include '"', '/', ':', '<', '>', '\', '|', '?', '@', and '*'.
+        
+        $originalBuildName = "$(Build.BuildNumber)"
+        $newBuildName = "$originalBuildName - Azure CLI Docker Build $(AzCliVersion)"
+
+        if("${{parameters.ShouldTest}}" -eq "true") {
+          $newBuildName = "$newBuildName with Test"
+        } else {
+          $newBuildName = "$newBuildName without Test"
+        }
+
+        $notAllowedChars = @('"', '/', ':', '<', '>', '\', '|', '?', '@', '*')
+        $notAllowedChars | ForEach-Object {$newBuildName = $newBuildName.Replace($_, '_')}
+        if ( $newBuildName.Length -gt 200 ) {
+          $newBuildName = $newBuildName.Substring(0, 200)
+        }
+        Write-Host "##vso[build.updatebuildnumber]$newBuildName"
 
 - job: BuildRpmPackagesAzureLinux
   displayName: Build Rpm Package
@@ -223,22 +261,35 @@ jobs:
     - bash: ./scripts/ci/install_docker.sh
       displayName: Install Docker
 
+    - task: Bash@3
+      displayName: Create Test and Output Folders
+      inputs:
+        targetType: 'inline'
+        script: |
+          mkdir output
+          chmod +x ./scripts/release/docker/test_az_cli_in_pipeline.sh
+          ls ./.azure-pipelines
+
     - bash: |
         set -exv
-        
+
+        echo "== Load docker image =="
         TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$(AzCliVersion).tar"
-        
-        echo "== Test docker image =="
-        
         docker load < $TAR_FILE
         
         echo "== Run az self-test  =="
         docker run $(AzCliImageName):$(AzCliImageTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
         
+      displayName: 'Run Simple Test'
+
+    - bash: |
+        echo "== List docker image =="
+        docker images
+        
         echo "== Run unit test =="
         docker run --rm -v $(pwd):/azure-cli $(AzCliImageName):$(AzCliImageTag) /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
         
-      displayName: 'Test Built Docker Image'
+      displayName: 'Run Unit Test'
 
 - job: BuildCopaPatchedDockerImageAzureLinux
   displayName: Build Copa Patched Docker Image Azure Linux
@@ -259,6 +310,7 @@ jobs:
     AzCliVersion: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
     AzCliImageName: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
     AzCliImageTag: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageTag'] ]
+    AzCliImagePatchedTag: $[ dependencies.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImagePatchedTag'] ]
   steps:
     - task: DownloadPipelineArtifact@1
       displayName: 'Download Docker Image'
@@ -338,5 +390,71 @@ jobs:
             
             echo "== Run az self-test  =="
             docker run $(AzCliImageName):$(AzCliImageTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
-            
-          
+
+    - task: Bash@3
+      displayName: Create Output Folders
+      inputs:
+        targetType: 'inline'
+        script: |
+          pwd
+          mkdir output
+
+    - task: Bash@3
+      displayName: Scan with Trivy
+      inputs:
+        targetType: 'inline'
+        script: |
+          export IMAGE=$(AzCliImageName):$(AzCliImageTag)
+          OutputFile="trivy-scan-before.json"
+          sudo trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
+          cp $OutputFile ./output/
+
+    - task: Bash@3
+      displayName: Setup Docker BuildKit
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -eux
+          # Enable Docker BuildKit
+          export DOCKER_BUILDKIT=1
+          export BUILDKIT_PROGRESS=plain
+                
+          # Check Docker version and BuildKit support
+          sudo docker version
+          sudo docker buildx version || echo "buildx not available"
+
+          # Try to create and use a new builder with containerd image store
+          sudo docker buildx create --name copa-builder --driver docker-container --use || true
+          sudo docker buildx inspect --bootstrap || echo "Failed to bootstrap buildx"
+                
+          # Alternative: Enable experimental features in Docker daemon
+          echo "Checking Docker daemon configuration..."
+          sudo docker info | grep -i experimental || echo "Experimental features not enabled"
+
+    - task: Bash@3
+      displayName: Patch with Copacetic
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -eux
+          export DOCKER_BUILDKIT=1
+          export BUILDKIT_PROGRESS=plain
+
+          export COPA_EXPERIMENTAL=1
+          export IMAGE=$(AzCliImageName):$(AzCliImageTag)
+
+          echo "before copa patch-----------------------"
+          sudo COPA_EXPERIMENTAL=1 copa patch -i $IMAGE -r trivy-scan-before.json --pkg-types os,library --library-patch-level ${{parameters.PatchLevel}} --tag $(AzCliImagePatchedTag)
+
+          echo "after copa patch-----------------------"
+
+    - task: Bash@3
+      displayName: Check Docker Image
+      inputs:
+        targetType: 'inline'
+        script: |
+            echo "== Check Docker Images =="
+            docker images
+
+            echo "== Run az self-test  =="
+            docker run $(AzCliImageName):$(AzCliImagePatchedTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
