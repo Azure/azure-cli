@@ -12771,38 +12771,53 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--custom-ca-trust-certificates={custom_ca_trust_certificates}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)]),
+            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)] if os.environ.get(ENV_LIVE_TEST, False) else ["testcert"]*2 ),
         ])
 
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_add_nodepool_with_custom_ca_trust_certificates(self, resource_group, resource_group_location):
+    def test_aks_update_remove_custom_ca_trust_certificates(self, resource_group, resource_group_location):
+        """Test removing custom CA trust certificates by updating with empty certificate file."""
         aks_name = self.create_random_name('cliakstest', 16)
         node_pool_name = self.create_random_name('c', 6)
-        node_pool_name_second = self.create_random_name('c', 6)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'node_pool_name': node_pool_name,
-            'node_pool_name_second': node_pool_name_second,
             'ssh_key_value': self.generate_ssh_keys(),
-            'custom_ca_trust_certificates': get_test_data_file_path("certs.txt")
+            'custom_ca_trust_certificates': get_test_data_file_path("certs.txt"),
+            'empty_custom_ca_trust_certificates': get_test_data_file_path("certs_empty.txt")
         })
 
-        # 1. create
+        # 1. Create cluster with custom CA trust certificates
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
                      '--nodepool-name {node_pool_name} -c 1 ' \
                      '--ssh-key-value={ssh_key_value} ' \
-                     '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomCATrustPreview ' \
                      '--custom-ca-trust-certificates={custom_ca_trust_certificates}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)] if os.environ.get(ENV_LIVE_TEST, False) else ["testcert"]*2 ),
+            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)] if os.environ.get(ENV_LIVE_TEST, False) else ["testcert"]*2),
+        ])
+
+        # 2. Update cluster to remove certificates by providing empty certificate file
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--custom-ca-trust-certificates={empty_custom_ca_trust_certificates}'
+        self.cmd(update_cmd, checks=[
+            self.check('securityProfile.customCaTrustCertificates', None),
+        ])
+
+        # Wait for the update to complete
+        self.cmd('aks wait -g {resource_group} -n {name} --updated', checks=[self.is_empty()])
+
+        # # 3. Verify the cluster and certificates are indeed removed
+        get_cmd = 'aks show --resource-group={resource_group} --name={name}'
+        self.cmd(get_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.customCaTrustCertificates', None),
         ])
 
         # delete
