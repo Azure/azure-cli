@@ -23,12 +23,14 @@ class TestIdentity(ScenarioTest):
         self.cmd('identity create -n {identity} -g {rg}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
+            self.check('isolationScope', 'None'),
             self.check('assignmentRestrictions', '{providers: []}')
         ])
 
-        self.cmd('identity update -n {identity} -g {rg} --assignment-restrictions {providers: ['Microsoft.Compute']}', checks=[
+        self.cmd('identity update -n {identity} -g {rg} --assignment-restriction {providers: ['Microsoft.Compute']}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
+            self.check('isolationScope', 'Regional'),
             self.check('assignmentRestrictions', '{providers: [Microsoft.Compute]}')
         ])
 
@@ -37,15 +39,17 @@ class TestIdentity(ScenarioTest):
         self.cmd('identity list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('identity delete -n {identity} -g {rg}')
 
-        self.cmd('identity create -n {identity} -g {rg} --assignment-restrictions {providers: [Microsoft.Compute]}', checks=[
+        self.cmd('identity create -n {identity} -g {rg} --assignment-restriction {providers: [Microsoft.Compute]}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
+            self.check('isolationScope', 'Regional'),
             self.check('assignmentRestrictions', '{providers: [Microsoft.Compute]}')
         ])
 
-        self.cmd('identity update -n {identity} -g {rg} --assignment-restrictions {providers: []}', checks=[
+        self.cmd('identity update -n {identity} -g {rg} --assignment-restriction {providers: []}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
+            self.check('isolationScope', 'None'),
             self.check('assignmentRestrictions', '{providers: []}')
         ])
 
