@@ -4375,6 +4375,97 @@ def remove_plan_managed_instance_registry_adapter(cmd, resource_group_name, name
     return _patch_plan_registry_adapters(cmd, resource_group_name, name, adapters, location)
 
 
+def list_plan_managed_instance_install_scripts(cmd, resource_group_name, name):
+    """List install scripts for a managed instance app service plan."""
+    # Use AAZ-based approach to get the App Service Plan
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    return plan_result.get('installScripts', [])
+
+
+def _patch_plan_install_scripts(cmd, resource_group_name, name, scripts, location):
+    """Helper to PATCH installScripts for a managed instance app service plan using AAZ."""
+    plan_update_cmd = AppServicePlanUpdate(cli_ctx=cmd.cli_ctx)
+    poller = plan_update_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': location,
+        'install_scripts': scripts
+    })
+
+    # Wait for the operation to complete and get the result
+    plan_result = poller.result()
+    
+    # Return the updated install scripts directly from the result
+    return plan_result.get('installScripts', [])
+
+
+def add_plan_managed_instance_install_script(cmd, resource_group_name, name, install_script_name, source_uri, type):
+    """Add or update an install script for a managed instance app service plan."""
+    # First get the current install scripts using AAZ Show
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    # Extract current scripts directly from the plan result
+    existing_scripts = plan_result.get('installScripts', [])
+    updated_scripts = []
+    script_found = False
+
+    # New script object
+    script_obj = {
+        'name': install_script_name,
+        'source': {
+            'sourceUri': source_uri,
+            'type': type
+        }
+    }
+
+    # Replace existing script in the same position or add to end
+    for script in existing_scripts:
+        if script.get('name', '').lower() == install_script_name.lower():
+            # Replace the existing script in the same position
+            updated_scripts.append(script_obj)
+            script_found = True
+        else:
+            # Keep existing script
+            updated_scripts.append(script)
+
+    # If script wasn't found, add it to the end
+    if not script_found:
+        updated_scripts.append(script_obj)
+
+    location = plan_result.get('location')
+    # Update using AAZ
+    return _patch_plan_install_scripts(cmd, resource_group_name, name, updated_scripts, location)
+
+
+def remove_plan_managed_instance_install_script(cmd, resource_group_name, name, install_script_name):
+    """Remove an install script from a managed instance app service plan."""
+    # First get the current install scripts using AAZ Show
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    # Extract current scripts directly from the plan result
+    scripts = plan_result.get('installScripts', [])
+    
+    # Remove script by case-insensitive name
+    scripts = [s for s in scripts if s.get('name', '').lower() != install_script_name.lower()]
+    
+    location = plan_result.get('location')
+    # Update using AAZ
+    return _patch_plan_install_scripts(cmd, resource_group_name, name, scripts, location)
+
+
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
     try:
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,

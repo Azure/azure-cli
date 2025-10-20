@@ -160,6 +160,48 @@ subscription than the app service environment, please use the resource ID for --
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name', local_context_attribute=None)
 
+    with self.argument_context('appservice plan managed-instance install-script') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                    configured_default='appserviceplan', id_part='name',
+                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+
+    with self.argument_context('appservice plan managed-instance install-script add') as c:
+        c.argument('install_script_name', options_list=['--install-script-name'], help='Name of the install script')
+        c.argument('source_uri', options_list=['--source-uri'], help='Source URI of the install script')
+        c.argument('type', options_list=['--type'], help='Type of the install script', arg_type=get_enum_type(INSTALL_SCRIPT_TYPES))
+
+    with self.argument_context('appservice plan managed-instance install-script remove') as c:
+        c.argument('install_script_name', options_list=['--install-script-name'], help='Name of the install script to remove')
+
+    with self.argument_context('appservice plan managed-instance install-script list') as c:
+        pass
+
+    with self.argument_context('appservice plan managed-instance storage-mount') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                    configured_default='appserviceplan', id_part='name',
+                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+
+    with self.argument_context('appservice plan managed-instance storage-mount list') as c:
+        pass
+
+    with self.argument_context('appservice plan managed-instance storage-mount add') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan')
+        c.argument('mount_name', options_list=['--mount-name'], help='Name of the storage mount')
+        c.argument('mount_type', options_list=['--type'], arg_type=get_enum_type(STORAGE_MOUNT_TYPES), help='Type of the storage mount')
+        c.argument('source', options_list=['--source'], help='Source URI or path for the storage mount')
+        c.argument('destination_path', options_list=['--destination-path'], help='Destination path in the managed instance')
+        c.argument('credentials_secret_uri', options_list=['--credentials-secret-uri'], help='Key Vault secret URI for credentials')
+
+    with self.argument_context('appservice plan managed-instance storage-mount remove') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan')
+        c.argument('mount_name', options_list=['--mount-name'], help='Name of the storage mount to remove')
+
     with self.argument_context('appservice plan managed-instance registry-adapter') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                     completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),

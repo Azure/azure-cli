@@ -318,12 +318,20 @@ def load_command_table(self, _):
                                  setter_arg_name='app_service_plan', setter_type=appservice_custom, supports_no_wait=True,
                                  exception_handler=ex_handler_factory())
 
+    with self.command_group('appservice plan managed-instance install-script') as g:
+        g.custom_command('list', 'list_plan_managed_instance_install_scripts')
+        g.custom_command('add', 'add_plan_managed_instance_install_script')
+        g.custom_command('remove', 'remove_plan_managed_instance_install_script')
+
+    with self.command_group('appservice plan managed-instance storage-mount') as g:
+        g.custom_command('list', 'list_plan_managed_instance_storage_mounts')
+        g.custom_command('add', 'add_plan_managed_instance_storage_mount')
+        g.custom_command('remove', 'remove_plan_managed_instance_storage_mount')
 
     with self.command_group('appservice plan managed-instance registry-adapter') as g:
         g.custom_command('list', 'list_plan_managed_instance_registry_adapters')
         g.custom_command('add', 'add_plan_managed_instance_registry_adapter')
         g.custom_command('remove', 'remove_plan_managed_instance_registry_adapter')
-
 
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
