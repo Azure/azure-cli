@@ -469,7 +469,7 @@ class TestWebappMocked(unittest.TestCase):
 
 
     def test_update_app_settings_error_handling_no_parameters(self):
-        """Test that MutuallyExclusiveArgumentError is raised when neither settings nor slot_settings are provided"""
+        """Test that MutuallyExclusiveArgumentError is raised when neither settings nor slot_settings are provided."""
         cmd_mock = _get_test_cmd()
         
         # Test missing both parameters - should fail early without calling any services
@@ -480,7 +480,7 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom.shell_safe_json_parse')
     def test_update_app_settings_error_handling_invalid_format(self, mock_json_parse, mock_site_op):
-        """Test that InvalidArgumentValueError is raised for invalid setting formats"""
+        """Test that InvalidArgumentValueError is raised for invalid setting formats."""
         cmd_mock = _get_test_cmd()
         
         # Setup minimal mocks needed to reach the error handling code
@@ -501,7 +501,7 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom.shell_safe_json_parse')
     def test_update_app_settings_error_handling_invalid_format_no_equals(self, mock_json_parse, mock_site_op):
-        """Test ValueError path when shell_safe_json_parse raises InvalidArgumentValueError and string contains no '='"""
+        """Test ValueError path when shell_safe_json_parse raises InvalidArgumentValueError and string contains no '='."""
         cmd_mock = _get_test_cmd()
         
         # Setup minimal mocks needed to reach the error handling code
@@ -526,7 +526,7 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
     def test_update_app_settings_success_key_value_format(self, mock_build, mock_settings_op, mock_centauri, 
                                                          mock_client_factory, mock_site_op):
-        """Test successful processing of key=value format settings"""
+        """Test successful processing of key=value format settings."""
         cmd_mock = _get_test_cmd()
         
         # Setup mocks
@@ -551,7 +551,7 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     def test_update_application_settings_polling_error_handling(self, mock_send_request):
-        """Test that AzureResponseError is raised in polling function when appropriate"""
+        """Test that AzureResponseError is raised in polling function when appropriate."""
         cmd_mock = _get_test_cmd()
         
         # Mock an exception that doesn't have the expected structure
@@ -575,7 +575,7 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
     def test_update_app_settings_success_with_slot_settings(self, mock_build, mock_settings_op, mock_centauri,
                                                            mock_client_factory, mock_site_op):
-        """Test successful processing with slot settings"""
+        """Test successful processing with slot settings."""
         cmd_mock = _get_test_cmd()
         
         # Setup mocks
