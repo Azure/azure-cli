@@ -4466,6 +4466,102 @@ def remove_plan_managed_instance_install_script(cmd, resource_group_name, name, 
     return _patch_plan_install_scripts(cmd, resource_group_name, name, scripts, location)
 
 
+def list_plan_managed_instance_storage_mounts(cmd, resource_group_name, name):
+    """List storage mounts for a managed instance app service plan."""
+    # Use AAZ-based approach to get the App Service Plan
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    return plan_result.get('storageMounts', [])
+
+
+def _patch_plan_storage_mounts(cmd, resource_group_name, name, mounts, location):
+    """Helper to PATCH storageMounts for a managed instance app service plan using AAZ."""
+    plan_update_cmd = AppServicePlanUpdate(cli_ctx=cmd.cli_ctx)
+    poller = plan_update_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': location,
+        'storage_mounts': mounts
+    })
+
+    # Wait for the operation to complete and get the result
+    plan_result = poller.result()
+    
+    # Return the updated storage mounts directly from the result
+    return plan_result.get('storageMounts', [])
+
+
+def add_plan_managed_instance_storage_mount(cmd, resource_group_name, name, mount_name, mount_type, source, destination_path, credentials_secret_uri=None):
+    """Add or update a storage mount for a managed instance app service plan."""
+    # First get the current storage mounts using AAZ Show
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    # Extract current mounts directly from the plan result
+    existing_mounts = plan_result.get('storageMounts', [])
+    updated_mounts = []
+    mount_found = False
+
+    # New mount object
+    mount_obj = {
+        'name': mount_name,
+        'source': source,
+        'type': mount_type,
+        'destinationPath': destination_path
+    }
+    
+    # Add credentials key vault reference if provided
+    if credentials_secret_uri:
+        mount_obj['credentialsKeyVaultReference'] = {
+            'secretUri': credentials_secret_uri
+        }
+
+    # Replace existing mount in the same position or add to end
+    for mount in existing_mounts:
+        if mount.get('name', '').lower() == mount_name.lower():
+            # Replace the existing mount in the same position
+            updated_mounts.append(mount_obj)
+            mount_found = True
+        else:
+            # Keep existing mount
+            updated_mounts.append(mount)
+
+    # If mount wasn't found, add it to the end
+    if not mount_found:
+        updated_mounts.append(mount_obj)
+
+    location = plan_result.get('location')
+    # Update using AAZ
+    return _patch_plan_storage_mounts(cmd, resource_group_name, name, updated_mounts, location)
+
+
+def remove_plan_managed_instance_storage_mount(cmd, resource_group_name, name, mount_name):
+    """Remove a storage mount from a managed instance app service plan."""
+    # First get the current storage mounts using AAZ Show
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    # Extract current mounts directly from the plan result
+    mounts = plan_result.get('storageMounts', [])
+    
+    # Remove mount by case-insensitive name
+    mounts = [m for m in mounts if m.get('name', '').lower() != mount_name.lower()]
+    
+    location = plan_result.get('location')
+    # Update using AAZ
+    return _patch_plan_storage_mounts(cmd, resource_group_name, name, mounts, location)
+
+
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
     try:
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
