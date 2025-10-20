@@ -126,7 +126,7 @@ class Update(AAZCommand):
         _args_schema.scheduled_events_api_version = AAZStrArg(
             options=["--se-api-version", "--scheduled-events-api-version"],
             arg_group="EventGridAndResourceGraph",
-            help="Specifies the api-version to determine which Scheduled Events configuration schema version will be delivered.",
+            help="Specify the api-version to determine which Scheduled Events configuration schema version will be delivered.",
             nullable=True,
         )
 
