@@ -34,12 +34,6 @@ az migrate server update-replication --resource-group myRG --project-name myProj
 # Check cross-platform environment
 az migrate server check-environment
 ```
-az migrate server show-replication-status --resource-group myRG --project-name myProject --vm-name myVM
-
-# Update replication properties
-az migrate server update-replication --resource-group myRG --project-name myProject --target-object-id objectId
-```
-
 ### Azure Local (Stack HCI) Migration Commands
 ```bash
 # Initialize Azure Local replication infrastructure  
