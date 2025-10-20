@@ -14,6 +14,7 @@ from unittest import mock
 import uuid
 
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
+from azure.core.exceptions import HttpResponseError
 from knack.util import CLIError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only, live_only
 from azure.cli.core.azclierror import ArgumentUsageError, RequiredArgumentMissingError, \
@@ -2236,6 +2237,20 @@ class VMAvailSetScenarioTest(ScenarioTest):
             self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_avset_scheduled_events_policy_parameters', location='eastus')
+    def test_vm_avset_scheduled_events_policy_parameters(self, resource_group):
+        self.kwargs.update({
+            'avset': self.create_random_name('avset', 15)
+        })
+
+        self.cmd('vm availability-set create -g {rg} -n {avset} --platform-fault-domain-count 1 --platform-update-domain-count 1')
+        self.cmd('vm availability-set update -g {rg} -n {avset} --enable-all-instance-down True', checks=[
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
+        ])
+        with self.assertRaises(HttpResponseError): # No available regions found
+            self.cmd('vm availability-set update -g {rg} -n {avset} --scheduled-events-api-version 2020-07-01', checks=[
+                self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01')
+            ])
 
 class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')
