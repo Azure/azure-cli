@@ -1,0 +1,155 @@
+parameters:
+- name: architectures
+  type: object
+- name: artifactNamePrefix
+  type: string
+  default: 'docker-azurelinux3.0'
+- name: condition
+  type: string
+  default: 'succeeded()'
+- name: timeoutInMinutes
+  type: number
+  default: 100
+- name: AzCliVersion
+  type: string
+  default: ''
+- name: AzCliImageName
+  type: string
+  default: ''
+- name: AzCliImageTag
+  type: string
+  default: ''
+
+jobs:
+- job: TestDockerImageSmokeTest
+  displayName: Test Docker Image - Smoke Test
+  condition: ${{ parameters.condition }}
+  timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
+  strategy:
+    matrix:
+      ${{ each arch in parameters.architectures }}:
+        Azure Linux 3.0 ${{ arch.name }}:
+          pool: ${{ arch.pool }}
+          artifactName: ${{ parameters.artifactNamePrefix }}-${{ arch.value }}
+          architecture: ${{ arch.value }}
+  pool:
+    name: $(pool)
+  steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Docker Image'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+        artifactName: $(artifactName)
+
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
+
+    - task: Bash@3
+      displayName: Install PowerShell for ARM64 Agent
+      condition: and(succeeded(), eq(variables['architecture'], 'arm64'))
+      inputs:
+        targetType: 'inline'
+        script: |
+          curl -L -o /tmp/powershell.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.4.11/powershell-7.4.11-linux-arm64.tar.gz
+          sudo mkdir -p /opt/microsoft/powershell/7
+          sudo tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell/7
+          sudo chmod +x /opt/microsoft/powershell/7/pwsh
+          sudo ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
+          PATH=/usr/bin:/sbin:/usr/sbin:$PATH
+
+    - task: Bash@3
+      displayName: Install Az.Accounts for ARM64 Agents
+      condition: and(succeeded(), eq(variables['architecture'], 'arm64'))
+      inputs:
+        targetType: 'inline'
+        script: |
+          pwsh -command 'Register-PSRepository -Default -InstallationPolicy Trusted'
+          pwsh -command 'Install-Module -Name Az.Accounts -Repository PSGallery -AllowClobber -Force'
+
+    - task: Bash@3
+      displayName: Prepare Test and Output Folders
+      inputs:
+        targetType: 'inline'
+        script: |
+          mkdir output
+          chmod +x ./scripts/release/docker/test_az_cli_in_pipeline.sh
+          ls ./.azure-pipelines
+
+    - task: Bash@3
+      displayName: 🚀 Self Test
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "== Load docker image =="
+          TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-${{ parameters.AzCliVersion }}.tar"
+          docker load < $TAR_FILE
+
+          echo "== Docker Images =="
+          docker images
+          
+          echo "== Run az self-test  =="
+          docker run ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+
+          #sudo docker run $(TestImage):$(TestImageTag) /bin/bash -c "time az self-test && time az --version && (tdnf list --installed || true) "
+
+    - task: AzurePowerShell@5
+      displayName: Get Azure Service Connection Info
+      inputs:
+        pwsh: true
+        azureSubscription: '$(TestAzureSubscription)'
+        ScriptType: 'InlineScript'
+        azurePowerShellVersion: 'LatestVersion'
+        Inline: |
+          $PSVersionTable
+          $AzAccessToken = (Get-AzAccessToken -AsSecureString).Token
+          $AzGraphToken = (Get-AzAccessToken -ResourceTypeName MSGraph -AsSecureString).Token
+          $ssPtr = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($AzAccessToken)
+          $ssPtrGraph = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($AzGraphToken)
+          try {
+            $AzAccessToken = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ssPtr)
+            $AzGraphToken = [System.Runtime.InteropServices.Marshal]::PtrToStringBSTR($ssPtrGraph)
+          }
+          finally {
+            [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ssPtr)
+            [System.Runtime.InteropServices.Marshal]::ZeroFreeBSTR($ssPtrGraph)
+          }
+          
+          $AzUserId = (Get-AzAccessToken).UserId
+          $AzSubscription = (Get-AzContext).Subscription
+          $AzTenant = (Get-AzContext).Tenant
+
+          Write-Host "##vso[task.setvariable variable=AzAccessToken;issecret=true]$AzAccessToken"
+          Write-Host "##vso[task.setvariable variable=AzUserId;issecret=true]$AzUserId"
+          Write-Host "##vso[task.setvariable variable=AzSubscription;issecret=true]$AzSubscription"
+          Write-Host "##vso[task.setvariable variable=AzTenant;issecret=true]$AzTenant"
+          Write-Host "##vso[task.setvariable variable=AzGraphToken;issecret=true]$AzGraphToken"
+
+    - task: PowerShell@2
+      displayName: Get OIDC Token
+      inputs:
+        targetType: inline
+        pwsh: true
+        script: |
+          $token = "$(System.AccessToken)"
+          $header = @{authorization = "Bearer $token"}
+          $scUrl = "${env:SYSTEM_OIDCREQUESTURI}?api-version=7.1&serviceConnectionId=75a6a794-72e5-4618-b576-deea04f8b21d"
+          $result = Invoke-RestMethod -Uri $scUrl -Method Post -ContentType "application/json" -Headers $header
+          $OidcToken = $result.oidcToken
+          Write-Host "##vso[task.setvariable variable=OidcToken;issecret=true]$OidcToken"
+          
+    - task: Bash@3
+      displayName: 🚀🚀 Smoke Test
+      inputs:
+        targetType: 'inline'
+        script: |
+          sudo docker run -v $(System.DefaultWorkingDirectory)/scripts/docker:/test ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash -c "az login --service-principal --username $(AzUserId) --tenant $(AzTenant) --federated-token $(OidcToken) && az account set --subscription $(AzSubscription) && /test/test_az_cli_in_pipeline.sh"
+
+          echo "--------------------------------------------"
+
+          mv $(System.DefaultWorkingDirectory)/scripts/docker/azure_cli_test_output.log $(System.DefaultWorkingDirectory)/output/azure_cli_test_output_before.log
+          mv $(System.DefaultWorkingDirectory)/scripts/docker/azure_cli_test_result.csv $(System.DefaultWorkingDirectory)/output/azure_cli_test_result_before.csv
+          ls $(System.DefaultWorkingDirectory)/output
+
+    - publish: $(System.DefaultWorkingDirectory)/output
+      artifact: ${{ parameters.AzCliVersion }}-$(architecture)-smoke-test
+      displayName: Publish Artifact
