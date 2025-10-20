@@ -155,19 +155,33 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: None,
         ResourceType.MGMT_NETWORK: '2022-01-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2024-11-01', {
-            'resource_skus': '2019-04-01',
-            'disks': '2023-04-02',
-            'disk_encryption_sets': '2022-03-02',
-            'disk_accesses': '2020-05-01',
-            'snapshots': '2023-10-02',
-            'galleries': '2021-10-01',
-            'gallery_images': '2021-10-01',
+        ResourceType.MGMT_COMPUTE: SDKProfile('2025-04-01', {
+            'resource_skus': '2021-07-01',
+            'disks': '2025-01-02',
+            'disk_encryption_sets': '2025-01-02',
+            'disk_accesses': '2025-01-02',
+            'disk_restore_point': '2025-01-02',
+            'snapshots': '2025-01-02',
+            'galleries': '2024-03-03',
+            'gallery_images': '2024-03-03',
             'gallery_image_versions': '2024-03-03',
-            'gallery_applications': '2021-07-01',
-            'gallery_application_versions': '2022-01-03',
-            'shared_galleries': '2022-01-03',
-            'virtual_machine_scale_sets': '2024-11-01',
+            'gallery_applications': '2024-03-03',
+            'gallery_application_versions': '2024-03-03',
+            'gallery_in_vm_access_control_profiles': '2024-03-03',
+            'gallery_in_vm_access_control_profile_versions': '2024-03-03',
+            'gallery_sharing_profile': '2024-03-03',
+            'shared_galleries': '2024-03-03',
+            'shared_gallery_images': '2024-03-03',
+            'shared_gallery_image_versions': '2024-03-03',
+            'community_galleries': '2024-03-03',
+            'community_gallery_images': '2024-03-03',
+            'community_gallery_image_versions': '2024-03-03',
+            'soft_deleted_resource': '2024-03-03',
+            'cloud_services': '2024-11-04',
+            'cloud_service_roles': '2024-11-04',
+            'cloud_service_role_instances': '2024-11-04',
+            'cloud_service_operating_systems': '2024-11-04',
+            'cloud_services_update_domain': '2024-11-04',
         }),
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
@@ -475,6 +489,9 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
         e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
                       azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
                       azure.keyvault.v7_0.models.KeyVault
+        
+        For SDKs that only support the latest API version (e.g., azure-mgmt-compute >= 36.0.0),
+        returns the unversioned path.
     """
     api_version = get_api_version(api_profile, resource_type)
     if api_version is None:
@@ -483,7 +500,20 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
         if operation_group is None:
             raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
         api_version = getattr(api_version, operation_group)
-    return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_').replace('.', '_'))
+    
+    # Try versioned path first for backward compatibility
+    versioned_path = '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_').replace('.', '_'))
+    
+    # Check if the versioned module exists by attempting to import it
+    try:
+        import_module(versioned_path)
+        return versioned_path
+    except ImportError:
+        # SDK doesn't support versioned paths (e.g., azure-mgmt-compute >= 36.0.0)
+        # Fall back to unversioned path
+        logger.debug("Versioned path '%s' not found, falling back to unversioned path '%s'",
+                     versioned_path, resource_type.import_prefix)
+        return resource_type.import_prefix
 
 
 def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
