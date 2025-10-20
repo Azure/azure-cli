@@ -575,7 +575,7 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
     def test_update_app_settings_success_with_slot_settings(self, mock_build, mock_settings_op, mock_centauri,
                                                            mock_client_factory, mock_site_op):
-        """Test successful processing with slot settings"""
+        """Test successful processing with slot settings."""
         cmd_mock = _get_test_cmd()
         
         # Setup mocks
