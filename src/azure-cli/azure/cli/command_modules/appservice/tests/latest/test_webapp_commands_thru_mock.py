@@ -501,7 +501,7 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom.shell_safe_json_parse')
     def test_update_app_settings_error_handling_invalid_format_no_equals(self, mock_json_parse, mock_site_op):
-        """Test ValueError path when shell_safe_json_parse raises InvalidArgumentValueError and string contains no '='"""
+        """Test ValueError path when shell_safe_json_parse raises InvalidArgumentValueError and string contains no '='."""
         cmd_mock = _get_test_cmd()
         
         # Setup minimal mocks needed to reach the error handling code
