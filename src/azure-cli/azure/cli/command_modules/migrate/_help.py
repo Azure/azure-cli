@@ -35,7 +35,7 @@ helps['migrate local get-discovered-server'] = """
         - name: --project-name
           short-summary: Name of the Azure Migrate project.
           long-summary: The Azure Migrate project that contains the discovered servers.
-        - name: --resource-group-name --resource-group -g
+        - name: --resource-group-name
           short-summary: Name of the resource group containing the Azure Migrate project.
         - name: --display-name
           short-summary: Display name of the source machine to filter by.
@@ -107,7 +107,7 @@ helps['migrate local replication init'] = """
         Note: This command uses a preview API version and may experience breaking changes in
         future releases.
     parameters:
-        - name: --resource-group-name --resource-group -g
+        - name: --resource-group-name
           short-summary: Resource group of the Azure Migrate project.
           long-summary: The resource group containing the Azure Migrate project and related resources.
         - name: --project-name
@@ -119,7 +119,7 @@ helps['migrate local replication init'] = """
         - name: --target-appliance-name
           short-summary: Target appliance name.
           long-summary: Name of the Azure Local or Azure Stack HCI appliance that will host the migrated servers.
-        - name: --cache-storage-account-id
+        - name: --cache-storage-id
           short-summary: Storage account ARM ID for private endpoint scenario.
           long-summary: Full ARM resource ID of the storage account to use for caching replication data in private endpoint scenarios.
         - name: --subscription-id
@@ -178,7 +178,7 @@ helps['migrate local replication new'] = """
         - name: --project-name
           short-summary: Name of the Azure Migrate project.
           long-summary: Required when using --machine-index to identify which project to query.
-        - name: --resource-group-name --resource-group -g
+        - name: --resource-group-name
           short-summary: Resource group containing the Azure Migrate project.
           long-summary: Required when using --machine-index.
         - name: --target-storage-path-id

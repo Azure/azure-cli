@@ -53,7 +53,7 @@ def load_arguments(self, _):
                    help='Specifies the target appliance name for the AzLocal scenario.', 
                    required=True)
         c.argument('cache_storage_account_id', 
-                   options_list=['--cache-storage-account-id'], 
+                   options_list=['--cache-storage-account-id', '--cache-storage-id'], 
                    help='Specifies the Storage Account ARM Id to be used for private endpoint scenario.')
         c.argument('subscription_id', subscription_id_type)
         c.argument('pass_thru', 
