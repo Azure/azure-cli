@@ -525,7 +525,19 @@ def _parse_simple_key_value_setting(s, dest):
 
 
 def _parse_json_setting(s, dest, result, slot_result, setting_type):
-    """Parse JSON format settings."""
+    """
+    Parse JSON format settings.
+
+    Parameters:
+        s (str): The input string containing JSON-formatted settings.
+        dest (dict): A dictionary for storing parsed settings (may be unused in this function).
+        result (dict): A dictionary to store the parsed key-value pairs from the settings.
+        slot_result (dict): A dictionary to store slot setting flags for each key.
+        setting_type (str): The type of settings being parsed, either "SlotSettings" or "Settings".
+
+    Returns:
+        bool: True if parsing was successful, False otherwise.
+    """
     try:
         temp = shell_safe_json_parse(s)
         if isinstance(temp, list):  # Accept the output of the "list" command
