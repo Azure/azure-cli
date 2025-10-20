@@ -40,7 +40,7 @@ stages:
     steps:
     - checkout: none
     - task: Bash@3
-      name: SetAzCliVersionTask
+      name: PrepareAzCliVersionTask
       displayName: Prepare Azure CLI Info
       inputs:
         targetType: 'inline'
@@ -95,18 +95,18 @@ stages:
   dependsOn: 
   - PrepareInfo
   variables:
-    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliVersion'] ]
-    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageName'] ]
-    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageTag'] ]
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
   jobs:
   - job: BuildRpmPackagesAzureLinux
     displayName: Build Rpm Package
     strategy:
       matrix:
         ${{ each arch in parameters.architectures }}:
-          Azure Linux 3.0 ${{ arch.name }}:
+          ${{ arch.name }}:
             image: mcr.microsoft.com/azurelinux/base/core:3.0
-            artifact: rpm-azurelinux3.0-${{ arch.value }}
+            uploadArtifact: rpm-azurelinux3.0-${{ arch.value }}
             pool: ${{ arch.pool }}
     pool:
       name: $(pool)
@@ -136,7 +136,7 @@ stages:
       displayName: 'Publish Artifact: rpm-azurelinux'
       inputs:
         TargetPath: $(Build.ArtifactStagingDirectory)
-        ArtifactName: $(artifact)
+        ArtifactName: $(uploadArtifact)
 
   - job: BuildDockerImageAzureLinux
     displayName: Build Docker Image
@@ -145,23 +145,24 @@ stages:
     strategy:
       matrix:
         ${{ each arch in parameters.architectures }}:
-          Azure Linux 3.0 ${{ arch.name }}:
+          ${{ arch.name }}:
             pool: ${{ arch.pool }}
-            artifactName: docker-azurelinux3.0-${{ arch.value }}
+            downloadArtifactName: rpm-azurelinux3.0-${{ arch.value }}
+            uploadArtifactName: docker-azurelinux3.0-${{ arch.value }}
             dockerfile: azure-linux.dockerfile
-            packageArtifactName: rpm-azurelinux3.0-${{ arch.value }}
             image: mcr.microsoft.com/azurelinux/base/core:3.0
     pool:
       name: $(pool)
-
     steps:
       - bash: ./scripts/ci/install_docker.sh
         displayName: Install Docker
+
       - task: DownloadPipelineArtifact@1
         displayName: 'Download Build Artifacts'
         inputs:
           TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
-          artifactName: $(packageArtifactName)
+          artifactName: $(downloadArtifactName)
+
       - bash: |
           set -ex
           mkdir docker-temp
@@ -187,7 +188,7 @@ stages:
       - task: PublishPipelineArtifact@0
         inputs:
           TargetPath: $(Build.ArtifactStagingDirectory)
-          ArtifactName: $(artifactName)
+          ArtifactName: $(uploadArtifactName)
 
 - stage: Test1
   displayName: 1st Test - for Original Image
@@ -195,9 +196,9 @@ stages:
   - PrepareInfo
   - Build 
   variables:
-    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliVersion'] ]
-    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageName'] ]
-    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageTag'] ]
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
   jobs:
   - job: TestRpmPackagesAzureLinux
     displayName: Test Rpm Package
@@ -208,16 +209,16 @@ stages:
     strategy:
       matrix:
         ${{ each arch in parameters.architectures }}:
-          Azure Linux 3.0 ${{ arch.name }}:
+          ${{ arch.name }}:
             image: mcr.microsoft.com/azurelinux/base/core:3.0
-            artifact: rpm-azurelinux3.0-${{ arch.value }}
+            downloadArtifactName: rpm-azurelinux3.0-${{ arch.value }}
             pool: ${{ arch.pool }}
     steps:
     - task: DownloadPipelineArtifact@1
       displayName: 'Download Build Artifacts'
       inputs:
         TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
-        artifactName: $(artifact)
+        artifactName: $(downloadArtifactName)
 
     - bash: ./scripts/ci/install_docker.sh
       displayName: Install Docker
@@ -229,7 +230,6 @@ stages:
         echo "== Test rpm package on ${IMAGE} =="
         docker pull $IMAGE
         docker run --rm -e RPM_NAME=$RPM_NAME -v $SYSTEM_ARTIFACTSDIRECTORY/rpm:/mnt/rpm -v $(pwd):/azure-cli $IMAGE /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh
-
       displayName: 'Test Rpm Package Azure Linux'
 
   - template: templates/test-docker-image-smoke.yml
@@ -249,15 +249,17 @@ stages:
       AzCliVersion: $(AzCliVersion)
       AzCliImageName: $(AzCliImageName)
       AzCliImageTag: $(AzCliImageTag)
-- stage: UseCopaToPatch
+
+- stage: PatchWithCopa
   displayName: Patch with Copacetic
   dependsOn: 
   - PrepareInfo
   - Build
   variables:
-    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliVersion'] ]
-    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageName'] ]
-    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageTag'] ]
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
+    AzCliImagePatchedTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImagePatchedTag'] ]
   jobs:
   - job: BuildCopaPatchedDockerImageAzureLinux
     displayName: Build Copa Patched Docker Image
@@ -265,10 +267,10 @@ stages:
     strategy:
       matrix:
         ${{ each arch in parameters.architectures }}:
-          Azure Linux 3.0 ${{ arch.name }}:
+          ${{ arch.name }}:
             pool: ${{ arch.pool }}
-            artifactName: docker-azurelinux3.0-${{ arch.value }}
-            patchedArtifactName: docker-azurelinux3.0-${{ arch.value }}-patched
+            downloadArtifactName: docker-azurelinux3.0-${{ arch.value }}
+            uploadArtifactName: docker-azurelinux3.0-${{ arch.value }}-patched
             architecture: ${{ arch.value }}
     pool:
       name: $(pool)
@@ -278,7 +280,7 @@ stages:
         displayName: 'Download Docker Image'
         inputs:
           TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
-          artifactName: $(artifactName)
+          artifactName: $(downloadArtifactName)
 
       - bash: ./scripts/ci/install_docker.sh
         displayName: Install Docker
@@ -432,7 +434,7 @@ stages:
 
       - publish: $(System.DefaultWorkingDirectory)/output
         artifact: $(AzCliVersion)-$(architecture)-copa
-        displayName: Publish Artifact
+        displayName: Publish trivy and copa Artifact
 
       - task: Bash@3
         displayName: Save Docker Image
@@ -443,7 +445,7 @@ stages:
             docker images
 
             echo "== Save Docker Image to tar file  =="
-            docker save -o "$BUILD_STAGINGDIRECTORY/docker-azure-cli-$(AzCliVersion)-patched.tar" $(AzCliImageName):$(AzCliImagePatchedTag)
+            docker save -o "$BUILD_STAGINGDIRECTORY/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImagePatchedTag)
 
       - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
         displayName: 'SBOM'
@@ -452,39 +454,53 @@ stages:
           DockerImagesToScan: $(AzCliImagePatchedTag)
 
       - task: PublishPipelineArtifact@0
+        displayName: Publish docker Artifact
         inputs:
           TargetPath: $(Build.ArtifactStagingDirectory)
-          ArtifactName: $(patchedArtifactName)
+          ArtifactName: $(uploadArtifactName)
 
 - stage: Test2
   displayName: 2nd Test - for Copa Patched Image
   dependsOn: 
   - PrepareInfo
   - Build
-  - UseCopaToPatch
+  - PatchWithCopa
   variables:
-    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliVersion'] ]
-    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageName'] ]
-    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageTag'] ]
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
+    AzCliImagePatchedTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImagePatchedTag'] ]
   jobs:
-  - job: TestCopaPatchedDockerImageAzureLinux
+  - job: TestCopaPatchedDockerImage
     displayName: Test Copa Patched Docker Image
     timeoutInMinutes: 180
     strategy:
       matrix:
         ${{ each arch in parameters.architectures }}:
-          Azure Linux 3.0 ${{ arch.name }}:
+          ${{ arch.name }}:
             pool: ${{ arch.pool }}
-            artifactName: docker-azurelinux3.0-${{ arch.value }}
+            downloadArtifactName: docker-azurelinux3.0-${{ arch.value }}-patched
             architecture: ${{ arch.value }}
     pool:
       name: $(pool)
     steps:
-      - task: DownloadPipelineArtifact@1
-        displayName: 'Download Docker Image'
-        inputs:
-          TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
-          artifactName: $(artifactName)
+  - template: templates/test-docker-image-smoke.yml
+    parameters:
+      architectures: ${{ parameters.architectures }}
+      ShouldTest: ${{ parameters.ShouldTest }}
+      downloadArtifactNameSuffix: '-patched'
+      timeoutInMinutes: 100
+      AzCliVersion: $(AzCliVersion)
+      AzCliImageName: $(AzCliImageName)
+      AzCliImageTag: $(AzCliImagePatchedTag)
+      
 
-      - bash: ./scripts/ci/install_docker.sh
-        displayName: Install Docker
+  - template: templates/test-docker-image-unit.yml
+    parameters:
+      architectures: ${{ parameters.architectures }}
+      ShouldTest: ${{ parameters.ShouldTest }}
+      downloadArtifactNameSuffix: '-patched'
+      timeoutInMinutes: 180
+      AzCliVersion: $(AzCliVersion)
+      AzCliImageName: $(AzCliImageName)
+      AzCliImageTag: $(AzCliImagePatchedTag)

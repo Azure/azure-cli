@@ -1,10 +1,10 @@
 parameters:
 - name: architectures
   type: object
-- name: artifactNamePrefix
+- name: downloadArtifactNamePrefix
   type: string
   default: 'docker-azurelinux3.0'
-- name: artifactNameSuffix
+- name: downloadArtifactNameSuffix
   type: string
   default: ''
 - name: ShouldTest
@@ -32,9 +32,9 @@ jobs:
   strategy:
     matrix:
       ${{ each arch in parameters.architectures }}:
-        Azure Linux 3.0 ${{ arch.name }}:
+        ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          downloadArtifactName: ${{ parameters.artifactNamePrefix }}-${{ arch.value }}${{ parameters.artifactNameSuffix }}
+          downloadArtifactName: ${{ parameters.downloadArtifactNamePrefix }}-${{ arch.value }}${{ parameters.downloadArtifactNameSuffix }}
   pool:
     name: $(pool)
   steps:
