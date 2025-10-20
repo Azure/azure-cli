@@ -2797,7 +2797,7 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
             'vmss_name': vm_vmss_name,
             'instance_id': instance_id,
             'command_id': command_id,
-            'scripts': scripts,
+            'script': scripts,
             'parameters': params
         })
 
@@ -2807,7 +2807,7 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
         'resource_group': resource_group_name,
         'vm_name': vm_vmss_name,
         'command_id': command_id,
-        'scripts': scripts,
+        'script': scripts,
         'parameters': params
     })
 
