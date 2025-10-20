@@ -524,6 +524,38 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp')
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
+    @mock.patch('azure.cli.command_modules.appservice.custom.shell_safe_json_parse')
+    def test_update_app_settings_error_handling_invalid_format_no_equals(self, mock_json_parse, mock_build, mock_settings_op,
+                                                                        mock_centauri, mock_client_factory, mock_site_op):
+        """Test ValueError path when shell_safe_json_parse raises InvalidArgumentValueError and string contains no '='"""
+        cmd_mock = _get_test_cmd()
+        
+        # Setup mocks
+        mock_app_settings = mock.MagicMock()
+        mock_app_settings.properties = {}
+        mock_site_op.return_value = mock_app_settings
+        
+        mock_client = mock.MagicMock()
+        mock_client_factory.return_value = mock_client
+        mock_centauri.return_value = False
+        mock_settings_op.return_value = mock_app_settings
+        mock_build.return_value = {"success": True}
+        
+        # Mock shell_safe_json_parse to raise InvalidArgumentValueError
+        mock_json_parse.side_effect = InvalidArgumentValueError("Invalid JSON format")
+        
+        # Test invalid format with no equals sign - this should trigger ValueError in split('=', 1)
+        invalid_setting_no_equals = "invalidformatthatcontainsnoequalsign"
+        
+        with self.assertRaisesRegex(InvalidArgumentValueError, 
+                                   r"Invalid setting format.*Expected 'key=value' format or valid JSON"):
+            update_app_settings(cmd_mock, 'test-rg', 'test-app', settings=[invalid_setting_no_equals])
+
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
+    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp')
+    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
+    @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
     def test_update_app_settings_success_key_value_format(self, mock_build, mock_settings_op, mock_centauri, 
                                                          mock_client_factory, mock_site_op):
         """Test successful processing of key=value format settings"""
