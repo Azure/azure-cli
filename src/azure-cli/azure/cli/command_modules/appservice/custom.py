@@ -511,6 +511,58 @@ def update_app_settings_functionapp(cmd, resource_group_name, name, settings=Non
     return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
 
 
+def _parse_simple_key_value_setting(s, dest):
+    """Parse simple key=value settings format."""
+    if ('=' in s and not s.lstrip().startswith(('{"', "[", "{")) and
+            not s.startswith('@')):  # @ indicates file input
+        try:
+            setting_name, value = s.split('=', 1)
+            dest[setting_name] = value
+            return True
+        except ValueError:
+            pass  # Fall back to JSON parsing if split fails
+    return False
+
+
+def _parse_json_setting(s, dest, result, slot_result, setting_type):
+    """Parse JSON format settings."""
+    try:
+        temp = shell_safe_json_parse(s)
+        if isinstance(temp, list):  # Accept the output of the "list" command
+            for t in temp:
+                if 'slotSetting' in t.keys():
+                    slot_result[t['name']] = t['slotSetting']
+                elif setting_type == "SlotSettings":
+                    slot_result[t['name']] = True
+                result[t['name']] = t['value']
+        else:
+            # Handle JSON objects: setting_type is either "SlotSettings" or "Settings" (from line 525 loop)
+            # Different logic needed for slot settings vs regular settings
+            if setting_type == "SlotSettings":
+                # For slot settings JSON objects, add values to result and mark as slot settings
+                result.update(temp)
+                for key in temp:
+                    slot_result[key] = True
+            else:
+                # For regular settings JSON objects, add values to result only
+                result.update(temp)
+        return True
+    except InvalidArgumentValueError:
+        return False
+
+
+def _parse_fallback_key_value_setting(s, result):
+    """Parse key=value as fallback when JSON parsing fails."""
+    try:
+        setting_name, value = s.split('=', 1)
+    except ValueError as ex:
+        raise InvalidArgumentValueError(
+            f"Invalid setting format: '{s}'. Expected 'key=value' format or valid JSON.",
+            recommendation="Use 'key=value' format or provide valid JSON like '{\"key\": \"value\"}'."
+        ) from ex
+    result[setting_name] = value
+
+
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
     if not settings and not slot_settings:
         raise MutuallyExclusiveArgumentError('Please provide either --settings or --slot-settings parameter.')
@@ -521,49 +573,19 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
-    # pylint: disable=too-many-nested-blocks
+    
     for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
         for s in src:
-            # Check if this looks like a simple key=value pair without JSON/dict syntax
-            # If so, parse it directly to avoid unnecessary warnings from ast.literal_eval
-            if ('=' in s and not s.lstrip().startswith(('{"', "[", "{")) and
-                    not s.startswith('@')):  # @ indicates file input
-                try:
-                    setting_name, value = s.split('=', 1)
-                    dest[setting_name] = value
-                    continue
-                except ValueError:
-                    pass  # Fall back to JSON parsing if split fails
-
-            try:
-                temp = shell_safe_json_parse(s)
-                if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
-                    for t in temp:
-                        if 'slotSetting' in t.keys():
-                            slot_result[t['name']] = t['slotSetting']
-                        elif setting_type == "SlotSettings":
-                            slot_result[t['name']] = True
-                        result[t['name']] = t['value']
-                else:
-                    # Handle JSON objects: setting_type is either "SlotSettings" or "Settings" (from line 525 loop)
-                    # Different logic needed for slot settings vs regular settings
-                    if setting_type == "SlotSettings":
-                        # For slot settings JSON objects, add values to result and mark as slot settings
-                        result.update(temp)
-                        for key in temp:
-                            slot_result[key] = True
-                    else:
-                        # For regular settings JSON objects, add values to result only
-                        result.update(temp)
-            except InvalidArgumentValueError:
-                try:
-                    setting_name, value = s.split('=', 1)
-                except ValueError as ex:
-                    raise InvalidArgumentValueError(
-                        f"Invalid setting format: '{s}'. Expected 'key=value' format or valid JSON.",
-                        recommendation="Use 'key=value' format or provide valid JSON like '{\"key\": \"value\"}'."
-                    ) from ex
-                result[setting_name] = value
+            # Try simple key=value parsing first
+            if _parse_simple_key_value_setting(s, dest):
+                continue
+            
+            # Try JSON parsing
+            if _parse_json_setting(s, dest, result, slot_result, setting_type):
+                continue
+            
+            # Fallback to key=value parsing with error handling
+            _parse_fallback_key_value_setting(s, result)
 
     for setting_name, value in result.items():
         app_settings.properties[setting_name] = value
