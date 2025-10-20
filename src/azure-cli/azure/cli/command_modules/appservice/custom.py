@@ -549,7 +549,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                     if setting_type == "SlotSettings":
                         # For slot settings JSON objects, add values to result and mark as slot settings
                         result.update(temp)
-                        for key in temp.keys():
+                        for key in temp:
                             slot_result[key] = True
                     elif setting_type == "Settings":
                         # For regular settings JSON objects, add values to result only
