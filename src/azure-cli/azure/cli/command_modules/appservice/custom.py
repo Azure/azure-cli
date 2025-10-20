@@ -558,12 +558,12 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
             except InvalidArgumentValueError:
                 try:
                     setting_name, value = s.split('=', 1)
-                    result[setting_name] = value
                 except ValueError as ex:
                     raise InvalidArgumentValueError(
                         f"Invalid setting format: '{s}'. Expected 'key=value' format or valid JSON.",
                         recommendation="Use 'key=value' format or provide valid JSON like '{\"key\": \"value\"}'."
                     ) from ex
+                result[setting_name] = value
 
     for setting_name, value in result.items():
         app_settings.properties[setting_name] = value
