@@ -116,7 +116,7 @@ class Update(AAZCommand):
         _args_schema.enable_all_instance_down = AAZBoolArg(
             options=["--all-instance-down", "--enable-all-instance-down"],
             arg_group="AllInstancesDown",
-            help="Specifies if Scheduled Events should be auto-approved when all instances are down. its default value is true",
+            help="Specify if Scheduled Events should be auto-approved when all instances are down. Its default value is true",
             nullable=True,
         )
 
