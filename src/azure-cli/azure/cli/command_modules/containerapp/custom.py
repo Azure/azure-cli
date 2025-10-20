@@ -2895,9 +2895,10 @@ def show_registry(cmd, name, resource_group_name, server):
 
     registries_def = containerapp_def["properties"]["configuration"]["registries"]
 
-    for r in registries_def:
-        if r['server'].lower() == server.lower():
-            return r
+    if registries_def is not None:
+        for r in registries_def:
+            if r['server'].lower() == server.lower():
+                return r
     raise InvalidArgumentValueError("The containerapp {} does not have specified registry assigned.".format(name))
 
 
