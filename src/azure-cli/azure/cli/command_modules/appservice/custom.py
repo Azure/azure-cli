@@ -536,7 +536,7 @@ def _parse_json_setting(s, dest, result, slot_result, setting_type):
                     slot_result[t['name']] = True
                 result[t['name']] = t['value']
         else:
-            # Handle JSON objects: setting_type is either "SlotSettings" or "Settings" (from line 525 loop)
+            # Handle JSON objects: setting_type is either "SlotSettings" or "Settings"
             # Different logic needed for slot settings vs regular settings
             if setting_type == "SlotSettings":
                 # For slot settings JSON objects, add values to result and mark as slot settings
