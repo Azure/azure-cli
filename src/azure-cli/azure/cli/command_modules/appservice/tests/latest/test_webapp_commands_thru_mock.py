@@ -493,9 +493,9 @@ class TestWebappMocked(unittest.TestCase):
         
         # Test invalid format that can't be parsed as JSON or key=value
         invalid_setting = "invalid_format_no_equals_no_json"
+        expected_message = r"Invalid setting format.*Expected 'key=value' format or valid JSON"
         
-        with self.assertRaisesRegex(InvalidArgumentValueError, 
-                                   r"Invalid setting format.*Expected 'key=value' format or valid JSON"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, expected_message):
             update_app_settings(cmd_mock, 'test-rg', 'test-app', settings=[invalid_setting])
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
@@ -514,9 +514,9 @@ class TestWebappMocked(unittest.TestCase):
         
         # Test invalid format with no equals sign - this should trigger ValueError in split('=', 1)
         invalid_setting_no_equals = "invalidformatthatcontainsnoequalsign"
+        expected_message = r"Invalid setting format.*Expected 'key=value' format or valid JSON"
         
-        with self.assertRaisesRegex(InvalidArgumentValueError, 
-                                   r"Invalid setting format.*Expected 'key=value' format or valid JSON"):
+        with self.assertRaisesRegex(InvalidArgumentValueError, expected_message):
             update_app_settings(cmd_mock, 'test-rg', 'test-app', settings=[invalid_setting_no_equals])
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
@@ -562,12 +562,11 @@ class TestWebappMocked(unittest.TestCase):
                 self.response.headers = {}
         
         # Mock _generic_settings_operation to raise the exception
-        with mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation') as mock_settings_op:
+        with mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation') as mock_settings_op, \
+             self.assertRaisesRegex(AzureResponseError, "Failed to update application settings"):
             mock_settings_op.side_effect = MockException()
-            
-            with self.assertRaisesRegex(AzureResponseError, "Failed to update application settings"):
-                update_application_settings_polling(cmd_mock, 'test-rg', 'test-app', 
-                                                   mock.MagicMock(), None, mock.MagicMock())
+            update_application_settings_polling(cmd_mock, 'test-rg', 'test-app', 
+                                               mock.MagicMock(), None, mock.MagicMock())
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')

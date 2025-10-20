@@ -545,7 +545,8 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                             slot_result[t['name']] = True
                         result[t['name']] = t['value']
                 else:
-                    # Handle JSON objects: different logic for slot settings vs regular settings
+                    # Handle JSON objects: setting_type is either "SlotSettings" or "Settings" (from line 525 loop)
+                    # Different logic needed for slot settings vs regular settings
                     if setting_type == "SlotSettings":
                         # For slot settings JSON objects, add values to result and mark as slot settings
                         result.update(temp)
