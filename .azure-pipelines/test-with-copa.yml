@@ -239,6 +239,7 @@ stages:
           Azure Linux 3.0 ${{ arch.name }}:
             pool: ${{ arch.pool }}
             artifactName: docker-azurelinux3.0-${{ arch.value }}
+            architecture: ${{ arch.value }}
     pool:
       name: $(pool)
     variables:
@@ -254,6 +255,28 @@ stages:
 
       - bash: ./scripts/ci/install_docker.sh
         displayName: Install Docker
+
+      - task: Bash@3
+        displayName: Install PowerShell for ARM64 Agent
+        condition: and(succeeded(), eq(variables['architecture'], 'arm64'))
+        inputs:
+          targetType: 'inline'
+          script: |
+            curl -L -o /tmp/powershell.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.4.11/powershell-7.4.11-linux-arm64.tar.gz
+            sudo mkdir -p /opt/microsoft/powershell/7
+            sudo tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell/7
+            sudo chmod +x /opt/microsoft/powershell/7/pwsh
+            sudo ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
+            PATH=/usr/bin:/sbin:/usr/sbin:$PATH
+
+      - task: Bash@3
+        displayName: Install Az.Accounts for ARM64 Agents
+        condition: and(succeeded(), eq(variables['architecture'], 'arm64'))
+        inputs:
+          targetType: 'inline'
+          script: |
+            pwsh -command 'Register-PSRepository -Default -InstallationPolicy Trusted'
+            pwsh -command 'Install-Module -Name Az.Accounts -Repository PSGallery -AllowClobber -Force'
 
       - task: Bash@3
         displayName: Prepare Test and Output Folders
