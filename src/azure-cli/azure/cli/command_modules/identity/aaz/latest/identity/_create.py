@@ -78,12 +78,6 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="Restrictions on which resource providers this identity can be assigned to.",
         )
-        _args_schema.isolation_scope = AAZStrArg(
-            options=["--isolation-scope"],
-            arg_group="Properties",
-            help="Enum to configure regional restrictions on identity assignment, as necessary.",
-            enum={"None": "None", "Regional": "Regional"},
-        )
 
         assignment_restriction = cls._args_schema.assignment_restriction
         assignment_restriction.providers = AAZListArg(
