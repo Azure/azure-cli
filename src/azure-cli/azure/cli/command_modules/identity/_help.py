@@ -22,7 +22,7 @@ examples:
 
   - name: Create an identity with resource assignment restrictions.
     text: |
-        az identity create --name MyIdentity --resource-group MyResourceGroup --assignment-restriction {providers: ['Microsoft.Compute', 'Microsoft.Storage/Accounts']}
+        az identity create --name MyIdentity --resource-group MyResourceGroup --assignment-restriction '{"providers": ["Microsoft.Compute", "Microsoft.Storage/Accounts"]}'
 """
 
 helps['identity update'] = """
@@ -31,7 +31,7 @@ short-summary: Update an identity.
 examples:
   - name: Update an identity to restrict assignment to specific resources.
     text: |
-        az identity update --name MyIdentity --resource-group MyResourceGroup --assignment-restriction {providers: ['Microsoft.Compute', 'Microsoft.Storage/Accounts']}
+        az identity update --name MyIdentity --resource-group MyResourceGroup --assignment-restriction '{"providers": ["Microsoft.Compute", "Microsoft.Storage/Accounts"]}'
 """
 
 helps['identity list'] = """
