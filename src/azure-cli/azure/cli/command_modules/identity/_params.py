@@ -11,7 +11,6 @@ from azure.cli.core.commands.parameters import get_location_type, tags_type, get
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME',
                                 help='The name of the identity resource.')
 
-
 def load_arguments(self, _):
 
     with self.argument_context('identity') as c:
@@ -25,4 +24,3 @@ def load_arguments(self, _):
     with self.argument_context('identity update') as c:
         c.argument('tags', tags_type)
         c.argument('assignment_restriction', required=False, help='Identity assignment restriction, used to restrict the resources that can be assigned to the identity.')
-        

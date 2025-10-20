@@ -39,7 +39,7 @@ class TestIdentity(ScenarioTest):
         self.cmd('identity list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('identity delete -n {identity} -g {rg}')
 
-        self.cmd('identity create -n {identity} -g {rg} --assignment-restriction {providers: [Microsoft.Compute]}', checks=[
+        self.cmd('identity create -n {identity} -g {rg} --assignment-restriction {providers: ['Microsoft.Compute']}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
             self.check('isolationScope', 'Regional'),
