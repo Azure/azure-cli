@@ -24,6 +24,7 @@ parameters:
   type: string
   default: ''
 
+jobs:
 - job: TestDockerImageSmokeTest
   displayName: Test Docker Image - Smoke Test
   condition: and(succeeded(), eq(${{parameters.ShouldTest}}, true))
