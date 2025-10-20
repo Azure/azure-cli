@@ -570,7 +570,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
-    # Process slot configurations BEFORE updating application settings
+    # Process slot configurations before updating application settings to ensure proper configuration order.
     # This ensures that slot settings are properly configured before the values are applied
     app_settings_slot_cfg_names = []
     if slot_result:
