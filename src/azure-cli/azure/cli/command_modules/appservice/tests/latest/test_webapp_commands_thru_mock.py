@@ -480,7 +480,7 @@ class TestWebappMocked(unittest.TestCase):
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
     @mock.patch('azure.cli.command_modules.appservice.custom.shell_safe_json_parse')
     def test_update_app_settings_error_handling_invalid_format(self, mock_json_parse, mock_site_op):
-        """Test that InvalidArgumentValueError is raised for invalid setting formats"""
+        """Test that InvalidArgumentValueError is raised for invalid setting formats."""
         cmd_mock = _get_test_cmd()
         
         # Setup minimal mocks needed to reach the error handling code
