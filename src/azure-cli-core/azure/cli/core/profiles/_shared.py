@@ -294,6 +294,11 @@ class _ApiVersions:  # pylint: disable=too-few-public-methods
             self._resolve()
             return self._operations_groups_value[item]
         except KeyError:
+            # If operation group not found in client properties, try the profile directly
+            # This handles SDKs that don't have versioned operation groups (e.g., azure-mgmt-compute >= 36.0.0)
+            value = self._sdk_profile.profile.get(item)
+            if value is not None:
+                return self._post_process(value)
             raise AttributeError('Attribute {} does not exist.'.format(item))
 
 
@@ -497,9 +502,11 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
     if api_version is None:
         return resource_type.import_prefix
     if isinstance(api_version, _ApiVersions):
+        # For SDKProfile, use the default version if no operation_group specified
         if operation_group is None:
-            raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
-        api_version = getattr(api_version, operation_group)
+            api_version = api_version._sdk_profile.default_api_version
+        else:
+            api_version = getattr(api_version, operation_group)
     
     # Try versioned path first for backward compatibility
     versioned_path = '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_').replace('.', '_'))
