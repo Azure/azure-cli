@@ -185,10 +185,6 @@ helps['migrate local replication new'] = """
         - name: --nic-to-include
           short-summary: NICs to include for replication (power user mode).
           long-summary: Space-separated list of NIC IDs to replicate from the source server. Use this for power user mode.
-        - name: --target-resource-group-id
-          short-summary: Target resource group ARM ID.
-          long-summary: Full ARM resource ID of the resource group where migrated VM resources will be created.
-        - name: --target-vm-name
           short-summary: Name of the VM to be created.
           long-summary: The name for the virtual machine that will be created on the target environment.
         - name: --os-disk-id
