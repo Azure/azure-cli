@@ -189,8 +189,7 @@ class Create(AAZCommand):
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("assignmentRestriction", AAZObjectType, ".assignment_restriction", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("isolationScope", AAZStrType, ".isolation_scope", typ_kwargs={"flags": {"required": True}})
-
+                
             assignment_restriction = _builder.get(".properties.assignmentRestriction")
             if assignment_restriction is not None:
                 assignment_restriction.set_prop("providers", AAZListType, ".providers")
@@ -252,10 +251,6 @@ class Create(AAZCommand):
             properties.client_id = AAZStrType(
                 serialized_name="clientId",
                 flags={"read_only": True},
-            )
-            properties.isolation_scope = AAZStrType(
-                serialized_name="isolationScope",
-                flags={"required": True},
             )
             properties.principal_id = AAZStrType(
                 serialized_name="principalId",
