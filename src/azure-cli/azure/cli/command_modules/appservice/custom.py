@@ -545,7 +545,16 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                             slot_result[t['name']] = True
                         result[t['name']] = t['value']
                 else:
-                    dest.update(temp)
+                    # Handle JSON objects - when using --slot-settings with object format,
+                    # treat all keys as slot settings
+                    if setting_type == "SlotSettings":
+                        # For slot settings, we need to add values to result (for app settings)
+                        # AND mark them as slot settings in slot_result
+                        result.update(temp)  # Add actual values to result
+                        for key in temp.keys():
+                            slot_result[key] = True  # Mark as slot setting
+                    else:
+                        dest.update(temp)  # Regular settings go to dest (which is result)
             except CLIError:
                 setting_name, value = s.split('=', 1)
                 dest[setting_name] = value
@@ -555,16 +564,8 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
-
-# TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
-    if is_centauri_functionapp(cmd, resource_group_name, name):
-        update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
-        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
-    else:
-        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
-                                             'update_application_settings',
-                                             app_settings, slot, client)
-
+    # Process slot configurations BEFORE updating application settings
+    # This ensures that slot settings are properly configured before the values are applied
     app_settings_slot_cfg_names = []
     if slot_result:
         slot_cfg_names = client.web_apps.list_slot_configuration_names(resource_group_name, name)
@@ -577,6 +578,15 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                 slot_cfg_names.app_setting_names.remove(slot_setting_name)
         app_settings_slot_cfg_names = slot_cfg_names.app_setting_names
         client.web_apps.update_slot_configuration_names(resource_group_name, name, slot_cfg_names)
+
+# TODO: Centauri currently return wrong payload for update appsettings, remove this once backend has the fix.
+    if is_centauri_functionapp(cmd, resource_group_name, name):
+        update_application_settings_polling(cmd, resource_group_name, name, app_settings, slot, client)
+        result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'list_application_settings', slot)
+    else:
+        result = _generic_settings_operation(cmd.cli_ctx, resource_group_name, name,
+                                             'update_application_settings',
+                                             app_settings, slot, client)
 
     return _build_app_settings_output(result.properties, app_settings_slot_cfg_names, redact=True)
 
