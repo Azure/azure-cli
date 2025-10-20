@@ -898,10 +898,10 @@ examples:
   - name: Get the storage usage for an Azure Container Registry.
     text: >
         az acr show-usage -n myregistry
-  - name: Get the current amount of storage used by the registry (in bytes).
+  - name: Get the current amount of storage used by the registry based on its SKU (in bytes).
     text: >
         az acr show-usage -n myregistry --query "value[?name=='Size'] | [0]"
-  - name: Get the maximum storage limit allowed for the registry based on its SKU (in bytes).
+  - name: Get the maximum storage limit allowed for the registry.
     text: >
         az acr show-usage -n myregistry --query "value[?name=='MaximumStorageCapacity'] | [0]"
 """
