@@ -176,15 +176,6 @@ helps['migrate local replication new'] = """
         - name: --target-vm-cpu-core
           short-summary: Number of CPU cores for the target VM.
           long-summary: Specify the number of CPU cores to allocate to the migrated VM.
-        - name: --target-virtual-switch-id
-          short-summary: Logical network ARM ID for VM connectivity.
-          long-summary: Full ARM resource ID of the logical network (virtual switch) that the migrated VM will use. Required for default user mode.
-        - name: --target-test-virtual-switch-id
-          short-summary: Test logical network ARM ID.
-          long-summary: Full ARM resource ID of the test logical network for test failover scenarios.
-        - name: --is-dynamic-memory-enabled
-          short-summary: Enable or disable dynamic memory.
-          long-summary: Specify 'true' to enable dynamic memory or 'false' for static memory allocation.
         - name: --target-vm-ram
           short-summary: Target RAM size in MB.
           long-summary: Specify the amount of RAM to allocate to the target VM in megabytes.
