@@ -26,7 +26,7 @@ class MigrateGetDiscoveredServerTests(ScenarioTest):
         mock_response.json.return_value = data
         return mock_response
 
-    def _create_sample_server_data(self, index=1, machine_name=f"test-machine", display_name="TestServer"):
+    def _create_sample_server_data(self, index=1, machine_name="test-machine", display_name="TestServer"):
         """Helper to create sample discovered server data"""
         return {
             'id': f'/subscriptions/sub-id/resourceGroups/rg/providers/Microsoft.Migrate/migrateprojects/project/machines/machine-{index}',
