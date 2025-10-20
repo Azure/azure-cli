@@ -71,8 +71,8 @@ class Update(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.assignment_restrictions = AAZObjectArg(
-            options=["--assignment-restrictions"],
+        _args_schema.assignment_restriction = AAZObjectArg(
+            options=["--assignment-restriction"],
             arg_group="Properties",
             help="Restrictions on which resource providers this identity can be assigned to.",
         )
@@ -83,8 +83,8 @@ class Update(AAZCommand):
             enum={"None": "None", "Regional": "Regional"},
         )
 
-        assignment_restrictions = cls._args_schema.assignment_restrictions
-        assignment_restrictions.providers = AAZListArg(
+        assignment_restriction = cls._args_schema.assignment_restriction
+        assignment_restriction.providers = AAZListArg(
             options=["providers"],
             help="List of resource provider types that this identity can be assigned to (case-insensitive). Examples: 'Microsoft.Compute', 'Microsoft.Storage/Accounts', 'Microsoft.Network/VirtualNetworks'.",
             nullable=True,
@@ -93,7 +93,7 @@ class Update(AAZCommand):
             ),
         )
 
-        providers = cls._args_schema.assignment_restrictions.providers
+        providers = cls._args_schema.assignment_restriction.providers
         providers.Element = AAZStrArg(
             nullable=True,
         )
@@ -323,14 +323,14 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("assignmentRestrictions", AAZObjectType, ".assignment_restrictions", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("assignmentRestriction", AAZObjectType, ".assignment_restriction", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("isolationScope", AAZStrType, ".isolation_scope", typ_kwargs={"flags": {"required": True}})
 
-            assignment_restrictions = _builder.get(".properties.assignmentRestrictions")
-            if assignment_restrictions is not None:
-                assignment_restrictions.set_prop("providers", AAZListType, ".providers")
+            assignment_restriction = _builder.get(".properties.assignmentRestriction")
+            if assignment_restriction is not None:
+                assignment_restriction.set_prop("providers", AAZListType, ".providers")
 
-            providers = _builder.get(".properties.assignmentRestrictions.providers")
+            providers = _builder.get(".properties.assignmentRestriction.providers")
             if providers is not None:
                 providers.set_elements(AAZStrType, ".")
 
@@ -391,8 +391,8 @@ class _UpdateHelper:
         )
 
         properties = _schema_identity_read.properties
-        properties.assignment_restrictions = AAZObjectType(
-            serialized_name="assignmentRestrictions",
+        properties.assignment_restriction = AAZObjectType(
+            serialized_name="assignmentRestriction",
             flags={"required": True},
         )
         properties.client_id = AAZStrType(
@@ -412,10 +412,10 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
-        assignment_restrictions = _schema_identity_read.properties.assignment_restrictions
-        assignment_restrictions.providers = AAZListType()
+        assignment_restriction = _schema_identity_read.properties.assignment_restriction
+        assignment_restriction.providers = AAZListType()
 
-        providers = _schema_identity_read.properties.assignment_restrictions.providers
+        providers = _schema_identity_read.properties.assignment_restriction.providers
         providers.Element = AAZStrType()
 
         system_data = _schema_identity_read.system_data

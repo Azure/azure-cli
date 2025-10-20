@@ -172,8 +172,8 @@ class Show(AAZCommand):
             )
 
             properties = cls._schema_on_200.properties
-            properties.assignment_restrictions = AAZObjectType(
-                serialized_name="assignmentRestrictions",
+            properties.assignment_restriction = AAZObjectType(
+                serialized_name="assignmentRestriction",
                 flags={"required": True},
             )
             properties.client_id = AAZStrType(
@@ -193,10 +193,10 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
 
-            assignment_restrictions = cls._schema_on_200.properties.assignment_restrictions
-            assignment_restrictions.providers = AAZListType()
+            assignment_restriction = cls._schema_on_200.properties.assignment_restriction
+            assignment_restriction.providers = AAZListType()
 
-            providers = cls._schema_on_200.properties.assignment_restrictions.providers
+            providers = cls._schema_on_200.properties.assignment_restriction.providers
             providers.Element = AAZStrType()
 
             system_data = cls._schema_on_200.system_data

@@ -43,14 +43,14 @@ class TestIdentity(ScenarioTest):
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
             self.check('isolationScope', 'Regional'),
-            self.check('assignmentRestrictions', '{providers: [Microsoft.Compute]}')
+            self.check('assignmentRestriction', '{providers: [Microsoft.Compute]}')
         ])
 
         self.cmd('identity update -n {identity} -g {rg} --assignment-restriction {providers: []}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
             self.check('isolationScope', 'None'),
-            self.check('assignmentRestrictions', '{providers: []}')
+            self.check('assignmentRestriction', '{providers: []}')
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_federated_identity_credential_', location='centraluseuap')
