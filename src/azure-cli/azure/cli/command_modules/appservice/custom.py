@@ -4162,7 +4162,7 @@ has been deployed ".format(app_service_environment)
             "virtual_network_subnet_id": subnet_resource_id,
         } if subnet_resource_id else None,
         "rdp_enabled": rdp_enabled,
-        "mi_system_assigned": str(enable_system_assigned_identity) if enable_system_assigned_identity is not None else None,
+        "mi_system_assigned": str(enable_system_assigned_identity) if enable_system_assigned_identity else None,
         "mi_user_assigned": user_assigned_identities,
         "plan_default_identity": plan_default_identity,
         "registry_adapters": registry_adapters,
