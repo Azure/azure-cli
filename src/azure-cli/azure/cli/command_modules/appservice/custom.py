@@ -513,7 +513,7 @@ def update_app_settings_functionapp(cmd, resource_group_name, name, settings=Non
 
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
     if not settings and not slot_settings:
-        raise MutuallyExclusiveArgumentError('Usage Error: --settings |--slot-settings')
+        raise MutuallyExclusiveArgumentError('Please provide either --settings or --slot-settings parameter.')
 
     settings = settings or []
     slot_settings = slot_settings or []
@@ -555,10 +555,16 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                             slot_result[key] = True  # Mark as slot setting
                     else:
                         dest.update(temp)  # Regular settings go to dest (which is result)
-            except CLIError:
-                setting_name, value = s.split('=', 1)
-                dest[setting_name] = value
-                result.update(dest)
+            except InvalidArgumentValueError:
+                try:
+                    setting_name, value = s.split('=', 1)
+                    dest[setting_name] = value
+                    result.update(dest)
+                except ValueError as ex:
+                    raise InvalidArgumentValueError(
+                        f"Invalid setting format: '{s}'. Expected 'key=value' format or valid JSON.",
+                        recommendation="Use 'key=value' format or provide valid JSON like '{\"key\": \"value\"}'."
+                    ) from ex
 
     for setting_name, value in result.items():
         app_settings.properties[setting_name] = value
@@ -607,7 +613,7 @@ def update_application_settings_polling(cmd, resource_group_name, name, app_sett
                 time.sleep(5)
                 r = send_raw_request(cmd.cli_ctx, method='get', url=poll_url)
         else:
-            raise CLIError(ex)
+            raise AzureResponseError(f"Failed to update application settings: {str(ex)}") from ex
 
 
 def add_azure_storage_account(cmd, resource_group_name, name, custom_id, storage_type, account_name,
