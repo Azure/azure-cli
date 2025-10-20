@@ -88,11 +88,11 @@ def load_arguments(self, _):
                    arg_group='HTTP', nargs='+',
                    help='One or more Entra user identities (object ID or user principal name) '
                    'to associate with the cluster. Multiple values can be separated by spaces or commas.')
-        c.argument('entra_user_full_info', options_list=['--entra-user-full-info', '--entra-info'],
+        c.argument('entra_user_full_info', options_list=['--entra-user-full-info', '--entra-uinfo'],
                    arg_group='HTTP', completer=FilesCompleter(), type=shell_safe_json_parse,
                    help='The Entra user information to associate with the cluster. '
                         'This can be provided as a JSON string or from a file using the `@{path}` syntax. '
-                        'Each entry should include "objectID", "upn", and "displayName" fields. '
+                        'Each entry should include "objectId", "upn", and "displayName" fields. '
                         'Please see: `https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/azure/cli/'
                         'command_modules/hdinsight/tests/latest/entrauserconfig.json`')
 
@@ -433,10 +433,10 @@ def load_arguments(self, _):
                        arg_group='HTTP', nargs='+',
                        help='One or more Entra user identities (object ID or user principal name) to '
                             'associate with the cluster. Multiple values can be separated by spaces or commas.')
-            c.argument('entra_user_full_info', options_list=['--entra-user-full-info', '--entra-info'],
+            c.argument('entra_user_full_info', options_list=['--entra-user-full-info', '--entra-uinfo'],
                        arg_group='HTTP', completer=FilesCompleter(), type=shell_safe_json_parse,
                        help='The Entra user information to associate with the cluster. '
                             'This can be provided as a JSON string or from a file using the `@{path}` syntax. '
-                            'Each entry should include "objectID", "upn", and "displayName" fields. '
+                            'Each entry should include "objectId", "upn", and "displayName" fields. '
                             'Please see: `https://github.com/Azure/azure-cli/blob/dev/src/azure-cli/azure/cli/'
                             'command_modules/hdinsight/tests/latest/entrauserconfig.json`')

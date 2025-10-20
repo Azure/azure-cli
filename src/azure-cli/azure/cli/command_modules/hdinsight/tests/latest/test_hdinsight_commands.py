@@ -685,7 +685,7 @@ class HDInsightClusterTests(ScenarioTest):
             'upn1':'test1@example.com',
             'upn2':'test2@example.com'
         })
-        self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} --entra-info @"{config_path}" --yes')
+        self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} --entra-uinfo @"{config_path}" --yes')
         self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} --entra-uid {upn1} {upn2} --yes')
         self.cmd('az hdinsight credentials show -n {cluster} --resource-group {rg}')
 
@@ -776,7 +776,7 @@ class HDInsightClusterTests(ScenarioTest):
         if entra_user:
             return '--entra-uid {}'.format(entra_user)
         else :
-            return '--entra-info {}'.format(entra_full_info)
+            return '--entra-uinfo {}'.format(entra_full_info)
 
     @staticmethod
     def _with_cluster_config():

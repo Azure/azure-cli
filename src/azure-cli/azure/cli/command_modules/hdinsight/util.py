@@ -387,7 +387,7 @@ def get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, toJson=T
                         error_msg=f'No Entra user found for input: "{data}"',
                         recommendation=[
                             'Verify the user exists in Microsoft Entra ID',
-                            'Confirm the identifier (email, UPN, or object ID) is correct',
+                            'Confirm the identifier (email, upn, or objectId) is correct',
                             'Try querying manually: az ad user show --id <identifier>'
                         ]
                     )
@@ -414,9 +414,9 @@ def get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, toJson=T
                 raise InvalidArgumentValueError(
                     error_msg=f'Invalid keys detected in user object: {", ".join(invalid_keys)}',
                     recommendation=[
-                        'User objects must only contain: ObjectId, DisplayName, and Upn',
+                        'User objects must only contain: objectId, displayName, and upn',
                         f'Remove invalid keys: {", ".join(invalid_keys)}',
-                        'Example valid format: [{"ObjectId": "...", "DisplayName": "...", "Upn": "..."}]'
+                        'Example valid format: [{"objectId": "...", "displayName": "...", "upn": "..."}]'
                     ]
                 )
             rest_auth_entra_users.append({'ObjectId': user_normalized.get('objectid'),
