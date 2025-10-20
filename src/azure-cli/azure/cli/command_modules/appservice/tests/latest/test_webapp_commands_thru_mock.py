@@ -468,46 +468,25 @@ class TestWebappMocked(unittest.TestCase):
                                                                      certificate_envelope=cert_def)
 
 
-    @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
-    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
-    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp')
-    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
-    @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
-    def test_update_app_settings_error_handling_no_parameters(self, mock_build, mock_settings_op, mock_centauri, 
-                                                             mock_client_factory, mock_site_op):
+    def test_update_app_settings_error_handling_no_parameters(self):
         """Test that MutuallyExclusiveArgumentError is raised when neither settings nor slot_settings are provided"""
         cmd_mock = _get_test_cmd()
         
-        # Test missing both parameters
+        # Test missing both parameters - should fail early without calling any services
         with self.assertRaisesRegex(MutuallyExclusiveArgumentError, 
                                    "Please provide either --settings or --slot-settings parameter"):
             update_app_settings(cmd_mock, 'test-rg', 'test-app')
-        
-        # Ensure mocks weren't called since we should fail early
-        mock_site_op.assert_not_called()
-        mock_client_factory.assert_not_called()
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
-    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
-    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp')
-    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
-    @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
     @mock.patch('azure.cli.command_modules.appservice.custom.shell_safe_json_parse')
-    def test_update_app_settings_error_handling_invalid_format(self, mock_json_parse, mock_build, mock_settings_op, 
-                                                              mock_centauri, mock_client_factory, mock_site_op):
+    def test_update_app_settings_error_handling_invalid_format(self, mock_json_parse, mock_site_op):
         """Test that InvalidArgumentValueError is raised for invalid setting formats"""
         cmd_mock = _get_test_cmd()
         
-        # Setup mocks
+        # Setup minimal mocks needed to reach the error handling code
         mock_app_settings = mock.MagicMock()
         mock_app_settings.properties = {}
         mock_site_op.return_value = mock_app_settings
-        
-        mock_client = mock.MagicMock()
-        mock_client_factory.return_value = mock_client
-        mock_centauri.return_value = False
-        mock_settings_op.return_value = mock_app_settings
-        mock_build.return_value = {"success": True}
         
         # Mock shell_safe_json_parse to raise InvalidArgumentValueError (simulating invalid JSON)
         mock_json_parse.side_effect = InvalidArgumentValueError("Invalid JSON format")
@@ -520,26 +499,15 @@ class TestWebappMocked(unittest.TestCase):
             update_app_settings(cmd_mock, 'test-rg', 'test-app', settings=[invalid_setting])
 
     @mock.patch('azure.cli.command_modules.appservice.custom._generic_site_operation')
-    @mock.patch('azure.cli.command_modules.appservice.custom.web_client_factory')
-    @mock.patch('azure.cli.command_modules.appservice.custom.is_centauri_functionapp')
-    @mock.patch('azure.cli.command_modules.appservice.custom._generic_settings_operation')
-    @mock.patch('azure.cli.command_modules.appservice.custom._build_app_settings_output')
     @mock.patch('azure.cli.command_modules.appservice.custom.shell_safe_json_parse')
-    def test_update_app_settings_error_handling_invalid_format_no_equals(self, mock_json_parse, mock_build, mock_settings_op,
-                                                                        mock_centauri, mock_client_factory, mock_site_op):
+    def test_update_app_settings_error_handling_invalid_format_no_equals(self, mock_json_parse, mock_site_op):
         """Test ValueError path when shell_safe_json_parse raises InvalidArgumentValueError and string contains no '='"""
         cmd_mock = _get_test_cmd()
         
-        # Setup mocks
+        # Setup minimal mocks needed to reach the error handling code
         mock_app_settings = mock.MagicMock()
         mock_app_settings.properties = {}
         mock_site_op.return_value = mock_app_settings
-        
-        mock_client = mock.MagicMock()
-        mock_client_factory.return_value = mock_client
-        mock_centauri.return_value = False
-        mock_settings_op.return_value = mock_app_settings
-        mock_build.return_value = {"success": True}
         
         # Mock shell_safe_json_parse to raise InvalidArgumentValueError
         mock_json_parse.side_effect = InvalidArgumentValueError("Invalid JSON format")

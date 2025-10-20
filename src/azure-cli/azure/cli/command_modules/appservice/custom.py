@@ -545,13 +545,15 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                             slot_result[t['name']] = True
                         result[t['name']] = t['value']
                 else:
-                    # For slot settings JSON objects, add values to result and mark as slot settings
+                    # Handle JSON objects: different logic for slot settings vs regular settings
                     if setting_type == "SlotSettings":
+                        # For slot settings JSON objects, add values to result and mark as slot settings
                         result.update(temp)
                         for key in temp.keys():
                             slot_result[key] = True
-                    else:
-                        dest.update(temp)
+                    elif setting_type == "Settings":
+                        # For regular settings JSON objects, add values to result only
+                        result.update(temp)
             except InvalidArgumentValueError:
                 try:
                     setting_name, value = s.split('=', 1)
