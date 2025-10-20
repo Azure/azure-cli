@@ -545,16 +545,13 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                             slot_result[t['name']] = True
                         result[t['name']] = t['value']
                 else:
-                    # Handle JSON objects - when using --slot-settings with object format,
-                    # treat all keys as slot settings
+                    # For slot settings JSON objects, add values to result and mark as slot settings
                     if setting_type == "SlotSettings":
-                        # For slot settings, we need to add values to result (for app settings)
-                        # AND mark them as slot settings in slot_result
-                        result.update(temp)  # Add actual values to result
+                        result.update(temp)
                         for key in temp.keys():
-                            slot_result[key] = True  # Mark as slot setting
+                            slot_result[key] = True
                     else:
-                        dest.update(temp)  # Regular settings go to dest (which is result)
+                        dest.update(temp)
             except InvalidArgumentValueError:
                 try:
                     setting_name, value = s.split('=', 1)
@@ -570,7 +567,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
         app_settings.properties[setting_name] = value
     client = web_client_factory(cmd.cli_ctx)
 
-    # Process slot configurations BEFORE updating application settings
+    # Process slot configurations before updating application settings to ensure proper configuration order.
     # This ensures that slot settings are properly configured before the values are applied
     app_settings_slot_cfg_names = []
     if slot_result:
