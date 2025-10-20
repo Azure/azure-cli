@@ -551,7 +551,7 @@ class TestWebappMocked(unittest.TestCase):
 
     @mock.patch('azure.cli.command_modules.appservice.custom.send_raw_request')
     def test_update_application_settings_polling_error_handling(self, mock_send_request):
-        """Test that AzureResponseError is raised in polling function when appropriate"""
+        """Test that AzureResponseError is raised in polling function when appropriate."""
         cmd_mock = _get_test_cmd()
         
         # Mock an exception that doesn't have the expected structure
