@@ -4156,6 +4156,7 @@ has been deployed ".format(app_service_environment)
         "per_site_scaling": plan_def.per_site_scaling,
         "hosting_environment_profile": plan_def.hosting_environment_profile,
         "async_scaling_enabled": plan_def.async_scaling_enabled,
+        "zone_redundant": zone_redundant if zone_redundant else None,
         "is_custom_mode": is_custom_mode,
         "network": {
             "virtual_network_subnet_id": subnet_resource_id,
