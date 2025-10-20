@@ -31,6 +31,7 @@ def update_identity(instance, tags=None, assignment_restriction=None):
     if assignment_restriction is not None:
         parameters['assignmentRestriction'] = assignment_restriction or instance.assignment_restriction
     return parameters
+    
 
 def list_identity_resources(cmd, resource_group_name, resource_name):
     from azure.cli.command_modules.identity._client_factory import _msi_list_resources_client

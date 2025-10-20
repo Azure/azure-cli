@@ -25,3 +25,4 @@ def load_arguments(self, _):
     with self.argument_context('identity update') as c:
         c.argument('tags', tags_type)
         c.argument('assignment_restriction', required=False, help='Identity assignment restriction, used to restrict the resources that can be assigned to the identity.')
+        
