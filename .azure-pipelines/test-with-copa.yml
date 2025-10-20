@@ -232,7 +232,7 @@ stages:
   - template: templates/test-docker-image-smoke.yml
     parameters:
       architectures: ${{ parameters.architectures }}
-      ShouldTest: ${{parameters.ShouldTest}}
+      ShouldTest: ${{ parameters.ShouldTest }}
       timeoutInMinutes: 100
       AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
       AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
@@ -241,7 +241,7 @@ stages:
   - template: templates/test-docker-image-unit.yml
     parameters:
       architectures: ${{ parameters.architectures }}
-      ShouldTest: ${{parameters.ShouldTest}}
+      ShouldTest: ${{ parameters.ShouldTest }}
       timeoutInMinutes: 180
       AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
       AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]

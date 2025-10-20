@@ -4,9 +4,13 @@ parameters:
 - name: artifactNamePrefix
   type: string
   default: 'docker-azurelinux3.0'
-- name: condition
+- name: artifactNameSuffix
   type: string
-  default: 'succeeded()'
+  default: ''
+- name: ShouldTest
+  displayName: Test?
+  type: boolean
+  default: false
 - name: timeoutInMinutes
   type: number
   default: 100
@@ -30,7 +34,7 @@ jobs:
       ${{ each arch in parameters.architectures }}:
         Azure Linux 3.0 ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          artifactName: ${{ parameters.artifactNamePrefix }}-${{ arch.value }}
+          artifactName: ${{ parameters.artifactNamePrefix }}-${{ arch.value }}${{ parameters.artifactNameSuffix }}
           architecture: ${{ arch.value }}
   pool:
     name: $(pool)
