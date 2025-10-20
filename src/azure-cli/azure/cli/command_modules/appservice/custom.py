@@ -512,7 +512,21 @@ def update_app_settings_functionapp(cmd, resource_group_name, name, settings=Non
 
 
 def _parse_simple_key_value_setting(s, dest):
-    """Parse simple key=value settings format."""
+    """
+    Parse simple key=value settings format.
+
+    Parameters
+    ----------
+    s : str
+        The setting string to parse.
+    dest : dict
+        Dictionary to store the parsed setting.
+
+    Returns
+    -------
+    bool
+        True if parsing succeeded, False otherwise.
+    """
     if ('=' in s and not s.lstrip().startswith(('{"', "[", "{")) and
             not s.startswith('@')):  # @ indicates file input
         try:
