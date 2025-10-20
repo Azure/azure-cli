@@ -155,34 +155,7 @@ AZURE_API_PROFILES = {
     'latest': {
         ResourceType.MGMT_STORAGE: None,
         ResourceType.MGMT_NETWORK: '2022-01-01',
-        ResourceType.MGMT_COMPUTE: SDKProfile('2025-04-01', {
-            'resource_skus': '2021-07-01',
-            'disks': '2025-01-02',
-            'disk_encryption_sets': '2025-01-02',
-            'disk_accesses': '2025-01-02',
-            'disk_restore_point': '2025-01-02',
-            'snapshots': '2025-01-02',
-            'galleries': '2024-03-03',
-            'gallery_images': '2024-03-03',
-            'gallery_image_versions': '2024-03-03',
-            'gallery_applications': '2024-03-03',
-            'gallery_application_versions': '2024-03-03',
-            'gallery_in_vm_access_control_profiles': '2024-03-03',
-            'gallery_in_vm_access_control_profile_versions': '2024-03-03',
-            'gallery_sharing_profile': '2024-03-03',
-            'shared_galleries': '2024-03-03',
-            'shared_gallery_images': '2024-03-03',
-            'shared_gallery_image_versions': '2024-03-03',
-            'community_galleries': '2024-03-03',
-            'community_gallery_images': '2024-03-03',
-            'community_gallery_image_versions': '2024-03-03',
-            'soft_deleted_resource': '2024-03-03',
-            'cloud_services': '2024-11-04',
-            'cloud_service_roles': '2024-11-04',
-            'cloud_service_role_instances': '2024-11-04',
-            'cloud_service_operating_systems': '2024-11-04',
-            'cloud_services_update_domain': '2024-11-04',
-        }),
+        ResourceType.MGMT_COMPUTE: None,
         ResourceType.MGMT_RESOURCE_FEATURES: '2021-07-01',
         ResourceType.MGMT_RESOURCE_LINKS: '2016-09-01',
         ResourceType.MGMT_RESOURCE_LOCKS: '2016-09-01',
@@ -294,11 +267,6 @@ class _ApiVersions:  # pylint: disable=too-few-public-methods
             self._resolve()
             return self._operations_groups_value[item]
         except KeyError:
-            # If operation group not found in client properties, try the profile directly
-            # This handles SDKs that don't have versioned operation groups (e.g., azure-mgmt-compute >= 36.0.0)
-            value = self._sdk_profile.profile.get(item)
-            if value is not None:
-                return self._post_process(value)
             raise AttributeError('Attribute {} does not exist.'.format(item))
 
 
@@ -499,11 +467,9 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
     if api_version is None:
         return resource_type.import_prefix
     if isinstance(api_version, _ApiVersions):
-        # For SDKProfile, use the default version if no operation_group specified
         if operation_group is None:
-            api_version = api_version._sdk_profile.default_api_version
-        else:
-            api_version = getattr(api_version, operation_group)
+            raise ValueError("operation_group is required for resource type '{}'".format(resource_type))
+        api_version = getattr(api_version, operation_group)
     return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_').replace('.', '_'))
 
 
@@ -512,26 +478,9 @@ def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
     sub_mod_prefix = kwargs.get('mod', None)
     operation_group = kwargs.get('operation_group', None)
     sdk_path = get_versioned_sdk_path(api_profile, resource_type, operation_group)
-    
-    # Check if we should try unversioned path
-    # This handles SDKs that only support the latest API version (e.g., azure-mgmt-compute >= 36.0.0)
-    unversioned_path = resource_type.import_prefix
-    should_try_unversioned = False
-    
-    # Try to import the base versioned module to check if it exists
-    if 'v' in sdk_path.split(unversioned_path, 1)[-1]:
-        try:
-            import_module(sdk_path.rsplit('.', 1)[0] if '.' in sdk_path.split('.v', 1)[1] else sdk_path)
-        except (ImportError, IndexError):
-            # Versioned module doesn't exist, use unversioned path
-            logger.debug("Versioned SDK path '%s' not found, using unversioned path '%s'", sdk_path, unversioned_path)
-            sdk_path = unversioned_path
-            should_try_unversioned = True
-    
     if not attr_args:
-        # No attributes to load. Return the sdk module
+        # No attributes to load. Return the versioned sdk
         return import_module(sdk_path)
-    
     results = []
     for mod_attr_path in attr_args:
         if sub_mod_prefix and '#' not in mod_attr_path:
