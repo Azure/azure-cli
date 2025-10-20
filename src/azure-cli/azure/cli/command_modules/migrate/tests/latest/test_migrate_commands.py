@@ -5,7 +5,7 @@
 
 import unittest
 from unittest import mock
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only, record_only
+from azure.cli.testsdk import ScenarioTest, record_only
 from azure.cli.core.util import CLIError
 from knack.util import CLIError as KnackCLIError
 

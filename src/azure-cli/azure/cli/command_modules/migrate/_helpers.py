@@ -4,7 +4,6 @@
 # --------------------------------------------------------------------------------------------
 
 import hashlib
-import time
 from enum import Enum
 from knack.util import CLIError
 from knack.log import get_logger
@@ -55,10 +54,21 @@ class VMNicSelection(Enum):
     NotSelected = "NotSelected"
 
 class IdFormats:
-    MachineArmIdTemplate = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.OffAzure/{siteType}/{siteName}/machines/{machineName}"
-    StoragePathArmIdTemplate = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureStackHCI/storagecontainers/{storagePathName}"
-    ResourceGroupArmIdTemplate = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
-    LogicalNetworkArmIdTemplate = "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.AzureStackHCI/logicalnetworks/{logicalNetworkName}"
+    MachineArmIdTemplate = (
+        "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
+        "/providers/Microsoft.OffAzure/{siteType}/{siteName}/machines/{machineName}"
+    )
+    StoragePathArmIdTemplate = (
+        "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
+        "/providers/Microsoft.AzureStackHCI/storagecontainers/{storagePathName}"
+    )
+    ResourceGroupArmIdTemplate = (
+        "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
+    )
+    LogicalNetworkArmIdTemplate = (
+        "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
+        "/providers/Microsoft.AzureStackHCI/logicalnetworks/{logicalNetworkName}"
+    )
 
 class RoleDefinitionIds:
     ContributorId = "b24988ac-6180-42a0-ab88-20f7382dd24c"
@@ -66,9 +76,9 @@ class RoleDefinitionIds:
 
 class ReplicationDetails:
     class PolicyDetails:
-        DefaultRecoveryPointHistoryInMinutes = 4320  # 72 hours
-        DefaultCrashConsistentFrequencyInMinutes = 60  # 1 hour
-        DefaultAppConsistentFrequencyInMinutes = 240  # 4 hours
+        RecoveryPointHistoryInMinutes = 4320  # 72 hours
+        CrashConsistentFrequencyInMinutes = 60  # 1 hour
+        AppConsistentFrequencyInMinutes = 240  # 4 hours
 
 def send_get_request(cmd, request_uri):
     """
@@ -79,7 +89,7 @@ def send_get_request(cmd, request_uri):
         method='GET',
         url=request_uri,
     )
-    
+
     if response.status_code >= 400:
         error_message = f"Status: {response.status_code}"
         try:
@@ -106,17 +116,17 @@ def get_resource_by_id(cmd, resource_id, api_version):
     """Get an Azure resource by its ARM ID."""
     uri = f"{resource_id}?api-version={api_version}"
     request_uri = cmd.cli_ctx.cloud.endpoints.resource_manager + uri
-    
+
     response = send_raw_request(
         cmd.cli_ctx,
         method='GET',
         url=request_uri,
     )
-    
+
     # Return None for 404 Not Found
     if response.status_code == 404:
         return None
-    
+
     # Raise error for other non-success status codes
     if response.status_code >= 400:
         error_message = f"Failed to get resource. Status: {response.status_code}"
@@ -126,35 +136,47 @@ def get_resource_by_id(cmd, resource_id, api_version):
                 error_details = error_body['error']
                 error_code = error_details.get('code', 'Unknown')
                 error_msg = error_details.get('message', 'No message provided')
-                
+
                 # For specific error codes, provide more helpful messages
                 if error_code == "ResourceGroupNotFound":
-                    resource_group_name = resource_id.split('/')[4] if len(resource_id.split('/')) > 4 else 'unknown'
-                    raise CLIError(f"Resource group '{resource_group_name}' does not exist. Please create it first or check the subscription.")
-                elif error_code == "ResourceNotFound":
+                    rg_parts = resource_id.split('/')
+                    resource_group_name = rg_parts[4] if len(rg_parts) > 4 else 'unknown'
+                    raise CLIError(
+                        f"Resource group '{resource_group_name}' does not exist. "
+                        "Please create it first or check the subscription."
+                    )
+                if error_code == "ResourceNotFound":
                     raise CLIError(f"Resource not found: {error_msg}")
-                else:
-                    raise CLIError(f"{error_code}: {error_msg}")
+
+                raise CLIError(f"{error_code}: {error_msg}")
         except (ValueError, KeyError) as e:
             if not isinstance(e, CLIError):
                 error_message += f", Response: {response.text}"
                 raise CLIError(error_message)
             raise
-    
+
     return response.json()
 
-def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait=False):
-    """Create or update an Azure resource."""
+def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait=False):  # pylint: disable=unused-argument
+    """Create or update an Azure resource.
+
+    Args:
+        cmd: Command context
+        resource_id: Resource ID
+        api_version: API version
+        properties: Resource properties
+        no_wait: If True, does not wait for operation to complete (reserved for future use)
+    """
     import json as json_module
-    
+
     uri = f"{resource_id}?api-version={api_version}"
     request_uri = cmd.cli_ctx.cloud.endpoints.resource_manager + uri
     # Convert properties to JSON string for the body
     body = json_module.dumps(properties)
-    
+
     # Headers need to be passed as a list of strings in "key=value" format
     headers = ['Content-Type=application/json']
-    
+
     response = send_raw_request(
         cmd.cli_ctx,
         method='PUT',
@@ -162,7 +184,7 @@ def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait
         body=body,
         headers=headers
     )
-    
+
     if response.status_code >= 400:
         error_message = f"Failed to create/update resource. Status: {response.status_code}"
         try:
@@ -175,11 +197,11 @@ def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait
         except (ValueError, KeyError):
             error_message += f", Response: {response.text}"
         raise CLIError(error_message)
-    
+
     # Handle empty response for async operations (202 status code)
     if response.status_code == 202 or not response.text or response.text.strip() == '':
         return None
-    
+
     try:
         return response.json()
     except (ValueError, json_module.JSONDecodeError):
@@ -190,31 +212,31 @@ def delete_resource(cmd, resource_id, api_version):
     """Delete an Azure resource."""
     uri = f"{resource_id}?api-version={api_version}"
     request_uri = cmd.cli_ctx.cloud.endpoints.resource_manager + uri
-    
+
     response = send_raw_request(
         cmd.cli_ctx,
         method='DELETE',
         url=request_uri,
     )
-    
+
     return response.status_code < 400
 
 def validate_arm_id_format(arm_id, template):
     """
     Validate if an ARM ID matches the expected template format.
-    
+
     Args:
         arm_id (str): The ARM ID to validate
         template (str): The template format to match against
-    
+
     Returns:
         bool: True if the ARM ID matches the template format
     """
     import re
-    
+
     if not arm_id or not arm_id.startswith('/'):
         return False
-    
+
     # Convert template to regex pattern
     # Replace {variableName} with a pattern that matches valid Azure resource names
     pattern = template
@@ -225,8 +247,8 @@ def validate_arm_id_format(arm_id, template):
     pattern = pattern.replace('{machineName}', '[a-zA-Z0-9._-]+')
     pattern = pattern.replace('{storagePathName}', '[a-zA-Z0-9._-]+')
     pattern = pattern.replace('{logicalNetworkName}', '[a-zA-Z0-9._-]+')
-    
+
     # Make the pattern case-insensitive and match the whole string
     pattern = f'^{pattern}$'
-    
+
     return bool(re.match(pattern, arm_id, re.IGNORECASE))
