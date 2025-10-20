@@ -1,49 +1,27 @@
 # Azure CLI Migration Module
 
-This module provides comprehensive migration capabilities for Azure resources and workloads through Azure CLI commands, with special focus on Azure Local (Azure Stack HCI) migrations.
+This module provides server discovery and replication capabilities for Azure resources and workloads through Azure CLI commands, with special focus on Azure Local (Azure Stack HCI) migrations.
 
 ## Features
 
-- **Cross-platform PowerShell integration**: Leverages PowerShell cmdlets on Windows, Linux, and macOS
-- **Azure Local migration**: Full support for migrating VMs to Azure Stack HCI
-- **Server discovery and replication**: Discover and replicate servers from various sources
-- **Authentication management**: Comprehensive Azure authentication support
+- **Server discovery**: Discover servers from various sources
+- **Replication management**: Initialize and create new replications for supported workloads
 
 ## Prerequisites
 
 - Azure CLI 2.0+
-- PowerShell Core (for cross-platform support) or Windows PowerShell
 - Valid Azure subscription
 - Appropriate permissions for migration operations
 - For Azure Local: Azure Stack HCI environment with proper networking
 
 ## Command Overview
 
-The Azure CLI migrate module provides the following command groups:
+The Azure CLI migrate module provides the following commands:
 
-### Core Migration Commands
+### Server Discovery
 ```bash
-# Check migration prerequisites
-az migrate check-prerequisites
-
-# Set up migration environment
-az migrate setup-env --install-powershell
-
-# Verify migration setup
-az migrate verify-setup --resource-group myRG --project-name myProject
-```
-
-### Server Discovery and Replication
-```bash
-# List discovered servers
-az migrate server list-discovered --resource-group myRG --project-name myProject --source-machine-type VMware
-
-# Show discovered servers in table format
-az migrate server get-discovered-servers-table --resource-group myRG --project-name myProject
-
-# Find servers by display name
-az migrate server find-by-name --resource-group myRG --project-name myProject --display-name "WebServer"
-
+# Get discovered servers
+az migrate get-discovered-server --resource-group myRG --project-name myProject
 # Create server replication
 az migrate server create-replication --resource-group myRG --project-name myProject --target-vm-name myVM --target-resource-group targetRG --target-network targetNet
 
