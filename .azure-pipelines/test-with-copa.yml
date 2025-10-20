@@ -40,7 +40,7 @@ stages:
     steps:
     - checkout: none
     - task: Bash@3
-      name: PrepareAzCliVersion
+      name: SetAzCliVersionTask
       displayName: Prepare Azure CLI Info
       inputs:
         targetType: 'inline'
@@ -94,6 +94,10 @@ stages:
   displayName: Build RPM and Docker Images
   dependsOn: 
   - PrepareInfo
+  variables:
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageTag'] ]
   jobs:
   - job: BuildRpmPackagesAzureLinux
     displayName: Build Rpm Package
@@ -149,10 +153,7 @@ stages:
             image: mcr.microsoft.com/azurelinux/base/core:3.0
     pool:
       name: $(pool)
-    variables:
-      AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
-      AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
-      AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageTag'] ]
+
     steps:
       - bash: ./scripts/ci/install_docker.sh
         displayName: Install Docker
@@ -193,6 +194,10 @@ stages:
   dependsOn: 
   - PrepareInfo
   - Build 
+  variables:
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageTag'] ]
   jobs:
   - job: TestRpmPackagesAzureLinux
     displayName: Test Rpm Package
@@ -207,8 +212,6 @@ stages:
             image: mcr.microsoft.com/azurelinux/base/core:3.0
             artifact: rpm-azurelinux3.0-${{ arch.value }}
             pool: ${{ arch.pool }}
-    variables:
-      AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
     steps:
     - task: DownloadPipelineArtifact@1
       displayName: 'Download Build Artifacts'
@@ -234,24 +237,27 @@ stages:
       architectures: ${{ parameters.architectures }}
       ShouldTest: ${{ parameters.ShouldTest }}
       timeoutInMinutes: 100
-      AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
-      AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
-      AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageTag'] ]
+      AzCliVersion: $(AzCliVersion)
+      AzCliImageName: $(AzCliImageName)
+      AzCliImageTag: $(AzCliImageTag)
 
   - template: templates/test-docker-image-unit.yml
     parameters:
       architectures: ${{ parameters.architectures }}
       ShouldTest: ${{ parameters.ShouldTest }}
       timeoutInMinutes: 180
-      AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
-      AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
-      AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageTag'] ]
-
+      AzCliVersion: $(AzCliVersion)
+      AzCliImageName: $(AzCliImageName)
+      AzCliImageTag: $(AzCliImageTag)
 - stage: UseCopaToPatch
   displayName: Patch with Copacetic
   dependsOn: 
   - PrepareInfo
   - Build
+  variables:
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageTag'] ]
   jobs:
   - job: BuildCopaPatchedDockerImageAzureLinux
     displayName: Build Copa Patched Docker Image
@@ -266,11 +272,7 @@ stages:
             architecture: ${{ arch.value }}
     pool:
       name: $(pool)
-    variables:
-      AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
-      AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
-      AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageTag'] ]
-      AzCliImagePatchedTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImagePatchedTag'] ]
+
     steps:
       - task: DownloadPipelineArtifact@1
         displayName: 'Download Docker Image'
@@ -460,6 +462,10 @@ stages:
   - PrepareInfo
   - Build
   - UseCopaToPatch
+  variables:
+    AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliVersion'] ]
+    AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageName'] ]
+    AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['SetAzCliVersionTask.AzCliImageTag'] ]
   jobs:
   - job: TestCopaPatchedDockerImageAzureLinux
     displayName: Test Copa Patched Docker Image
@@ -473,11 +479,6 @@ stages:
             architecture: ${{ arch.value }}
     pool:
       name: $(pool)
-    variables:
-      AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliVersion'] ]
-      AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageName'] ]
-      AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImageTag'] ]
-      AzCliImagePatchedTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersion.AzCliImagePatchedTag'] ]
     steps:
       - task: DownloadPipelineArtifact@1
         displayName: 'Download Docker Image'
