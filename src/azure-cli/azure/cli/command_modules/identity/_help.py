@@ -20,10 +20,6 @@ examples:
     text: |
         az identity create --name MyIdentity --resource-group MyResourceGroup
 
-  - name: Create an identity with regional assignment restrictions.
-    text: |
-        az identity create --name MyIdentity --resource-group MyResourceGroup --isolation-scope Regional
-  
   - name: Create an identity with resource assignment restrictions.
     text: |
         az identity create --name MyIdentity --resource-group MyResourceGroup --assignment-restriction {providers: ['Microsoft.Compute', 'Microsoft.Storage/Accounts']}
@@ -33,9 +29,6 @@ helps['identity update'] = """
 type: command
 short-summary: Update an identity.
 examples:
-  - name: Update an identity to restrict assignment within an Azure region.
-    text: |
-        az identity update --name MyIdentity --resource-group MyResourceGroup --isolation-scope Regional
   - name: Update an identity to restrict assignment to specific resources.
     text: |
         az identity update --name MyIdentity --resource-group MyResourceGroup --assignment-restriction {providers: ['Microsoft.Compute', 'Microsoft.Storage/Accounts']}
