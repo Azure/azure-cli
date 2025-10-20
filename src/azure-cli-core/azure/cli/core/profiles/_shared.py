@@ -494,9 +494,6 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
         e.g. Converts azure.mgmt.storage.operations.storage_accounts_operations to
                       azure.mgmt.storage.v2016_12_01.operations.storage_accounts_operations
                       azure.keyvault.v7_0.models.KeyVault
-        
-        For SDKs that only support the latest API version (e.g., azure-mgmt-compute >= 36.0.0),
-        returns the unversioned path.
     """
     api_version = get_api_version(api_profile, resource_type)
     if api_version is None:
@@ -507,20 +504,7 @@ def get_versioned_sdk_path(api_profile, resource_type, operation_group=None):
             api_version = api_version._sdk_profile.default_api_version
         else:
             api_version = getattr(api_version, operation_group)
-    
-    # Try versioned path first for backward compatibility
-    versioned_path = '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_').replace('.', '_'))
-    
-    # Check if the versioned module exists by attempting to import it
-    try:
-        import_module(versioned_path)
-        return versioned_path
-    except ImportError:
-        # SDK doesn't support versioned paths (e.g., azure-mgmt-compute >= 36.0.0)
-        # Fall back to unversioned path
-        logger.debug("Versioned path '%s' not found, falling back to unversioned path '%s'",
-                     versioned_path, resource_type.import_prefix)
-        return resource_type.import_prefix
+    return '{}.v{}'.format(resource_type.import_prefix, api_version.replace('-', '_').replace('.', '_'))
 
 
 def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
@@ -528,9 +512,26 @@ def get_versioned_sdk(api_profile, resource_type, *attr_args, **kwargs):
     sub_mod_prefix = kwargs.get('mod', None)
     operation_group = kwargs.get('operation_group', None)
     sdk_path = get_versioned_sdk_path(api_profile, resource_type, operation_group)
+    
+    # Check if we should try unversioned path
+    # This handles SDKs that only support the latest API version (e.g., azure-mgmt-compute >= 36.0.0)
+    unversioned_path = resource_type.import_prefix
+    should_try_unversioned = False
+    
+    # Try to import the base versioned module to check if it exists
+    if 'v' in sdk_path.split(unversioned_path, 1)[-1]:
+        try:
+            import_module(sdk_path.rsplit('.', 1)[0] if '.' in sdk_path.split('.v', 1)[1] else sdk_path)
+        except (ImportError, IndexError):
+            # Versioned module doesn't exist, use unversioned path
+            logger.debug("Versioned SDK path '%s' not found, using unversioned path '%s'", sdk_path, unversioned_path)
+            sdk_path = unversioned_path
+            should_try_unversioned = True
+    
     if not attr_args:
-        # No attributes to load. Return the versioned sdk
+        # No attributes to load. Return the sdk module
         return import_module(sdk_path)
+    
     results = []
     for mod_attr_path in attr_args:
         if sub_mod_prefix and '#' not in mod_attr_path:
