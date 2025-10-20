@@ -557,8 +557,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
             except InvalidArgumentValueError:
                 try:
                     setting_name, value = s.split('=', 1)
-                    dest[setting_name] = value
-                    result.update(dest)
+                    result[setting_name] = value
                 except ValueError as ex:
                     raise InvalidArgumentValueError(
                         f"Invalid setting format: '{s}'. Expected 'key=value' format or valid JSON.",
