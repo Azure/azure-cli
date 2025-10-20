@@ -99,8 +99,9 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         gateway_config['restAuthCredential.password'] = http_password
     else:
         if entra_user_identity and entra_user_full_info:
-            raise MutuallyExclusiveArgumentError('Cannot provide both --entra-user-identity and'
-            ' --entra-user-full-info parameters.')
+            raise MutuallyExclusiveArgumentError(
+                'Cannot provide both --entra-user-identity and'
+                ' --entra-user-full-info parameters.')
         gateway_config['restAuthCredential.isEnabled'] = 'false'
         gateway_config['restAuthEntraUsers'] = get_entra_user_info(cmd, entra_user_identity, entra_user_full_info)
     cluster_configurations['gateway'] = gateway_config
@@ -918,8 +919,9 @@ def _validate_schedule_configuration(autoscale_configuration):
     if not autoscale_configuration.recurrence:
         raise CLIError('The cluster has not enabled Schedule-based autoscale.')
 
-def update_gateway_settings(cmd, client, cluster_name, resource_group_name, http_username=None, 
-                            http_password=None,  entra_user_identity=None, entra_user_full_info=None, no_wait=False):
+
+def update_gateway_settings(cmd, client, cluster_name, resource_group_name, http_username=None,
+                            http_password=None, entra_user_identity=None, entra_user_full_info=None, no_wait=False):
     from azure.mgmt.hdinsight.models import UpdateGatewaySettingsParameters
     from .util import get_entra_user_info
     if not http_password and not entra_user_identity and not entra_user_full_info:
@@ -930,18 +932,20 @@ def update_gateway_settings(cmd, client, cluster_name, resource_group_name, http
     if http_password and not http_username:
         http_username = 'admin'
     if entra_user_identity and entra_user_full_info:
-        raise MutuallyExclusiveArgumentError('Cannot provide both --entra-user-identity and'
-        ' --entra-user-full-info parameters.')
+        raise MutuallyExclusiveArgumentError(
+            'Cannot provide both --entra-user-identity and'
+            ' --entra-user-full-info parameters.')
     rest_auth_entra_users_data = None
     if entra_user_identity or entra_user_full_info:
         rest_auth_entra_users_data = get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, False)
     update_gateway_settings_parameters = UpdateGatewaySettingsParameters(
-        is_credential_enabled = bool(http_password),
-        user_name = http_username,
-        password = http_password,
-        rest_auth_entra_users = rest_auth_entra_users_data
+        is_credential_enabled=bool(http_password),
+        user_name=http_username,
+        password=http_password,
+        rest_auth_entra_users=rest_auth_entra_users_data
     )
     try:
-        return sdk_no_wait(no_wait, client.begin_update_gateway_settings, resource_group_name, cluster_name, update_gateway_settings_parameters)
+        return sdk_no_wait(no_wait, client.begin_update_gateway_settings, resource_group_name,
+                           cluster_name, update_gateway_settings_parameters)
     except Exception as ex:
         raise CLIError(str(ex))

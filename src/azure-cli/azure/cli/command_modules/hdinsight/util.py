@@ -362,6 +362,7 @@ def get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, toJson=T
 
     def is_email(value):
         return "@" in value and "." in value
+
     def normalize_keys(d):
         return {k.lower(): v for k, v in d.items()}
 
@@ -390,8 +391,9 @@ def get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, toJson=T
                             'Try querying manually: az ad user show --id <identifier>'
                         ]
                     )
-                rest_auth_entra_users.append({'ObjectId': user['id'], 
-                                              'DisplayName': user['displayName'], 'Upn': user['userPrincipalName']})
+                rest_auth_entra_users.append({'ObjectId': user['id'],
+                                              'DisplayName': user['displayName'],
+                                              'Upn': user['userPrincipalName']})
             except ResourceNotFoundError:
                 raise
             except Exception as ex:
@@ -417,6 +419,7 @@ def get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, toJson=T
                         'Example valid format: [{"ObjectId": "...", "DisplayName": "...", "Upn": "..."}]'
                     ]
                 )
-            rest_auth_entra_users.append({'ObjectId': user_normalized.get('objectid'), 
-                                          'DisplayName': user_normalized.get('displayname'), 'Upn': user_normalized.get('upn')})
+            rest_auth_entra_users.append({'ObjectId': user_normalized.get('objectid'),
+                                          'DisplayName': user_normalized.get('displayname'),
+                                          'Upn': user_normalized.get('upn')})
     return json.dumps(rest_auth_entra_users) if toJson else rest_auth_entra_users
