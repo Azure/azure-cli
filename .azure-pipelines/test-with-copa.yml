@@ -471,36 +471,22 @@ stages:
     AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
     AzCliImagePatchedTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImagePatchedTag'] ]
   jobs:
-  - job: TestCopaPatchedDockerImage
-    displayName: Test Copa Patched Docker Image
-    timeoutInMinutes: 180
-    strategy:
-      matrix:
-        ${{ each arch in parameters.architectures }}:
-          ${{ arch.name }}:
-            pool: ${{ arch.pool }}
-            downloadArtifactName: docker-azurelinux3.0-${{ arch.value }}-patched
-            architecture: ${{ arch.value }}
-    pool:
-      name: $(pool)
-    steps:
-    - template: templates/test-docker-image-smoke.yml
-      parameters:
-        architectures: ${{ parameters.architectures }}
-        ShouldTest: ${{ parameters.ShouldTest }}
-        downloadArtifactNameSuffix: '-patched'
-        timeoutInMinutes: 100
-        AzCliVersion: $(AzCliVersion)
-        AzCliImageName: $(AzCliImageName)
-        AzCliImageTag: $(AzCliImagePatchedTag)
-        
+  - template: templates/test-docker-image-smoke.yml
+    parameters:
+      architectures: ${{ parameters.architectures }}
+      ShouldTest: ${{ parameters.ShouldTest }}
+      downloadArtifactNameSuffix: '-patched'
+      timeoutInMinutes: 100
+      AzCliVersion: $(AzCliVersion)
+      AzCliImageName: $(AzCliImageName)
+      AzCliImageTag: $(AzCliImagePatchedTag)
 
-    - template: templates/test-docker-image-unit.yml
-      parameters:
-        architectures: ${{ parameters.architectures }}
-        ShouldTest: ${{ parameters.ShouldTest }}
-        downloadArtifactNameSuffix: '-patched'
-        timeoutInMinutes: 180
-        AzCliVersion: $(AzCliVersion)
-        AzCliImageName: $(AzCliImageName)
-        AzCliImageTag: $(AzCliImagePatchedTag)
+  - template: templates/test-docker-image-unit.yml
+    parameters:
+      architectures: ${{ parameters.architectures }}
+      ShouldTest: ${{ parameters.ShouldTest }}
+      downloadArtifactNameSuffix: '-patched'
+      timeoutInMinutes: 180
+      AzCliVersion: $(AzCliVersion)
+      AzCliImageName: $(AzCliImageName)
+      AzCliImageTag: $(AzCliImagePatchedTag)
