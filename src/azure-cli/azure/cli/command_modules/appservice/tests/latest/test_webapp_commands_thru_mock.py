@@ -469,7 +469,7 @@ class TestWebappMocked(unittest.TestCase):
 
 
     def test_update_app_settings_error_handling_no_parameters(self):
-        """Test that MutuallyExclusiveArgumentError is raised when neither settings nor slot_settings are provided"""
+        """Test that MutuallyExclusiveArgumentError is raised when neither settings nor slot_settings are provided."""
         cmd_mock = _get_test_cmd()
         
         # Test missing both parameters - should fail early without calling any services
