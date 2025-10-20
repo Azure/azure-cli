@@ -41,13 +41,11 @@ class TestActions(unittest.TestCase):
 
     @staticmethod
     def _get_compute_model(model_type, api_version=None):
-        from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
+        # With azure-mgmt-compute 34.1.0+, models are imported directly from azure.mgmt.compute.models
+        # instead of versioned paths like azure.mgmt.compute.v2024_11_01.models
         from importlib import import_module
-
-        if api_version is None:
-            api_version = AZURE_API_PROFILES['latest'][ResourceType.MGMT_COMPUTE].default_api_version
-        api_version = "v" + api_version.replace("-", "_")
-        result = getattr(import_module('azure.mgmt.compute.{}.models'.format(api_version)), model_type)
+        
+        result = getattr(import_module('azure.mgmt.compute.models'), model_type)
         return result
 
     def test_generate_specfied_ssh_key_files(self):
