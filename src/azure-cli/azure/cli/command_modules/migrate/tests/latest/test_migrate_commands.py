@@ -5,7 +5,7 @@
 
 import unittest
 from unittest import mock
-from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only
+from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, live_only, record_only
 from azure.cli.core.util import CLIError
 from knack.util import CLIError as KnackCLIError
 
@@ -697,6 +697,254 @@ class MigrateReplicationNewTests(ScenarioTest):
         except Exception as e:
             # Expected to fail at later stages
             pass
+
+
+class MigrateScenarioTests(ScenarioTest):
+    @record_only()
+    def test_migrate_local_get_discovered_server_all_parameters(self):
+        self.kwargs.update({
+            'project': 'test-migrate-project',
+            'rg': 'test-resource-group',
+            'display_name': 'test-server',
+            'machine_type': 'VMware',
+            'subscription': '00000000-0000-0000-0000-000000000000',
+            'machine_name': 'machine-001',
+            'appliance': 'test-appliance'
+        })
+
+        # Test with project-name and resource-group-name parameters
+        self.cmd('az migrate local get-discovered-server '
+                '--project-name {project} '
+                '--resource-group-name {rg}')
+
+        # Test with display-name filter
+        self.cmd('az migrate local get-discovered-server '
+                '--project-name {project} '
+                '--resource-group-name {rg} '
+                '--display-name {display_name}')
+
+        # Test with source-machine-type
+        self.cmd('az migrate local get-discovered-server '
+                '--project-name {project} '
+                '--resource-group-name {rg} '
+                '--source-machine-type {machine_type}')
+
+        # Test with subscription-id
+        self.cmd('az migrate local get-discovered-server '
+                '--project-name {project} '
+                '--resource-group-name {rg} '
+                '--subscription-id {subscription}')
+
+        # Test with name parameter
+        self.cmd('az migrate local get-discovered-server '
+                '--project-name {project} '
+                '--resource-group-name {rg} '
+                '--name {machine_name}')
+
+        # Test with appliance-name
+        self.cmd('az migrate local get-discovered-server '
+                '--project-name {project} '
+                '--resource-group-name {rg} '
+                '--appliance-name {appliance}')
+
+        # Test with all parameters combined
+        self.cmd('az migrate local get-discovered-server '
+                '--project-name {project} '
+                '--resource-group-name {rg} '
+                '--display-name {display_name} '
+                '--source-machine-type {machine_type} '
+                '--subscription-id {subscription} '
+                '--appliance-name {appliance}')
+
+    @record_only()
+    def test_migrate_local_replication_init_all_parameters(self):
+        self.kwargs.update({
+            'rg': 'test-resource-group',
+            'project': 'test-migrate-project',
+            'source_appliance': 'vmware-appliance',
+            'target_appliance': 'azlocal-appliance',
+            'storage_account': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Storage/storageAccounts/cachestorage',
+            'subscription': '00000000-0000-0000-0000-000000000000'
+        })
+
+        # Test with required parameters
+        self.cmd('az migrate local replication init '
+                '--resource-group-name {rg} '
+                '--project-name {project} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance}')
+
+        # Test with cache-storage-account-id
+        self.cmd('az migrate local replication init '
+                '--resource-group-name {rg} '
+                '--project-name {project} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--cache-storage-account-id {storage_account}')
+
+        # Test with subscription-id
+        self.cmd('az migrate local replication init '
+                '--resource-group-name {rg} '
+                '--project-name {project} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--subscription-id {subscription}')
+
+        # Test with pass-thru
+        self.cmd('az migrate local replication init '
+                '--resource-group-name {rg} '
+                '--project-name {project} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--pass-thru')
+
+        # Test with all parameters
+        self.cmd('az migrate local replication init '
+                '--resource-group-name {rg} '
+                '--project-name {project} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--cache-storage-account-id {storage_account} '
+                '--subscription-id {subscription} '
+                '--pass-thru')
+
+    @record_only()
+    def test_migrate_local_replication_new_with_machine_id(self):
+        self.kwargs.update({
+            'machine_id': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Migrate/migrateprojects/test-project/machines/machine-001',
+            'storage_path': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.AzureStackHCI/storageContainers/storage01',
+            'target_rg': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/target-rg',
+            'vm_name': 'migrated-vm-01',
+            'source_appliance': 'vmware-appliance',
+            'target_appliance': 'azlocal-appliance',
+            'virtual_switch': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.AzureStackHCI/logicalNetworks/network01',
+            'test_switch': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.AzureStackHCI/logicalNetworks/test-network',
+            'os_disk': 'disk-0',
+            'subscription': '00000000-0000-0000-0000-000000000000'
+        })
+
+        # Test with machine-id (default user mode)
+        self.cmd('az migrate local replication new '
+                '--machine-id {machine_id} '
+                '--target-storage-path-id {storage_path} '
+                '--target-resource-group-id {target_rg} '
+                '--target-vm-name {vm_name} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--target-virtual-switch-id {virtual_switch} '
+                '--os-disk-id {os_disk}')
+
+        # Test with target-vm-cpu-core
+        self.cmd('az migrate local replication new '
+                '--machine-id {machine_id} '
+                '--target-storage-path-id {storage_path} '
+                '--target-resource-group-id {target_rg} '
+                '--target-vm-name {vm_name} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--target-virtual-switch-id {virtual_switch} '
+                '--os-disk-id {os_disk} '
+                '--target-vm-cpu-core 4')
+
+        # Test with target-vm-ram
+        self.cmd('az migrate local replication new '
+                '--machine-id {machine_id} '
+                '--target-storage-path-id {storage_path} '
+                '--target-resource-group-id {target_rg} '
+                '--target-vm-name {vm_name} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--target-virtual-switch-id {virtual_switch} '
+                '--os-disk-id {os_disk} '
+                '--target-vm-ram 8192')
+
+        # Test with is-dynamic-memory-enabled
+        self.cmd('az migrate local replication new '
+                '--machine-id {machine_id} '
+                '--target-storage-path-id {storage_path} '
+                '--target-resource-group-id {target_rg} '
+                '--target-vm-name {vm_name} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--target-virtual-switch-id {virtual_switch} '
+                '--os-disk-id {os_disk} '
+                '--is-dynamic-memory-enabled false')
+
+        # Test with target-test-virtual-switch-id
+        self.cmd('az migrate local replication new '
+                '--machine-id {machine_id} '
+                '--target-storage-path-id {storage_path} '
+                '--target-resource-group-id {target_rg} '
+                '--target-vm-name {vm_name} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--target-virtual-switch-id {virtual_switch} '
+                '--target-test-virtual-switch-id {test_switch} '
+                '--os-disk-id {os_disk}')
+
+        # Test with subscription-id
+        self.cmd('az migrate local replication new '
+                '--machine-id {machine_id} '
+                '--target-storage-path-id {storage_path} '
+                '--target-resource-group-id {target_rg} '
+                '--target-vm-name {vm_name} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--target-virtual-switch-id {virtual_switch} '
+                '--os-disk-id {os_disk} '
+                '--subscription-id {subscription}')
+
+    @record_only()
+    def test_migrate_local_replication_new_with_machine_index(self):
+        """Test replication new command with machine-index"""
+        self.kwargs.update({
+            'machine_index': 1,
+            'project': 'test-migrate-project',
+            'rg': 'test-resource-group',
+            'storage_path': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.AzureStackHCI/storageContainers/storage01',
+            'target_rg': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/target-rg',
+            'vm_name': 'migrated-vm-02',
+            'source_appliance': 'vmware-appliance',
+            'target_appliance': 'azlocal-appliance',
+            'virtual_switch': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.AzureStackHCI/logicalNetworks/network01',
+            'os_disk': 'disk-0'
+        })
+
+        # Test with machine-index and required parameters
+        self.cmd('az migrate local replication new '
+                '--machine-index {machine_index} '
+                '--project-name {project} '
+                '--resource-group-name {rg} '
+                '--target-storage-path-id {storage_path} '
+                '--target-resource-group-id {target_rg} '
+                '--target-vm-name {vm_name} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--target-virtual-switch-id {virtual_switch} '
+                '--os-disk-id {os_disk}')
+
+    @record_only()
+    def test_migrate_local_replication_new_power_user_mode(self):
+        """Test replication new command with power user mode (disk-to-include and nic-to-include)"""
+        self.kwargs.update({
+            'machine_id': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.Migrate/migrateprojects/test-project/machines/machine-003',
+            'storage_path': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test-rg/providers/Microsoft.AzureStackHCI/storageContainers/storage01',
+            'target_rg': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/target-rg',
+            'vm_name': 'migrated-vm-03',
+            'source_appliance': 'vmware-appliance',
+            'target_appliance': 'azlocal-appliance'
+        })
+
+        # Test with disk-to-include and nic-to-include (power user mode)
+        self.cmd('az migrate local replication new '
+                '--machine-id {machine_id} '
+                '--target-storage-path-id {storage_path} '
+                '--target-resource-group-id {target_rg} '
+                '--target-vm-name {vm_name} '
+                '--source-appliance-name {source_appliance} '
+                '--target-appliance-name {target_appliance} '
+                '--disk-to-include disk-0 disk-1 '
+                '--nic-to-include nic-0')
 
 
 if __name__ == '__main__':
