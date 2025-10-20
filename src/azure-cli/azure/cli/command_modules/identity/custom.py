@@ -17,8 +17,6 @@ def create_identity(client, resource_group_name, resource_name, location, tags=N
     parameters['location'] = location
     if tags is not None:
         parameters['tags'] = tags
-    if isolation_scope is not None:
-        parameters['isolationScope'] = isolation_scope
     if assignment_restriction is not None:
         parameters['assignmentRestriction'] = assignment_restriction
     return client.create_or_update(resource_group_name=resource_group_name,
@@ -30,8 +28,6 @@ def update_identity(instance, tags=None, isolation_scope=None, assignment_restri
     parameters = {}
     if tags is not None:
         parameters['tags'] = tags
-    if isolation_scope is not None:
-        parameters['isolationScope'] = isolation_scope or instance.isolation_scope
     if assignment_restriction is not None:
         parameters['assignmentRestriction'] = assignment_restriction or instance.assignment_restriction
     return parameters
