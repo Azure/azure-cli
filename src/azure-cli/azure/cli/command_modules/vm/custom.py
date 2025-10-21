@@ -873,7 +873,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_user_redeploy_scheduled_events=None, zone_placement_policy=None, include_zones=None,
               exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None):
+              key_incarnation_id=None, add_proxy_agent_extension=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1103,7 +1103,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         imds_mode=imds_mode,
         wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
         imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
-        key_incarnation_id=key_incarnation_id)
+        key_incarnation_id=key_incarnation_id, add_proxy_agent_extension=add_proxy_agent_extension)
 
     vm_resource['dependsOn'] = vm_dependencies
 

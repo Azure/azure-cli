@@ -311,7 +311,7 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
         enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
         zone_placement_policy=None, include_zones=None, exclude_zones=None, align_regional_disks_to_vm_zone=None,
         wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
-        imds_access_control_profile_reference_id=None, key_incarnation_id=None):
+        imds_access_control_profile_reference_id=None, key_incarnation_id=None, add_proxy_agent_extension=None):
 
     os_caching = disk_info['os'].get('caching')
 
@@ -694,6 +694,9 @@ def build_vm_resource(  # pylint: disable=too-many-locals, too-many-statements, 
 
     if imds:
         proxy_agent_settings['imds'] = imds
+
+    if add_proxy_agent_extension is not None:
+        proxy_agent_settings['addProxyAgentExtension'] = add_proxy_agent_extension
 
     if proxy_agent_settings:
         vm_properties['securityProfile']['proxyAgentSettings'] = proxy_agent_settings
