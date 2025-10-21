@@ -224,6 +224,14 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan')
         c.argument('registry_key', options_list=['--registry-key'], help='Registry key for the adapter to remove')
 
+    with self.argument_context('appservice plan instance rdp') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                   configured_default='appserviceplan', id_part='name')
+        c.argument('worker_name', options_list=['--worker-name'], help='The name of the worker instance to connect to', required=True)
+        c.argument('bastion_name', options_list=['--bastion-name'], help='Name of the Azure Bastion host to use for the RDP connection', required=True)
+        c.argument('bastion_resource_group_name', options_list=['--bastion-resource-group'], help='Resource group name of the Azure Bastion host (defaults to the plan resource group)')
+
     with self.argument_context('webapp create') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new web app. Web app name can contain only allow alphanumeric characters and hyphens, it cannot start or end in a hyphen, and must be less than 64 characters.',
                    validator=validate_site_create,
