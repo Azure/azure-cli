@@ -232,6 +232,21 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('bastion_name', options_list=['--bastion-name'], help='Name of the Azure Bastion host to use for the RDP connection', required=True)
         c.argument('bastion_resource_group_name', options_list=['--bastion-resource-group'], help='Resource group name of the Azure Bastion host (defaults to the plan resource group)')
 
+    with self.argument_context('appservice plan identity') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                   configured_default='appserviceplan', id_part='name',
+                   local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+
+    with self.argument_context('appservice plan identity assign') as c:
+        c.argument('identities', nargs='*', options_list=['--identities'],
+                   help='Space-separated identities to assign. Use \'[system]\' to refer to the system assigned identity, or a resource ID to refer to a user assigned identity.')
+
+    with self.argument_context('appservice plan identity remove') as c:
+        c.argument('identities', nargs='*', options_list=['--identities'],
+                   help='Space-separated identities to remove. Use \'[system]\' to refer to the system assigned identity, or a resource ID to refer to a user assigned identity.')
+
     with self.argument_context('webapp create') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new web app. Web app name can contain only allow alphanumeric characters and hyphens, it cannot start or end in a hyphen, and must be less than 64 characters.',
                    validator=validate_site_create,

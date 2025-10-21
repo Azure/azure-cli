@@ -4561,6 +4561,179 @@ def remove_plan_managed_instance_storage_mount(cmd, resource_group_name, name, m
     # Update using AAZ
     return _patch_plan_storage_mounts(cmd, resource_group_name, name, mounts, location)
 
+
+def show_plan_identity(cmd, resource_group_name, name):
+    """Show the identity configuration of an app service plan."""
+    # Use AAZ-based approach to get the App Service Plan
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    return plan_result.get('identity', {})
+
+
+def _determine_identity_type(system_assigned, user_assigned_identities):
+    """Helper to determine the correct identity type based on system and user assignments."""
+    has_system = system_assigned is not None and system_assigned
+    has_user = user_assigned_identities and len(user_assigned_identities) > 0
+    
+    if has_system and has_user:
+        return "SystemAssigned,UserAssigned"
+    elif has_system:
+        return "SystemAssigned"
+    elif has_user:
+        return "UserAssigned"
+    else:
+        return "None"
+
+
+def _patch_plan_identity(cmd, resource_group_name, name, identity_type, user_assigned_identities, location):
+    """Helper to PATCH identity for an app service plan using AAZ."""
+    # Build the identity object for AAZ
+    identity_args = {}
+    
+    if identity_type == "SystemAssigned":
+        identity_args['mi_system_assigned'] = "True"
+    elif identity_type == "UserAssigned":
+        identity_args['mi_user_assigned'] = user_assigned_identities or []
+    elif identity_type == "SystemAssigned,UserAssigned":
+        identity_args['mi_system_assigned'] = "True"
+        identity_args['mi_user_assigned'] = user_assigned_identities or []
+    # For "None", we don't set any identity args
+    
+    plan_update_cmd = AppServicePlanUpdate(cli_ctx=cmd.cli_ctx)
+    update_args = {
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': location
+    }
+    update_args.update(identity_args)
+    
+    poller = plan_update_cmd(command_args=update_args)
+    
+    # Wait for the operation to complete and get the result
+    plan_result = poller.result()
+    
+    # Return the updated identity directly from the result
+    return plan_result.get('identity', {})
+
+
+def assign_plan_identity(cmd, resource_group_name, name, identities=None):
+    """Assign system or user-assigned identities to an app service plan."""
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    
+    # Parse the identities parameter similar to webapp pattern
+    if not identities:
+        raise InvalidArgumentValueError("No identities specified. Use '[system]' for system-assigned identity or provide user-assigned identity resource IDs.")
+    
+    # Determine what identities to assign
+    system_assigned = False
+    user_assigned_identities = []
+    
+    for identity in identities:
+        if identity.lower() == '[system]':
+            system_assigned = True
+        else:
+            user_assigned_identities.append(identity)
+    
+    # Get the current plan to understand existing identity
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    current_identity = plan_result.get('identity', {})
+    current_type = current_identity.get('type', 'None')
+    current_user_assigned = current_identity.get('userAssignedIdentities', {})
+    
+    # Determine what the new identity should be
+    has_existing_system = current_type in ['SystemAssigned', 'SystemAssigned,UserAssigned']
+    has_existing_user = current_type in ['UserAssigned', 'SystemAssigned,UserAssigned']
+    
+    # Merge existing user-assigned identities with new ones
+    final_user_assigned = []
+    if has_existing_user and current_user_assigned:
+        final_user_assigned.extend(list(current_user_assigned.keys()))
+    
+    # Add new user-assigned identities (avoid duplicates)
+    for identity in user_assigned_identities:
+        if identity not in final_user_assigned:
+            final_user_assigned.append(identity)
+    
+    # Determine final system assignment
+    final_system_assigned = has_existing_system or system_assigned
+    
+    # Determine the correct identity type
+    identity_type = _determine_identity_type(final_system_assigned, final_user_assigned)
+    
+    location = plan_result.get('location')
+    # Update using AAZ
+    return _patch_plan_identity(cmd, resource_group_name, name, identity_type, final_user_assigned, location)
+
+
+def remove_plan_identity(cmd, resource_group_name, name, identities=None):
+    """Remove system or user-assigned identities from an app service plan."""
+    from azure.cli.core.azclierror import InvalidArgumentValueError, ResourceNotFoundError
+    
+    # Parse the identities parameter similar to webapp pattern
+    if not identities:
+        raise InvalidArgumentValueError("No identities specified. Use '[system]' for system-assigned identity or provide user-assigned identity resource IDs.")
+    
+    # Determine what identities to remove
+    remove_system = False
+    remove_user_assigned = []
+    
+    for identity in identities:
+        if identity.lower() == '[system]':
+            remove_system = True
+        else:
+            remove_user_assigned.append(identity)
+    
+    # Get the current plan to understand existing identity
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+    
+    current_identity = plan_result.get('identity', {})
+    current_type = current_identity.get('type', 'None')
+    current_user_assigned = current_identity.get('userAssignedIdentities', {})
+    
+    # Validate current state
+    has_system = current_type in ['SystemAssigned', 'SystemAssigned,UserAssigned']
+    has_user = current_type in ['UserAssigned', 'SystemAssigned,UserAssigned']
+    
+    if remove_system and not has_system:
+        raise ResourceNotFoundError(f"System-assigned identity is not associated with plan '{name}'")
+    
+    # Check if user-assigned identities exist
+    if remove_user_assigned:
+        existing_user_ids = set(current_user_assigned.keys()) if current_user_assigned else set()
+        remove_user_ids = set(remove_user_assigned)
+        non_existing = remove_user_ids - existing_user_ids
+        if non_existing:
+            raise ResourceNotFoundError(f"User-assigned identities '{', '.join(non_existing)}' are not associated with plan '{name}'")
+    
+    # Calculate what should remain
+    final_system_assigned = has_system and not remove_system
+    
+    final_user_assigned = []
+    if has_user and current_user_assigned:
+        # Keep existing user-assigned identities except those being removed
+        final_user_assigned = [uid for uid in current_user_assigned.keys() if uid not in remove_user_assigned]
+    
+    # Determine the correct identity type
+    identity_type = _determine_identity_type(final_system_assigned, final_user_assigned)
+    
+    location = plan_result.get('location')
+    # Update using AAZ
+    return _patch_plan_identity(cmd, resource_group_name, name, identity_type, final_user_assigned, location)
+
+
 def rdp_to_plan_instance(cmd, resource_group_name, name, worker_name, bastion_name, bastion_resource_group_name=None):
     """Generate RDP file and connect to a managed instance app service plan instance via Azure Bastion."""
     # NOTE: This implementation purposefully shells out to another az command (network bastion rdp)

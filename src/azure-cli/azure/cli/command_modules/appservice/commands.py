@@ -336,6 +336,11 @@ def load_command_table(self, _):
     with self.command_group('appservice plan managed-instance instance', custom_command_type=appservice_custom, is_preview=True) as g:
         g.custom_command('rdp', 'rdp_to_plan_instance')
 
+    with self.command_group('appservice plan identity', is_preview=True) as g:
+        g.custom_show_command('show', 'show_plan_identity')
+        g.custom_command('assign', 'assign_plan_identity')
+        g.custom_command('remove', 'remove_plan_identity')
+
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
 
