@@ -573,17 +573,17 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     app_settings = _generic_site_operation(cmd.cli_ctx, resource_group_name, name,
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
-    
+
     for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
         for s in src:
             # Try simple key=value parsing first
             if _parse_simple_key_value_setting(s, dest):
                 continue
-            
+
             # Try JSON parsing
             if _parse_json_setting(s, dest, result, slot_result, setting_type):
                 continue
-            
+
             # Fallback to key=value parsing with error handling
             _parse_fallback_key_value_setting(s, result)
 
