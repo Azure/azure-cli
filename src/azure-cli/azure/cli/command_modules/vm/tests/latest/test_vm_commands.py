@@ -6566,7 +6566,8 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
+        r = self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $1 $2, this is a test" --parameters hello world').get_output_in_json()
+        self.assertIn('hello world, this is a test', r['value'][0]['message'])
 
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command_v2')
