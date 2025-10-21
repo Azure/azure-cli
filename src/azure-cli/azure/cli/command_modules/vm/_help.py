@@ -3015,23 +3015,6 @@ helps['restore-point collection show'] = """
                az restore-point collection show --resource-group "myResourceGroup" --collection-name "rpcName"
 """
 
-helps['restore-point collection create'] = """
-    type: command
-    short-summary: "Create the restore point collection. Please refer to https://aka.ms/RestorePoints \
-for more details. When updating a restore point collection, only tags may be modified."
-    examples:
-      - name: Create or update a restore point collection.
-        text: |-
-               az restore-point collection create --location "norwayeast" --source-id "/subscriptions/{subscription-id}\
-/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM" --tags myTag1="tagValue1" \
---resource-group "myResourceGroup" --collection-name "myRpc"
-"""
-
-helps['restore-point collection update'] = """
-    type: command
-    short-summary: "Update the restore point collection."
-"""
-
 helps['restore-point collection wait'] = """
     type: command
     short-summary: Place the CLI in a waiting state until a condition of the restore-point-collection is met.
