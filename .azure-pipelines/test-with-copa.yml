@@ -90,31 +90,31 @@ stages:
           }
           Write-Host "##vso[build.updatebuildnumber]$newBuildName"
 
-  - task: AzureCLI@2
-    name: PrepareServiceConnectionInfoTask
-    displayName: Get Azure Service Connection Info
-    inputs:
-      azureSubscription: '$(TestAzureSubscription)'
-      scriptType: 'bash'
-      scriptLocation: 'inlineScript'
-      inlineScript: |
-        az account show
-        
-        # Get user, subscription and tenant info
-        AzUserId=$(az account show --query user.name -o tsv)
-        AzSubscription=$(az account show --query id -o tsv)
-        AzTenant=$(az account show --query tenantId -o tsv)
-        
-        echo "Azure User ID: $AzUserId"
-        echo "Azure Subscription: $AzSubscription"
-        echo "Azure Tenant: $AzTenant"
-        echo "Azure Service Connection Id: $AZURESUBSCRIPTION_SERVICE_CONNECTION_ID"
-        
-        # Set pipeline variables as secrets
-        echo "##vso[task.setvariable variable=AzUserId;issecret=true;isOutput=true]$AzUserId"
-        echo "##vso[task.setvariable variable=AzSubscription;issecret=true;isOutput=true]$AzSubscription"
-        echo "##vso[task.setvariable variable=AzTenant;issecret=true;isOutput=true]$AzTenant"
-        echo "##vso[task.setvariable variable=ServiceConnectionId;isOutput=true]$AZURESUBSCRIPTION_SERVICE_CONNECTION_ID"
+    - task: AzureCLI@2
+      name: PrepareServiceConnectionInfoTask
+      displayName: Get Azure Service Connection Info
+      inputs:
+        azureSubscription: '$(TestAzureSubscription)'
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          az account show
+          
+          # Get user, subscription and tenant info
+          AzUserId=$(az account show --query user.name -o tsv)
+          AzSubscription=$(az account show --query id -o tsv)
+          AzTenant=$(az account show --query tenantId -o tsv)
+          
+          echo "Azure User ID: $AzUserId"
+          echo "Azure Subscription: $AzSubscription"
+          echo "Azure Tenant: $AzTenant"
+          echo "Azure Service Connection Id: $AZURESUBSCRIPTION_SERVICE_CONNECTION_ID"
+          
+          # Set pipeline variables as secrets
+          echo "##vso[task.setvariable variable=AzUserId;issecret=true;isOutput=true]$AzUserId"
+          echo "##vso[task.setvariable variable=AzSubscription;issecret=true;isOutput=true]$AzSubscription"
+          echo "##vso[task.setvariable variable=AzTenant;issecret=true;isOutput=true]$AzTenant"
+          echo "##vso[task.setvariable variable=ServiceConnectionId;isOutput=true]$AZURESUBSCRIPTION_SERVICE_CONNECTION_ID"
 
 - stage: Build
   displayName: Build RPM and Docker Images
