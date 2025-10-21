@@ -512,7 +512,21 @@ def update_app_settings_functionapp(cmd, resource_group_name, name, settings=Non
 
 
 def _parse_simple_key_value_setting(s, dest):
-    """Parse simple key=value settings format."""
+    """
+    Parse simple key=value settings format.
+
+    Parameters
+    ----------
+    s : str
+        The setting string to parse.
+    dest : dict
+        Dictionary to store the parsed setting.
+
+    Returns
+    -------
+    bool
+        True if parsing succeeded, False otherwise.
+    """
     if ('=' in s and not s.lstrip().startswith(('{"', "[", "{")) and
             not s.startswith('@')):  # @ indicates file input
         try:
@@ -525,7 +539,19 @@ def _parse_simple_key_value_setting(s, dest):
 
 
 def _parse_json_setting(s, dest, result, slot_result, setting_type):
-    """Parse JSON format settings."""
+    """
+    Parse JSON format settings.
+
+    Parameters:
+        s (str): The input string containing JSON-formatted settings.
+        dest (dict): A dictionary for storing parsed settings (may be unused in this function).
+        result (dict): A dictionary to store the parsed key-value pairs from the settings.
+        slot_result (dict): A dictionary to store slot setting flags for each key.
+        setting_type (str): The type of settings being parsed, either "SlotSettings" or "Settings".
+
+    Returns:
+        bool: True if parsing was successful, False otherwise.
+    """
     try:
         temp = shell_safe_json_parse(s)
         if isinstance(temp, list):  # Accept the output of the "list" command
@@ -536,7 +562,7 @@ def _parse_json_setting(s, dest, result, slot_result, setting_type):
                     slot_result[t['name']] = True
                 result[t['name']] = t['value']
         else:
-            # Handle JSON objects: setting_type is either "SlotSettings" or "Settings" (from line 525 loop)
+            # Handle JSON objects: setting_type is either "SlotSettings" or "Settings"
             # Different logic needed for slot settings vs regular settings
             if setting_type == "SlotSettings":
                 # For slot settings JSON objects, add values to result and mark as slot settings
