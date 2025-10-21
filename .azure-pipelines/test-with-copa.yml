@@ -428,7 +428,6 @@ stages:
         inputs:
           targetType: 'inline'
           script: |
-            mkdir output
             export IMAGE=$(AzCliImageName):$(AzCliImagePatchedTag)
             OutputFile="trivy-scan-after.json"
             trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
