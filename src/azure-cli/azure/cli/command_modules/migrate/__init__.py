@@ -13,11 +13,11 @@ class MigrateCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core.commands import CliCommandType
-        
+
         migrate_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.migrate.custom#{}',
         )
-        
+
         super().__init__(
             cli_ctx=cli_ctx,
             custom_command_type=migrate_custom,

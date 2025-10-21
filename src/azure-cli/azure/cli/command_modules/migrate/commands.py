@@ -11,4 +11,3 @@ def load_command_table(self, _):
     with self.command_group('migrate local replication') as g:
         g.custom_command('init', 'initialize_replication_infrastructure')
         g.custom_command('new', 'new_local_server_replication')
-

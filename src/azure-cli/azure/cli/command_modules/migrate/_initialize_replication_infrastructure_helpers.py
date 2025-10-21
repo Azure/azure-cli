@@ -16,7 +16,7 @@ from azure.cli.command_modules.migrate._helpers import (
     ProvisioningState,
     AzLocalInstanceTypes,
     FabricInstanceTypes,
-    ReplicationDetails,
+    ReplicationPolicyDetails,
     RoleDefinitionIds,
     StorageAccountProvisioningState
 )
@@ -415,9 +415,9 @@ def setup_replication_policy(cmd, rg_uri, replication_vault_name, instance_type)
                       policy.get('properties', {}).get('provisioningState') == ProvisioningState.Deleted.value):
         print(f"Creating Policy '{policy_name}'...")
 
-        recoveryPoint = ReplicationDetails.PolicyDetails.RecoveryPointHistoryInMinutes
-        crashConsistentFreq = ReplicationDetails.PolicyDetails.CrashConsistentFrequencyInMinutes
-        appConsistentFreq = ReplicationDetails.PolicyDetails.AppConsistentFrequencyInMinutes
+        recoveryPoint = ReplicationPolicyDetails.RecoveryPointHistoryInMinutes
+        crashConsistentFreq = ReplicationPolicyDetails.CrashConsistentFrequencyInMinutes
+        appConsistentFreq = ReplicationPolicyDetails.AppConsistentFrequencyInMinutes
 
         policy_body = {
             "properties": {

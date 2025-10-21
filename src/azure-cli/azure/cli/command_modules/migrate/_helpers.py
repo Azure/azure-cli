@@ -53,7 +53,9 @@ class VMNicSelection(Enum):
     SelectedByUser = "SelectedByUser"
     NotSelected = "NotSelected"
 
+# pylint: disable=too-few-public-methods
 class IdFormats:
+    """Container for ARM resource ID format templates."""
     MachineArmIdTemplate = (
         "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
         "/providers/Microsoft.OffAzure/{siteType}/{siteName}/machines/{machineName}"
@@ -70,15 +72,16 @@ class IdFormats:
         "/providers/Microsoft.AzureStackHCI/logicalnetworks/{logicalNetworkName}"
     )
 
+# pylint: disable=too-few-public-methods
 class RoleDefinitionIds:
+    """Container for Azure role definition IDs."""
     ContributorId = "b24988ac-6180-42a0-ab88-20f7382dd24c"
     StorageBlobDataContributorId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe"
 
-class ReplicationDetails:
-    class PolicyDetails:
-        RecoveryPointHistoryInMinutes = 4320  # 72 hours
-        CrashConsistentFrequencyInMinutes = 60  # 1 hour
-        AppConsistentFrequencyInMinutes = 240  # 4 hours
+class ReplicationPolicyDetails(Enum):
+    RecoveryPointHistoryInMinutes = 4320  # 72 hours
+    CrashConsistentFrequencyInMinutes = 60  # 1 hour
+    AppConsistentFrequencyInMinutes = 240  # 4 hours
 
 def send_get_request(cmd, request_uri):
     """
