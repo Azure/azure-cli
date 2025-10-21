@@ -67,7 +67,7 @@ class ShowRdpPassword(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True, secret_hidden=False)
         return result
 
     class AppServicePlansGetServerFarmRdpPassword(AAZHttpOperation):
