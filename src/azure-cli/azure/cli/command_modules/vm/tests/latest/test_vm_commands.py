@@ -12407,7 +12407,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus2')
     def test_vm_vmss_proxy_agent(self, resource_group):
         self.kwargs.update({
             'nsg1': self.create_random_name('nsg', 10),
@@ -12420,7 +12420,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'vnet': self.create_random_name('vnet', 15)
         })
         self.cmd('network nsg create -g {rg} -n {nsg1}')
-        self.cmd('vm create -g {rg} -n {vm1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm1} --image Ubuntu2204 --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-username azureuser --generate-ssh-keys --nsg-rule NONE --add-proxy-agent-extension true')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -12429,7 +12429,8 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.enabled', True),
             self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
-            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1),
+            self.check('securityProfile.proxyAgentSettings.addProxyAgentExtension', True)
         ])
 
         self.cmd('vm update -g {rg} -n {vm1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 2', checks=[
