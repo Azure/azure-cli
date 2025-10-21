@@ -6,7 +6,7 @@
 # pylint: disable=line-too-long, too-many-lines
 from knack.arguments import CLIArgumentType
 
-from azure.cli.core.commands.parameters import get_location_type, tags_type, get_enum_type
+from azure.cli.core.commands.parameters import get_location_type, tags_type
 
 name_arg_type = CLIArgumentType(options_list=('--name', '-n'), metavar='NAME',
                                 help='The name of the identity resource.')
