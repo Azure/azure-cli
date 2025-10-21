@@ -295,7 +295,7 @@ stages:
     AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
     AzCliImagePatchedTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImagePatchedTag'] ]
   jobs:
-  - job: BuildCopaPatchedDockerImageAzureLinux
+  - job: BuildCopaPatchedDockerImage
     displayName: Build Copa Patched Docker Image
     timeoutInMinutes: 180
     strategy:
@@ -318,6 +318,28 @@ stages:
 
       - bash: ./scripts/ci/install_docker.sh
         displayName: Install Docker
+      
+      - task: Bash@3
+        displayName: Configure Docker Daemon
+        inputs:
+          targetType: 'inline'
+          script: |
+            if [ -f /etc/docker/daemon.json ]; then
+              echo "Docker daemon.json exists, printing content:"
+              cat /etc/docker/daemon.json
+            else
+              echo "Docker daemon.json does not exist, creating it..."
+              sudo mkdir -p /etc/docker
+              echo '{"features": { "containerd-snapshotter": true }}' | sudo tee /etc/docker/daemon.json
+              echo "Created /etc/docker/daemon.json with containerd-snapshotter enabled"
+            fi
+
+      - task: Bash@3
+        displayName: Restart Docker
+        inputs:
+          targetType: 'inline'
+          script: |
+            sudo systemctl restart docker
 
       - task: Bash@3
         displayName: Install Trivy
@@ -327,7 +349,7 @@ stages:
             set -eux
             curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/bin
             echo "----------------------------------"
-            sudo trivy --version
+            trivy --version
 
       - task: Bash@3
         displayName: Install copacetic
@@ -345,13 +367,13 @@ stages:
             sudo chmod +x /opt/copacetic/copa
             sudo ln -s /opt/copacetic/copa /usr/bin/copa
 
-            echo "----------------------------------"
-            sudo copa --version
-            echo "----------------------------------"
-            sudo copa --help
-            echo "----------------------------------"
-            sudo copa patch --help
-            echo "----------------------------------"
+            echo "---------------- copa --version ------------------"
+            copa --version
+            echo "---------------- copa --help ------------------"
+            copa --help
+            echo "---------------- copa patch --help ------------------"
+            copa patch --help
+            echo "-----------------------------------------------------"
 
       - task: Bash@3
         displayName: Check Docker Image
@@ -378,49 +400,17 @@ stages:
             mkdir output
             export IMAGE=$(AzCliImageName):$(AzCliImageTag)
             OutputFile="trivy-scan-before.json"
-            sudo trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
+            trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
             cp $OutputFile ./output/
-
-      - task: Bash@3
-        displayName: Setup Docker BuildKit
-        inputs:
-          targetType: 'inline'
-          script: |
-            set -eux
-            # Enable Docker BuildKit
-            export DOCKER_BUILDKIT=1
-            export BUILDKIT_PROGRESS=plain
-                  
-            # Check Docker version and BuildKit support
-            sudo docker version
-            sudo docker buildx version || echo "buildx not available"
-
-            # Try to create and use a new builder with containerd image store
-            sudo docker buildx create --name copa-builder --driver docker-container --use || true
-            sudo docker buildx inspect --bootstrap || echo "Failed to bootstrap buildx"
-                  
-            # Alternative: Enable experimental features in Docker daemon
-            echo "Checking Docker daemon configuration..."
-            sudo docker info | grep -i experimental || echo "Experimental features not enabled"
 
       - task: Bash@3
         displayName: Patch with Copacetic
         inputs:
           targetType: 'inline'
           script: |
-            export DOCKER_BUILDKIT=1
-            export BUILDKIT_PROGRESS=plain
-
             export COPA_EXPERIMENTAL=1
             export IMAGE=$(AzCliImageName):$(AzCliImageTag)
-
-            echo "before copa patch-----------------------"
-
-            # currently it failed; let's fake the patched image
-            # sudo COPA_EXPERIMENTAL=1 copa patch -i $IMAGE -r trivy-scan-before.json --pkg-types os,library --library-patch-level ${{parameters.PatchLevel}} --tag $(AzCliImagePatchedTag)
-            sudo docker tag $(AzCliImageName):$(AzCliImageTag) $(AzCliImageName):$(AzCliImagePatchedTag)
-
-            echo "after copa patch-----------------------"
+            copa patch -i $IMAGE -r trivy-scan-before.json --pkg-types os,library --library-patch-level ${{parameters.PatchLevel}} --tag $(AzCliImagePatchedTag)
 
       - task: Bash@3
         displayName: Check Docker Image
@@ -441,12 +431,12 @@ stages:
             mkdir output
             export IMAGE=$(AzCliImageName):$(AzCliImagePatchedTag)
             OutputFile="trivy-scan-after.json"
-            sudo trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
+            trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
             cp $OutputFile ./output/
 
       - publish: $(System.DefaultWorkingDirectory)/output
-        artifact: $(AzCliVersion)-$(architecture)-copa
-        displayName: Publish trivy and copa Artifact
+        artifact: $(AzCliVersion)-$(architecture)-trivy
+        displayName: Publish trivy Artifact
 
       - task: Bash@3
         displayName: Save Docker Image
