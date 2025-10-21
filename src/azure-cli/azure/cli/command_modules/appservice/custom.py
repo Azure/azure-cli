@@ -4131,10 +4131,8 @@ has been deployed ".format(app_service_environment)
                                vnet_name=subnet_info["vnet_name"],
                                subnet_name=subnet_info["subnet_name"])
         subnet_resource_id = subnet_info["subnet_resource_id"]
-        vnet_route_all_enabled = True
     else:
         subnet_resource_id = None
-        vnet_route_all_enabled = None
 
     if assign_identities is not None:
         _, _, user_assigned_identities, enable_system_assigned_identity = _build_identities_info(assign_identities)
