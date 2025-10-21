@@ -4062,7 +4062,7 @@ class PlanProgressBar(IndeterminateProgressBar):
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
-                            is_custom_mode=None, assign_identities=None, plan_default_identity=None,
+                            is_managed_instance=None, assign_identities=None, plan_default_identity=None,
                             rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(

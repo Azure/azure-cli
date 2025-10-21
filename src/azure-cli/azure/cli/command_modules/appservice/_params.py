@@ -131,7 +131,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('zone_redundant', options_list=['--zone-redundant', '-z'], help='Enable zone redundancy for high availability. Minimum instance count is 2.')
         c.argument('tags', arg_type=tags_type)
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
-        c.argument('is_custom_mode', action='store_true', is_preview=True, help='host web app on custom mode worker')
+        c.argument('is_managed_instance', action='store_true', is_preview=True, help='host web app on managed instance')
         c.argument('assign_identities', nargs='*', options_list=['--assign-identity'], is_preview=True,
                     help='accept system or user assigned identities separated by spaces. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples')
         c.argument('default_identity', is_preview=True,
