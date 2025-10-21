@@ -91,11 +91,11 @@ jobs:
       inputs:
         targetType: 'inline'
         script: |
-          scUrl="${SYSTEM_OIDCREQUESTURI}?api-version=7.1&serviceConnectionId=$(ServiceConnectionId)"
+          scUrl="${SYSTEM_OIDCREQUESTURI}?api-version=7.1&serviceConnectionId=${{parameters.TestServiceConnectionId}}"
           response=$(curl -s -X POST "$scUrl" -H "Authorization: Bearer $(System.AccessToken)" -H "Content-Type: application/json" -d '')
           OidcToken=$(echo "$response" | jq -r '.oidcToken')
 
-          sudo docker run -v $(System.DefaultWorkingDirectory)/scripts/docker:/test ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash -c "az login --service-principal --username $(AzUserId) --tenant $(AzTenant) --federated-token $OidcToken && az account set --subscription $(AzSubscription) && /test/test_az_cli_in_pipeline.sh"
+          sudo docker run -v $(System.DefaultWorkingDirectory)/scripts/docker:/test ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash -c "az login --service-principal --username ${{parameters.TestAzUserId}} --tenant ${{parameters.TestAzTenant}} --federated-token $OidcToken && az account set --subscription ${{parameters.TestAzSubscription}} && /test/test_az_cli_in_pipeline.sh"
 
           echo "--------------------------------------------"
 

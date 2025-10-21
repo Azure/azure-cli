@@ -482,6 +482,10 @@ stages:
     AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageName'] ]
     AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
     AzCliImagePatchedTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImagePatchedTag'] ]
+    TestAzUserId: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzUserId'] ]
+    TestAzSubscription: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzSubscription'] ]
+    TestAzTenant: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzTenant'] ]
+    TestServiceConnectionId: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.ServiceConnectionId'] ]
   jobs:
   - template: templates/test-docker-image-smoke.yml
     parameters:
