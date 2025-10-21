@@ -538,13 +538,12 @@ def _parse_simple_key_value_setting(s, dest):
     return False
 
 
-def _parse_json_setting(s, dest, result, slot_result, setting_type):
+def _parse_json_setting(s, result, slot_result, setting_type):
     """
     Parse JSON format settings.
 
     Parameters:
         s (str): The input string containing JSON-formatted settings.
-        dest (dict): A dictionary for storing parsed settings (may be unused in this function).
         result (dict): A dictionary to store the parsed key-value pairs from the settings.
         slot_result (dict): A dictionary to store slot setting flags for each key.
         setting_type (str): The type of settings being parsed, either "SlotSettings" or "Settings".
@@ -607,7 +606,7 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                 continue
 
             # Try JSON parsing
-            if _parse_json_setting(s, dest, result, slot_result, setting_type):
+            if _parse_json_setting(s, result, slot_result, setting_type):
                 continue
 
             # Fallback to key=value parsing with error handling
