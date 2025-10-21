@@ -90,6 +90,32 @@ stages:
           }
           Write-Host "##vso[build.updatebuildnumber]$newBuildName"
 
+  - task: AzureCLI@2
+    name: PrepareServiceConnectionInfoTask
+    displayName: Get Azure Service Connection Info
+    inputs:
+      azureSubscription: '$(TestAzureSubscription)'
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        az account show
+        
+        # Get user, subscription and tenant info
+        AzUserId=$(az account show --query user.name -o tsv)
+        AzSubscription=$(az account show --query id -o tsv)
+        AzTenant=$(az account show --query tenantId -o tsv)
+        
+        echo "Azure User ID: $AzUserId"
+        echo "Azure Subscription: $AzSubscription"
+        echo "Azure Tenant: $AzTenant"
+        echo "Azure Service Connection Id: $AZURESUBSCRIPTION_SERVICE_CONNECTION_ID"
+        
+        # Set pipeline variables as secrets
+        echo "##vso[task.setvariable variable=AzUserId;issecret=true;isOutput=true]$AzUserId"
+        echo "##vso[task.setvariable variable=AzSubscription;issecret=true;isOutput=true]$AzSubscription"
+        echo "##vso[task.setvariable variable=AzTenant;issecret=true;isOutput=true]$AzTenant"
+        echo "##vso[task.setvariable variable=ServiceConnectionId;isOutput=true]$AZURESUBSCRIPTION_SERVICE_CONNECTION_ID"
+
 - stage: Build
   displayName: Build RPM and Docker Images
   dependsOn: 
@@ -199,6 +225,10 @@ stages:
     AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliVersion'] ]
     AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageName'] ]
     AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
+    TestAzUserId: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzUserId'] ]
+    TestAzSubscription: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzSubscription'] ]
+    TestAzTenant: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.AzTenant'] ]
+    TestServiceConnectionId: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.ServiceConnectionId'] ]
   jobs:
   - job: TestRpmPackagesAzureLinux
     displayName: Test Rpm Package
@@ -240,6 +270,10 @@ stages:
       AzCliVersion: $(AzCliVersion)
       AzCliImageName: $(AzCliImageName)
       AzCliImageTag: $(AzCliImageTag)
+      TestAzUserId: $(TestAzUserId)
+      TestAzSubscription: $(TestAzSubscription)
+      TestAzTenant: $(TestAzTenant)
+      TestServiceConnectionId: $(TestServiceConnectionId)
 
   - template: templates/test-docker-image-unit.yml
     parameters:
@@ -284,28 +318,6 @@ stages:
 
       - bash: ./scripts/ci/install_docker.sh
         displayName: Install Docker
-
-      - task: Bash@3
-        displayName: Install PowerShell for ARM64 Agent
-        condition: and(succeeded(), eq(variables['architecture'], 'arm64'))
-        inputs:
-          targetType: 'inline'
-          script: |
-            curl -L -o /tmp/powershell.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.4.11/powershell-7.4.11-linux-arm64.tar.gz
-            sudo mkdir -p /opt/microsoft/powershell/7
-            sudo tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell/7
-            sudo chmod +x /opt/microsoft/powershell/7/pwsh
-            sudo ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
-            PATH=/usr/bin:/sbin:/usr/sbin:$PATH
-
-      - task: Bash@3
-        displayName: Install Az.Accounts for ARM64 Agents
-        condition: and(succeeded(), eq(variables['architecture'], 'arm64'))
-        inputs:
-          targetType: 'inline'
-          script: |
-            pwsh -command 'Register-PSRepository -Default -InstallationPolicy Trusted'
-            pwsh -command 'Install-Module -Name Az.Accounts -Repository PSGallery -AllowClobber -Force'
 
       - task: Bash@3
         displayName: Install Trivy
@@ -480,6 +492,10 @@ stages:
       AzCliVersion: $(AzCliVersion)
       AzCliImageName: $(AzCliImageName)
       AzCliImageTag: $(AzCliImagePatchedTag)
+      TestAzUserId: $(TestAzUserId)
+      TestAzSubscription: $(TestAzSubscription)
+      TestAzTenant: $(TestAzTenant)
+      TestServiceConnectionId: $(TestServiceConnectionId)
 
   - template: templates/test-docker-image-unit.yml
     parameters:
