@@ -1,50 +1,66 @@
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
+# Licensed under the MIT License.
+# See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
 from knack.util import CLIError
 import json
 
-def validate_get_discovered_server_params(project_name, resource_group_name, source_machine_type):
+
+def validate_get_discovered_server_params(project_name,
+                                          resource_group_name,
+                                          source_machine_type):
     """Validate required parameters for get_discovered_server."""
     if not project_name:
         raise CLIError("project_name is required.")
     if not resource_group_name:
         raise CLIError("resource_group_name is required.")
     if source_machine_type and source_machine_type not in ["VMware", "HyperV"]:
-        raise CLIError("source_machine_type must be either 'VMware' or 'HyperV'.")
+        raise CLIError("source_machine_type is not 'VMware' or 'HyperV'.")
 
 
 def build_base_uri(subscription_id, resource_group_name, project_name,
-                    appliance_name, name, source_machine_type):
+                   appliance_name, name, source_machine_type):
     """Build the base URI for the API request."""
     if appliance_name and name:
         # GetInSite: Get specific machine in specific site
         if source_machine_type == "HyperV":
-            return (f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/"
-                   f"providers/Microsoft.OffAzure/HyperVSites/{appliance_name}/machines/{name}")
+            return (f"/subscriptions/{subscription_id}"
+                    f"/resourceGroups/{resource_group_name}/"
+                    f"providers/Microsoft.OffAzure/HyperVSites"
+                    f"/{appliance_name}/machines/{name}")
         # VMware or default
-        return (f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/"
-               f"providers/Microsoft.OffAzure/VMwareSites/{appliance_name}/machines/{name}")
+        return (f"/subscriptions/{subscription_id}"
+                f"/resourceGroups/{resource_group_name}/"
+                f"providers/Microsoft.OffAzure/VMwareSites"
+                f"/{appliance_name}/machines/{name}")
 
     if appliance_name:
         # ListInSite: List machines in specific site
         if source_machine_type == "HyperV":
-            return (f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/"
-                   f"providers/Microsoft.OffAzure/HyperVSites/{appliance_name}/machines")
+            return (f"/subscriptions/{subscription_id}"
+                    f"/resourceGroups/{resource_group_name}/"
+                    f"providers/Microsoft.OffAzure/HyperVSites"
+                    f"/{appliance_name}/machines")
         # VMware or default
-        return (f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/"
-               f"providers/Microsoft.OffAzure/VMwareSites/{appliance_name}/machines")
+        return (f"/subscriptions/{subscription_id}"
+                f"/resourceGroups/{resource_group_name}/"
+                f"providers/Microsoft.OffAzure"
+                f"/VMwareSites/{appliance_name}/machines")
 
     if name:
         # Get: Get specific machine from project
-        return (f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/"
-               f"providers/Microsoft.Migrate/migrateprojects/{project_name}/machines/{name}")
+        return (f"/subscriptions/{subscription_id}"
+                f"/resourceGroups/{resource_group_name}/"
+                f"providers/Microsoft.Migrate/migrateprojects"
+                f"/{project_name}/machines/{name}")
 
     # List: List all machines in project
-    return (f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/"
-           f"providers/Microsoft.Migrate/migrateprojects/{project_name}/machines")
+    return (f"/subscriptions/{subscription_id}"
+            f"/resourceGroups/{resource_group_name}/"
+            f"providers/Microsoft.Migrate/migrateprojects"
+            f"/{project_name}/machines")
 
 
 def fetch_all_servers(cmd, request_uri, send_get_request):
@@ -111,9 +127,14 @@ def extract_server_info(server, index):
 def print_server_info(server_info):
     """Print formatted server information."""
     index_str = f"[{server_info['index']}]"
-    print(f"{index_str} Machine Name: {server_info['machine_name']}")
-    print(f"{' ' * len(index_str)} IP Addresses: {server_info['ip_addresses']}")
-    print(f"{' ' * len(index_str)} Operating System: {server_info['operating_system']}")
-    print(f"{' ' * len(index_str)} Boot Type: {server_info['boot_type']}")
-    print(f"{' ' * len(index_str)} OS Disk ID: {server_info['os_disk_id']}")
+    print(f"{index_str} Machine Name: "
+          f"{server_info['machine_name']}")
+    print(f"{' ' * len(index_str)} IP Addresses: "
+          f"{server_info['ip_addresses']}")
+    print(f"{' ' * len(index_str)} Operating System: "
+          f"{server_info['operating_system']}")
+    print(f"{' ' * len(index_str)} Boot Type: "
+          f"{server_info['boot_type']}")
+    print(f"{' ' * len(index_str)} OS Disk ID: "
+          f"{server_info['os_disk_id']}")
     print()

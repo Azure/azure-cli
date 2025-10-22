@@ -1,8 +1,9 @@
 # --------------------------------------------------------------------------------------------
 # Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
+# Licensed under the MIT License.
+# See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+# pylint: disable=E501
 import hashlib
 from enum import Enum
 from knack.util import CLIError
@@ -10,6 +11,7 @@ from knack.log import get_logger
 from azure.cli.core.util import send_raw_request
 
 logger = get_logger(__name__)
+
 
 class APIVersion(Enum):
     Microsoft_Authorization = "2022-04-01"
@@ -21,6 +23,7 @@ class APIVersion(Enum):
     Microsoft_Migrate = "2020-05-01"
     Microsoft_HybridCompute = "2024-07-10"
 
+
 class ProvisioningState(Enum):
     Succeeded = "Succeeded"
     Creating = "Creating"
@@ -30,47 +33,58 @@ class ProvisioningState(Enum):
     Failed = "Failed"
     Canceled = "Canceled"
 
+
 class StorageAccountProvisioningState(Enum):
     Succeeded = "Succeeded"
     Creating = "Creating"
     ResolvingDNS = "ResolvingDNS"
 
+
 class AzLocalInstanceTypes(Enum):
     HyperVToAzLocal = "HyperVToAzStackHCI"
     VMwareToAzLocal = "VMwareToAzStackHCI"
+
 
 class FabricInstanceTypes(Enum):
     HyperVInstance = "HyperVMigrate"
     VMwareInstance = "VMwareMigrate"
     AzLocalInstance = "AzStackHCI"
 
+
 class SiteTypes(Enum):
     HyperVSites = "HyperVSites"
     VMwareSites = "VMwareSites"
+
 
 class VMNicSelection(Enum):
     SelectedByDefault = "SelectedByDefault"
     SelectedByUser = "SelectedByUser"
     NotSelected = "NotSelected"
 
+
 # pylint: disable=too-few-public-methods
 class IdFormats:
     """Container for ARM resource ID format templates."""
     MachineArmIdTemplate = (
-        "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
-        "/providers/Microsoft.OffAzure/{siteType}/{siteName}/machines/{machineName}"
+        "/subscriptions/{subscriptionId}/resourceGroups/"
+        "{resourceGroupName}/providers/Microsoft.OffAzure/{siteType}/"
+        "{siteName}/machines/{machineName}"
     )
     StoragePathArmIdTemplate = (
-        "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
-        "/providers/Microsoft.AzureStackHCI/storagecontainers/{storagePathName}"
+        "/subscriptions/{subscriptionId}/resourceGroups/"
+        "{resourceGroupName}/providers/Microsoft.AzureStackHCI/"
+        "storagecontainers/{storagePathName}"
     )
     ResourceGroupArmIdTemplate = (
-        "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
+        "/subscriptions/{subscriptionId}/resourceGroups/"
+        "{resourceGroupName}"
     )
     LogicalNetworkArmIdTemplate = (
-        "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}"
-        "/providers/Microsoft.AzureStackHCI/logicalnetworks/{logicalNetworkName}"
+        "/subscriptions/{subscriptionId}/resourceGroups/"
+        "{resourceGroupName}/providers/Microsoft.AzureStackHCI/"
+        "logicalnetworks/{logicalNetworkName}"
     )
+
 
 # pylint: disable=too-few-public-methods
 class RoleDefinitionIds:
@@ -78,10 +92,12 @@ class RoleDefinitionIds:
     ContributorId = "b24988ac-6180-42a0-ab88-20f7382dd24c"
     StorageBlobDataContributorId = "ba92f5b4-2d11-453d-a403-e96b0029c9fe"
 
+
 class ReplicationPolicyDetails(Enum):
     RecoveryPointHistoryInMinutes = 4320  # 72 hours
     CrashConsistentFrequencyInMinutes = 60  # 1 hour
     AppConsistentFrequencyInMinutes = 240  # 4 hours
+
 
 def send_get_request(cmd, request_uri):
     """
@@ -107,6 +123,7 @@ def send_get_request(cmd, request_uri):
         raise CLIError(error_message)
     return response
 
+
 def generate_hash_for_artifact(artifact):
     """Generate a hash for the given artifact string."""
     hash_object = hashlib.sha256(artifact.encode())
@@ -114,6 +131,7 @@ def generate_hash_for_artifact(artifact):
     # Convert to numeric hash similar to PowerShell GetHashCode
     numeric_hash = int(hex_dig[:8], 16)
     return str(numeric_hash)
+
 
 def get_resource_by_id(cmd, resource_id, api_version):
     """Get an Azure resource by its ARM ID."""
@@ -132,20 +150,23 @@ def get_resource_by_id(cmd, resource_id, api_version):
 
     # Raise error for other non-success status codes
     if response.status_code >= 400:
-        error_message = f"Failed to get resource. Status: {response.status_code}"
+        error_message = (
+            f"Failed to get resource. Status: {response.status_code}")
         try:
             error_body = response.json()
             if 'error' in error_body:
                 error_details = error_body['error']
                 error_code = error_details.get('code', 'Unknown')
-                error_msg = error_details.get('message', 'No message provided')
+                error_msg = (
+                    error_details.get('message', 'No message provided'))
 
                 # For specific error codes, provide more helpful messages
                 if error_code == "ResourceGroupNotFound":
                     rg_parts = resource_id.split('/')
-                    resource_group_name = rg_parts[4] if len(rg_parts) > 4 else 'unknown'
+                    rg_name = (
+                        rg_parts[4] if len(rg_parts) > 4 else 'unknown')
                     raise CLIError(
-                        f"Resource group '{resource_group_name}' does not exist. "
+                        f"Resource group '{rg_name}' does not exist. "
                         "Please create it first or check the subscription."
                     )
                 if error_code == "ResourceNotFound":
@@ -160,7 +181,8 @@ def get_resource_by_id(cmd, resource_id, api_version):
 
     return response.json()
 
-def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait=False):  # pylint: disable=unused-argument
+
+def create_or_update_resource(cmd, resource_id, api_version, properties):
     """Create or update an Azure resource.
 
     Args:
@@ -168,7 +190,8 @@ def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait
         resource_id: Resource ID
         api_version: API version
         properties: Resource properties
-        no_wait: If True, does not wait for operation to complete (reserved for future use)
+        no_wait: If True, does not wait for operation to complete
+            (reserved for future use)
     """
     import json as json_module
 
@@ -189,7 +212,9 @@ def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait
     )
 
     if response.status_code >= 400:
-        error_message = f"Failed to create/update resource. Status: {response.status_code}"
+        error_message = (
+            f"Failed to create/update resource. "
+            f"Status: {response.status_code}")
         try:
             error_body = response.json()
             if 'error' in error_body:
@@ -202,7 +227,8 @@ def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait
         raise CLIError(error_message)
 
     # Handle empty response for async operations (202 status code)
-    if response.status_code == 202 or not response.text or response.text.strip() == '':
+    if (response.status_code == 202 or not response.text or
+            response.text.strip() == ''):
         return None
 
     try:
@@ -210,6 +236,7 @@ def create_or_update_resource(cmd, resource_id, api_version, properties, no_wait
     except (ValueError, json_module.JSONDecodeError):
         # If we can't parse JSON, return None
         return None
+
 
 def delete_resource(cmd, resource_id, api_version):
     """Delete an Azure resource."""
@@ -223,6 +250,7 @@ def delete_resource(cmd, resource_id, api_version):
     )
 
     return response.status_code < 400
+
 
 def validate_arm_id_format(arm_id, template):
     """
@@ -241,9 +269,12 @@ def validate_arm_id_format(arm_id, template):
         return False
 
     # Convert template to regex pattern
-    # Replace {variableName} with a pattern that matches valid Azure resource names
+    # Replace {variableName} with a pattern that matches valid Azure
+    # resource names
     pattern = template
-    pattern = pattern.replace('{subscriptionId}', '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
+    pattern = pattern.replace(
+        '{subscriptionId}',
+        '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}')
     pattern = pattern.replace('{resourceGroupName}', '[a-zA-Z0-9._-]+')
     pattern = pattern.replace('{siteType}', '(HyperVSites|VMwareSites)')
     pattern = pattern.replace('{siteName}', '[a-zA-Z0-9._-]+')
