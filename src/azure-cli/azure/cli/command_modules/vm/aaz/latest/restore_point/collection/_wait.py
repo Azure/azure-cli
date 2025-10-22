@@ -49,6 +49,11 @@ class Wait(AAZWaitCommand):
             required=True,
             id_part="name",
         )
+        _args_schema.expand = AAZStrArg(
+            options=["--expand"],
+            help="The expand expression to apply on the operation.",
+            enum={"restorePoints": "restorePoints"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
@@ -115,6 +120,9 @@ class Wait(AAZWaitCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "$expand", self.ctx.args.expand,
+                ),
                 **self.serialize_query_param(
                     "api-version", "2024-11-01",
                     required=True,

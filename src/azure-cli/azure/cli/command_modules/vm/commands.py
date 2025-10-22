@@ -563,4 +563,3 @@ def load_command_table(self, _):
 
     with self.command_group('restore-point collection', restore_point_collection) as g:
         g.custom_show_command('show', 'restore_point_collection_show')
-        g.wait_command('wait')

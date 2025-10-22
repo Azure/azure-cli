@@ -3014,16 +3014,3 @@ helps['restore-point collection show'] = """
         text: |-
                az restore-point collection show --resource-group "myResourceGroup" --collection-name "rpcName"
 """
-
-helps['restore-point collection wait'] = """
-    type: command
-    short-summary: Place the CLI in a waiting state until a condition of the restore-point-collection is met.
-    parameters:
-      - name: --expand
-        short-summary: The expand expression to apply on the operation. If expand=restorePoints, server will return all
-                       contained restore points in the restorePointCollection. "restorePoints" Default value is None.
-    examples:
-      - name: Pause executing next line of CLI script until the restore-point-collection is successfully deleted.
-        text: |-
-               az restore-point collection wait --resource-group "myResourceGroup" --collection-name "rpcName" --deleted
-"""

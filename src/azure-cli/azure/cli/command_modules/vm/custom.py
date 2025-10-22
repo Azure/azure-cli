@@ -5973,7 +5973,7 @@ def restore_point_collection_show(cmd,
         "restore_point_collection_name": restore_point_collection_name,
     }
     if restore_points is not None:
-        args.expand = 'restorePoints'
+        args['expand'] = 'restorePoints'
     return Show(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 # endRegion
