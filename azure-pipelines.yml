@@ -1178,6 +1178,9 @@ jobs:
       pip install msrestazure markupsafe==2.0.1
       # Some extension will change the dependence, so run `azdev setup` again after all extensions installed.
       azdev setup -c ./s -r ./azure-cli-extensions
+      
+      # Force install this version to be compatible with numpy 2.0
+      pip install deepdiff==8.6.1
 
       mkdir -p /tmp/module_stats
 
