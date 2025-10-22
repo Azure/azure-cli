@@ -186,13 +186,13 @@ stages:
       - task: DownloadPipelineArtifact@1
         displayName: 'Download RPM Package'
         inputs:
-          TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+          TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
           artifactName: $(downloadArtifactName)
 
       - bash: |
           set -ex
           mkdir docker-temp
-          mv $(Build.ArtifactStagingDirectory)/docker/*.rpm ./docker-temp/azure-cli.rpm
+          mv $(Build.ArtifactStagingDirectory)/rpm/*.rpm ./docker-temp/azure-cli.rpm
           
           docker build --no-cache \
             --build-arg IMAGE=$IMAGE \
@@ -433,18 +433,19 @@ stages:
             docker images
 
             echo "== Save Docker Image to tar file  =="
-            docker save -o "$BUILD_STAGINGDIRECTORY/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImagePatchedTag)
+            mkdir "$BUILD_STAGINGDIRECTORY/copa"
+            docker save -o "$BUILD_STAGINGDIRECTORY/copa/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImagePatchedTag)
 
       - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
         displayName: 'SBOM'
         inputs:
-          BuildDropPath: $(Build.ArtifactStagingDirectory)
+          BuildDropPath: $(Build.ArtifactStagingDirectory)/copa
           DockerImagesToScan: $(AzCliImagePatchedTag)
 
       - task: PublishPipelineArtifact@0
         displayName: Publish docker Artifact
         inputs:
-          TargetPath: $(Build.ArtifactStagingDirectory)
+          TargetPath: $(Build.ArtifactStagingDirectory)/copa
           ArtifactName: $(uploadArtifactName)
 
       - task: Bash@3
