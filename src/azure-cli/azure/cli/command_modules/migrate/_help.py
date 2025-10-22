@@ -40,28 +40,34 @@ helps['migrate local get-discovered-server'] = """
     parameters:
         - name: --project-name
           short-summary: Name of the Azure Migrate project.
-          long-summary: The Azure Migrate project that contains
-          the discovered servers.
+          long-summary: >
+            The Azure Migrate project that contains
+            the discovered servers.
         - name: --display-name
           short-summary: Display name of the source machine to filter by.
-          long-summary: Filter discovered servers by their display name
-          (partial match supported).
+          long-summary: >
+            Filter discovered servers by their display name
+            (partial match supported).
         - name: --source-machine-type
           short-summary: Type of the source machine.
-          long-summary: Filter by source machine type. Valid values are
-          'VMware' or 'HyperV'.
+          long-summary: >
+            Filter by source machine type. Valid values are
+            'VMware' or 'HyperV'.
         - name: --subscription-id
           short-summary: Azure subscription ID.
-          long-summary: The subscription containing the Azure Migrate project.
-          Uses the default subscription if not specified.
+          long-summary: >
+            The subscription containing the Azure Migrate project.
+            Uses the default subscription if not specified.
         - name: --name
           short-summary: Internal name of the specific source machine.
-          long-summary: The internal machine name assigned by Azure Migrate
-          (different from display name).
+          long-summary: >
+            The internal machine name assigned by Azure Migrate
+            (different from display name).
         - name: --appliance-name
           short-summary: Name of the appliance (site) containing the machines.
-          long-summary: Filter servers discovered by
-          a specific Azure Migrate appliance.
+          long-summary: >
+            Filter servers discovered by
+            a specific Azure Migrate appliance.
     examples:
         - name: List all discovered servers in a project
           text: |
@@ -121,24 +127,29 @@ helps['migrate local replication init'] = """
     parameters:
         - name: --project-name
           short-summary: Name of the Azure Migrate project.
-          long-summary: The Azure Migrate project to be used
-          for server migration.
+          long-summary: >
+            The Azure Migrate project to be used
+            for server migration.
         - name: --source-appliance-name
           short-summary: Source appliance name.
-          long-summary: Name of the Azure Migrate appliance that
-          discovered the source servers.
+          long-summary: >
+            Name of the Azure Migrate appliance that
+            discovered the source servers.
         - name: --target-appliance-name
           short-summary: Target appliance name.
-          long-summary: Name of the Azure Local appliance that
-          will host the migrated servers.
+          long-summary: >
+            Name of the Azure Local appliance that
+            will host the migrated servers.
         - name: --subscription-id
           short-summary: Azure subscription ID.
-          long-summary: The subscription containing the Azure Migrate project.
-          Uses the current subscription if not specified.
+          long-summary: >
+            The subscription containing the Azure Migrate project.
+            Uses the current subscription if not specified.
         - name: --pass-thru
           short-summary: Return true when the command succeeds.
-          long-summary: When enabled, returns a boolean value
-          indicating successful completion.
+          long-summary: >
+            When enabled, returns a boolean value
+            indicating successful completion.
     examples:
         - name: Initialize replication infrastructure
           text: |
@@ -176,59 +187,72 @@ helps['migrate local replication new'] = """
     parameters:
         - name: --machine-id
           short-summary: ARM resource ID of the discovered server to migrate.
-          long-summary: Full ARM resource ID of the discovered machine.
-          Required if --machine-index is not provided.
+          long-summary: >
+            Full ARM resource ID of the discovered machine.
+            Required if --machine-index is not provided.
         - name: --machine-index
           short-summary: Index of the discovered server from the list
-          long-summary: Select a server by its position
-          in the discovered servers list.
-          Required if --machine-id is not provided.
+          long-summary: >
+            Select a server by its position
+            in the discovered servers list.
+            Required if --machine-id is not provided.
         - name: --project-name
           short-summary: Name of the Azure Migrate project.
-          long-summary: Required when using --machine-index
-          to identify which project to query.
+          long-summary: >
+            Required when using --machine-index
+            to identify which project to query.
         - name: --target-storage-path-id
           short-summary: Storage path ARM ID where VMs will be stored.
-          long-summary: Full ARM resource ID of the storage path
-          on the target Azure Local cluster.
+          long-summary: >
+            Full ARM resource ID of the storage path
+            on the target Azure Local cluster.
         - name: --target-vm-cpu-core
           short-summary: Number of CPU cores for the target VM.
-          long-summary: Specify the number of CPU cores
-          to allocate to the migrated VM.
+          long-summary: >
+            Specify the number of CPU cores
+            to allocate to the migrated VM.
         - name: --target-vm-ram
           short-summary: Target RAM size in MB.
-          long-summary: Specify the amount of RAM to
-          allocate to the target VM in megabytes.
+          long-summary: >
+            Specify the amount of RAM to
+            allocate to the target VM in megabytes.
         - name: --disk-to-include
           short-summary: Disks to include for replication (power user mode).
-          long-summary: Space-separated list of disk IDs
-          to replicate from the source server.
-          Use this for power user mode.
+          long-summary: >
+            Space-separated list of disk IDs
+            to replicate from the source server.
+            Use this for power user mode.
         - name: --nic-to-include
           short-summary: NICs to include for replication (power user mode).
-          long-summary: Space-separated list of NIC IDs
-          to replicate from the source server.
-          Use this for power user mode.
+          long-summary: >
+            Space-separated list of NIC IDs
+            to replicate from the source server.
+            Use this for power user mode.
         - name: --vm-name
           short-summary: Name of the VM to be created.
-          long-summary: The name for the virtual machine
-          that will be created on the target environment.
+          long-summary: >
+            The name for the virtual machine
+            that will be created on the target environment.
         - name: --os-disk-id
           short-summary: Operating system disk ID.
-          long-summary: ID of the operating system disk for
-          the source server. Required for default user mode.
+          long-summary: >
+            ID of the operating system disk for
+            the source server. Required for default user mode.
         - name: --source-appliance-name
           short-summary: Source appliance name.
-          long-summary: Name of the Azure Migrate appliance
-          that discovered the source server.
+          long-summary: >
+            Name of the Azure Migrate appliance
+            that discovered the source server.
         - name: --target-appliance-name
           short-summary: Target appliance name.
-          long-summary: Name of the Azure Local appliance
-          that will host the migrated server.
+          long-summary: >
+            Name of the Azure Local appliance
+            that will host the migrated server.
         - name: --subscription-id
           short-summary: Azure subscription ID.
-          long-summary: The subscription to use.
-          Uses the current subscription if not specified.
+          long-summary: >
+            The subscription to use.
+            Uses the current subscription if not specified.
     examples:
         - name: Create replication using machine ARM ID (default user mode)
           text: |
