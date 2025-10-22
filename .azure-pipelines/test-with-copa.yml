@@ -200,21 +200,21 @@ stages:
             --file $DOCKERFILE \
             $BUILD_SOURCESDIRECTORY
 
-          docker save -o "$BUILD_STAGINGDIRECTORY/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImageTag)
+          mkdir $(Build.ArtifactStagingDirectory)/docker
+          docker save -o "$(Build.ArtifactStagingDirectory)/docker/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImageTag)
 
         displayName: 'Build Docker Image'
 
       - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
         displayName: 'SBOM'
-        condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
         inputs:
-          BuildDropPath: $(Build.ArtifactStagingDirectory)
+          BuildDropPath: $(Build.ArtifactStagingDirectory)/docker
           DockerImagesToScan: $(AzCliDockerImageTag)
 
       - task: PublishPipelineArtifact@0
         displayName: Publish docker Artifact
         inputs:
-          TargetPath: $(Build.ArtifactStagingDirectory)
+          TargetPath: $(Build.ArtifactStagingDirectory)/docker
           ArtifactName: $(uploadArtifactName)
 
 - stage: Test1
@@ -419,11 +419,11 @@ stages:
         inputs:
           targetType: 'inline'
           script: |
-              echo "== Check Docker Images =="
-              docker images
+            echo "== Check Docker Images =="
+            docker images
 
-              echo "== Run az self-test  =="
-              docker run $(AzCliImageName):$(AzCliImagePatchedTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+            echo "== Run az self-test  =="
+            docker run $(AzCliImageName):$(AzCliImagePatchedTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
 
       - task: Bash@3
         displayName: Save Patched Docker Image
