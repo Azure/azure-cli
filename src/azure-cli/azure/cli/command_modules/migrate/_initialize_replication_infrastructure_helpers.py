@@ -596,7 +596,7 @@ def setup_replication_policy(cmd,
                 # During creation, it might still return 404 initially
                 if ("ResourceNotFound" in str(poll_error) or
                         "404" in str(poll_error)):
-                    print(f"Policy creation in progress... ({i+1}/20)")
+                    print(f"Policy creation in progress... ({i + 1}/20)")
                     continue
                 raise
 
@@ -925,8 +925,6 @@ def _verify_role_assignments(auth_client, storage_account_id,
 def grant_storage_permissions(cmd, storage_account_id, source_dra,
                               target_dra, replication_vault, subscription_id):
     """Grant role assignments for DRAs and vault identity to storage acct."""
-    logger = get_logger(__name__)
-
     from azure.mgmt.authorization import AuthorizationManagementClient
 
     # Get role assignment client
@@ -1290,7 +1288,7 @@ def _wait_for_extension_creation(cmd, extension_uri):
                                  ProvisioningState.Canceled.value]:
                     break
         except CLIError:
-            print(f"Waiting for extension... ({i+1}/20)")
+            print(f"Waiting for extension... ({i + 1}/20)")
 
 
 def _handle_extension_creation_error(cmd, extension_uri, create_error):

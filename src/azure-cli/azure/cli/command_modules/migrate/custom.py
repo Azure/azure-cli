@@ -303,7 +303,7 @@ def new_local_server_replication(cmd,
 
     try:
         site_type, site_name, machine_name, run_as_account_id, \
-            instance_type = validate_ARM_id_formats(
+            instance_type, resource_group_name = validate_ARM_id_formats(
                 machine_id,
                 target_storage_path_id,
                 target_resource_group_id,

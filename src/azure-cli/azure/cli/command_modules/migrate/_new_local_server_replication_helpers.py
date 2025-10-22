@@ -328,7 +328,7 @@ def validate_ARM_id_formats(machine_id,
 
     run_as_account_id = None
     instance_type = None
-    return site_type, site_name, machine_name, run_as_account_id, instance_type
+    return site_type, site_name, machine_name, run_as_account_id, instance_type, resource_group_name
 
 
 def process_site_type_hyperV(cmd,
@@ -1057,8 +1057,8 @@ def process_target_fabric(cmd,
         props = dra.get('properties', {})
         custom_props = props.get('customProperties', {})
         if (props.get('machineName') == source_appliance_name and
-                custom_props.get('instanceType') == fabric_instance_type
-                and bool(props.get('isResponsive'))):
+                custom_props.get('instanceType') == fabric_instance_type and
+                bool(props.get('isResponsive'))):
             source_dra = dra
             break
 
@@ -1242,7 +1242,7 @@ def construct_disk_and_nic_mapping(is_power_user_mode,
         print(f"DEBUG: Processing {len(nic_to_include)} NICs in "
               f"power user mode")
         for i, nic in enumerate(nic_to_include):
-            print(f"DEBUG: Processing NIC {i+1}: ID={nic.get('nicId')}, "
+            print(f"DEBUG: Processing NIC {i + 1}: ID={nic.get('nicId')}, "
                   f"Target={nic.get('targetNetworkId')}")
             nic_obj = {
                 'nicId': nic.get('nicId'),
