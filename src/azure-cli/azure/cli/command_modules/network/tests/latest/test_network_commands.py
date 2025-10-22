@@ -557,6 +557,10 @@ class NetworkPublicIpWithSku(ScenarioTest):
             self.check('publicIPAllocationMethod', 'Static')
         ])
 
+        self.cmd('network public-ip create -g {rg} -n {ip4} --sku standardv2 --allocation-method static --ip-tags FirstPartyUsage=/NonProd', checks=[
+            self.check('publicIp.sku.name', 'StandardV2'),
+        ])
+
 
 class NetworkCustomIPPrefix(ScenarioTest):
     @ResourceGroupPreparer(name_prefix="cli_test_network_custom_ip_prefix_", location="eastus2")
@@ -5654,6 +5658,57 @@ class NetworkVnetGatewayMultiAuth(ScenarioTest):
         self.cmd('network vnet-gateway update -g {rg} -n {gw} --allow-remote-vnet-traffic false --allow-vwan-traffic false',
                  checks=[self.check('allowRemoteVnetTraffic', False),
                          self.check('allowVirtualWanTraffic', False)])
+
+
+class NetworkExpressRouteGatewayScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_no_pip')
+    def test_network_vnet_gateway_expressroute_without_public_ip(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'gw': 'gw',
+            'sku': 'Standard',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        result = self.cmd('network vnet-gateway create -g {rg} -n {gw} --vnet {vnet} '
+                          '--gateway-type ExpressRoute --sku {sku}').get_output_in_json()
+
+        ip_configs = result['vnetGateway']['ipConfigurations']
+        self.assertEqual(1, len(ip_configs))
+
+        ip_config = ip_configs[0]
+        self.assertEqual('Dynamic', ip_config['privateIPAllocationMethod'])
+        self.assertTrue(ip_config['subnet']['id'].endswith('/subnets/GatewaySubnet'))
+        self.assertFalse(ip_config.get('publicIPAddress'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_with_pip')
+    def test_network_vnet_gateway_expressroute_with_public_ip(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'pip': 'pip',
+            'gw': 'gw',
+            'sku': 'Standard',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        public_ip = self.cmd('network public-ip create -g {rg} -n {pip}').get_output_in_json()['publicIp']['id']
+        self.kwargs['pip_id'] = public_ip
+        print(self.kwargs['pip_id'])
+        result = self.cmd('network vnet-gateway create -g {rg} -n {gw} --vnet {vnet} '
+                          '--gateway-type ExpressRoute --sku {sku} --public-ip-addresses {pip}').get_output_in_json()
+
+        ip_configs = result['vnetGateway']['ipConfigurations']
+        self.assertEqual(1, len(ip_configs))
+
+        ip_config = ip_configs[0]
+        print(ip_config)
+        self.assertEqual('Dynamic', ip_config['privateIPAllocationMethod'])
+        self.assertTrue(ip_config['subnet']['id'].endswith('/subnets/GatewaySubnet'))
+        # public ip is ommitted by design with auto-assigned ip
+        self.assertFalse(ip_config.get('publicIPAddress'))
 
 
 class NetworkVirtualRouter(ScenarioTest):

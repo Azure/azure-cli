@@ -34,7 +34,7 @@ class CognitiveServicesDeploymentTests(ScenarioTest):
 
         self.assertEqual(self.cmd('az cognitiveservices account deployment list -n {sname} -g {rg}').get_output_in_json(), [])
 
-        deployment = self.cmd('az cognitiveservices account deployment create -n {sname} -g {rg} --deployment-name dpy --model-name "gpt-35-turbo" --model-version "0613" --model-format OpenAI --sku-name "Standard" --sku-capacity 1').get_output_in_json()
+        deployment = self.cmd('az cognitiveservices account deployment create -n {sname} -g {rg} --deployment-name dpy --model-name "gpt-35-turbo" --model-version "0125" --model-format OpenAI --sku-name "Standard" --sku-capacity 1').get_output_in_json()
 
         deployments = self.cmd('az cognitiveservices account deployment list -n {sname} -g {rg}').get_output_in_json()
         self.assertTrue(len(deployments) > 0)

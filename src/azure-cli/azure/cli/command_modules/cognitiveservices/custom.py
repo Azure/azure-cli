@@ -15,6 +15,7 @@ from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAcco
     Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties, \
     CommitmentPlan, CommitmentPlanProperties, CommitmentPeriod
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
+from azure.cli.core.azclierror import BadRequestError
 
 logger = get_logger(__name__)
 
@@ -86,9 +87,22 @@ def list_skus(cmd, kind=None, location=None, resource_group_name=None, account_n
     return [x for x in cf_resource_skus(cmd.cli_ctx).list() if _filter_sku(x)]
 
 
+def _is_valid_kind_change(current_kind, target_kind):
+    valid_upgrades = {
+        'AIServices': ['OpenAI'],
+        'OpenAI': ['AIServices']
+    }
+    return target_kind in valid_upgrades.get(current_kind, [])
+
+
+def _kind_uses_project_management(kind):
+    return kind in ['AIServices']
+
+
 def create(
         client, resource_group_name, account_name, sku_name, kind, location, custom_domain=None,
         tags=None, api_properties=None, assign_identity=False, storage=None, encryption=None,
+        allow_project_management=None,
         yes=None):  # pylint: disable=unused-argument
     """
     Create an Azure Cognitive Services account.
@@ -96,15 +110,19 @@ def create(
 
     sku = Sku(name=sku_name)
 
+    if _kind_uses_project_management(kind) and allow_project_management is None:
+        allow_project_management = True
+
     properties = CognitiveServicesAccountProperties()
     if api_properties is not None:
         api_properties = CognitiveServicesAccountApiProperties.deserialize(api_properties)
         properties.api_properties = api_properties
     if custom_domain:
         properties.custom_sub_domain_name = custom_domain
+    properties.allow_project_management = allow_project_management
     params = CognitiveServicesAccount(sku=sku, kind=kind, location=location,
                                       properties=properties, tags=tags)
-    if assign_identity:
+    if assign_identity or allow_project_management:
         params.identity = Identity(type=IdentityType.system_assigned)
 
     if storage is not None:
@@ -117,10 +135,12 @@ def create(
 
 
 def update(client, resource_group_name, account_name, sku_name=None, custom_domain=None,
-           tags=None, api_properties=None, storage=None, encryption=None):
+           tags=None, api_properties=None, storage=None, encryption=None,
+           allow_project_management=None, kind=None):
     """
     Update an Azure Cognitive Services account.
     """
+    sa = None
     if sku_name is None:
         sa = client.get(resource_group_name, account_name)
         sku_name = sa.sku.name
@@ -133,7 +153,19 @@ def update(client, resource_group_name, account_name, sku_name=None, custom_doma
         properties.api_properties = api_properties
     if custom_domain:
         properties.custom_sub_domain_name = custom_domain
+    if allow_project_management is not None:
+        properties.allow_project_management = allow_project_management
+
     params = CognitiveServicesAccount(sku=sku, properties=properties, tags=tags)
+
+    if kind is not None:
+        if sa is None:
+            sa = client.get(resource_group_name, account_name)
+        if kind != sa.kind and not _is_valid_kind_change(sa.kind, kind):
+            raise BadRequestError("Changing the account kind from '{}' to '{}' is not supported.".format(sa.kind, kind))
+        params.kind = kind
+        if _kind_uses_project_management(kind) and allow_project_management is None:
+            params.properties.allow_project_management = True
 
     if storage is not None:
         params.properties.user_owned_storage = json.loads(storage)

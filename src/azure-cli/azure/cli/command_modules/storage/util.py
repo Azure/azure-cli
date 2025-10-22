@@ -44,10 +44,7 @@ def collect_blob_objects(blob_service, container, pattern=None):
             else:
                 blobs = container_client.list_blobs()
         for blob in blobs:
-            try:
-                blob_name = blob.name.encode('utf-8') if isinstance(blob.name, str) else blob.name
-            except NameError:
-                blob_name = blob.name
+            blob_name = blob.name
 
             if not pattern or _match_path(blob_name, pattern):
                 yield blob_name, blob
@@ -101,7 +98,8 @@ def glob_files_remotely_track2(client, share_name, pattern, snapshot=None, is_sh
                 if not pattern or _match_path(os.path.join(current_dir, f['name']), pattern):
                     yield current_dir, f['name']
             else:
-                queue.appendleft(os.path.join(current_dir, f['name']))
+                new_path = normalize_blob_file_path(None, os.path.join(current_dir, f['name']))
+                queue.appendleft(new_path)
 
 
 def create_short_lived_blob_sas_v2(cmd, account_name, container, blob, account_key=None, user_delegation_key=None):
