@@ -920,8 +920,13 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: List[str] or None
         """
         custom_ca_certs_file_path = self.raw_param.get("custom_ca_trust_certificates")
-        if not custom_ca_certs_file_path:
+        if custom_ca_certs_file_path is None:
             return None
+        # Reject empty string - user must provide a valid file path
+        if custom_ca_certs_file_path == "":
+            raise InvalidArgumentValueError(
+                "custom_ca_trust_certificates cannot be an empty string. Please provide a valid file path."
+            )
         if not os.path.isfile(custom_ca_certs_file_path):
             raise InvalidArgumentValueError(
                 "{} is not valid file, or not accessible.".format(
@@ -8710,11 +8715,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        ca_certs = self.context.get_custom_ca_trust_certificates()
-        if ca_certs:
+        # Check if the parameter was explicitly provided
+        if self.context.raw_param.get("custom_ca_trust_certificates") is not None:
+            ca_certs = self.context.get_custom_ca_trust_certificates()
             if mc.security_profile is None:
                 mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
 
+            # Set certificates (this allows setting to empty list to remove certificates)
             mc.security_profile.custom_ca_trust_certificates = ca_certs
 
         return mc

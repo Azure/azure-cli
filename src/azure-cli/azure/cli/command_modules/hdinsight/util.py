@@ -169,6 +169,20 @@ def get_storage_account_endpoint(cmd, storage_account, is_wasb):
     return host
 
 
+def is_wasb_storage_account(cmd, storage_account):
+    from ._client_factory import cf_storage
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
+    is_wasb = True
+    if is_valid_resource_id(storage_account):
+        parsed_storage_account = parse_resource_id(storage_account)
+        resource_group_name = parsed_storage_account['resource_group']
+        storage_account_name = parsed_storage_account['resource_name']
+        storage_client = cf_storage(cmd.cli_ctx)
+        properties = storage_client.storage_accounts.get_properties(resource_group_name, storage_account_name)
+        is_wasb = not properties.is_hns_enabled
+    return is_wasb
+
+
 def build_identities_info(identities):
     from azure.mgmt.hdinsight.models import ClusterIdentity, ResourceIdentityType
     identity = None
@@ -339,3 +353,73 @@ def map_cluster_type(cluster_type):
     if cluster_type.lower() == 'mlservices' or cluster_type.lower() == 'rserver':
         cluster_type = 'mlservice'
     return cluster_type
+
+
+def get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, toJson=True):
+    import json
+    from ._client_factory import cf_graph
+    from azure.cli.core.azclierror import ResourceNotFoundError, InvalidArgumentValueError, AzureResponseError
+
+    def is_email(value):
+        return "@" in value and "." in value
+
+    def normalize_keys(d):
+        return {k.lower(): v for k, v in d.items()}
+
+    graph_client = cf_graph(cmd.cli_ctx)
+    rest_auth_entra_users = []
+    if entra_user_identity:
+        user_data = []
+        for item in entra_user_identity:
+            if item:
+                user_data.extend([s.strip() for s in item.split(',') if s.strip()])
+        for data in user_data:
+            try:
+                user = graph_client.user_get(data)
+                if user is None:
+                    filter_expr = f"id eq '{data}'"
+                    if is_email(data):
+                        filter_expr = f"userPrincipalName eq '{data}' or mail eq '{data}'"
+                    user = graph_client.user_list(filter=filter_expr)
+                    user = user[0]
+                if user is None:
+                    raise ResourceNotFoundError(
+                        error_msg=f'No Entra user found for input: "{data}"',
+                        recommendation=[
+                            'Verify the user exists in Microsoft Entra ID',
+                            'Confirm the identifier (email, upn, or objectId) is correct',
+                            'Try querying manually: az ad user show --id <identifier>'
+                        ]
+                    )
+                rest_auth_entra_users.append({'ObjectId': user['id'],
+                                              'DisplayName': user['displayName'],
+                                              'Upn': user['userPrincipalName']})
+            except ResourceNotFoundError:
+                raise
+            except Exception as ex:
+                raise AzureResponseError(
+                    error_msg=f'Error: {type(ex).__name__}: {str(ex)}',
+                    recommendation=[
+                        'Check network connectivity to Microsoft Graph API',
+                        'Validate authentication permissions for directory queries',
+                        'Retry operation with --debug to inspect detailed error',
+                        'Alternatively, consider using --entra-user-full-info to provide user details directly',
+                    ]
+                )
+    else:
+        for user in entra_user_full_info:
+            user_normalized = normalize_keys(user)
+            allowed_keys = {'objectid', 'displayname', 'upn'}
+            if invalid_keys := set(user_normalized.keys()) - allowed_keys:
+                raise InvalidArgumentValueError(
+                    error_msg=f'Invalid keys detected in user object: {", ".join(invalid_keys)}',
+                    recommendation=[
+                        'User objects must only contain: objectId, displayName, and upn',
+                        f'Remove invalid keys: {", ".join(invalid_keys)}',
+                        'Example valid format: [{"objectId": "...", "displayName": "...", "upn": "..."}]'
+                    ]
+                )
+            rest_auth_entra_users.append({'ObjectId': user_normalized.get('objectid'),
+                                          'DisplayName': user_normalized.get('displayname'),
+                                          'Upn': user_normalized.get('upn')})
+    return json.dumps(rest_auth_entra_users) if toJson else rest_auth_entra_users

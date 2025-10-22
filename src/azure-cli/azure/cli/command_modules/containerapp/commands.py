@@ -217,3 +217,16 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_workload_profile')
         g.custom_command('update', 'update_workload_profile')
         g.custom_command('delete', 'delete_workload_profile')
+
+    with self.command_group('containerapp env http-route-config') as g:
+        g.custom_show_command('show', 'show_http_route_config')
+        g.custom_command('list', 'list_http_route_configs')
+        g.custom_command('create', 'create_http_route_config', exception_handler=ex_handler_factory())
+        g.custom_command('update', 'update_http_route_config', exception_handler=ex_handler_factory())
+        g.custom_command('delete', 'delete_http_route_config', confirmation=True, exception_handler=ex_handler_factory())
+
+    with self.command_group('containerapp env premium-ingress') as g:
+        g.custom_show_command('show', 'show_environment_premium_ingress')
+        g.custom_command('add', 'add_environment_premium_ingress')
+        g.custom_command('update', 'update_environment_premium_ingress')
+        g.custom_command('remove', 'remove_environment_premium_ingress', confirmation=True)
