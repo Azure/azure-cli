@@ -1,14 +1,10 @@
 parameters:
 - name: architectures
   type: object
-- name: downloadArtifactNamePrefix
-  type: string
-  default: 'docker-azurelinux3.0'
 - name: downloadArtifactNameSuffix
   type: string
   default: ''
 - name: ShouldTest
-  displayName: Test?
   type: boolean
   default: false
 - name: timeoutInMinutes
@@ -46,7 +42,8 @@ jobs:
       ${{ each arch in parameters.architectures }}:
         ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          downloadArtifactName: ${{ parameters.downloadArtifactNamePrefix }}-${{ arch.value }}${{ parameters.downloadArtifactNameSuffix }}
+          downloadArtifactName: ${{ parameters.AzCliVersion }}-docker-${{ arch.value }}${{ parameters.downloadArtifactNameSuffix }}
+          uploadArtifactName:  ${{ parameters.AzCliVersion }}-docker-${{ arch.value }}-smoke-test${{ parameters.downloadArtifactNameSuffix }}
           architecture: ${{ arch.value }}
   pool:
     name: $(pool)
@@ -59,14 +56,6 @@ jobs:
 
     - bash: ./scripts/ci/install_docker.sh
       displayName: Install Docker
-
-    - task: Bash@3
-      displayName: Prepare Test and Output Folders
-      inputs:
-        targetType: 'inline'
-        script: |
-          mkdir output
-          chmod +x ./scripts/release/docker/test_az_cli_in_pipeline.sh
 
     - task: Bash@3
       displayName: 🚀 Self Test
@@ -92,14 +81,16 @@ jobs:
           response=$(curl -s -X POST "$scUrl" -H "Authorization: Bearer $(System.AccessToken)" -H "Content-Type: application/json" -d '')
           OidcToken=$(echo "$response" | jq -r '.oidcToken')
 
+          chmod +x ./scripts/release/docker/test_az_cli_in_pipeline.sh
           docker run -v $(System.DefaultWorkingDirectory)/scripts/release/docker:/test ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash -c "az login --service-principal --username ${{parameters.TestAzUserId}} --tenant ${{parameters.TestAzTenant}} --federated-token $OidcToken && az account set --subscription ${{parameters.TestAzSubscription}} && /test/test_az_cli_in_pipeline.sh"
 
           echo "--------------------------------------------"
 
+          mkdir output
           mv $(System.DefaultWorkingDirectory)/scripts/release/docker/azure_cli_test_output.log $(System.DefaultWorkingDirectory)/output/azure_cli_test_output.log
           mv $(System.DefaultWorkingDirectory)/scripts/release/docker/azure_cli_test_result.csv $(System.DefaultWorkingDirectory)/output/azure_cli_test_result.csv
           ls $(System.DefaultWorkingDirectory)/output
 
     - publish: $(System.DefaultWorkingDirectory)/output
-      artifact: ${{ parameters.AzCliVersion }}-$(architecture)-smoke-test${{ parameters.downloadArtifactNameSuffix }}
-      displayName: Publish Artifact
+      artifact: $(uploadArtifactName)
+      displayName: Publish Test Artifact

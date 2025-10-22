@@ -8,7 +8,6 @@ parameters:
   type: string
   default: ''
 - name: ShouldTest
-  displayName: Test?
   type: boolean
   default: false
 - name: timeoutInMinutes
@@ -34,7 +33,7 @@ jobs:
       ${{ each arch in parameters.architectures }}:
         ${{ arch.name }}:
           pool: ${{ arch.pool }}
-          downloadArtifactName: ${{ parameters.downloadArtifactNamePrefix }}-${{ arch.value }}${{ parameters.downloadArtifactNameSuffix }}
+          downloadArtifactName: ${{ parameters.AzCliVersion }}-docker-${{ arch.value }}${{ parameters.downloadArtifactNameSuffix }}
   pool:
     name: $(pool)
   steps:
@@ -47,15 +46,6 @@ jobs:
     - bash: ./scripts/ci/install_docker.sh
       displayName: Install Docker
 
-    - task: Bash@3
-      displayName: Create Test and Output Folders
-      inputs:
-        targetType: 'inline'
-        script: |
-          mkdir output
-          chmod +x ./scripts/release/docker/test_az_cli_in_pipeline.sh
-          ls ./.azure-pipelines
-
     - bash: |
         set -exv
 
@@ -66,7 +56,7 @@ jobs:
         echo "== Run az self-test  =="
         docker run ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
         
-      displayName: '🚀 Run Simple Test'
+      displayName: '🚀 Run Self Test'
 
     - bash: |
         echo "== List docker image =="
