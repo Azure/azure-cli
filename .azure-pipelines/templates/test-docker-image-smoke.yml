@@ -38,7 +38,7 @@ parameters:
 
 jobs:
 - job: TestDockerImageSmokeTest
-  displayName: Test Docker Image - Smoke Test
+  displayName: Smoke Test - Docker Image
   condition: and(succeeded(), eq(${{parameters.ShouldTest}}, true))
   timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
   strategy:

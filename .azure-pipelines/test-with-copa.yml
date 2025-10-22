@@ -31,17 +31,17 @@ parameters:
 
 stages:
 - stage: PrepareInfo
-  displayName: Prepare Azure CLI Info
+  displayName: Prepare Build Info
   jobs:
   - job: PrepareAzCliVersion
-    displayName: Prepare Azure CLI Info
+    displayName: Prepare Build Info
     pool:
       name: ${{ variables.ubuntu_pool }}
     steps:
     - checkout: none
     - task: Bash@3
       name: PrepareAzCliVersionTask
-      displayName: Prepare Azure CLI Info
+      displayName: Prepare Build Info
       inputs:
         targetType: 'inline'
         script: |
@@ -126,7 +126,7 @@ stages:
     AzCliImageTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageTag'] ]
   jobs:
   - job: BuildRpmPackagesAzureLinux
-    displayName: Build Rpm Package
+    displayName: Build Rpm
     strategy:
       matrix:
         ${{ each arch in parameters.architectures }}:
@@ -231,7 +231,7 @@ stages:
     TestServiceConnectionId: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.ServiceConnectionId'] ]
   jobs:
   - job: TestRpmPackagesAzureLinux
-    displayName: Test Rpm Package
+    displayName: Test - Rpm Package
     timeoutInMinutes: 180
     condition: and(succeeded(), in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI', 'Manual', 'Schedule'), eq(${{parameters.ShouldTest}}, true))
     pool:
@@ -424,20 +424,6 @@ stages:
               docker run $(AzCliImageName):$(AzCliImagePatchedTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
 
       - task: Bash@3
-        displayName: Scan with Trivy again
-        inputs:
-          targetType: 'inline'
-          script: |
-            export IMAGE=$(AzCliImageName):$(AzCliImagePatchedTag)
-            OutputFile="trivy-scan-after.json"
-            trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
-            cp $OutputFile ./output/
-
-      - publish: $(System.DefaultWorkingDirectory)/output
-        artifact: $(AzCliVersion)-$(architecture)-trivy
-        displayName: Publish trivy Artifact
-
-      - task: Bash@3
         displayName: Save Docker Image
         inputs:
           targetType: 'inline'
@@ -459,6 +445,22 @@ stages:
         inputs:
           TargetPath: $(Build.ArtifactStagingDirectory)
           ArtifactName: $(uploadArtifactName)
+
+      - task: Bash@3
+        displayName: Scan with Trivy again
+        continueOnError: true
+        inputs:
+          targetType: 'inline'
+          script: |
+            set -eux
+            export IMAGE=$(AzCliImageName):$(AzCliImagePatchedTag)
+            OutputFile="trivy-scan-after.json"
+            trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
+            cp $OutputFile ./output/
+
+      - publish: $(System.DefaultWorkingDirectory)/output
+        artifact: $(AzCliVersion)-$(architecture)-trivy
+        displayName: Publish trivy Artifact
 
 - stage: Test2
   displayName: 2nd Test - for Copa Patched Image
