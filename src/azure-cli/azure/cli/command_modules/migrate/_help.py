@@ -140,21 +140,13 @@ helps['migrate local replication init'] = """
           long-summary: When enabled, returns a boolean value
           indicating successful completion.
     examples:
-        - name: Initialize replication infrastructure for
-        VMware to Azure Local migration
+        - name: Initialize replication infrastructure
           text: |
             az migrate local replication init \\
                 --resource-group-name myRG \\
                 --project-name myMigrateProject \\
                 --source-appliance-name myVMwareAppliance \\
                 --target-appliance-name myAzStackHCIAppliance
-        - name: Initialize with a specific storage account for private endpoint
-          text: |
-            az migrate local replication init \\
-                --resource-group-name myRG \\
-                --project-name myMigrateProject \\
-                --source-appliance-name myVMwareAppliance \\
-                --target-appliance-name myAzStackHCIAppliance \\
         - name: Initialize and return success status
           text: |
             az migrate local replication init \\
@@ -187,8 +179,7 @@ helps['migrate local replication new'] = """
           long-summary: Full ARM resource ID of the discovered machine.
           Required if --machine-index is not provided.
         - name: --machine-index
-          short-summary: Index of the discovered server
-          from the list (1-based).
+          short-summary: Index of the discovered server from the list
           long-summary: Select a server by its position
           in the discovered servers list.
           Required if --machine-id is not provided.
