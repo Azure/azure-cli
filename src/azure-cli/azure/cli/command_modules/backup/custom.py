@@ -449,6 +449,92 @@ def list_vaults(client, resource_group_name=None):
     return client.list_by_subscription_id()
 
 
+def list_deleted_vaults(cmd, client, resource_group_name=None, location=None):
+    """List soft-deleted Recovery Services vaults."""
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    return client.list_by_subscription_id(subscription_id, location=location)
+
+
+def undelete_vault(cmd, client, vault_name, resource_group_name=None, location=None, vault_id=None):
+    """Restore a soft-deleted Recovery Services vault."""
+    # Parse vault ID if provided
+    if vault_id:
+        if not is_valid_resource_id(vault_id):
+            raise InvalidArgumentValueError("Invalid vault ID format.")
+        
+        # Parse resource ID to extract subscription, resource group, and vault name
+        vault_id_parts = vault_id.split('/')
+        if len(vault_id_parts) < 9:
+            raise InvalidArgumentValueError("Invalid vault ID format.")
+        
+        parsed_subscription_id = vault_id_parts[2]
+        parsed_resource_group = vault_id_parts[4]
+        parsed_vault_name = vault_id_parts[8]
+        
+        # Override parameters if vault_id is provided
+        resource_group_name = parsed_resource_group
+        vault_name = parsed_vault_name
+        
+        # Validate subscription ID matches current context
+        current_subscription_id = get_subscription_id(cmd.cli_ctx)
+        if parsed_subscription_id != current_subscription_id:
+            raise InvalidArgumentValueError(
+                f"Vault ID subscription ({parsed_subscription_id}) does not match current subscription ({current_subscription_id})."
+            )
+    
+    if not vault_name or not resource_group_name:
+        raise RequiredArgumentMissingError("Either provide vault-name and resource-group-name, or a valid vault-id.")
+    
+    if not location:
+        # If location not provided, try to get it from the deleted vault list
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        deleted_vaults = client.list_by_subscription_id(subscription_id)
+        
+        for deleted_vault in deleted_vaults:
+            if (deleted_vault.name == vault_name and 
+                deleted_vault.id and resource_group_name in deleted_vault.id):
+                location = deleted_vault.location
+                break
+        
+        if not location:
+            raise RequiredArgumentMissingError(
+                "Location is required. Could not determine location from deleted vault list."
+            )
+    
+    return client.begin_undelete(resource_group_name, vault_name, location=location)
+
+
+def list_deleted_vault_containers(cmd, vault_name, resource_group_name):
+    """List backup containers in a soft-deleted vault using Azure Resource Graph."""
+    from azure.mgmt.resourcegraph import ResourceGraphClient
+    from azure.mgmt.resourcegraph.models import QueryRequest
+    
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    vault_resource_id = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.RecoveryServices/vaults/{vault_name}"
+    
+    # Create Resource Graph client
+    resource_graph_client = get_mgmt_service_client(cmd.cli_ctx, ResourceGraphClient)
+    
+    # Construct the query to find backup containers in the deleted vault
+    query = f"""
+    recoveryservicesresources
+    | where type == "microsoft.recoveryservices/vaults/backupfabrics/protectioncontainers"
+    | where id startswith "{vault_resource_id}"
+    | project id, name, type, properties, location
+    """
+    
+    query_request = QueryRequest(
+        subscriptions=[subscription_id],
+        query=query
+    )
+    
+    try:
+        response = resource_graph_client.resources(query_request)
+        return response.data
+    except Exception as ex:
+        raise CLIError(f"Failed to query backup containers: {str(ex)}")
+
+
 def assign_identity(client, resource_group_name, vault_name, system_assigned=None, user_assigned=None):
     vault_details = client.get(resource_group_name, vault_name)
 

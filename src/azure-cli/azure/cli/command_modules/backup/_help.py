@@ -597,3 +597,38 @@ examples:
   - name: Delete resource guard mapping of the Recovery Services vault.
     text: az backup vault resource-guard-mapping delete --resource-group MyResourceGroup --name MyVault
 """
+
+helps['backup vault deleted-vault'] = """
+type: group
+short-summary: Manage soft-deleted Recovery Services vaults.
+"""
+
+helps['backup vault deleted-vault list'] = """
+type: command
+short-summary: List soft-deleted Recovery Services vaults.
+examples:
+  - name: List all soft-deleted vaults in the current subscription.
+    text: az backup vault deleted-vault list
+  - name: List soft-deleted vaults in a specific resource group.
+    text: az backup vault deleted-vault list --resource-group MyResourceGroup
+  - name: List soft-deleted vaults in a specific location.
+    text: az backup vault deleted-vault list --location eastus
+"""
+
+helps['backup vault deleted-vault undelete'] = """
+type: command
+short-summary: Restore a soft-deleted Recovery Services vault.
+examples:
+  - name: Restore a soft-deleted vault by name and resource group.
+    text: az backup vault deleted-vault undelete --name MyVault --resource-group MyResourceGroup --location eastus
+  - name: Restore a soft-deleted vault using its ARM ID.
+    text: az backup vault deleted-vault undelete --vault-id /subscriptions/{subscription-id}/resourceGroups/{rg-name}/providers/Microsoft.RecoveryServices/vaults/{vault-name}
+"""
+
+helps['backup vault deleted-vault list-containers'] = """
+type: command
+short-summary: List backup containers in a soft-deleted vault.
+examples:
+  - name: List backup containers in a soft-deleted vault.
+    text: az backup vault deleted-vault list-containers --name MyVault --resource-group MyResourceGroup
+"""
