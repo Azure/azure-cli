@@ -18,6 +18,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+unset AZ_INSTALLER
+
 export USERNAME=azureuser
 
 # Install RPM package only if InstallRPM is true

@@ -63,6 +63,6 @@ jobs:
         docker images
         
         echo "== Run unit test =="
-        docker run --rm -e AZ_INSTALLER='' -v $(pwd):/azure-cli ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
+        docker run --rm -v $(pwd):/azure-cli ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
         
       displayName: '🚀🚀 Run Unit Test'

@@ -398,6 +398,7 @@ stages:
         inputs:
           targetType: 'inline'
           script: |
+            set -eux
             mkdir output
             export IMAGE=$(AzCliImageName):$(AzCliImageTag)
             OutputFile="trivy-scan-before.json"
