@@ -53,7 +53,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
     'azure-appconfiguration~=1.7.1',
-    'azure-batch~=15.0.0b1',
+    'azure-batch==15.0.0b1',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
     'azure-data-tables==12.4.0',
@@ -85,7 +85,7 @@ DEPENDENCIES = [
     'azure-mgmt-eventgrid==10.2.0b2',
     'azure-mgmt-eventhub~=12.0.0b1',
     'azure-mgmt-extendedlocation==1.0.0b2',
-    'azure-mgmt-hdinsight==9.0.0b3',
+    'azure-mgmt-hdinsight==9.1.0b2',
     'azure-mgmt-imagebuilder~=1.3.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==5.0.0b1',
