@@ -1,10 +1,23 @@
 ---
 # exclusions for the migrate module
 
+migrate:
+    rule_exclusions:
+        - missing_group_help
+
+migrate local:
+    rule_exclusions:
+        - missing_group_help
+
+migrate local replication:
+    rule_exclusions:
+        - missing_group_help
+
 migrate local get-discovered-server:
     rule_exclusions:
         - missing_command_test_coverage
         - missing_parameter_test_coverage
+        - missing_command_example
     parameters:
         resource_group_name:
             rule_exclusions:
@@ -14,6 +27,7 @@ migrate local replication init:
     rule_exclusions:
         - missing_command_test_coverage
         - missing_parameter_test_coverage
+        - missing_command_example
     parameters:
         resource_group_name:
             rule_exclusions:
@@ -23,6 +37,7 @@ migrate local replication new:
     rule_exclusions:
         - missing_command_test_coverage
         - missing_parameter_test_coverage
+        - missing_command_example
     parameters:
         resource_group_name:
             rule_exclusions:
