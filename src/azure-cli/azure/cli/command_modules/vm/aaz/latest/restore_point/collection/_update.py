@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update the restore point collection.
+
+    :example: Update a restore point collection.
+        az restore-point collection update -g MyResourceGroup --collection-name MyRestorePointCollection --tags key1=value1 key2=value2
     """
 
     _aaz_info = {
