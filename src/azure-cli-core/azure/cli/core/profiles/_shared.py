@@ -114,6 +114,7 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_SQL = ('azure.mgmt.sql', None)
     MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
     MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
+    MGMT_MIGRATE = ('azure.mgmt.migrate', None)
     MGMT_NETAPPFILES = ('azure.mgmt.netappfiles', None)
     DATA_STORAGE_BLOB = ('azure.multiapi.storagev2.blob', None)
     DATA_STORAGE_FILEDATALAKE = ('azure.multiapi.storagev2.filedatalake', None)
