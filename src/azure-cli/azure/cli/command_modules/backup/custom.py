@@ -482,26 +482,40 @@ def undelete_vault(cmd, client, deleted_vault_name=None, location=None, deleted_
 
 
 def list_deleted_vault_containers(cmd, client, deleted_vault_name=None, location=None, deleted_vault_id=None):
-    if deleted_vault_name is None or location is None:
-        # Parse the deleted vault ID to extract name and location
-        deleted_vault_name, location = cust_help.get_deleted_vault_parameters(deleted_vault_id)
-
+    """List backup containers in a soft-deleted vault using Azure Resource Graph."""
     from azure.mgmt.resourcegraph import ResourceGraphClient
     from azure.mgmt.resourcegraph.models import QueryRequest
     
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    vault_resource_id = f"/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.RecoveryServices/vaults/{vault_name}"
     
-    # Create Resource Graph client
-    resource_graph_client = get_mgmt_service_client(cmd.cli_ctx, ResourceGraphClient)
+    # Build the KQL query dynamically based on input parameters
+    query = '''recoveryservicesresources
+| where type == "microsoft.recoveryservices/locations/deletedvaults/backupfabrics/protectioncontainers/protecteditems"
+| extend dataSourceType = strcat(properties.backupManagementType, '/', properties.workloadType)'''
     
-    # Construct the query to find backup containers in the deleted vault
-    query = f"""
-    recoveryservicesresources
-    | where type == "microsoft.recoveryservices/vaults/backupfabrics/protectioncontainers"
-    | where id startswith "{vault_resource_id}"
-    | project id, name, type, properties, location
-    """
+    # Add filtering based on provided parameters
+    if deleted_vault_id:
+        # If vault ID is provided, filter by it
+        query += f'''
+| where tostring(id) contains "{deleted_vault_id}"'''
+    elif deleted_vault_name:
+        # If vault name is provided, filter by name
+        query += f'''
+| where tostring(id) contains "{deleted_vault_name}"'''
+        
+        # Also filter by location if provided
+        if location:
+            query += f'''
+| where tostring(id) contains "{location}"'''
+    
+    query += '''
+| project id, type, name, location, resourceGroup, subscriptionId, dataSourceType, properties, tags'''
+    
+    # Create Resource Graph client with proper credential handling
+    from azure.cli.core._profile import Profile
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    credential, _, _ = profile.get_login_credentials()
+    resource_graph_client = ResourceGraphClient(credential)
     
     query_request = QueryRequest(
         subscriptions=[subscription_id],
