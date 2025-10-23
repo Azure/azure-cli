@@ -323,12 +323,6 @@ stages:
             echo '{"features": { "containerd-snapshotter": true }}' | sudo tee /etc/docker/daemon.json
             echo "Created /etc/docker/daemon.json with containerd-snapshotter enabled"
           fi
-
-    - task: Bash@3
-      displayName: Restart Docker
-      inputs:
-        targetType: 'inline'
-        script: |
           sudo systemctl restart docker
 
     - task: Bash@3
