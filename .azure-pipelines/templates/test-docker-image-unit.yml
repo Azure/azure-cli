@@ -25,7 +25,7 @@ parameters:
 
 jobs:
 - job: TestDockerImageUnitTest
-  displayName: Unit Test - Docker Image
+  displayName: Unit Test - Docker
   condition: and(succeeded(), eq(${{parameters.ShouldTest}}, true))
   timeoutInMinutes: ${{ parameters.timeoutInMinutes }}
   strategy:
@@ -55,7 +55,7 @@ jobs:
       
       echo "== Run az self-test  =="
       docker run ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
-    displayName: '🚀 Run Self Test'
+    displayName: '🚀 Self Test'
 
   - bash: |
       echo "== List docker image =="
@@ -63,4 +63,4 @@ jobs:
       
       echo "== Run unit test =="
       docker run --rm -v $(pwd):/azure-cli ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
-    displayName: '🚀🚀 Run Unit Test'
+    displayName: '🚀🚀 Unit Test'

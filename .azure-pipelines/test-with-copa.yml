@@ -1,11 +1,5 @@
 variables:
 - template: ${{ variables.Pipeline.Workspace }}/.azure-pipelines/templates/variables.yml
-- name: Codeql.Enabled
-  value: false
-- name: ComponentDetection.ForceScan
-  value: eq(variables['Build.SourceBranch'], 'refs/heads/release')
-- name: CopaVersion
-  value: 0.12.0-rc.1
 
 parameters:
 - name: architectures
@@ -22,7 +16,7 @@ parameters:
   type: boolean
   default: false
 - name: PatchLevel
-  displayName: library-patch-level?
+  displayName: copa-library-patch-level?
   default: "patch"
   values:
   - patch
@@ -31,7 +25,7 @@ parameters:
 
 stages:
 - stage: PrepareInfo
-  displayName: Prepare Build Info
+  displayName: Prepare
   jobs:
   - job: PrepareAzCliVersion
     displayName: Prepare Build Info
@@ -41,7 +35,7 @@ stages:
     - checkout: none
     - task: Bash@3
       name: PrepareAzCliVersionTask
-      displayName: Prepare Build Info
+      displayName: Get Azure CLI Version
       inputs:
         targetType: 'inline'
         script: |
@@ -55,7 +49,7 @@ stages:
           echo "Azure CLI version: $AzCLI_VERSION"
           echo "Azure CLI Image Name: $AzCLI_IMAGE_NAME"
           echo "Azure CLI Image Tag: $AzCLI_IMAGE_TAG"
-          echo "Azure CLI Image Patched Tag: $AzCLI_IMAGE_PATCHED_TAG"
+          echo "Azure CLI Image Copa Patched Tag: $AzCLI_IMAGE_PATCHED_TAG"
 
           echo "##vso[task.setvariable variable=AzCliVersion]$AzCLI_VERSION"
 
@@ -98,8 +92,6 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          az account show
-          
           # Get user, subscription and tenant info
           AzUserId=$(az account show --query user.name -o tsv)
           AzSubscription=$(az account show --query id -o tsv)
@@ -117,7 +109,7 @@ stages:
           echo "##vso[task.setvariable variable=ServiceConnectionId;isOutput=true]$AZURESUBSCRIPTION_SERVICE_CONNECTION_ID"
 
 - stage: Build
-  displayName: Build RPM and Docker Images
+  displayName: Build
   dependsOn: 
   - PrepareInfo
   variables:
@@ -131,7 +123,7 @@ stages:
       matrix:
         ${{ each arch in parameters.architectures }}:
           ${{ arch.name }}:
-            image: mcr.microsoft.com/azurelinux/base/core:3.0
+            image: $(BaseImage)
             uploadArtifact: $(AzCliVersion)-rpm-${{ arch.value }}
             pool: ${{ arch.pool }}
     pool:
@@ -140,10 +132,10 @@ stages:
     - bash: ./scripts/ci/install_docker.sh
       displayName: Install Docker
 
-    - task: PipAuthenticate@1
-      displayName: 'Pip Authenticate'
-      inputs:
-        artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
+    # - task: PipAuthenticate@1
+    #   displayName: 'Pip Authenticate'
+    #   inputs:
+    #     artifactFeeds: $(AZURE_ARTIFACTS_FEEDS)
 
     - task: Bash@3
       displayName: 'Build Rpm Package: Azure Linux'
@@ -152,7 +144,7 @@ stages:
         filePath: scripts/release/rpm/pipeline_azurelinux.sh
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-      displayName: 'SBOM'
+      displayName: 'Generate SBOM'
       inputs:
         BuildDropPath: $(Build.ArtifactStagingDirectory)
 
@@ -163,7 +155,7 @@ stages:
         ArtifactName: $(uploadArtifact)
 
   - job: BuildDockerImageAzureLinux
-    displayName: Build Docker Image
+    displayName: Build Docker
     dependsOn: 
     - BuildRpmPackagesAzureLinux
     strategy:
@@ -174,7 +166,7 @@ stages:
             downloadArtifactName: $(AzCliVersion)-rpm-${{ arch.value }}
             uploadArtifactName: $(AzCliVersion)-docker-${{ arch.value }}
             dockerfile: azure-linux.dockerfile
-            image: mcr.microsoft.com/azurelinux/base/core:3.0
+            image: $(BaseImage)
     pool:
       name: $(pool)
     steps:
@@ -203,7 +195,7 @@ stages:
       displayName: 'Build Docker Image'
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-      displayName: 'SBOM'
+      displayName: 'Generate SBOM'
       inputs:
         BuildDropPath: $(Build.ArtifactStagingDirectory)/docker
         DockerImagesToScan: $(AzCliDockerImageTag)
@@ -215,7 +207,7 @@ stages:
         ArtifactName: $(uploadArtifactName)
 
 - stage: Test1
-  displayName: 1st Test - for Original Image
+  displayName: 1st Test - Original Image
   dependsOn: 
   - PrepareInfo
   - Build 
@@ -229,7 +221,7 @@ stages:
     TestServiceConnectionId: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareServiceConnectionInfoTask.ServiceConnectionId'] ]
   jobs:
   - job: TestRpmPackagesAzureLinux
-    displayName: Test - Rpm Package
+    displayName: Test - Rpm
     timeoutInMinutes: 180
     condition: and(succeeded(), eq(${{parameters.ShouldTest}}, true))
     pool:
@@ -238,7 +230,7 @@ stages:
       matrix:
         ${{ each arch in parameters.architectures }}:
           ${{ arch.name }}:
-            image: mcr.microsoft.com/azurelinux/base/core:3.0
+            image: $(BaseImage)
             downloadArtifactName: $(AzCliVersion)-rpm-${{ arch.value }}
             pool: ${{ arch.pool }}
     steps:
@@ -294,7 +286,7 @@ stages:
     AzCliImagePatchedTag: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImagePatchedTag'] ]
   jobs:
   - job: BuildCopaPatchedDockerImage
-    displayName: Build Copa Patched Docker Image
+    displayName: Patch with Copa
     timeoutInMinutes: 180
     strategy:
       matrix:
@@ -463,7 +455,7 @@ stages:
       displayName: Publish Trivy Artifact
 
 - stage: Test2
-  displayName: 2nd Test - for Copa Patched Image
+  displayName: 2nd Test - Copa Patched Image
   dependsOn: 
   - PrepareInfo
   - Build
