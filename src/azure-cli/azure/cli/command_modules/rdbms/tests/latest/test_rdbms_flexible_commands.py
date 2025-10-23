@@ -70,8 +70,8 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
-    postgres_backup_location = 'westus'
+    postgres_location = 'centralindia'
+    postgres_backup_location = 'southindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -945,6 +945,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
         if (live_test):
+            sleep(90)
             self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( backup_identity['principalId'], scope))
             self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( backup_identity['principalId'], scope))
 
@@ -1019,7 +1020,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1123,7 +1124,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1262,7 +1263,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1487,7 +1488,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1880,7 +1881,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  resource_group, location, vnet_name, vnet_prefix))
 
         self.cmd('postgres flexible-server create -g {} -l {} --vnet {} --yes'.format(
-                 resource_group, 'westus', vnet_name), # location of vnet and server are different
+                 resource_group, 'southindia', vnet_name), # location of vnet and server are different
                  expect_failure=True)
 
         # delegated to different service
@@ -1888,12 +1889,12 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                           resource_group, subnet_name, vnet_name, subnet_prefix, "Microsoft.DBforMySQL/flexibleServers")).get_output_in_json()
 
         self.cmd('postgres flexible-server create -g {} -l {} --subnet {} --yes'.format(
-                 resource_group, 'eastus', subnet["id"]), # Delegated to different service
+                 resource_group, 'centralindia', subnet["id"]), # Delegated to different service
                  expect_failure=True)
 
 
 class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
@@ -2085,7 +2086,7 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2157,7 +2158,7 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2229,7 +2230,7 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
             attempts += 1
             if len(backups) > 0:
                 break
-            os.environ.get(ENV_LIVE_TEST, False) and sleep(60)
+            os.environ.get(ENV_LIVE_TEST, False) and sleep(120)
 
         backups_length = len(backups)
         self.assertTrue(backups_length > 0)
@@ -2262,7 +2263,7 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2434,7 +2435,7 @@ class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2483,7 +2484,7 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
 
 
 class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2542,7 +2543,7 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
