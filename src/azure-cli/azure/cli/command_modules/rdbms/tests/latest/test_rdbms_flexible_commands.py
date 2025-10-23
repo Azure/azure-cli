@@ -945,7 +945,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
         if (live_test):
-            sleep(90)
             self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( backup_identity['principalId'], scope))
             self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( backup_identity['principalId'], scope))
 
