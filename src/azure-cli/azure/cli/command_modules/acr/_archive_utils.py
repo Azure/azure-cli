@@ -213,7 +213,7 @@ def _archive_file_recursively(tar, name, arcname, parent_ignored, parent_matchin
 
     # Even if a dir is ignored by .dockerignore, its children might still be included (Docker semantics),
     # so we continue scanning unless it is in our build_ignore_dirs set (performance skip list).
-    if tarinfo.isdir() and not (os.path.basename(tarinfo.name) in build_ignore_dirs):
+    if tarinfo.isdir() and os.path.basename(tarinfo.name) not in build_ignore_dirs:
         for f in os.listdir(name):
             _archive_file_recursively(tar, os.path.join(name, f), os.path.join(arcname, f),
                                       parent_ignored=ignored, parent_matching_rule_index=matching_rule_index,
