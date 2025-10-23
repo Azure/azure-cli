@@ -598,34 +598,38 @@ examples:
     text: az backup vault resource-guard-mapping delete --resource-group MyResourceGroup --name MyVault
 """
 
-helps['backup vault deleted-vault'] = """
+helps['backup deleted-vault'] = """
 type: group
 short-summary: Manage soft-deleted Recovery Services vaults.
 """
 
-helps['backup vault deleted-vault list'] = """
+helps['backup deleted-vault list'] = """
 type: command
 short-summary: List soft-deleted Recovery Services vaults.
 examples:
-  - name: List all soft-deleted vaults in the current subscription.
-    text: az backup vault deleted-vault list
-  - name: List soft-deleted vaults in a specific resource group.
-    text: az backup vault deleted-vault list --resource-group MyResourceGroup
-  - name: List soft-deleted vaults in a specific location.
+  - name: List soft-deleted vaults in a specific location under the active subscription.
     text: az backup vault deleted-vault list --location eastus
 """
 
-helps['backup vault deleted-vault undelete'] = """
+helps['backup deleted-vault get'] = """
+type: command
+short-summary: Get details of a soft-deleted Recovery Services vault.
+examples:
+  - name: Get details of a soft-deleted vault by name and location.
+    text: az backup vault deleted-vault list --location eastus --name deletedVaultName
+"""
+
+helps['backup deleted-vault undelete'] = """
 type: command
 short-summary: Restore a soft-deleted Recovery Services vault.
 examples:
-  - name: Restore a soft-deleted vault by name and resource group.
-    text: az backup vault deleted-vault undelete --name MyVault --resource-group MyResourceGroup --location eastus
+  - name: Restore a soft-deleted vault by name and location.
+    text: az backup vault deleted-vault undelete --name MyVault --location eastus
   - name: Restore a soft-deleted vault using its ARM ID.
-    text: az backup vault deleted-vault undelete --vault-id /subscriptions/{subscription-id}/resourceGroups/{rg-name}/providers/Microsoft.RecoveryServices/vaults/{vault-name}
+    text: az backup vault deleted-vault undelete --ids /subscriptions/{subscription-id}/locations/{location}/deletedVaults/{deleted-vault-name}
 """
 
-helps['backup vault deleted-vault list-containers'] = """
+helps['backup deleted-vault list-containers'] = """
 type: command
 short-summary: List backup containers in a soft-deleted vault.
 examples:

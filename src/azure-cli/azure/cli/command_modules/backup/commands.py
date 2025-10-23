@@ -43,8 +43,9 @@ def load_command_table(self, _):
         g.custom_command('encryption update', 'update_encryption')
         g.custom_command('encryption show', 'show_encryption', client_factory=backup_resource_encryption_config_cf)
 
-    with self.command_group('backup vault deleted-vault', backup_custom, client_factory=deleted_vaults_cf, exception_handler=backup_exception_handler) as g:
+    with self.command_group('backup deleted-vault', backup_custom, client_factory=deleted_vaults_cf, exception_handler=backup_exception_handler) as g:
         g.custom_command('list', 'list_deleted_vaults')
+        g.custom_command('get', 'get_deleted_vault')
         g.custom_command('undelete', 'undelete_vault')
         g.custom_command('list-containers', 'list_deleted_vault_containers')
 

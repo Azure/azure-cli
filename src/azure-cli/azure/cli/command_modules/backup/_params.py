@@ -164,6 +164,15 @@ def load_arguments(self, _):
     with self.argument_context('backup vault encryption show') as c:
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
 
+    # Deleted Vault
+    with self.argument_context('backup deleted-vault') as c:
+        c.argument('location', help='Location of the deleted vault.')
+
+    for command in ['get', 'undelete', 'list-containers']:
+        with self.argument_context(f'backup deleted-vault ' + command) as c:
+            c.argument('deleted_vault_name', vault_name_type, options_list=['--name', '-n'], help='Name of the deleted vault.')
+            c.argument('deleted_vault_id', options_list=['--ids', '--deleted-vault-id'], help='ID of the deleted vault.')
+
     # Container
     with self.argument_context('backup container') as c:
         c.argument('vault_name', vault_name_type, id_part='name')
@@ -403,7 +412,6 @@ def load_arguments(self, _):
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
         c.argument('disk_access_option', arg_type=get_enum_type(allowed_disk_access_options), help='Specify the disk access option for target disks.')
         c.argument('target_disk_access_id', help='Specify the target disk access ID when --disk-access-option is set to EnablePrivateAccessForAllDisks')
-        c.argument('cvm_os_des_id', options_list=['--cvm-os-des-id', '--cvm-os-disk-encryption-set-id'], help='Specify the Disk Encryption Set ID to use for OS disk encryption during restore of a Confidential VM. This is applicable only for Confidential VMs with managed disks. Please ensure that Disk Encryption Set has access to the Key vault.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)

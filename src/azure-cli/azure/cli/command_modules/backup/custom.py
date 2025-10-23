@@ -19,7 +19,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity, MonitoringSettings, \
     AzureMonitorAlertSettings, ClassicAlertSettings, SecuritySettings, ImmutabilitySettings, RestoreSettings, \
-    CrossSubscriptionRestoreSettings
+    CrossSubscriptionRestoreSettings, DeletedVaultUndeleteInputProperties, DeletedVaultUndeleteInput
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
@@ -449,63 +449,43 @@ def list_vaults(client, resource_group_name=None):
     return client.list_by_subscription_id()
 
 
-def list_deleted_vaults(cmd, client, resource_group_name=None, location=None):
-    """List soft-deleted Recovery Services vaults."""
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    return client.list_by_subscription_id(subscription_id, location=location)
+def list_deleted_vaults(cmd, client, location):
+    return client.list_by_subscription_id(location=location)
 
 
-def undelete_vault(cmd, client, vault_name, resource_group_name=None, location=None, vault_id=None):
-    """Restore a soft-deleted Recovery Services vault."""
-    # Parse vault ID if provided
-    if vault_id:
-        if not is_valid_resource_id(vault_id):
-            raise InvalidArgumentValueError("Invalid vault ID format.")
-        
-        # Parse resource ID to extract subscription, resource group, and vault name
-        vault_id_parts = vault_id.split('/')
-        if len(vault_id_parts) < 9:
-            raise InvalidArgumentValueError("Invalid vault ID format.")
-        
-        parsed_subscription_id = vault_id_parts[2]
-        parsed_resource_group = vault_id_parts[4]
-        parsed_vault_name = vault_id_parts[8]
-        
-        # Override parameters if vault_id is provided
-        resource_group_name = parsed_resource_group
-        vault_name = parsed_vault_name
-        
-        # Validate subscription ID matches current context
-        current_subscription_id = get_subscription_id(cmd.cli_ctx)
-        if parsed_subscription_id != current_subscription_id:
-            raise InvalidArgumentValueError(
-                f"Vault ID subscription ({parsed_subscription_id}) does not match current subscription ({current_subscription_id})."
-            )
+def get_deleted_vault(cmd, client, deleted_vault_name=None, location=None, deleted_vault_id=None):
+    if deleted_vault_name is None or location is None:
+        # Parse the deleted vault ID to extract name and location
+        deleted_vault_name, location = cust_help.get_deleted_vault_parameters(deleted_vault_id)
+
+    return client.get(location, deleted_vault_name)
+
+
+def undelete_vault(cmd, client, deleted_vault_name=None, location=None, deleted_vault_id=None):
+    if deleted_vault_name is None or location is None:
+        # Parse the deleted vault ID to extract name and location
+        deleted_vault_name, location = cust_help.get_deleted_vault_parameters(deleted_vault_id)
     
-    if not vault_name or not resource_group_name:
-        raise RequiredArgumentMissingError("Either provide vault-name and resource-group-name, or a valid vault-id.")
+    deleted_vault_entity = get_deleted_vault(cmd, client, deleted_vault_name, location)
+    if deleted_vault_entity is None:
+        raise ResourceNotFoundError(f"Deleted vault '{deleted_vault_name}' not found in location '{location}'.")
     
-    if not location:
-        # If location not provided, try to get it from the deleted vault list
-        subscription_id = get_subscription_id(cmd.cli_ctx)
-        deleted_vaults = client.list_by_subscription_id(subscription_id)
-        
-        for deleted_vault in deleted_vaults:
-            if (deleted_vault.name == vault_name and 
-                deleted_vault.id and resource_group_name in deleted_vault.id):
-                location = deleted_vault.location
-                break
-        
-        if not location:
-            raise RequiredArgumentMissingError(
-                "Location is required. Could not determine location from deleted vault list."
-            )
-    
-    return client.begin_undelete(resource_group_name, vault_name, location=location)
+    resource_group = cust_help.extract_arm_resource_group_from_id(deleted_vault_entity.properties['vaultId'])
+    request_body = DeletedVaultUndeleteInput(
+        properties=DeletedVaultUndeleteInputProperties(
+            recovery_resource_group_id=resource_group
+        )
+    )
+
+    # Start the undelete operation and wait for completion
+    return client.begin_undelete(location, deleted_vault_name, request_body).result()
 
 
-def list_deleted_vault_containers(cmd, vault_name, resource_group_name):
-    """List backup containers in a soft-deleted vault using Azure Resource Graph."""
+def list_deleted_vault_containers(cmd, client, deleted_vault_name=None, location=None, deleted_vault_id=None):
+    if deleted_vault_name is None or location is None:
+        # Parse the deleted vault ID to extract name and location
+        deleted_vault_name, location = cust_help.get_deleted_vault_parameters(deleted_vault_id)
+
     from azure.mgmt.resourcegraph import ResourceGraphClient
     from azure.mgmt.resourcegraph.models import QueryRequest
     
