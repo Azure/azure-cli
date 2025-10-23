@@ -2229,7 +2229,7 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
             attempts += 1
             if len(backups) > 0:
                 break
-            os.environ.get(ENV_LIVE_TEST, False) and sleep(120)
+            os.environ.get(ENV_LIVE_TEST, False) and sleep(60)
 
         backups_length = len(backups)
         self.assertTrue(backups_length > 0)
