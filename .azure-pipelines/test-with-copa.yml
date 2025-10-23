@@ -25,9 +25,9 @@ parameters:
   displayName: library-patch-level?
   default: "patch"
   values:
-    - patch
-    - minor
-    - major
+  - patch
+  - minor
+  - major
 
 stages:
 - stage: PrepareInfo
@@ -180,42 +180,41 @@ stages:
     pool:
       name: $(pool)
     steps:
-      - bash: ./scripts/ci/install_docker.sh
-        displayName: Install Docker
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
 
-      - task: DownloadPipelineArtifact@1
-        displayName: 'Download RPM Package'
-        inputs:
-          TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
-          artifactName: $(downloadArtifactName)
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download RPM Package'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/rpm'
+        artifactName: $(downloadArtifactName)
 
-      - bash: |
-          set -ex
-          mkdir docker-temp
-          mv $(Build.ArtifactStagingDirectory)/rpm/*.rpm ./docker-temp/azure-cli.rpm
-          
-          docker build --no-cache \
-            --build-arg IMAGE=$IMAGE \
-            --tag $(AzCliImageName):$(AzCliImageTag) \
-            --file $DOCKERFILE \
-            $BUILD_SOURCESDIRECTORY
+    - bash: |
+        set -ex
+        mkdir docker-temp
+        mv $(Build.ArtifactStagingDirectory)/rpm/*.rpm ./docker-temp/azure-cli.rpm
+        
+        docker build --no-cache \
+          --build-arg IMAGE=$IMAGE \
+          --tag $(AzCliImageName):$(AzCliImageTag) \
+          --file $DOCKERFILE \
+          $BUILD_SOURCESDIRECTORY
 
-          mkdir $(Build.ArtifactStagingDirectory)/docker
-          docker save -o "$(Build.ArtifactStagingDirectory)/docker/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImageTag)
+        mkdir $(Build.ArtifactStagingDirectory)/docker
+        docker save -o "$(Build.ArtifactStagingDirectory)/docker/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImageTag)
+      displayName: 'Build Docker Image'
 
-        displayName: 'Build Docker Image'
+    - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+      displayName: 'SBOM'
+      inputs:
+        BuildDropPath: $(Build.ArtifactStagingDirectory)/docker
+        DockerImagesToScan: $(AzCliDockerImageTag)
 
-      - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-        displayName: 'SBOM'
-        inputs:
-          BuildDropPath: $(Build.ArtifactStagingDirectory)/docker
-          DockerImagesToScan: $(AzCliDockerImageTag)
-
-      - task: PublishPipelineArtifact@0
-        displayName: Publish docker Artifact
-        inputs:
-          TargetPath: $(Build.ArtifactStagingDirectory)/docker
-          ArtifactName: $(uploadArtifactName)
+    - task: PublishPipelineArtifact@0
+      displayName: Publish docker Artifact
+      inputs:
+        TargetPath: $(Build.ArtifactStagingDirectory)/docker
+        ArtifactName: $(uploadArtifactName)
 
 - stage: Test1
   displayName: 1st Test - for Original Image
@@ -311,159 +310,159 @@ stages:
       name: $(pool)
 
     steps:
-      - task: DownloadPipelineArtifact@1
-        displayName: 'Download Docker Image'
-        inputs:
-          TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
-          artifactName: $(downloadArtifactName)
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Download Docker Image'
+      inputs:
+        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+        artifactName: $(downloadArtifactName)
 
-      - bash: ./scripts/ci/install_docker.sh
-        displayName: Install Docker
+    - bash: ./scripts/ci/install_docker.sh
+      displayName: Install Docker
       
-      - task: Bash@3
-        displayName: Configure Docker Daemon
-        inputs:
-          targetType: 'inline'
-          script: |
-            if [ -f /etc/docker/daemon.json ]; then
-              echo "Docker daemon.json exists, printing content:"
-              cat /etc/docker/daemon.json
-            else
-              echo "Docker daemon.json does not exist, creating it..."
-              sudo mkdir -p /etc/docker
-              echo '{"features": { "containerd-snapshotter": true }}' | sudo tee /etc/docker/daemon.json
-              echo "Created /etc/docker/daemon.json with containerd-snapshotter enabled"
-            fi
+    - task: Bash@3
+      displayName: Configure Docker Daemon
+      inputs:
+        targetType: 'inline'
+        script: |
+          if [ -f /etc/docker/daemon.json ]; then
+            echo "Docker daemon.json exists, printing content:"
+            cat /etc/docker/daemon.json
+          else
+            echo "Docker daemon.json does not exist, creating it..."
+            sudo mkdir -p /etc/docker
+            echo '{"features": { "containerd-snapshotter": true }}' | sudo tee /etc/docker/daemon.json
+            echo "Created /etc/docker/daemon.json with containerd-snapshotter enabled"
+          fi
 
-      - task: Bash@3
-        displayName: Restart Docker
-        inputs:
-          targetType: 'inline'
-          script: |
-            sudo systemctl restart docker
+    - task: Bash@3
+      displayName: Restart Docker
+      inputs:
+        targetType: 'inline'
+        script: |
+          sudo systemctl restart docker
 
-      - task: Bash@3
-        displayName: Install Trivy
-        inputs:
-          targetType: 'inline'
-          script: |
-            set -eux
-            curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/bin
-            echo "----------------------------------"
-            trivy --version
+    - task: Bash@3
+      displayName: Install Trivy
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -eux
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh -s -- -b /usr/bin
+          echo "----------------------------------"
+          trivy --version
 
-      - task: Bash@3
-        displayName: Install Copa
-        inputs:
-          targetType: 'inline'
-          script: |
-            CopaDownloadUrl="https://github.com/project-copacetic/copacetic/releases/download/v$(CopaVersion)/copa_$(CopaVersion)_linux_amd64.tar.gz"
-            if [ "$(architecture)" = "arm64" ]; then
-              CopaDownloadUrl="https://github.com/project-copacetic/copacetic/releases/download/v$(CopaVersion)/copa_$(CopaVersion)_linux_arm64.tar.gz"
-            fi
-            echo "Download copa from: $CopaDownloadUrl"
-            curl -L -o /tmp/copa.tar.gz $CopaDownloadUrl
-            sudo mkdir -p /opt/copacetic
-            sudo tar zxf /tmp/copa.tar.gz -C /opt/copacetic
-            sudo chmod +x /opt/copacetic/copa
-            sudo ln -s /opt/copacetic/copa /usr/bin/copa
+    - task: Bash@3
+      displayName: Install Copa
+      inputs:
+        targetType: 'inline'
+        script: |
+          CopaDownloadUrl="https://github.com/project-copacetic/copacetic/releases/download/v$(CopaVersion)/copa_$(CopaVersion)_linux_amd64.tar.gz"
+          if [ "$(architecture)" = "arm64" ]; then
+            CopaDownloadUrl="https://github.com/project-copacetic/copacetic/releases/download/v$(CopaVersion)/copa_$(CopaVersion)_linux_arm64.tar.gz"
+          fi
+          echo "Download copa from: $CopaDownloadUrl"
+          curl -L -o /tmp/copa.tar.gz $CopaDownloadUrl
+          sudo mkdir -p /opt/copacetic
+          sudo tar zxf /tmp/copa.tar.gz -C /opt/copacetic
+          sudo chmod +x /opt/copacetic/copa
+          sudo ln -s /opt/copacetic/copa /usr/bin/copa
+          
+          echo "---------------- copa --version ------------------"
+          copa --version
+          echo "---------------- copa --help ------------------"
+          copa --help
+          echo "---------------- copa patch --help ------------------"
+          copa patch --help
+          echo "-----------------------------------------------------"
 
-            echo "---------------- copa --version ------------------"
-            copa --version
-            echo "---------------- copa --help ------------------"
-            copa --help
-            echo "---------------- copa patch --help ------------------"
-            copa patch --help
-            echo "-----------------------------------------------------"
+    - task: Bash@3
+      displayName: Check Docker Image
+      inputs:
+        targetType: 'inline'
+        script: |
+          TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$(AzCliVersion).tar"
+          docker load < $TAR_FILE
+          
+          echo "== Check Docker Images =="
+          docker images
+          
+          echo "== docker container =="
+          docker ps
+          
+          echo "== Run az self-test  =="
+          docker run $(AzCliImageName):$(AzCliImageTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
 
-      - task: Bash@3
-        displayName: Check Docker Image
-        inputs:
-          targetType: 'inline'
-          script: |
-              TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-$(AzCliVersion).tar"
-              docker load < $TAR_FILE
-              
-              echo "== Check Docker Images =="
-              docker images
-              
-              echo "== docker container =="
-              docker ps
-              
-              echo "== Run az self-test  =="
-              docker run $(AzCliImageName):$(AzCliImageTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+    - task: Bash@3
+      displayName: Scan with Trivy
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -eux
+          mkdir output
+          export IMAGE=$(AzCliImageName):$(AzCliImageTag)
+          OutputFile="trivy-scan-before.json"
+          trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
+          cp $OutputFile ./output/
 
-      - task: Bash@3
-        displayName: Scan with Trivy
-        inputs:
-          targetType: 'inline'
-          script: |
-            set -eux
-            mkdir output
-            export IMAGE=$(AzCliImageName):$(AzCliImageTag)
-            OutputFile="trivy-scan-before.json"
-            trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
-            cp $OutputFile ./output/
+    - task: Bash@3
+      displayName: Patch with Copa
+      inputs:
+        targetType: 'inline'
+        script: |
+          export COPA_EXPERIMENTAL=1
+          export IMAGE=$(AzCliImageName):$(AzCliImageTag)
+          copa patch -i $IMAGE -r trivy-scan-before.json --pkg-types os,library --library-patch-level ${{parameters.PatchLevel}} --tag $(AzCliImagePatchedTag)
 
-      - task: Bash@3
-        displayName: Patch with Copa
-        inputs:
-          targetType: 'inline'
-          script: |
-            export COPA_EXPERIMENTAL=1
-            export IMAGE=$(AzCliImageName):$(AzCliImageTag)
-            copa patch -i $IMAGE -r trivy-scan-before.json --pkg-types os,library --library-patch-level ${{parameters.PatchLevel}} --tag $(AzCliImagePatchedTag)
+    - task: Bash@3
+      displayName: Check Patched Docker Image
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "== Check Docker Images =="
+          docker images
+          
+          echo "== Run az self-test  =="
+          docker run $(AzCliImageName):$(AzCliImagePatchedTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
 
-      - task: Bash@3
-        displayName: Check Patched Docker Image
-        inputs:
-          targetType: 'inline'
-          script: |
-            echo "== Check Docker Images =="
-            docker images
+    - task: Bash@3
+      displayName: Save Patched Docker Image
+      inputs:
+        targetType: 'inline'
+        script: |
+          echo "== Check Docker Images =="
+          docker images
+          
+          echo "== Save Docker Image to tar file  =="
+          mkdir "$BUILD_STAGINGDIRECTORY/copa"
+          docker save -o "$BUILD_STAGINGDIRECTORY/copa/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImagePatchedTag)
 
-            echo "== Run az self-test  =="
-            docker run $(AzCliImageName):$(AzCliImagePatchedTag) /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+    - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+      displayName: 'SBOM'
+      inputs:
+        BuildDropPath: $(Build.ArtifactStagingDirectory)/copa
+        DockerImagesToScan: $(AzCliImagePatchedTag)
 
-      - task: Bash@3
-        displayName: Save Patched Docker Image
-        inputs:
-          targetType: 'inline'
-          script: |
-            echo "== Check Docker Images =="
-            docker images
+    - task: PublishPipelineArtifact@0
+      displayName: Publish docker Artifact
+      inputs:
+        TargetPath: $(Build.ArtifactStagingDirectory)/copa
+        ArtifactName: $(uploadArtifactName)
 
-            echo "== Save Docker Image to tar file  =="
-            mkdir "$BUILD_STAGINGDIRECTORY/copa"
-            docker save -o "$BUILD_STAGINGDIRECTORY/copa/docker-azure-cli-$(AzCliVersion).tar" $(AzCliImageName):$(AzCliImagePatchedTag)
+    - task: Bash@3
+      displayName: Scan with Trivy again
+      continueOnError: true
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -eux
+          export IMAGE=$(AzCliImageName):$(AzCliImagePatchedTag)
+          OutputFile="trivy-scan-after.json"
+          trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
+          cp $OutputFile ./output/
 
-      - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-        displayName: 'SBOM'
-        inputs:
-          BuildDropPath: $(Build.ArtifactStagingDirectory)/copa
-          DockerImagesToScan: $(AzCliImagePatchedTag)
-
-      - task: PublishPipelineArtifact@0
-        displayName: Publish docker Artifact
-        inputs:
-          TargetPath: $(Build.ArtifactStagingDirectory)/copa
-          ArtifactName: $(uploadArtifactName)
-
-      - task: Bash@3
-        displayName: Scan with Trivy again
-        continueOnError: true
-        inputs:
-          targetType: 'inline'
-          script: |
-            set -eux
-            export IMAGE=$(AzCliImageName):$(AzCliImagePatchedTag)
-            OutputFile="trivy-scan-after.json"
-            trivy image --pkg-types os,library --ignore-unfixed -f json -o $OutputFile $IMAGE
-            cp $OutputFile ./output/
-
-      - publish: $(System.DefaultWorkingDirectory)/output
-        artifact: $(AzCliVersion)-$(architecture)-trivy
-        displayName: Publish Trivy Artifact
+    - publish: $(System.DefaultWorkingDirectory)/output
+      artifact: $(AzCliVersion)-$(architecture)-trivy
+      displayName: Publish Trivy Artifact
 
 - stage: Test2
   displayName: 2nd Test - for Copa Patched Image

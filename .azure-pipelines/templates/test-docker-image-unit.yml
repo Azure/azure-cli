@@ -37,32 +37,30 @@ jobs:
   pool:
     name: $(pool)
   steps:
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Download Docker Image'
-      inputs:
-        TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
-        artifactName: $(downloadArtifactName)
+  - task: DownloadPipelineArtifact@1
+    displayName: 'Download Docker Image'
+    inputs:
+      TargetPath: '$(Build.ArtifactStagingDirectory)/docker'
+      artifactName: $(downloadArtifactName)
 
-    - bash: ./scripts/ci/install_docker.sh
-      displayName: Install Docker
+  - bash: ./scripts/ci/install_docker.sh
+    displayName: Install Docker
 
-    - bash: |
-        set -exv
+  - bash: |
+      set -exv
+      
+      echo "== Load docker image =="
+      TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-${{ parameters.AzCliVersion }}.tar"
+      docker load < $TAR_FILE
+      
+      echo "== Run az self-test  =="
+      docker run ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
+    displayName: '🚀 Run Self Test'
 
-        echo "== Load docker image =="
-        TAR_FILE="$SYSTEM_ARTIFACTSDIRECTORY/docker/docker-azure-cli-${{ parameters.AzCliVersion }}.tar"
-        docker load < $TAR_FILE
-        
-        echo "== Run az self-test  =="
-        docker run ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash -c "time az self-test && time az --version && tdnf list --installed"
-        
-      displayName: '🚀 Run Self Test'
-
-    - bash: |
-        echo "== List docker image =="
-        docker images
-        
-        echo "== Run unit test =="
-        docker run --rm -v $(pwd):/azure-cli ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
-        
-      displayName: '🚀🚀 Run Unit Test'
+  - bash: |
+      echo "== List docker image =="
+      docker images
+      
+      echo "== Run unit test =="
+      docker run --rm -v $(pwd):/azure-cli ${{ parameters.AzCliImageName }}:${{ parameters.AzCliImageTag }} /bin/bash /azure-cli/scripts/release/rpm/test_azurelinux_in_docker.sh --InstallRPM false
+    displayName: '🚀🚀 Run Unit Test'
