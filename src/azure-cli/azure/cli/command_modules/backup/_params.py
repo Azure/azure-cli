@@ -169,7 +169,7 @@ def load_arguments(self, _):
         c.argument('location', help='Location of the deleted vault.')
 
     for command in ['get', 'undelete', 'list-containers']:
-        with self.argument_context(f'backup deleted-vault ' + command) as c:
+        with self.argument_context('backup deleted-vault ' + command) as c:
             c.argument('deleted_vault_name', vault_name_type, options_list=['--name', '-n'], help='Name of the deleted vault.')
             c.argument('deleted_vault_id', options_list=['--ids', '--deleted-vault-id'], help='ID of the deleted vault.')
 

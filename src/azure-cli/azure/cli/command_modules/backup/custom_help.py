@@ -8,7 +8,6 @@ import json
 import re
 import os
 from datetime import datetime, timedelta
-from itertools import islice, chain
 from urllib.parse import urlparse
 
 from knack.log import get_logger
@@ -118,7 +117,8 @@ def extract_arm_resource_group_from_id(resource_id):
     if id_parts.get('subscription') is None or id_parts.get('resource_group') is None:
         raise InvalidArgumentValueError("The resource ID does not contain subscription or resource group information.")
 
-    arm_resource_group = f"/subscriptions/{id_parts.get('subscription')}/resourceGroups/{id_parts.get('resource_group')}"
+    arm_resource_group = (f"/subscriptions/{id_parts.get('subscription')}/"
+                          f"resourceGroups/{id_parts.get('resource_group')}")
     return arm_resource_group
 
 
@@ -128,8 +128,8 @@ def get_deleted_vault_parameters(deleted_vault_id):
         deleted_vault_name = id_parts.get('child_name_1')
         location = id_parts.get('name')
         if deleted_vault_name is None or location is None:
-            raise InvalidArgumentValueError("Unable to fetch the deleted vault name and the location. " \
-            "Please provide a valid deleted vault id.")
+            raise InvalidArgumentValueError("Unable to fetch the deleted vault name and the location. "
+                                            "Please provide a valid deleted vault id.")
     else:
         raise InvalidArgumentValueError("Please provide a valid deleted vault id.")
 

@@ -465,11 +465,11 @@ def undelete_vault(cmd, client, deleted_vault_name=None, location=None, deleted_
     if deleted_vault_name is None or location is None:
         # Parse the deleted vault ID to extract name and location
         deleted_vault_name, location = cust_help.get_deleted_vault_parameters(deleted_vault_id)
-    
+
     deleted_vault_entity = get_deleted_vault(cmd, client, deleted_vault_name, location)
     if deleted_vault_entity is None:
         raise ResourceNotFoundError(f"Deleted vault '{deleted_vault_name}' not found in location '{location}'.")
-    
+
     resource_group = cust_help.extract_arm_resource_group_from_id(deleted_vault_entity.properties['vaultId'])
     request_body = DeletedVaultUndeleteInput(
         properties=DeletedVaultUndeleteInputProperties(
@@ -485,14 +485,14 @@ def list_deleted_vault_containers(cmd, client, deleted_vault_name=None, location
     """List backup containers in a soft-deleted vault using Azure Resource Graph."""
     from azure.mgmt.resourcegraph import ResourceGraphClient
     from azure.mgmt.resourcegraph.models import QueryRequest
-    
+
     subscription_id = get_subscription_id(cmd.cli_ctx)
-    
+
     # Build the KQL query dynamically based on input parameters
     query = '''recoveryservicesresources
 | where type == "microsoft.recoveryservices/locations/deletedvaults/backupfabrics/protectioncontainers/protecteditems"
 | extend dataSourceType = strcat(properties.backupManagementType, '/', properties.workloadType)'''
-    
+
     # Add filtering based on provided parameters
     if deleted_vault_id:
         # If vault ID is provided, filter by it
@@ -502,26 +502,26 @@ def list_deleted_vault_containers(cmd, client, deleted_vault_name=None, location
         # If vault name is provided, filter by name
         query += f'''
 | where tostring(id) contains "{deleted_vault_name}"'''
-        
+
         # Also filter by location if provided
         if location:
             query += f'''
 | where tostring(id) contains "{location}"'''
-    
+
     query += '''
 | project id, type, name, location, resourceGroup, subscriptionId, dataSourceType, properties, tags'''
-    
+
     # Create Resource Graph client with proper credential handling
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cmd.cli_ctx)
     credential, _, _ = profile.get_login_credentials()
     resource_graph_client = ResourceGraphClient(credential)
-    
+
     query_request = QueryRequest(
         subscriptions=[subscription_id],
         query=query
     )
-    
+
     try:
         response = resource_graph_client.resources(query_request)
         return response.data
