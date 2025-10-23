@@ -42,11 +42,11 @@ class RegistryAdapterAddAction(KeyValueAddAction):
         
         for key, value in parsed_pairs.items():
             if key == 'registry-key':
-                result['registry_key'] = value
+                result['registryKey'] = value
             elif key == 'type':
                 result['type'] = value
             elif key == 'secret-uri':
-                result['key_vault_secret_reference'] = {'secret_uri': value}
+                result['keyVaultSecretReference'] = {'secretUri': value}
             else:
                 continue  # Ignore unknown keys or handle as needed
         
@@ -66,9 +66,9 @@ class StorageMountAddAction(KeyValueAddAction):
             elif key == 'type':
                 result['type'] = value
             elif key == 'destination-path':
-                result['destination_path'] = value
+                result['destinationPath'] = value
             elif key == 'credentials-secret-uri':
-                result['credentials_key_vault_reference'] = {'secret_uri': value}
+                result['credentialsKeyVaultReference'] = {'secretUri': value}
             else:
                 continue  # Ignore unknown keys or handle as needed
         
@@ -85,7 +85,7 @@ class InstallScriptAddAction(KeyValueAddAction):
             if key == 'name':
                 result['name'] = value
             elif key == 'source-uri':
-                source['source_uri'] = value
+                source['sourceUri'] = value
             elif key == 'type':
                 source['type'] = value
             else:

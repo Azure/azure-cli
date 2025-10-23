@@ -100,7 +100,7 @@ from .aaz.latest.relay.hyco import Show as HyCoShow
 from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
 from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
 from .aaz.latest.relay.namespace import List as NamespaceList
-from .aaz.latest.appservice.plan import Show as AppServicePlanShow, Update as AppServicePlanUpdate, Create as AppServicePlanCreate
+from .aaz.latest.appservice.plan import Show as AppServicePlanShow, Update as AppServicePlanUpdate
 from .aaz.latest.appservice.plan.managed_instance import ShowRdpPassword as AppServicePlanManagedInstanceShowRdpPassword
 from .aaz.latest.appservice.plan.managed_instance.instance import List as AppServicePlanManagedInstanceList
 
@@ -3992,6 +3992,81 @@ def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
         sku_def.capacity = max(3, number_of_workers)
 
 
+def _enable_managed_instance_properties(plan_def, is_managed_instance=None, assign_identities=None, 
+                                       enable_system_assigned_identity=None, user_assigned_identities=None,
+                                       plan_default_identity=None, subnet_resource_id=None, rdp_enabled=None,
+                                       registry_adapters=None, install_scripts=None, storage_mounts=None):
+    """Configure additional properties for managed instance App Service Plan features."""
+    # Check if additional properties are already enabled (e.g., by zone_redundant)
+    additional_properties_enabled = hasattr(plan_def, 'additional_properties') and plan_def.additional_properties
+    
+    # Only enable additional properties if we have managed instance features to configure
+    has_managed_instance_features = any([
+        is_managed_instance,
+        assign_identities,
+        subnet_resource_id,
+        rdp_enabled is not None,
+        plan_default_identity,
+        registry_adapters,
+        install_scripts,
+        storage_mounts
+    ])
+    
+    if not has_managed_instance_features:
+        return
+    
+    if not additional_properties_enabled:
+        plan_def.enable_additional_properties_sending()
+        existing_properties = plan_def.serialize()["properties"]
+        plan_def.additional_properties["properties"] = existing_properties
+    
+    # Configure managed instance mode
+    if is_managed_instance:
+        plan_def.additional_properties["properties"]["isCustomMode"] = True
+    
+    # Configure identity
+    if assign_identities:
+        identity_config = {}
+        
+        if enable_system_assigned_identity and user_assigned_identities:
+            identity_config["type"] = "SystemAssigned,UserAssigned"
+            identity_config["userAssignedIdentities"] = {uid: {} for uid in user_assigned_identities}
+        elif enable_system_assigned_identity:
+            identity_config["type"] = "SystemAssigned"
+        elif user_assigned_identities:
+            identity_config["type"] = "UserAssigned"
+            identity_config["userAssignedIdentities"] = {uid: {} for uid in user_assigned_identities}
+        
+        if identity_config:
+            plan_def.additional_properties["identity"] = identity_config
+    
+    # Configure network (VNet integration)
+    if subnet_resource_id:
+        plan_def.additional_properties["properties"]["network"] = {
+            "virtualNetworkSubnetId": subnet_resource_id
+        }
+    
+    # Configure RDP access
+    if rdp_enabled is not None:
+        plan_def.additional_properties["properties"]["rdpEnabled"] = rdp_enabled
+    
+    # Configure default identity
+    if plan_default_identity:
+        plan_def.additional_properties["properties"]["planDefaultIdentity"] = plan_default_identity
+    
+    # Configure registry adapters
+    if registry_adapters:
+        plan_def.additional_properties["properties"]["registryAdapters"] = registry_adapters
+    
+    # Configure install scripts
+    if install_scripts:
+        plan_def.additional_properties["properties"]["installScripts"] = install_scripts
+    
+    # Configure storage mounts
+    if storage_mounts:
+        plan_def.additional_properties["properties"]["storageMounts"] = storage_mounts
+
+
 # Progress bar for serverfarm async scaling operations
 class PlanProgressBar(IndeterminateProgressBar):
     STATUS_CHECK_INTERVAL_SEC = 60
@@ -4140,38 +4215,27 @@ has been deployed ".format(app_service_environment)
         user_assigned_identities = None
         enable_system_assigned_identity = None
 
-    class AppServicePlanCreateWithNoWait(AppServicePlanCreate):
-        def pre_operations(self):
-            args = self.ctx.args
-            args.no_wait = no_wait
-
-    poller = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)(command_args={
-        "name": name,
-        "resource_group": resource_group_name,
-        "location": location,
-        "tags": tags,
-        "sku": sku_def.__dict__,
-        "reserved": plan_def.reserved,
-        "hyper_v": plan_def.hyper_v,
-        "per_site_scaling": plan_def.per_site_scaling,
-        "hosting_environment_profile": plan_def.hosting_environment_profile,
-        "async_scaling_enabled": plan_def.async_scaling_enabled,
-        "zone_redundant": zone_redundant if zone_redundant else None,
-        "is_custom_mode": is_managed_instance,
-        "network": {
-            "virtual_network_subnet_id": subnet_resource_id,
-        } if subnet_resource_id else None,
-        "rdp_enabled": rdp_enabled,
-        "mi_system_assigned": str(enable_system_assigned_identity) if enable_system_assigned_identity else None,
-        "mi_user_assigned": user_assigned_identities,
-        "plan_default_identity": plan_default_identity,
-        "registry_adapters": registry_adapters,
-        "install_scripts": install_scripts,
-        "storage_mounts": storage_mounts,
-    })
+    # Configure managed instance features using additional properties
+    # TODO: replace in the future with updated SDK that has first-class support for these features
+    _enable_managed_instance_properties(
+        plan_def=plan_def,
+        is_managed_instance=is_managed_instance,
+        assign_identities=assign_identities,
+        enable_system_assigned_identity=enable_system_assigned_identity,
+        user_assigned_identities=user_assigned_identities,
+        plan_default_identity=plan_default_identity,
+        subnet_resource_id=subnet_resource_id,
+        rdp_enabled=rdp_enabled,
+        registry_adapters=registry_adapters,
+        install_scripts=install_scripts,
+        storage_mounts=storage_mounts
+    )
 
     if no_wait:
-        return poller
+        return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, 
+                          resource_group_name=resource_group_name, name=name, app_service_plan=plan_def)
+
+    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
 
     # Only use progress bar for actual long-running operations (async scaling)
     # Check if the operation is actually async by looking at the poller status
