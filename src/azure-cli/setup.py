@@ -97,7 +97,7 @@ DEPENDENCIES = [
     'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=9.0',
     'azure-mgmt-monitor~=7.0.0b1',
-    'azure-mgmt-msi~=7.0.0',
+    'azure-mgmt-msi~=7.1.0',
     'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
     'azure-mgmt-postgresqlflexibleservers==1.1.0b2',
