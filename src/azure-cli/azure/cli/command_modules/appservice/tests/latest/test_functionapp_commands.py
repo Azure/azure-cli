@@ -3402,6 +3402,30 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
         with self.assertRaises(ValidationError):
             self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --vnet {} --subnet {} --configure-networking-later'.format(resource_group, functionapp_name, storage_account, ep_plan_name, vnet_name, subnet_name))
 
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_create_elastic_premium_zone_redundant_plan(self, resource_group):
+        ep_plan_name = self.create_random_name('epplan', 24)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP1 --zone-redundant'.format(resource_group, ep_plan_name)).assert_with_checks([
+            JMESPathCheck('zoneRedundant', True)
+        ])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_create_elastic_premium_ep2_zone_redundant_plan(self, resource_group):
+        ep_plan_name = self.create_random_name('epplan', 24)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP2 --zone-redundant'.format(resource_group, ep_plan_name)).assert_with_checks([
+            JMESPathCheck('zoneRedundant', True)
+        ])
+
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_create_elastic_premium_ep3_zone_redundant_plan(self, resource_group):
+        ep_plan_name = self.create_random_name('epplan', 24)
+
+        self.cmd('functionapp plan create -g {} -n {} --sku EP3 --zone-redundant'.format(resource_group, ep_plan_name)).assert_with_checks([
+            JMESPathCheck('zoneRedundant', True)
+        ])
+
     @live_only()
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     def test_functionapp_elastic_premium_restricted_public_network_access_storage_vnet(self, resource_group):

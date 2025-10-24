@@ -1,0 +1,111 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp plan create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -g -n --sku --zone-redundant
+      User-Agent:
+      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"francecentral","tags":{"product":"azurecli","cause":"automation","test":"test_functionapp_create_elastic_premium_zone_redundant_plan","date":"2025-10-24T19:29:44Z","module":"appservice"},"properties":{"provisioningState":"Succeeded"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '408'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 24 Oct 2025 19:29:52 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '16499'
+      x-msedge-ref:
+      - 'Ref A: E84614F2A52F47DB9F22CF1806B3120A Ref B: MWH011020809040 Ref C: 2025-10-24T19:29:51Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "francecentral", "sku": {"name": "EP1", "tier": "ElasticPremium",
+      "capacity": 3}, "properties": {"perSiteScaling": false, "isXenon": false, "zoneRedundant":
+      true}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - functionapp plan create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '176'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -n --sku --zone-redundant
+      User-Agent:
+      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.22631-SP0)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/epplan000002?api-version=2024-11-01
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/epplan000002","name":"epplan000002","type":"Microsoft.Web/serverfarms","kind":"elastic","location":"francecentral","properties":{"serverFarmId":49329,"name":"epplan000002","sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":3},"workerSize":"D1","workerSizeId":3,"workerTierName":null,"numberOfWorkers":3,"currentWorkerSize":"D1","currentWorkerSizeId":3,"currentNumberOfWorkers":3,"status":"Ready","webSpace":"clitest.rg000001-FranceCentralwebspace","subscription":"2819c8c8-a774-4ac9-bf91-8bb8f1f47ece","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":0,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"France
+        Central","perSiteScaling":false,"elasticScaleEnabled":true,"maximumElasticWorkerCount":3,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"elastic","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-par-029_49329","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":true,"maximumNumberOfZones":3,"currentNumberOfZonesUtilized":3,"migrateToVMSS":null,"vnetConnectionsUsed":null,"vnetConnectionsMax":null,"createdTime":"2025-10-24T19:29:57.7633333","asyncScalingEnabled":false,"isCustomMode":null,"powerState":null,"eligibleLogCategories":null},"sku":{"name":"EP1","tier":"ElasticPremium","size":"EP1","family":"EP","capacity":3}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '1798'
+      content-type:
+      - application/json
+      date:
+      - Fri, 24 Oct 2025 19:30:00 GMT
+      etag:
+      - '"1DC451C95C3A4E0"'
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-aspnet-version:
+      - 4.0.30319
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=bd30bf6a-f200-4cfd-bcd6-a339b0d9dbe8/westus2/412c828c-939b-41d5-b009-3825e4a158db
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '12000'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '800'
+      x-msedge-ref:
+      - 'Ref A: 8D5BEF42718E4279B082054561E55B1B Ref B: MWH011020806060 Ref C: 2025-10-24T19:29:52Z'
+      x-powered-by:
+      - ASP.NET
+    status:
+      code: 200
+      message: OK
+version: 1
