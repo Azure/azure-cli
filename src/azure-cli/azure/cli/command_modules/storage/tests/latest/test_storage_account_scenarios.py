@@ -2923,3 +2923,41 @@ class StorageSkuTests(ScenarioTest):
         sku_list = self.cmd('storage sku list').get_output_in_json()
         assert sku_list is not None
         assert len(sku_list) > 0
+
+class StorageAccountNetworkSecurityPerimeterConfigurationTests(StorageScenarioMixin, ScenarioTest):
+    @record_only()
+    @AllowLargeResponse(size_kb=10000)
+    def test_storage_account_nsp(self):
+        self.kwargs.update({
+            'sa': 'satestnsp1',
+            'rg': 'rgtestnsp',
+            'cmd': 'storage account network-security-perimeter-configuration',
+            'nsp_name': 'nsp1',
+            'nsp_profile_name': 'nspprofile1',
+            'nsp_association_name': 'nspassociation1',
+        })
+        self.cmd('group create -g {rg} -l eastus')
+        account_id = self.cmd('storage account create -n {sa} -g {rg}').get_output_in_json()['id']
+
+        # requires nsp extension, so run beforehand
+        # self.cmd('network perimeter create --name {nsp_name} --resource-group {rg}')
+        # nsp_profile_id = self.cmd('network perimeter profile create --name {nsp_profile_name} --resource-group {rg} '
+        #          '--perimeter-name {nsp_name}').get_output_in_json()['id']
+        # self.kwargs.update({"account_id": account_id, "nsp_profile_id": nsp_profile_id})
+        # self.cmd('network perimeter association create --name {nsp_association_name} '
+        #          '--perimeter-name {nsp_name} --resource-group {rg} --access-mode Learning '
+        #          '--private-link-resource {{id:{account_id}}} --profile {{id:{nsp_profile_id}}}')
+
+        config_list = self.cmd('{cmd} list --account-name {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(config_list[0]['profile']['name'], "nspprofile1")
+        self.assertEqual(config_list[0]['resourceAssociation']['name'], "nspassociation1")
+        self.assertEqual(config_list[0]['resourceAssociation']['accessMode'], "Learning")
+        config_name = config_list[0]['name']
+        self.kwargs.update({'config_name': config_name})
+
+        self.cmd('{cmd} show --account-name {sa} -g {rg} -n {config_name}').assert_with_checks(
+            JMESPathCheck('profile.name', "nspprofile1"),
+            JMESPathCheck('resourceAssociation.name', "nspassociation1"),
+            JMESPathCheck('resourceAssociation.accessMode', "Learning"))
+
+        self.cmd('{cmd} reconcile --account-name {sa} -g {rg} -n {config_name}')
