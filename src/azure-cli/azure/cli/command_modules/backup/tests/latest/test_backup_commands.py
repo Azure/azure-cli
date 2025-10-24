@@ -1567,3 +1567,140 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.status", "Completed"),
             self.check("resourceGroup", '{rg}')
         ])
+
+    @ResourceGroupPreparer(location="eastus2euap")
+    def test_vault_soft_delete_basic(self, resource_group, resource_group_location):
+        """Test 1: Create vault, delete it, check deleted vaults list, get specific deleted vault, undelete vault"""
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'vault': self.create_random_name('clitest-vault-', 20)
+        })
+
+        # Create vault
+        self.cmd('backup vault create --name {vault} --resource-group {rg} --location {location}', checks=[
+            self.check('name', '{vault}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        # Delete vault
+        self.cmd('backup vault delete --name {vault} --resource-group {rg} --yes')
+
+        # Check vault appears in deleted vaults list
+        deleted_vaults = self.cmd('backup deleted-vault list').get_output_in_json()
+        vault_found = any(vault.get('name', '').startswith('{vault}'.format(**self.kwargs)) for vault in deleted_vaults)
+        self.assertTrue(vault_found, "Deleted vault not found in deleted vaults list")
+
+        # Get specific deleted vault
+        vault_name_from_list = None
+        for vault in deleted_vaults:
+            if vault.get('name', '').startswith('{vault}'.format(**self.kwargs)):
+                vault_name_from_list = vault['name']
+                break
+
+        self.kwargs['deleted_vault_name'] = vault_name_from_list
+        
+        deleted_vault = self.cmd('backup deleted-vault get --name {deleted_vault_name} --location {location}').get_output_in_json()
+        self.assertEqual(deleted_vault['name'], vault_name_from_list)
+
+        # Undelete vault
+        self.cmd('backup deleted-vault undelete --name {deleted_vault_name} --location {location}')
+
+        # Verify vault is restored
+        self.cmd('backup vault show --name {vault} --resource-group {rg}', checks=[
+            self.check('name', '{vault}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        # Cleanup - delete the restored vault
+        self.cmd('backup vault delete --name {vault} --resource-group {rg} --yes')
+
+    @RGPreparer(location="eastus2euap")
+    @VaultPreparer(soft_delete=True)
+    @VMPreparer()
+    def test_vault_soft_delete_with_items(self, resource_group, resource_group_location, vault_name, vm_name):
+        """Test 2: Create vault with backup item, delete both, check deleted vault containers, undelete vault and item"""
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'vault': vault_name,
+            'vm': vm_name
+        })
+
+        # Enable backup for VM
+        self.cmd('backup protection enable-for-vm --vm {vm} --vault-name {vault} --resource-group {rg} '
+                 '--policy-name DefaultPolicy')
+
+        # Wait for backup to be configured
+        import time
+        time.sleep(30)
+
+        # Verify backup item exists
+        self.cmd('backup item list --vault-name {vault} --resource-group {rg} --backup-management-type AzureIaasVM', 
+                 checks=[
+                     self.check("length(@)", 1),
+                     self.check("[0].properties.friendlyName", '{vm}')
+                 ])
+
+        # Delete backup data (soft delete)
+        self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM '
+                 '--vault-name {vault} --resource-group {rg} --container-name {vm} --item-name {vm} '
+                 '--delete-backup-data --yes')
+
+        # Delete vault
+        self.cmd('backup vault delete --name {vault} --resource-group {rg} --yes')
+
+        # Check vault appears in deleted vaults list
+        deleted_vaults = self.cmd('backup deleted-vault list').get_output_in_json()
+        vault_found = any(vault.get('name', '').startswith('{vault}'.format(**self.kwargs)) for vault in deleted_vaults)
+        self.assertTrue(vault_found, "Deleted vault not found in deleted vaults list")
+
+        # Get the actual deleted vault name
+        vault_name_from_list = None
+        for vault in deleted_vaults:
+            if vault.get('name', '').startswith('{vault}'.format(**self.kwargs)):
+                vault_name_from_list = vault['name']
+                break
+
+        self.kwargs['deleted_vault_name'] = vault_name_from_list
+
+        # Check backup containers in deleted vault
+        containers = self.cmd('backup deleted-vault list-containers --name {deleted_vault_name}').get_output_in_json()
+        self.assertGreater(len(containers), 0, "No backup containers found in deleted vault")
+
+        # Verify the backup item is in the containers
+        vm_found = any(container.get('name', '').find('{vm}'.format(**self.kwargs)) >= 0 for container in containers)
+        self.assertTrue(vm_found, "VM backup item not found in deleted vault containers")
+
+        # Undelete vault
+        self.cmd('backup deleted-vault undelete --name {deleted_vault_name} --location {location}')
+
+        # Verify vault is restored
+        self.cmd('backup vault show --name {vault} --resource-group {rg}', checks=[
+            self.check('name', '{vault}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        # Undelete backup item
+        self.cmd('backup protection undelete --vault-name {vault} --resource-group {rg} '
+                 '--container-name {vm} --item-name {vm} --workload-type VM --backup-management-type AzureIaasVM')
+
+        # Verify backup item is restored
+        self.cmd('backup item show --vault-name {vault} --resource-group {rg} --backup-management-type AzureIaasVM '
+                 '--container-name {vm} --name {vm}', checks=[
+                     self.check("properties.friendlyName", '{vm}'),
+                     self.check("properties.protectionState", "ProtectionStopped")
+                 ])
+
+    @RGPreparer(location="eastus2euap")  
+    def test_vault_soft_delete_misc_operations(self, resource_group, resource_group_location):
+        """Test 3: Minor unit tests for vault soft delete operations"""
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'vault': self.create_random_name('clitest-vault-', 20)
+        })
+
+        # Test listing deleted vaults with location filter
+        deleted_vaults = self.cmd('backup deleted-vault list --location {location}').get_output_in_json()
+        self.assertIsInstance(deleted_vaults, list)
