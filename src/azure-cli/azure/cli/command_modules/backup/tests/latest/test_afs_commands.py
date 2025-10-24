@@ -26,7 +26,7 @@ vault_name = "sarath-vault"
 class BackupTests(ScenarioTest, unittest.TestCase):
     #@record_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
@@ -60,7 +60,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     #@record_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
@@ -109,7 +109,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     #@record_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
@@ -178,7 +178,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     #@record_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
@@ -220,8 +220,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     #@record_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
-    @RGPreparer(location="centraluseuap", random_name_length=30, parameter_name="resource_group2")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=20)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap", random_name_length=30, parameter_name="resource_group2")
     @VaultPreparer()
     @StorageAccountPreparer(location="centraluseuap", parameter_name="storage_account", resource_group_parameter_name="resource_group")
     @StorageAccountPreparer(location="centraluseuap", parameter_name="storage_account_rg2", resource_group_parameter_name="resource_group2")
@@ -360,7 +360,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     #@record_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
@@ -414,7 +414,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     #@record_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
@@ -472,7 +472,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     #@record_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
@@ -508,7 +508,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
@@ -577,7 +577,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=20)
     @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()

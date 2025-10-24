@@ -44,7 +44,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         return status
 
 
-    @RGPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
     @VMPreparer()
     @StorageAccountPreparer(location="eastus2euap")
@@ -92,7 +92,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --delete-backup-data true --yes')
 
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
     # @PolicyPreparer(parameter_name='policy')
@@ -224,7 +224,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?name == '{vault3}'])", 1)
         ])
 
-    @RGPreparer(location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
@@ -259,7 +259,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{vm1}'])", 1),
             self.check("length([?properties.friendlyName == '{vm2}'])", 1)])
 
-    @RGPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
     @PolicyPreparer(parameter_name='policy1')
     @PolicyPreparer(parameter_name='policy2', instant_rp_days="3")
@@ -374,7 +374,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}').get_output_in_json()
         self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
-    @RGPreparer(location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
@@ -459,7 +459,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         item1_json = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1} -n {vm1}').get_output_in_json()
         self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
 
-    @RGPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
@@ -484,7 +484,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vault_name.lower(), rp1_json['id'].lower())
         self.assertIn(vm_name.lower(), rp1_json['id'].lower())
 
-    @RGPreparer(location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
     @VaultPreparer()
     @VMPreparer()
     def test_backup_protection(self, resource_group, vault_name, vm_name):
@@ -540,7 +540,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.assertTrue(protection_check == '')
 
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
@@ -673,8 +673,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
 
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap")
-    @RGPreparer(parameter_name="target_resource_group", location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="eastus2euap")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
@@ -786,8 +786,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap")
-    @RGPreparer(parameter_name="target_resource_group", location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="eastus2euap")
     @VaultPreparer(storageRedundancy = "ZoneRedundant")
     @VMPreparer(image="Win2022Datacenter")
     @ItemPreparer()
@@ -827,9 +827,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     @AllowLargeResponse()
-    @RGPreparer(location="centraluseuap")
-    @RGPreparer(parameter_name="target_resource_group", location="centraluseuap")
-    @RGPreparer(parameter_name="storage_account_resource_group", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="storage_account_resource_group", location="centraluseuap")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
@@ -880,8 +880,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     @unittest.skip("Test skipped due to temporary test infrastructure issues")
     @AllowLargeResponse()
-    @RGPreparer(location="centraluseuap")
-    @RGPreparer(parameter_name="target_resource_group", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="centraluseuap")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
@@ -923,8 +923,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     @unittest.skip("Test skipped due to service-side flag being disabled")
     @AllowLargeResponse()
-    @RGPreparer(location="centraluseuap")
-    @RGPreparer(parameter_name="target_resource_group", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="centraluseuap")
     @KeyVaultPreparer()
     @KeyPreparer()
     @DESPreparer()
@@ -971,12 +971,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.status", "Completed")
         ])   
 
-    @RGPreparer(location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
-    @StorageAccountPreparer(location=" centraluseuap")
+    @StorageAccountPreparer(location="centraluseuap")
     def test_backup_job(self, resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
@@ -1011,7 +1011,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
 
-    @RGPreparer(location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
@@ -1059,7 +1059,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.isScheduledForDeferredDelete", None)
         ])
 
-    @RGPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
     @VMPreparer()
     @StorageAccountPreparer(location="eastus2euap")
@@ -1156,7 +1156,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-    @RGPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
@@ -1202,7 +1202,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length(@)", 0)
         ])
 
-    @RGPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
     def test_backup_identity(self, resource_group, vault_name):
         self.kwargs.update({
@@ -1313,7 +1313,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
 
-    @RGPreparer()
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_")
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
     @KeyVaultPreparer(additional_params='--enable-rbac-authorization false')
@@ -1473,7 +1473,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-    @RGPreparer(location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
     @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @ItemPreparer(vm_parameter_name='vm1')
@@ -1571,10 +1571,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     def test_vault_soft_delete_basic(self, resource_group, resource_group_location):
         """Test 1: Create vault, delete it, check deleted vaults list, get specific deleted vault, undelete vault"""
+        vault_name = self.create_random_name('clitest-vault-', 20)
         self.kwargs.update({
             'rg': resource_group,
             'location': resource_group_location,
-            'vault': self.create_random_name('clitest-vault-', 20)
+            'vault': vault_name
         })
 
         # Create vault
@@ -1587,17 +1588,16 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup vault delete --name {vault} --resource-group {rg} --yes')
 
         # Check vault appears in deleted vaults list
-        deleted_vaults = self.cmd('backup deleted-vault list').get_output_in_json()
-        vault_found = any(vault.get('name', '').startswith('{vault}'.format(**self.kwargs)) for vault in deleted_vaults)
+        vault_found = None
+        deleted_vaults = self.cmd('backup deleted-vault list -l {location}').get_output_in_json()
+        for vault in deleted_vaults:
+            original_vault_id = vault.get('properties').get('vaultId')
+            if vault_name in original_vault_id:
+                vault_found = vault
+                break
         self.assertTrue(vault_found, "Deleted vault not found in deleted vaults list")
 
-        # Get specific deleted vault
-        vault_name_from_list = None
-        for vault in deleted_vaults:
-            if vault.get('name', '').startswith('{vault}'.format(**self.kwargs)):
-                vault_name_from_list = vault['name']
-                break
-
+        vault_name_from_list = vault_found['name']
         self.kwargs['deleted_vault_name'] = vault_name_from_list
         
         deleted_vault = self.cmd('backup deleted-vault get --name {deleted_vault_name} --location {location}').get_output_in_json()
@@ -1615,7 +1615,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # Cleanup - delete the restored vault
         self.cmd('backup vault delete --name {vault} --resource-group {rg} --yes')
 
-    @RGPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
     @VMPreparer()
     def test_vault_soft_delete_with_items(self, resource_group, resource_group_location, vault_name, vm_name):
@@ -1651,17 +1651,16 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup vault delete --name {vault} --resource-group {rg} --yes')
 
         # Check vault appears in deleted vaults list
-        deleted_vaults = self.cmd('backup deleted-vault list').get_output_in_json()
-        vault_found = any(vault.get('name', '').startswith('{vault}'.format(**self.kwargs)) for vault in deleted_vaults)
+        vault_found = None
+        deleted_vaults = self.cmd('backup deleted-vault list -l {location}').get_output_in_json()
+        for vault in deleted_vaults:
+            original_vault_id = vault.get('properties').get('vaultId')
+            if vault_name in original_vault_id:
+                vault_found = vault
+                break
         self.assertTrue(vault_found, "Deleted vault not found in deleted vaults list")
 
-        # Get the actual deleted vault name
-        vault_name_from_list = None
-        for vault in deleted_vaults:
-            if vault.get('name', '').startswith('{vault}'.format(**self.kwargs)):
-                vault_name_from_list = vault['name']
-                break
-
+        vault_name_from_list = vault_found['name']
         self.kwargs['deleted_vault_name'] = vault_name_from_list
 
         # Check backup containers in deleted vault
@@ -1691,8 +1690,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                      self.check("properties.friendlyName", '{vm}'),
                      self.check("properties.protectionState", "ProtectionStopped")
                  ])
+        tmp_vault = self.cmd('backup vault show --name {vault} --resource-group {rg}').get_output_in_json()
+        print("Officially, the test is done here. Vault is: ", tmp_vault)
 
-    @RGPreparer(location="eastus2euap")  
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     def test_vault_soft_delete_misc_operations(self, resource_group, resource_group_location):
         """Test 3: Minor unit tests for vault soft delete operations"""
         self.kwargs.update({

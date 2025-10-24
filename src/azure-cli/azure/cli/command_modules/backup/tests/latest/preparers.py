@@ -101,6 +101,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
                                                self.resource_group_parameter_name))
 
     def _cleanup(self, vault_name, resource_group):
+        print(vault_name, resource_group)
         containers = execute(self.cli_ctx, 'az backup container list --backup-management-type AzureIaasVM -v {} -g {} --query [].properties.friendlyName'
                              .format(vault_name, resource_group)).get_output_in_json()
         for container in containers:
