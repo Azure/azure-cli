@@ -5623,8 +5623,7 @@ class _FunctionAppSkuStackRuntimeHelper:
         return self._stacks
 
     def get_raw_function_app_stacks(self, cmd, location, runtime, sku):
-        stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?' \
-                         'api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}?sku={}'
+        stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?api-version=2023-01-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}&sku={}'
         if runtime == "dotnet-isolated":
             runtime = "dotnet"
         request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime, sku)
@@ -5742,7 +5741,8 @@ class _FunctionAppSkuStackRuntimeHelper:
 
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
-            raise ValidationError("Invalid version {0} for runtime {1} for function apps on this plan. Supported versions for runtime {1} are {2}."
+            raise ValidationError('Invalid version {0} for runtime {1} for function apps on this plan.'
+                                  'Supported versions for runtime {1} are {2}.'
                                   .format(version, runtime, versions))
         return matched_runtime_version
 
@@ -6427,7 +6427,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
     if flexconsumption_location:
-        runtime_helper = _FunctionAppSkuStackRuntimeHelper(cmd, flexconsumption_location, runtime, "FC1", runtime_version)
+        runtime_helper = _FunctionAppSkuStackRuntimeHelper(cmd, flexconsumption_location,
+                                                           runtime, "FC1", runtime_version)
         matched_runtime = runtime_helper.resolve(runtime, runtime_version)
     else:
         runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
