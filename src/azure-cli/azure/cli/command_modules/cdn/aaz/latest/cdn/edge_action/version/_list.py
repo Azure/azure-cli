@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List EdgeActionVersion resources by EdgeAction
+
+    :example: GetEdgeActionVersionsByEdgeAction
+        az cdn edge-action version list --resource-group testrg --edge-action-name edgeAction1
     """
 
     _aaz_info = {

@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List EdgeActionExecutionFilter resources by EdgeAction
+
+    :example: ListEdgeActionsExecutionFilters_byEdgeAction
+        az cdn edge-action execution-filter list --resource-group testrg --edge-action-name edgeAction1
     """
 
     _aaz_info = {

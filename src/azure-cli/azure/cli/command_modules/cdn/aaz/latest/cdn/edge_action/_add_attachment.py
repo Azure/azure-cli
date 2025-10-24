@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class AddAttachment(AAZCommand):
     """A long-running operation for adding an EdgeAction attachment.
+
+    :example: EdgeActions_AddAttachment
+        az cdn edge-action add-attachment --resource-group testrg --edge-action-name edgeAction1 --attached-resource-id /subscriptions/sub1/resourceGroups/rs1/providers/Microsoft.Cdn/Profiles/myProfile/afdEndpoints/ep1/routes/route1
     """
 
     _aaz_info = {

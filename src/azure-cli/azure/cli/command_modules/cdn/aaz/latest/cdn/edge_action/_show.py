@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get EdgeAction resource
+
+    :example: GetEdgeAction
+        az cdn edge-action show --resource-group testrg --edge-action-name edgeAction1
     """
 
     _aaz_info = {

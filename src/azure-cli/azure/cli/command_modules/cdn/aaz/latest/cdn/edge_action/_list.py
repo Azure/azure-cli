@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List EdgeAction resources by subscription ID
+
+    :example: ListEdgeActions_bySubscription
+        az cdn edge-action list
     """
 
     _aaz_info = {

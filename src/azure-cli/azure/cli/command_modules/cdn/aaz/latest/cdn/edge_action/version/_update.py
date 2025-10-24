@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update EdgeActionVersion version
+
+    :example: UpdateEdgeActionVersion
+        az cdn edge-action version update --resource-group testrg --edge-action-name edgeAction1 --version version2 --location global --deployment-type zip --is-default-version True
     """
 
     _aaz_info = {

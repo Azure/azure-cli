@@ -17,6 +17,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete EdgeActionExecutionFilter resource
+
+    :example: DeleteEdgeActionExecutionFilter
+        az cdn edge-action execution-filter delete --resource-group testrg --edge-action-name edgeAction1 --execution-filter executionFilter1
     """
 
     _aaz_info = {
