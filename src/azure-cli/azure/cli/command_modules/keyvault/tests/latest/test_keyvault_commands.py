@@ -133,6 +133,7 @@ class KeyVaultMHSMPrivateLinkResourceScenarioTest(ScenarioTest):
 
 
 class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pec')
     @KeyVaultPreparer(name_prefix='cli-test-kv-pec-', location='eastus2', additional_params='--enable-rbac-authorization false')
     def test_keyvault_private_endpoint_connection(self, resource_group, key_vault):
@@ -2647,6 +2648,96 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
         # Remove multiple ip addresses
         self.cmd('keyvault network-rule remove --ip-address {ip} {ip2} {ip3} --name {kv} --resource-group {rg}',
                  checks=[self.check('length(properties.networkAcls.ipRules)', 1)])
+
+class KeyVaultMHSMNetworkRuleScenarioTest(ScenarioTest):
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_test_mhsm_network_rule')
+    def test_keyvault_mhsm_network_rule(self, resource_group):
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "cfd63e61-7aec-4d54-ba2c-394c6d10df25"
+        self.kwargs.update({
+            'hsm': self.create_random_name('cli-test-hsm-nr-', 24),
+            'hsm2': self.create_random_name('cli-test-hsm-nr-', 24),
+            'loc': 'uksouth',
+            'init_admin': logged_in_user,
+            'ip': '1.2.3.4/32',
+            'ip2': '2.3.4.0/24',
+            'ip3': '3.4.5.0/24',
+            'ip4': '4.5.0.0/16',
+            'ip5': '1.2.3.4'
+        })
+
+        # test creating network rules while creating managed hsm
+        self.cmd('keyvault create --hsm-name {hsm} -l {loc} -g {rg} --default-action Deny --network-acls-ips {ip} {ip2} --administrators {init_admin} --retention-days 7', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 2),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}'),
+            self.check('properties.networkAcls.ipRules[1].value', '{ip2}')
+        ])
+
+        # basic tests
+        self.cmd('keyvault create --hsm-name {hsm2} -l {loc} -g {rg} --administrators {init_admin} --retention-days 7')
+        cert_dir = os.path.join(TEST_DIR, 'certs')
+        tmp_dir = self.create_temp_dir()
+
+        self.kwargs.update({
+            'cert0': os.path.join(cert_dir, 'cert_0.cer').replace('\\', '\\\\'),
+            'cert1': os.path.join(cert_dir, 'cert_1.cer').replace('\\', '\\\\'),
+            'cert2': os.path.join(cert_dir, 'cert_2.cer').replace('\\', '\\\\'),
+            'security_domain': os.path.join(tmp_dir, 'clitest-mhsm-SD.json').replace('\\', '\\\\')
+        })
+        self.cmd('keyvault security-domain download --hsm-name {hsm2} --sd-wrapping-keys {cert0} {cert1} {cert2} '
+                 '--sd-quorum 2 --security-domain-file {security_domain}')
+        self.cmd('keyvault update-hsm --hsm-name {hsm2} -g {rg} --default-action Deny')
+
+        # add network-rule for ip-address
+        self.cmd('keyvault network-rule add --ip-address {ip} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')])
+
+        # Add twice to make sure there is no duplication
+        self.cmd('keyvault network-rule add --ip-address {ip} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 1),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')
+        ])
+
+        # Add ip without CIDR format to make sure there is no duplication
+        self.cmd('keyvault network-rule add --ip-address {ip5} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 1),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')
+        ])
+
+        # list network-rule for ip-address
+        self.cmd('keyvault network-rule list --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('ipRules[0].value', '{ip}')])
+
+        # remove network-rule for ip-address
+        self.cmd('keyvault network-rule remove --ip-address {ip} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 0)])
+
+        # remove network-rule for ip-address without CIDR
+        self.cmd('keyvault network-rule add --ip-address {ip} --hsm-name {hsm2} --resource-group {rg}')
+        self.cmd('keyvault network-rule remove --ip-address {ip5} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 0)])
+
+        # Add multiple ip addresses
+        self.cmd('keyvault network-rule add --ip-address {ip} {ip2} {ip3} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 3)
+        ])
+
+        # Add multiple ip addresses with overlaps between them
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('keyvault network-rule add --ip-address {ip} {ip5} --hsm-name {hsm2} --resource-group {rg}')
+
+        # Add multiple ip addresses with some overlaps with the server
+        self.cmd('keyvault network-rule add --ip-address {ip4} {ip5} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 4)
+        ])
+
+        # Remove multiple ip addresses
+        self.cmd('keyvault network-rule remove --ip-address {ip} {ip2} {ip3} --hsm-name {hsm2} --resource-group {rg}',
+                 checks=[self.check('length(properties.networkAcls.ipRules)', 1)])
+
 
 class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pna')
