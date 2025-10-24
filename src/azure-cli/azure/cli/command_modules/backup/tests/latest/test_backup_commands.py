@@ -45,7 +45,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
 
     @RGPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     def test_backup_scenario(self, resource_group, vault_name, vm_name, storage_account):
@@ -225,7 +225,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     @RGPreparer(location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     @ItemPreparer(vm_parameter_name='vm1')
@@ -260,7 +260,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{vm2}'])", 1)])
 
     @RGPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @PolicyPreparer(parameter_name='policy1')
     @PolicyPreparer(parameter_name='policy2', instant_rp_days="3")
     @VMPreparer(parameter_name='vm1')
@@ -375,7 +375,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
     @RGPreparer(location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     @ItemPreparer(vm_parameter_name='vm1')
@@ -460,7 +460,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
 
     @RGPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -485,7 +485,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vm_name.lower(), rp1_json['id'].lower())
 
     @RGPreparer(location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     def test_backup_protection(self, resource_group, vault_name, vm_name):
 
@@ -541,7 +541,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     @AllowLargeResponse()
     @RGPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -675,7 +675,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @AllowLargeResponse()
     @RGPreparer(location="eastus2euap")
     @RGPreparer(parameter_name="target_resource_group", location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -788,7 +788,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @AllowLargeResponse()
     @RGPreparer(location="eastus2euap")
     @RGPreparer(parameter_name="target_resource_group", location="eastus2euap")
-    @VaultPreparer(soft_delete=False, storageRedundancy = "ZoneRedundant")
+    @VaultPreparer(storageRedundancy = "ZoneRedundant")
     @VMPreparer(image="Win2022Datacenter")
     @ItemPreparer()
     @RPPreparer()
@@ -830,7 +830,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @RGPreparer(location="centraluseuap")
     @RGPreparer(parameter_name="target_resource_group", location="centraluseuap")
     @RGPreparer(parameter_name="storage_account_resource_group", location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -882,7 +882,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @AllowLargeResponse()
     @RGPreparer(location="centraluseuap")
     @RGPreparer(parameter_name="target_resource_group", location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -928,7 +928,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     @KeyVaultPreparer()
     @KeyPreparer()
     @DESPreparer()
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -972,7 +972,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])   
 
     @RGPreparer(location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -1060,7 +1060,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     @RGPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     def test_backup_disk_exclusion(self, resource_group, vault_name, vm_name, storage_account):
@@ -1157,7 +1157,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     @RGPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -1474,7 +1474,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     @RGPreparer(location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @ItemPreparer(vm_parameter_name='vm1')
     @PolicyPreparer(parameter_name='policy1', instant_rp_days='4')
@@ -1568,7 +1568,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-    @ResourceGroupPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     def test_vault_soft_delete_basic(self, resource_group, resource_group_location):
         """Test 1: Create vault, delete it, check deleted vaults list, get specific deleted vault, undelete vault"""
         self.kwargs.update({
@@ -1616,7 +1616,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup vault delete --name {vault} --resource-group {rg} --yes')
 
     @RGPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=True)
+    @VaultPreparer()
     @VMPreparer()
     def test_vault_soft_delete_with_items(self, resource_group, resource_group_location, vault_name, vm_name):
         """Test 2: Create vault with backup item, delete both, check deleted vault containers, undelete vault and item"""
