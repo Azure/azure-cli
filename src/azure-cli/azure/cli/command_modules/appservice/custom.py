@@ -5623,7 +5623,7 @@ class _FunctionAppSkuStackRuntimeHelper:
         return self._stacks
 
     def get_raw_function_app_stacks(self, cmd, location, runtime, sku):
-        stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?api-version=2023-01-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}&sku={}'
+        stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?api-version=2023-01-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}&sku={}'  # pylint: disable=line-too-long
         if runtime == "dotnet-isolated":
             runtime = "dotnet"
         request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime, sku)
