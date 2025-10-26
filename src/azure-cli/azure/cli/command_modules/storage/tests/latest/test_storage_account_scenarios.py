@@ -1871,6 +1871,22 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('placement.zonePlacementPolicy', 'Any')
         ])
 
+    def test_storage_account_geo_sla(self):
+        self.kwargs.update({
+            'rg': 'yifantestzp',
+            'sa': self.create_random_name('sa', 24)
+        })
+
+        self.cmd('storage account create -n {sa} -g {rg} --sku Standard_GRS '
+                 '--enable-blob-geo-priority-replication true', checks=[
+            JMESPathCheck('geoPriorityReplicationStatus.isBlobEnabled', True)
+        ])
+        self.cmd('storage account update -n {sa} -g {rg} '
+                 '--enable-blob-geo-priority-replication false', checks=[
+            JMESPathCheck('geoPriorityReplicationStatus.isBlobEnabled', False)
+        ])
+
+
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
         account_info = self.cmd('account show').get_output_in_json()
