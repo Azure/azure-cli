@@ -12,27 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "restore-point collection list",
+    "restore-point collection wait",
 )
-class List(AAZCommand):
-    """Get the list of restore point collections in a resource group.
-
-    :example: Get the list of restore point collections in a resource group.
-        az restore-point collection list --resource-group "myResourceGroup"
+class Wait(AAZWaitCommand):
+    """Place the CLI in a waiting state until a condition is met.
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/restorepointcollections", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/restorepointcollections/{}", "2024-11-01"],
         ]
     }
 
-    AZ_SUPPORT_PAGINATION = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
-        return self.build_paging(self._execute_operations, self._output)
+        self._execute_operations()
+        return self._output()
 
     _args_schema = None
 
@@ -48,11 +43,22 @@ class List(AAZCommand):
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
         )
+        _args_schema.restore_point_collection_name = AAZStrArg(
+            options=["--collection-name", "--restore-point-collection-name"],
+            help="The name of the restore point collection.",
+            required=True,
+            id_part="name",
+        )
+        _args_schema.expand = AAZStrArg(
+            options=["--expand"],
+            help="The expand expression to apply on the operation.",
+            enum={"restorePoints": "restorePoints"},
+        )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.RestorePointCollectionsList(ctx=self.ctx)()
+        self.RestorePointCollectionsGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -64,11 +70,10 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
-        next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
-        return result, next_link
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        return result
 
-    class RestorePointCollectionsList(AAZHttpOperation):
+    class RestorePointCollectionsGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -82,7 +87,7 @@ class List(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Compute/restorePointCollections/{restorePointCollectionName}",
                 **self.url_parameters
             )
 
@@ -102,6 +107,10 @@ class List(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
+                    "restorePointCollectionName", self.ctx.args.restore_point_collection_name,
+                    required=True,
+                ),
+                **self.serialize_url_param(
                     "subscriptionId", self.ctx.subscription_id,
                     required=True,
                 ),
@@ -111,6 +120,9 @@ class List(AAZCommand):
         @property
         def query_parameters(self):
             parameters = {
+                **self.serialize_query_param(
+                    "$expand", self.ctx.args.expand,
+                ),
                 **self.serialize_query_param(
                     "api-version", "2024-11-01",
                     required=True,
@@ -145,40 +157,29 @@ class List(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.next_link = AAZStrType(
-                serialized_name="nextLink",
-            )
-            _schema_on_200.value = AAZListType(
-                flags={"required": True},
-            )
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
+            _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.location = AAZStrType(
+            _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
-            _element.name = AAZStrType(
+            _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.properties = AAZObjectType(
+            _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
-            _element.system_data = AAZObjectType(
+            _schema_on_200.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _ListHelper._build_schema_system_data_read(_element.system_data)
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
+            _WaitHelper._build_schema_system_data_read(_schema_on_200.system_data)
+            _schema_on_200.tags = AAZDictType()
+            _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.value.Element.properties
+            properties = cls._schema_on_200.properties
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -193,10 +194,10 @@ class List(AAZCommand):
             )
             properties.source = AAZObjectType()
 
-            restore_points = cls._schema_on_200.value.Element.properties.restore_points
+            restore_points = cls._schema_on_200.properties.restore_points
             restore_points.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.properties.restore_points.Element
+            _element = cls._schema_on_200.properties.restore_points.Element
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
@@ -210,12 +211,12 @@ class List(AAZCommand):
                 serialized_name="systemData",
                 flags={"read_only": True},
             )
-            _ListHelper._build_schema_system_data_read(_element.system_data)
+            _WaitHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
 
-            properties = cls._schema_on_200.value.Element.properties.restore_points.Element.properties
+            properties = cls._schema_on_200.properties.restore_points.Element.properties
             properties.consistency_mode = AAZStrType(
                 serialized_name="consistencyMode",
             )
@@ -236,42 +237,42 @@ class List(AAZCommand):
             properties.source_restore_point = AAZObjectType(
                 serialized_name="sourceRestorePoint",
             )
-            _ListHelper._build_schema_api_entity_reference_read(properties.source_restore_point)
+            _WaitHelper._build_schema_api_entity_reference_read(properties.source_restore_point)
             properties.time_created = AAZStrType(
                 serialized_name="timeCreated",
             )
 
-            exclude_disks = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.exclude_disks
+            exclude_disks = cls._schema_on_200.properties.restore_points.Element.properties.exclude_disks
             exclude_disks.Element = AAZObjectType()
-            _ListHelper._build_schema_api_entity_reference_read(exclude_disks.Element)
+            _WaitHelper._build_schema_api_entity_reference_read(exclude_disks.Element)
 
-            instance_view = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.instance_view
+            instance_view = cls._schema_on_200.properties.restore_points.Element.properties.instance_view
             instance_view.disk_restore_points = AAZListType(
                 serialized_name="diskRestorePoints",
             )
             instance_view.statuses = AAZListType()
 
-            disk_restore_points = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.instance_view.disk_restore_points
+            disk_restore_points = cls._schema_on_200.properties.restore_points.Element.properties.instance_view.disk_restore_points
             disk_restore_points.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.instance_view.disk_restore_points.Element
+            _element = cls._schema_on_200.properties.restore_points.Element.properties.instance_view.disk_restore_points.Element
             _element.id = AAZStrType()
             _element.replication_status = AAZObjectType(
                 serialized_name="replicationStatus",
             )
 
-            replication_status = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.instance_view.disk_restore_points.Element.replication_status
+            replication_status = cls._schema_on_200.properties.restore_points.Element.properties.instance_view.disk_restore_points.Element.replication_status
             replication_status.completion_percent = AAZIntType(
                 serialized_name="completionPercent",
             )
             replication_status.status = AAZObjectType()
-            _ListHelper._build_schema_instance_view_status_read(replication_status.status)
+            _WaitHelper._build_schema_instance_view_status_read(replication_status.status)
 
-            statuses = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.instance_view.statuses
+            statuses = cls._schema_on_200.properties.restore_points.Element.properties.instance_view.statuses
             statuses.Element = AAZObjectType()
-            _ListHelper._build_schema_instance_view_status_read(statuses.Element)
+            _WaitHelper._build_schema_instance_view_status_read(statuses.Element)
 
-            source_metadata = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata
+            source_metadata = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata
             source_metadata.diagnostics_profile = AAZObjectType(
                 serialized_name="diagnosticsProfile",
                 flags={"read_only": True},
@@ -311,18 +312,18 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
-            diagnostics_profile = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.diagnostics_profile
+            diagnostics_profile = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.diagnostics_profile
             diagnostics_profile.boot_diagnostics = AAZObjectType(
                 serialized_name="bootDiagnostics",
             )
 
-            boot_diagnostics = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.diagnostics_profile.boot_diagnostics
+            boot_diagnostics = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.diagnostics_profile.boot_diagnostics
             boot_diagnostics.enabled = AAZBoolType()
             boot_diagnostics.storage_uri = AAZStrType(
                 serialized_name="storageUri",
             )
 
-            hardware_profile = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.hardware_profile
+            hardware_profile = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.hardware_profile
             hardware_profile.vm_size = AAZStrType(
                 serialized_name="vmSize",
             )
@@ -330,7 +331,7 @@ class List(AAZCommand):
                 serialized_name="vmSizeProperties",
             )
 
-            vm_size_properties = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.hardware_profile.vm_size_properties
+            vm_size_properties = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.hardware_profile.vm_size_properties
             vm_size_properties.v_cp_us_available = AAZIntType(
                 serialized_name="vCPUsAvailable",
             )
@@ -338,7 +339,7 @@ class List(AAZCommand):
                 serialized_name="vCPUsPerCore",
             )
 
-            os_profile = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile
+            os_profile = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile
             os_profile.admin_password = AAZStrType(
                 serialized_name="adminPassword",
                 flags={"secret": True},
@@ -366,7 +367,7 @@ class List(AAZCommand):
                 serialized_name="windowsConfiguration",
             )
 
-            linux_configuration = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration
+            linux_configuration = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration
             linux_configuration.disable_password_authentication = AAZBoolType(
                 serialized_name="disablePasswordAuthentication",
             )
@@ -381,7 +382,7 @@ class List(AAZCommand):
             )
             linux_configuration.ssh = AAZObjectType()
 
-            patch_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration.patch_settings
+            patch_settings = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration.patch_settings
             patch_settings.assessment_mode = AAZStrType(
                 serialized_name="assessmentMode",
             )
@@ -392,7 +393,7 @@ class List(AAZCommand):
                 serialized_name="patchMode",
             )
 
-            automatic_by_platform_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration.patch_settings.automatic_by_platform_settings
+            automatic_by_platform_settings = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration.patch_settings.automatic_by_platform_settings
             automatic_by_platform_settings.bypass_platform_safety_checks_on_user_schedule = AAZBoolType(
                 serialized_name="bypassPlatformSafetyChecksOnUserSchedule",
             )
@@ -400,36 +401,36 @@ class List(AAZCommand):
                 serialized_name="rebootSetting",
             )
 
-            ssh = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration.ssh
+            ssh = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration.ssh
             ssh.public_keys = AAZListType(
                 serialized_name="publicKeys",
             )
 
-            public_keys = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration.ssh.public_keys
+            public_keys = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration.ssh.public_keys
             public_keys.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration.ssh.public_keys.Element
+            _element = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration.ssh.public_keys.Element
             _element.key_data = AAZStrType(
                 serialized_name="keyData",
             )
             _element.path = AAZStrType()
 
-            secrets = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.secrets
+            secrets = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.secrets
             secrets.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.secrets.Element
+            _element = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.secrets.Element
             _element.source_vault = AAZObjectType(
                 serialized_name="sourceVault",
             )
-            _ListHelper._build_schema_sub_resource_read(_element.source_vault)
+            _WaitHelper._build_schema_sub_resource_read(_element.source_vault)
             _element.vault_certificates = AAZListType(
                 serialized_name="vaultCertificates",
             )
 
-            vault_certificates = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.secrets.Element.vault_certificates
+            vault_certificates = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.secrets.Element.vault_certificates
             vault_certificates.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.secrets.Element.vault_certificates.Element
+            _element = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.secrets.Element.vault_certificates.Element
             _element.certificate_store = AAZStrType(
                 serialized_name="certificateStore",
             )
@@ -437,7 +438,7 @@ class List(AAZCommand):
                 serialized_name="certificateUrl",
             )
 
-            windows_configuration = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration
+            windows_configuration = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration
             windows_configuration.additional_unattend_content = AAZListType(
                 serialized_name="additionalUnattendContent",
             )
@@ -461,10 +462,10 @@ class List(AAZCommand):
                 serialized_name="winRM",
             )
 
-            additional_unattend_content = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.additional_unattend_content
+            additional_unattend_content = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.additional_unattend_content
             additional_unattend_content.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.additional_unattend_content.Element
+            _element = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.additional_unattend_content.Element
             _element.component_name = AAZStrType(
                 serialized_name="componentName",
             )
@@ -476,7 +477,7 @@ class List(AAZCommand):
                 serialized_name="settingName",
             )
 
-            patch_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.patch_settings
+            patch_settings = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.patch_settings
             patch_settings.assessment_mode = AAZStrType(
                 serialized_name="assessmentMode",
             )
@@ -490,7 +491,7 @@ class List(AAZCommand):
                 serialized_name="patchMode",
             )
 
-            automatic_by_platform_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.patch_settings.automatic_by_platform_settings
+            automatic_by_platform_settings = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.patch_settings.automatic_by_platform_settings
             automatic_by_platform_settings.bypass_platform_safety_checks_on_user_schedule = AAZBoolType(
                 serialized_name="bypassPlatformSafetyChecksOnUserSchedule",
             )
@@ -498,19 +499,19 @@ class List(AAZCommand):
                 serialized_name="rebootSetting",
             )
 
-            win_rm = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.win_rm
+            win_rm = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.win_rm
             win_rm.listeners = AAZListType()
 
-            listeners = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.win_rm.listeners
+            listeners = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.win_rm.listeners
             listeners.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.win_rm.listeners.Element
+            _element = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.win_rm.listeners.Element
             _element.certificate_url = AAZStrType(
                 serialized_name="certificateUrl",
             )
             _element.protocol = AAZStrType()
 
-            security_profile = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.security_profile
+            security_profile = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.security_profile
             security_profile.encryption_at_host = AAZBoolType(
                 serialized_name="encryptionAtHost",
             )
@@ -527,15 +528,15 @@ class List(AAZCommand):
                 serialized_name="uefiSettings",
             )
 
-            encryption_identity = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.security_profile.encryption_identity
+            encryption_identity = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.security_profile.encryption_identity
             encryption_identity.user_assigned_identity_resource_id = AAZStrType(
                 serialized_name="userAssignedIdentityResourceId",
             )
 
-            proxy_agent_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.security_profile.proxy_agent_settings
+            proxy_agent_settings = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.security_profile.proxy_agent_settings
             proxy_agent_settings.enabled = AAZBoolType()
             proxy_agent_settings.imds = AAZObjectType()
-            _ListHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
+            _WaitHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
             proxy_agent_settings.key_incarnation_id = AAZIntType(
                 serialized_name="keyIncarnationId",
             )
@@ -543,9 +544,9 @@ class List(AAZCommand):
             proxy_agent_settings.wire_server = AAZObjectType(
                 serialized_name="wireServer",
             )
-            _ListHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
+            _WaitHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
 
-            uefi_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.security_profile.uefi_settings
+            uefi_settings = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(
                 serialized_name="secureBootEnabled",
             )
@@ -553,7 +554,7 @@ class List(AAZCommand):
                 serialized_name="vTpmEnabled",
             )
 
-            storage_profile = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.storage_profile
+            storage_profile = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.storage_profile
             storage_profile.data_disks = AAZListType(
                 serialized_name="dataDisks",
             )
@@ -565,17 +566,17 @@ class List(AAZCommand):
                 serialized_name="osDisk",
             )
 
-            data_disks = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.storage_profile.data_disks
+            data_disks = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.storage_profile.data_disks
             data_disks.Element = AAZObjectType()
 
-            _element = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.storage_profile.data_disks.Element
+            _element = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.storage_profile.data_disks.Element
             _element.caching = AAZStrType(
                 flags={"read_only": True},
             )
             _element.disk_restore_point = AAZObjectType(
                 serialized_name="diskRestorePoint",
             )
-            _ListHelper._build_schema_disk_restore_point_attributes_read(_element.disk_restore_point)
+            _WaitHelper._build_schema_disk_restore_point_attributes_read(_element.disk_restore_point)
             _element.disk_size_gb = AAZIntType(
                 serialized_name="diskSizeGB",
                 flags={"read_only": True},
@@ -586,7 +587,7 @@ class List(AAZCommand):
             _element.managed_disk = AAZObjectType(
                 serialized_name="managedDisk",
             )
-            _ListHelper._build_schema_managed_disk_parameters_read(_element.managed_disk)
+            _WaitHelper._build_schema_managed_disk_parameters_read(_element.managed_disk)
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
@@ -595,14 +596,14 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
-            os_disk = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.storage_profile.os_disk
+            os_disk = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.storage_profile.os_disk
             os_disk.caching = AAZStrType(
                 flags={"read_only": True},
             )
             os_disk.disk_restore_point = AAZObjectType(
                 serialized_name="diskRestorePoint",
             )
-            _ListHelper._build_schema_disk_restore_point_attributes_read(os_disk.disk_restore_point)
+            _WaitHelper._build_schema_disk_restore_point_attributes_read(os_disk.disk_restore_point)
             os_disk.disk_size_gb = AAZIntType(
                 serialized_name="diskSizeGB",
                 flags={"read_only": True},
@@ -614,7 +615,7 @@ class List(AAZCommand):
             os_disk.managed_disk = AAZObjectType(
                 serialized_name="managedDisk",
             )
-            _ListHelper._build_schema_managed_disk_parameters_read(os_disk.managed_disk)
+            _WaitHelper._build_schema_managed_disk_parameters_read(os_disk.managed_disk)
             os_disk.name = AAZStrType(
                 flags={"read_only": True},
             )
@@ -627,7 +628,7 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
-            encryption_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.storage_profile.os_disk.encryption_settings
+            encryption_settings = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.storage_profile.os_disk.encryption_settings
             encryption_settings.disk_encryption_key = AAZObjectType(
                 serialized_name="diskEncryptionKey",
             )
@@ -636,7 +637,7 @@ class List(AAZCommand):
                 serialized_name="keyEncryptionKey",
             )
 
-            disk_encryption_key = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.storage_profile.os_disk.encryption_settings.disk_encryption_key
+            disk_encryption_key = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.storage_profile.os_disk.encryption_settings.disk_encryption_key
             disk_encryption_key.secret_url = AAZStrType(
                 serialized_name="secretUrl",
                 flags={"required": True},
@@ -645,9 +646,9 @@ class List(AAZCommand):
                 serialized_name="sourceVault",
                 flags={"required": True},
             )
-            _ListHelper._build_schema_sub_resource_read(disk_encryption_key.source_vault)
+            _WaitHelper._build_schema_sub_resource_read(disk_encryption_key.source_vault)
 
-            key_encryption_key = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.storage_profile.os_disk.encryption_settings.key_encryption_key
+            key_encryption_key = cls._schema_on_200.properties.restore_points.Element.properties.source_metadata.storage_profile.os_disk.encryption_settings.key_encryption_key
             key_encryption_key.key_url = AAZStrType(
                 serialized_name="keyUrl",
                 flags={"required": True},
@@ -656,22 +657,22 @@ class List(AAZCommand):
                 serialized_name="sourceVault",
                 flags={"required": True},
             )
-            _ListHelper._build_schema_sub_resource_read(key_encryption_key.source_vault)
+            _WaitHelper._build_schema_sub_resource_read(key_encryption_key.source_vault)
 
-            source = cls._schema_on_200.value.Element.properties.source
+            source = cls._schema_on_200.properties.source
             source.id = AAZStrType()
             source.location = AAZStrType(
                 flags={"read_only": True},
             )
 
-            tags = cls._schema_on_200.value.Element.tags
+            tags = cls._schema_on_200.tags
             tags.Element = AAZStrType()
 
             return cls._schema_on_200
 
 
-class _ListHelper:
-    """Helper class for List"""
+class _WaitHelper:
+    """Helper class for Wait"""
 
     _schema_api_entity_reference_read = None
 
@@ -885,4 +886,4 @@ class _ListHelper:
         _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
 
-__all__ = ["List"]
+__all__ = ["Wait"]
