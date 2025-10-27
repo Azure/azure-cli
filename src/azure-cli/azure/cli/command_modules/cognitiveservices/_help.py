@@ -431,9 +431,6 @@ helps['cognitiveservices account connection delete'] = """
 helps['cognitiveservices account connection create'] = """
     type: command
     short-summary: Create a connection.
-    long-summary: >
-        connection allow to store authentication and configuration information needed to connect and interact
-        with the external resources
     examples:
     - name: Create a connection from a YAML specification file.
       text: az cognitiveservices account connection create --file connection.yml --connection-name my-connection-name --resource-group my-resource-group --name my-cogsvc-account
@@ -445,6 +442,13 @@ helps['cognitiveservices account connection update'] = """
     examples:
     - name: Update a connection API Key.
       text: az cognitiveservices account connection update --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account --set properties.credentials.key=<new-key>
+"""
+helps['cognitiveservices account project'] = """
+    type: group
+    short-summary: Manage Azure Cognitive Services account projects.
+    long-summary: >
+       Projects let you organize your work, such as agents, evaluations, and files, as you build stateful apps and explore new ideas. It is a container for access management,
+       data upload and integration, and monitoring
 """
 helps['cognitiveservices account project connection'] = """
     type: group
@@ -461,7 +465,3 @@ helps['cognitiveservices account project connection update'] = """
       text: az cognitiveservices account project connection update --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account --project-name my-project --set properties.credentials.key=<new-key>
 """
 
-helps['cognitiveservices account project'] = """
-type: group
-short-summary: Manage Azure Cognitive Services account projects.
-"""
