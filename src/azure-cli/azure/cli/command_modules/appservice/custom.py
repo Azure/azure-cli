@@ -100,7 +100,7 @@ from .aaz.latest.relay.hyco import Show as HyCoShow
 from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
 from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
 from .aaz.latest.relay.namespace import List as NamespaceList
-from .aaz.latest.appservice.plan import Show as AppServicePlanShow, Update as AppServicePlanUpdate
+from .aaz.latest.appservice.plan import Show as AppServicePlanShow, Update as AppServicePlanUpdate, Create as AppServicePlanCreate
 from .aaz.latest.appservice.plan.managed_instance import ShowRdpPassword as AppServicePlanManagedInstanceShowRdpPassword
 from .aaz.latest.appservice.plan.managed_instance.instance import List as AppServicePlanManagedInstanceList
 
@@ -4215,27 +4215,33 @@ has been deployed ".format(app_service_environment)
         user_assigned_identities = None
         enable_system_assigned_identity = None
 
-    # Configure managed instance features using additional properties
-    # TODO: replace in the future with updated SDK that has first-class support for these features
-    _enable_managed_instance_properties(
-        plan_def=plan_def,
-        is_managed_instance=is_managed_instance,
-        assign_identities=assign_identities,
-        enable_system_assigned_identity=enable_system_assigned_identity,
-        user_assigned_identities=user_assigned_identities,
-        plan_default_identity=plan_default_identity,
-        subnet_resource_id=subnet_resource_id,
-        rdp_enabled=rdp_enabled,
-        registry_adapters=registry_adapters,
-        install_scripts=install_scripts,
-        storage_mounts=storage_mounts
-    )
+    poller = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": name,
+        "resource_group": resource_group_name,
+        "location": location,
+        "tags": tags,
+        "sku": sku_def.__dict__,
+        "reserved": plan_def.reserved,
+        "hyper_v": plan_def.hyper_v,
+        "per_site_scaling": plan_def.per_site_scaling,
+        "hosting_environment_profile": plan_def.hosting_environment_profile,
+        "async_scaling_enabled": plan_def.async_scaling_enabled,
+        "zone_redundant": zone_redundant if zone_redundant else None,
+        "is_custom_mode": is_managed_instance,
+        "network": {
+            "virtual_network_subnet_id": subnet_resource_id,
+        } if subnet_resource_id else None,
+        "rdp_enabled": rdp_enabled,
+        "mi_system_assigned": str(enable_system_assigned_identity) if enable_system_assigned_identity else None,
+        "mi_user_assigned": user_assigned_identities,
+        "plan_default_identity": plan_default_identity,
+        "registry_adapters": registry_adapters,
+        "install_scripts": install_scripts,
+        "storage_mounts": storage_mounts,
+    })
 
     if no_wait:
-        return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, 
-                          resource_group_name=resource_group_name, name=name, app_service_plan=plan_def)
-
-    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
+        return poller
 
     # Only use progress bar for actual long-running operations (async scaling)
     # Check if the operation is actually async by looking at the poller status
