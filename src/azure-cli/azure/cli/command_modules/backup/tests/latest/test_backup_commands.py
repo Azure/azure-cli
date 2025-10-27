@@ -1322,7 +1322,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['key_vault_id'] = "subscriptions/{}/resourceGroups/{}/providers/Microsoft.KeyVault/vaults/{}".format(
             subscription, resource_group, key_vault)
         # Uncomment during live runs
-        # self.cmd('role assignment create --role "{user_rbac_permissions}" --scope "{key_vault_id}" --assignee "{user_principal_id}"')
+        self.cmd('role assignment create --role "{user_rbac_permissions}" --scope "{key_vault_id}" --assignee "{user_principal_id}"')
 
         self.kwargs['identity1_id'] = self.cmd('identity create -n "{identity1}" -g "{rg}" --query id').get_output_in_json()
         self.kwargs['identity1_principalid'] = self.cmd('identity show -n "{identity1}" -g "{rg}" --query principalId').get_output_in_json()
@@ -1511,6 +1511,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # try deleting resource guard mapping
         self.cmd('backup vault resource-guard-mapping delete -n {vault} -g {rg} -y')
 
+    @unittest.skip("Skipping CVM OS Disk Encryption Set test as the required resources are not available in the test subscription. TODO @sgholap to create required resources.")
     def test_cvm_os_des_id(self):
         self.kwargs.update({
             'vault': "PSTestingVault",
