@@ -3024,6 +3024,33 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  ])
 
 
+class NetworkAppGatewayHttpSettingsScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_http_settings_', location='eastus2')
+    def test_app_gateway_http_settings_basic(self, resource_group):
+        self.kwargs.update({
+            'ag': 'ag1',
+            'ip': 'pip1',
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'http_settings': 'httpSettings1'
+        })
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --default-outbound-access false')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet} --public-ip-address {ip} --priority 1001 --sku Standard_v2')
+
+        self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {ag} -n {http_settings} --port 443 \
+                 --protocol Https --cookie-based-affinity disabled --validate-cert-chain-and-expiry false --validate-sni true', checks=[
+            self.check('name', '{http_settings}'),
+            self.check('port', 443),
+            self.check('protocol', 'Https'),
+            self.check('cookieBasedAffinity', 'Disabled'),
+            self.check('validateCertChainAndExpiry', False),
+            self.check('validateSNI', True),
+        ])
+
+
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ddos_protection', location='eastus2')
