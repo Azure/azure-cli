@@ -653,7 +653,7 @@ type: command
 short-summary: Get details of a soft-deleted Recovery Services vault.
 examples:
   - name: Get details of a soft-deleted vault by name and location.
-    text: az backup vault deleted-vault list --location eastus --name deletedVaultName
+    text: az backup vault deleted-vault get --location eastus --name deletedVaultName
 """
 
 helps['backup deleted-vault undelete'] = """
@@ -671,5 +671,5 @@ type: command
 short-summary: List backup containers in a soft-deleted vault.
 examples:
   - name: List backup containers in a soft-deleted vault.
-    text: az backup vault deleted-vault list-containers --name MyVault --resource-group MyResourceGroup
+    text: az backup vault deleted-vault list-containers --name MyVault
 """
