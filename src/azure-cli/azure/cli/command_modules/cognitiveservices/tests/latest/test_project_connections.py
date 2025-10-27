@@ -48,6 +48,10 @@ class CognitiveServicesProjectConnectionsTests(ScenarioTest):
             self.check('[0].name', '{sname}/{pname}')
         ]).get_output_in_json()
         
+        prj = self.cmd('az cognitiveservices account project update -n {sname} -g {rg} --project-name {pname} --description "{projdisplayname}"',
+                            checks=[self.check('properties.provisioningState', 'Succeeded'),
+                                    self.check('properties.description', '{projdisplayname}')]).get_output_in_json()
+
         acctconn = self.cmd('az cognitiveservices account project connection create -n {sname} -g {rg} --project-name {pname} --connection-name {connname} --file {connfile}',
                            checks=[
                                self.check('properties.authType', 'ManagedIdentity'),

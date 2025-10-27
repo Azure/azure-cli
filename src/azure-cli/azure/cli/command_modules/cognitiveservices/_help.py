@@ -408,26 +408,24 @@ helps['cognitiveservices account connection list'] = """
         The list of connections in an Azure AI Foundry account.
     examples:
     - name: List all connections in an Azure AI Foundry account
-      text: az cognitiveservices connection list --resource-group my-resource-group --name my-cogsvc-account
-    - name: List all connections in an Azure AI Foundry account, and show the API key for applicable connections
-      text: az cognitiveservices connection list --resource-group my-resource-group --name my-cogsvc-account --populate-secrets
+      text: az cognitiveservices account connection list --resource-group my-resource-group --name my-cogsvc-account
     - name: List all the connections in an Azure AI Foundry account using --query argument to execute a JMESPath query on the results of commands.
-      text: az cognitiveservices connection list --query \"[].{Name:name}\"  --output table --resource-group my-resource-group --name my-cogsvc-account
+      text: az cognitiveservices account connection list --query \"[].{Name:name}\"  --output table --resource-group my-resource-group --name my-cogsvc-account
 """
 
 helps['cognitiveservices account connection show'] = """
     type: command
     short-summary: Show details of a connection.
     examples:
-    - name: Show details of a connection, including its API key.
-      text: az cognitiveservices connection show --resource-group my-resource-group --name my-connection-name --name my-cogsvc-account --populate-secrets
+    - name: Show details of a connection.
+      text: az cognitiveservices account connection show --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account
 """
 helps['cognitiveservices account connection delete'] = """
     type: command
     short-summary: Delete a connection.
     examples:
     - name: Delete a connection.
-      text: az cognitiveservices connection delete --resource-group my-resource-group --name my-connection-name --name my-cogsvc-account
+      text: az cognitiveservices account connection delete --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account
 """
 
 helps['cognitiveservices account connection create'] = """
@@ -438,17 +436,15 @@ helps['cognitiveservices account connection create'] = """
         with the external resources
     examples:
     - name: Create a connection from a YAML specification file.
-      text: az cognitiveservices connection create --file connection.yml --resource-group my-resource-group --name my-cogsvc-account
-    - name: Create a connection from a YAML specification file, and show the API key in the returned connection for verification.
-      text: az cognitiveservices connection create --file connection.yml --resource-group my-resource-group --name my-cogsvc-account --populate-secrets
+      text: az cognitiveservices account connection create --file connection.yml --connection-name my-connection-name --resource-group my-resource-group --name my-cogsvc-account
 """
 
 helps['cognitiveservices account connection update'] = """
     type: command
     short-summary: Update a connection.
     examples:
-    - name: update a connection API Key.
-      text: az cognitiveservices connection update --resource-group my-resource-group --name my-connection-name --name my-cogsvc-account --set properties.credentials.key=<new-key>
+    - name: Update a connection API Key.
+      text: az cognitiveservices account connection update --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account --set properties.credentials.key=<new-key>
 """
 helps['cognitiveservices account project connection'] = """
     type: group
@@ -461,8 +457,8 @@ helps['cognitiveservices account project connection update'] = """
     type: command
     short-summary: Update a project connection.
     examples:
-    - name: update a connection API Key.
-      text: az cognitiveservices account project connection update --resource-group my-resource-group --name my-connection-name --name my-cogsvc-account --project-name my-project --set properties.credentials.key=<new-key>
+    - name: Update a connection API Key.
+      text: az cognitiveservices account project connection update --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account --project-name my-project --set properties.credentials.key=<new-key>
 """
 
 helps['cognitiveservices account project'] = """

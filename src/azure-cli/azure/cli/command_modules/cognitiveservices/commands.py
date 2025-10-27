@@ -126,7 +126,7 @@ def load_command_table(self, _):
         g.command('delete', 'begin_delete')
         g.show_command('show', 'get')
         g.command('list', 'list')
-        g.command('update', 'begin_update')
+        g.custom_command('update', 'project_update')
 
     with self.command_group(
             'cognitiveservices account project connection', project_connections_type,
@@ -139,8 +139,7 @@ def load_command_table(self, _):
             'update',
             setter_name='update',
             setter_arg_name='connection',
-            custom_func_name='project_connection_update',
-            supports_no_wait=True)
+            custom_func_name='project_connection_update')
 
     with self.command_group(
             'cognitiveservices account connection', account_connections_type,
@@ -153,5 +152,4 @@ def load_command_table(self, _):
             'update',
             setter_name='update',
             setter_arg_name='connection',
-            custom_func_name='account_connection_update',
-            supports_no_wait=True)
+            custom_func_name='account_connection_update')

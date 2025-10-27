@@ -281,7 +281,8 @@ def deployment_begin_create_or_update(
         client, resource_group_name, account_name, deployment_name,
         model_format, model_name, model_version, model_source=None,
         sku_name=None, sku_capacity=None,
-        scale_settings_scale_type=None, scale_settings_capacity=None):
+        scale_settings_scale_type=None, scale_settings_capacity=None,
+        spillover_deployment_name=None):
     """
     Create a deployment for Azure Cognitive Services account.
     """
@@ -300,7 +301,8 @@ def deployment_begin_create_or_update(
         dpy.properties.scale_settings = DeploymentScaleSettings()
         dpy.properties.scale_settings.scale_type = scale_settings_scale_type
         dpy.properties.scale_settings.capacity = scale_settings_capacity
-
+    if spillover_deployment_name is not None:  
+        dpy.properties.spillover_deployment_name = spillover_deployment_name
     return client.begin_create_or_update(resource_group_name, account_name, deployment_name, dpy, polling=False)
 
 
@@ -349,6 +351,27 @@ def project_create(
         assign_identity = True
     project.identity = compose_identity(system_assigned=assign_identity, user_assigned_identity=user_assigned_identity)
     return client.begin_create(resource_group_name, account_name, project_name, project, polling=no_wait)
+
+
+
+def project_update(
+    client,
+    resource_group_name,
+    account_name,
+    project_name,
+    description=None,
+    display_name=None,
+):
+    """
+    Update a project for Azure Cognitive Services account.
+    """
+    project_props = ProjectProperties()
+    if description is not None:
+        project_props.description = description
+    if display_name is not None:
+        project_props.display_name = display_name
+    project = Project(properties=project_props)
+    return client.begin_update(resource_group_name, account_name, project_name, project)
 
 
 def account_connection_create(
