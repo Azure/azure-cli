@@ -55,6 +55,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # Disable Protection
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureStorage --delete-backup-data true --yes')
+
+        # Cleaning up Storage account locks
+        command_string = 'lock list -g {} --resource-name {} --resource-type {}'.format(
+            resource_group, storage_account, 'Microsoft.Storage/storageAccounts')
+        list_of_locks = self.cmd(command_string).get_output_in_json()
+        for lock in list_of_locks:
+            command_string = 'lock delete --ids {}'.format(lock["id"])
+            self.cmd(command_string)
         # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         # time.sleep(100)
 
@@ -409,6 +417,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         protected_item_count2 = len(item_json)
 
         self.assertTrue(protected_item_count1 == protected_item_count2)
+
+        # Cleaning up Storage account locks
+        command_string = 'lock list -g {} --resource-name {} --resource-type {}'.format(
+            resource_group, storage_account, 'Microsoft.Storage/storageAccounts')
+        list_of_locks = self.cmd(command_string).get_output_in_json()
+        for lock in list_of_locks:
+            command_string = 'lock delete --ids {}'.format(lock["id"])
+            self.cmd(command_string)
         # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         # time.sleep(100)
 

@@ -672,6 +672,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
 
     def _delete_lock(self, lock):
         lock_id = lock["id"]
+        print("deleting lock ID: ", lock_id)
         try:
             command_string = 'az lock delete --ids {}'.format(lock_id)
             execute(self.cli_ctx, command_string)
