@@ -28,9 +28,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/availabilitysets/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/availabilitysets/{}", "2025-04-01"],
         ]
     }
 
@@ -107,6 +107,26 @@ class Update(AAZCommand):
         sku.tier = AAZStrArg(
             options=["tier"],
             help="Specifies the tier of virtual machines in a scale set.<br /><br /> Possible Values:<br /><br /> **Standard**<br /><br /> **Basic**",
+            nullable=True,
+        )
+
+        # define Arg Group "AllInstancesDown"
+
+        _args_schema = cls._args_schema
+        _args_schema.enable_all_instance_down = AAZBoolArg(
+            options=["--all-instance-down", "--enable-all-instance-down"],
+            arg_group="AllInstancesDown",
+            help="Specify if Scheduled Events should be auto-approved when all instances are down. Its default value is true",
+            nullable=True,
+        )
+
+        # define Arg Group "EventGridAndResourceGraph"
+
+        _args_schema = cls._args_schema
+        _args_schema.scheduled_events_api_version = AAZStrArg(
+            options=["--se-api-version", "--scheduled-events-api-version"],
+            arg_group="EventGridAndResourceGraph",
+            help="Specify the api-version to determine which Scheduled Events configuration schema version will be delivered.",
             nullable=True,
         )
 
@@ -212,7 +232,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-04-01",
                     required=True,
                 ),
             }
@@ -295,7 +315,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-04-01",
                     required=True,
                 ),
             }
@@ -364,9 +384,14 @@ class Update(AAZCommand):
 
             scheduled_events_policy = _builder.get(".properties.scheduledEventsPolicy")
             if scheduled_events_policy is not None:
+                scheduled_events_policy.set_prop("allInstancesDown", AAZObjectType)
                 scheduled_events_policy.set_prop("scheduledEventsAdditionalPublishingTargets", AAZObjectType)
                 scheduled_events_policy.set_prop("userInitiatedReboot", AAZObjectType)
                 scheduled_events_policy.set_prop("userInitiatedRedeploy", AAZObjectType)
+
+            all_instances_down = _builder.get(".properties.scheduledEventsPolicy.allInstancesDown")
+            if all_instances_down is not None:
+                all_instances_down.set_prop("automaticallyApprove", AAZBoolType, ".enable_all_instance_down")
 
             scheduled_events_additional_publishing_targets = _builder.get(".properties.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets")
             if scheduled_events_additional_publishing_targets is not None:
@@ -375,6 +400,7 @@ class Update(AAZCommand):
             event_grid_and_resource_graph = _builder.get(".properties.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph")
             if event_grid_and_resource_graph is not None:
                 event_grid_and_resource_graph.set_prop("enable", AAZBoolType, ".additional_scheduled_events")
+                event_grid_and_resource_graph.set_prop("scheduledEventsApiVersion", AAZStrType, ".scheduled_events_api_version")
 
             user_initiated_reboot = _builder.get(".properties.scheduledEventsPolicy.userInitiatedReboot")
             if user_initiated_reboot is not None:
@@ -420,6 +446,7 @@ class _UpdateHelper:
             _schema.name = cls._schema_availability_set_read.name
             _schema.properties = cls._schema_availability_set_read.properties
             _schema.sku = cls._schema_availability_set_read.sku
+            _schema.system_data = cls._schema_availability_set_read.system_data
             _schema.tags = cls._schema_availability_set_read.tags
             _schema.type = cls._schema_availability_set_read.type
             return
@@ -440,6 +467,10 @@ class _UpdateHelper:
             flags={"client_flatten": True},
         )
         availability_set_read.sku = AAZObjectType()
+        availability_set_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
         availability_set_read.tags = AAZDictType()
         availability_set_read.type = AAZStrType(
             flags={"read_only": True},
@@ -462,11 +493,18 @@ class _UpdateHelper:
         properties.statuses = AAZListType(
             flags={"read_only": True},
         )
+        properties.virtual_machine_scale_set_migration_info = AAZObjectType(
+            serialized_name="virtualMachineScaleSetMigrationInfo",
+            flags={"read_only": True},
+        )
         properties.virtual_machines = AAZListType(
             serialized_name="virtualMachines",
         )
 
         scheduled_events_policy = _schema_availability_set_read.properties.scheduled_events_policy
+        scheduled_events_policy.all_instances_down = AAZObjectType(
+            serialized_name="allInstancesDown",
+        )
         scheduled_events_policy.scheduled_events_additional_publishing_targets = AAZObjectType(
             serialized_name="scheduledEventsAdditionalPublishingTargets",
         )
@@ -477,6 +515,11 @@ class _UpdateHelper:
             serialized_name="userInitiatedRedeploy",
         )
 
+        all_instances_down = _schema_availability_set_read.properties.scheduled_events_policy.all_instances_down
+        all_instances_down.automatically_approve = AAZBoolType(
+            serialized_name="automaticallyApprove",
+        )
+
         scheduled_events_additional_publishing_targets = _schema_availability_set_read.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets
         scheduled_events_additional_publishing_targets.event_grid_and_resource_graph = AAZObjectType(
             serialized_name="eventGridAndResourceGraph",
@@ -484,6 +527,9 @@ class _UpdateHelper:
 
         event_grid_and_resource_graph = _schema_availability_set_read.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
         event_grid_and_resource_graph.enable = AAZBoolType()
+        event_grid_and_resource_graph.scheduled_events_api_version = AAZStrType(
+            serialized_name="scheduledEventsApiVersion",
+        )
 
         user_initiated_reboot = _schema_availability_set_read.properties.scheduled_events_policy.user_initiated_reboot
         user_initiated_reboot.automatically_approve = AAZBoolType(
@@ -507,6 +553,28 @@ class _UpdateHelper:
         _element.message = AAZStrType()
         _element.time = AAZStrType()
 
+        virtual_machine_scale_set_migration_info = _schema_availability_set_read.properties.virtual_machine_scale_set_migration_info
+        virtual_machine_scale_set_migration_info.default_virtual_machine_scale_set_info = AAZObjectType(
+            serialized_name="defaultVirtualMachineScaleSetInfo",
+            flags={"read_only": True},
+        )
+        virtual_machine_scale_set_migration_info.migrate_to_virtual_machine_scale_set = AAZObjectType(
+            serialized_name="migrateToVirtualMachineScaleSet",
+            flags={"read_only": True},
+        )
+        cls._build_schema_sub_resource_read(virtual_machine_scale_set_migration_info.migrate_to_virtual_machine_scale_set)
+
+        default_virtual_machine_scale_set_info = _schema_availability_set_read.properties.virtual_machine_scale_set_migration_info.default_virtual_machine_scale_set_info
+        default_virtual_machine_scale_set_info.constrained_maximum_capacity = AAZBoolType(
+            serialized_name="constrainedMaximumCapacity",
+            flags={"read_only": True},
+        )
+        default_virtual_machine_scale_set_info.default_virtual_machine_scale_set = AAZObjectType(
+            serialized_name="defaultVirtualMachineScaleSet",
+            flags={"read_only": True},
+        )
+        cls._build_schema_sub_resource_read(default_virtual_machine_scale_set_info.default_virtual_machine_scale_set)
+
         virtual_machines = _schema_availability_set_read.properties.virtual_machines
         virtual_machines.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(virtual_machines.Element)
@@ -516,6 +584,26 @@ class _UpdateHelper:
         sku.name = AAZStrType()
         sku.tier = AAZStrType()
 
+        system_data = _schema_availability_set_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
         tags = _schema_availability_set_read.tags
         tags.Element = AAZStrType()
 
@@ -524,6 +612,7 @@ class _UpdateHelper:
         _schema.name = cls._schema_availability_set_read.name
         _schema.properties = cls._schema_availability_set_read.properties
         _schema.sku = cls._schema_availability_set_read.sku
+        _schema.system_data = cls._schema_availability_set_read.system_data
         _schema.tags = cls._schema_availability_set_read.tags
         _schema.type = cls._schema_availability_set_read.type
 
