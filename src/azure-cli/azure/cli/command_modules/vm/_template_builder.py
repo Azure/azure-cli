@@ -1045,7 +1045,8 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
                         enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None,
                         skuprofile_allostrat=None, skuprofile_rank=None,
                         security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
-                        imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
+                        imds_mode=None, add_proxy_agent_extension=None,
+                        wire_server_access_control_profile_reference_id=None,
                         imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                         automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
                         enable_automatic_repairs=None):
@@ -1600,7 +1601,7 @@ def build_vmss_resource(cmd, name, computer_name_prefix, location, tags, overpro
 
     if imds:
         proxy_agent_settings['imds'] = imds
-    
+
     if add_proxy_agent_extension is not None:
         proxy_agent_settings['addProxyAgentExtension'] = add_proxy_agent_extension
 
