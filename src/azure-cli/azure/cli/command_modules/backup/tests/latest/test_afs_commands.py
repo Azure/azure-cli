@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import unittest
 import time
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
-    StorageAccountPreparer, record_only
+    StorageAccountPreparer, record_only, live_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from .preparers import VaultPreparer, FileSharePreparer, AFSPolicyPreparer, AFSItemPreparer, \
     AFSRPPreparer, FilePreparer, RGPreparer
@@ -24,7 +24,7 @@ vault_name = "sarath-vault"
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
-    #@record_only()
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
     @VaultPreparer()
@@ -67,6 +67,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
     @VaultPreparer()
@@ -116,6 +117,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
     @VaultPreparer()
@@ -185,6 +187,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
     @VaultPreparer()
@@ -227,6 +230,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap", random_name_length=30, parameter_name="resource_group2")
@@ -367,6 +371,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
     @VaultPreparer()
@@ -429,6 +434,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
     @VaultPreparer()
@@ -487,6 +493,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
     @VaultPreparer()
@@ -523,6 +530,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         #     self.check("length([?properties.friendlyName == '{container}'])", 0)])
         # time.sleep(100)
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
     @VaultPreparer()
@@ -592,6 +600,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         # time.sleep(100)
 
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
     @VaultPreparer()
