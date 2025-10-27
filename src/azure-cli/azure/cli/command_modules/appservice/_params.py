@@ -224,7 +224,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan')
         c.argument('registry_key', options_list=['--registry-key'], help='Registry key for the adapter to remove')
 
-    with self.argument_context('appservice plan instance rdp') as c:
+    with self.argument_context('appservice plan managed-instance instance rdp') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name')
