@@ -438,8 +438,7 @@ def undelete_vault(cmd, client, deleted_vault_name=None, location=None, deleted_
 
 def list_deleted_vault_containers(cmd, client, deleted_vault_name=None, location=None, deleted_vault_id=None):
     """List backup containers in a soft-deleted vault using Azure Resource Graph."""
-    from azure.mgmt.resourcegraph import ResourceGraphClient
-    from azure.mgmt.resourcegraph.models import QueryRequest
+    from ._arg_client import ARGClient, QueryBody
 
     subscription_id = get_subscription_id(cmd.cli_ctx)
 
@@ -466,20 +465,15 @@ def list_deleted_vault_containers(cmd, client, deleted_vault_name=None, location
     query += '''
 | project id, type, name, location, resourceGroup, subscriptionId, dataSourceType, properties, tags'''
 
-    # Create Resource Graph client with proper credential handling
-    from azure.cli.core._profile import Profile
-    profile = Profile(cli_ctx=cmd.cli_ctx)
-    credential, _, _ = profile.get_login_credentials()
-    resource_graph_client = ResourceGraphClient(credential)
-
-    query_request = QueryRequest(
-        subscriptions=[subscription_id],
-        query=query
-    )
+    # Create query body with subscription filter
+    query_body = QueryBody(query)
+    query_body.options = {
+        "subscriptions": [subscription_id]
+    }
 
     try:
-        response = resource_graph_client.resources(query_request)
-        return response.data
+        response = ARGClient(cmd.cli_ctx).send(query_body)
+        return response.get('data', [])
     except Exception as ex:
         raise CLIError(f"Failed to query backup containers: {str(ex)}")
 
