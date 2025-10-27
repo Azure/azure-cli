@@ -1032,15 +1032,18 @@ def list_encryption_scope(client, resource_group_name, account_name,
 # pylint: disable=no-member
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
-                     destination_container=None, min_creation_time=None, prefix_match=None, enable_metrics=None):
+                     destination_container=None, min_creation_time=None, prefix_match=None, enable_metrics=None,
+                     priority_replication=None):
     from azure.core.exceptions import HttpResponseError
     ObjectReplicationPolicy = cmd.get_models('ObjectReplicationPolicy')
 
     if properties is None:
         rules = []
-        ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter, ObjectReplicationPolicyPropertiesMetrics = \
+        (ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter, ObjectReplicationPolicyPropertiesMetrics,
+         ObjectReplicationPolicyPropertiesPriorityReplication) = \
             cmd.get_models('ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter',
-                           'ObjectReplicationPolicyPropertiesMetrics')
+                           'ObjectReplicationPolicyPropertiesMetrics',
+                           'ObjectReplicationPolicyPropertiesPriorityReplication')
         if source_container and destination_container:
             rule = ObjectReplicationPolicyRule(
                 rule_id=rule_id,
@@ -1052,7 +1055,9 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
         or_policy = ObjectReplicationPolicy(source_account=source_account,
                                             destination_account=destination_account,
                                             rules=rules,
-                                            metrics=ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics))
+                                            metrics=ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics),
+                                            priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
+                                                enabled=priority_replication))
     else:
         or_policy = properties
     try:
@@ -1068,7 +1073,8 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
 
 
 def update_or_policy(cmd, client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
-                     properties=None, source_account=None, destination_account=None, enable_metrics=None):
+                     properties=None, source_account=None, destination_account=None, enable_metrics=None,
+                     priority_replication=None):
 
     if source_account is not None:
         parameters.source_account = source_account
@@ -1083,6 +1089,12 @@ def update_or_policy(cmd, client, parameters, resource_group_name, account_name,
     if enable_metrics is not None:
         ObjectReplicationPolicyPropertiesMetrics = cmd.get_models('ObjectReplicationPolicyPropertiesMetrics')
         parameters.metrics = ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics)
+
+    if priority_replication is not None:
+        ObjectReplicationPolicyPropertiesPriorityReplication = (
+            cmd.get_models('ObjectReplicationPolicyPropertiesPriorityReplication'))
+        parameters.priority_replication = ObjectReplicationPolicyPropertiesPriorityReplication(enabled=
+                                                                                               priority_replication)
 
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    object_replication_policy_id=object_replication_policy_id, properties=parameters)
