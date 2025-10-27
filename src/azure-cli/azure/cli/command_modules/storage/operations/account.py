@@ -1069,7 +1069,8 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
                                'destination account.')
         raise ex
 
-# pylint: line-too-long
+
+# pylint: disable=line-too-long
 def update_or_policy(cmd, client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
                      properties=None, source_account=None, destination_account=None, enable_metrics=None,
                      priority_replication=None):
