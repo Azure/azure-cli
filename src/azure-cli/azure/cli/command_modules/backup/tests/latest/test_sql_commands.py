@@ -788,6 +788,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ]).get_output_in_json()
 
 
+    @record_only()
     def test_backup_wl_reconfigure(self):
         self.kwargs.update({
             'resource_group': 'zubairRG',
