@@ -1,7 +1,4 @@
-from azure.cli.core.azclierror import FileOperationError, InvalidArgumentValueError
 from azure.mgmt.cognitiveservices.models import ConnectionCategory
-from os import PathLike
-from typing import IO, Any, AnyStr, Dict, List, Optional, Union
 
 _ML_CONNECTION_TYPE_TO_COGNITIVE_SERVICES_CONNECTION_TYPE = {
     "PythonFeed": ConnectionCategory.PYTHON_FEED,
@@ -127,94 +124,6 @@ def get_valid_mlconn_types():
 
 
 def get_mapped_mlconn_type(ml_connection_type: str):
-    from azure.ai.ml._utils.utils import _snake_to_camel as snake_to_camel
+    from . _utils import snake_to_camel
     normalized_name = snake_to_camel(ml_connection_type)
     return _ML_CONNECTION_TYPE_TO_COGNITIVE_SERVICES_CONNECTION_TYPE.get(normalized_name)
-
-
-def from_ml_connection(mlconn):
-    from azure.mgmt.cognitiveservices import models
-    import azure.ai.ml.entities as ml_entities
-    conn = None
-    connection_category = get_mapped_mlconn_type(mlconn.type)
-    if connection_category is None:
-        raise InvalidArgumentValueError(
-            f"Invalid connection type '{mlconn.type}'. ",
-            recommendation=[
-                "Verify that the connection type property is set to one of the following values:",
-                ', '.join(get_valid_mlconn_types())])
-    match type(mlconn.credentials):
-        case ml_entities.PatTokenConfiguration:
-            conn = models.PATAuthTypeConnectionProperties(
-                credentials=models.ConnectionPersonalAccessToken(pat=mlconn.credentials.pat))
-        case ml_entities.SasTokenConfiguration:
-            conn = models.SASAuthTypeConnectionProperties(
-                credentials=models.ConnectionSharedAccessSignature(sas=mlconn.credentials.sas_token))
-        case ml_entities.UsernamePasswordConfiguration:
-            conn = models.UsernamePasswordAuthTypeConnectionProperties(
-                credentials=models.ConnectionUsernamePassword(
-                    username=mlconn.credentials.username,
-                    password=mlconn.credentials.password))
-        case ml_entities.ManagedIdentityConfiguration:
-            conn = models.ManagedIdentityAuthTypeConnectionProperties(
-                credentials=models.ConnectionManagedIdentity(
-                    client_id=mlconn.credentials.client_id,
-                    resource_id=mlconn.credentials.resource_id,
-                ))
-        case ml_entities.ServicePrincipalConfiguration:
-            conn = models.ServicePrincipalAuthTypeConnectionProperties(
-                credentials=models.ConnectionServicePrincipal(
-                    client_id=mlconn.credentials.client_id,
-                    client_secret=mlconn.credentials.client_secret,
-                    tenant_id=mlconn.credentials.tenant_id
-                ))
-        case ml_entities.AccessKeyConfiguration:
-            conn = models.AccessKeyAuthTypeConnectionProperties(
-                credentials=models.ConnectionAccessKey(
-                    access_key_id=mlconn.credentials.access_key_id,
-                    secret_access_key=mlconn.credentials.secret_access_key
-                )
-            )
-        case ml_entities.ApiKeyConfiguration:
-            conn = models.ApiKeyAuthConnectionProperties(
-                credentials=models.ConnectionApiKey(key=mlconn.credentials.key)
-            )
-        case ml_entities.NoneCredentialConfiguration:
-            conn = models.NoneAuthTypeConnectionProperties()
-        case ml_entities.AccountKeyConfiguration:
-            conn = models.AccountKeyAuthTypeConnectionProperties(
-                credentials=models.ConnectionAccountKey(
-                    key=mlconn.credentials.account_key
-                )
-            )
-        case ml_entities.AadCredentialConfiguration:
-            conn = models.AADAuthTypeConnectionProperties()
-        case _:
-            conn = models.AADAuthTypeConnectionProperties()
-    conn.category = connection_category
-    conn.target = mlconn.target
-    conn.metadata = mlconn.metadata
-    return conn
-
-
-def load_connection_from_file(source: Union[str, PathLike, IO[AnyStr]],
-                              params_override: Optional[List[Dict[str, Any]]] = None):
-    """
-    Load a connection from a JSON file or string.
-    """
-    from azure.ai.ml.entities._load_functions import load_connection
-    cogsvc_connection = None
-    ml_connection = None
-    try:
-        ml_connection = load_connection(
-            source=source,
-            params_override=params_override,
-        )
-        # The azure.ai.ml._workspace._ai_workspaces.connection.Connection type maps to the
-        # azure.mgmt.cognitiveservices.models.ConnectionPropertiesV2 credentialed subclass type.
-        # We need to convert it to the latter type before sending it to the API.
-    except Exception as e:
-        raise FileOperationError(f"Failed to load connection from {source}: {e}",
-                                 recommendation="Check the file path and format.")
-    cogsvc_connection = from_ml_connection(ml_connection)
-    return cogsvc_connection
