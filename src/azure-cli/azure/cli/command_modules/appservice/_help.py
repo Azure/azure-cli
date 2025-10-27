@@ -195,6 +195,39 @@ examples:
     text: az appservice plan managed-instance registry-adapter remove --name MyAppServicePlan --resource-group MyResourceGroup --registry-key myregistry
 """
 
+helps['appservice plan managed-instance network'] = """
+type: group
+short-summary: Manage network integration for managed instance App Service plans.
+"""
+
+helps['appservice plan managed-instance network show'] = """
+type: command
+short-summary: Show the network configuration for a managed instance App Service plan.
+examples:
+  - name: Show the network configuration for a managed instance App Service plan.
+    text: az appservice plan managed-instance network show --name MyAppServicePlan --resource-group MyResourceGroup
+"""
+
+helps['appservice plan managed-instance network add'] = """
+type: command
+short-summary: Add VNet integration to a managed instance App Service plan.
+examples:
+  - name: Add VNet integration to a managed instance App Service plan using subnet name and VNet name.
+    text: az appservice plan managed-instance network add --name MyAppServicePlan --resource-group MyResourceGroup --vnet MyVNet --subnet MySubnet
+  - name: Add VNet integration to a managed instance App Service plan using vnet resource id
+    text: az appservice plan managed-instance network add --name MyAppServicePlan --resource-group MyResourceGroup --vnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]' --subnet MySubnet
+  - name: Add VNet integration to a managed instance App Service plan using subnet resource ID.
+    text: az appservice plan managed-instance network add --name MyAppServicePlan --resource-group MyResourceGroup --subnet '/subscriptions/[sub id]/resourceGroups/[MyResourceGroup]/providers/Microsoft.Network/virtualNetworks/[MyVnetName]/subnets/[MySubnetName]'
+"""
+
+helps['appservice plan managed-instance network remove'] = """
+type: command
+short-summary: Remove VNet integration from a managed instance App Service plan.
+examples:
+  - name: Remove VNet integration from a managed instance App Service plan.
+    text: az appservice plan managed-instance network remove --name MyAppServicePlan --resource-group MyResourceGroup
+"""
+
 helps['appservice plan identity'] = """
 type: group
 short-summary: Manage managed identity for App Service plans.
@@ -230,6 +263,16 @@ examples:
     text: az appservice plan identity remove --name MyAppServicePlan --resource-group MyResourceGroup --identities /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
   - name: Remove both system-assigned and user-assigned managed identities from an App Service plan.
     text: az appservice plan identity remove --name MyAppServicePlan --resource-group MyResourceGroup --identities [system] /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+"""
+
+helps['appservice plan identity set-default'] = """
+type: command
+short-summary: Set the default managed identity for an App Service plan.
+examples:
+  - name: Set system-assigned identity as the default for an App Service plan.
+    text: az appservice plan identity set-default --name MyAppServicePlan --resource-group MyResourceGroup --identity [system]
+  - name: Set a user-assigned identity as the default for an App Service plan.
+    text: az appservice plan identity set-default --name MyAppServicePlan --resource-group MyResourceGroup --identity /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
 """
 
 helps['appservice vnet-integration'] = """

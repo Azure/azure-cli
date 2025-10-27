@@ -442,3 +442,154 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
             resource_group, plan_name, identity2_id), checks=[
             JMESPathCheck('type', None)
         ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
+    def test_appservice_plan_managed_instance_network_basic(self, resource_group):
+        """Test basic network operations for managed instance plans."""
+        plan_name = self.create_random_name('mi-plan-net', 24)
+        vnet_name = self.create_random_name('mi-vnet', 24)
+        subnet_name = self.create_random_name('mi-subnet', 24)
+        
+        # Create VNet and subnet
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16'.format(
+            resource_group, vnet_name))
+        
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.1.0/24 --delegations Microsoft.Web/serverFarms'.format(
+            resource_group, vnet_name, subnet_name))
+        
+        # Create managed instance plan
+        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
+            resource_group, plan_name))
+        
+        # Test network show (should be empty initially)
+        self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('virtualNetworkSubnetId', None)
+        ])
+        
+        # Add VNet integration using VNet and subnet names
+        self.cmd('appservice plan managed-instance network add -g {} -n {} --vnet {} --subnet {}'.format(
+            resource_group, plan_name, vnet_name, subnet_name), checks=[
+            JMESPathCheckExists('virtualNetworkSubnetId')
+        ])
+        
+        # Verify network configuration shows the subnet ID
+        network_result = self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheckExists('virtualNetworkSubnetId')
+        ]).get_output_in_json()
+        
+        subnet_id = network_result['virtualNetworkSubnetId']
+        self.assertIn(subnet_name, subnet_id)
+        self.assertIn(vnet_name, subnet_id)
+        
+        # Remove VNet integration
+        self.cmd('appservice plan managed-instance network remove -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('virtualNetworkSubnetId', None)
+        ])
+        
+        # Verify network configuration is cleared
+        self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('virtualNetworkSubnetId', None)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
+    def test_appservice_plan_managed_instance_network_resource_id(self, resource_group):
+        """Test network operations using resource IDs."""
+        plan_name = self.create_random_name('mi-plan-net-id', 24)
+        vnet_name = self.create_random_name('mi-vnet-id', 24)
+        subnet_name = self.create_random_name('mi-subnet-id', 24)
+        
+        # Create VNet and subnet
+        vnet_result = self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16'.format(
+            resource_group, vnet_name)).get_output_in_json()
+        vnet_id = vnet_result['newVNet']['id']
+        
+        subnet_result = self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.1.0/24 --delegations Microsoft.Web/serverFarms'.format(
+            resource_group, vnet_name, subnet_name)).get_output_in_json()
+        subnet_id = subnet_result['id']
+        
+        # Create managed instance plan
+        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
+            resource_group, plan_name))
+        
+        # Add VNet integration using VNet resource ID and subnet name
+        self.cmd('appservice plan managed-instance network add -g {} -n {} --vnet {} --subnet {}'.format(
+            resource_group, plan_name, vnet_id, subnet_name), checks=[
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+        
+        # Remove and re-add using subnet resource ID only
+        self.cmd('appservice plan managed-instance network remove -g {} -n {}'.format(
+            resource_group, plan_name))
+        
+        self.cmd('appservice plan managed-instance network add -g {} -n {} --subnet {}'.format(
+            resource_group, plan_name, subnet_id), checks=[
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
+    def test_appservice_plan_managed_instance_network_validation_errors(self, resource_group):
+        """Test network command validation and error cases."""
+        plan_name = self.create_random_name('mi-plan-net-err', 24)
+        
+        # Create managed instance plan
+        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
+            resource_group, plan_name))
+        
+        # Test add command without any network parameters (should fail)
+        with self.assertRaises(Exception):
+            self.cmd('appservice plan managed-instance network add -g {} -n {}'.format(
+                resource_group, plan_name))
+        
+        # Test add command with non-existent VNet (should fail)
+        with self.assertRaises(Exception):
+            self.cmd('appservice plan managed-instance network add -g {} -n {} --vnet non-existent-vnet --subnet non-existent-subnet'.format(
+                resource_group, plan_name))
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
+    def test_appservice_plan_managed_instance_network_with_plan_creation(self, resource_group):
+        """Test creating managed instance plan with network integration from the start."""
+        plan_name = self.create_random_name('mi-plan-net-create', 24)
+        vnet_name = self.create_random_name('mi-vnet-create', 24)
+        subnet_name = self.create_random_name('mi-subnet-create', 24)
+        
+        # Create VNet and subnet first
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16'.format(
+            resource_group, vnet_name))
+        
+        subnet_result = self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.1.0/24 --delegations Microsoft.Web/serverFarms'.format(
+            resource_group, vnet_name, subnet_name)).get_output_in_json()
+        subnet_id = subnet_result['id']
+        
+        # Create managed instance plan with network integration
+        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance --vnet {} --subnet {}'.format(
+            resource_group, plan_name, vnet_name, subnet_name), checks=[
+            JMESPathCheck('name', plan_name),
+            JMESPathCheck('isCustomMode', True),
+            JMESPathCheck('network.virtualNetworkSubnetId', subnet_id)
+        ])
+        
+        # Verify network configuration is set correctly
+        self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+        
+        # Test that we can still modify the network after creation
+        self.cmd('appservice plan managed-instance network remove -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('virtualNetworkSubnetId', None)
+        ])
+        
+        # And add it back
+        self.cmd('appservice plan managed-instance network add -g {} -n {} --vnet {} --subnet {}'.format(
+            resource_group, plan_name, vnet_name, subnet_name), checks=[
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])

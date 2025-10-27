@@ -333,6 +333,11 @@ def load_command_table(self, _):
         g.custom_command('add', 'add_plan_managed_instance_registry_adapter')
         g.custom_command('remove', 'remove_plan_managed_instance_registry_adapter')
 
+    with self.command_group('appservice plan managed-instance network') as g:
+        g.custom_show_command('show', 'show_plan_managed_instance_network')
+        g.custom_command('add', 'add_plan_managed_instance_network')
+        g.custom_command('remove', 'remove_plan_managed_instance_network')
+
     with self.command_group('appservice plan managed-instance instance', custom_command_type=appservice_custom, is_preview=True) as g:
         g.custom_command('rdp', 'rdp_to_plan_instance')
 
@@ -340,6 +345,7 @@ def load_command_table(self, _):
         g.custom_show_command('show', 'show_plan_identity')
         g.custom_command('assign', 'assign_plan_identity')
         g.custom_command('remove', 'remove_plan_identity')
+        g.custom_command('set-default', 'set_plan_default_identity')
 
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)

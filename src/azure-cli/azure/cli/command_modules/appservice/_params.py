@@ -170,7 +170,7 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('appservice plan managed-instance install-script add') as c:
         c.argument('install_script_name', options_list=['--install-script-name'], help='Name of the install script')
         c.argument('source_uri', options_list=['--source-uri'], help='Source URI of the install script')
-        c.argument('type', options_list=['--type'], help='Type of the install script', arg_type=get_enum_type(INSTALL_SCRIPT_TYPES))
+        c.argument('install_script_type', options_list=['--type'], help='Type of the install script', arg_type=get_enum_type(INSTALL_SCRIPT_TYPES))
 
     with self.argument_context('appservice plan managed-instance install-script remove') as c:
         c.argument('install_script_name', options_list=['--install-script-name'], help='Name of the install script to remove')
@@ -224,6 +224,23 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan')
         c.argument('registry_key', options_list=['--registry-key'], help='Registry key for the adapter to remove')
 
+    with self.argument_context('appservice plan managed-instance network') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                    configured_default='appserviceplan', id_part='name',
+                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+
+    with self.argument_context('appservice plan managed-instance network show') as c:
+        pass
+
+    with self.argument_context('appservice plan managed-instance network add') as c:
+        c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the app service plan will be used. Must be used with --subnet argument.")
+        c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet argument is also needed if specifying subnet by name.")
+
+    with self.argument_context('appservice plan managed-instance network remove') as c:
+        pass
+
     with self.argument_context('appservice plan managed-instance instance rdp') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
@@ -246,6 +263,9 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('appservice plan identity remove') as c:
         c.argument('identities', nargs='*', options_list=['--identities'],
                    help='Space-separated identities to remove. Use \'[system]\' to refer to the system assigned identity, or a resource ID to refer to a user assigned identity.')
+
+    with self.argument_context('appservice plan identity set-default') as c:
+        c.argument('identity', help='Identity to set as default. Use [system] for system-assigned identity or provide user-assigned identity resource ID.')
 
     with self.argument_context('webapp create') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new web app. Web app name can contain only allow alphanumeric characters and hyphens, it cannot start or end in a hyphen, and must be less than 64 characters.',
