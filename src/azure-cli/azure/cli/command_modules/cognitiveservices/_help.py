@@ -464,4 +464,3 @@ helps['cognitiveservices account project connection update'] = """
     - name: Update a connection API Key.
       text: az cognitiveservices account project connection update --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account --project-name my-project --set properties.credentials.key=<new-key>
 """
-
