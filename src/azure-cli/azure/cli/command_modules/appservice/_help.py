@@ -103,6 +103,135 @@ examples:
     crafted: true
 """
 
+helps['appservice plan managed-instance'] = """
+type: group
+short-summary: Manage configurations for managed instance App Service plans.
+"""
+
+helps['appservice plan managed-instance install-script'] = """
+type: group
+short-summary: Manage install scripts for managed instance App Service plans.
+"""
+
+helps['appservice plan managed-instance install-script list'] = """
+type: command
+short-summary: List install scripts for a managed instance App Service plan.
+examples:
+  - name: List all install scripts for a managed instance App Service plan.
+    text: az appservice plan managed-instance install-script list --name MyAppServicePlan --resource-group MyResourceGroup
+"""
+
+helps['appservice plan managed-instance install-script add'] = """
+type: command
+short-summary: Add an install script to a managed instance App Service plan.
+examples:
+  - name: Add an install script to a managed instance App Service plan.
+    text: az appservice plan managed-instance install-script add --name MyAppServicePlan --resource-group MyResourceGroup --install-script-name MyScript --source-uri https://example.com/script.ps1 --type PowerShell
+"""
+
+helps['appservice plan managed-instance install-script remove'] = """
+type: command
+short-summary: Remove an install script from a managed instance App Service plan.
+examples:
+  - name: Remove an install script from a managed instance App Service plan.
+    text: az appservice plan managed-instance install-script remove --name MyAppServicePlan --resource-group MyResourceGroup --install-script-name MyScript
+"""
+
+helps['appservice plan managed-instance storage-mount'] = """
+type: group
+short-summary: Manage storage mounts for managed instance App Service plans.
+"""
+
+helps['appservice plan managed-instance storage-mount list'] = """
+type: command
+short-summary: List storage mounts for a managed instance App Service plan.
+examples:
+  - name: List all storage mounts for a managed instance App Service plan.
+    text: az appservice plan managed-instance storage-mount list --name MyAppServicePlan --resource-group MyResourceGroup
+"""
+
+helps['appservice plan managed-instance storage-mount add'] = """
+type: command
+short-summary: Add a storage mount to a managed instance App Service plan.
+examples:
+  - name: Add a storage mount to a managed instance App Service plan.
+    text: az appservice plan managed-instance storage-mount add --name MyAppServicePlan --resource-group MyResourceGroup --mount-name MyMount --type AzureFiles --source //myaccount.file.core.windows.net/myshare --destination-path /mnt/myshare --credentials-secret-uri https://myvault.vault.azure.net/secrets/storage-credentials/myversion
+"""
+
+helps['appservice plan managed-instance storage-mount remove'] = """
+type: command
+short-summary: Remove a storage mount from a managed instance App Service plan.
+examples:
+  - name: Remove a storage mount from a managed instance App Service plan.
+    text: az appservice plan managed-instance storage-mount remove --name MyAppServicePlan --resource-group MyResourceGroup --mount-name MyMount
+"""
+
+helps['appservice plan managed-instance registry-adapter'] = """
+type: group
+short-summary: Manage registry adapters for managed instance App Service plans.
+"""
+
+helps['appservice plan managed-instance registry-adapter list'] = """
+type: command
+short-summary: List registry adapters for a managed instance App Service plan.
+examples:
+  - name: List all registry adapters for a managed instance App Service plan.
+    text: az appservice plan managed-instance registry-adapter list --name MyAppServicePlan --resource-group MyResourceGroup
+"""
+
+helps['appservice plan managed-instance registry-adapter add'] = """
+type: command
+short-summary: Add a registry adapter to a managed instance App Service plan.
+examples:
+  - name: Add a registry adapter to a managed instance App Service plan.
+    text: az appservice plan managed-instance registry-adapter add --name MyAppServicePlan --resource-group MyResourceGroup --registry-key myregistry --type String --secret-uri https://myvault.vault.azure.net/secrets/registryKeyValue/myversion
+"""
+
+helps['appservice plan managed-instance registry-adapter remove'] = """
+type: command
+short-summary: Remove a registry adapter from a managed instance App Service plan.
+examples:
+  - name: Remove a registry adapter from a managed instance App Service plan.
+    text: az appservice plan managed-instance registry-adapter remove --name MyAppServicePlan --resource-group MyResourceGroup --registry-key myregistry
+"""
+
+helps['appservice plan identity'] = """
+type: group
+short-summary: Manage managed identity for App Service plans.
+"""
+
+helps['appservice plan identity show'] = """
+type: command
+short-summary: Show the managed identity for an App Service plan.
+examples:
+  - name: Show the managed identity for an App Service plan.
+    text: az appservice plan identity show --name MyAppServicePlan --resource-group MyResourceGroup
+"""
+
+helps['appservice plan identity assign'] = """
+type: command
+short-summary: Assign a managed identity to an App Service plan.
+examples:
+  - name: Assign a system-assigned managed identity to an App Service plan.
+    text: az appservice plan identity assign --name MyAppServicePlan --resource-group MyResourceGroup --identities [system]
+  - name: Assign a user-assigned managed identity to an App Service plan.
+    text: az appservice plan identity assign --name MyAppServicePlan --resource-group MyResourceGroup --identities /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+  - name: Assign both system-assigned and user-assigned managed identities to an App Service plan.
+    text: az appservice plan identity assign --name MyAppServicePlan --resource-group MyResourceGroup --identities [system] /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+"""
+
+helps['appservice plan identity remove'] = """
+type: command
+short-summary: Remove managed identities from an App Service plan.
+examples:
+  - name: Remove a system-assigned managed identity from an App Service plan.
+    text: az appservice plan identity remove --name MyAppServicePlan --resource-group MyResourceGroup --identities [system]
+  - name: Remove a user-assigned managed identity from an App Service plan.
+    text: az appservice plan identity remove --name MyAppServicePlan --resource-group MyResourceGroup --identities /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+  - name: Remove both system-assigned and user-assigned managed identities from an App Service plan.
+    text: az appservice plan identity remove --name MyAppServicePlan --resource-group MyResourceGroup --identities [system] /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+"""
+
 helps['appservice vnet-integration'] = """
 type: group
 short-summary: a method that lists the virtual network integrations used in an appservice plan
