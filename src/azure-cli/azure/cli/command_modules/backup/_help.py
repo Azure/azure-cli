@@ -671,5 +671,5 @@ type: command
 short-summary: List backup containers in a soft-deleted vault.
 examples:
   - name: List backup containers in a soft-deleted vault.
-    text: az backup vault deleted-vault list-containers --name MyVault --resource-group MyResourceGroup
+    text: az backup vault deleted-vault list-containers --name MyVault
 """
