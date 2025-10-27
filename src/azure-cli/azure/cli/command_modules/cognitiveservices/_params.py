@@ -198,6 +198,7 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account deployment') as c:
         c.argument('deployment_name', help='Cognitive Services account deployment name')
         c.argument('spillover_deployment_name',
+                   options_list=['--spillover-deployment-name', '--spillover-name'],
                    help='The name of the standard deployment to use as a spillover when at capacity.')
 
     with self.argument_context('cognitiveservices account deployment', arg_group='DeploymentModel') as c:
@@ -235,6 +236,8 @@ def load_arguments(self, _):
         c.argument('project_name', help='Cognitive Services account project name')
         c.argument('location', arg_type=get_location_type(self.cli_ctx),
                    completer=location_completer)
+        c.argument('description', help='Description of the project.')
+        c.argument('display_name', help='Display name of the project.')
 
     with self.argument_context('cognitiveservices account project', arg_group='Project Identity') as c:
         c.argument("assign_identity",
