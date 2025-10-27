@@ -56,7 +56,7 @@ def generate_sas(cmd, client, services, resource_types, permission, expiry, star
                          start=start, ip=ip, protocol=protocol, **kwargs)
 
 
-# pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument, line-too-long
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
                            encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
@@ -323,8 +323,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if enable_blob_geo_priority_replication is not None:
         GeoPriorityReplicationStatus = cmd.get_models('GeoPriorityReplicationStatus')
-        params.geo_priority_replication_status = GeoPriorityReplicationStatus(is_blob_enabled=
-                                                                              enable_blob_geo_priority_replication)
+        params.geo_priority_replication_status = GeoPriorityReplicationStatus(is_blob_enabled=enable_blob_geo_priority_replication)
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
@@ -733,8 +732,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if enable_blob_geo_priority_replication is not None:
         GeoPriorityReplicationStatus = cmd.get_models('GeoPriorityReplicationStatus')
-        params.geo_priority_replication_status = GeoPriorityReplicationStatus(is_blob_enabled=
-                                                                              enable_blob_geo_priority_replication)
+        params.geo_priority_replication_status = GeoPriorityReplicationStatus(is_blob_enabled=enable_blob_geo_priority_replication)
 
     return params
 
@@ -1071,7 +1069,7 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
                                'destination account.')
         raise ex
 
-
+# pylint: line-too-long
 def update_or_policy(cmd, client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
                      properties=None, source_account=None, destination_account=None, enable_metrics=None,
                      priority_replication=None):
@@ -1093,8 +1091,7 @@ def update_or_policy(cmd, client, parameters, resource_group_name, account_name,
     if priority_replication is not None:
         ObjectReplicationPolicyPropertiesPriorityReplication = (
             cmd.get_models('ObjectReplicationPolicyPropertiesPriorityReplication'))
-        parameters.priority_replication = ObjectReplicationPolicyPropertiesPriorityReplication(enabled=
-                                                                                               priority_replication)
+        parameters.priority_replication = ObjectReplicationPolicyPropertiesPriorityReplication(enabled=priority_replication)
 
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    object_replication_policy_id=object_replication_policy_id, properties=parameters)
