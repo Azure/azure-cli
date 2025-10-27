@@ -301,7 +301,7 @@ def deployment_begin_create_or_update(
         dpy.properties.scale_settings = DeploymentScaleSettings()
         dpy.properties.scale_settings.scale_type = scale_settings_scale_type
         dpy.properties.scale_settings.capacity = scale_settings_capacity
-    if spillover_deployment_name is not None:  
+    if spillover_deployment_name is not None:
         dpy.properties.spillover_deployment_name = spillover_deployment_name
     return client.begin_create_or_update(resource_group_name, account_name, deployment_name, dpy, polling=False)
 
@@ -351,7 +351,6 @@ def project_create(
         assign_identity = True
     project.identity = compose_identity(system_assigned=assign_identity, user_assigned_identity=user_assigned_identity)
     return client.begin_create(resource_group_name, account_name, project_name, project, polling=no_wait)
-
 
 
 def project_update(
