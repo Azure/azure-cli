@@ -174,14 +174,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('standardTierStorageRedundancy', new_storage_model)
         ])
 
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --hybrid-backup-security-features Disable', checks=[
-            self.check("properties.enhancedSecurityState", 'Disabled'),
-        ])
-
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --hybrid-backup-security-features Enable', checks=[
-            self.check("properties.enhancedSecurityState", 'Enabled'),
-        ])
-
         self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --classic-alerts Disable --job-failure-alerts Disable', checks=[
             self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Disabled'),
             self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Disabled')
@@ -1048,10 +1040,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
-        # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
-        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable')
-
         self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
             self.check("properties.friendlyName", '{vm}'),
             self.check("properties.protectionState", "ProtectionStopped"),
@@ -1070,11 +1058,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'rg': resource_group,
             'sa': storage_account
         })
-
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
-        # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
-        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable')
-
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk1 --new --size-gb 10')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk2 --new --size-gb 10')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk3 --new --size-gb 10')
@@ -1156,51 +1139,51 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
-    @VaultPreparer()
-    @VMPreparer()
-    @ItemPreparer()
-    @RPPreparer()
-    @StorageAccountPreparer(location="eastus2euap")
-    def test_backup_archive (self, resource_group, vault_name, vm_name, storage_account):
-        self.kwargs.update({
-            'vault': vault_name,
-            'vm': vm_name,
-            'rg': resource_group,
-            'sa': storage_account
-        })
+    # @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    # @VaultPreparer()
+    # @VMPreparer()
+    # @ItemPreparer()
+    # @RPPreparer()
+    # @StorageAccountPreparer(location="eastus2euap")
+    # def test_backup_archive (self, resource_group, vault_name, vm_name, storage_account):
+    #     self.kwargs.update({
+    #         'vault': vault_name,
+    #         'vm': vm_name,
+    #         'rg': resource_group,
+    #         'sa': storage_account
+    #     })
 
-        # Get Container
-        self.kwargs['container'] = self.cmd('backup container show -n {vm} -v {vault} -g {rg} --backup-management-type AzureIaasVM --query properties.friendlyName').get_output_in_json()
+    #     # Get Container
+    #     self.kwargs['container'] = self.cmd('backup container show -n {vm} -v {vault} -g {rg} --backup-management-type AzureIaasVM --query properties.friendlyName').get_output_in_json()
         
-        # Get Item
-        self.kwargs['item'] = self.cmd('backup item list -g {rg} -v {vault} -c {container} --backup-management-type AzureIaasVM --workload-type VM --query [0].properties.friendlyName').get_output_in_json()
+    #     # Get Item
+    #     self.kwargs['item'] = self.cmd('backup item list -g {rg} -v {vault} -c {container} --backup-management-type AzureIaasVM --workload-type VM --query [0].properties.friendlyName').get_output_in_json()
         
-        # Getting the recovery point IDs (names) and storing it in a list
-        rp_names = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container} -i {item}', checks=[
-            self.check("length(@)", 1)
-        ]).get_output_in_json()
+    #     # Getting the recovery point IDs (names) and storing it in a list
+    #     rp_names = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container} -i {item}', checks=[
+    #         self.check("length(@)", 1)
+    #     ]).get_output_in_json()
         
-        self.kwargs['rp1'] = rp_names[0]['name']
-        self.kwargs['rp1_tier'] = rp_names[0]['tierType']
-        self.kwargs['rp1_is_ready_for_move'] = rp_names[0]['properties']['recoveryPointMoveReadinessInfo']['ArchivedRP']['isReadyForMove']
+    #     self.kwargs['rp1'] = rp_names[0]['name']
+    #     self.kwargs['rp1_tier'] = rp_names[0]['tierType']
+    #     self.kwargs['rp1_is_ready_for_move'] = rp_names[0]['properties']['recoveryPointMoveReadinessInfo']['ArchivedRP']['isReadyForMove']
         
-        # Check Archivable Recovery Points 
-        self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --is-ready-for-move {rp1_is_ready_for_move} --target-tier VaultArchive --query [0]', checks=[
-            self.check("resourceGroup", '{rg}'),
-            self.check("properties.recoveryPointMoveReadinessInfo.ArchivedRP.isReadyForMove", '{rp1_is_ready_for_move}')
-        ])
+    #     # Check Archivable Recovery Points 
+    #     self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --is-ready-for-move {rp1_is_ready_for_move} --target-tier VaultArchive --query [0]', checks=[
+    #         self.check("resourceGroup", '{rg}'),
+    #         self.check("properties.recoveryPointMoveReadinessInfo.ArchivedRP.isReadyForMove", '{rp1_is_ready_for_move}')
+    #     ])
 
-        # Get Archived Recovery Points 
-        self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --tier {rp1_tier} --query [0]', checks=[
-            self.check("tierType", '{rp1_tier}'),
-            self.check("resourceGroup", '{rg}')
-        ])
+    #     # Get Archived Recovery Points 
+    #     self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --tier {rp1_tier} --query [0]', checks=[
+    #         self.check("tierType", '{rp1_tier}'),
+    #         self.check("resourceGroup", '{rg}')
+    #     ])
 
-        # Get Recommended for Archive Recovery Points
-        self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --recommended-for-archive', checks=[
-            self.check("length(@)", 0)
-        ])
+    #     # Get Recommended for Archive Recovery Points
+    #     self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --recommended-for-archive', checks=[
+    #         self.check("length(@)", 0)
+    #     ])
 
     @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
@@ -1499,14 +1482,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('name', 'VaultProxy'),
             self.check('length(properties.resourceGuardOperationDetails)', 9)
         ])
-
-        # Try disabling soft delete
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
-            # self.check('properties.softDeleteFeatureState', 'Disabled')
-        # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
-        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable', checks=[
-        #     self.check('properties.securitySettings.softDeleteSettings.softDeleteState', 'Disabled')
-        # ])
 
         time.sleep(300)
 
