@@ -4275,9 +4275,6 @@ def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_worke
 
 
 def list_plan_managed_instance_registry_adapters(cmd, resource_group_name, name):
-    """List registry adapters for a managed instance app service plan."""
-    # Use AAZ-based approach to get the App Service Plan
-    
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4288,7 +4285,6 @@ def list_plan_managed_instance_registry_adapters(cmd, resource_group_name, name)
 
 
 def _patch_plan_registry_adapters(cmd, resource_group_name, name, adapters, location):
-    """Helper to PATCH registryAdapters for a managed instance app service plan using AAZ."""
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     current_plan = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4311,8 +4307,6 @@ def _patch_plan_registry_adapters(cmd, resource_group_name, name, adapters, loca
 
 
 def add_plan_managed_instance_registry_adapter(cmd, resource_group_name, name, registry_key, adapter_type, secret_uri):
-    """Add or update a registry adapter for a managed instance app service plan."""
-    # First get the current registry adapters using AAZ Show
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4346,13 +4340,10 @@ def add_plan_managed_instance_registry_adapter(cmd, resource_group_name, name, r
         updated_adapters.append(adapter_obj)
 
     location = plan_result.get('location')
-    # Update using AAZ
     return _patch_plan_registry_adapters(cmd, resource_group_name, name, updated_adapters, location)
 
 
 def remove_plan_managed_instance_registry_adapter(cmd, resource_group_name, name, registry_key):
-    """Remove a registry adapter from a managed instance app service plan."""
-    # First get the current registry adapters using AAZ Show
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4366,13 +4357,10 @@ def remove_plan_managed_instance_registry_adapter(cmd, resource_group_name, name
     adapters = [a for a in adapters if a.get('registryKey', '').lower() != registry_key.lower()]
     
     location = plan_result.get('location')
-    # Update using AAZ
     return _patch_plan_registry_adapters(cmd, resource_group_name, name, adapters, location)
 
 
 def list_plan_managed_instance_install_scripts(cmd, resource_group_name, name):
-    """List install scripts for a managed instance app service plan."""
-    # Use AAZ-based approach to get the App Service Plan
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4383,7 +4371,6 @@ def list_plan_managed_instance_install_scripts(cmd, resource_group_name, name):
 
 
 def _patch_plan_install_scripts(cmd, resource_group_name, name, scripts, location):
-    """Helper to PATCH installScripts for a managed instance app service plan using AAZ."""
     plan_update_cmd = AppServicePlanUpdate(cli_ctx=cmd.cli_ctx)
     poller = plan_update_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4392,16 +4379,12 @@ def _patch_plan_install_scripts(cmd, resource_group_name, name, scripts, locatio
         'install_scripts': scripts
     })
 
-    # Wait for the operation to complete and get the result
     plan_result = poller.result()
     
-    # Return the updated install scripts directly from the result
     return plan_result.get('installScripts', [])
 
 
 def add_plan_managed_instance_install_script(cmd, resource_group_name, name, install_script_name, source_uri, type):
-    """Add or update an install script for a managed instance app service plan."""
-    # First get the current install scripts using AAZ Show
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4437,13 +4420,10 @@ def add_plan_managed_instance_install_script(cmd, resource_group_name, name, ins
         updated_scripts.append(script_obj)
 
     location = plan_result.get('location')
-    # Update using AAZ
     return _patch_plan_install_scripts(cmd, resource_group_name, name, updated_scripts, location)
 
 
 def remove_plan_managed_instance_install_script(cmd, resource_group_name, name, install_script_name):
-    """Remove an install script from a managed instance app service plan."""
-    # First get the current install scripts using AAZ Show
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4457,13 +4437,10 @@ def remove_plan_managed_instance_install_script(cmd, resource_group_name, name, 
     scripts = [s for s in scripts if s.get('name', '').lower() != install_script_name.lower()]
     
     location = plan_result.get('location')
-    # Update using AAZ
     return _patch_plan_install_scripts(cmd, resource_group_name, name, scripts, location)
 
 
 def list_plan_managed_instance_storage_mounts(cmd, resource_group_name, name):
-    """List storage mounts for a managed instance app service plan."""
-    # Use AAZ-based approach to get the App Service Plan
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4474,7 +4451,6 @@ def list_plan_managed_instance_storage_mounts(cmd, resource_group_name, name):
 
 
 def _patch_plan_storage_mounts(cmd, resource_group_name, name, mounts, location):
-    """Helper to PATCH storageMounts for a managed instance app service plan using AAZ."""
     plan_update_cmd = AppServicePlanUpdate(cli_ctx=cmd.cli_ctx)
     poller = plan_update_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4483,16 +4459,12 @@ def _patch_plan_storage_mounts(cmd, resource_group_name, name, mounts, location)
         'storage_mounts': mounts
     })
 
-    # Wait for the operation to complete and get the result
     plan_result = poller.result()
     
-    # Return the updated storage mounts directly from the result
     return plan_result.get('storageMounts', [])
 
 
 def add_plan_managed_instance_storage_mount(cmd, resource_group_name, name, mount_name, mount_type, source, destination_path, credentials_secret_uri=None):
-    """Add or update a storage mount for a managed instance app service plan."""
-    # First get the current storage mounts using AAZ Show
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4533,13 +4505,10 @@ def add_plan_managed_instance_storage_mount(cmd, resource_group_name, name, moun
         updated_mounts.append(mount_obj)
 
     location = plan_result.get('location')
-    # Update using AAZ
     return _patch_plan_storage_mounts(cmd, resource_group_name, name, updated_mounts, location)
 
 
 def remove_plan_managed_instance_storage_mount(cmd, resource_group_name, name, mount_name):
-    """Remove a storage mount from a managed instance app service plan."""
-    # First get the current storage mounts using AAZ Show
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4553,13 +4522,10 @@ def remove_plan_managed_instance_storage_mount(cmd, resource_group_name, name, m
     mounts = [m for m in mounts if m.get('name', '').lower() != mount_name.lower()]
     
     location = plan_result.get('location')
-    # Update using AAZ
     return _patch_plan_storage_mounts(cmd, resource_group_name, name, mounts, location)
 
 
 def show_plan_identity(cmd, resource_group_name, name):
-    """Show the identity configuration of an app service plan."""
-    # Use AAZ-based approach to get the App Service Plan
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
@@ -4570,7 +4536,6 @@ def show_plan_identity(cmd, resource_group_name, name):
 
 
 def _determine_identity_type(system_assigned, user_assigned_identities):
-    """Helper to determine the correct identity type based on system and user assignments."""
     has_system = system_assigned is not None and system_assigned
     has_user = user_assigned_identities and len(user_assigned_identities) > 0
     
@@ -4585,8 +4550,6 @@ def _determine_identity_type(system_assigned, user_assigned_identities):
 
 
 def _patch_plan_identity(cmd, resource_group_name, name, identity_type, user_assigned_identities, location):
-    """Helper to PATCH identity for an app service plan using AAZ."""
-    # Build the identity object for AAZ
     identity_args = {}
     
     if identity_type == "SystemAssigned":
@@ -4616,7 +4579,6 @@ def _patch_plan_identity(cmd, resource_group_name, name, identity_type, user_ass
 
 
 def assign_plan_identity(cmd, resource_group_name, name, identities=None):
-    """Assign system or user-assigned identities to an app service plan."""
     from azure.cli.core.azclierror import InvalidArgumentValueError
     
     # Parse the identities parameter similar to webapp pattern
@@ -4665,12 +4627,10 @@ def assign_plan_identity(cmd, resource_group_name, name, identities=None):
     identity_type = _determine_identity_type(final_system_assigned, final_user_assigned)
     
     location = plan_result.get('location')
-    # Update using AAZ
     return _patch_plan_identity(cmd, resource_group_name, name, identity_type, final_user_assigned, location)
 
 
 def remove_plan_identity(cmd, resource_group_name, name, identities=None):
-    """Remove system or user-assigned identities from an app service plan."""
     from azure.cli.core.azclierror import InvalidArgumentValueError, ResourceNotFoundError
     
     # Parse the identities parameter similar to webapp pattern
@@ -4725,15 +4685,10 @@ def remove_plan_identity(cmd, resource_group_name, name, identities=None):
     identity_type = _determine_identity_type(final_system_assigned, final_user_assigned)
     
     location = plan_result.get('location')
-    # Update using AAZ
     return _patch_plan_identity(cmd, resource_group_name, name, identity_type, final_user_assigned, location)
 
 
 def rdp_to_plan_instance(cmd, resource_group_name, name, worker_name, bastion_name, bastion_resource_group_name=None):
-    """Generate RDP file and connect to a managed instance app service plan instance via Azure Bastion."""
-    # NOTE: This implementation purposefully shells out to another az command (network bastion rdp)
-    # using run_az_cmd, per explicit user request. Longer-term we may want to call the
-    # underlying Bastion SDK directly instead of invoking a nested CLI.
     from azure.cli.core.azclierror import ResourceNotFoundError, CLIInternalError, InvalidArgumentValueError
     from azure.cli.core.util import run_az_cmd
 
