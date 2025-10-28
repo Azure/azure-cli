@@ -335,16 +335,18 @@ def _application_deployment_command(client, resource_group_name, account_name, a
     request = azure.core.rest.HttpRequest(
         method="POST",
         url=_app_deployment_url(client, resource_group_name, account_name, application_name, application_deployment_name) + f"/{opname}",
-        params={'api-version': '2025-11-15-preview'}
+        params={'api-version': '2025-10-01-preview'}
     )
     response = client._send_request(
         request
     )
     response.raise_for_status()
 
-def application_deployment_start(client, resource_group_name, account_name, application_name, application_deployment_name):
-    return _application_deployment_command(client, resource_group_name, account_name, application_name, application_deployment_name, 'start')
+def application_deployment_start(client, resource_group_name, account_name, appname, appdeploymentname):
+    """Start an application deployment."""
+    return _application_deployment_command(client, resource_group_name, account_name, appname, appdeploymentname, 'start')
 
-def application_deployment_stop(client, resource_group_name, account_name, application_name, application_deployment_name):
-    return _application_deployment_command(client, resource_group_name, account_name, application_name, application_deployment_name, 'stop')
+def application_deployment_stop(client, resource_group_name, account_name, appname, appdeploymentname):
+    """Stop an application deployment."""
+    return _application_deployment_command(client, resource_group_name, account_name, appname, appdeploymentname, 'stop')
 
