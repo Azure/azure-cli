@@ -8,10 +8,10 @@ Release History
 
 **ACR**
 
-* `az acr create | update`: Remove preview flag for `--role-assignment-mode` (#32212)
+* `az acr create/update`: Remove preview flag for `--role-assignment-mode` (#32212)
 * `az acr check-health`: Remove preview flag for `--repository` (#32212)
-* `az acr task create | update`: Remove preview flag for `--source-acr-auth-id` (#32212)
-* `az acr build | run`: Remove preview flag for `--source-acr-auth-id` (#32212)
+* `az acr task create/update`: Remove preview flag for `--source-acr-auth-id` (#32212)
+* `az acr build/run`: Remove preview flag for `--source-acr-auth-id` (#32212)
 * `az acr config content-trust`, `show`, `update`: Add deprecation notice (#32196)
 
 **AKS**
