@@ -19,6 +19,10 @@ Release History
 * `az aks update`: Add support to remove existing certificates by setting the value of `--custom-ca-trust-certificates` to an empty file (#32201)
 * `az aks create/update`: Add `--acns-advanced-networkpolicies` parameter to support enabling advanced networking policies (`None`, `L7` or `FQDN`) (#32265)
 
+**ARM**
+
+* `az resource list`: Include `provisioningState` property in table output (#32156)
+
 **Backup**
 
 * `az backup vault deleted-vault`: Implementing List and Undelete for Deleted Backup Vaults (#32306)
@@ -44,10 +48,6 @@ Release History
 **Network**
 
 * `az network application-gateway create/update`: Add parameter `--enable-fips` (#32339)
-
-**Resource**
-
-* Populate the provisioningState as Status on table output for resource list (#32156)
 
 **SQL**
 
