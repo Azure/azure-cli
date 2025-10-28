@@ -4062,7 +4062,7 @@ class PlanProgressBar(IndeterminateProgressBar):
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
-                            is_managed_instance=None, assign_identities=None, plan_default_identity=None,
+                            is_managed_instance=None, assign_identities=None, default_identity=None,
                             rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
@@ -4159,7 +4159,7 @@ has been deployed ".format(app_service_environment)
         "rdp_enabled": rdp_enabled,
         "mi_system_assigned": str(enable_system_assigned_identity) if enable_system_assigned_identity else None,
         "mi_user_assigned": user_assigned_identities,
-        "plan_default_identity": plan_default_identity,
+        "plan_default_identity": default_identity,
         "registry_adapters": registry_adapters,
         "install_scripts": install_scripts,
         "storage_mounts": storage_mounts,

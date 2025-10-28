@@ -275,6 +275,25 @@ examples:
     text: az appservice plan identity set-default --name MyAppServicePlan --resource-group MyResourceGroup --identity /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
 """
 
+helps['appservice plan managed-instance instance'] = """
+type: group
+short-summary: Manage instances for managed instance App Service plans.
+"""
+
+helps['appservice plan managed-instance instance rdp'] = """
+type: command
+short-summary: Connect to a managed instance App Service plan worker via RDP using Azure Bastion.
+long-summary: |
+  This command establishes an RDP connection to a specific worker instance in a managed instance App Service plan using Azure Bastion.
+  The command retrieves the RDP password for the specified worker and launches an RDP session through the specified Bastion host.
+  You must have appropriate permissions to access the App Service plan, the worker instance, and the Bastion resource.
+examples:
+  - name: Connect to a worker instance via RDP using Azure Bastion.
+    text: az appservice plan managed-instance instance rdp --name MyAppServicePlan --resource-group MyResourceGroup --worker-name MyWorker --bastion-name MyBastion --bastion-resource-group MyBastionRG
+  - name: Connect to a worker instance via RDP with Bastion in the same resource group as the App Service plan.
+    text: az appservice plan managed-instance instance rdp --name MyAppServicePlan --resource-group MyResourceGroup --worker-name MyWorker --bastion-name MyBastion
+"""
+
 helps['appservice vnet-integration'] = """
 type: group
 short-summary: a method that lists the virtual network integrations used in an appservice plan

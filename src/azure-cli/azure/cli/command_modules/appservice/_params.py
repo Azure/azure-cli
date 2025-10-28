@@ -177,7 +177,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('install_script_name', options_list=['--install-script-name'], help='Name of the install script to remove')
 
     with self.argument_context('appservice plan managed-instance install-script list') as c:
-        pass
+        c.ignore('ids')
+        c.argument('name', id_part=None)
 
     with self.argument_context('appservice plan managed-instance storage-mount') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
@@ -187,7 +188,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('resource_group_name', arg_type=resource_group_name_type)
 
     with self.argument_context('appservice plan managed-instance storage-mount list') as c:
-        pass
+        c.ignore('ids')
+        c.argument('name', id_part=None)
 
     with self.argument_context('appservice plan managed-instance storage-mount add') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
@@ -211,7 +213,8 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('resource_group_name', arg_type=resource_group_name_type)
 
     with self.argument_context('appservice plan managed-instance registry-adapter list') as c:
-        pass
+        c.ignore('ids')
+        c.argument('name', id_part=None)
 
     with self.argument_context('appservice plan managed-instance registry-adapter add') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
