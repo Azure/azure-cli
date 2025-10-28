@@ -66,11 +66,19 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
     original_docker_file_name = os.path.basename(docker_file_path.replace("\\", os.sep))
     ignore_list, ignore_list_size = _load_dockerignore_file(source_location, original_docker_file_name)
     common_vcs_ignore_list = {'.git', '.gitignore', '.bzr', 'bzrignore', '.hg', '.hgignore', '.svn'}
+    # Directories that should be completely excluded (no recursive descent) for performance reasons.
+    # These typically contain large numbers of files that are not needed for container build context.
+    build_ignore_dirs = {'.venv'}
 
     def _ignore_check(tarinfo, parent_ignored, parent_matching_rule_index):
-        # ignore common vcs dir or file
-        if tarinfo.name in common_vcs_ignore_list:
+        # Ignore common VCS dirs/files by basename so nested instances are handled.
+        if os.path.basename(tarinfo.name) in common_vcs_ignore_list:
             logger.warning("Excluding '%s' based on default ignore rules", tarinfo.name)
+            return True, parent_matching_rule_index
+
+        # Exclude performance-heavy directories entirely (no traversal) regardless of .dockerignore.
+        if tarinfo.isdir() and os.path.basename(tarinfo.name) in build_ignore_dirs:
+            logger.warning("Excluding '%s' directory for performance", os.path.basename(tarinfo.name))
             return True, parent_matching_rule_index
 
         if ignore_list is None:
@@ -100,7 +108,8 @@ def _pack_source_code(source_location, tar_file_path, docker_file_path, docker_f
                                   arcname="",
                                   parent_ignored=False,
                                   parent_matching_rule_index=ignore_list_size,
-                                  ignore_check=_ignore_check)
+                                  ignore_check=_ignore_check,
+                                  build_ignore_dirs=build_ignore_dirs)
 
         # Add the Dockerfile if it's specified.
         # In the case of run, there will be no Dockerfile.
@@ -182,7 +191,8 @@ def _load_dockerignore_file(source_location, original_docker_file_name):
     return ignore_list, len(ignore_list)
 
 
-def _archive_file_recursively(tar, name, arcname, parent_ignored, parent_matching_rule_index, ignore_check):
+def _archive_file_recursively(tar, name, arcname, parent_ignored, parent_matching_rule_index,
+                              ignore_check, build_ignore_dirs):
     # create a TarInfo object from the file
     tarinfo = tar.gettarinfo(name, arcname)
 
@@ -201,12 +211,13 @@ def _archive_file_recursively(tar, name, arcname, parent_ignored, parent_matchin
         else:
             tar.addfile(tarinfo)
 
-    # even the dir is ignored, its child items can still be included, so continue to scan
-    if tarinfo.isdir():
+    # Even if a dir is ignored by .dockerignore, its children might still be included (Docker semantics),
+    # so we continue scanning unless it is in our build_ignore_dirs set (performance skip list).
+    if tarinfo.isdir() and os.path.basename(tarinfo.name) not in build_ignore_dirs:
         for f in os.listdir(name):
             _archive_file_recursively(tar, os.path.join(name, f), os.path.join(arcname, f),
                                       parent_ignored=ignored, parent_matching_rule_index=matching_rule_index,
-                                      ignore_check=ignore_check)
+                                      ignore_check=ignore_check, build_ignore_dirs=build_ignore_dirs)
 
 
 def check_remote_source_code(source_location):
