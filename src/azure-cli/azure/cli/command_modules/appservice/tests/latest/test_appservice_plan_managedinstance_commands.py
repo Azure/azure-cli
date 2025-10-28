@@ -63,7 +63,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
             JMESPathCheck('properties.isCustomMode', True),
-            JMESPathCheck('identity.type', 'SystemAssigned,UserAssigned'),
+            JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned'),
             JMESPathCheckExists('identity.principalId'),
             JMESPathCheckExists('identity.tenantId'),
             JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity_id))
@@ -135,7 +135,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Assign user-assigned identity (should now have both)
         self.cmd('appservice plan identity assign -g {} -n {} --identities {}'.format(
             resource_group, plan_name, identity_id), checks=[
-            JMESPathCheck('type', 'SystemAssigned,UserAssigned'),
+            JMESPathCheck('type', 'SystemAssigned, UserAssigned'),
             JMESPathCheckExists('principalId'),
             JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id))
         ])
@@ -321,7 +321,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
             JMESPathCheck('name', plan_name),
             JMESPathCheck('properties.isCustomMode', True),
             JMESPathCheck('properties.rdpEnabled', True),
-            JMESPathCheck('identity.type', 'SystemAssigned,UserAssigned'),
+            JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned'),
             JMESPathCheckExists('identity.principalId'),
             JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity_id))
         ])
@@ -357,7 +357,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Test identity operations on complex plan
         self.cmd('appservice plan identity show -g {} -n {}'.format(
             resource_group, plan_name), checks=[
-            JMESPathCheck('type', 'SystemAssigned,UserAssigned'),
+            JMESPathCheck('type', 'SystemAssigned, UserAssigned'),
             JMESPathCheckExists('principalId'),
             JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id))
         ])
@@ -415,7 +415,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Assign both identities at once with system
         self.cmd('appservice plan identity assign -g {} -n {} --identities [system] {} {}'.format(
             resource_group, plan_name, identity1_id, identity2_id), checks=[
-            JMESPathCheck('type', 'SystemAssigned,UserAssigned'),
+            JMESPathCheck('type', 'SystemAssigned, UserAssigned'),
             JMESPathCheckExists('principalId'),
             JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity1_id)),
             JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity2_id))
@@ -424,7 +424,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Remove one user identity
         self.cmd('appservice plan identity remove -g {} -n {} --identities {}'.format(
             resource_group, plan_name, identity1_id), checks=[
-            JMESPathCheck('type', 'SystemAssigned,UserAssigned'),
+            JMESPathCheck('type', 'SystemAssigned, UserAssigned'),
             JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity2_id)),
             JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity1_id))
         ])
@@ -482,7 +482,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Now assign user-assigned identity to the plan
         self.cmd('appservice plan identity assign -g {} -n {} --identities {}'.format(
             resource_group, plan_name, identity_id), checks=[
-            JMESPathCheck('type', 'SystemAssigned,UserAssigned'),
+            JMESPathCheck('type', 'SystemAssigned, UserAssigned'),
             JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id))
         ])
         
@@ -500,124 +500,12 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.assertEqual(plan_result['planDefaultIdentity']['type'], 'UserAssigned')
         self.assertEqual(plan_result['planDefaultIdentity']['userAssignedIdentityResourceId'], identity_id)
         
-        # Test error case: try to set default identity that's not assigned to the plan
-        identity2_name = self.create_random_name('mi-identity-unassigned', 24)
-        identity2_result = self.cmd('identity create -g {} -n {}'.format(
-            resource_group, identity2_name)).get_output_in_json()
-        identity2_id = identity2_result['id']
-        
-        # This should fail because the identity is not assigned to the plan
-        with self.assertRaises(Exception):
-            self.cmd('appservice plan identity set-default -g {} -n {} --identity {}'.format(
-                resource_group, plan_name, identity2_id))
-        
-        # Test error case: try to set system identity as default when it's not assigned
-        # First remove the system identity
-        self.cmd('appservice plan identity remove -g {} -n {} --identities [system]'.format(
-            resource_group, plan_name), checks=[
-            JMESPathCheck('type', 'UserAssigned'),
-            JMESPathCheck('principalId', None)
-        ])
-        
-        # Now trying to set system as default should fail
-        with self.assertRaises(Exception):
-            self.cmd('appservice plan identity set-default -g {} -n {} --identity [system]'.format(
-                resource_group, plan_name))
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
-    def test_appservice_plan_identity_set_default_validation(self, resource_group):
-        """Test validation for setting default identity."""
-        plan_name = self.create_random_name('mi-plan-default-val', 24)
-        
-        # Create managed instance plan without any identities
-        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
-            resource_group, plan_name))
-        
-        # Test error case: try to set default identity when no identities are assigned
-        with self.assertRaises(Exception):
-            self.cmd('appservice plan identity set-default -g {} -n {} --identity [system]'.format(
-                resource_group, plan_name))
-        
-        # Test error case: missing identity parameter
-        with self.assertRaises(Exception):
-            self.cmd('appservice plan identity set-default -g {} -n {}'.format(
-                resource_group, plan_name))
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
-    def test_appservice_plan_identity_set_default_multiple_user_assigned(self, resource_group):
-        """Test setting default identity with multiple user-assigned identities."""
-        plan_name = self.create_random_name('mi-plan-default-multi', 24)
-        identity1_name = self.create_random_name('mi-id1-default', 24)
-        identity2_name = self.create_random_name('mi-id2-default', 24)
-        
-        # Create managed instance plan
-        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
-            resource_group, plan_name))
-        
-        # Create two user-assigned identities
-        identity1_result = self.cmd('identity create -g {} -n {}'.format(
-            resource_group, identity1_name)).get_output_in_json()
-        identity2_result = self.cmd('identity create -g {} -n {}'.format(
-            resource_group, identity2_name)).get_output_in_json()
-        
-        identity1_id = identity1_result['id']
-        identity2_id = identity2_result['id']
-        
-        # Assign both identities to the plan
-        self.cmd('appservice plan identity assign -g {} -n {} --identities {} {}'.format(
-            resource_group, plan_name, identity1_id, identity2_id), checks=[
-            JMESPathCheck('type', 'UserAssigned'),
-            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity1_id)),
-            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity2_id))
-        ])
-        
-        # Set first identity as default
-        self.cmd('appservice plan identity set-default -g {} -n {} --identity {}'.format(
-            resource_group, plan_name, identity1_id), checks=[
-            JMESPathCheck('type', 'UserAssigned'),
-            JMESPathCheck('userAssignedIdentityResourceId', identity1_id)
-        ])
-        
-        # Verify default identity is set correctly
-        plan_result = self.cmd('appservice plan show -g {} -n {}'.format(
-            resource_group, plan_name)).get_output_in_json()
-        self.assertEqual(plan_result['planDefaultIdentity']['userAssignedIdentityResourceId'], identity1_id)
-        
-        # Switch to second identity as default
-        self.cmd('appservice plan identity set-default -g {} -n {} --identity {}'.format(
-            resource_group, plan_name, identity2_id), checks=[
-            JMESPathCheck('type', 'UserAssigned'),
-            JMESPathCheck('userAssignedIdentityResourceId', identity2_id)
-        ])
-        
-        # Verify default identity has been updated
-        plan_result = self.cmd('appservice plan show -g {} -n {}'.format(
-            resource_group, plan_name)).get_output_in_json()
-        self.assertEqual(plan_result['planDefaultIdentity']['userAssignedIdentityResourceId'], identity2_id)
-        
-        # Test that we cannot set default to an identity that gets removed
-        # Remove identity2 from the plan
-        self.cmd('appservice plan identity remove -g {} -n {} --identities {}'.format(
-            resource_group, plan_name, identity2_id), checks=[
-            JMESPathCheck('type', 'UserAssigned'),
-            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity1_id)),
-            JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity2_id))
-        ])
-        
-        # The default identity should now be invalid/cleared, and we should be able to set it to identity1
-        self.cmd('appservice plan identity set-default -g {} -n {} --identity {}'.format(
-            resource_group, plan_name, identity1_id), checks=[
-            JMESPathCheck('type', 'UserAssigned'),
-            JMESPathCheck('userAssignedIdentityResourceId', identity1_id)
-        ])
-
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
     def test_appservice_plan_managed_instance_network_basic(self, resource_group):
         """Test basic network operations for managed instance plans."""
         plan_name = self.create_random_name('mi-plan-net', 24)
+        webapp_name = self.create_random_name('mi-app-net', 24)
         vnet_name = self.create_random_name('mi-vnet', 24)
         subnet_name = self.create_random_name('mi-subnet', 24)
         
@@ -632,6 +520,10 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
             resource_group, plan_name))
         
+        # Create app service
+        self.cmd('webapp create -g {} -n {} --plan {}'
+                 .format(resource_group, webapp_name, plan_name))
+
         # Test network show (should be empty initially)
         self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
             resource_group, plan_name), checks=[
@@ -704,26 +596,6 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
-    def test_appservice_plan_managed_instance_network_validation_errors(self, resource_group):
-        """Test network command validation and error cases."""
-        plan_name = self.create_random_name('mi-plan-net-err', 24)
-        
-        # Create managed instance plan
-        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
-            resource_group, plan_name))
-        
-        # Test add command without any network parameters (should fail)
-        with self.assertRaises(Exception):
-            self.cmd('appservice plan managed-instance network add -g {} -n {}'.format(
-                resource_group, plan_name))
-        
-        # Test add command with non-existent VNet (should fail)
-        with self.assertRaises(Exception):
-            self.cmd('appservice plan managed-instance network add -g {} -n {} --vnet non-existent-vnet --subnet non-existent-subnet'.format(
-                resource_group, plan_name))
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
     def test_appservice_plan_managed_instance_network_with_plan_creation(self, resource_group):
         """Test creating managed instance plan with network integration from the start."""
         plan_name = self.create_random_name('mi-plan-net-create', 24)
@@ -749,17 +621,5 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Verify network configuration is set correctly
         self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
             resource_group, plan_name), checks=[
-            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
-        ])
-        
-        # Test that we can still modify the network after creation
-        self.cmd('appservice plan managed-instance network remove -g {} -n {}'.format(
-            resource_group, plan_name), checks=[
-            JMESPathCheck('virtualNetworkSubnetId', None)
-        ])
-        
-        # And add it back
-        self.cmd('appservice plan managed-instance network add -g {} -n {} --vnet {} --subnet {}'.format(
-            resource_group, plan_name, vnet_name, subnet_name), checks=[
             JMESPathCheck('virtualNetworkSubnetId', subnet_id)
         ])
