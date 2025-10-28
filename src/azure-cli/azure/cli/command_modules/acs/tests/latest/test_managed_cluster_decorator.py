@@ -13314,6 +13314,273 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_1, ground_truth_mc_1)
     
+    def test_get_acns_advanced_networkpolicies(self):
+        # Default, not set.
+        ctx_1 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict({}),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_1.get_acns_advanced_networkpolicies(), None)
+
+        # Set to "None" (valid value)
+        ctx_2 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "acns_advanced_networkpolicies": "None",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_2.get_acns_advanced_networkpolicies(), "None")
+
+        # Set to "FQDN"
+        ctx_3 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "acns_advanced_networkpolicies": "FQDN",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_3.get_acns_advanced_networkpolicies(), "FQDN")
+
+        # Set to "L7"
+        ctx_4 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "acns_advanced_networkpolicies": "L7",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.CREATE,
+        )
+        self.assertEqual(ctx_4.get_acns_advanced_networkpolicies(), "L7")
+
+        # Mutual exclusive error with disable_acns_security
+        ctx_5 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "acns_advanced_networkpolicies": "FQDN",
+                    "disable_acns_security": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_5.get_acns_advanced_networkpolicies()
+
+        # Mutual exclusive error with disable_acns
+        ctx_6 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "acns_advanced_networkpolicies": "L7",
+                    "disable_acns": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_6.get_acns_advanced_networkpolicies()
+
+        # Mutual exclusive error with both disable flags
+        ctx_7 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "acns_advanced_networkpolicies": "FQDN",
+                    "disable_acns_security": True,
+                    "disable_acns": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        with self.assertRaises(MutuallyExclusiveArgumentError):
+            ctx_7.get_acns_advanced_networkpolicies()
+
+        # Valid case with enable_acns
+        ctx_8 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "acns_advanced_networkpolicies": "FQDN",
+                    "enable_acns": True,
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        self.assertEqual(ctx_8.get_acns_advanced_networkpolicies(), "FQDN")
+
+    def test_set_up_network_profile_acns_advanced_networkpolicies(self):
+        # Create mode - set advanced network policies with new security object
+        dec_1 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+                "acns_advanced_networkpolicies": "FQDN",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(location="test_location")
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.set_up_network_profile(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.network_profile.advanced_networking)
+        self.assertEqual(dec_mc_1.network_profile.advanced_networking.enabled, True)
+        self.assertIsNotNone(dec_mc_1.network_profile.advanced_networking.security)
+        self.assertEqual(
+            dec_mc_1.network_profile.advanced_networking.security.advanced_network_policies,
+            "FQDN"
+        )
+
+        # Create mode - set advanced network policies with existing security object
+        dec_2 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+                "disable_acns_security": False,
+                "acns_advanced_networkpolicies": "L7",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(location="test_location")
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.set_up_network_profile(mc_2)
+
+        self.assertIsNotNone(dec_mc_2.network_profile.advanced_networking)
+        self.assertEqual(dec_mc_2.network_profile.advanced_networking.enabled, True)
+        self.assertIsNotNone(dec_mc_2.network_profile.advanced_networking.security)
+        self.assertEqual(
+            dec_mc_2.network_profile.advanced_networking.security.advanced_network_policies,
+            "L7"
+        )
+
+        # Create mode - set advanced network policies to "None"
+        dec_3 = AKSManagedClusterCreateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+                "acns_advanced_networkpolicies": "None",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(location="test_location")
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.set_up_network_profile(mc_3)
+
+        self.assertIsNotNone(dec_mc_3.network_profile.advanced_networking)
+        self.assertEqual(dec_mc_3.network_profile.advanced_networking.enabled, True)
+        self.assertIsNotNone(dec_mc_3.network_profile.advanced_networking.security)
+        self.assertEqual(
+            dec_mc_3.network_profile.advanced_networking.security.advanced_network_policies,
+            "None"
+        )
+
+    def test_update_network_profile_advanced_networking_with_networkpolicies(self):
+        # Update mode - add advanced network policies with new security object
+        dec_1 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+                "acns_advanced_networkpolicies": "FQDN",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_1 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+            ),
+        )
+        dec_1.context.attach_mc(mc_1)
+        dec_mc_1 = dec_1.update_network_profile_advanced_networking(mc_1)
+
+        self.assertIsNotNone(dec_mc_1.network_profile.advanced_networking)
+        self.assertEqual(dec_mc_1.network_profile.advanced_networking.enabled, True)
+        self.assertIsNotNone(dec_mc_1.network_profile.advanced_networking.security)
+        self.assertEqual(
+            dec_mc_1.network_profile.advanced_networking.security.advanced_network_policies,
+            "FQDN"
+        )
+
+        # Update mode - add advanced network policies with existing security enabled
+        dec_2 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+                "enable_acns_security": True,
+                "acns_advanced_networkpolicies": "L7",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_2 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+            ),
+        )
+        dec_2.context.attach_mc(mc_2)
+        dec_mc_2 = dec_2.update_network_profile_advanced_networking(mc_2)
+
+        self.assertIsNotNone(dec_mc_2.network_profile.advanced_networking)
+        self.assertEqual(dec_mc_2.network_profile.advanced_networking.enabled, True)
+        self.assertIsNotNone(dec_mc_2.network_profile.advanced_networking.security)
+        self.assertEqual(
+            dec_mc_2.network_profile.advanced_networking.security.advanced_network_policies,
+            "L7"
+        )
+
+        # Update mode - change advanced network policies value
+        dec_3 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_acns": True,
+                "acns_advanced_networkpolicies": "None",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_3 = self.models.ManagedCluster(
+            location="test_location",
+            network_profile=self.models.ContainerServiceNetworkProfile(
+                network_plugin="azure",
+                advanced_networking=self.models.AdvancedNetworking(
+                    enabled=True,
+                    security=self.models.AdvancedNetworkingSecurity(
+                        enabled=True,
+                        advanced_network_policies="FQDN",
+                    ),
+                ),
+            ),
+        )
+        dec_3.context.attach_mc(mc_3)
+        dec_mc_3 = dec_3.update_network_profile_advanced_networking(mc_3)
+
+        self.assertIsNotNone(dec_mc_3.network_profile.advanced_networking)
+        self.assertEqual(dec_mc_3.network_profile.advanced_networking.enabled, True)
+        self.assertIsNotNone(dec_mc_3.network_profile.advanced_networking.security)
+        self.assertEqual(
+            dec_mc_3.network_profile.advanced_networking.security.advanced_network_policies,
+            "None"
+        )
+
     def test_update_custom_ca_certificates(self):
         # set to non-empty
         dec_1 = AKSManagedClusterUpdateDecorator(

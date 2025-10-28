@@ -5962,46 +5962,19 @@ def restore_point_show(client,
 
 
 # region Restore point collection
-def restore_point_collection_show(client,
+def restore_point_collection_show(cmd,
                                   resource_group_name,
                                   restore_point_collection_name,
                                   expand=None,
                                   restore_points=None):
+    from .aaz.latest.restore_point.collection import Show
+    args = {
+        "resource_group": resource_group_name,
+        "restore_point_collection_name": restore_point_collection_name,
+    }
     if restore_points is not None:
-        expand = 'restorePoints'
-    return client.get(resource_group_name=resource_group_name,
-                      restore_point_collection_name=restore_point_collection_name,
-                      expand=expand)
-
-
-def restore_point_collection_create(client,
-                                    resource_group_name,
-                                    restore_point_collection_name,
-                                    location,
-                                    source_id,
-                                    tags=None):
-    parameters = {}
-    properties = {}
-    parameters['location'] = location
-    if tags is not None:
-        parameters['tags'] = tags
-    properties['source'] = {'id': source_id}
-    parameters['properties'] = properties
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   restore_point_collection_name=restore_point_collection_name,
-                                   parameters=parameters)
-
-
-def restore_point_collection_update(client,
-                                    resource_group_name,
-                                    restore_point_collection_name,
-                                    tags=None):
-    parameters = {}
-    if tags is not None:
-        parameters['tags'] = tags
-    return client.update(resource_group_name=resource_group_name,
-                         restore_point_collection_name=restore_point_collection_name,
-                         parameters=parameters)
+        args['expand'] = 'restorePoints'
+    return Show(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 # endRegion
 
