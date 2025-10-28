@@ -28,16 +28,16 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
             resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('sku.name', 'P1V4'),
+            JMESPathCheck('sku.name', 'P1v4'),
             JMESPathCheckExists('id')
         ])
         
         # Verify plan shows correctly and has managed instance properties
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('sku.name', 'P1V4'),
+            JMESPathCheck('sku.name', 'P1v4'),
             # Validate managed instance mode is enabled via additional properties
-            JMESPathCheck('isCustomMode', True)
+            JMESPathCheck('properties.isCustomMode', True)
         ])
 
     @AllowLargeResponse()
@@ -62,7 +62,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Verify plan shows correctly with identity properties
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('isCustomMode', True),
+            JMESPathCheck('properties.isCustomMode', True),
             JMESPathCheck('identity.type', 'SystemAssigned,UserAssigned'),
             JMESPathCheckExists('identity.principalId'),
             JMESPathCheckExists('identity.tenantId'),
@@ -79,13 +79,13 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance --rdp-enabled'.format(
             resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('sku.name', 'P1V4')
+            JMESPathCheck('sku.name', 'P1v4')
         ])
         
         # Verify plan shows correctly with RDP enabled
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('isCustomMode', True),
+            JMESPathCheck('properties.isCustomMode', True),
             JMESPathCheck('rdpEnabled', True)
         ])
 
@@ -103,7 +103,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Verify basic managed instance creation
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('isCustomMode', True)
+            JMESPathCheck('properties.isCustomMode', True)
         ])
         
         # Create user-assigned identity
@@ -169,7 +169,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Verify basic managed instance creation
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('isCustomMode', True)
+            JMESPathCheck('properties.isCustomMode', True)
         ])
         
         # List install scripts (should be empty initially)
@@ -216,7 +216,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Verify basic managed instance creation
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('isCustomMode', True)
+            JMESPathCheck('properties.isCustomMode', True)
         ])
         
         # List storage mounts (should be empty initially)
@@ -263,7 +263,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Verify basic managed instance creation
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('isCustomMode', True)
+            JMESPathCheck('properties.isCustomMode', True)
         ])
         
         # List registry adapters (should be empty initially)
@@ -319,7 +319,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Verify plan shows correctly with all complex properties
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('isCustomMode', True),
+            JMESPathCheck('properties.isCustomMode', True),
             JMESPathCheck('rdpEnabled', True),
             JMESPathCheck('identity.type', 'SystemAssigned,UserAssigned'),
             JMESPathCheckExists('identity.principalId'),
@@ -400,7 +400,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Verify basic managed instance creation
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('isCustomMode', True)
+            JMESPathCheck('properties.isCustomMode', True)
         ])
         
         # Create two user-assigned identities
@@ -742,7 +742,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance --vnet {} --subnet {}'.format(
             resource_group, plan_name, vnet_name, subnet_name), checks=[
             JMESPathCheck('name', plan_name),
-            JMESPathCheck('isCustomMode', True),
+            JMESPathCheck('properties.isCustomMode', True),
             JMESPathCheck('network.virtualNetworkSubnetId', subnet_id)
         ])
         
