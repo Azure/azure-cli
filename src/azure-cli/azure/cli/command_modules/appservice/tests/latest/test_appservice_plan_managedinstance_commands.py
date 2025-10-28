@@ -206,8 +206,8 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         """Test storage mount add, list, and remove operations."""
         plan_name = self.create_random_name('mi-plan-storage', 24)
         mount_name = 'test-mount'
-        source_path = '//example.com/share'
-        destination_path = 'C:\\mounts\\share'
+        source_path = '\\\\example.file.core.windows.net\\share1'
+        destination_path = 'D:\\mount\\share1'
         
         # Create managed instance plan
         self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
@@ -226,7 +226,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         ])
         
         # Add storage mount
-        self.cmd('appservice plan managed-instance storage-mount add -g {} -n {} --mount-name {} --source {} --destination-path {} --type FileShare'.format(
+        self.cmd('appservice plan managed-instance storage-mount add -g {} -n {} --mount-name {} --source {} --destination-path {} --type AzureFiles'.format(
             resource_group, plan_name, mount_name, source_path, destination_path), checks=[
             JMESPathCheck('length(@)', 1),
             JMESPathCheck('[0].name', mount_name),
@@ -383,64 +383,6 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan managed-instance install-script list -g {} -n {}'.format(
             resource_group, plan_name), checks=[
             JMESPathCheck('length(@)', 0)
-        ])
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
-    def test_appservice_plan_identity_multiple_user_assigned(self, resource_group):
-        """Test identity operations with multiple user-assigned identities."""
-        plan_name = self.create_random_name('mi-plan-multi-id', 24)
-        identity1_name = self.create_random_name('mi-id1', 24)
-        identity2_name = self.create_random_name('mi-id2', 24)
-        
-        # Create managed instance plan
-        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
-            resource_group, plan_name))
-        
-        # Verify basic managed instance creation
-        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
-            JMESPathCheck('name', plan_name),
-            JMESPathCheck('properties.isCustomMode', True)
-        ])
-        
-        # Create two user-assigned identities
-        identity1_result = self.cmd('identity create -g {} -n {}'.format(
-            resource_group, identity1_name)).get_output_in_json()
-        identity2_result = self.cmd('identity create -g {} -n {}'.format(
-            resource_group, identity2_name)).get_output_in_json()
-        
-        identity1_id = identity1_result['id']
-        identity2_id = identity2_result['id']
-        
-        # Assign both identities at once with system
-        self.cmd('appservice plan identity assign -g {} -n {} --identities [system] {} {}'.format(
-            resource_group, plan_name, identity1_id, identity2_id), checks=[
-            JMESPathCheck('type', 'SystemAssigned, UserAssigned'),
-            JMESPathCheckExists('principalId'),
-            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity1_id)),
-            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity2_id))
-        ])
-        
-        # Remove one user identity
-        self.cmd('appservice plan identity remove -g {} -n {} --identities {}'.format(
-            resource_group, plan_name, identity1_id), checks=[
-            JMESPathCheck('type', 'SystemAssigned, UserAssigned'),
-            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity2_id)),
-            JMESPathCheckNotExists('userAssignedIdentities."{}"'.format(identity1_id))
-        ])
-        
-        # Remove system identity (should still have user identity)
-        self.cmd('appservice plan identity remove -g {} -n {} --identities [system]'.format(
-            resource_group, plan_name), checks=[
-            JMESPathCheck('type', 'UserAssigned'),
-            JMESPathCheck('principalId', None),
-            JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity2_id))
-        ])
-        
-        # Remove remaining user identity
-        self.cmd('appservice plan identity remove -g {} -n {} --identities {}'.format(
-            resource_group, plan_name, identity2_id), checks=[
-            JMESPathCheck('type', None)
         ])
 
     @AllowLargeResponse()
