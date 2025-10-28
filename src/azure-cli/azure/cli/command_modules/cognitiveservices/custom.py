@@ -325,3 +325,26 @@ def commitment_plan_create_or_update(
         plan.properties.next.count = next_count
     plan.properties.auto_renew = auto_renew
     return client.create_or_update(resource_group_name, account_name, commitment_plan_name, plan)
+
+def _app_deployment_url(client, resource_group_name, account_name, application_name, application_deployment_name):
+    url = f"/subscriptions/{client._config.subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.CognitiveServices/accounts/{account_name}/applications/{application_name}/deployments/{application_deployment_name}"
+    return url
+
+def _application_deployment_command(client, resource_group_name, account_name, application_name, application_deployment_name, opname):
+    import azure.core.rest
+    request = azure.core.rest.HttpRequest(
+        method="POST",
+        url=_app_deployment_url(client, resource_group_name, account_name, application_name, application_deployment_name) + f"/{opname}",
+        params={'api-version': '2025-11-15-preview'}
+    )
+    response = client._send_request(
+        request
+    )
+    response.raise_for_status()
+
+def application_deployment_start(client, resource_group_name, account_name, application_name, application_deployment_name):
+    return _application_deployment_command(client, resource_group_name, account_name, application_name, application_deployment_name, 'start')
+
+def application_deployment_stop(client, resource_group_name, account_name, application_name, application_deployment_name):
+    return _application_deployment_command(client, resource_group_name, account_name, application_name, application_deployment_name, 'stop')
+

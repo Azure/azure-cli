@@ -214,3 +214,7 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account commitment-plan', arg_group='Next CommitmentPeriod') as c:
         c.argument('next_count', help='Cognitive Services account commitment plan next commitment period count.')
         c.argument('next_tier', help='Cognitive Services account commitment plan next commitment period tier.')
+
+    with self.argument_context('cognitiveservices application') as c:
+        c.argument('application_name', help='Cognitive Services application name')
+        

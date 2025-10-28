@@ -40,3 +40,19 @@ def cf_models(cli_ctx, *_):
 
 def cf_usages(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).usages
+
+class ApplicationClient:
+    def __init__(self, cli_ctx):
+        self.client = get_cognitiveservices_management_client(cli_ctx)
+
+    def start(self, *,resource_group_name: str, account_name: str):
+        # Placeholder implementation for starting application deployment
+        return f"Starting application deployment for account '{account_name}' in resource group '{resource_group_name}'."
+
+    def stop(self, *, resource_group_name: str, account_name: str):
+        # Placeholder implementation for stopping application deployment
+        return f"Stopping application deployment for account '{account_name}' in resource group '{resource_group_name}'."
+
+def cf_application(cli_ctx, *_):
+    print('cf_application called')
+    return get_cognitiveservices_management_client(cli_ctx)
