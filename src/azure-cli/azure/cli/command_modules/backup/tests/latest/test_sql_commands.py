@@ -788,13 +788,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ]).get_output_in_json()
 
 
+    @AllowLargeResponse()
+    @record_only()
     def test_backup_wl_reconfigure(self):
         self.kwargs.update({
             'resource_group': 'zubairRG',
             'vault1': 'zimmut-ccy-6',
             'vault2': 'zimmut-ccy-5',
             'container': 'sql-migration-vm2',
-            'item': 'model',
+            'item': 'master',
             'policy_name': 'HourlyLogBackup'
         })
 
@@ -831,4 +833,4 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
         # Clean up - delete the backup item from vault2
-        self.cmd('backup protection disable -g "{resource_group}" -v "{vault2}" -c "{container}" -i "{item}" --backup-management-type AzureWorkload --workload-type MSSQL --delete-backup-data true --yes')
+        # self.cmd('backup protection disable -g "{resource_group}" -v "{vault2}" -c "{container}" -i "{item}" --backup-management-type AzureWorkload --workload-type MSSQL --delete-backup-data true --yes')

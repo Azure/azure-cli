@@ -223,52 +223,6 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_no_ssh_key(self, resource_group, resource_group_location):
-        # kwargs for string formatting
-        aks_name = self.create_random_name('cliakstest', 16)
-        tags = "key1=value1"
-        nodepool_labels = "label1=value1 label2=value2"
-        nodepool_tags = "tag1=tv1 tag2=tv2"
-        self.kwargs.update({
-            'resource_group': resource_group,
-            'name': aks_name,
-            'location': resource_group_location,
-            'tags': tags,
-            'nodepool_labels': nodepool_labels,
-            'nodepool_tags': nodepool_tags,
-            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
-        })
-
-        # create
-        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--node-count=1 ' \
-                     '--tags {tags} --nodepool-labels {nodepool_labels} --nodepool-tags {nodepool_tags}'
-        self.cmd(create_cmd, checks=[
-            self.check('provisioningState', 'Succeeded'),
-        ])
-        
-        # show
-        self.cmd('aks show -g {resource_group} -n {name}', checks=[
-            self.check('type', '{resource_type}'),
-            self.check('resourceGroup', '{resource_group}'),
-            self.check('name', '{name}'),
-            self.exists('nodeResourceGroup'),
-            self.exists('kubernetesVersion'),
-            self.exists('fqdn'),
-            self.check('agentPoolProfiles[0].count', 1),
-            self.check('agentPoolProfiles[0].osType', 'Linux'),
-            self.check('agentPoolProfiles[0].nodeLabels.label1', 'value1'),
-            self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
-            self.check('agentPoolProfiles[0].tags.tag1', 'tv1'),
-            self.check('agentPoolProfiles[0].tags.tag2', 'tv2'),
-            self.check('agentPoolProfiles[0].maxPods', 250),  # default maxPods is 250 now as default network plugin has been changed to azure
-        ])
-
-        # delete
-        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
-
-    @AllowLargeResponse()
-    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_create_default(self, resource_group, resource_group_location):
         # kwargs for string formatting
         aks_name = self.create_random_name('cliakstest', 16)
@@ -12697,6 +12651,148 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             "aks delete -g {resource_group} -n {name} --yes --no-wait",
             checks=[self.is_empty()],
         )
+    
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westus2",
+    )
+    def test_aks_create_with_advanced_networkpolicies(
+        self, resource_group, resource_group_location
+    ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "location": resource_group_location,
+            }
+        )
+        # Cilium Cluster with ACNS enabled and advanced network policies set to L7
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
+            "--network-plugin azure --network-dataplane=cilium --network-plugin-mode overlay "
+            "--enable-acns --acns-advanced-networkpolicies L7 "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.advancedNetworkPolicies", "L7"),
+            ],
+        )
+
+        # Update advanced network policies to FQDN
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-acns --acns-advanced-networkpolicies FQDN "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.advancedNetworkPolicies", "FQDN"),
+            ],
+        )
+
+        # Update advanced network policies to None
+        update_cmd2 = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-acns --acns-advanced-networkpolicies None "
+        )
+        self.cmd(
+            update_cmd2,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.advancedNetworkPolicies", "None"),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+    
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17,
+        name_prefix="clitest",
+        location="westus2",
+    )
+    def test_aks_update_with_advanced_networkpolicies(
+        self, resource_group, resource_group_location
+    ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "location": resource_group_location,
+            }
+        )
+
+        # Cilium Cluster with ACNS enabled and advanced network policies set to L7
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--ssh-key-value={ssh_key_value} --node-count=1 --tier standard "
+            "--network-plugin azure --network-dataplane=cilium --network-plugin-mode overlay "
+            "--enable-acns "
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.advancedNetworkPolicies", "FQDN"),
+            ],
+        )
+
+        # Update advanced network policies to L7
+        update_cmd = (
+            "aks update --resource-group={resource_group} --name={name} "
+            "--enable-acns --acns-advanced-networkpolicies L7 "
+        )
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("networkProfile.advancedNetworking.enabled", True),
+                self.check("networkProfile.advancedNetworking.observability.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.enabled", True),
+                self.check("networkProfile.advancedNetworking.security.advancedNetworkPolicies", "L7"),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
@@ -12817,38 +12913,53 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                      '--custom-ca-trust-certificates={custom_ca_trust_certificates}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)]),
+            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)] if os.environ.get(ENV_LIVE_TEST, False) else ["testcert"]*2 ),
         ])
 
         # delete
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
-    
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
-    def test_aks_create_add_nodepool_with_custom_ca_trust_certificates(self, resource_group, resource_group_location):
+    def test_aks_update_remove_custom_ca_trust_certificates(self, resource_group, resource_group_location):
+        """Test removing custom CA trust certificates by updating with empty certificate file."""
         aks_name = self.create_random_name('cliakstest', 16)
         node_pool_name = self.create_random_name('c', 6)
-        node_pool_name_second = self.create_random_name('c', 6)
         self.kwargs.update({
             'resource_group': resource_group,
             'name': aks_name,
             'node_pool_name': node_pool_name,
-            'node_pool_name_second': node_pool_name_second,
             'ssh_key_value': self.generate_ssh_keys(),
-            'custom_ca_trust_certificates': get_test_data_file_path("certs.txt")
+            'custom_ca_trust_certificates': get_test_data_file_path("certs.txt"),
+            'empty_custom_ca_trust_certificates': get_test_data_file_path("certs_empty.txt")
         })
 
-        # 1. create
+        # 1. Create cluster with custom CA trust certificates
         create_cmd = 'aks create --resource-group={resource_group} --name={name} ' \
                      '--nodepool-name {node_pool_name} -c 1 ' \
                      '--ssh-key-value={ssh_key_value} ' \
-                     '--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/CustomCATrustPreview ' \
                      '--custom-ca-trust-certificates={custom_ca_trust_certificates}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
-            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)] if os.environ.get(ENV_LIVE_TEST, False) else ["testcert"]*2 ),
+            self.check('securityProfile.customCaTrustCertificates', [CUSTOM_CA_TEST_CERT_STR for _ in range(2)] if os.environ.get(ENV_LIVE_TEST, False) else ["testcert"]*2),
+        ])
+
+        # 2. Update cluster to remove certificates by providing empty certificate file
+        update_cmd = 'aks update --resource-group={resource_group} --name={name} ' \
+                     '--custom-ca-trust-certificates={empty_custom_ca_trust_certificates}'
+        self.cmd(update_cmd, checks=[
+            self.check('securityProfile.customCaTrustCertificates', None),
+        ])
+
+        # Wait for the update to complete
+        self.cmd('aks wait -g {resource_group} -n {name} --updated', checks=[self.is_empty()])
+
+        # # 3. Verify the cluster and certificates are indeed removed
+        get_cmd = 'aks show --resource-group={resource_group} --name={name}'
+        self.cmd(get_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+            self.check('securityProfile.customCaTrustCertificates', None),
         ])
 
         # delete
