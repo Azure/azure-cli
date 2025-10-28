@@ -86,7 +86,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
             JMESPathCheck('properties.isCustomMode', True),
-            JMESPathCheck('rdpEnabled', True)
+            JMESPathCheck('properties.rdpEnabled', True)
         ])
 
     @AllowLargeResponse()
@@ -320,7 +320,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
             JMESPathCheck('properties.isCustomMode', True),
-            JMESPathCheck('rdpEnabled', True),
+            JMESPathCheck('properties.rdpEnabled', True),
             JMESPathCheck('identity.type', 'SystemAssigned,UserAssigned'),
             JMESPathCheckExists('identity.principalId'),
             JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity_id))

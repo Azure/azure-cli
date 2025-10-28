@@ -11,10 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "appservice plan managed-instance show-rdp-password",
-    is_preview=True,
-)
 class ShowRdpPassword(AAZCommand):
     """Get the RDP password for an IsCustomMode ServerFarm.
     """
