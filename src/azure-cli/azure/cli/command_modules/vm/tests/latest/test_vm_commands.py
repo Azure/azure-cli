@@ -12392,7 +12392,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus')
     def test_vm_vmss_proxy_agent(self, resource_group):
         self.kwargs.update({
             'nsg1': self.create_random_name('nsg', 10),
@@ -12424,13 +12424,14 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 2)
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image Win2022Datacenter --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
-        self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent True --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 1')
+        self.cmd('vm create -g {rg} -n {vm2} --image Ubuntu2204 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-username azureuser --generate-ssh-keys --nsg-rule NONE')
+        self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent True --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 1 --add-proxy-agent-extension true')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('securityProfile.proxyAgentSettings.enabled', True),
             self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
             self.check('securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
-            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1),
+            self.check('securityProfile.proxyAgentSettings.addProxyAgentExtension', True)
         ])
         self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent False')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
@@ -12466,11 +12467,12 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network nsg create -g {rg} -n {nsg2}')
-        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --nsg {nsg2} --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!')
-        self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --wire-server-mode Audit --imds-mode Audit', checks=[
+        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Ubuntu2204 --nsg {nsg2} --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-username azureuser --generate-ssh-keys')
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --wire-server-mode Audit --imds-mode Audit --add-proxy-agent-extension true', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
-            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit')
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.addProxyAgentExtension', True)
         ])
         self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent False', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
