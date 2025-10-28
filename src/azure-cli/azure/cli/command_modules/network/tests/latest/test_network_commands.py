@@ -1604,9 +1604,16 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.kwargs.update({
             'ag': 'ag1',
             'res': 'application-gateway http-settings',
-            'name': 'mysettings'
+            'name': 'mysettings',
+            'name2': 'mysettings2',
+            'ip': 'pip',
+            'vnet': 'vnet1',
+            'subnet': 'subnet1'
         })
-        self._create_ag()
+        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --default-outbound-access false')
+        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet} --public-ip-address {ip} --priority 1001 --sku Standard_v2')
 
         self.cmd('network {res} create -g {rg} --gateway-name {ag} -n {name} --no-wait --affinity-cookie-name mycookie --connection-draining-timeout 60 --cookie-based-affinity --host-name-from-backend-pool --protocol https --timeout 50 --port 70')
         self.cmd('network {res} show -g {rg} --gateway-name {ag} -n {name}', checks=[
@@ -1633,6 +1640,16 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 2))
         self.cmd('network {res} delete -g {rg} --gateway-name {ag} --no-wait -n {name}')
         self.cmd('network {res} list -g {rg} --gateway-name {ag}', checks=self.check('length(@)', 1))
+
+        self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {ag} -n {name2} --port 443 \
+                 --protocol Https --cookie-based-affinity disabled --validate-cert-chain-and-expiry false --validate-sni true', checks=[
+            self.check('name', '{name2}'),
+            self.check('port', 443),
+            self.check('protocol', 'Https'),
+            self.check('cookieBasedAffinity', 'Disabled'),
+            self.check('validateCertChainAndExpiry', False),
+            self.check('validateSNI', True),
+        ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_probe')
     def test_network_ag_probe(self, resource_group):
@@ -3022,33 +3039,6 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  checks=[
                      self.not_exists('exceptions')
                  ])
-
-
-class NetworkAppGatewayHttpSettingsScenarioTest(ScenarioTest):
-
-    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_http_settings_', location='eastus2')
-    def test_app_gateway_http_settings_basic(self, resource_group):
-        self.kwargs.update({
-            'ag': 'ag1',
-            'ip': 'pip1',
-            'vnet': 'vnet1',
-            'subnet': 'subnet1',
-            'http_settings': 'httpSettings1'
-        })
-        self.cmd('network public-ip create -g {rg} -n {ip} --sku Standard --ip-tags FirstPartyUsage=/NonProd')
-        self.cmd('network vnet create -g {rg} -n {vnet} --address-prefix 10.0.0.0/16')
-        self.cmd('network vnet subnet create -g {rg} --vnet-name {vnet} -n {subnet} --address-prefix 10.0.0.0/24 --default-outbound-access false')
-        self.cmd('network application-gateway create -g {rg} -n {ag} --vnet-name {vnet} --subnet {subnet} --public-ip-address {ip} --priority 1001 --sku Standard_v2')
-
-        self.cmd('network application-gateway http-settings create -g {rg} --gateway-name {ag} -n {http_settings} --port 443 \
-                 --protocol Https --cookie-based-affinity disabled --validate-cert-chain-and-expiry false --validate-sni true', checks=[
-            self.check('name', '{http_settings}'),
-            self.check('port', 443),
-            self.check('protocol', 'Https'),
-            self.check('cookieBasedAffinity', 'Disabled'),
-            self.check('validateCertChainAndExpiry', False),
-            self.check('validateSNI', True),
-        ])
 
 
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
