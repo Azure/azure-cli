@@ -43,7 +43,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.progress import IndeterminateProgressBar
 from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, get_json_object, \
-    ConfiguredDefaultSetter, sdk_no_wait
+    ConfiguredDefaultSetter
 from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
@@ -4280,7 +4280,7 @@ def list_plan_managed_instance_registry_adapters(cmd, resource_group_name, name)
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     return plan_result.get('registryAdapters', [])
 
 
@@ -4296,18 +4296,19 @@ def _update_plan_registry_adapters(cmd, resource_group_name, name, adapters, cur
 
     # Wait for the operation to complete and get the result
     plan_result = poller.result()
-    
+
     # Return the updated registry adapters directly from the result
     return plan_result.get('registryAdapters', [])
 
 
-def add_plan_managed_instance_registry_adapter(cmd, resource_group_name, name, registry_key, adapter_type, secret_uri):
+def add_plan_managed_instance_registry_adapter(cmd, resource_group_name, name,
+                                               registry_key, adapter_type, secret_uri):
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     # Extract current adapters directly from the plan result
     existing_adapters = plan_result.get('registryAdapters', [])
     updated_adapters = []
@@ -4329,7 +4330,7 @@ def add_plan_managed_instance_registry_adapter(cmd, resource_group_name, name, r
             adapter_found = True
         else:
             # Keep existing adapter
-            updated_adapters.append(adapter)    
+            updated_adapters.append(adapter)
 
     if not adapter_found:
         updated_adapters.append(adapter_obj)
@@ -4343,13 +4344,13 @@ def remove_plan_managed_instance_registry_adapter(cmd, resource_group_name, name
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     # Extract current adapters directly from the plan result
     adapters = plan_result.get('registryAdapters', [])
-    
+
     # Remove adapter by case-insensitive registry key
     adapters = [a for a in adapters if a.get('registryKey', '').lower() != registry_key.lower()]
-    
+
     return _update_plan_registry_adapters(cmd, resource_group_name, name, adapters, plan_result)
 
 
@@ -4359,7 +4360,7 @@ def list_plan_managed_instance_install_scripts(cmd, resource_group_name, name):
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     return plan_result.get('installScripts', [])
 
 
@@ -4374,17 +4375,18 @@ def _update_plan_install_scripts(cmd, resource_group_name, name, scripts, curren
     })
 
     plan_result = poller.result()
-    
+
     return plan_result.get('installScripts', [])
 
 
-def add_plan_managed_instance_install_script(cmd, resource_group_name, name, install_script_name, source_uri, install_script_type):
+def add_plan_managed_instance_install_script(cmd, resource_group_name, name,
+                                             install_script_name, source_uri, install_script_type):
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     # Extract current scripts directly from the plan result
     existing_scripts = plan_result.get('installScripts', [])
     updated_scripts = []
@@ -4422,13 +4424,13 @@ def remove_plan_managed_instance_install_script(cmd, resource_group_name, name, 
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     # Extract current scripts directly from the plan result
     scripts = plan_result.get('installScripts', [])
-    
+
     # Remove script by case-insensitive name
     scripts = [s for s in scripts if s.get('name', '').lower() != install_script_name.lower()]
-    
+
     return _update_plan_install_scripts(cmd, resource_group_name, name, scripts, plan_result)
 
 
@@ -4438,7 +4440,7 @@ def list_plan_managed_instance_storage_mounts(cmd, resource_group_name, name):
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     return plan_result.get('storageMounts', [])
 
 
@@ -4453,17 +4455,19 @@ def _update_plan_storage_mounts(cmd, resource_group_name, name, mounts, current_
     })
 
     plan_result = poller.result()
-    
+
     return plan_result.get('storageMounts', [])
 
 
-def add_plan_managed_instance_storage_mount(cmd, resource_group_name, name, mount_name, mount_type, source, destination_path, credentials_secret_uri=None):
+def add_plan_managed_instance_storage_mount(cmd, resource_group_name, name,
+                                            mount_name, mount_type, source,
+                                            destination_path, credentials_secret_uri=None):
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     # Extract current mounts directly from the plan result
     existing_mounts = plan_result.get('storageMounts', [])
     updated_mounts = []
@@ -4476,7 +4480,7 @@ def add_plan_managed_instance_storage_mount(cmd, resource_group_name, name, moun
         'type': mount_type,
         'destinationPath': destination_path
     }
-    
+
     # Add credentials key vault reference if provided
     if credentials_secret_uri:
         mount_obj['credentialsKeyVaultReference'] = {
@@ -4506,13 +4510,13 @@ def remove_plan_managed_instance_storage_mount(cmd, resource_group_name, name, m
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     # Extract current mounts directly from the plan result
     mounts = plan_result.get('storageMounts', [])
-    
+
     # Remove mount by case-insensitive name
     mounts = [m for m in mounts if m.get('name', '').lower() != mount_name.lower()]
-    
+
     return _update_plan_storage_mounts(cmd, resource_group_name, name, mounts, plan_result)
 
 
@@ -4522,14 +4526,14 @@ def show_plan_managed_instance_network(cmd, resource_group_name, name):
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     # Return the whole network information from the plan result
     return plan_result.get('network', {})
 
 
 def _update_plan_network(cmd, resource_group_name, name, subnet_resource_id, current_plan):
     plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
-    
+
     # Handle None, empty string, and actual resource IDs properly
     if subnet_resource_id is None:
         network_config = None
@@ -4537,7 +4541,7 @@ def _update_plan_network(cmd, resource_group_name, name, subnet_resource_id, cur
         network_config = {
             'virtual_network_subnet_id': subnet_resource_id
         }
-    
+
     poller = plan_create_cmd(command_args={
         'resource_group': resource_group_name,
         'name': name,
@@ -4547,26 +4551,24 @@ def _update_plan_network(cmd, resource_group_name, name, subnet_resource_id, cur
     })
 
     plan_result = poller.result()
-    
+
     # Return the whole network information from the updated plan result
     return plan_result.get('network', {})
 
 
 def add_plan_managed_instance_network(cmd, resource_group_name, name, vnet=None, subnet=None):
-    from azure.cli.core.azclierror import RequiredArgumentMissingError
-    
     # Validate that both vnet and subnet are provided
     if not subnet and not vnet:
         raise RequiredArgumentMissingError('Either --subnet or both --vnet and --subnet arguments are required.')
-    
+
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     location = plan_result.get('location')
-    
+
     if subnet or vnet:
         subnet_info = _get_subnet_info(cmd=cmd,
                                        resource_group_name=resource_group_name,
@@ -4593,7 +4595,7 @@ def remove_plan_managed_instance_network(cmd, resource_group_name, name):
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     # Explicitly set to empty string to remove network configuration
     return _update_plan_network(cmd, resource_group_name, name, "", plan_result)
 
@@ -4604,27 +4606,27 @@ def show_plan_identity(cmd, resource_group_name, name):
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     return plan_result.get('identity', {})
 
 
 def _determine_identity_type(system_assigned, user_assigned_identities):
     has_system = system_assigned is not None and system_assigned
     has_user = user_assigned_identities and len(user_assigned_identities) > 0
-    
+
     if has_system and has_user:
         return "SystemAssigned,UserAssigned"
-    elif has_system:
+    if has_system:
         return "SystemAssigned"
-    elif has_user:
+    if has_user:
         return "UserAssigned"
-    else:
-        return "None"
+
+    return "None"
 
 
 def _update_plan_identity(cmd, resource_group_name, name, identity_type, user_assigned_identities, current_plan):
     identity_args = {}
-    
+
     if identity_type == "SystemAssigned":
         identity_args['mi_system_assigned'] = "True"
     elif identity_type == "UserAssigned":
@@ -4633,7 +4635,7 @@ def _update_plan_identity(cmd, resource_group_name, name, identity_type, user_as
         identity_args['mi_system_assigned'] = "True"
         identity_args['mi_user_assigned'] = user_assigned_identities or []
     # For "None", we don't set any identity args
-    
+
     plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
     update_args = {
         'resource_group': resource_group_name,
@@ -4643,12 +4645,12 @@ def _update_plan_identity(cmd, resource_group_name, name, identity_type, user_as
     }
 
     update_args.update(identity_args)
-    
+
     poller = plan_create_cmd(command_args=update_args)
-    
+
     # Wait for the operation to complete and get the result
     plan_result = poller.result()
-    
+
     # Return the updated identity directly from the result
     return plan_result.get('identity', {})
 
@@ -4656,121 +4658,125 @@ def _update_plan_identity(cmd, resource_group_name, name, identity_type, user_as
 def assign_plan_identity(cmd, resource_group_name, name, identities=None):
     # Parse the identities parameter similar to webapp pattern
     if not identities:
-        raise InvalidArgumentValueError("No identities specified. Use '[system]' for system-assigned identity or provide user-assigned identity resource IDs.")
-    
+        raise InvalidArgumentValueError("No identities specified. Use '[system]' for system-assigned identity "
+                                        "or provide user-assigned identity resource IDs.")
+
     # Determine what identities to assign
     system_assigned = False
     user_assigned_identities = []
-    
+
     for identity in identities:
         if identity.lower() == '[system]':
             system_assigned = True
         else:
             user_assigned_identities.append(identity)
-    
+
     # Get the current plan to understand existing identity
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     current_identity = plan_result.get('identity', {})
     current_type = current_identity.get('type', 'None')
     current_user_assigned = current_identity.get('userAssignedIdentities', {})
-    
+
     # Determine what the new identity should be
     has_existing_system = current_type and 'SystemAssigned' in current_type
     has_existing_user = current_type and 'UserAssigned' in current_type
-    
+
     # Merge existing user-assigned identities with new ones
     final_user_assigned = []
     if has_existing_user and current_user_assigned:
         final_user_assigned.extend(list(current_user_assigned.keys()))
-    
+
     # Add new user-assigned identities (avoid duplicates)
     for identity in user_assigned_identities:
         if identity not in final_user_assigned:
             final_user_assigned.append(identity)
-    
+
     # Determine final system assignment
     final_system_assigned = has_existing_system or system_assigned
 
     # Determine the correct identity type
     identity_type = _determine_identity_type(final_system_assigned, final_user_assigned)
-    
+
     return _update_plan_identity(cmd, resource_group_name, name, identity_type, final_user_assigned, plan_result)
 
 
 def remove_plan_identity(cmd, resource_group_name, name, identities=None):
     # Parse the identities parameter similar to webapp pattern
     if not identities:
-        raise InvalidArgumentValueError("No identities specified. Use '[system]' for system-assigned identity or provide user-assigned identity resource IDs.")
-    
+        raise InvalidArgumentValueError("No identities specified. Use '[system]' for system-assigned identity "
+                                        "or provide user-assigned identity resource IDs.")
+
     # Determine what identities to remove
     remove_system = False
     remove_user_assigned = []
-    
+
     for identity in identities:
         if identity.lower() == '[system]':
             remove_system = True
         else:
             remove_user_assigned.append(identity)
-    
+
     # Get the current plan to understand existing identity
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     current_identity = plan_result.get('identity', {})
     current_type = current_identity.get('type', 'None')
     current_user_assigned = current_identity.get('userAssignedIdentities', {})
-    
+
     # Validate current state
     has_system = current_type and 'SystemAssigned' in current_type
     has_user = current_type and 'UserAssigned' in current_type
-    
+
     if remove_system and not has_system:
         raise ResourceNotFoundError(f"System-assigned identity is not associated with plan '{name}'")
-    
+
     # Check if user-assigned identities exist
     if remove_user_assigned:
         existing_user_ids = set(current_user_assigned.keys()) if current_user_assigned else set()
         remove_user_ids = set(remove_user_assigned)
         non_existing = remove_user_ids - existing_user_ids
         if non_existing:
-            raise ResourceNotFoundError(f"User-assigned identities '{', '.join(non_existing)}' are not associated with plan '{name}'")
-    
+            raise ResourceNotFoundError(f"User-assigned identities '{', '.join(non_existing)}' "
+                                        f"are not associated with plan '{name}'")
+
     # Calculate what should remain
     final_system_assigned = has_system and not remove_system
-    
+
     final_user_assigned = []
     if has_user and current_user_assigned:
         # Keep existing user-assigned identities except those being removed
         final_user_assigned = [uid for uid in current_user_assigned.keys() if uid not in remove_user_assigned]
-    
+
     # Determine the correct identity type
     identity_type = _determine_identity_type(final_system_assigned, final_user_assigned)
-    
+
     return _update_plan_identity(cmd, resource_group_name, name, identity_type, final_user_assigned, plan_result)
 
 
 def set_plan_default_identity(cmd, resource_group_name, name, identity=None):
     # Validate that identity is provided
     if not identity:
-        raise InvalidArgumentValueError("Identity is required. Use '[system]' for system-assigned identity or provide user-assigned identity resource ID.")
-    
+        raise InvalidArgumentValueError("Identity is required. Use '[system]' for system-assigned identity "
+                                        "or provide user-assigned identity resource ID.")
+
     # Get the current plan
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
         'name': name
     })
-    
+
     location = plan_result.get('location')
-    
+
     # Determine identity type and resource ID
     if identity.lower() == '[system]':
         identity_type = "SystemAssigned"
@@ -4778,7 +4784,7 @@ def set_plan_default_identity(cmd, resource_group_name, name, identity=None):
     else:
         identity_type = "UserAssigned"
         user_assigned_identity_resource_id = identity
-    
+
     # Update the plan with the default identity
     plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
     update_args = {
@@ -4790,22 +4796,21 @@ def set_plan_default_identity(cmd, resource_group_name, name, identity=None):
             'identity_type': identity_type
         }
     }
-    
+
     # Add user assigned identity resource ID if it's a user-assigned identity
     if user_assigned_identity_resource_id:
         update_args['plan_default_identity']['user_assigned_identity_resource_id'] = user_assigned_identity_resource_id
-    
+
     poller = plan_create_cmd(command_args=update_args)
-    
+
     # Wait for the operation to complete and get the result
     plan_result = poller.result()
-    
+
     # Return the updated plan default identity
     return plan_result.get('planDefaultIdentity', {})
 
 
 def rdp_to_plan_instance(cmd, resource_group_name, name, worker_name, bastion_name, bastion_resource_group_name=None):
-    from azure.cli.core.azclierror import ResourceNotFoundError, CLIInternalError, InvalidArgumentValueError
     from azure.cli.core.util import run_az_cmd
 
     # 1. Default bastion RG to plan RG if not supplied
@@ -4852,7 +4857,7 @@ def rdp_to_plan_instance(cmd, resource_group_name, name, worker_name, bastion_na
 
     password_value = password_response.get('rdpPassword')
     if not password_value:
-        raise CLIInternalError(f"Failed to retrieve RDP password")
+        raise CLIInternalError("Failed to retrieve RDP password")
 
     # 4. Invoke the Bastion RDP command
     bastion_cmd = [
@@ -4872,7 +4877,8 @@ def rdp_to_plan_instance(cmd, resource_group_name, name, worker_name, bastion_na
         run_az_cmd(bastion_cmd)
     except Exception as ex:  # pylint: disable=broad-except
         raise CLIInternalError(f"Failed invoking Bastion RDP command: {ex}") from ex
-    
+
+
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
     try:
         return _generic_site_operation(cmd.cli_ctx, resource_group_name, webapp_name,
