@@ -254,7 +254,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         """Test registry adapter add, list, and remove operations."""
         plan_name = self.create_random_name('mi-plan-registry', 24)
         registry_key = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\TestKey'
-        secret_uri = 'https://example.vault.azure.net/secrets/test-secret'
+        secret_uri = 'https://example.vault.azure.net/secrets/test-secret/version'
         
         # Create managed instance plan
         self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
@@ -513,8 +513,9 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16'.format(
             resource_group, vnet_name))
         
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.1.0/24 --delegations Microsoft.Web/serverFarms'.format(
-            resource_group, vnet_name, subnet_name))
+        subnet_result = self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.1.0/24 --delegations Microsoft.Web/serverFarms'.format(
+            resource_group, vnet_name, subnet_name)).get_output_in_json()
+        subnet_id = subnet_result['id']
         
         # Create managed instance plan
         self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
@@ -533,18 +534,14 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         # Add VNet integration using VNet and subnet names
         self.cmd('appservice plan managed-instance network add -g {} -n {} --vnet {} --subnet {}'.format(
             resource_group, plan_name, vnet_name, subnet_name), checks=[
-            JMESPathCheckExists('virtualNetworkSubnetId')
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
         ])
         
         # Verify network configuration shows the subnet ID
-        network_result = self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
+        self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
             resource_group, plan_name), checks=[
-            JMESPathCheckExists('virtualNetworkSubnetId')
-        ]).get_output_in_json()
-        
-        subnet_id = network_result['virtualNetworkSubnetId']
-        self.assertIn(subnet_name, subnet_id)
-        self.assertIn(vnet_name, subnet_id)
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
         
         # Remove VNet integration
         self.cmd('appservice plan managed-instance network remove -g {} -n {}'.format(
@@ -622,4 +619,102 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
             resource_group, plan_name), checks=[
             JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
+    def test_appservice_plan_managed_instance_comprehensive_create(self, resource_group):
+        """Test creating a managed instance plan with all features in a single command."""
+        plan_name = self.create_random_name('mi-plan-comprehensive', 24)
+        identity_name = self.create_random_name('mi-identity-comprehensive', 24)
+        vnet_name = self.create_random_name('mi-vnet-comprehensive', 24)
+        subnet_name = self.create_random_name('mi-subnet-comprehensive', 24)
+        
+        # Test data
+        script_name = 'ComprehensiveScript'
+        script_uri = 'https://example.com/comprehensive-script.ps1'
+        mount_name = 'ComprehensiveMount'
+        source_path = '//example.com/comprehensive-share'
+        destination_path = 'D:/comprehensive-mount'
+        registry_key = 'HKEY_LOCAL_MACHINE/Software/ComprehensiveApp/Key1'
+        secret_uri = 'https://comprehensive.vault.azure.net/secrets/comprehensive-secret/version'
+        storage_secret_uri = 'https://comprehensive.vault.azure.net/secrets/storage-secret/version'
+        
+        # Create user-assigned identity
+        identity_result = self.cmd('identity create -g {} -n {}'.format(
+            resource_group, identity_name)).get_output_in_json()
+        identity_id = identity_result['id']
+        
+        # Create VNet and subnet
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16'.format(
+            resource_group, vnet_name))
+        subnet_result = self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name)).get_output_in_json()
+        subnet_id = subnet_result['id']
+        
+        # Create comprehensive managed instance plan with all features
+        self.cmd('appservice plan create -g {} -n {} --number-of-workers 2 --sku P1V4 --location {} --is-managed-instance --assign-identity [system] {} --default-identity {} --rdp-enabled --subnet {} --registry-adapter registry-key="{}" type="String" secret-uri="{}" --install-script name="{}" source-uri="{}" --storage-mount mount-name="{}" source="{}" destination-path="{}" secret-uri="{}"'.format(
+            resource_group, plan_name, MANAGED_INSTANCE_LOCATION, identity_id, identity_id, subnet_id, 
+            registry_key, secret_uri, script_name, script_uri, mount_name, source_path, destination_path, storage_secret_uri), checks=[
+            JMESPathCheck('name', plan_name),
+            JMESPathCheck('sku.name', 'P1v4'),
+            JMESPathCheck('properties.isCustomMode', True),
+            JMESPathCheck('properties.rdpEnabled', True),
+            JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned'),
+            JMESPathCheckExists('identity.principalId'),
+            JMESPathCheckExists('identity.tenantId'),
+            JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity_id)),
+            JMESPathCheck('network.virtualNetworkSubnetId', subnet_id)
+        ])
+        
+        # Verify all features were set correctly via show command
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
+            JMESPathCheck('name', plan_name),
+            JMESPathCheck('properties.isCustomMode', True),
+            JMESPathCheck('properties.rdpEnabled', True),
+            JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned'),
+            JMESPathCheckExists('identity.principalId'),
+            JMESPathCheckExists('identity.tenantId'),
+            JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity_id))
+        ])
+        
+        # Verify default identity was set
+        default_identity_result = self.cmd('appservice plan managed-instance identity show-default -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('type', 'UserAssigned'),
+            JMESPathCheck('userAssignedIdentityResourceId', identity_id)
+        ])
+        
+        # Verify network configuration
+        self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+        
+        # Verify install script was added
+        self.cmd('appservice plan managed-instance install-script list -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', script_name),
+            JMESPathCheck('[0].source.sourceUri', script_uri),
+            JMESPathCheck('[0].source.type', 'RemoteAzureBlob')
+        ])
+        
+        # Verify storage mount was added
+        self.cmd('appservice plan managed-instance storage-mount list -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', mount_name),
+            JMESPathCheck('[0].source', source_path),
+            JMESPathCheck('[0].destinationPath', destination_path),
+            JMESPathCheck('[0].type', 'FileShare')
+        ])
+        
+        # Verify registry adapter was added
+        self.cmd('appservice plan managed-instance registry-adapter list -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].registryKey', registry_key),
+            JMESPathCheck('[0].type', 'String'),
+            JMESPathCheck('[0].keyVaultSecretReference.secretUri', secret_uri)
         ])
