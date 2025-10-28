@@ -22,11 +22,13 @@ class ListAll(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-11-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/restorepointcollections", "2022-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.compute/restorepointcollections", "2024-11-01"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -101,7 +103,7 @@ class ListAll(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-11-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -137,7 +139,9 @@ class ListAll(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -155,6 +159,11 @@ class ListAll(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _ListAllHelper._build_schema_system_data_read(_element.system_data)
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -188,6 +197,11 @@ class ListAll(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _ListAllHelper._build_schema_system_data_read(_element.system_data)
             _element.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -201,6 +215,7 @@ class ListAll(AAZCommand):
             )
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
+                flags={"read_only": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -250,28 +265,41 @@ class ListAll(AAZCommand):
             source_metadata = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata
             source_metadata.diagnostics_profile = AAZObjectType(
                 serialized_name="diagnosticsProfile",
+                flags={"read_only": True},
             )
             source_metadata.hardware_profile = AAZObjectType(
                 serialized_name="hardwareProfile",
+                flags={"read_only": True},
+            )
+            source_metadata.hyper_v_generation = AAZStrType(
+                serialized_name="hyperVGeneration",
+                flags={"read_only": True},
             )
             source_metadata.license_type = AAZStrType(
                 serialized_name="licenseType",
+                flags={"read_only": True},
             )
-            source_metadata.location = AAZStrType()
+            source_metadata.location = AAZStrType(
+                flags={"read_only": True},
+            )
             source_metadata.os_profile = AAZObjectType(
                 serialized_name="osProfile",
+                flags={"read_only": True},
             )
             source_metadata.security_profile = AAZObjectType(
                 serialized_name="securityProfile",
+                flags={"read_only": True},
             )
             source_metadata.storage_profile = AAZObjectType(
                 serialized_name="storageProfile",
             )
             source_metadata.user_data = AAZStrType(
                 serialized_name="userData",
+                flags={"read_only": True},
             )
             source_metadata.vm_id = AAZStrType(
                 serialized_name="vmId",
+                flags={"read_only": True},
             )
 
             diagnostics_profile = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.diagnostics_profile
@@ -304,6 +332,7 @@ class ListAll(AAZCommand):
             os_profile = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile
             os_profile.admin_password = AAZStrType(
                 serialized_name="adminPassword",
+                flags={"secret": True},
             )
             os_profile.admin_username = AAZStrType(
                 serialized_name="adminUsername",
@@ -355,6 +384,9 @@ class ListAll(AAZCommand):
             )
 
             automatic_by_platform_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.linux_configuration.patch_settings.automatic_by_platform_settings
+            automatic_by_platform_settings.bypass_platform_safety_checks_on_user_schedule = AAZBoolType(
+                serialized_name="bypassPlatformSafetyChecksOnUserSchedule",
+            )
             automatic_by_platform_settings.reboot_setting = AAZStrType(
                 serialized_name="rebootSetting",
             )
@@ -405,6 +437,7 @@ class ListAll(AAZCommand):
             )
             windows_configuration.enable_vm_agent_platform_updates = AAZBoolType(
                 serialized_name="enableVMAgentPlatformUpdates",
+                flags={"read_only": True},
             )
             windows_configuration.patch_settings = AAZObjectType(
                 serialized_name="patchSettings",
@@ -449,6 +482,9 @@ class ListAll(AAZCommand):
             )
 
             automatic_by_platform_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.os_profile.windows_configuration.patch_settings.automatic_by_platform_settings
+            automatic_by_platform_settings.bypass_platform_safety_checks_on_user_schedule = AAZBoolType(
+                serialized_name="bypassPlatformSafetyChecksOnUserSchedule",
+            )
             automatic_by_platform_settings.reboot_setting = AAZStrType(
                 serialized_name="rebootSetting",
             )
@@ -469,12 +505,36 @@ class ListAll(AAZCommand):
             security_profile.encryption_at_host = AAZBoolType(
                 serialized_name="encryptionAtHost",
             )
+            security_profile.encryption_identity = AAZObjectType(
+                serialized_name="encryptionIdentity",
+            )
+            security_profile.proxy_agent_settings = AAZObjectType(
+                serialized_name="proxyAgentSettings",
+            )
             security_profile.security_type = AAZStrType(
                 serialized_name="securityType",
             )
             security_profile.uefi_settings = AAZObjectType(
                 serialized_name="uefiSettings",
             )
+
+            encryption_identity = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.security_profile.encryption_identity
+            encryption_identity.user_assigned_identity_resource_id = AAZStrType(
+                serialized_name="userAssignedIdentityResourceId",
+            )
+
+            proxy_agent_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.security_profile.proxy_agent_settings
+            proxy_agent_settings.enabled = AAZBoolType()
+            proxy_agent_settings.imds = AAZObjectType()
+            _ListAllHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
+            proxy_agent_settings.key_incarnation_id = AAZIntType(
+                serialized_name="keyIncarnationId",
+            )
+            proxy_agent_settings.mode = AAZStrType()
+            proxy_agent_settings.wire_server = AAZObjectType(
+                serialized_name="wireServer",
+            )
+            _ListAllHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
 
             uefi_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(
@@ -488,6 +548,10 @@ class ListAll(AAZCommand):
             storage_profile.data_disks = AAZListType(
                 serialized_name="dataDisks",
             )
+            storage_profile.disk_controller_type = AAZStrType(
+                serialized_name="diskControllerType",
+                flags={"read_only": True},
+            )
             storage_profile.os_disk = AAZObjectType(
                 serialized_name="osDisk",
             )
@@ -496,40 +560,62 @@ class ListAll(AAZCommand):
             data_disks.Element = AAZObjectType()
 
             _element = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.storage_profile.data_disks.Element
-            _element.caching = AAZStrType()
+            _element.caching = AAZStrType(
+                flags={"read_only": True},
+            )
             _element.disk_restore_point = AAZObjectType(
                 serialized_name="diskRestorePoint",
             )
-            _ListAllHelper._build_schema_api_entity_reference_read(_element.disk_restore_point)
+            _ListAllHelper._build_schema_disk_restore_point_attributes_read(_element.disk_restore_point)
             _element.disk_size_gb = AAZIntType(
                 serialized_name="diskSizeGB",
+                flags={"read_only": True},
             )
-            _element.lun = AAZIntType()
+            _element.lun = AAZIntType(
+                flags={"read_only": True},
+            )
             _element.managed_disk = AAZObjectType(
                 serialized_name="managedDisk",
             )
             _ListAllHelper._build_schema_managed_disk_parameters_read(_element.managed_disk)
-            _element.name = AAZStrType()
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.write_accelerator_enabled = AAZBoolType(
+                serialized_name="writeAcceleratorEnabled",
+                flags={"read_only": True},
+            )
 
             os_disk = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.storage_profile.os_disk
-            os_disk.caching = AAZStrType()
+            os_disk.caching = AAZStrType(
+                flags={"read_only": True},
+            )
             os_disk.disk_restore_point = AAZObjectType(
                 serialized_name="diskRestorePoint",
             )
-            _ListAllHelper._build_schema_api_entity_reference_read(os_disk.disk_restore_point)
+            _ListAllHelper._build_schema_disk_restore_point_attributes_read(os_disk.disk_restore_point)
             os_disk.disk_size_gb = AAZIntType(
                 serialized_name="diskSizeGB",
+                flags={"read_only": True},
             )
             os_disk.encryption_settings = AAZObjectType(
                 serialized_name="encryptionSettings",
+                flags={"read_only": True},
             )
             os_disk.managed_disk = AAZObjectType(
                 serialized_name="managedDisk",
             )
             _ListAllHelper._build_schema_managed_disk_parameters_read(os_disk.managed_disk)
-            os_disk.name = AAZStrType()
+            os_disk.name = AAZStrType(
+                flags={"read_only": True},
+            )
             os_disk.os_type = AAZStrType(
                 serialized_name="osType",
+                flags={"read_only": True},
+            )
+            os_disk.write_accelerator_enabled = AAZBoolType(
+                serialized_name="writeAcceleratorEnabled",
+                flags={"read_only": True},
             )
 
             encryption_settings = cls._schema_on_200.value.Element.properties.restore_points.Element.properties.source_metadata.storage_profile.os_disk.encryption_settings
@@ -607,6 +693,59 @@ class _ListAllHelper:
         disk_encryption_set_parameters_read.id = AAZStrType()
 
         _schema.id = cls._schema_disk_encryption_set_parameters_read.id
+
+    _schema_disk_restore_point_attributes_read = None
+
+    @classmethod
+    def _build_schema_disk_restore_point_attributes_read(cls, _schema):
+        if cls._schema_disk_restore_point_attributes_read is not None:
+            _schema.encryption = cls._schema_disk_restore_point_attributes_read.encryption
+            _schema.id = cls._schema_disk_restore_point_attributes_read.id
+            _schema.source_disk_restore_point = cls._schema_disk_restore_point_attributes_read.source_disk_restore_point
+            return
+
+        cls._schema_disk_restore_point_attributes_read = _schema_disk_restore_point_attributes_read = AAZObjectType()
+
+        disk_restore_point_attributes_read = _schema_disk_restore_point_attributes_read
+        disk_restore_point_attributes_read.encryption = AAZObjectType()
+        disk_restore_point_attributes_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        disk_restore_point_attributes_read.source_disk_restore_point = AAZObjectType(
+            serialized_name="sourceDiskRestorePoint",
+        )
+        cls._build_schema_api_entity_reference_read(disk_restore_point_attributes_read.source_disk_restore_point)
+
+        encryption = _schema_disk_restore_point_attributes_read.encryption
+        encryption.disk_encryption_set = AAZObjectType(
+            serialized_name="diskEncryptionSet",
+        )
+        cls._build_schema_disk_encryption_set_parameters_read(encryption.disk_encryption_set)
+        encryption.type = AAZStrType()
+
+        _schema.encryption = cls._schema_disk_restore_point_attributes_read.encryption
+        _schema.id = cls._schema_disk_restore_point_attributes_read.id
+        _schema.source_disk_restore_point = cls._schema_disk_restore_point_attributes_read.source_disk_restore_point
+
+    _schema_host_endpoint_settings_read = None
+
+    @classmethod
+    def _build_schema_host_endpoint_settings_read(cls, _schema):
+        if cls._schema_host_endpoint_settings_read is not None:
+            _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+            _schema.mode = cls._schema_host_endpoint_settings_read.mode
+            return
+
+        cls._schema_host_endpoint_settings_read = _schema_host_endpoint_settings_read = AAZObjectType()
+
+        host_endpoint_settings_read = _schema_host_endpoint_settings_read
+        host_endpoint_settings_read.in_vm_access_control_profile_reference_id = AAZStrType(
+            serialized_name="inVMAccessControlProfileReferenceId",
+        )
+        host_endpoint_settings_read.mode = AAZStrType()
+
+        _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+        _schema.mode = cls._schema_host_endpoint_settings_read.mode
 
     _schema_instance_view_status_read = None
 
@@ -691,6 +830,50 @@ class _ListAllHelper:
         sub_resource_read.id = AAZStrType()
 
         _schema.id = cls._schema_sub_resource_read.id
+
+    _schema_system_data_read = None
+
+    @classmethod
+    def _build_schema_system_data_read(cls, _schema):
+        if cls._schema_system_data_read is not None:
+            _schema.created_at = cls._schema_system_data_read.created_at
+            _schema.created_by = cls._schema_system_data_read.created_by
+            _schema.created_by_type = cls._schema_system_data_read.created_by_type
+            _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+            _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+            _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
+            return
+
+        cls._schema_system_data_read = _schema_system_data_read = AAZObjectType(
+            flags={"read_only": True}
+        )
+
+        system_data_read = _schema_system_data_read
+        system_data_read.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data_read.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data_read.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data_read.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data_read.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data_read.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        _schema.created_at = cls._schema_system_data_read.created_at
+        _schema.created_by = cls._schema_system_data_read.created_by
+        _schema.created_by_type = cls._schema_system_data_read.created_by_type
+        _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+        _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+        _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
 
 __all__ = ["ListAll"]
