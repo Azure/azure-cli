@@ -1683,7 +1683,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
     if add_proxy_agent_extension is not None:
         from .aaz.latest.vm import Update as _Update
-        
+
         class Update(_Update):
             pass
         
@@ -1697,7 +1697,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                 }
             }
         }
-        
+
         LongRunningOperation(cmd.cli_ctx)(Update(cli_ctx=cmd.cli_ctx)(command_args=args))
         vm = get_vm_to_update(cmd, resource_group_name, vm_name)
 
@@ -4223,10 +4223,10 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
 
     if add_proxy_agent_extension is not None:
         from .aaz.latest.vmss import Update as _VMSSUpdate
-        
+
         class VMSSUpdate(_VMSSUpdate):
             pass
-        
+
         args = {
             'resource_group': resource_group_name,
             'vm_scale_set_name': name,
@@ -4239,7 +4239,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 }
             }
         }
-        
+
         LongRunningOperation(cmd.cli_ctx)(VMSSUpdate(cli_ctx=cmd.cli_ctx)(command_args=args))
         vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
 
