@@ -17,7 +17,7 @@ Release History
 **AKS**
 
 * `az aks update`: Add support to remove existing certificates by setting the value of `--custom-ca-trust-certificates` to an empty file (#32201)
-* `az aks create/update`: Add `--acns-advanced-networkpolicies` parameter to support enabling advanced networking policies (`None`, `L7` or `FQDN`). This is part of the ACNS Security feature suite (#32265)
+* `az aks create/update`: Add `--acns-advanced-networkpolicies` parameter to support enabling advanced networking policies (`None`, `L7` or `FQDN`) (#32265)
 
 **Backup**
 
