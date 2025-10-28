@@ -4810,7 +4810,7 @@ def set_plan_default_identity(cmd, resource_group_name, name, identity=None):
     return plan_result.get('planDefaultIdentity', {})
 
 
-def rdp_to_plan_instance(cmd, resource_group_name, name, worker_name, bastion_name, bastion_resource_group_name=None):
+def connect_to_plan_instance(cmd, resource_group_name, name, worker_name, bastion_name, bastion_resource_group_name=None):
     from azure.cli.core.util import run_az_cmd
 
     # 1. Default bastion RG to plan RG if not supplied
@@ -4867,12 +4867,10 @@ def rdp_to_plan_instance(cmd, resource_group_name, name, worker_name, bastion_na
         '--target-ip-address', target_ip
     ]
 
-    logger.warning("Invoking Bastion RDP command: %s", ' '.join(bastion_cmd))
     logger.warning("Use the following credentials to login:")
     logger.warning("RDP username: Administrator")
     logger.warning("RDP password: %s", password_value)
 
-    # Execute and ignore return payload (side effect: launches RDP session / saves .rdp file)
     try:
         run_az_cmd(bastion_cmd)
     except Exception as ex:  # pylint: disable=broad-except
