@@ -126,7 +126,7 @@ type: command
 short-summary: Add an install script to a managed instance App Service plan.
 examples:
   - name: Add an install script to a managed instance App Service plan.
-    text: az appservice plan managed-instance install-script add --name MyAppServicePlan --resource-group MyResourceGroup --install-script-name MyScript --source-uri https://example.com/script.ps1 --type PowerShell
+    text: az appservice plan managed-instance install-script add --name MyAppServicePlan --resource-group MyResourceGroup --install-script-name MyScript --source-uri https://example.com/script.ps1 --type RemoteAzureBlob
 """
 
 helps['appservice plan managed-instance install-script remove'] = """
