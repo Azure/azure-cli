@@ -1686,7 +1686,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
 
         class Update(_Update):
             pass
-        
+
         args = {
             'resource_group': resource_group_name,
             'vm_name': vm_name,
