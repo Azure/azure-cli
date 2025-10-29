@@ -37,7 +37,7 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller, 
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false, \
     get_postgres_tiers, get_postgres_skus
 from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info
-from ._util import get_automated_tuning_settings_map
+from ._util import get_auto_tuning_settings_map
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
@@ -1668,18 +1668,18 @@ def _update_parameters(cmd, client, server_name, configuration_name, resource_gr
         client.begin_update(resource_group_name, server_name, configuration_name, parameters), cmd.cli_ctx, 'PostgreSQL Parameter update')
 
 
-def automated_tuning_update(cmd, client, resource_group_name, server_name, automated_tuning_enabled):
+def auto_tuning_update(cmd, client, resource_group_name, server_name, auto_tuning_enabled):
     validate_resource_group(resource_group_name)
     source = "user-override"
 
-    if automated_tuning_enabled == "True":
+    if auto_tuning_enabled == "True":
         subscription = get_subscription_id(cmd.cli_ctx)
         postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, subscription)
         source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
         location = ''.join(source_server_object.location.lower().split())
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-        automated_tuning_supported = list_location_capability_info['index_tuning_supported']
-        if not automated_tuning_supported:
+        auto_tuning_supported = list_location_capability_info['index_tuning_supported']
+        if not auto_tuning_supported:
             raise CLIError("Automated tuning is not supported for the server.")
 
         logger.warning("Enabling automated tuning for the server.")
@@ -1701,42 +1701,42 @@ def automated_tuning_update(cmd, client, resource_group_name, server_name, autom
         logger.warning("Automated tuning is disabled for the server.")
 
 
-def automated_tuning_show(client, resource_group_name, server_name):
+def auto_tuning_show(client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
-    automated_tuning_configuration = client.get(resource_group_name, server_name, "index_tuning.mode")
+    auto_tuning_configuration = client.get(resource_group_name, server_name, "index_tuning.mode")
     query_capture_mode_configuration = client.get(resource_group_name, server_name, "pg_qs.query_capture_mode")
 
-    if automated_tuning_configuration.value.lower() == "report" and query_capture_mode_configuration.value.lower() != "none":
+    if auto_tuning_configuration.value.lower() == "report" and query_capture_mode_configuration.value.lower() != "none":
         logger.warning("Automated tuning is enabled for the server.")
     else:
         logger.warning("Automated tuning is disabled for the server.")
 
 
-def automated_tuning_settings_list(cmd, client, resource_group_name, server_name):
+def auto_tuning_settings_list(cmd, client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
-    automated_tuning_configurations_map_values = get_automated_tuning_settings_map().values()
+    auto_tuning_configurations_map_values = get_auto_tuning_settings_map().values()
     configurations_list = client.list_by_server(resource_group_name, server_name)
 
     # Filter the list based on the values in the dictionary
-    automated_tuning_settings = [setting for setting in configurations_list if setting.name in automated_tuning_configurations_map_values]
+    auto_tuning_settings = [setting for setting in configurations_list if setting.name in auto_tuning_configurations_map_values]
 
-    return automated_tuning_settings
+    return auto_tuning_settings
 
 
-def automated_tuning_settings_get(cmd, client, resource_group_name, server_name, setting_name):
+def auto_tuning_settings_get(cmd, client, resource_group_name, server_name, setting_name):
     validate_resource_group(resource_group_name)
-    automated_tuning_configurations_map = get_automated_tuning_settings_map()
-    automated_tuning_configuration_name = automated_tuning_configurations_map[setting_name]
+    auto_tuning_configurations_map = get_auto_tuning_settings_map()
+    auto_tuning_configuration_name = auto_tuning_configurations_map[setting_name]
 
     return client.get(
         resource_group_name=resource_group_name,
         server_name=server_name,
-        configuration_name=automated_tuning_configuration_name)
+        configuration_name=auto_tuning_configuration_name)
 
 
-def automated_tuning_settings_set(client, resource_group_name, server_name, setting_name, value=None):
+def auto_tuning_settings_set(client, resource_group_name, server_name, setting_name, value=None):
     source = "user-override" if value else None
-    tuning_settings = get_automated_tuning_settings_map()
+    tuning_settings = get_auto_tuning_settings_map()
     configuration_name = tuning_settings[setting_name]
     return flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source, value)
 

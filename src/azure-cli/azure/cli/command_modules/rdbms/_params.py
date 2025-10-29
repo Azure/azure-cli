@@ -23,7 +23,7 @@ from azure.cli.core.local_context import LocalContextAttribute, LocalContextActi
 from .randomname.generate import generate_username
 from ._flexible_server_util import get_current_time
 from argcomplete.completers import FilesCompleter
-from ._util import get_automated_tuning_settings_map
+from ._util import get_auto_tuning_settings_map
 
 
 def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-locals
@@ -1087,7 +1087,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 argument_context_string = '{} flexible-server auto-tuning {}'.format(command_group, scope)
                 with self.argument_context(argument_context_string) as c:
                     c.argument('setting_name', options_list=['--name', '-n'], required=True,
-                               arg_type=get_enum_type(get_automated_tuning_settings_map().keys()),
+                               arg_type=get_enum_type(get_auto_tuning_settings_map().keys()),
                                help='The name of the tuning setting.')
 
             with self.argument_context('{} flexible-server auto-tuning set-settings'.format(command_group)) as c:

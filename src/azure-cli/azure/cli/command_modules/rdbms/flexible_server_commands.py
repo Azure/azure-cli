@@ -298,10 +298,10 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('postgres flexible-server auto-tuning', postgres_flexible_config_sdk,
                             client_factory=cf_postgres_flexible_config) as g:
-        g.custom_command('update', 'automated_tuning_update', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_show_command('show', 'automated_tuning_show', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('list-settings', 'automated_tuning_settings_list', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('show-settings', 'automated_tuning_settings_get', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('set-settings', 'automated_tuning_settings_set', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('update', 'auto_tuning_update', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_show_command('show', 'auto_tuning_show', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list-settings', 'auto_tuning_settings_list', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('show-settings', 'auto_tuning_settings_get', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('set-settings', 'auto_tuning_settings_set', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('list-index-recommendations', 'index_recommendations_list', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('list-table-recommendations', 'table_recommendations_list', custom_command_type=flexible_servers_custom_postgres)
