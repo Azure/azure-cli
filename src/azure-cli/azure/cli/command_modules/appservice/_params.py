@@ -137,7 +137,7 @@ subscription than the app service environment, please use the resource ID for --
                    help='accept system or user assigned identities separated by spaces. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples')
         c.argument('default_identity', is_preview=True,
                    help='accept system or user assigned identity separated. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
-        c.argument('rdp_enabled', action='store_true', is_preview=True,
+        c.argument('rdp_enabled', arg_type=get_three_state_flag(), is_preview=True,
                    help='Enable RDP. Requires is-custom-mode to be true.')
         c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
@@ -157,7 +157,7 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
         c.argument('default_identity', is_preview=True,
                    help='accept system or user assigned identity separated. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
-        c.argument('rdp_enabled', action='store_true', is_preview=True,
+        c.argument('rdp_enabled', arg_type=get_three_state_flag(), is_preview=True,
                    help='Enable RDP. Requires is-custom-mode to be true.')
         c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")

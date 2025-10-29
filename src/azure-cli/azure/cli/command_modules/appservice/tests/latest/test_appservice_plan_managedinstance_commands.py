@@ -159,8 +159,9 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
     def test_appservice_plan_install_script_operations(self, resource_group):
         """Test install script add, list, and remove operations."""
         plan_name = self.create_random_name('mi-plan-script', 24)
+        storage_account_name = self.create_random_name('miscriptstg', 15)  # Storage account names must be 3-24 chars, lowercase only
         script_name = 'test-script'
-        script_uri = 'https://miplanscripts.blob.core.windows.net/scripts/script1.ps1'
+        script_uri = f'https://{storage_account_name}.blob.core.windows.net/scripts/script1.ps1'
         
         # Create managed instance plan
         self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
@@ -205,9 +206,11 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
     def test_appservice_plan_storage_mount_operations(self, resource_group):
         """Test storage mount add, list, and remove operations."""
         plan_name = self.create_random_name('mi-plan-storage', 24)
+        storage_account_name = self.create_random_name('mistoragestg', 15)  # Storage account names must be 3-24 chars, lowercase only
+        key_vault_name = self.create_random_name('mi-storage-kv', 20)
         mount_name = 'test-mount'
         # For UNC paths, we need 4 backslashes to get 2 in the final JSON
-        source_path = r'\\\\example.file.core.windows.net\share1'
+        source_path = f'\\\\\\\\{storage_account_name}.file.core.windows.net\\share1'
         destination_path = r'D:\mount1'
         
         # Create managed instance plan
@@ -228,11 +231,11 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         
         # Add storage mount - use quotes around paths to handle backslashes properly
         # Include credentials for the storage mount as required by the API
-        credentials_uri = 'https://example.vault.azure.net/secrets/storage-credentials/version'
+        credentials_uri = f'https://{key_vault_name}.vault.azure.net/secrets/storage-credentials/version'
         
         # Expected response values (after JSON parsing)
         # The JSON response has escaped backslashes, but when parsed they become unescaped
-        expected_source = r'\\example.file.core.windows.net\share1'  # 2 backslashes at start, 1 in middle
+        expected_source = f'\\\\{storage_account_name}.file.core.windows.net\\share1'  # 2 backslashes at start, 1 in middle
         expected_destination = r'D:\mount1'  # 1 backslash
         
         self.cmd('appservice plan managed-instance storage-mount add -g {} -n {} --mount-name {} --source "{}" --destination-path "{}" --type AzureFiles --credentials-secret-uri {}'.format(
@@ -262,8 +265,9 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
     def test_appservice_plan_registry_adapter_operations(self, resource_group):
         """Test registry adapter add, list, and remove operations."""
         plan_name = self.create_random_name('mi-plan-registry', 24)
+        key_vault_name = self.create_random_name('mi-registry-kv', 20)
         registry_key = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\TestKey'
-        secret_uri = 'https://example.vault.azure.net/secrets/test-secret/version'
+        secret_uri = f'https://{key_vault_name}.vault.azure.net/secrets/test-secret/version'
         
         # Create managed instance plan
         self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
@@ -309,6 +313,8 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         """Test complex scenario with multiple features."""
         plan_name = self.create_random_name('mi-plan-complex', 24)
         identity_name = self.create_random_name('mi-identity', 24)
+        storage_account_name = self.create_random_name('micomplexstg', 15)  # Storage account names must be 3-24 chars, lowercase only
+        key_vault_name = self.create_random_name('mi-complex-kv', 20)
         script_name = 'complex-script'
         mount_name = 'complex-mount'
         registry_key = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\ComplexKey'
@@ -336,16 +342,16 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         ])
         
         # Add install script
-        self.cmd('appservice plan managed-instance install-script add -g {} -n {} --install-script-name {} --source-uri https://complexscripts.blob.core.windows.net/scripts/complex.ps1 --type RemoteAzureBlob'.format(
-            resource_group, plan_name, script_name))
+        self.cmd('appservice plan managed-instance install-script add -g {} -n {} --install-script-name {} --source-uri https://{}.blob.core.windows.net/scripts/complex.ps1 --type RemoteAzureBlob'.format(
+            resource_group, plan_name, script_name, storage_account_name))
         
         # Add storage mount
-        self.cmd('appservice plan managed-instance storage-mount add -g {} -n {} --mount-name {} --source //complex.share/path --destination-path C:\\complex --type FileShare --credentials-secret-uri https://vault.azure.net/secrets/complex-storage'.format(
-            resource_group, plan_name, mount_name))
+        self.cmd('appservice plan managed-instance storage-mount add -g {} -n {} --mount-name {} --source //{}.file.core.windows.net/complex-share --destination-path C:\\complex --type FileShare --credentials-secret-uri https://{}.vault.azure.net/secrets/complex-storage'.format(
+            resource_group, plan_name, mount_name, storage_account_name, key_vault_name))
         
         # Add registry adapter
-        self.cmd('appservice plan managed-instance registry-adapter add -g {} -n {} --registry-key "{}" --type String --secret-uri https://vault.azure.net/secrets/complex'.format(
-            resource_group, plan_name, registry_key))
+        self.cmd('appservice plan managed-instance registry-adapter add -g {} -n {} --registry-key "{}" --type String --secret-uri https://{}.vault.azure.net/secrets/complex'.format(
+            resource_group, plan_name, registry_key, key_vault_name))
         
         # Verify all components are present
         self.cmd('appservice plan managed-instance install-script list -g {} -n {}'.format(
@@ -714,4 +720,124 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan managed-instance instance list -g {} --name {}'.format(
             resource_group, plan_name), checks=[
             JMESPathCheck('length(@)', 3)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
+    def test_appservice_plan_managed_instance_comprehensive_update(self, resource_group):
+        """Test updating a managed instance plan with all features in a single command."""
+        plan_name = self.create_random_name('mi-plan-update', 24)
+        vnet_name = self.create_random_name('mi-vnet-update', 24)
+        subnet_name = self.create_random_name('mi-subnet-update', 24)
+        
+        # Generate random names for storage account and key vault
+        storage_account_name = self.create_random_name('miupdatestg', 15)  # Storage account names must be 3-24 chars, lowercase only
+        key_vault_name = self.create_random_name('mi-update-kv', 20)
+        
+        # Test data using generated names
+        script_name = 'UpdateScript1'
+        script_uri = f'https://{storage_account_name}.blob.core.windows.net/scripts/update-script.ps1'
+        mount_name = 'UpdateMount1'
+        # Use proper Windows UNC path format with proper escaping
+        source_path = f'\\\\\\\\{storage_account_name}.file.core.windows.net\\update-share'  # 4 backslashes for UNC path
+        destination_path = r'D:\update-mount'  # 1 backslash for drive path
+        registry_key = 'HKEY_LOCAL_MACHINE\\Software\\UpdateApp\\Key1'  # Use backslashes for registry keys
+        secret_uri = f'https://{key_vault_name}.vault.azure.net/secrets/update-secret/version'
+        storage_secret_uri = f'https://{key_vault_name}.vault.azure.net/secrets/update-storage-secret/version'
+        
+        # Expected response values (after JSON parsing)
+        expected_source = f'\\\\{storage_account_name}.file.core.windows.net\\update-share'  # 2 backslashes after JSON parsing
+        expected_destination = r'D:\update-mount'  # 1 backslash after JSON parsing
+        
+        # Create VNet and subnet
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16'.format(
+            resource_group, vnet_name))
+        subnet_result = self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.1.0/24 --delegations Microsoft.Web/serverFarms'.format(
+            resource_group, vnet_name, subnet_name)).get_output_in_json()
+        subnet_id = subnet_result['id']
+        
+        # Create basic managed instance plan with system-assigned identity only
+        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance --assign-identity [system]'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('name', plan_name),
+            JMESPathCheck('sku.name', 'P1v4'),
+            JMESPathCheck('isCustomMode', True),
+            JMESPathCheck('identity.type', 'SystemAssigned')
+        ])
+        
+        # Verify initial state
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
+            JMESPathCheck('name', plan_name),
+            JMESPathCheck('properties.isCustomMode', True),
+            JMESPathCheck('properties.rdpEnabled', None),  # Should not be set initially
+            JMESPathCheck('properties.planDefaultIdentity', None),  # Should not be set initially
+            JMESPathCheck('identity.type', 'SystemAssigned')
+        ])
+        
+        # Now perform comprehensive update with all managed instance features
+        self.cmd('appservice plan update -g {} -n {} --default-identity [system] --rdp-enabled --vnet {} --subnet {} --registry-adapter registry-key="{}" type="String" secret-uri="{}" --install-script name="{}" source-uri="{}" type="RemoteAzureBlob" --storage-mount name="{}" source="{}" destination-path="{}" type="AzureFiles" credentials-secret-uri="{}"'.format(
+            resource_group, plan_name, vnet_name, subnet_name,
+            registry_key, secret_uri, script_name, script_uri, mount_name, source_path, destination_path, storage_secret_uri), checks=[
+            JMESPathCheck('name', plan_name),
+            JMESPathCheck('sku.name', 'P1v4')
+        ])
+        
+        # Verify all features were set correctly via comprehensive show command
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
+            JMESPathCheck('name', plan_name),
+            JMESPathCheck('properties.isCustomMode', True),
+            JMESPathCheck('properties.rdpEnabled', True),
+            JMESPathCheck('identity.type', 'SystemAssigned'),
+            JMESPathCheckExists('identity.principalId'),
+            JMESPathCheckExists('identity.tenantId'),
+            JMESPathCheckExists('properties.planDefaultIdentity'),
+            JMESPathCheck('properties.planDefaultIdentity.identityType', 'SystemAssigned'),
+            JMESPathCheckNotExists('properties.planDefaultIdentity.userAssignedIdentityResourceId')
+        ])
+        
+        # Verify network configuration
+        self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+        
+        # Verify install script was added
+        self.cmd('appservice plan managed-instance install-script list -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', script_name),
+            JMESPathCheck('[0].source.sourceUri', script_uri),
+            JMESPathCheck('[0].source.type', 'RemoteAzureBlob')
+        ])
+        
+        # Verify storage mount was added
+        self.cmd('appservice plan managed-instance storage-mount list -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', mount_name),
+            JMESPathCheck('[0].source', expected_source),
+            JMESPathCheck('[0].destinationPath', expected_destination),
+            JMESPathCheck('[0].type', 'AzureFiles')
+        ])
+        
+        # Verify registry adapter was added
+        self.cmd('appservice plan managed-instance registry-adapter list -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].registryKey', registry_key),
+            JMESPathCheck('[0].type', 'String'),
+            JMESPathCheck('[0].keyVaultSecretReference.secretUri', secret_uri)
+        ])
+        
+        # Test that we can update individual components later
+        # Update RDP to disabled
+        self.cmd('appservice plan update -g {} -n {} --rdp-enabled false'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('name', plan_name),
+            JMESPathCheck('sku.name', 'P1v4')
+        ])
+        
+        # Verify RDP was disabled
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
+            JMESPathCheck('properties.rdpEnabled', False)
         ])
