@@ -4186,10 +4186,18 @@ has been deployed ".format(app_service_environment)
     if no_wait:
         return poller
 
-    # Only use progress bar for actual long-running operations (async scaling)
-    # Check if the operation is actually async by looking at the poller status
-    if poller.done():
-        # This completed synchronously (200 response), no need for progress bar
+    # wait on _initial_response being set
+    # throw error after some amount of time
+    found_initial_response = False
+    import time
+    for i in range(30):
+        time.sleep(1)
+        if hasattr(poller._polling_method, '_initial_response'):
+            found_initial_response = True
+            break
+
+    if not found_initial_response or poller._polling_method._initial_response.http_response.status_code == 200:
+        # for synchronous operations, or if we are unable to get the initial response, directly return poller result
         return poller.result()
 
     # Asynchronous operation (202 response), use custom progress bar
