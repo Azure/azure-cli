@@ -100,7 +100,7 @@ from .aaz.latest.relay.hyco import Show as HyCoShow
 from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
 from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
 from .aaz.latest.relay.namespace import List as NamespaceList
-from .aaz.latest.appservice.plan import Show as AppServicePlanShow, Create as AppServicePlanCreate
+from .aaz.latest.appservice.plan import Show as AppServicePlanShow, Create as AppServicePlanCreate, Update as AppServicePlanUpdate
 
 logger = get_logger(__name__)
 
@@ -4138,6 +4138,19 @@ has been deployed ".format(app_service_environment)
         user_assigned_identities = None
         enable_system_assigned_identity = None
 
+    # Transform default_identity parameter into the proper structure
+    plan_default_identity = None
+    if default_identity:
+        if default_identity.lower() == '[system]':
+            plan_default_identity = {
+                'identity_type': "SystemAssigned"
+            }
+        else:
+            plan_default_identity = {
+                'identity_type': "UserAssigned",
+                'user_assigned_identity_resource_id': default_identity
+            }
+
     poller = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "name": name,
         "resource_group": resource_group_name,
@@ -4157,7 +4170,7 @@ has been deployed ".format(app_service_environment)
         "rdp_enabled": rdp_enabled,
         "mi_system_assigned": str(enable_system_assigned_identity) if enable_system_assigned_identity else None,
         "mi_user_assigned": user_assigned_identities,
-        "plan_default_identity": default_identity,
+        "plan_default_identity": plan_default_identity,
         "registry_adapters": registry_adapters,
         "install_scripts": install_scripts,
         "storage_mounts": storage_mounts,
@@ -4623,28 +4636,44 @@ def _determine_identity_type(system_assigned, user_assigned_identities):
 
 
 def _update_plan_identity(cmd, resource_group_name, name, identity_type, user_assigned_identities, current_plan):
-    identity_args = {}
+    class IdentityUpdate(AppServicePlanUpdate):
+        def pre_instance_update(self, instance):
+            # Construct the appropriate identity object based on the desired identity_type
+            if identity_type == "None":
+                # Explicitly clear the identity
+                instance.identity = {"type": "None"}
+            elif identity_type == "SystemAssigned":
+                instance.identity = {"type": "SystemAssigned"}
+            elif identity_type == "UserAssigned":
+                # For user-assigned identity, we need to include the user assigned identities
+                user_assigned_dict = {}
+                if user_assigned_identities:
+                    for identity_id in user_assigned_identities:
+                        user_assigned_dict[identity_id] = {}  # Empty object as required by the API
+                instance.identity = {
+                    "type": "UserAssigned",
+                    "userAssignedIdentities": user_assigned_dict
+                }
+            elif identity_type == "SystemAssigned,UserAssigned":
+                # For combined identity, include both system and user assigned
+                user_assigned_dict = {}
+                if user_assigned_identities:
+                    for identity_id in user_assigned_identities:
+                        user_assigned_dict[identity_id] = {}  # Empty object as required by the API
+                instance.identity = {
+                    "type": "SystemAssigned,UserAssigned",
+                    "userAssignedIdentities": user_assigned_dict
+                }
 
-    if identity_type == "SystemAssigned":
-        identity_args['mi_system_assigned'] = "True"
-    elif identity_type == "UserAssigned":
-        identity_args['mi_user_assigned'] = user_assigned_identities or []
-    elif identity_type == "SystemAssigned,UserAssigned":
-        identity_args['mi_system_assigned'] = "True"
-        identity_args['mi_user_assigned'] = user_assigned_identities or []
-    # For "None", we don't set any identity args
-
-    plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
+    identity_update_cmd = IdentityUpdate(cli_ctx=cmd.cli_ctx)
     update_args = {
         'resource_group': resource_group_name,
-        'name': name,
         'location': current_plan.get('location'),
-        'sku': current_plan.get('sku', {})
+        'sku': current_plan.get('sku', {}),
+        'name': name,
     }
 
-    update_args.update(identity_args)
-
-    poller = plan_create_cmd(command_args=update_args)
+    poller = identity_update_cmd(command_args=update_args)
 
     # Wait for the operation to complete and get the result
     plan_result = poller.result()
