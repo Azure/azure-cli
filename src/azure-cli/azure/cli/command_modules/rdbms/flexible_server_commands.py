@@ -296,11 +296,12 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('stop', 'flexible_server_fabric_mirroring_stop')
         g.custom_command('update-databases', 'flexible_server_fabric_mirroring_update_databases')
 
-    with self.command_group('postgres flexible-server index-tuning', postgres_flexible_config_sdk,
+    with self.command_group('postgres flexible-server automated-tuning', postgres_flexible_config_sdk,
                             client_factory=cf_postgres_flexible_config) as g:
-        g.custom_command('update', 'index_tuning_update', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_show_command('show', 'index_tuning_show', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('list-settings', 'index_tuning_settings_list', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('show-settings', 'index_tuning_settings_get', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('set-settings', 'index_tuning_settings_set', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('list-recommendations', 'recommendations_list', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('update', 'automated_tuning_update', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_show_command('show', 'automated_tuning_show', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list-settings', 'automated_tuning_settings_list', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('show-settings', 'automated_tuning_settings_get', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('set-settings', 'automated_tuning_settings_set', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list-index-recommendations', 'index_recommendations_list', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list-table-recommendations', 'table_recommendations_list', custom_command_type=flexible_servers_custom_postgres)
