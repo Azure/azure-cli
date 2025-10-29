@@ -100,7 +100,8 @@ from .aaz.latest.relay.hyco import Show as HyCoShow
 from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
 from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
 from .aaz.latest.relay.namespace import List as NamespaceList
-from .aaz.latest.appservice.plan import Show as AppServicePlanShow, Create as AppServicePlanCreate, Update as AppServicePlanUpdate
+from .aaz.latest.appservice.plan import (Show as AppServicePlanShow, Create as AppServicePlanCreate,
+                                         Update as AppServicePlanUpdate)
 
 logger = get_logger(__name__)
 
@@ -2338,6 +2339,22 @@ def _build_identities_info(identities):
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
 
 
+def _build_plan_default_identity(default_identity):
+    """Transform default_identity parameter into the proper structure for plan creation."""
+    if not default_identity:
+        return None
+
+    if default_identity.lower() == '[system]':
+        return {
+            'identity_type': "SystemAssigned"
+        }
+
+    return {
+        'identity_type': "UserAssigned",
+        'user_assigned_identity_resource_id': default_identity
+    }
+
+
 def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot):
     site_config = get_site_configs(cmd, resource_group, name, slot)
     linux_fx_version = getattr(site_config, "linux_fx_version", None)
@@ -4139,17 +4156,7 @@ has been deployed ".format(app_service_environment)
         enable_system_assigned_identity = None
 
     # Transform default_identity parameter into the proper structure
-    plan_default_identity = None
-    if default_identity:
-        if default_identity.lower() == '[system]':
-            plan_default_identity = {
-                'identity_type': "SystemAssigned"
-            }
-        else:
-            plan_default_identity = {
-                'identity_type': "UserAssigned",
-                'user_assigned_identity_resource_id': default_identity
-            }
+    plan_default_identity = _build_plan_default_identity(default_identity)
 
     poller = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)(command_args={
         "name": name,
