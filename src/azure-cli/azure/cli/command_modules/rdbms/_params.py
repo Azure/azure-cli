@@ -1060,37 +1060,37 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
         # automated tuning
         if command_group == 'postgres':
             for scope in ['update', 'show', 'list-settings', 'show-settings', 'set-settings', 'list-table-recommendations', 'list-index-recommendations']:
-                argument_context_string = '{} flexible-server tuning {}'.format(command_group, scope)
+                argument_context_string = '{} flexible-server auto-tuning {}'.format(command_group, scope)
                 with self.argument_context(argument_context_string) as c:
                     c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
-            with self.argument_context('{} flexible-server tuning update'.format(command_group)) as c:
+            with self.argument_context('{} flexible-server auto-tuning update'.format(command_group)) as c:
                 c.argument('tuning_enabled',
                            options_list=['--enabled'],
                            required=True,
                            help='Enable or disable index and table tuning feature.',
                            arg_type=get_enum_type(['True', 'False']))
 
-            with self.argument_context('{} flexible-server tuning list-index-recommendations'.format(command_group)) as c:
+            with self.argument_context('{} flexible-server auto-tuning list-index-recommendations'.format(command_group)) as c:
                 c.argument('recommendation_type',
                            options_list=['--recommendation-type', '-r'],
                            help='Retrieve recommendations based on type.',
                            arg_type=get_enum_type(['CreateIndex', 'DropIndex', 'ReIndex']))
 
-            with self.argument_context('{} flexible-server tuning list-table-recommendations'.format(command_group)) as c:
+            with self.argument_context('{} flexible-server auto-tuning list-table-recommendations'.format(command_group)) as c:
                 c.argument('recommendation_type',
                            options_list=['--recommendation-type', '-r'],
                            help='Retrieve recommendations based on type.',
                            arg_type=get_enum_type(['AnalyzeTable']))
 
             for scope in ['show-settings', 'set-settings']:
-                argument_context_string = '{} flexible-server tuning {}'.format(command_group, scope)
+                argument_context_string = '{} flexible-server auto-tuning {}'.format(command_group, scope)
                 with self.argument_context(argument_context_string) as c:
                     c.argument('setting_name', options_list=['--name', '-n'], required=True,
                                arg_type=get_enum_type(get_automated_tuning_settings_map().keys()),
                                help='The name of the tuning setting.')
 
-            with self.argument_context('{} flexible-server tuning set-settings'.format(command_group)) as c:
+            with self.argument_context('{} flexible-server auto-tuning set-settings'.format(command_group)) as c:
                 c.argument('value', options_list=['--value', '-v'],
                            help='Value of the tuning setting.')
 

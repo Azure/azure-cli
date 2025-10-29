@@ -296,7 +296,7 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('stop', 'flexible_server_fabric_mirroring_stop')
         g.custom_command('update-databases', 'flexible_server_fabric_mirroring_update_databases')
 
-    with self.command_group('postgres flexible-server automated-tuning', postgres_flexible_config_sdk,
+    with self.command_group('postgres flexible-server auto-tuning', postgres_flexible_config_sdk,
                             client_factory=cf_postgres_flexible_config) as g:
         g.custom_command('update', 'automated_tuning_update', custom_command_type=flexible_servers_custom_postgres)
         g.custom_show_command('show', 'automated_tuning_show', custom_command_type=flexible_servers_custom_postgres)

@@ -2884,41 +2884,41 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
                  database_engine, resource_group, server_name, sku_name, tier, storage_size, version, location))
 
         # Enable automated tuning for server
-        self.cmd('{} flexible-server automated-tuning update -g {} -s {} --enabled True'.format(database_engine, resource_group, server_name),
+        self.cmd('{} flexible-server auto-tuning update -g {} -s {} --enabled True'.format(database_engine, resource_group, server_name),
                  checks=NoneCheck())
 
         # Show that automated tuning is enabled
-        self.cmd('{} flexible-server automated-tuning show -g {} -s {}'.format(database_engine, resource_group, server_name),
+        self.cmd('{} flexible-server auto-tuning show -g {} -s {}'.format(database_engine, resource_group, server_name),
                  checks=NoneCheck())
 
         # List settings associated with automated tuning for server
-        self.cmd('{} flexible-server automated-tuning list-settings -g {} -s {}'.format(database_engine, resource_group, server_name),
+        self.cmd('{} flexible-server auto-tuning list-settings -g {} -s {}'.format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
         # Show properties of automated tuning setting for server
-        self.cmd('{} flexible-server automated-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+        self.cmd('{} flexible-server auto-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
                  checks=[JMESPathCheck('value', 'report')])
         self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'pg_qs.query_capture_mode', resource_group, server_name),
                  checks=[JMESPathCheck('value', 'all')])
 
         # Set new value of automated tuning setting for server
         value = '1006'
-        self.cmd('{} flexible-server automated-tuning set-settings -g {} -s {} -n {} -v {}'.format(database_engine, resource_group, server_name,
+        self.cmd('{} flexible-server auto-tuning set-settings -g {} -s {} -n {} -v {}'.format(database_engine, resource_group, server_name,
                                                                                                'unused_reads_per_table', value),
                  checks=[JMESPathCheck('value', value)])
 
         # List index recommendations associated with automated tuning for server
-        self.cmd('{} flexible-server automated-tuning list-index-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
+        self.cmd('{} flexible-server auto-tuning list-index-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
         # List table recommendations associated with automated tuning for server
-        self.cmd('{} flexible-server automated-tuning list-table-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
+        self.cmd('{} flexible-server auto-tuning list-table-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
         # Disable automated tuning for server
-        self.cmd('{} flexible-server automated-tuning update -g {} -s {} --enabled False'.format(database_engine, resource_group, server_name),
+        self.cmd('{} flexible-server auto-tuning update -g {} -s {} --enabled False'.format(database_engine, resource_group, server_name),
                  checks=NoneCheck())
 
         # Show properties of automated tuning setting for server
-        self.cmd('{} flexible-server automated-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+        self.cmd('{} flexible-server auto-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
                  checks=[JMESPathCheck('value', 'off')])
