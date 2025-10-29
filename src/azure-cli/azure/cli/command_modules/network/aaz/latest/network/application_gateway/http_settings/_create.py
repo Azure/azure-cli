@@ -120,7 +120,7 @@ class Create(AAZCommand):
             help="Connection draining of the backend http settings resource.",
         )
         _args_schema.dedicated_backend_connection = AAZBoolArg(
-            options=["--dedicated-backend-connection"],
+            options=["--dedicated-connection", "--dedicated-backend-connection"],
             arg_group="Properties",
             help="Enable or disable dedicated connection per backend server. Default is set to false.",
         )
@@ -135,7 +135,7 @@ class Create(AAZCommand):
             help="Array of references to application gateway trusted root certificates.",
         )
         _args_schema.validate_cert_chain_and_expiry = AAZBoolArg(
-            options=["--validate-cert-chain-and-expiry"],
+            options=["--validate-cert-ce", "--validate-cert-chain-and-expiry"],
             arg_group="Properties",
             help="Verify or skip both chain and expiry validations of the certificate on the backend server. Default is set to true.",
             default=True,
