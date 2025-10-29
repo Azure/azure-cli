@@ -160,7 +160,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         """Test install script add, list, and remove operations."""
         plan_name = self.create_random_name('mi-plan-script', 24)
         script_name = 'test-script'
-        script_uri = 'https://example.com/script.ps1'
+        script_uri = 'https://miplanscripts.blob.core.windows.net/scripts/script1.ps1'
         
         # Create managed instance plan
         self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance'.format(
@@ -336,7 +336,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         ])
         
         # Add install script
-        self.cmd('appservice plan managed-instance install-script add -g {} -n {} --install-script-name {} --source-uri https://example.com/complex.ps1 --type RemoteAzureBlob'.format(
+        self.cmd('appservice plan managed-instance install-script add -g {} -n {} --install-script-name {} --source-uri https://complexscripts.blob.core.windows.net/scripts/complex.ps1 --type RemoteAzureBlob'.format(
             resource_group, plan_name, script_name))
         
         # Add storage mount
@@ -563,6 +563,114 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
             resource_group, plan_name), checks=[
             JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
+    def test_appservice_plan_managed_instance_comprehensive_create(self, resource_group):
+        """Test creating a managed instance plan with all features in a single command."""
+        plan_name = self.create_random_name('mi-plan-comp', 24)
+        identity_name = self.create_random_name('mi-identity-comp', 24)
+        vnet_name = self.create_random_name('mi-vnet-comp', 24)
+        subnet_name = self.create_random_name('mi-subnet-comp', 24)
+        
+        # Generate random names for storage account and key vault
+        storage_account_name = self.create_random_name('micompstg', 15)  # Storage account names must be 3-24 chars, lowercase only
+        key_vault_name = self.create_random_name('mi-comp-kv', 20)
+        
+        # Test data using generated names
+        script_name = 'Script1'
+        script_uri = f'https://{storage_account_name}.blob.core.windows.net/scripts/comprehensive-script.ps1'
+        mount_name = 'Mount1'
+        # Use proper Windows UNC path format with proper escaping
+        source_path = f'\\\\\\\\{storage_account_name}.file.core.windows.net\\comprehensive-share'  # 4 backslashes for UNC path
+        destination_path = r'D:\comprehensive-mount'  # 1 backslash for drive path
+        registry_key = 'HKEY_LOCAL_MACHINE\\Software\\ComprehensiveApp\\Key1'  # Use backslashes for registry keys
+        secret_uri = f'https://{key_vault_name}.vault.azure.net/secrets/comprehensive-secret/version'
+        storage_secret_uri = f'https://{key_vault_name}.vault.azure.net/secrets/storage-secret/version'
+        
+        # Expected response values (after JSON parsing)
+        expected_source = f'\\\\{storage_account_name}.file.core.windows.net\\comprehensive-share'  # 2 backslashes after JSON parsing
+        expected_destination = r'D:\comprehensive-mount'  # 1 backslash after JSON parsing
+        
+        # Create user-assigned identity
+        identity_result = self.cmd('identity create -g {} -n {}'.format(
+            resource_group, identity_name)).get_output_in_json()
+        identity_id = identity_result['id']
+        
+        # Create VNet and subnet
+        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16'.format(
+            resource_group, vnet_name))
+        subnet_result = self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix 10.0.0.0/24'.format(
+            resource_group, vnet_name, subnet_name)).get_output_in_json()
+        subnet_id = subnet_result['id']
+        
+        # Create comprehensive managed instance plan with all features
+        self.cmd('appservice plan create -g {} -n {} --number-of-workers 2 --sku P1V4 --location {} --is-managed-instance --assign-identity [system] {} --default-identity {} --rdp-enabled --subnet {} --registry-adapter registry-key="{}" type="String" secret-uri="{}" --install-script name="{}" source-uri="{}" type="RemoteAzureBlob" --storage-mount name="{}" source="{}" destination-path="{}" type="AzureFiles" credentials-secret-uri="{}"'.format(
+            resource_group, plan_name, MANAGED_INSTANCE_LOCATION, identity_id, identity_id, subnet_id, 
+            registry_key, secret_uri, script_name, script_uri, mount_name, source_path, destination_path, storage_secret_uri), checks=[
+            JMESPathCheck('name', plan_name),
+            JMESPathCheck('sku.name', 'P1v4'),
+            JMESPathCheck('isCustomMode', True),
+            JMESPathCheck('rdpEnabled', True),
+            JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned'),
+            JMESPathCheckExists('identity.principalId'),
+            JMESPathCheckExists('identity.tenantId'),
+            JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity_id)),
+            JMESPathCheck('network.virtualNetworkSubnetId', subnet_id)
+        ])
+        
+        # Verify all features were set correctly via show command
+        self.cmd('appservice plan show -g {} -n {}'.format(resource_group, plan_name), checks=[
+            JMESPathCheck('name', plan_name),
+            JMESPathCheck('properties.isCustomMode', True),
+            JMESPathCheck('properties.rdpEnabled', True),
+            JMESPathCheck('identity.type', 'SystemAssigned, UserAssigned'),
+            JMESPathCheckExists('identity.principalId'),
+            JMESPathCheckExists('identity.tenantId'),
+            JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity_id))
+        ])
+        
+        # Verify default identity was set (this should be visible in the plan show command)
+        self.cmd('appservice plan show -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheckExists('properties.planDefaultIdentity'),
+            JMESPathCheck('properties.planDefaultIdentity.identityType', 'UserAssigned'),
+            JMESPathCheck('properties.planDefaultIdentity.userAssignedIdentityResourceId', identity_id)
+        ])
+        
+        # Verify network configuration
+        self.cmd('appservice plan managed-instance network show -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('virtualNetworkSubnetId', subnet_id)
+        ])
+        
+        # Verify install script was added
+        self.cmd('appservice plan managed-instance install-script list -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', script_name),
+            JMESPathCheck('[0].source.sourceUri', script_uri),
+            JMESPathCheck('[0].source.type', 'RemoteAzureBlob')
+        ])
+        
+        # Verify storage mount was added
+        self.cmd('appservice plan managed-instance storage-mount list -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].name', mount_name),
+            JMESPathCheck('[0].source', expected_source),
+            JMESPathCheck('[0].destinationPath', expected_destination),
+            JMESPathCheck('[0].type', 'AzureFiles')  # Changed from 'FileShare' to 'AzureFiles'
+        ])
+        
+        # Verify registry adapter was added
+        self.cmd('appservice plan managed-instance registry-adapter list -g {} -n {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('length(@)', 1),
+            JMESPathCheck('[0].registryKey', registry_key),
+            JMESPathCheck('[0].type', 'String'),
+            JMESPathCheck('[0].keyVaultSecretReference.secretUri', secret_uri)
         ])
 
     @AllowLargeResponse()
