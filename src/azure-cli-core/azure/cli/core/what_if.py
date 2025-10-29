@@ -111,7 +111,7 @@ def _make_what_if_request(payload, headers_dict, cli_ctx=None):
         progress_thread.start()
 
         session = Session()
-        req = Request(method="POST", url=f"{function_app_url}/api/what_if_preview",
+        req = Request(method="POST", url=f"{function_app_url}/api/what_if_cli_preview",
                       headers=headers_dict, data=json.dumps(payload))
         prepared = session.prepare_request(req)
         response = session.send(prepared)
