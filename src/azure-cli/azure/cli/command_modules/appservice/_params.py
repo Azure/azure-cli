@@ -155,6 +155,18 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('number_of_workers', type=int, help='Number of workers to be allocated.')
         c.ignore('allow_pending_state')
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
+        c.argument('default_identity', is_preview=True,
+                   help='accept system or user assigned identity separated. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
+        c.argument('rdp_enabled', action='store_true', is_preview=True,
+                   help='Enable RDP. Requires is-custom-mode to be true.')
+        c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
+        c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
+        c.argument('registry_adapters', options_list=['--registry-adapter'], is_preview=True, action=RegistryAdapterAddAction, nargs='+',
+                   help="Registry adapter configurations.")
+        c.argument('install_scripts', options_list=['--install-script'], is_preview=True, action=InstallScriptAddAction, nargs='+',
+                   help="Install script configurations.")
+        c.argument('storage_mounts', options_list=['--storage-mount'], is_preview=True, action=StorageMountAddAction, nargs='+',
+                   help="Storage mount configurations.")
 
     with self.argument_context('appservice plan delete') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',

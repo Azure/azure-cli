@@ -2355,6 +2355,22 @@ def _build_plan_default_identity(default_identity):
     }
 
 
+def _build_plan_default_identity_sdk(default_identity):
+    """Transform default_identity parameter into the proper structure for SDK-style operations."""
+    if not default_identity:
+        return None
+
+    if default_identity.lower() == '[system]':
+        return {
+            'identityType': "SystemAssigned"
+        }
+
+    return {
+        'identityType': "UserAssigned",
+        'userAssignedIdentityResourceId': default_identity
+    }
+
+
 def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot):
     site_config = get_site_configs(cmd, resource_group, name, slot)
     linux_fx_version = getattr(site_config, "linux_fx_version", None)
@@ -4221,16 +4237,27 @@ def update_app_service_plan_with_progress(cmd, resource_group_name, name, app_se
 
 
 def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, elastic_scale=None,
-                            max_elastic_worker_count=None, async_scaling_enabled=None):
+                            max_elastic_worker_count=None, async_scaling_enabled=None,
+                            default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
+                            registry_adapters=None, install_scripts=None, storage_mounts=None):
     if (number_of_workers is None and sku is None and
-            elastic_scale is None and max_elastic_worker_count is None and async_scaling_enabled is None):
+            elastic_scale is None and max_elastic_worker_count is None and async_scaling_enabled is None and
+            default_identity is None and rdp_enabled is None and vnet is None and subnet is None and
+            registry_adapters is None and install_scripts is None and storage_mounts is None):
         safe_params = cmd.cli_ctx.data['safe_params']
         if '--set' not in safe_params:
             args = ["--number-of-workers",
                     "--sku",
                     "--elastic-scale",
                     "--max-elastic-worker-count",
-                    "--async-scaling-enabled"]
+                    "--async-scaling-enabled",
+                    "--default-identity",
+                    "--rdp-enabled",
+                    "--vnet",
+                    "--subnet",
+                    "--registry-adapter",
+                    "--install-script",
+                    "--storage-mount"]
             logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
     sku_def = instance.sku
     if sku is not None:
@@ -4269,8 +4296,87 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
     if async_scaling_enabled is not None:
         instance.async_scaling_enabled = async_scaling_enabled
 
+    # Handle VNet integration
+    subnet_resource_id = None
+    if subnet or vnet:
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=instance.resource_group,
+                                       subnet=subnet,
+                                       vnet=vnet)
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=instance.location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+
+    # Transform default_identity parameter into the proper structure
+    plan_default_identity = _build_plan_default_identity_sdk(default_identity)
+
+    # Configure managed instance properties
+    _enable_managed_instance_properties(instance,
+                                        default_identity=plan_default_identity,
+                                        subnet_resource_id=subnet_resource_id,
+                                        rdp_enabled=rdp_enabled,
+                                        registry_adapters=registry_adapters,
+                                        install_scripts=install_scripts,
+                                        storage_mounts=storage_mounts)
+
     instance.sku = sku_def
     return instance
+
+
+def _enable_managed_instance_properties(plan_def, default_identity=None, subnet_resource_id=None, rdp_enabled=None,
+                                       registry_adapters=None, install_scripts=None, storage_mounts=None):
+    """Configure additional properties for managed instance App Service Plan features."""
+    # Only enable additional properties if we have managed instance features to configure
+    has_managed_instance_features = any([
+        default_identity,
+        subnet_resource_id,
+        rdp_enabled is not None,
+        registry_adapters,
+        install_scripts,
+        storage_mounts
+    ])
+
+    if not has_managed_instance_features:
+        return
+
+    plan_def.enable_additional_properties_sending()
+
+    # Only set properties if they haven't been set already (e.g., by elastic scale)
+    if "properties" not in plan_def.additional_properties:
+        existing_properties = plan_def.serialize()["properties"]
+        plan_def.additional_properties["properties"] = existing_properties
+
+    # Configure network (VNet integration)
+    if subnet_resource_id:
+        plan_def.additional_properties["properties"]["network"] = {
+            "virtualNetworkSubnetId": subnet_resource_id
+        }
+
+    # Configure RDP access
+    if rdp_enabled is not None:
+        plan_def.additional_properties["properties"]["rdpEnabled"] = rdp_enabled
+
+    # Configure default identity
+    if default_identity:
+        plan_def.additional_properties["properties"]["planDefaultIdentity"] = default_identity
+
+    # Configure registry adapters
+    if registry_adapters:
+        plan_def.additional_properties["properties"]["registryAdapters"] = registry_adapters
+
+    # Configure install scripts
+    if install_scripts:
+        plan_def.additional_properties["properties"]["installScripts"] = install_scripts
+
+    # Configure storage mounts
+    if storage_mounts:
+        plan_def.additional_properties["properties"]["storageMounts"] = storage_mounts
 
 
 def show_plan(cmd, resource_group_name, name):

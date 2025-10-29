@@ -564,3 +564,46 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
             resource_group, plan_name), checks=[
             JMESPathCheck('virtualNetworkSubnetId', subnet_id)
         ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=MANAGED_INSTANCE_LOCATION)
+    def test_appservice_plan_managed_instance_instance_operations(self, resource_group):
+        """Test managed instance plan instance list and recycle operations."""
+        plan_name = self.create_random_name('mi-plan-inst', 24)
+        webapp_name = self.create_random_name('mi-webapp-inst', 24)
+
+        # Create managed instance plan with 3 instances
+        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance --number-of-workers 3'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('name', plan_name),
+            JMESPathCheck('sku.name', 'P1v4'),
+            JMESPathCheck('sku.capacity', 3),
+            JMESPathCheck('isCustomMode', True)
+        ])
+
+        self.cmd(
+            'webapp create -g {} -n {} --plan {}'.format(resource_group, webapp_name, plan_name))
+
+        # List instances - should have 3 instances
+        instances_result = self.cmd('appservice plan managed-instance instance list -g {} --name {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('instanceCount', 3)
+        ]).get_output_in_json()
+
+        # Verify instances have required properties
+        for i, instance in enumerate(instances_result['instances']):
+            self.assertIsNotNone(instance.get('instanceName'), f"Instance {i} should have instanceName")
+
+        # Get the last worker name for recycle test
+        last_worker_name = instances_result['instances'][2]['instanceName']
+
+        # Test recycle operation on the last worker
+        # Recycle command doesn't return output, so we just verify it runs successfully
+        self.cmd('appservice plan managed-instance instance recycle -g {} --name {} --worker-name {}'.format(
+            resource_group, plan_name, last_worker_name))
+
+        # Verify instances list still works after recycle
+        self.cmd('appservice plan managed-instance instance list -g {} --name {}'.format(
+            resource_group, plan_name), checks=[
+            JMESPathCheck('length(@)', 3)
+        ])
