@@ -18,7 +18,7 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/clitest.rg000001?api-version=2024-11-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","test":"test_appservice_plan_registry_adapter_operations","date":"2025-10-28T22:50:09Z","module":"appservice"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001","name":"clitest.rg000001","type":"Microsoft.Resources/resourceGroups","location":"eastus2euap","tags":{"product":"azurecli","cause":"automation","test":"test_appservice_plan_registry_adapter_operations","date":"2025-10-29T22:22:06Z","module":"appservice"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 28 Oct 2025 22:50:11 GMT
+      - Wed, 29 Oct 2025 22:22:08 GMT
       expires:
       - '-1'
       pragma:
@@ -41,12 +41,13 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 1342282C108B4AEBAE8C4A7006235F5F Ref B: SN4AA2022301045 Ref C: 2025-10-28T22:50:11Z'
+      - 'Ref A: 852F8AEAB6D94938AA3BF2668A3A68F2 Ref B: SN4AA2022305027 Ref C: 2025-10-29T22:22:09Z'
     status:
       code: 200
       message: OK
 - request:
-    body: null
+    body: '{"location": "eastus2euap", "properties": {"isCustomMode": true, "perSiteScaling":
+      false}, "sku": {"capacity": 1, "name": "P1V4", "tier": "PREMIUMV4"}}'
     headers:
       Accept:
       - application/json
@@ -56,123 +57,31 @@ interactions:
       - appservice plan create
       Connection:
       - keep-alive
-      ParameterSetName:
-      - -g -n --sku --is-managed-instance
-      User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.13.9 (Windows-11-10.0.26200-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002?api-version=2024-11-01
-  response:
-    body:
-      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Web/serverFarms/mi-plan-registry000002''
-        under resource group ''clitest.rg000001'' was not found. For more details
-        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '236'
-      content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 28 Oct 2025 22:50:11 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - gateway
-      x-msedge-ref:
-      - 'Ref A: 9B41BEBB3440401DB67D5CF5D5A1003C Ref B: SN4AA2022302017 Ref C: 2025-10-28T22:50:12Z'
-    status:
-      code: 404
-      message: Not Found
-- request:
-    body: null
-    headers:
-      Accept:
+      Content-Length:
+      - '151'
+      Content-Type:
       - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appservice plan create
-      Connection:
-      - keep-alive
       ParameterSetName:
       - -g -n --sku --is-managed-instance
       User-Agent:
       - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.13.9 (Windows-11-10.0.26200-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002?api-version=2024-11-01
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002?api-version=2025-03-01
   response:
     body:
-      string: '{"error":{"code":"ResourceNotFound","message":"The Resource ''Microsoft.Web/serverFarms/mi-plan-registry000002''
-        under resource group ''clitest.rg000001'' was not found. For more details
-        please go to https://aka.ms/ARMResourceNotFoundFix"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"eastus2euap","properties":{"serverFarmId":1505,"name":"mi-plan-registry000002","sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1},"workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
+        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1505","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-29T22:22:12.09","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '236'
+      - '1932'
       content-type:
-      - application/json; charset=utf-8
-      date:
-      - Tue, 28 Oct 2025 22:50:12 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-failure-cause:
-      - gateway
-      x-msedge-ref:
-      - 'Ref A: 5E660DBE4F6B4F43A5F4F14A0E1061EC Ref B: SN4AA2022302009 Ref C: 2025-10-28T22:50:12Z'
-    status:
-      code: 404
-      message: Not Found
-- request:
-    body: null
-    headers:
-      Accept:
       - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appservice plan create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --sku --is-managed-instance
-      User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.13.9 (Windows-11-10.0.26200-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002?api-version=2024-11-01
-  response:
-    body:
-      string: '{"Code":"NotFound","Message":"Cannot find ServerFarm with name mi-plan-registry000002.","Target":null,"Details":[{"Message":"Cannot
-        find ServerFarm with name mi-plan-registry000002."},{"Code":"NotFound"},{"ErrorEntity":{"ExtendedCode":"51004","MessageTemplate":"Cannot
-        find {0} with name {1}.","Parameters":["ServerFarm","mi-plan-registry000002"],"Code":"NotFound","Message":"Cannot
-        find ServerFarm with name mi-plan-registry000002."}}],"Innererror":null}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '455'
-      content-type:
-      - application/json; charset=utf-8
       date:
-      - Tue, 28 Oct 2025 22:50:14 GMT
+      - Wed, 29 Oct 2025 22:22:15 GMT
+      etag:
+      - '"1DC492279FEDB15"'
       expires:
       - '-1'
       pragma:
@@ -185,114 +94,14 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
+      x-ms-operation-identifier:
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d1dbc388-1013-482b-b171-79f4269ea689/southcentralus/7dc467a7-97b3-41b0-9b3d-33d6a5536eb8
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '12000'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '800'
       x-msedge-ref:
-      - 'Ref A: 1E2760B3D7624E22AE1086520F47BD67 Ref B: SN4AA2022304039 Ref C: 2025-10-28T22:50:13Z'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 404
-      message: Not Found
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appservice plan create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --sku --is-managed-instance
-      User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.13.9 (Windows-11-10.0.26200-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002?api-version=2024-11-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"East
-        US 2 EUAP","properties":{"serverFarmId":1451,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
-        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1451","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-28T22:50:15.2666667","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1857'
-      content-type:
-      - application/json
-      date:
-      - Tue, 28 Oct 2025 22:50:16 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
-      x-msedge-ref:
-      - 'Ref A: 97FFEE75B8A4411D8F4993F13F92679B Ref B: SN4AA2022304051 Ref C: 2025-10-28T22:50:15Z'
-      x-powered-by:
-      - ASP.NET
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - application/json
-      Accept-Encoding:
-      - gzip, deflate
-      CommandName:
-      - appservice plan create
-      Connection:
-      - keep-alive
-      ParameterSetName:
-      - -g -n --sku --is-managed-instance
-      User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.13.9 (Windows-11-10.0.26200-SP0)
-    method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002?api-version=2024-11-01
-  response:
-    body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"East
-        US 2 EUAP","properties":{"serverFarmId":1451,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
-        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1451","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-28T22:50:15.2666667","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
-    headers:
-      cache-control:
-      - no-cache
-      content-length:
-      - '1857'
-      content-type:
-      - application/json
-      date:
-      - Tue, 28 Oct 2025 22:50:21 GMT
-      expires:
-      - '-1'
-      pragma:
-      - no-cache
-      strict-transport-security:
-      - max-age=31536000; includeSubDomains
-      x-aspnet-version:
-      - 4.0.30319
-      x-cache:
-      - CONFIG_NOCACHE
-      x-content-type-options:
-      - nosniff
-      x-ms-ratelimit-remaining-subscription-global-reads:
-      - '16499'
-      x-msedge-ref:
-      - 'Ref A: 115E1744EE5348C1BB3C7F9075939C1F Ref B: SN4AA2022301023 Ref C: 2025-10-28T22:50:21Z'
+      - 'Ref A: 115040A6A12A449FAB21E911A0CAC74C Ref B: SN4AA2022304047 Ref C: 2025-10-29T22:22:09Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -318,17 +127,17 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"East
-        US 2 EUAP","properties":{"serverFarmId":1451,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
-        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1451","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-28T22:50:15.2666667","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
+        US 2 EUAP","properties":{"serverFarmId":1505,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
+        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1505","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-29T22:22:12.09","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1857'
+      - '1852'
       content-type:
       - application/json
       date:
-      - Tue, 28 Oct 2025 22:50:22 GMT
+      - Wed, 29 Oct 2025 22:22:17 GMT
       expires:
       - '-1'
       pragma:
@@ -344,7 +153,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 6CE3DE8E4E244A7A8CBBEEA32BC2E2DF Ref B: SN4AA2022301023 Ref C: 2025-10-28T22:50:22Z'
+      - 'Ref A: EB72C889F856479E9B6AD69186FB7F15 Ref B: SN4AA2022301047 Ref C: 2025-10-29T22:22:16Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -370,17 +179,17 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"East
-        US 2 EUAP","properties":{"serverFarmId":1451,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
-        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1451","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-28T22:50:15.2666667","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
+        US 2 EUAP","properties":{"serverFarmId":1505,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
+        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1505","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-29T22:22:12.09","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1857'
+      - '1852'
       content-type:
       - application/json
       date:
-      - Tue, 28 Oct 2025 22:50:24 GMT
+      - Wed, 29 Oct 2025 22:22:18 GMT
       expires:
       - '-1'
       pragma:
@@ -396,7 +205,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 862FB91B23AD4106B16F5E52002631F1 Ref B: SN4AA2022305035 Ref C: 2025-10-28T22:50:23Z'
+      - 'Ref A: 2029C940FF7C47AB9A3682D667848384 Ref B: SN4AA2022302031 Ref C: 2025-10-29T22:22:17Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -422,17 +231,17 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"East
-        US 2 EUAP","properties":{"serverFarmId":1451,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
-        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1451","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-28T22:50:15.2666667","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
+        US 2 EUAP","properties":{"serverFarmId":1505,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
+        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1505","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":null,"provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-29T22:22:12.09","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1857'
+      - '1852'
       content-type:
       - application/json
       date:
-      - Tue, 28 Oct 2025 22:50:23 GMT
+      - Wed, 29 Oct 2025 22:22:18 GMT
       expires:
       - '-1'
       pragma:
@@ -448,7 +257,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 1FA4007FE3AA4841AB0D40094F978080 Ref B: SN4AA2022301037 Ref C: 2025-10-28T22:50:24Z'
+      - 'Ref A: 1893AC01026A40F798950D186A595461 Ref B: SN4AA2022305045 Ref C: 2025-10-29T22:22:19Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -616,7 +425,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 28 Oct 2025 22:50:27 GMT
+      - Wed, 29 Oct 2025 22:22:22 GMT
       expires:
       - '-1'
       pragma:
@@ -630,13 +439,13 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: D95B4E2DCD10446B9025CE01AF295D5C Ref B: SN4AA2022303053 Ref C: 2025-10-28T22:50:24Z'
+      - 'Ref A: 9EA62DD3905340219397B54C46FF3D74 Ref B: SN4AA2022303029 Ref C: 2025-10-29T22:22:19Z'
     status:
       code: 200
       message: OK
 - request:
     body: '{"location": "eastus2euap", "properties": {"registryAdapters": [{"keyVaultSecretReference":
-      {"secretUri": "https://example.vault.azure.net/secrets/test-secret/version"},
+      {"secretUri": "https://mi-registry-kv000003.vault.azure.net/secrets/test-secret/version"},
       "registryKey": "HKEY_LOCAL_MACHINE\\SOFTWARE\\TestKey", "type": "String"}]},
       "sku": {"capacity": 1, "family": "Pv4", "name": "P1v4", "size": "P1v4", "tier":
       "PremiumV4"}}'
@@ -650,7 +459,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '340'
+      - '353'
       Content-Type:
       - application/json
       ParameterSetName:
@@ -661,17 +470,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002?api-version=2025-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"eastus2euap","properties":{"serverFarmId":1451,"name":"mi-plan-registry000002","sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1},"workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
-        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1451","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-28T22:50:15.2666667","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[{"registryKey":"HKEY_LOCAL_MACHINE\\SOFTWARE\\TestKey","type":"String","keyVaultSecretReference":{"secretUri":"https://example.vault.azure.net/secrets/test-secret/version","referenceStatus":null}}],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"eastus2euap","properties":{"serverFarmId":1505,"name":"mi-plan-registry000002","sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1},"workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
+        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1505","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-29T22:22:12.09","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[{"registryKey":"HKEY_LOCAL_MACHINE\\SOFTWARE\\TestKey","type":"String","keyVaultSecretReference":{"secretUri":"https://mi-registry-kv000003.vault.azure.net/secrets/test-secret/version","referenceStatus":null}}],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2131'
+      - '2139'
       content-type:
       - application/json
       date:
-      - Tue, 28 Oct 2025 22:50:30 GMT
+      - Wed, 29 Oct 2025 22:22:25 GMT
       expires:
       - '-1'
       pragma:
@@ -685,13 +494,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d1dbc388-1013-482b-b171-79f4269ea689/southcentralus/c7c98026-ad20-47b6-9a06-6e81ca894804
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d1dbc388-1013-482b-b171-79f4269ea689/southcentralus/43128bbb-bbc6-4a54-865e-76396361c249
       x-ms-ratelimit-remaining-subscription-global-writes:
       - '11999'
       x-ms-ratelimit-remaining-subscription-writes:
       - '799'
       x-msedge-ref:
-      - 'Ref A: 84E10B4FC4514593ADF1D35AC9455312 Ref B: SN4AA2022301033 Ref C: 2025-10-28T22:50:28Z'
+      - 'Ref A: 57F33DA78AB34DB8B41298F6DD5366B7 Ref B: SN4AA2022304029 Ref C: 2025-10-29T22:22:22Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -717,17 +526,17 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"East
-        US 2 EUAP","properties":{"serverFarmId":1451,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
-        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1451","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-28T22:50:15.2666667","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[{"registryKey":"HKEY_LOCAL_MACHINE\\SOFTWARE\\TestKey","type":"String","keyVaultSecretReference":{"secretUri":"https://example.vault.azure.net/secrets/test-secret/version","referenceStatus":null}}],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
+        US 2 EUAP","properties":{"serverFarmId":1505,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
+        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1505","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-29T22:22:12.09","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[{"registryKey":"HKEY_LOCAL_MACHINE\\SOFTWARE\\TestKey","type":"String","keyVaultSecretReference":{"secretUri":"https://mi-registry-kv000003.vault.azure.net/secrets/test-secret/version","referenceStatus":null}}],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2051'
+      - '2059'
       content-type:
       - application/json
       date:
-      - Tue, 28 Oct 2025 22:50:31 GMT
+      - Wed, 29 Oct 2025 22:22:26 GMT
       expires:
       - '-1'
       pragma:
@@ -743,7 +552,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: A3E2694F78964B3A854EF70A5B4AD741 Ref B: SN4AA2022301045 Ref C: 2025-10-28T22:50:31Z'
+      - 'Ref A: 1A6E31524DCF4031ABEFFFDD160C4C93 Ref B: SN4AA2022305049 Ref C: 2025-10-29T22:22:26Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -769,17 +578,17 @@ interactions:
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"East
-        US 2 EUAP","properties":{"serverFarmId":1451,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
-        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1451","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-28T22:50:15.2666667","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[{"registryKey":"HKEY_LOCAL_MACHINE\\SOFTWARE\\TestKey","type":"String","keyVaultSecretReference":{"secretUri":"https://example.vault.azure.net/secrets/test-secret/version","referenceStatus":null}}],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
+        US 2 EUAP","properties":{"serverFarmId":1505,"name":"mi-plan-registry000002","workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
+        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1505","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-29T22:22:12.09","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[{"registryKey":"HKEY_LOCAL_MACHINE\\SOFTWARE\\TestKey","type":"String","keyVaultSecretReference":{"secretUri":"https://mi-registry-kv000003.vault.azure.net/secrets/test-secret/version","referenceStatus":null}}],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2051'
+      - '2059'
       content-type:
       - application/json
       date:
-      - Tue, 28 Oct 2025 22:50:32 GMT
+      - Wed, 29 Oct 2025 22:22:28 GMT
       expires:
       - '-1'
       pragma:
@@ -795,7 +604,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 34ECF7640AEA4DE0895088D8442CBCEB Ref B: SN4AA2022302011 Ref C: 2025-10-28T22:50:32Z'
+      - 'Ref A: B80591357AC747569B7D82474455FA3F Ref B: SN4AA2022304053 Ref C: 2025-10-29T22:22:26Z'
       x-powered-by:
       - ASP.NET
     status:
@@ -963,7 +772,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Tue, 28 Oct 2025 22:50:35 GMT
+      - Wed, 29 Oct 2025 22:22:29 GMT
       expires:
       - '-1'
       pragma:
@@ -977,7 +786,7 @@ interactions:
       x-ms-ratelimit-remaining-subscription-global-reads:
       - '16499'
       x-msedge-ref:
-      - 'Ref A: 08E9DC61DD964E22A0A243F735957598 Ref B: SN4AA2022305033 Ref C: 2025-10-28T22:50:32Z'
+      - 'Ref A: 0AD3929CAC0B4A128F6764D29773B683 Ref B: SN4AA2022304017 Ref C: 2025-10-29T22:22:28Z'
     status:
       code: 200
       message: OK
@@ -1005,17 +814,17 @@ interactions:
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002?api-version=2025-03-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"eastus2euap","properties":{"serverFarmId":1451,"name":"mi-plan-registry000002","sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1},"workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
-        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1451","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-28T22:50:15.2666667","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Web/serverfarms/mi-plan-registry000002","name":"mi-plan-registry000002","type":"Microsoft.Web/serverfarms","kind":"app","location":"eastus2euap","properties":{"serverFarmId":1505,"name":"mi-plan-registry000002","sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1},"workerSize":"SmallV4","workerSizeId":20,"workerTierName":null,"numberOfWorkers":1,"currentWorkerSize":"SmallV4","currentWorkerSizeId":20,"currentNumberOfWorkers":1,"status":"Ready","webSpace":"clitest.rg000001-EastUS2EUAPwebspace-Mavic","subscription":"663546d4-b5c7-459b-8819-b65223614c9f","adminSiteName":null,"hostingEnvironment":null,"hostingEnvironmentProfile":null,"maximumNumberOfWorkers":30,"planName":"VirtualDedicatedPlan","adminRuntimeSiteName":null,"computeMode":"Dedicated","siteMode":null,"geoRegion":"East
+        US 2 EUAP","perSiteScaling":false,"elasticScaleEnabled":false,"maximumElasticWorkerCount":1,"numberOfSites":0,"hostingEnvironmentId":null,"isSpot":false,"spotExpirationTime":null,"freeOfferExpirationTime":null,"tags":null,"kind":"app","resourceGroup":"clitest.rg000001","reserved":false,"isXenon":false,"hyperV":false,"mdmId":"waws-prod-euapbn1-019_1505","targetWorkerCount":0,"targetWorkerSizeId":0,"targetWorkerSku":"","provisioningState":"Succeeded","webSiteId":null,"existingServerFarmIds":null,"kubeEnvironmentProfile":null,"zoneRedundant":false,"maximumNumberOfZones":1,"currentNumberOfZonesUtilized":1,"migrateToVMSS":null,"vnetConnectionsUsed":0,"vnetConnectionsMax":2,"createdTime":"2025-10-29T22:22:12.09","asyncScalingEnabled":false,"isCustomMode":true,"registryAdapters":[],"installScripts":[],"storageMounts":[],"powerState":"Running","eligibleLogCategories":"AppServicePlatformLogs,AppServiceConsoleLogs"},"sku":{"name":"P1v4","tier":"PremiumV4","size":"P1v4","family":"Pv4","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1935'
+      - '1930'
       content-type:
       - application/json
       date:
-      - Tue, 28 Oct 2025 22:50:37 GMT
+      - Wed, 29 Oct 2025 22:22:38 GMT
       expires:
       - '-1'
       pragma:
@@ -1029,13 +838,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d1dbc388-1013-482b-b171-79f4269ea689/southcentralus/42f79698-32e5-4138-a7a4-ec569c2f94b5
+      - tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47,objectId=d1dbc388-1013-482b-b171-79f4269ea689/southcentralus/69938bf9-82eb-4c42-82d1-a7530852911b
       x-ms-ratelimit-remaining-subscription-global-writes:
-      - '11999'
+      - '12000'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '799'
+      - '800'
       x-msedge-ref:
-      - 'Ref A: A81DC2BD7A554029A6443A2010E0E6F6 Ref B: SN4AA2022302019 Ref C: 2025-10-28T22:50:35Z'
+      - 'Ref A: 77B2EA3CF9D9462D9B1C96B39054E230 Ref B: SN4AA2022304031 Ref C: 2025-10-29T22:22:30Z'
       x-powered-by:
       - ASP.NET
     status:

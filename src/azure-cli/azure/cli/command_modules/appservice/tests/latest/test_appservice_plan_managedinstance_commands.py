@@ -159,7 +159,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
     def test_appservice_plan_install_script_operations(self, resource_group):
         """Test install script add, list, and remove operations."""
         plan_name = self.create_random_name('mi-plan-script', 24)
-        storage_account_name = self.create_random_name('miscriptstg', 15)  # Storage account names must be 3-24 chars, lowercase only
+        storage_account_name = self.create_random_name('miscriptstg', 24)
         script_name = 'test-script'
         script_uri = f'https://{storage_account_name}.blob.core.windows.net/scripts/script1.ps1'
         
@@ -206,7 +206,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
     def test_appservice_plan_storage_mount_operations(self, resource_group):
         """Test storage mount add, list, and remove operations."""
         plan_name = self.create_random_name('mi-plan-storage', 24)
-        storage_account_name = self.create_random_name('mistoragestg', 15)  # Storage account names must be 3-24 chars, lowercase only
+        storage_account_name = self.create_random_name('mistoragestg', 24)
         key_vault_name = self.create_random_name('mi-storage-kv', 20)
         mount_name = 'test-mount'
         # For UNC paths, we need 4 backslashes to get 2 in the final JSON
@@ -313,7 +313,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         """Test complex scenario with multiple features."""
         plan_name = self.create_random_name('mi-plan-complex', 24)
         identity_name = self.create_random_name('mi-identity', 24)
-        storage_account_name = self.create_random_name('micomplexstg', 15)  # Storage account names must be 3-24 chars, lowercase only
+        storage_account_name = self.create_random_name('micomplexstg', 24)
         key_vault_name = self.create_random_name('mi-complex-kv', 20)
         script_name = 'complex-script'
         mount_name = 'complex-mount'
@@ -345,12 +345,17 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         self.cmd('appservice plan managed-instance install-script add -g {} -n {} --install-script-name {} --source-uri https://{}.blob.core.windows.net/scripts/complex.ps1 --type RemoteAzureBlob'.format(
             resource_group, plan_name, script_name, storage_account_name))
         
-        # Add storage mount
-        self.cmd('appservice plan managed-instance storage-mount add -g {} -n {} --mount-name {} --source //{}.file.core.windows.net/complex-share --destination-path C:\\complex --type FileShare --credentials-secret-uri https://{}.vault.azure.net/secrets/complex-storage'.format(
-            resource_group, plan_name, mount_name, storage_account_name, key_vault_name))
+        # Add storage mount - use proper UNC path formatting
+        # For UNC paths, we need 4 backslashes to get 2 in the final JSON
+        complex_source_path = f'\\\\\\\\{storage_account_name}.file.core.windows.net\\complex-share'
+        complex_destination_path = r'C:\complex'
+        complex_credentials_uri = f'https://{key_vault_name}.vault.azure.net/secrets/complex-storage/version'
+        
+        self.cmd('appservice plan managed-instance storage-mount add -g {} -n {} --mount-name {} --source "{}" --destination-path "{}" --type AzureFiles --credentials-secret-uri {}'.format(
+            resource_group, plan_name, mount_name, complex_source_path, complex_destination_path, complex_credentials_uri))
         
         # Add registry adapter
-        self.cmd('appservice plan managed-instance registry-adapter add -g {} -n {} --registry-key "{}" --type String --secret-uri https://{}.vault.azure.net/secrets/complex'.format(
+        self.cmd('appservice plan managed-instance registry-adapter add -g {} -n {} --registry-key "{}" --type String --secret-uri https://{}.vault.azure.net/secrets/complex/version'.format(
             resource_group, plan_name, registry_key, key_vault_name))
         
         # Verify all components are present
@@ -581,7 +586,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         subnet_name = self.create_random_name('mi-subnet-comp', 24)
         
         # Generate random names for storage account and key vault
-        storage_account_name = self.create_random_name('micompstg', 15)  # Storage account names must be 3-24 chars, lowercase only
+        storage_account_name = self.create_random_name('micompstg', 24)
         key_vault_name = self.create_random_name('mi-comp-kv', 20)
         
         # Test data using generated names
@@ -731,7 +736,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         subnet_name = self.create_random_name('mi-subnet-update', 24)
         
         # Generate random names for storage account and key vault
-        storage_account_name = self.create_random_name('miupdatestg', 15)  # Storage account names must be 3-24 chars, lowercase only
+        storage_account_name = self.create_random_name('miupdatestg', 24)
         key_vault_name = self.create_random_name('mi-update-kv', 20)
         
         # Test data using generated names
