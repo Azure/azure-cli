@@ -441,6 +441,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Describes the available zones for the product where storage account resource can be created.')
         c.argument('zone_placement_policy', arg_type=get_enum_type(t_zone_placement_policy),
                    help='The availability zone pinning policy for the storage account.')
+        c.argument('enable_blob_geo_priority_replication', arg_type=get_three_state_flag(),
+                   options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
+                   help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -539,6 +542,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Describes the available zones for the product where storage account resource can be created.')
         c.argument('zone_placement_policy', arg_type=get_enum_type(t_zone_placement_policy),
                    help='The availability zone pinning policy for the storage account.')
+        c.argument('enable_blob_geo_priority_replication', arg_type=get_three_state_flag(),
+                   options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
+                   help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key',
@@ -812,6 +818,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('min_creation_time', min_creation_time_type)
         c.argument('enable_metrics', arg_type=get_three_state_flag(),
                    help='Indicates whether object replication metrics feature is enabled for the policy.')
+        c.argument('priority_replication', arg_type=get_three_state_flag(),
+                   help='Indicates whether object replication priority replication feature is enabled for the policy.')
 
     for item in ['create', 'update']:
         with self.argument_context('storage account or-policy {}'.format(item),

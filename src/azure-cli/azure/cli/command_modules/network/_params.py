@@ -108,6 +108,7 @@ def load_arguments(self, _):
         c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.')
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
         c.argument('ssl_profile_id', help='SSL profile resource of the application gateway.', is_preview=True)
+        c.argument('enable_fips', arg_type=get_three_state_flag(), help='Whether FIPS is enabled on the application gateway resource.')
 
     with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
         c.argument('enable_private_link',

@@ -227,7 +227,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
                                custom_error_pages=None, firewall_policy=None, max_capacity=None,
-                               user_assigned_identity=None,
+                               user_assigned_identity=None, enable_fips=None,
                                enable_private_link=False,
                                private_link_ip_address=None,
                                private_link_subnet='PrivateLinkDefaultSubnet',
@@ -301,7 +301,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
-        firewall_policy, max_capacity, user_assigned_identity,
+        firewall_policy, max_capacity, user_assigned_identity, enable_fips,
         enable_private_link, private_link_name,
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
         private_link_subnet_id, trusted_client_cert, ssl_profile, ssl_profile_id, ssl_cert_name)

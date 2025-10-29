@@ -1516,16 +1516,6 @@ def load_arguments(self, _):
     # endRegion
 
     # region Restore point collection
-    with self.argument_context('restore-point collection create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-        c.argument('source_id', help='Resource Id of the source resource used to create this restore point collection',
-                   arg_group='Source')
-
-    with self.argument_context('restore-point collection update') as c:
-        c.argument('tags', tags_type)
-
     with self.argument_context('restore-point collection show') as c:
         c.argument('expand', help='The expand expression to apply on the operation.',
                    deprecate_info=c.deprecate(hide=True))

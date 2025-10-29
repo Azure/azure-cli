@@ -770,11 +770,14 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_basic')
     def test_network_app_gateway_with_defaults(self, resource_group):
-        self.cmd('network application-gateway create -g {rg} -n ag1 --priority 1001 --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
+        self.cmd('network vnet create -n vnet1 -g {rg} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -n subnet1 -g {rg} --vnet-name vnet1 --address-prefix 10.0.0.0/24 --default-outbound-access false')
+        self.cmd('network public-ip create -g {rg} -n pubip1 --sku standard --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --sku Standard_v2 --priority 1001 --vnet-name vnet1 --subnet subnet1 --public-ip-address pubip1 --enable-fips false')
+        self.cmd('network application-gateway show --resource-group {rg} --name ag1', checks=self.check('enableFips', False))
         self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait')
         self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait '
-                 '--capacity 3 --sku standard_small --tags foo=doo --http2 Disabled')
+                 '--capacity 3 --tags foo=doo --http2 Disabled --enable-fips true')
         self.cmd('network application-gateway wait -g {rg} -n ag1 --updated')
 
         ag_list = self.cmd('network application-gateway list --resource-group {rg}', checks=[
@@ -788,8 +791,8 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('name', 'ag1'),
             self.check('resourceGroup', resource_group),
             self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
-            self.check("frontendIPConfigurations[0].subnet.contains(id, 'default')", True),
             self.check("enableHttp2", False),
+            self.check("enableFips", True),
             self.check("contains(defaultPredefinedSslPolicy, 'AppGwSslPolicy')", True),
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1')
