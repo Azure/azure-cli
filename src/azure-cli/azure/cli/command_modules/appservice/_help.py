@@ -280,6 +280,22 @@ type: group
 short-summary: Manage instances for managed instance App Service plans.
 """
 
+helps['appservice plan managed-instance instance list'] = """
+type: command
+short-summary: List instances for a managed instance App Service plan.
+examples:
+  - name: List all instances for a managed instance App Service plan.
+    text: az appservice plan managed-instance instance list --name MyAppServicePlan --resource-group MyResourceGroup
+"""
+
+helps['appservice plan managed-instance instance recycle'] = """
+type: command
+short-summary: Recycle a specific instance in a managed instance App Service plan.
+examples:
+  - name: Recycle a specific worker instance in a managed instance App Service plan.
+    text: az appservice plan managed-instance instance recycle --name MyAppServicePlan --resource-group MyResourceGroup --worker-name MyWorkerInstance
+"""
+
 helps['appservice vnet-integration'] = """
 type: group
 short-summary: a method that lists the virtual network integrations used in an appservice plan
