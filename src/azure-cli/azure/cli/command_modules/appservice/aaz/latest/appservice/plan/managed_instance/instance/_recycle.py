@@ -16,7 +16,10 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class Recycle(AAZCommand):
-    """Recycles a managed instance worker machine.
+    """Recycle a specific instance in a managed instance App Service plan.
+
+    :example: Recycle a specific worker instance in a managed instance App Service plan.
+        az appservice plan managed-instance instance recycle --name MyAppServicePlan --resource-group MyResourceGroup --worker-name MyWorkerInstance
     """
 
     _aaz_info = {

@@ -16,7 +16,10 @@ from azure.cli.core.aaz import *
     is_preview=True,
 )
 class List(AAZCommand):
-    """Get the instance details for an app service plan.
+    """List instances for a managed instance App Service plan.
+
+    :example: List all instances for a managed instance App Service plan.
+        az appservice plan managed-instance instance list --name MyAppServicePlan --resource-group MyResourceGroup
     """
 
     _aaz_info = {
