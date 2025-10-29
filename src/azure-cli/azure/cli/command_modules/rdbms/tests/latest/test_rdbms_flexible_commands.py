@@ -2883,21 +2883,17 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'.format(
                  database_engine, resource_group, server_name, sku_name, tier, storage_size, version, location))
 
-
         # Enable index tuning for server
         self.cmd('{} flexible-server index-tuning update -g {} -s {} --enabled True'.format(database_engine, resource_group, server_name),
                  checks=NoneCheck())
-
 
         # Show that index tuning is enabled
         self.cmd('{} flexible-server index-tuning show -g {} -s {}'.format(database_engine, resource_group, server_name),
                  checks=NoneCheck())
 
-
         # List settings associated with index tuning for server
         self.cmd('{} flexible-server index-tuning list-settings -g {} -s {}'.format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('type(@)', 'array')])
-
 
         # Show properties of index tuning setting for server
         self.cmd('{} flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
@@ -2905,27 +2901,19 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'pg_qs.query_capture_mode', resource_group, server_name),
                  checks=[JMESPathCheck('value', 'all')])
 
-
         # Set new value of index tuning setting for server
         value = '1006'
         self.cmd('{} flexible-server index-tuning set-settings -g {} -s {} -n {} -v {}'.format(database_engine, resource_group, server_name,
                                                                                                'unused_reads_per_table', value),
                  checks=[JMESPathCheck('value', value)])
 
-
         # List recommendations associated with index tuning for server
         self.cmd('{} flexible-server index-tuning list-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('type(@)', 'array')])
 
-
         # Disable index tuning for server
         self.cmd('{} flexible-server index-tuning update -g {} -s {} --enabled False'.format(database_engine, resource_group, server_name),
-
-
-
-
                  checks=NoneCheck())
-
 
         # Show properties of index tuning setting for server
         self.cmd('{} flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),

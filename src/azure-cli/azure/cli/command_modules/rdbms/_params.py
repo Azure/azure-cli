@@ -1075,7 +1075,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('recommendation_type',
                            options_list=['--recommendation-type', '-r'],
                            help='Retrieve recommendations based on type.',
-                           arg_type=get_enum_type(['CreateIndex', 'DropIndex']))
+                           arg_type=get_enum_type(['CreateIndex', 'DropIndex', 'ReIndex']))
 
             for scope in ['show-settings', 'set-settings']:
                 argument_context_string = '{} flexible-server index-tuning {}'.format(command_group, scope)
