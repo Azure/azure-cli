@@ -4090,6 +4090,22 @@ class PlanProgressBar(IndeterminateProgressBar):
             self._emit("Scaling in progress...")
 
 
+def is_async_response(poller, timeout_seconds=30):
+    found_initial_response = False
+    for _ in range(timeout_seconds):
+        time.sleep(1)
+        if hasattr(poller._polling_method, '_initial_response'):  # pylint: disable=protected-access
+            found_initial_response = True
+            break
+
+    if not found_initial_response:
+        return False
+
+    # Check if this is an asynchronous operation (202) or synchronous (200)
+    status_code = poller._polling_method._initial_response.http_response.status_code  # pylint: disable=protected-access
+    return status_code == 202
+
+
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
@@ -4202,17 +4218,10 @@ has been deployed ".format(app_service_environment)
     if no_wait:
         return poller
 
-    # wait on _initial_response being set
-    # throw error after some amount of time
-    found_initial_response = False
-    import time
-    for i in range(30):
-        time.sleep(1)
-        if hasattr(poller._polling_method, '_initial_response'):
-            found_initial_response = True
-            break
+    # Check if this is an asynchronous operation
+    is_async = is_async_response(poller)
 
-    if not found_initial_response or poller._polling_method._initial_response.http_response.status_code == 200:
+    if not is_async:
         # for synchronous operations, or if we are unable to get the initial response, directly return poller result
         return poller.result()
 
@@ -4240,10 +4249,13 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
                             max_elastic_worker_count=None, async_scaling_enabled=None,
                             default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None):
-    if (number_of_workers is None and sku is None and
-            elastic_scale is None and max_elastic_worker_count is None and async_scaling_enabled is None and
-            default_identity is None and rdp_enabled is None and vnet is None and subnet is None and
-            registry_adapters is None and install_scripts is None and storage_mounts is None):
+    has_updates = any(param is not None for param in [
+        number_of_workers, sku, elastic_scale, max_elastic_worker_count,
+        async_scaling_enabled, default_identity, rdp_enabled, vnet, subnet,
+        registry_adapters, install_scripts, storage_mounts
+    ])
+
+    if not has_updates:
         safe_params = cmd.cli_ctx.data['safe_params']
         if '--set' not in safe_params:
             args = ["--number-of-workers",
@@ -4330,7 +4342,7 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
 
 
 def _enable_managed_instance_properties(plan_def, default_identity=None, subnet_resource_id=None, rdp_enabled=None,
-                                       registry_adapters=None, install_scripts=None, storage_mounts=None):
+                                        registry_adapters=None, install_scripts=None, storage_mounts=None):
     """Configure additional properties for managed instance App Service Plan features."""
     # Only enable additional properties if we have managed instance features to configure
     has_managed_instance_features = any([
