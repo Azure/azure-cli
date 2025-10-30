@@ -1001,6 +1001,7 @@ def _remove_dapr_readonly_attributes(daprcomponent_def):
         "latestRevisionFqdn",
         "customDomainVerificationId",
         "outboundIpAddresses",
+        "deploymentErrors",
         "fqdn"
     ]
 

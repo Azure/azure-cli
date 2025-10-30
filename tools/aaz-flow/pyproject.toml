@@ -1,12 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "aaz-flow"
-version = "0.1.0"
-description = "The MCP server utilized for code generation in Azure CLI (AAZ)."
+version = "1.0.0"
+description = "AAZ Flow is the MCP server for the AAZ APIs."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "fastmcp>=2.11.3"
+  "fastmcp>=2.11.0,<3.0.0"
 ]
 
-[tool.setuptools]
-py-modules = ["helpers", "main", "models"]
+[tool.hatch.build]
+packages = ["src/aaz-flow"]
+
+[tool.hatch.version]
+path = "src/aaz-flow/__init__.py"
