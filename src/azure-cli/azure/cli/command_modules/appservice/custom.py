@@ -102,6 +102,9 @@ from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeys
 from .aaz.latest.relay.namespace import List as NamespaceList
 from .aaz.latest.appservice.plan import (Show as AppServicePlanShow, Create as AppServicePlanCreate,
                                          Update as AppServicePlanUpdate)
+from .aaz.latest.appservice.plan.managed_instance import (ShowRdpPassword
+                                                          as AppServicePlanManagedInstanceShowRdpPassword)
+from .aaz.latest.appservice.plan.managed_instance.instance import List as AppServicePlanManagedInstanceList
 
 logger = get_logger(__name__)
 
@@ -4968,6 +4971,71 @@ def set_plan_default_identity(cmd, resource_group_name, name, identity=None):
 
     # Return the updated plan default identity
     return plan_result.get('planDefaultIdentity', {})
+
+
+def connect_to_plan_instance(cmd, resource_group_name, name, worker_name,
+                             bastion_name, bastion_resource_group_name=None):
+    from azure.cli.core.util import run_az_cmd
+
+    # 1. Default bastion RG to plan RG if not supplied
+    if not bastion_resource_group_name:
+        bastion_resource_group_name = resource_group_name
+
+    # 2. List instances to locate the target worker and its IP address
+    instances_cmd = AppServicePlanManagedInstanceList(cli_ctx=cmd.cli_ctx)
+    instances_payload = instances_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    instances = instances_payload.get('instances', []) if isinstance(instances_payload, dict) else []
+
+    # Search for the specified worker using the documented shape {"instanceName": ..., "ipAddress": ...}
+    target_instance = None
+    for inst in instances:
+        inst_worker_name = inst.get('instanceName')
+        if inst_worker_name and inst_worker_name.lower() == worker_name.lower():
+            target_instance = inst
+            break
+
+    if not target_instance:
+        raise ResourceNotFoundError(f"Worker instance '{worker_name}' not found in plan '{name}'.")
+
+    # Resolve IP address field (try a few possible keys)
+    target_ip = target_instance.get('ipAddress')
+    if not target_ip:
+        raise InvalidArgumentValueError("Could not determine target IP address from instance metadata.")
+
+    # 3. Retrieve RDP password after validating worker exists
+    password_cmd = AppServicePlanManagedInstanceShowRdpPassword(cli_ctx=cmd.cli_ctx)
+    password_response = password_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    password_value = password_response.get('rdpPassword')
+    if not password_value:
+        raise UnclassifiedUserFault("Double check that the app service plan is set with rdp-enabled and try again.")
+
+    logger.warning("Use the following credentials to login:")
+    logger.warning("RDP username: Administrator")
+    logger.warning("RDP password: [copied to clipboard]")
+    _copy_string_to_clipboard(password_value)
+
+    # 4. Invoke the Bastion RDP command
+    bastion_cmd = [
+        'az', 'network', 'bastion', 'rdp',
+        '--name', bastion_name,
+        '--resource-group', bastion_resource_group_name,
+        '--target-ip-address', target_ip
+    ]
+
+    run_az_cmd(bastion_cmd)
+
+
+def _copy_string_to_clipboard(string_value):
+    from azure.cli.core.util import run_cmd
+    run_cmd(["cmd.exe", "/c", "echo", "|", "set", "/p={}|".format(string_value), "clip"], check=False)
 
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
