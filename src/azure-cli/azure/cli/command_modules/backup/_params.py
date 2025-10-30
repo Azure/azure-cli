@@ -108,7 +108,7 @@ def load_arguments(self, _):
         c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(enable_disable_options), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
         c.argument('immutability_state', arg_type=get_enum_type(allowed_immutability_options), help='Use this parameter to configure immutability settings for the vault. By default, immutability is "Disabled" for the vault. "Unlocked" means that immutability is enabled for the vault and can be reversed. "Locked" means that immutability is enabled for the vault and cannot be reversed.')
         c.argument('cross_subscription_restore_state', arg_type=get_enum_type(enable_disable_permadisable_options), help='Use this parameter to configure cross subscription restore settings for the vault. By default, the property is "Enabled" for the vault.')
-        # TODO Re-add once the new SDK is in place
+        # TODO May add the soft_delete_retention_period_in_days parameter later. The other will not be exposed.
         # c.argument('soft_delete_state', options_list=['--soft-delete-state', '--soft-delete-feature-state'], arg_type=get_enum_type(allowed_softdelete_options), help='Set soft-delete feature state for a Recovery Services Vault.')
         # c.argument('soft_delete_retention_period_in_days', type=int, options_list=['--soft-delete-duration'], help='Set soft-delete retention duration time in days for a Recovery Services Vault.')
 
@@ -119,7 +119,7 @@ def load_arguments(self, _):
         c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(enable_disable_options), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
         c.argument('immutability_state', arg_type=get_enum_type(allowed_immutability_options), help='Use this parameter to configure immutability settings for the vault. By default, immutability is "Disabled" for the vault. "Unlocked" means that immutability is enabled for the vault and can be reversed. "Locked" means that immutability is enabled for the vault and cannot be reversed.')
         c.argument('cross_subscription_restore_state', arg_type=get_enum_type(enable_disable_permadisable_options), help='Use this parameter to configure cross subscription restore settings for the vault. By default, the property is "Enabled" for the vault.')
-        # TODO Re-add once the new SDK is in place
+        # TODO Discussion with Rishav once Enhanced Soft Delete is in place. We can only expose the latter, and might have to disable it from vaultconfig API
         # c.argument('soft_delete_state', options_list=['--soft-delete-state', '--soft-delete-feature-state'], arg_type=get_enum_type(allowed_softdelete_options), help='Set soft-delete feature state for a Recovery Services Vault.')
         # c.argument('soft_delete_retention_period_in_days', type=int, options_list=['--soft-delete-duration'], help='Set soft-delete retention duration time in days for a Recovery Services Vault.')
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant', 'ZoneRedundant']), help='Set backup storage properties for a Recovery Services vault.')
@@ -163,6 +163,15 @@ def load_arguments(self, _):
 
     with self.argument_context('backup vault encryption show') as c:
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
+
+    # Deleted Vault
+    with self.argument_context('backup deleted-vault') as c:
+        c.argument('location', help='Location of the deleted vault.')
+
+    for command in ['get', 'undelete', 'list-containers']:
+        with self.argument_context('backup deleted-vault ' + command) as c:
+            c.argument('deleted_vault_name', vault_name_type, options_list=['--name', '-n'], help='Name of the deleted vault.')
+            c.argument('deleted_vault_id', options_list=['--ids', '--deleted-vault-id'], help='ID of the deleted vault.')
 
     # Container
     with self.argument_context('backup container') as c:
@@ -414,7 +423,7 @@ def load_arguments(self, _):
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
         c.argument('disk_access_option', arg_type=get_enum_type(allowed_disk_access_options), help='Specify the disk access option for target disks.')
         c.argument('target_disk_access_id', help='Specify the target disk access ID when --disk-access-option is set to EnablePrivateAccessForAllDisks')
-        c.argument('cvm_os_des_id', options_list=['--cvm-os-des-id', '--cvm-os-disk-encryption-set-id'], help='Specify the Disk Encryption Set ID to use for OS disk encryption during restore of a Confidential VM. This is applicable only for Confidential VMs with managed disks. Please ensure that Disk Encryption Set has access to the Key vault.')
+        c.argument('cvm_os_des_id', help='Disk encryption set ID for the OS disk of confidential VMs. This is used to encrypt the OS disk during restore.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)

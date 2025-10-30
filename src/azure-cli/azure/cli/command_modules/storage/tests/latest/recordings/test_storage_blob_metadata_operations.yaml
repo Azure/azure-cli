@@ -15,12 +15,12 @@ interactions:
       ParameterSetName:
       - -n -g --query -o
       User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: POST
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2025-01-01&$expand=kerb
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest.rg000001/providers/Microsoft.Storage/storageAccounts/clitest000002/listKeys?api-version=2025-06-01&$expand=kerb
   response:
     body:
-      string: '{"keys":[{"creationTime":"2025-09-23T09:03:47.5400167Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2025-09-23T09:03:47.5400167Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+      string: '{"keys":[{"creationTime":"2025-10-24T09:45:30.8189919Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2025-10-24T09:45:30.8189919Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
     headers:
       cache-control:
       - no-cache
@@ -29,7 +29,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Tue, 23 Sep 2025 09:04:13 GMT
+      - Fri, 24 Oct 2025 09:45:56 GMT
       expires:
       - '-1'
       pragma:
@@ -41,7 +41,7 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-operation-identifier:
-      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/ea9661e0-372a-4d15-b9c9-671a0d77b542
+      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/56f49088-d8d3-4c85-9429-975e2183e239
       x-ms-ratelimit-remaining-subscription-resource-requests:
       - '799'
       x-ms-throttling-version:
@@ -65,9 +65,9 @@ interactions:
       ParameterSetName:
       - -n --account-name --account-key
       User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Tue, 23 Sep 2025 09:04:14 GMT
+      - Fri, 24 Oct 2025 09:45:56 GMT
       x-ms-version:
       - '2022-11-02'
     method: PUT
@@ -79,11 +79,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 23 Sep 2025 09:04:14 GMT
+      - Fri, 24 Oct 2025 09:45:57 GMT
       etag:
-      - '"0x8DDFA802BAF7D1B"'
+      - '"0x8DE12E22237E79C"'
       last-modified:
-      - Tue, 23 Sep 2025 09:04:15 GMT
+      - Fri, 24 Oct 2025 09:45:57 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
@@ -181,9 +181,9 @@ interactions:
       \       #                  account_info, blob_name, container)\r\n        #\r\n
       \       # self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name,
       container) \\\r\n        #     .assert_with_checks(JMESPathCheck('properties.contentSettings.contentType',
-      None))\r\n\r\n        self.storage_cmd('storage blob service-properties show',
-      account_info) \\\r\n            .assert_with_checks(JMESPathCheck('hourMetrics.enabled',
-      True))\r\n\r\n        if not skip_download:\r\n            downloaded = os.path.join(local_dir,
+      None))\r\n\r\n        # service behavior change\r\n        self.storage_cmd('storage
+      blob service-properties show', account_info) \\\r\n            .assert_with_checks(JMESPathCheck('hourMetrics.enabled',
+      False))\r\n\r\n        if not skip_download:\r\n            downloaded = os.path.join(local_dir,
       'test.file')\r\n\r\n            self.storage_cmd('storage blob download -n {}
       -c {} --file \"{}\"',\r\n                             account_info, blob_name,
       container, downloaded)\r\n            self.assertTrue(os.path.isfile(downloaded),
@@ -414,10 +414,10 @@ interactions:
       = self.create_random_name(prefix='account', length=24)\r\n\r\n        self.cmd('storage
       account create -n {} -g {} --kind StorageV2'.format(storage_account, resource_group))\r\n
       \       account_info = self.get_account_info(resource_group, storage_account)\r\n\r\n
-      \       self.storage_cmd('storage blob service-properties show', account_info)
-      \\\r\n            .assert_with_checks(JMESPathCheck('staticWebsite.enabled',
+      \       # service behavior change\r\n        self.storage_cmd('storage blob
+      service-properties show', account_info) \\\r\n            .assert_with_checks(JMESPathCheck('staticWebsite.enabled',
       False),\r\n                                JMESPathCheck('hourMetrics.enabled',
-      True),\r\n                                JMESPathCheck('minuteMetrics.enabled',
+      False),\r\n                                JMESPathCheck('minuteMetrics.enabled',
       False),\r\n                                JMESPathCheck('minuteMetrics.includeApis',
       None),\r\n                                JMESPathCheck('logging.delete', False))\r\n\r\n
       \       self.storage_cmd('storage blob service-properties update --static-website
@@ -503,8 +503,8 @@ interactions:
       self.assertRaisesRegex(ClientAuthenticationError, \"Authentication failure\"):\r\n
       \           self.cmd('storage blob show --account-name {} --account-key=\"YQ==\"
       -c foo -n bar.txt '.format(storage_account))\r\n\r\n    @ResourceGroupPreparer()\r\n
-      \   @StorageAccountPreparer(kind='StorageV2', location='centraluseuap')\r\n
-      \   def test_storage_blob_upload_tiers_scenarios(self, resource_group, storage_account_info):\r\n
+      \   @StorageAccountPreparer(kind='StorageV2', location='centralus')\r\n    def
+      test_storage_blob_upload_tiers_scenarios(self, resource_group, storage_account_info):\r\n
       \       account_info = storage_account_info\r\n        container = self.create_container(account_info,
       prefix=\"con\")\r\n\r\n        local_file = self.create_temp_file(128)\r\n\r\n
       \       # test with file\r\n        block_blob_tiers = ['Cold', 'Hot','Cool','Archive']\r\n
@@ -658,7 +658,7 @@ interactions:
       'rehydrate-pending-to-cold'))\r\n\r\n\r\n@api_version_constraint(ResourceType.DATA_STORAGE_BLOB,
       min_api='2020-10-02')\r\nclass StorageBlobImmutabilityTests(StorageScenarioMixin,
       ScenarioTest):\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n    @StorageAccountPreparer(name_prefix='version',
-      kind='StorageV2', location='centraluseuap')\r\n    def test_storage_blob_vlm(self,
+      kind='StorageV2', location='centralus')\r\n    def test_storage_blob_vlm(self,
       resource_group, storage_account_info):\r\n        container = self.create_random_name(prefix='container',
       length=18)\r\n        blob = self.create_random_name(prefix='blob', length=18)\r\n
       \       self.kwargs.update({\r\n            'container': container,\r\n            'blob':
@@ -732,13 +732,13 @@ interactions:
       '.format(\r\n            container, account_name, account_key)).assert_with_checks(\r\n
       \           JMESPathCheck('length(@)', 2))\r\n\r\n\r\nclass StorageBlobPITRTests(StorageScenarioMixin,
       ScenarioTest):\r\n    @AllowLargeResponse()\r\n    @ResourceGroupPreparer(name_prefix=\"storage_blob_restore\",
-      location=\"centraluseuap\")\r\n    @StorageAccountPreparer(name_prefix=\"restore\",
-      kind=\"StorageV2\", sku='Standard_LRS', location=\"centraluseuap\")\r\n    def
-      test_storage_blob_restore(self, resource_group, storage_account):\r\n        import
-      time\r\n        # Enable Policy\r\n        self.cmd('storage account blob-service-properties
-      update --enable-change-feed --enable-delete-retention --delete-retention-days
-      2 --enable-versioning -n {sa}')\\\r\n            .assert_with_checks(JMESPathCheck('changeFeed.enabled',
-      True),\r\n                                JMESPathCheck('deleteRetentionPolicy.enabled',
+      location=\"centralus\")\r\n    @StorageAccountPreparer(name_prefix=\"restore\",
+      kind=\"StorageV2\", sku='Standard_LRS', location=\"centralus\")\r\n    def test_storage_blob_restore(self,
+      resource_group, storage_account):\r\n        import time\r\n        # Enable
+      Policy\r\n        self.cmd('storage account blob-service-properties update --enable-change-feed
+      --enable-delete-retention --delete-retention-days 2 --enable-versioning -n {sa}')\\\r\n
+      \           .assert_with_checks(JMESPathCheck('changeFeed.enabled', True),\r\n
+      \                               JMESPathCheck('deleteRetentionPolicy.enabled',
       True),\r\n                                JMESPathCheck('deleteRetentionPolicy.days',
       2))\r\n\r\n        self.cmd('storage account blob-service-properties update
       --enable-restore-policy --restore-days 1 -n {sa} ')\r\n\r\n        c1 = self.create_random_name(prefix='containera',
@@ -803,7 +803,7 @@ interactions:
       blob show -c {} -n {} ', account_info, target_container, 'dst') \\\r\n            .assert_with_checks(JMESPathCheck('properties.blobTier',
       'Archive'),\r\n                                JMESPathCheck('properties.rehydrationStatus',
       'rehydrate-pending-to-cool'))\r\n\r\n    @AllowLargeResponse()\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n
-      \   @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='centraluseuap')\r\n
+      \   @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='centralus')\r\n
       \   def test_storage_container_vlm_scenarios(self, resource_group, storage_account):\r\n
       \       self.kwargs.update({\r\n            'container1': self.create_random_name(prefix='con1',
       length=10),\r\n            'container2': self.create_random_name(prefix='con2',
@@ -832,7 +832,7 @@ interactions:
       False),\r\n                     JMESPathCheck('immutableStorageWithVersioning.migrationState',
       'InProgress')})\r\n\r\n\r\nclass StorageContainerScenarioTest(StorageScenarioMixin,
       ScenarioTest):\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n    @StorageAccountPreparer(kind='StorageV2',
-      name_prefix='clitest', location='eastus2euap')\r\n    def test_storage_container_list_scenarios(self,
+      name_prefix='clitest', location='eastus2')\r\n    def test_storage_container_list_scenarios(self,
       resource_group, storage_account):\r\n        account_info = self.get_account_info(resource_group,
       storage_account)\r\n        container1 = self.create_container(account_info,
       prefix=\"con1\")\r\n        container2 = self.create_container(account_info,
@@ -863,7 +863,7 @@ interactions:
       1))\r\n        self.storage_cmd('storage container list --include-deleted ',
       account_info) \\\r\n            .assert_with_checks(JMESPathCheck('length(@)',
       2))\r\n\r\n    @ResourceGroupPreparer(name_prefix='clitest')\r\n    @StorageAccountPreparer(kind='StorageV2',
-      name_prefix='clitest', location='eastus2euap')\r\n    def test_storage_container_soft_delete_scenarios(self,
+      name_prefix='clitest', location='eastus2')\r\n    def test_storage_container_soft_delete_scenarios(self,
       resource_group, storage_account):\r\n        import time\r\n        account_info
       = self.get_account_info(resource_group, storage_account)\r\n        container
       = self.create_container(account_info, prefix=\"con1\")\r\n        self.cmd('storage
@@ -896,7 +896,7 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '68289'
+      - '68333'
       Content-Type:
       - application/octet-stream
       If-None-Match:
@@ -904,13 +904,13 @@ interactions:
       ParameterSetName:
       - -c -n -f --account-name --account-key
       User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-blob-content-type:
       - text/x-python
       x-ms-blob-type:
       - BlockBlob
       x-ms-date:
-      - Tue, 23 Sep 2025 09:04:15 GMT
+      - Fri, 24 Oct 2025 09:45:58 GMT
       x-ms-version:
       - '2022-11-02'
     method: PUT
@@ -922,17 +922,17 @@ interactions:
       content-length:
       - '0'
       content-md5:
-      - tynVFMmJ9QDwv5bUU3xSmQ==
+      - hk4hA0JZQ+sL8vOOUWCLzw==
       date:
-      - Tue, 23 Sep 2025 09:04:16 GMT
+      - Fri, 24 Oct 2025 09:45:59 GMT
       etag:
-      - '"0x8DDFA802CAB08B6"'
+      - '"0x8DE12E223249540"'
       last-modified:
-      - Tue, 23 Sep 2025 09:04:16 GMT
+      - Fri, 24 Oct 2025 09:45:59 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-content-crc64:
-      - Bmd8/l9C1pk=
+      - OBYNoiSlufg=
       x-ms-request-server-encrypted:
       - 'true'
       x-ms-version:
@@ -956,9 +956,9 @@ interactions:
       ParameterSetName:
       - -n -c --metadata --account-name --account-key
       User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Tue, 23 Sep 2025 09:04:17 GMT
+      - Fri, 24 Oct 2025 09:45:59 GMT
       x-ms-meta-a:
       - b
       x-ms-meta-c:
@@ -974,11 +974,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 23 Sep 2025 09:04:17 GMT
+      - Fri, 24 Oct 2025 09:46:00 GMT
       etag:
-      - '"0x8DDFA802D5E4E3B"'
+      - '"0x8DE12E223C94817"'
       last-modified:
-      - Tue, 23 Sep 2025 09:04:18 GMT
+      - Fri, 24 Oct 2025 09:46:00 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -1002,9 +1002,9 @@ interactions:
       ParameterSetName:
       - -n -c --account-name --account-key
       User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Tue, 23 Sep 2025 09:04:18 GMT
+      - Fri, 24 Oct 2025 09:46:00 GMT
       x-ms-version:
       - '2022-11-02'
     method: HEAD
@@ -1016,23 +1016,23 @@ interactions:
       accept-ranges:
       - bytes
       content-length:
-      - '68289'
+      - '68333'
       content-md5:
-      - tynVFMmJ9QDwv5bUU3xSmQ==
+      - hk4hA0JZQ+sL8vOOUWCLzw==
       content-type:
       - text/x-python
       date:
-      - Tue, 23 Sep 2025 09:04:18 GMT
+      - Fri, 24 Oct 2025 09:46:01 GMT
       etag:
-      - '"0x8DDFA802D5E4E3B"'
+      - '"0x8DE12E223C94817"'
       last-modified:
-      - Tue, 23 Sep 2025 09:04:18 GMT
+      - Fri, 24 Oct 2025 09:46:00 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-blob-type:
       - BlockBlob
       x-ms-creation-time:
-      - Tue, 23 Sep 2025 09:04:16 GMT
+      - Fri, 24 Oct 2025 09:45:59 GMT
       x-ms-lease-state:
       - available
       x-ms-lease-status:
@@ -1064,9 +1064,9 @@ interactions:
       ParameterSetName:
       - -n -c --account-name --account-key
       User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Tue, 23 Sep 2025 09:04:19 GMT
+      - Fri, 24 Oct 2025 09:46:01 GMT
       x-ms-version:
       - '2022-11-02'
     method: PUT
@@ -1078,11 +1078,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Tue, 23 Sep 2025 09:04:19 GMT
+      - Fri, 24 Oct 2025 09:46:02 GMT
       etag:
-      - '"0x8DDFA802EBB4722"'
+      - '"0x8DE12E225119C90"'
       last-modified:
-      - Tue, 23 Sep 2025 09:04:20 GMT
+      - Fri, 24 Oct 2025 09:46:02 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-request-server-encrypted:
@@ -1106,9 +1106,9 @@ interactions:
       ParameterSetName:
       - -n -c --account-name --account-key
       User-Agent:
-      - AZURECLI/2.77.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      - AZURECLI/2.78.0 azsdk-python-storage-blob/12.16.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Tue, 23 Sep 2025 09:04:20 GMT
+      - Fri, 24 Oct 2025 09:46:03 GMT
       x-ms-version:
       - '2022-11-02'
     method: HEAD
@@ -1120,23 +1120,23 @@ interactions:
       accept-ranges:
       - bytes
       content-length:
-      - '68289'
+      - '68333'
       content-md5:
-      - tynVFMmJ9QDwv5bUU3xSmQ==
+      - hk4hA0JZQ+sL8vOOUWCLzw==
       content-type:
       - text/x-python
       date:
-      - Tue, 23 Sep 2025 09:04:21 GMT
+      - Fri, 24 Oct 2025 09:46:03 GMT
       etag:
-      - '"0x8DDFA802EBB4722"'
+      - '"0x8DE12E225119C90"'
       last-modified:
-      - Tue, 23 Sep 2025 09:04:20 GMT
+      - Fri, 24 Oct 2025 09:46:02 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-blob-type:
       - BlockBlob
       x-ms-creation-time:
-      - Tue, 23 Sep 2025 09:04:16 GMT
+      - Fri, 24 Oct 2025 09:45:59 GMT
       x-ms-lease-state:
       - available
       x-ms-lease-status:
