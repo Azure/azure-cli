@@ -647,6 +647,11 @@ class ApimScenarioTest(ScenarioTest):
             'apim api export -g "{rg}" --service-name "{service_name}" --api-id "{api_id}" --export-format "OpenApiJsonFile" --file-path "{file_path}" --file-name "{file_name}"'
         )
 
+        # verify an exported file exists and then clean up
+        exported_full_path = os.path.join(TEST_DIR, custom_filename)
+        self.assertTrue(os.path.exists(exported_full_path))
+        os.remove(exported_full_path)
+
 
         # service delete command
         self.cmd('apim delete -g {rg} -n {service_name} -y')
