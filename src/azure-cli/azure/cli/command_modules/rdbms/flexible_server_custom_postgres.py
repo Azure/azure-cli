@@ -1752,6 +1752,7 @@ def recommendations_list(cmd, resource_group_name, server_name, recommendation_t
         recommendation_type=recommendation_type
     )
 
+
 def auto_tuning_update(cmd, client, resource_group_name, server_name, auto_tuning_enabled):
     validate_resource_group(resource_group_name)
     source = "user-override"
@@ -1847,6 +1848,7 @@ def auto_tuning_table_recommendations_list(cmd, resource_group_name, server_name
         tuning_option="table",
         recommendation_type=recommendation_type
     )
+
 
 def _update_private_endpoint_connection_status(cmd, client, resource_group_name, server_name,
                                                private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument

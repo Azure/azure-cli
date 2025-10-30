@@ -22,4 +22,8 @@ register_other_breaking_change('postgres db',
 register_other_breaking_change('postgres server-logs',
                                message='Azure Database for PostgreSQL Single Server is deprecated. '
                                'Please migrate to Flexible Server for new deployments.')
-register_command_group_deprecate(command_group='postgres flexible-server index-tuning', redirect='postgres flexible-server auto-tuning', message='Index tuning feature has now expanded its capabilities to support other automatically generated recommendations which are covered by the new command.')
+register_command_group_deprecate(command_group='postgres flexible-server index-tuning',
+                                 redirect='postgres flexible-server auto-tuning',
+                                 message='Index tuning feature has now expanded its capabilities to support '
+                                 'other automatically generated recommendations which are covered by the '
+                                 'new command.')
