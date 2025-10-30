@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.78.0"
+VERSION = "2.79.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -85,7 +85,7 @@ DEPENDENCIES = [
     'azure-mgmt-eventgrid==10.2.0b2',
     'azure-mgmt-eventhub~=12.0.0b1',
     'azure-mgmt-extendedlocation==1.0.0b2',
-    'azure-mgmt-hdinsight==9.0.0b3',
+    'azure-mgmt-hdinsight==9.1.0b2',
     'azure-mgmt-imagebuilder~=1.3.0',
     'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==5.0.0b1',
@@ -105,7 +105,7 @@ DEPENDENCIES = [
     'azure-mgmt-rdbms==10.2.0b17',
     'azure-mgmt-mysqlflexibleservers==1.0.0b3',
     'azure-mgmt-recoveryservicesbackup~=9.2.0',
-    'azure-mgmt-recoveryservices~=3.1.0',
+    'azure-mgmt-recoveryservices~=4.0.0',
     'azure-mgmt-redhatopenshift~=1.5.0',
     'azure-mgmt-redis~=14.5.0',
     'azure-mgmt-resource==25.0.0b1',
@@ -122,7 +122,7 @@ DEPENDENCIES = [
     'azure-mgmt-signalr==2.0.0b2',
     'azure-mgmt-sqlvirtualmachine==1.0.0b5',
     'azure-mgmt-sql==4.0.0b22',
-    'azure-mgmt-storage==23.1.0',
+    'azure-mgmt-storage==24.0.0',
     'azure-mgmt-synapse==2.1.0b5',
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==9.0.0',

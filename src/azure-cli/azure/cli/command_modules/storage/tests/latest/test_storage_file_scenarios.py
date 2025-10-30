@@ -628,6 +628,8 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('fileMode', '0664'),
                                 JMESPathCheck('owner', '3'),
                                 JMESPathCheck('group', '4'))
+        self.storage_cmd('storage file list --share-name {}', account_info, share_name)\
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
 
         # test copy mode
         dst_file_path = dir_name + '/' + 'dst_file.txt'
@@ -649,6 +651,8 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('fileMode', '0666'),
                                 JMESPathCheck('owner', '4'),
                                 JMESPathCheck('group', '5'))
+        self.storage_cmd('storage file list --share-name {} --path {}', account_info, share_name, dir_name) \
+            .assert_with_checks(JMESPathCheck('length(@)', 3))
 
         # hard link
         link_path = dir_name + '/' + 'linked_file.txt'
