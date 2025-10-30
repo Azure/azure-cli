@@ -15,7 +15,7 @@ from knack.util import StatusTag, color_map
 
 logger = get_logger()
 
-NEXT_BREAKING_CHANGE_RELEASE = '2.79.0'
+NEXT_BREAKING_CHANGE_RELEASE = '2.80.0'
 NEXT_BREAKING_CHANGE_DATE = 'Nov 2025'
 DEFAULT_BREAKING_CHANGE_TAG = '[Breaking Change]'
 
