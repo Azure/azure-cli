@@ -1096,7 +1096,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                     c.argument('server_name', options_list=['--server-name', '-s'], arg_type=server_name_arg_type)
 
             with self.argument_context('{} flexible-server auto-tuning update'.format(command_group)) as c:
-                c.argument('tuning_enabled',
+                c.argument('auto_tuning_enabled',
                            options_list=['--enabled'],
                            required=True,
                            help='Enable or disable index and table tuning feature.',
