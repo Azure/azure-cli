@@ -15,8 +15,8 @@ class TestIdentity(ScenarioTest):
     def test_identity_management(self, resource_group):
         self.kwargs.update({
             'identity': 'myidentity',
-            'assignment_restriction_compute': '\{"providers":\["Microsoft.Compute"\]\}',
-            'assignment_restriction_empty': '\{"providers":\[\]\}'
+            'resource_restriction_compute': '\{"providers":\["Microsoft.Compute"\]\}',
+            'resource_restriction_empty': '\{"providers":\[\]\}'
         })
 
         operations = self.cmd('identity list-operations').get_output_in_json()
@@ -25,13 +25,13 @@ class TestIdentity(ScenarioTest):
         self.cmd('identity create -n {identity} -g {rg}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('assignmentRestriction', None)
+            self.check('resourceRestriction', None)
         ])
 
-        self.cmd('identity update -n {identity} -g {rg} --assignment-restriction {assignment_restriction_compute}', checks=[
+        self.cmd('identity update -n {identity} -g {rg} --resource-restriction {resource_restriction_compute}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('assignmentRestriction.providers[0]', 'Microsoft.Compute')
+            self.check('resourceRestriction.providers[0]', 'Microsoft.Compute')
         ])
 
         self.cmd('identity list-resources -g {rg} -n {identity}')
@@ -39,16 +39,16 @@ class TestIdentity(ScenarioTest):
         self.cmd('identity list -g {rg}', checks=self.check('length(@)', 1))
         self.cmd('identity delete -n {identity} -g {rg}')
 
-        self.cmd('identity create -n {identity} -g {rg} --assignment-restriction {assignment_restriction_compute}', checks=[
+        self.cmd('identity create -n {identity} -g {rg} --resource-restriction {resource_restriction_compute}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('assignmentRestriction.providers[0]', 'Microsoft.Compute')
+            self.check('resourceRestriction.providers[0]', 'Microsoft.Compute')
         ])
 
-        self.cmd('identity update -n {identity} -g {rg} --assignment-restriction {assignment_restriction_empty}', checks=[
+        self.cmd('identity update -n {identity} -g {rg} --resource-restriction {resource_restriction_empty}', checks=[
             self.check('name', '{identity}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('assignmentRestriction.providers', [])
+            self.check('resourceRestriction.providers', [])
         ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_federated_identity_credential_', location='centraluseuap')
