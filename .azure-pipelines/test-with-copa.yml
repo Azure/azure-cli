@@ -390,15 +390,44 @@ stages:
 
     - task: Bash@3
       displayName: Patch with Copa
+      name: PatchWithCopaTask
       inputs:
         targetType: 'inline'
         script: |
           export COPA_EXPERIMENTAL=1
           export IMAGE=$(AzCliImageName):$(AzCliImageTag)
-          copa patch -i $IMAGE -r trivy-scan-before.json --pkg-types os,library --library-patch-level ${{parameters.PatchLevel}} --tag $(AzCliImagePatchedTag)
+          copa patch -i $IMAGE -r trivy-scan-before.json --pkg-types os,library --library-patch-level ${{parameters.PatchLevel}} --tag $(AzCliImagePatchedTag) 2>&1 | tee copa-patch.log
+
+          echo "------------- copa patched result: -------------"
+          cat copa-patch.log
+          echo "------------------------------------------------"
+          
+          PatchableVulnerabilitiesFound=true
+          if grep -q "Error" copa-patch.log; then
+            if grep -q "Error: no patchable vulnerabilities found" copa-patch.log; then
+              echo "no patchable vulnerabilities found"
+              PatchableVulnerabilitiesFound=false
+            else
+              echo "Found error in copa-patch.log:"
+              grep "Error" copa-patch.log
+              exit 1
+            fi
+          else
+            PATCHED_IMAGE="$(AzCliImageName):$(AzCliImagePatchedTag)"
+            if ! docker image ls --format "table {{.Repository}}:{{.Tag}}" | grep -q "^$PATCHED_IMAGE$"; then
+              echo "Error: Patched image $PATCHED_IMAGE does not exist"
+              exit 1
+            fi
+          fi
+          echo "##vso[task.setvariable variable=PatchableVulnerabilitiesFound]$PatchableVulnerabilitiesFound"
+          echo "##vso[task.setvariable variable=PatchableVulnerabilitiesFound;isOutput=true]$PatchableVulnerabilitiesFound"
+
+          echo "== Check Docker Images =="
+          docker images
 
     - task: Bash@3
       displayName: Check Patched Docker Image
+      condition: and(succeeded(), eq(variables['PatchableVulnerabilitiesFound'], 'true'))
       inputs:
         targetType: 'inline'
         script: |
@@ -410,6 +439,7 @@ stages:
 
     - task: Bash@3
       displayName: Save Patched Docker Image
+      condition: and(succeeded(), eq(variables['PatchableVulnerabilitiesFound'], 'true'))
       inputs:
         targetType: 'inline'
         script: |
@@ -422,18 +452,21 @@ stages:
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
+      condition: and(succeeded(), eq(variables['PatchableVulnerabilitiesFound'], 'true'))
       inputs:
         BuildDropPath: $(Build.ArtifactStagingDirectory)/copa
         DockerImagesToScan: $(AzCliImagePatchedTag)
 
     - task: PublishPipelineArtifact@0
       displayName: Publish docker Artifact
+      condition: and(succeeded(), eq(variables['PatchableVulnerabilitiesFound'], 'true'))
       inputs:
         TargetPath: $(Build.ArtifactStagingDirectory)/copa
         ArtifactName: $(uploadArtifactName)
 
     - task: Bash@3
       displayName: Scan with Trivy again
+      condition: and(succeeded(), eq(variables['PatchableVulnerabilitiesFound'], 'true'))
       continueOnError: true
       inputs:
         targetType: 'inline'
@@ -454,6 +487,7 @@ stages:
   - PrepareInfo
   - Build
   - PatchWithCopa
+  condition: and(succeeded(), eq(dependencies.PatchWithCopa.outputs['BuildCopaPatchedDockerImage.PatchWithCopaTask.PatchableVulnerabilitiesFound'], 'true'))
   variables:
     AzCliVersion: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliVersion'] ]
     AzCliImageName: $[ stageDependencies.PrepareInfo.PrepareAzCliVersion.outputs['PrepareAzCliVersionTask.AzCliImageName'] ]
