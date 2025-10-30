@@ -142,11 +142,11 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
         c.argument('registry_adapters', options_list=['--registry-adapter'], is_preview=True, action=RegistryAdapterAddAction, nargs='+',
-                   help="Registry adapter configurations. Provide key-value pairs for registry-key=<key> type=<type> secret-uri=<uri>.")
+                   help="Registry adapter configurations. Provide key-value pairs for `registry-key=<key> type=<type> secret-uri=<uri>`.")
         c.argument('install_scripts', options_list=['--install-script'], is_preview=True, action=InstallScriptAddAction, nargs='+',
-                   help="Install script configurations. Provide key-value pairs for name=<name> source-uri=<uri> type=<type>.")
+                   help="Install script configurations. Provide key-value pairs for `name=<name> source-uri=<uri> type=<type>`.")
         c.argument('storage_mounts', options_list=['--storage-mount'], is_preview=True, action=StorageMountAddAction, nargs='+',
-                   help="Storage mount configurations. Provide key-value pairs for name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>.")
+                   help="Storage mount configurations. Provide key-value pairs for `name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>`.")
 
     with self.argument_context('appservice plan update') as c:
         c.argument('sku', arg_type=sku_arg_type)
@@ -162,11 +162,11 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('vnet', is_preview=True, help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the webapp will be used. Must be used with --subnet argument.")
         c.argument('subnet', is_preview=True, help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet is argument also needed if specifying subnet by name.")
         c.argument('registry_adapters', options_list=['--registry-adapter'], is_preview=True, action=RegistryAdapterAddAction, nargs='+',
-                   help="Registry adapter configurations. Provide key-value pairs for registry-key=<key> type=<type> secret-uri=<uri>.")
+                   help="Registry adapter configurations. Provide key-value pairs for `registry-key=<key> type=<type> secret-uri=<uri>`.")
         c.argument('install_scripts', options_list=['--install-script'], is_preview=True, action=InstallScriptAddAction, nargs='+',
-                   help="Install script configurations. Provide key-value pairs for name=<name> source-uri=<uri> type=<type>.")
+                   help="Install script configurations. Provide key-value pairs for `name=<name> source-uri=<uri> type=<type>`.")
         c.argument('storage_mounts', options_list=['--storage-mount'], is_preview=True, action=StorageMountAddAction, nargs='+',
-                   help="Storage mount configurations. Provide key-value pairs for name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>.")
+                   help="Storage mount configurations. Provide key-value pairs for `name=<name> source=<source> type=<type> destination-path=<path> credentials-secret-uri=<uri>`.")
 
     with self.argument_context('appservice plan delete') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
