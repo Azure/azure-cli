@@ -111,7 +111,7 @@ def _postgres_parse_list_capability(result):
         'zones': zones,
         'server_versions': versions,
         'supported_server_versions': supported_server_versions,
-        'index_tuning_supported': index_tuning_supported
+        'auto_tuning_supported': auto_tuning_supported
     }
 
 

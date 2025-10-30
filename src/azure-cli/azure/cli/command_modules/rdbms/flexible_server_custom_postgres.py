@@ -1678,8 +1678,8 @@ def index_tuning_update(cmd, client, resource_group_name, server_name, index_tun
         source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
         location = ''.join(source_server_object.location.lower().split())
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-        index_tuning_supported = list_location_capability_info['index_tuning_supported']
-        if not index_tuning_supported:
+        auto_tuning_supported = list_location_capability_info['auto_tuning_supported']
+        if not auto_tuning_supported:
             raise CLIError("Index tuning is not supported for the server.")
 
         logger.warning("Enabling index tuning for the server.")
@@ -1762,7 +1762,7 @@ def auto_tuning_update(cmd, client, resource_group_name, server_name, auto_tunin
         source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
         location = ''.join(source_server_object.location.lower().split())
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-        auto_tuning_supported = list_location_capability_info['index_tuning_supported']
+        auto_tuning_supported = list_location_capability_info['auto_tuning_supported']
         if not auto_tuning_supported:
             raise CLIError("Autonomous tuning is not supported for the server.")
 
