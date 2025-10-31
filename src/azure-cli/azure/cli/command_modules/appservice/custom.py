@@ -388,7 +388,7 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
                                  "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
 
 
-def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
+def _get_subnet_info(cmd, resource_group_name, vnet, subnet, attached_resource="webapp"):
     from azure.cli.core.commands.client_factory import get_subscription_id
     subnet_info = {"vnet_name": None,
                    "subnet_name": None,
@@ -423,8 +423,8 @@ def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
         subscription_id = parsed_vnet["subscription"]
         subnet_info["vnet_resource_id"] = vnet
     else:
-        logger.warning("Assuming subnet resource group is the same as webapp. "
-                       "Use a resource ID for --subnet or --vnet to use a different resource group.")
+        logger.warning("Assuming subnet resource group is the same as %s. "
+                       "Use a resource ID for --subnet or --vnet to use a different resource group.", attached_resource)
         subnet_rg = resource_group_name
         vnet_name = vnet
         subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -4171,7 +4171,8 @@ has been deployed ".format(app_service_environment)
         subnet_info = _get_subnet_info(cmd=cmd,
                                        resource_group_name=resource_group_name,
                                        subnet=subnet,
-                                       vnet=vnet)
+                                       vnet=vnet,
+                                       attached_resource="app service plan")
         _validate_vnet_integration_location(cmd=cmd, webapp_location=location,
                                             subnet_resource_group=subnet_info["resource_group_name"],
                                             vnet_name=subnet_info["vnet_name"],
@@ -4317,7 +4318,8 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
         subnet_info = _get_subnet_info(cmd=cmd,
                                        resource_group_name=instance.resource_group,
                                        subnet=subnet,
-                                       vnet=vnet)
+                                       vnet=vnet,
+                                       attached_resource="app service plan")
         _validate_vnet_integration_location(cmd=cmd, webapp_location=instance.location,
                                             subnet_resource_group=subnet_info["resource_group_name"],
                                             vnet_name=subnet_info["vnet_name"],
@@ -4496,9 +4498,11 @@ def remove_plan_managed_instance_registry_adapter(cmd, resource_group_name, name
     adapters = plan_result.get('registryAdapters', [])
 
     # Remove adapter by case-insensitive registry key
-    adapters = [a for a in adapters if a.get('registryKey', '').lower() != registry_key.lower()]
+    updated_adapters = [a for a in adapters if a.get('registryKey', '').lower() != registry_key.lower()]
+    if len(adapters) == len(updated_adapters):
+        raise ResourceNotFoundError("Registry key {} not found".format(registry_key))
 
-    return _update_plan_registry_adapters(cmd, resource_group_name, name, adapters, plan_result)
+    return _update_plan_registry_adapters(cmd, resource_group_name, name, updated_adapters, plan_result)
 
 
 def list_plan_managed_instance_install_scripts(cmd, resource_group_name, name):
@@ -4576,9 +4580,12 @@ def remove_plan_managed_instance_install_script(cmd, resource_group_name, name, 
     scripts = plan_result.get('installScripts', [])
 
     # Remove script by case-insensitive name
-    scripts = [s for s in scripts if s.get('name', '').lower() != install_script_name.lower()]
+    updated_scripts = [s for s in scripts if s.get('name', '').lower() != install_script_name.lower()]
 
-    return _update_plan_install_scripts(cmd, resource_group_name, name, scripts, plan_result)
+    if len(scripts) == len(updated_scripts):
+        raise ResourceNotFoundError("Install script with name {} not found".format(install_script_name))
+
+    return _update_plan_install_scripts(cmd, resource_group_name, name, updated_scripts, plan_result)
 
 
 def list_plan_managed_instance_storage_mounts(cmd, resource_group_name, name):
@@ -4662,9 +4669,11 @@ def remove_plan_managed_instance_storage_mount(cmd, resource_group_name, name, m
     mounts = plan_result.get('storageMounts', [])
 
     # Remove mount by case-insensitive name
-    mounts = [m for m in mounts if m.get('name', '').lower() != mount_name.lower()]
+    updated_mounts = [m for m in mounts if m.get('name', '').lower() != mount_name.lower()]
+    if len(mounts) == len(updated_mounts):
+        raise ResourceNotFoundError("Storage mount with name {} not found".format(mount_name))
 
-    return _update_plan_storage_mounts(cmd, resource_group_name, name, mounts, plan_result)
+    return _update_plan_storage_mounts(cmd, resource_group_name, name, updated_mounts, plan_result)
 
 
 def show_plan_managed_instance_network(cmd, resource_group_name, name):
@@ -4720,7 +4729,8 @@ def add_plan_managed_instance_network(cmd, resource_group_name, name, vnet=None,
         subnet_info = _get_subnet_info(cmd=cmd,
                                        resource_group_name=resource_group_name,
                                        subnet=subnet,
-                                       vnet=vnet)
+                                       vnet=vnet,
+                                       attached_resource="app service plan")
         _validate_vnet_integration_location(cmd=cmd, webapp_location=location,
                                             subnet_resource_group=subnet_info["resource_group_name"],
                                             vnet_name=subnet_info["vnet_name"],
@@ -4854,9 +4864,9 @@ def assign_plan_identity(cmd, resource_group_name, name, identities=None):
     if has_existing_user and current_user_assigned:
         final_user_assigned.extend(list(current_user_assigned.keys()))
 
-    # Add new user-assigned identities (avoid duplicates)
+    # Add new user-assigned identities (avoid duplicates with case-insensitive comparison)
     for identity in user_assigned_identities:
-        if identity not in final_user_assigned:
+        if not any(existing.lower() == identity.lower() for existing in final_user_assigned):
             final_user_assigned.append(identity)
 
     # Determine final system assignment
@@ -4904,11 +4914,16 @@ def remove_plan_identity(cmd, resource_group_name, name, identities=None):
 
     # Check if user-assigned identities exist
     if remove_user_assigned:
-        existing_user_ids = set(current_user_assigned.keys()) if current_user_assigned else set()
-        remove_user_ids = set(remove_user_assigned)
+        existing_user_ids = set(id.lower() for id in current_user_assigned.keys()) if current_user_assigned else set()
+        remove_user_ids = set(id.lower() for id in remove_user_assigned)
         non_existing = remove_user_ids - existing_user_ids
         if non_existing:
-            raise ResourceNotFoundError(f"User-assigned identities '{', '.join(non_existing)}' "
+            # Find the original casing for error message
+            original_non_existing = []
+            for remove_id in remove_user_assigned:
+                if remove_id.lower() in non_existing:
+                    original_non_existing.append(remove_id)
+            raise ResourceNotFoundError(f"User-assigned identities '{', '.join(original_non_existing)}' "
                                         f"are not associated with plan '{name}'")
 
     # Calculate what should remain
@@ -4916,8 +4931,9 @@ def remove_plan_identity(cmd, resource_group_name, name, identities=None):
 
     final_user_assigned = []
     if has_user and current_user_assigned:
-        # Keep existing user-assigned identities except those being removed
-        final_user_assigned = [uid for uid in current_user_assigned.keys() if uid not in remove_user_assigned]
+        # Keep existing user-assigned identities except those being removed (case insensitive comparison)
+        remove_user_ids_lower = set(id.lower() for id in remove_user_assigned)
+        final_user_assigned = [uid for uid in current_user_assigned.keys() if uid.lower() not in remove_user_ids_lower]
 
     # Determine the correct identity type
     identity_type = _determine_identity_type(final_system_assigned, final_user_assigned)
