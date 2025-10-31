@@ -298,7 +298,7 @@ type: command
 short-summary: Recycle a specific instance in a managed instance App Service plan.
 examples:
   - name: Recycle a specific worker instance in a managed instance App Service plan.
-    text: az appservice plan managed-instance instance recycle --name MyAppServicePlan --resource-group MyResourceGroup --worker-name MyWorkerInstance
+    text: az appservice plan managed-instance instance recycle --name MyAppServicePlan --resource-group MyResourceGroup --instance-name MyWorkerInstance
 """
 
 helps['appservice vnet-integration'] = """

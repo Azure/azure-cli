@@ -11,10 +11,6 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "appservice plan managed-instance instance recycle",
-    is_preview=True,
-)
 class Recycle(AAZCommand):
     """Recycle a specific instance in a managed instance App Service plan.
 
