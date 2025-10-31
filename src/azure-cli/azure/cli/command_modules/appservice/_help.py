@@ -293,6 +293,14 @@ examples:
     text: az appservice plan managed-instance instance connect --name MyAppServicePlan --resource-group MyResourceGroup --instance-name MyInstance --bastion-name MyBastion
 """
 
+helps['appservice plan managed-instance instance recycle'] = """
+type: command
+short-summary: Recycle a specific instance in a managed instance App Service plan.
+examples:
+  - name: Recycle a specific worker instance in a managed instance App Service plan.
+    text: az appservice plan managed-instance instance recycle --name MyAppServicePlan --resource-group MyResourceGroup --worker-name MyWorkerInstance
+"""
+
 helps['appservice vnet-integration'] = """
 type: group
 short-summary: a method that lists the virtual network integrations used in an appservice plan

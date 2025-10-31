@@ -265,6 +265,12 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('bastion_name', options_list=['--bastion-name'], help='Name of the Azure Bastion host to use for the RDP connection', required=True)
         c.argument('bastion_resource_group_name', options_list=['--bastion-resource-group'], help='Resource group name of the Azure Bastion host (defaults to the plan resource group)')
 
+    with self.argument_context('appservice plan managed-instance instance recycle') as c:
+        c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
+                   completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
+                   configured_default='appserviceplan', id_part='name')
+        c.argument('instance_name', options_list=['--instance-name'], help='The name of the instance to recycle', required=True)
+
     with self.argument_context('appservice plan identity') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),

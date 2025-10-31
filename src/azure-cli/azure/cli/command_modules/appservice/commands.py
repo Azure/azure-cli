@@ -340,6 +340,7 @@ def load_command_table(self, _):
 
     with self.command_group('appservice plan managed-instance instance', custom_command_type=appservice_custom, is_preview=True) as g:
         g.custom_command('connect', 'connect_to_plan_instance')
+        g.custom_command('recycle', 'recycle_plan_managed_instance')
 
     with self.command_group('appservice plan identity', is_preview=True) as g:
         g.custom_show_command('show', 'show_plan_identity')

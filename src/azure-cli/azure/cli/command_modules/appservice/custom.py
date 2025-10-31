@@ -104,7 +104,8 @@ from .aaz.latest.appservice.plan import (Show as AppServicePlanShow, Create as A
                                          Update as AppServicePlanUpdate)
 from .aaz.latest.appservice.plan.managed_instance import (ShowRdpPassword
                                                           as AppServicePlanManagedInstanceShowRdpPassword)
-from .aaz.latest.appservice.plan.managed_instance.instance import List as AppServicePlanManagedInstanceList
+from .aaz.latest.appservice.plan.managed_instance.instance import (List as AppServicePlanManagedInstanceList,
+                                                                   Recycle as AppServicePlanManagedInstanceRecycle)
 
 logger = get_logger(__name__)
 
@@ -4617,7 +4618,7 @@ def add_plan_managed_instance_storage_mount(cmd, resource_group_name, name,
                                             mount_name, mount_type,
                                             destination_path, source=None, credentials_secret_uri=None):
     if not source and mount_type.lower() != "localstorage":
-        raise InvalidArgumentValueError("--source argument is required for mount type {}".format(mount_type))    
+        raise InvalidArgumentValueError("--source argument is required for mount type {}".format(mount_type))
 
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
@@ -4787,7 +4788,7 @@ def _determine_identity_type(system_assigned, user_assigned_identities):
 def _update_plan_identity(cmd, resource_group_name, name, identity_type, user_assigned_identities, current_plan):
     class IdentityUpdate(AppServicePlanUpdate):
         def pre_instance_update(self, instance):
-            instance.properties.storageMounts = None # need this due to backend bug
+            instance.properties.storageMounts = None  # need this due to backend bug
             # Construct the appropriate identity object based on the desired identity_type
             if identity_type == "None":
                 # Explicitly clear the identity
@@ -4991,6 +4992,17 @@ def set_plan_default_identity(cmd, resource_group_name, name, identity=None):
 
     # Return the updated plan default identity
     return plan_result.get('planDefaultIdentity', {})
+
+
+def recycle_plan_managed_instance(cmd, resource_group_name, name, instance_name):
+    recycle_cmd = AppServicePlanManagedInstanceRecycle(cli_ctx=cmd.cli_ctx)
+    _ = recycle_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'worker_name': instance_name
+    })
+
+    logger.warning("Initiated recycle for instance %s", instance_name)
 
 
 def connect_to_plan_instance(cmd, resource_group_name, name, instance_name,

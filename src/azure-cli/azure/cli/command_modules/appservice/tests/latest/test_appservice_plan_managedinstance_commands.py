@@ -718,7 +718,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
 
         # Test recycle operation on the last worker
         # Recycle command doesn't return output, so we just verify it runs successfully
-        self.cmd('appservice plan managed-instance instance recycle -g {} --name {} --worker-name {}'.format(
+        self.cmd('appservice plan managed-instance instance recycle -g {} --name {} --instance-name {}'.format(
             resource_group, plan_name, last_worker_name))
 
         # Verify instances list still works after recycle
