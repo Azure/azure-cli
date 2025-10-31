@@ -4614,8 +4614,11 @@ def _update_plan_storage_mounts(cmd, resource_group_name, name, mounts, current_
 
 
 def add_plan_managed_instance_storage_mount(cmd, resource_group_name, name,
-                                            mount_name, mount_type, source,
-                                            destination_path, credentials_secret_uri=None):
+                                            mount_name, mount_type,
+                                            destination_path, source=None, credentials_secret_uri=None):
+    if not source and mount_type.lower() != "localstorage":
+        raise InvalidArgumentValueError("--source argument is required for mount type {}".format(mount_type))    
+
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
     plan_result = plan_show_cmd(command_args={
         'resource_group': resource_group_name,
