@@ -12990,7 +12990,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
         # Prepare VM
         self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
-                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -13016,7 +13016,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
         # Prepare VM
         self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 '
-                 '--admin-password Test123456789# --license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password Test123456789# --license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -13041,7 +13041,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
         # Prepare VM
         self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
-                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -13070,7 +13070,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
         # Prepare VM
         self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
-                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
