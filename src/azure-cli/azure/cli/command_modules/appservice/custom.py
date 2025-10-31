@@ -4787,6 +4787,7 @@ def _determine_identity_type(system_assigned, user_assigned_identities):
 def _update_plan_identity(cmd, resource_group_name, name, identity_type, user_assigned_identities, current_plan):
     class IdentityUpdate(AppServicePlanUpdate):
         def pre_instance_update(self, instance):
+            instance.properties.storageMounts = None # need this due to backend bug
             # Construct the appropriate identity object based on the desired identity_type
             if identity_type == "None":
                 # Explicitly clear the identity
