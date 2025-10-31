@@ -4992,7 +4992,7 @@ def set_plan_default_identity(cmd, resource_group_name, name, identity=None):
     return plan_result.get('planDefaultIdentity', {})
 
 
-def connect_to_plan_instance(cmd, resource_group_name, name, worker_name,
+def connect_to_plan_instance(cmd, resource_group_name, name, instance_name,
                              bastion_name, bastion_resource_group_name=None):
     from azure.cli.core.util import run_az_cmd
 
@@ -5000,7 +5000,7 @@ def connect_to_plan_instance(cmd, resource_group_name, name, worker_name,
     if not bastion_resource_group_name:
         bastion_resource_group_name = resource_group_name
 
-    # 2. List instances to locate the target worker and its IP address
+    # 2. List instances to locate the target instance and its IP address
     instances_cmd = AppServicePlanManagedInstanceList(cli_ctx=cmd.cli_ctx)
     instances_payload = instances_cmd(command_args={
         'resource_group': resource_group_name,
@@ -5009,23 +5009,23 @@ def connect_to_plan_instance(cmd, resource_group_name, name, worker_name,
 
     instances = instances_payload.get('instances', []) if isinstance(instances_payload, dict) else []
 
-    # Search for the specified worker using the documented shape {"instanceName": ..., "ipAddress": ...}
+    # Search for the specified instance using the documented shape {"instanceName": ..., "ipAddress": ...}
     target_instance = None
     for inst in instances:
-        inst_worker_name = inst.get('instanceName')
-        if inst_worker_name and inst_worker_name.lower() == worker_name.lower():
+        inst_instance_name = inst.get('instanceName')
+        if inst_instance_name and inst_instance_name.lower() == instance_name.lower():
             target_instance = inst
             break
 
     if not target_instance:
-        raise ResourceNotFoundError(f"Worker instance '{worker_name}' not found in plan '{name}'.")
+        raise ResourceNotFoundError(f"Instance '{instance_name}' not found in plan '{name}'.")
 
     # Resolve IP address field (try a few possible keys)
     target_ip = target_instance.get('ipAddress')
     if not target_ip:
         raise InvalidArgumentValueError("Could not determine target IP address from instance metadata.")
 
-    # 3. Retrieve RDP password after validating worker exists
+    # 3. Retrieve RDP password after validating instance exists
     password_cmd = AppServicePlanManagedInstanceShowRdpPassword(cli_ctx=cmd.cli_ctx)
     password_response = password_cmd(command_args={
         'resource_group': resource_group_name,

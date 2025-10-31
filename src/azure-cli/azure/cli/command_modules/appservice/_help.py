@@ -282,15 +282,15 @@ short-summary: Manage instances for managed instance App Service plans.
 
 helps['appservice plan managed-instance instance connect'] = """
 type: command
-short-summary: Connect to a managed instance App Service plan worker via RDP using Azure Bastion.
+short-summary: Connect to a managed instance App Service plan worker instance via RDP using Azure Bastion.
 long-summary: |
   This command establishes an RDP connection to a specific worker instance in a managed instance App Service plan using Azure Bastion.
   You must have appropriate permissions to access the App Service plan and the Bastion resource.
 examples:
   - name: Connect to a worker instance via RDP using Azure Bastion.
-    text: az appservice plan managed-instance instance connect --name MyAppServicePlan --resource-group MyResourceGroup --worker-name MyWorker --bastion-name MyBastion --bastion-resource-group MyBastionRG
+    text: az appservice plan managed-instance instance connect --name MyAppServicePlan --resource-group MyResourceGroup --instance-name MyInstance --bastion-name MyBastion --bastion-resource-group MyBastionRG
   - name: Connect to a worker instance via RDP with Bastion in the same resource group as the App Service plan.
-    text: az appservice plan managed-instance instance connect --name MyAppServicePlan --resource-group MyResourceGroup --worker-name MyWorker --bastion-name MyBastion
+    text: az appservice plan managed-instance instance connect --name MyAppServicePlan --resource-group MyResourceGroup --instance-name MyInstance --bastion-name MyBastion
 """
 
 helps['appservice vnet-integration'] = """
