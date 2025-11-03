@@ -13,11 +13,11 @@
 # pylint: disable=too-many-locals
 
 from .generated.custom import *  # noqa: F403
+
 try:
     from .manual.custom import *  # noqa: F403
 except ImportError:
     pass
-
 
 import uuid
 import re
@@ -79,7 +79,6 @@ def apim_create(client, resource_group_name, name, publisher_email, sku_name=Sku
                 sku_capacity=1, virtual_network_type=VirtualNetworkType.none.value, enable_managed_identity=False,
                 public_network_access=None, disable_gateway=None, enable_client_certificate=None,
                 publisher_name=None, location=None, tags=None, no_wait=False):
-
     parameters = ApiManagementServiceResource(
         location=location,
         notification_sender_email=publisher_email,
@@ -110,7 +109,6 @@ def apim_update(instance, publisher_email=None, sku_name=None, sku_capacity=None
                 virtual_network_type=None, publisher_name=None, enable_managed_identity=None,
                 public_network_access=None, disable_gateway=None, enable_client_certificate=None,
                 tags=None):
-
     if publisher_email is not None:
         instance.publisher_email = publisher_email
 
@@ -517,25 +515,15 @@ def apim_api_import(
         parameters=parameters)
 
 
-def apim_api_export(client, resource_group_name, service_name, api_id, export_format, file_path=None, file_name=None,):
-    """Gets the details of the API specified by its identifier in the format specified """
-
-    import json
-    import yaml
-    import xml.etree.ElementTree as ET
-    import os
-    import requests
-
 def _determine_file_extension(mapped_format):
     """Determine file extension based on the mapped format."""
     if mapped_format in ['swagger', 'openapi+json']:
         return '.json'
-    elif mapped_format in ['wsdl', 'wadl']:
+    if mapped_format in ['wsdl', 'wadl']:
         return '.xml'
-    elif mapped_format in ['openapi']:
+    if mapped_format in ['openapi']:
         return '.yaml'
-    else:
-        return '.txt'
+    return '.txt'
 
 
 def _extract_export_link_or_text(response):
@@ -572,10 +560,10 @@ def _parse_exported_content(exported_text):
     import json
     import yaml
     import xml.etree.ElementTree as ET
-    
+
     if exported_text is None:
         return None
-    
+
     try:
         return json.loads(exported_text)
     except json.JSONDecodeError:
@@ -620,13 +608,13 @@ def _handle_playback_mode(export_format, file_path, file_name, api_id, format_ma
     if file_path is None:
         raise RequiredArgumentMissingError(
             "Please specify file path using '--file-path' argument.")
-    
-    file_extension = _determine_file_extension_from_export_format(export_format, format_mapping)
+
+    file_extension = _determine_file_extension_from_export_format(export_format)
     export_type = format_mapping.get(export_format, '').replace('-link', '')
-    
+
     if file_name is None:
         file_name = f"{api_id}_{export_type}{file_extension}"
-    
+
     full_path = os.path.join(file_path, file_name)
     try:
         os.makedirs(os.path.dirname(full_path), exist_ok=True)
@@ -634,31 +622,24 @@ def _handle_playback_mode(export_format, file_path, file_name, api_id, format_ma
             f.write('')
     except OSError as e:
         logger.warning("Error writing exported API to file in playback mode: %s", e)
-    
+
     logger.warning("APIM export results written to file (playback stub): %s", full_path)
-    return None
 
 
-def _determine_file_extension_from_export_format(export_format, format_mapping):
+def _determine_file_extension_from_export_format(export_format):
     """Determine file extension based on the export format."""
     if export_format in ['SwaggerFile', 'OpenApiJsonFile']:
         return '.json'
-    elif export_format in ['WsdlFile', 'WadlFile']:
+    if export_format in ['WsdlFile', 'WadlFile']:
         return '.xml'
-    elif export_format in ['OpenApiYamlFile']:
+    if export_format in ['OpenApiYamlFile']:
         return '.yaml'
-    else:
-        return '.txt'
+
+    return '.txt'
 
 
-def apim_api_export(client, resource_group_name, service_name, api_id, export_format, file_path=None, file_name=None,):
+def apim_api_export(client, resource_group_name, service_name, api_id, export_format, file_path=None, file_name=None, ):
     """Gets the details of the API specified by its identifier in the format specified """
-
-    import json
-    import yaml
-    import xml.etree.ElementTree as ET
-    import os
-    import requests
 
     # Define the mapping from old format values to new ones
     format_mapping = {
@@ -696,7 +677,7 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
 
     file_extension = _determine_file_extension(mapped_format)
     export_type = mapped_format
-    
+
     if file_name is None:
         file_name = f"{api_id}_{export_type}{file_extension}"
     full_path = os.path.join(file_path, file_name)
@@ -733,17 +714,14 @@ def api_export_result_to_dict(api_export_result):
 
 # Product API Operations
 def apim_product_api_list(client, resource_group_name, service_name, product_id):
-
     return client.product_api.list_by_product(resource_group_name, service_name, product_id)
 
 
 def apim_product_api_check_association(client, resource_group_name, service_name, product_id, api_id):
-
     return client.product_api.check_entity_exists(resource_group_name, service_name, product_id, api_id)
 
 
 def apim_product_api_add(client, resource_group_name, service_name, product_id, api_id, no_wait=False):
-
     return sdk_no_wait(
         no_wait,
         client.product_api.create_or_update,
@@ -754,7 +732,6 @@ def apim_product_api_add(client, resource_group_name, service_name, product_id, 
 
 
 def apim_product_api_delete(client, resource_group_name, service_name, product_id, api_id, no_wait=False):
-
     return sdk_no_wait(
         no_wait,
         client.product_api.delete,
@@ -767,19 +744,16 @@ def apim_product_api_delete(client, resource_group_name, service_name, product_i
 # Product Operations
 
 def apim_product_list(client, resource_group_name, service_name):
-
     return client.product.list_by_service(resource_group_name, service_name)
 
 
 def apim_product_show(client, resource_group_name, service_name, product_id):
-
     return client.product.get(resource_group_name, service_name, product_id)
 
 
 def apim_product_create(
         client, resource_group_name, service_name, product_name, product_id=None, description=None, legal_terms=None,
         subscription_required=None, approval_required=None, subscriptions_limit=None, state=None, no_wait=False):
-
     parameters = ProductContract(
         description=description,
         terms=legal_terms,
@@ -814,7 +788,6 @@ def apim_product_create(
 def apim_product_update(
         instance, product_name=None, description=None, legal_terms=None, subscription_required=None,
         approval_required=None, subscriptions_limit=None, state=None):
-
     if product_name is not None:
         instance.display_name = product_name
 
@@ -847,7 +820,6 @@ def apim_product_update(
 
 def apim_product_delete(
         client, resource_group_name, service_name, product_id, delete_subscriptions=None, if_match=None, no_wait=False):
-
     return sdk_no_wait(
         no_wait,
         client.product.delete,
@@ -1171,6 +1143,7 @@ def apim_ds_purge(client, service_name, location, no_wait=False):
         service_name=service_name,
         location=location)
 
+
 # Graphql Resolver Operations
 
 
@@ -1194,7 +1167,6 @@ def apim_graphql_resolver_create(
 
 def apim_graphql_resolver_delete(
         client, resource_group_name, service_name, api_id, resolver_id, no_wait=False, if_match=None):
-
     return sdk_no_wait(no_wait, client.graph_ql_api_resolver.delete,
                        resource_group_name=resource_group_name,
                        service_name=service_name,
@@ -1240,7 +1212,6 @@ def apim_graphql_resolver_policy_create(
 
 
 def apim_graphql_resolver_policy_show(client, resource_group_name, service_name, api_id, resolver_id):
-
     return client.graph_ql_api_resolver_policy.get(
         resource_group_name=resource_group_name,
         service_name=service_name,
@@ -1250,7 +1221,6 @@ def apim_graphql_resolver_policy_show(client, resource_group_name, service_name,
 
 
 def apim_graphql_resolver_policy_list(client, resource_group_name, service_name, api_id, resolver_id):
-
     return client.graph_ql_api_resolver_policy.list_by_resolver(
         resource_group_name=resource_group_name,
         service_name=service_name,
@@ -1260,7 +1230,6 @@ def apim_graphql_resolver_policy_list(client, resource_group_name, service_name,
 
 def apim_graphql_resolver_policy_delete(
         client, resource_group_name, service_name, api_id, resolver_id, no_wait=False, if_match=None):
-
     return sdk_no_wait(no_wait, client.graph_ql_api_resolver_policy.delete,
                        resource_group_name=resource_group_name,
                        service_name=service_name,
