@@ -21,6 +21,7 @@ except ImportError:
 
 import uuid
 import re
+import os
 from urllib.parse import urlparse
 
 from azure.cli.command_modules.apim._params import ImportFormat
@@ -525,8 +526,141 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
     import os
     import requests
 
+def _determine_file_extension(mapped_format):
+    """Determine file extension based on the mapped format."""
+    if mapped_format in ['swagger', 'openapi+json']:
+        return '.json'
+    elif mapped_format in ['wsdl', 'wadl']:
+        return '.xml'
+    elif mapped_format in ['openapi']:
+        return '.yaml'
+    else:
+        return '.txt'
+
+
+def _extract_export_link_or_text(response):
+    """Extract link or exported text from the API export response."""
+    link = None
+    exported_text = None
+    response_dict = api_export_result_to_dict(response)
+    try:
+        link = response_dict['additional_properties']['properties']['value']['link']
+    except KeyError:
+        # No link present; try to use direct content
+        try:
+            exported_text = response.value if hasattr(response, 'value') else None
+        except AttributeError:  # defensive
+            exported_text = None
+    return link, exported_text
+
+
+def _fetch_content_from_link(link):
+    """Fetch content from a downloadable link."""
+    import requests
+    try:
+        exported_results = requests.get(link, timeout=30)
+        if not exported_results.ok:
+            logger.warning("Got bad status from API Management during API export: %s", exported_results.status_code)
+        return exported_results.text
+    except requests.exceptions.ReadTimeout:
+        logger.warning("Timed out while exporting API from API Management.")
+        return None
+
+
+def _parse_exported_content(exported_text):
+    """Parse content into appropriate format (JSON, YAML, XML, or raw text)."""
+    import json
+    import yaml
+    import xml.etree.ElementTree as ET
+    
+    if exported_text is None:
+        return None
+    
+    try:
+        return json.loads(exported_text)
+    except json.JSONDecodeError:
+        try:
+            return yaml.safe_load(exported_text)
+        except yaml.YAMLError:
+            try:
+                return ET.fromstring(exported_text)
+            except ET.ParseError:
+                return exported_text  # raw text
+
+
+def _write_content_to_file(full_path, exported_result_content, file_extension, response):
+    """Write parsed content to file in appropriate format."""
+    import json
+    import yaml
+    import xml.etree.ElementTree as ET
+
+    try:
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        with open(full_path, 'w', encoding='utf-8') as f:
+            if isinstance(exported_result_content, dict) and file_extension == '.json':
+                json.dump(exported_result_content, f, indent=4)
+            elif isinstance(exported_result_content, dict) and file_extension == '.yaml':
+                yaml.dump(exported_result_content, f)
+            elif isinstance(exported_result_content, ET.Element):
+                ET.register_namespace('', 'http://wadl.dev.java.net/2009/02')
+                xml_string = ET.tostring(exported_result_content, encoding='unicode')
+                f.write(xml_string)
+            elif isinstance(exported_result_content, str):
+                f.write(exported_result_content)
+            else:
+                # Fallback: write the value attribute or stringified content
+                fallback = getattr(response, 'value', '')
+                f.write(fallback if isinstance(fallback, str) else str(exported_result_content))
+    except OSError as e:
+        logger.warning("Error writing exported API to file: %s", e)
+
+
+def _handle_playback_mode(export_format, file_path, file_name, api_id, format_mapping):
+    """Handle playback mode file export for testing."""
+    if file_path is None:
+        raise RequiredArgumentMissingError(
+            "Please specify file path using '--file-path' argument.")
+    
+    file_extension = _determine_file_extension_from_export_format(export_format, format_mapping)
+    export_type = format_mapping.get(export_format, '').replace('-link', '')
+    
+    if file_name is None:
+        file_name = f"{api_id}_{export_type}{file_extension}"
+    
+    full_path = os.path.join(file_path, file_name)
+    try:
+        os.makedirs(os.path.dirname(full_path), exist_ok=True)
+        with open(full_path, 'w', encoding='utf-8') as f:
+            f.write('')
+    except OSError as e:
+        logger.warning("Error writing exported API to file in playback mode: %s", e)
+    
+    logger.warning("APIM export results written to file (playback stub): %s", full_path)
+    return None
+
+
+def _determine_file_extension_from_export_format(export_format, format_mapping):
+    """Determine file extension based on the export format."""
+    if export_format in ['SwaggerFile', 'OpenApiJsonFile']:
+        return '.json'
+    elif export_format in ['WsdlFile', 'WadlFile']:
+        return '.xml'
+    elif export_format in ['OpenApiYamlFile']:
+        return '.yaml'
+    else:
+        return '.txt'
+
+
+def apim_api_export(client, resource_group_name, service_name, api_id, export_format, file_path=None, file_name=None,):
+    """Gets the details of the API specified by its identifier in the format specified """
+
+    import json
+    import yaml
+    import xml.etree.ElementTree as ET
+    import os
+    import requests
+
     # Define the mapping from old format values to new ones
-    # Use non-link formats for File exports to avoid duplicate identical GET requests
     format_mapping = {
         # File exports -> non-link formats
         "WadlFile": "wadl",
@@ -541,41 +675,15 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
         "OpenApiJsonUrl": "openapi+json-link",
         "WsdlUrl": "wsdl-link"
     }
-    mappedFormat = format_mapping.get(export_format)
+    mapped_format = format_mapping.get(export_format)
 
-    # Export the API from API Management
     # Optimization for playback mode: if exporting to a file during tests, avoid a second
     # management call which causes cassette mismatches. Instead, create the file directly.
-    import os as _os
-    is_live = _os.environ.get('AZURE_TEST_RUN_LIVE', '').lower() in ['true', '1', 'yes']
+    is_live = os.environ.get('AZURE_TEST_RUN_LIVE', '').lower() in ['true', '1', 'yes']
     if export_format.endswith('File') and not is_live:
-        # If file is requested in playback mode
-        if file_path is None:
-            raise RequiredArgumentMissingError(
-                "Please specify file path using '--file-path' argument.")
-        # Determine extension from format
-        if export_format in ['SwaggerFile', 'OpenApiJsonFile']:
-            file_extension = '.json'
-        elif export_format in ['WsdlFile', 'WadlFile']:
-            file_extension = '.xml'
-        elif export_format in ['OpenApiYamlFile']:
-            file_extension = '.yaml'
-        else:
-            file_extension = '.txt'
-        exportType = format_mapping.get(export_format, '').replace('-link', '') or mappedFormat
-        if file_name is None:
-            file_name = f"{api_id}_{exportType}{file_extension}"
-        full_path = os.path.join(file_path, file_name)
-        try:
-            os.makedirs(os.path.dirname(full_path), exist_ok=True)
-            with open(full_path, 'w', encoding='utf-8') as f:
-                f.write('')
-        except OSError as e:
-            logger.warning("Error writing exported API to file in playback mode: %s", e)
-        logger.warning("APIM export results written to file (playback stub): %s", full_path)
-        return None
+        return _handle_playback_mode(export_format, file_path, file_name, api_id, format_mapping)
 
-    response = client.api_export.get(resource_group_name, service_name, api_id, mappedFormat, True)
+    response = client.api_export.get(resource_group_name, service_name, api_id, mapped_format, True)
 
     # If url is requested, just return the export result (contains a link)
     if export_format in ['WadlUrl', 'SwaggerUrl', 'OpenApiYamlUrl', 'OpenApiJsonUrl', 'WsdlUrl']:
@@ -586,79 +694,28 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
         raise RequiredArgumentMissingError(
             "Please specify file path using '--file-path' argument.")
 
-    # Determine the file extension based on the mappedFormat
-    if mappedFormat in ['swagger', 'openapi+json']:
-        file_extension = '.json'
-    elif mappedFormat in ['wsdl', 'wadl']:
-        file_extension = '.xml'
-    elif mappedFormat in ['openapi']:
-        file_extension = '.yaml'
-    else:
-        file_extension = '.txt'
-
-    exportType = mappedFormat
+    file_extension = _determine_file_extension(mapped_format)
+    export_type = mapped_format
+    
     if file_name is None:
-        file_name = f"{api_id}_{exportType}{file_extension}"
+        file_name = f"{api_id}_{export_type}{file_extension}"
     full_path = os.path.join(file_path, file_name)
 
     # Try to obtain a downloadable link first (in case service still returns link)
-    link = None
-    exported_text = None
-    response_dict = api_export_result_to_dict(response)
-    try:
-        link = response_dict['additional_properties']['properties']['value']['link']
-    except KeyError:
-        # No link present; try to use direct content
-        try:
-            exported_text = response.value if hasattr(response, 'value') else None
-        except Exception:  # defensive
-            exported_text = None
+    link, exported_text = _extract_export_link_or_text(response)
 
     # Fetch content if link is available
     if link:
-        try:
-            exportedResults = requests.get(link, timeout=30)
-            if not exportedResults.ok:
-                logger.warning("Got bad status from API Management during API export: %s", exportedResults.status_code)
-            exported_text = exportedResults.text
-        except requests.exceptions.ReadTimeout:
-            logger.warning("Timed out while exporting API from API Management.")
+        fetched_text = _fetch_content_from_link(link)
+        if fetched_text:
+            exported_text = fetched_text
 
     # Parse content where possible for nicer formatting, otherwise write raw text
-    exportedResultContent = None
-    if exported_text is not None:
-        try:
-            exportedResultContent = json.loads(exported_text)
-        except Exception:
-            try:
-                exportedResultContent = yaml.safe_load(exported_text)
-            except Exception:
-                try:
-                    exportedResultContent = ET.fromstring(exported_text)
-                except Exception:
-                    exportedResultContent = exported_text  # raw text
+    exported_result_content = _parse_exported_content(exported_text)
 
     # Write results to a file
     logger.warning("Writing results to file: %s", full_path)
-    try:
-        os.makedirs(os.path.dirname(full_path), exist_ok=True)
-        with open(full_path, 'w', encoding='utf-8') as f:
-            if isinstance(exportedResultContent, dict) and file_extension == '.json':
-                json.dump(exportedResultContent, f, indent=4)
-            elif isinstance(exportedResultContent, dict) and file_extension == '.yaml':
-                yaml.dump(exportedResultContent, f)
-            elif isinstance(exportedResultContent, ET.Element):
-                ET.register_namespace('', 'http://wadl.dev.java.net/2009/02')
-                xml_string = ET.tostring(exportedResultContent, encoding='unicode')
-                f.write(xml_string)
-            elif isinstance(exportedResultContent, str):
-                f.write(exportedResultContent)
-            else:
-                # Fallback: write the value attribute or stringified content
-                fallback = getattr(response, 'value', '')
-                f.write(fallback if isinstance(fallback, str) else str(exportedResultContent))
-    except OSError as e:
-        logger.warning("Error writing exported API to file: %s", e)
+    _write_content_to_file(full_path, exported_result_content, file_extension, response)
 
     logger.warning("APIM export results written to file: %s", full_path)
     return None
