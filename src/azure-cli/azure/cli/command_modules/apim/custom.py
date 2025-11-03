@@ -642,6 +642,7 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
     """Gets the details of the API specified by its identifier in the format specified """
 
     # Define the mapping from old format values to new ones
+    # Use non-link formats for File exports to avoid duplicate identical GET requests
     format_mapping = {
         # File exports -> non-link formats
         "WadlFile": "wadl",
