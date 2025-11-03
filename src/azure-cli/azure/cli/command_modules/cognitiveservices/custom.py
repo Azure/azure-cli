@@ -325,3 +325,54 @@ def commitment_plan_create_or_update(
         plan.properties.next.count = next_count
     plan.properties.auto_renew = auto_renew
     return client.create_or_update(resource_group_name, account_name, commitment_plan_name, plan)
+
+
+def agent_update(client, account_name, agent_name, agent_version,
+                 min_replica=None, max_replica=None, description=None, tags=None):
+    """
+    Update hosted agent deployment configuration.
+    Updates horizontal scale configuration (min and max replica), agent meta-data such as description and tags.
+    New version is not created for this update.
+    """
+    raise NotImplementedError("agent_update command is not yet implemented")
+
+
+def agent_stop(client, account_name, agent_name, agent_version):
+    """
+    Stop hosted agent deployment.
+    """
+    raise NotImplementedError("agent_stop command is not yet implemented")
+
+
+def agent_start(client, account_name, agent_name, agent_version):
+    """
+    Start hosted agent deployment.
+    """
+    raise NotImplementedError("agent_start command is not yet implemented")
+
+
+def agent_delete_deployment(client, account_name, agent_name, agent_version):
+    """
+    Delete hosted agent deployment.
+    Deletes the agent deployment only, agent version associated with the deployment remains.
+    """
+    raise NotImplementedError("agent_delete_deployment command is not yet implemented")
+
+
+def agent_delete(client, account_name, agent_name, agent_version=None):
+    """
+    Delete hosted agent version or all versions.
+    If agent_version is provided, deletes the agent instance and agent definition associated with that version.
+    If agent_version is not provided, deletes all agent instances and agent definitions associated with the agent name.
+    """
+    raise NotImplementedError("agent_delete command is not yet implemented")
+
+
+def agent_list(client, account_name, agent_name, agent_version=None):
+    """
+    List hosted agent versions or deployments.
+    If agent_version is not provided, lists all versions for an agent.
+    If agent_version is provided, lists all deployments for that agent version.
+    """
+    raise NotImplementedError("agent_list command is not yet implemented")
+        

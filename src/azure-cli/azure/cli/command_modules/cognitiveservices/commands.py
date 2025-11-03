@@ -103,3 +103,11 @@ def load_command_table(self, _):
 
     with self.command_group('cognitiveservices usage', usages_type) as g:
         g.command('list', 'list')
+
+    with self.command_group('cognitiveservices agent', client_factory=cf_accounts) as g:
+        g.custom_command('update', 'agent_update')
+        g.custom_command('stop', 'agent_stop')
+        g.custom_command('start', 'agent_start')
+        g.custom_command('delete-deployment', 'agent_delete_deployment')
+        g.custom_command('delete', 'agent_delete')
+        g.custom_command('list', 'agent_list')

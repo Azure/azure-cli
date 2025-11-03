@@ -214,3 +214,15 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account commitment-plan', arg_group='Next CommitmentPeriod') as c:
         c.argument('next_count', help='Cognitive Services account commitment plan next commitment period count.')
         c.argument('next_tier', help='Cognitive Services account commitment plan next commitment period tier.')
+
+    with self.argument_context('cognitiveservices agent') as c:
+        c.argument('agent_name', help='Cognitive Services hosted agent name')
+        c.argument('agent_version', help='Cognitive Services hosted agent version')
+
+    with self.argument_context('cognitiveservices agent update') as c:
+        c.argument('min_replica', help='Minimum number of replicas for horizontal scaling')
+        c.argument('max_replica', help='Maximum number of replicas for horizontal scaling')
+        c.argument('description', help='Description of the agent')
+
+    with self.argument_context('cognitiveservices agent delete') as c:
+        c.argument('agent_version', help='Cognitive Services hosted agent version. If not provided, deletes all versions.', required=False)
