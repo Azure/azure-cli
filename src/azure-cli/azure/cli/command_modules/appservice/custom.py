@@ -5666,6 +5666,8 @@ class _FunctionAppSkuStackRuntimeHelper:
                         continue
 
                     for sku in skus:
+                        if sku['skuCode'] != self._sku:
+                            continue
 
                         github_actions_properties = {
                             'is_supported': github_actions_settings.get('isSupported', False),
