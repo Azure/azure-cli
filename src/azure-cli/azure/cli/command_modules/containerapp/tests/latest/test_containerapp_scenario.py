@@ -14,6 +14,7 @@ from azure.mgmt.core.tools import parse_resource_id
 from azure.cli.command_modules.containerapp.custom import containerapp_ssh
 from azure.cli.command_modules.containerapp.tests.latest.utils import create_containerapp_env, \
     prepare_containerapp_env_for_app_e2e_tests
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
 from azure.cli.testsdk.reverse_dependency import get_dummy_cli
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
@@ -489,7 +490,6 @@ class ContainerappScenarioTest(ScenarioTest):
     @live_only()  # Pass lively, But failed in playback mode with Role assignment error, which is expected: azure.cli.core.azclierror.UnauthorizedError: Role assignment failed with error
     @ResourceGroupPreparer(location="northeurope")
     @AllowLargeResponse(size_kb=99999)
-    @live_only()
     def test_containerapp_registry_msi(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
@@ -521,6 +521,9 @@ class ContainerappScenarioTest(ScenarioTest):
         self.cmd(f'containerapp registry show -g {resource_group} -n {app} --server {registry_list[0]["server"]}', checks=[
             JMESPathCheck('server', acr+'.azurecr.io'),
         ])
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd(f'containerapp registry show -g {resource_group} -n {app} --server abc')
 
         app_data = self.cmd(f'containerapp show -g {resource_group} -n {app}', checks=[
             JMESPathCheck("properties.provisioningState", "Succeeded"),

@@ -818,7 +818,7 @@ short-summary: Manage Azure Database for PostgreSQL servers.
 
 helps['postgres db'] = """
 type: group
-short-summary: Manage PostgreSQL databases on a server. Is scheduled to retire by March 28, 2025
+short-summary: Manage PostgreSQL databases on a server. Is deprecated, please migrate to Azure Database for PostgreSQL flexible server.
 """
 
 helps['postgres db create'] = """
@@ -857,7 +857,7 @@ examples:
 
 helps['postgres server'] = """
 type: group
-short-summary: Manage Azure Database for PostgreSQL Single Server. Is scheduled to retire by March 28, 2025. You can migrate to the Azure Database for PostgreSQL flexible server.
+short-summary: Manage Azure Database for PostgreSQL Single Server. Is deprecated, please migrate to Azure Database for PostgreSQL flexible server.
 """
 
 helps['postgres server configuration'] = """
@@ -1097,7 +1097,7 @@ short-summary: Wait for server to satisfy certain conditions.
 
 helps['postgres server-logs'] = """
 type: group
-short-summary: Manage server logs. Is scheduled to retire by March 28, 2025
+short-summary: Manage server logs. Is deprecated, please migrate to Azure Database for PostgreSQL flexible server.
 """
 
 helps['postgres server-logs download'] = """

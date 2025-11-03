@@ -14,7 +14,7 @@ import datetime
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, LiveScenarioTest, ResourceGroupPreparer,
-                               StorageAccountPreparer, JMESPathCheck, live_only)
+                               StorageAccountPreparer, JMESPathCheck, live_only, VirtualNetworkPreparer)
 from azure.cli.testsdk.checkers import JMESPathCheckNotExists, JMESPathPatternCheck
 from azure.cli.core.azclierror import ValidationError, ArgumentUsageError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 
@@ -1655,11 +1655,10 @@ class FunctionAppManagedEnvironment(ScenarioTest):
             
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
     @StorageAccountPreparer()
-    def test_functionapp_create_with_appcontainer_managed_environment_vnet_config_error(self, resource_group, storage_account):
+    @VirtualNetworkPreparer(location=WINDOWS_ASP_LOCATION_FUNCTIONAPP)
+    def test_functionapp_create_with_appcontainer_managed_environment_vnet_config_error(self, resource_group, storage_account, virtual_network):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 40)
         managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
-        subnet_name = self.create_random_name('swiftsubnet', 24)
-        vnet_name = self.create_random_name('swiftname', 24)
 
         self.cmd('containerapp env create --name {} --resource-group {} --location {} --logs-destination none'
         .format(managed_environment_name, resource_group, WINDOWS_ASP_LOCATION_FUNCTIONAPP)).assert_with_checks([
@@ -1667,16 +1666,14 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('location', 'France Central')])
 
-        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
-            resource_group, vnet_name, subnet_name))
-
         with self.assertRaises(ArgumentUsageError):
             self.cmd('functionapp create -g {} -n {} -s {} --vnet {} --subnet {}  --environment {} --runtime dotnet --functions-version 4'
-                    .format(resource_group, functionapp_name, storage_account, vnet_name, subnet_name, managed_environment_name))
+                    .format(resource_group, functionapp_name, storage_account, virtual_network, "default", managed_environment_name))
 
     @ResourceGroupPreparer(location='westeurope')
     @StorageAccountPreparer()
-    def test_functionapp_create_with_appcontainer_managed_environment_add_vnet_error(self, resource_group, storage_account):
+    @VirtualNetworkPreparer(location='westeurope')
+    def test_functionapp_create_with_appcontainer_managed_environment_add_vnet_error(self, resource_group, storage_account, virtual_network):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 32)
         managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
         subnet_name = self.create_random_name('swiftsubnet', 24)
@@ -1688,9 +1685,6 @@ class FunctionAppManagedEnvironment(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('location', 'West Europe')])
 
-        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
-            resource_group, vnet_name, subnet_name))
-
         self.cmd(
             'functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
             .format(resource_group, functionapp_name, storage_account, managed_environment_name)).assert_with_checks([
@@ -1700,24 +1694,19 @@ class FunctionAppManagedEnvironment(ScenarioTest):
 
         with self.assertRaises(ValidationError):
             self.cmd('functionapp vnet-integration add -g {} -n {} --vnet {} --subnet {}'
-            .format(resource_group, functionapp_name, vnet_name, subnet_name))
+            .format(resource_group, functionapp_name, virtual_network, "default"))
 
     @ResourceGroupPreparer(location='southcentralus')
     @StorageAccountPreparer()
     def test_functionapp_create_with_appcontainer_managed_environment_remove_vnet_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 32)
         managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
-        subnet_name = self.create_random_name('swiftsubnet', 24)
-        vnet_name = self.create_random_name('swiftname', 24)
 
         self.cmd('containerapp env create --name {} --resource-group {} --location southcentralus --logs-destination none'
         .format(managed_environment_name, resource_group)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('location', 'South Central US')])
-
-        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
-            resource_group, vnet_name, subnet_name))
 
         self.cmd(
             'functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'
@@ -1732,17 +1721,12 @@ class FunctionAppManagedEnvironment(ScenarioTest):
     def test_functionapp_create_with_appcontainer_managed_environment_list_vnet_error(self, resource_group, storage_account):
         functionapp_name = self.create_random_name('functionappwindowsruntime', 32)
         managed_environment_name = self.create_random_name('containerappmanagedenvironment', 40)
-        subnet_name = self.create_random_name('swiftsubnet', 24)
-        vnet_name = self.create_random_name('swiftname', 24)
 
         self.cmd('containerapp env create --name {} --resource-group {} --location westeurope --logs-destination none'
         .format(managed_environment_name, resource_group)).assert_with_checks([
                      JMESPathCheck('name', managed_environment_name),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('location', 'West Europe')])
-
-        self.cmd('network vnet create -g {} -n {} --address-prefix 10.0.0.0/16 --subnet-name {} --subnet-prefix 10.0.0.0/24'.format(
-            resource_group, vnet_name, subnet_name))
 
         self.cmd(
             'functionapp create -g {} -n {} -s {} --environment {} --runtime dotnet --functions-version 4'

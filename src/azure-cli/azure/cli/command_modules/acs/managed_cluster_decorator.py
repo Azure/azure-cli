@@ -920,8 +920,13 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: List[str] or None
         """
         custom_ca_certs_file_path = self.raw_param.get("custom_ca_trust_certificates")
-        if not custom_ca_certs_file_path:
+        if custom_ca_certs_file_path is None:
             return None
+        # Reject empty string - user must provide a valid file path
+        if custom_ca_certs_file_path == "":
+            raise InvalidArgumentValueError(
+                "custom_ca_trust_certificates cannot be an empty string. Please provide a valid file path."
+            )
         if not os.path.isfile(custom_ca_certs_file_path):
             raise InvalidArgumentValueError(
                 "{} is not valid file, or not accessible.".format(
@@ -2574,6 +2579,20 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool or None"""
         disable_acns_security = self.raw_param.get("disable_acns_security")
         return not bool(disable_acns_security) if disable_acns_security is not None else None
+
+    def get_acns_advanced_networkpolicies(self) -> Union[str, None]:
+        """Get the value of acns_advanced_networkpolicies
+        :return: str or None
+        """
+        disable_acns_security = self.raw_param.get("disable_acns_security")
+        disable_acns = self.raw_param.get("disable_acns")
+        acns_advanced_networkpolicies = self.raw_param.get("acns_advanced_networkpolicies")
+        if acns_advanced_networkpolicies is not None:
+            if disable_acns_security or disable_acns:
+                raise MutuallyExclusiveArgumentError(
+                    "--disable-acns-security and --disable-acns cannot be used with  --acns-advanced-networkpolicies."
+                )
+        return self.raw_param.get("acns_advanced_networkpolicies")
 
     def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self, enable_validation: bool = False
@@ -6175,6 +6194,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         network_dataplane = self.context.get_network_dataplane()
 
         (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
+        acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
         if acns_enabled is not None:
             acns = self.models.AdvancedNetworking(
                 enabled=acns_enabled,
@@ -6187,6 +6207,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 acns.security = self.models.AdvancedNetworkingSecurity(
                     enabled=acns_security,
                 )
+            if acns_advanced_networkpolicies is not None:
+                if acns.security is None:
+                    acns.security = self.models.AdvancedNetworkingSecurity(
+                        advanced_network_policies=acns_advanced_networkpolicies
+                    )
+                else:
+                    acns.security.advanced_network_policies = acns_advanced_networkpolicies
 
         if any(
             [
@@ -8086,6 +8113,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
         (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
+        acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
         if acns_enabled is not None:
             acns = self.models.AdvancedNetworking(
                 enabled=acns_enabled,
@@ -8098,6 +8126,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 acns.security = self.models.AdvancedNetworkingSecurity(
                     enabled=acns_security,
                 )
+            if acns_advanced_networkpolicies is not None:
+                if acns.security is None:
+                    acns.security = self.models.AdvancedNetworkingSecurity(
+                        advanced_network_policies=acns_advanced_networkpolicies
+                    )
+                else:
+                    acns.security.advanced_network_policies = acns_advanced_networkpolicies
         if acns_enabled is not None:
             mc.network_profile.advanced_networking = acns
         return mc
@@ -8710,11 +8745,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        ca_certs = self.context.get_custom_ca_trust_certificates()
-        if ca_certs:
+        # Check if the parameter was explicitly provided
+        if self.context.raw_param.get("custom_ca_trust_certificates") is not None:
+            ca_certs = self.context.get_custom_ca_trust_certificates()
             if mc.security_profile is None:
                 mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
 
+            # Set certificates (this allows setting to empty list to remove certificates)
             mc.security_profile.custom_ca_trust_certificates = ca_certs
 
         return mc
