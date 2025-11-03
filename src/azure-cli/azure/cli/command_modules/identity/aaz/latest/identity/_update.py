@@ -16,6 +16,12 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update an identity in the specified subscription and resource group.
+
+    :example: Update an identity's isolation scope with a name and resource group.
+        az identity update --name myIdentityName --resource-group myResourceGroup --isolation-scope None
+
+    :example: Update an identity using the resource restrictions and isolation scope parameter.
+        az identity update --name myIdentityName --resource-group myResourceGroup --resource-restriction {"providers":["Microsoft.Storage"]} --isolation-scope Regional
     """
 
     _aaz_info = {

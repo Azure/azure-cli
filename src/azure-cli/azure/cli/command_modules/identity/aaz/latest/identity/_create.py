@@ -16,6 +16,12 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create an identity in the specified subscription and resource group.
+
+     :example: Create an identity with a name and a resource group.
+        az identity create --name myIdentityName --resource-group myResourceGroup
+
+    :example: Create an identity using the resource restrictions and isolation scope parameter.
+        az identity create --name myIdentityName --resource-group myResourceGroup --resource-restriction {"providers":["Microsoft.Compute"]} --isolation-scope Regional
     """
 
     _aaz_info = {
