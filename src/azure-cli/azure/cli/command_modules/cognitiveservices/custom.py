@@ -4,10 +4,12 @@
 # --------------------------------------------------------------------------------------------
 
 import json
+import urllib.parse
 
 from knack.util import CLIError
 from knack.log import get_logger
 
+import azure.core.rest
 from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku, \
     VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction, \
     AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties, \
@@ -327,31 +329,46 @@ def commitment_plan_create_or_update(
     return client.create_or_update(resource_group_name, account_name, commitment_plan_name, plan)
 
 
-def agent_update(client, account_name, agent_name, agent_version,
-                 min_replica=None, max_replica=None, description=None, tags=None):
+AGENT_API_VERSION_PARAMS = { 'api-version': '2025-11-15-preview' }
+
+def agent_update(client, account_name, project_name, agent_name, agent_version,
+                 min_replica=None, max_replica=None, description=None, tags=None, endpoint=None):
     """
     Update hosted agent deployment configuration.
     Updates horizontal scale configuration (min and max replica), agent meta-data such as description and tags.
     New version is not created for this update.
     """
-    raise NotImplementedError("agent_update command is not yet implemented")
+    request_body = {}
+    if min_replica is not None:
+        request_body['min_replica'] = min_replica
+    if max_replica is not None:
+        request_body['max_replica'] = max_replica
+    request = azure.core.rest.HttpRequest('POST', f'/agents/{urllib.parse.quote(agent_name)}/containers/default:update', json = request_body, params=AGENT_API_VERSION_PARAMS)
+    response = client.send_request(request)
+    response.raise_for_status()
+    return response.json()
 
-
-def agent_stop(client, account_name, agent_name, agent_version):
+def agent_stop(client, account_name, project_name, agent_name, agent_version, endpoint=None):
     """
     Stop hosted agent deployment.
     """
-    raise NotImplementedError("agent_stop command is not yet implemented")
+    request = azure.core.rest.HttpRequest('POST', f'/agents/{urllib.parse.quote(agent_name)/containers/default:start}', params=AGENT_API_VERSION_PARAMS)
+    response = client.send_request(request)
+    response.raise_for_status()
+    return response.json()
 
 
-def agent_start(client, account_name, agent_name, agent_version):
+def agent_start(client, account_name, project_name, agent_name, agent_version, endpoint=None):
     """
     Start hosted agent deployment.
     """
-    raise NotImplementedError("agent_start command is not yet implemented")
+    request = azure.core.rest.HttpRequest('POST', f'/agents/{urllib.parse.quote(agent_name)/containers/default:start}', params=AGENT_API_VERSION_PARAMS)
+    response = client.send_request(request)
+    response.raise_for_status()
+    return response.json()
 
 
-def agent_delete_deployment(client, account_name, agent_name, agent_version):
+def agent_delete_deployment(client, account_name, project_name, agent_name, agent_version, endpoint=None):
     """
     Delete hosted agent deployment.
     Deletes the agent deployment only, agent version associated with the deployment remains.
@@ -359,20 +376,61 @@ def agent_delete_deployment(client, account_name, agent_name, agent_version):
     raise NotImplementedError("agent_delete_deployment command is not yet implemented")
 
 
-def agent_delete(client, account_name, agent_name, agent_version=None):
+def agent_delete(client, account_name, project_name, agent_name, agent_version=None, endpoint=None):
     """
     Delete hosted agent version or all versions.
-    If agent_version is provided, deletes the agent instance and agent definition associated with that version.
+    If agent_version is provided, deletes the agent instance and agent definition associated with `that version.
     If agent_version is not provided, deletes all agent instances and agent definitions associated with the agent name.
     """
-    raise NotImplementedError("agent_delete command is not yet implemented")
+    request = azure.core.rest.HttpRequest('DELETE', f'/agents/{urllib.parse.quote(agent_name)}', params = AGENT_API_VERSION_PARAMS)
+    response = client.send_request(request)
+    response.raise_for_status()
+    return response.json()
 
 
-def agent_list(client, account_name, agent_name, agent_version=None):
+def agent_list(client, account_name, project_name, endpoint=None):
     """
     List hosted agent versions or deployments.
     If agent_version is not provided, lists all versions for an agent.
     If agent_version is provided, lists all deployments for that agent version.
     """
-    raise NotImplementedError("agent_list command is not yet implemented")
-        
+    agents = []
+    params = AGENT_API_VERSION_PARAMS.copy()
+    while True:
+        request = azure.core.rest.HttpRequest('GET', f'/agents', params=params)
+        response = client.send_request(request)
+        response.raise_for_status()
+        body = response.json()
+        agents.extend(body.get('data', []))
+        if body.get('has_more'):
+            params['after'] = body.get('last_id')
+        else:
+            return agents
+
+
+def agent_versions_list(client, account_name, project_name, agent_name, endpoint=None):
+    """
+    List all versions of a hosted agent.
+    """
+    versions = []
+    params = AGENT_API_VERSION_PARAMS.copy()
+    while True:
+        request = azure.core.rest.HttpRequest('GET', f'/agents/{urllib.parse.quote(agent_name)}/versions', params=params)
+        response = client.send_request(request)
+        response.raise_for_status()
+        body = response.json()
+        versions.extend(body.get('data', []))
+        if body.get('has_more'):
+            params['after'] = body.get('last_id')
+        else:
+            return versions
+
+
+def agent_show(client, account_name, project_name, agent_name, endpoint=None):
+    """
+    Show details of a hosted agent.
+    """
+    request = azure.core.rest.HttpRequest('GET', f'/agents/{urllib.parse.quote(agent_name)}', params=AGENT_API_VERSION_PARAMS)
+    response = client.send_request(request)
+    response.raise_for_status()
+    return response.json()

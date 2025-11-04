@@ -121,6 +121,26 @@ def _validate_subnet(cmd, namespace):
             child_name_1=subnet)
 
 
+def validate_agent_endpoint_or_account_name(namespace):
+    """
+    Validate that either account_name or endpoint is provided, but not both.
+    """
+    from azure.cli.core.azclierror import MutuallyExclusiveArgumentError, RequiredArgumentMissingError
+    
+    account_name = getattr(namespace, 'account_name', None)
+    endpoint = getattr(namespace, 'endpoint', None)
+    
+    if account_name and endpoint:
+        raise MutuallyExclusiveArgumentError(
+            'Cannot specify both --name and --endpoint. Please provide only one.'
+        )
+    
+    if not account_name and not endpoint:
+        raise RequiredArgumentMissingError(
+            'Must specify either --name or --endpoint.'
+        )
+
+
 @Completer
 def sku_name_completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     names = {x.name for x in _sku_filter(cmd, namespace)}
@@ -216,13 +236,29 @@ def load_arguments(self, _):
         c.argument('next_tier', help='Cognitive Services account commitment plan next commitment period tier.')
 
     with self.argument_context('cognitiveservices agent') as c:
+        c.argument('account_name', arg_type=name_arg_type,
+                   help='cognitive service account name. Mutually exclusive with --endpoint.',
+                   completer=get_resource_name_completion_list('Microsoft.CognitiveServices/accounts'),
+                   required=False)
+        c.argument('project_name', help='AI Project name')
         c.argument('agent_name', help='Cognitive Services hosted agent name')
         c.argument('agent_version', help='Cognitive Services hosted agent version')
+        c.argument('endpoint', help='AI Projects endpoint URL. Mutually exclusive with --name.')
 
     with self.argument_context('cognitiveservices agent update') as c:
-        c.argument('min_replica', help='Minimum number of replicas for horizontal scaling')
-        c.argument('max_replica', help='Maximum number of replicas for horizontal scaling')
+        c.argument('min_replica', options_list=['--min-replica'], help='Minimum number of replicas for horizontal scaling')
+        c.argument('max_replica', options_list=['--max-replica'], help='Maximum number of replicas for horizontal scaling')
         c.argument('description', help='Description of the agent')
 
     with self.argument_context('cognitiveservices agent delete') as c:
         c.argument('agent_version', help='Cognitive Services hosted agent version. If not provided, deletes all versions.', required=False)
+
+    with self.argument_context('cognitiveservices agent versions') as c:
+        c.argument('account_name', arg_type=name_arg_type,
+                   help='cognitive service account name. Mutually exclusive with --endpoint.',
+                   completer=get_resource_name_completion_list('Microsoft.CognitiveServices/accounts'),
+                   required=False,
+                   validator=validate_agent_endpoint_or_account_name)
+        c.argument('project_name', help='AI Project name')
+        c.argument('agent_name', help='Cognitive Services hosted agent name')
+        c.argument('endpoint', help='AI Projects endpoint URL. Mutually exclusive with --name.')
