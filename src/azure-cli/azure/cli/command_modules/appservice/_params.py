@@ -181,12 +181,12 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('resource_group_name', arg_type=resource_group_name_type)
 
     with self.argument_context('appservice plan managed-instance install-script add') as c:
-        c.argument('install_script_name', options_list=['--install-script-name'], help='Name of the install script')
-        c.argument('source_uri', options_list=['--source-uri'], help='Source URI of the install script')
+        c.argument('install_script_name', help='Name of the install script')
+        c.argument('source_uri', help='Source URI of the install script')
         c.argument('install_script_type', options_list=['--type'], help='Type of the install script', arg_type=get_enum_type(INSTALL_SCRIPT_TYPES))
 
     with self.argument_context('appservice plan managed-instance install-script remove') as c:
-        c.argument('install_script_name', options_list=['--install-script-name'], help='Name of the install script to remove')
+        c.argument('install_script_name', help='Name of the install script to remove')
 
     with self.argument_context('appservice plan managed-instance install-script list') as c:
         c.ignore('ids')
@@ -206,16 +206,16 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('appservice plan managed-instance storage-mount add') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan')
-        c.argument('mount_name', options_list=['--mount-name'], help='Name of the storage mount')
+        c.argument('mount_name', help='Name of the storage mount')
         c.argument('mount_type', options_list=['--type'], arg_type=get_enum_type(STORAGE_MOUNT_TYPES), help='Type of the storage mount')
-        c.argument('source', options_list=['--source'], help='Source URI or path for the storage mount')
-        c.argument('destination_path', options_list=['--destination-path'], help='Destination path in the managed instance')
-        c.argument('credentials_secret_uri', options_list=['--credentials-secret-uri'], help='Key Vault secret URI for credentials')
+        c.argument('source', help='Source URI or path for the storage mount')
+        c.argument('destination_path', help='Destination path in the managed instance')
+        c.argument('credentials_secret_uri', help='Key Vault secret URI for credentials')
 
     with self.argument_context('appservice plan managed-instance storage-mount remove') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan')
-        c.argument('mount_name', options_list=['--mount-name'], help='Name of the storage mount to remove')
+        c.argument('mount_name', help='Name of the storage mount to remove')
 
     with self.argument_context('appservice plan managed-instance registry-adapter') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
@@ -231,14 +231,14 @@ subscription than the app service environment, please use the resource ID for --
     with self.argument_context('appservice plan managed-instance registry-adapter add') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan')
-        c.argument('registry_key', options_list=['--registry-key'], help='Registry key for the adapter')
+        c.argument('registry_key', help='Registry key for the adapter')
         c.argument('adapter_type', options_list=['--type'], arg_type=get_enum_type(REGISTRY_ADAPTER_TYPES), help='Type of the registry adapter')
-        c.argument('secret_uri', options_list=['--secret-uri'], help='Key Vault secret URI for the value')
+        c.argument('secret_uri', help='Key Vault secret URI for the value')
 
     with self.argument_context('appservice plan managed-instance registry-adapter remove') as c:
         c.argument('resource_group_name', arg_type=resource_group_name_type)
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan')
-        c.argument('registry_key', options_list=['--registry-key'], help='Registry key for the adapter to remove')
+        c.argument('registry_key', help='Registry key for the adapter to remove')
 
     with self.argument_context('appservice plan managed-instance network') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
@@ -247,29 +247,23 @@ subscription than the app service environment, please use the resource ID for --
                    local_context_attribute=LocalContextAttribute(name='plan_name', actions=[LocalContextAction.GET]))
         c.argument('resource_group_name', arg_type=resource_group_name_type)
 
-    with self.argument_context('appservice plan managed-instance network show') as c:
-        pass
-
     with self.argument_context('appservice plan managed-instance network add') as c:
         c.argument('vnet', help="Name or resource ID of the regional virtual network. If there are multiple vnets of the same name across different resource groups, use vnet resource id to specify which vnet to use. If vnet name is used, by default, the vnet in the same resource group as the app service plan will be used. Must be used with --subnet argument.")
         c.argument('subnet', help="Name or resource ID of the pre-existing subnet to have the app service plan join. The --vnet argument is also needed if specifying subnet by name.")
-
-    with self.argument_context('appservice plan managed-instance network remove') as c:
-        pass
 
     with self.argument_context('appservice plan managed-instance instance connect') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name')
-        c.argument('instance_name', options_list=['--instance-name'], help='The name of the instance to connect to', required=True)
-        c.argument('bastion_name', options_list=['--bastion-name'], help='Name of the Azure Bastion host to use for the RDP connection', required=True)
+        c.argument('instance_name', help='The name of the instance to connect to', required=True)
+        c.argument('bastion_name', help='Name of the Azure Bastion host to use for the RDP connection', required=True)
         c.argument('bastion_resource_group_name', options_list=['--bastion-resource-group'], help='Resource group name of the Azure Bastion host (defaults to the plan resource group)')
 
     with self.argument_context('appservice plan managed-instance instance recycle') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
                    completer=get_resource_name_completion_list('Microsoft.Web/serverFarms'),
                    configured_default='appserviceplan', id_part='name')
-        c.argument('instance_name', options_list=['--instance-name'], help='The name of the instance to recycle', required=True)
+        c.argument('instance_name', help='The name of the instance to recycle', required=True)
 
     with self.argument_context('appservice plan identity') as c:
         c.argument('name', arg_type=name_arg_type, help='The name of the app service plan',
