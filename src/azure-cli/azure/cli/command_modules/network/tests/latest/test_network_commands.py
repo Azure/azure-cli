@@ -2425,8 +2425,14 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
         ])
 
         # prepare two IPs
-        self.cmd('network public-ip create -g {rg} -n {ip1} --sku standard')
-        self.cmd('network public-ip create -g {rg} -n {ip2} --sku standard')
+        self.cmd('network public-ip create -g {rg} -n {ip1} --sku standard --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network public-ip create -g {rg} -n {ip2} --sku standard --ip-tags FirstPartyUsage=/NonProd')
+
+        self.cmd('network vnet create -g {rg} -n vnet1 --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name vnet1 -n subnet1 --address-prefix 10.0.0.0/24 --default-outbound false')
+
+        self.cmd('network vnet create -g {rg} -n vnet2 --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -g {rg} --vnet-name vnet2 -n subnet2 --address-prefix 10.0.0.0/24 --default-outbound false')
 
         # create two application gateways and assign with the same waf-policy
         self.cmd('network application-gateway create -g {rg} -n {ag1} --subnet subnet1 --vnet-name vnet1 '
