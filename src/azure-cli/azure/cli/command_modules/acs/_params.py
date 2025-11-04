@@ -19,6 +19,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
     CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
     CONST_NETWORK_DATAPLANE_AZURE, CONST_NETWORK_DATAPLANE_CILIUM,
+    CONST_ADVANCED_NETWORKPOLICIES_NONE, CONST_ADVANCED_NETWORKPOLICIES_FQDN, CONST_ADVANCED_NETWORKPOLICIES_L7,
     CONST_NETWORK_POLICY_AZURE, CONST_NETWORK_POLICY_CALICO, CONST_NETWORK_POLICY_CILIUM, CONST_NETWORK_POLICY_NONE,
     CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_KUBENET,
     CONST_NETWORK_PLUGIN_MODE_OVERLAY, CONST_NETWORK_PLUGIN_NONE,
@@ -31,7 +32,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODE_OS_CHANNEL_SECURITY_PATCH,
     CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER, CONST_NODEPOOL_MODE_GATEWAY,
     CONST_OS_DISK_TYPE_EPHEMERAL, CONST_OS_DISK_TYPE_MANAGED,
-    CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER,
+    CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3,
+    CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER,
     CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204,
     CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022,
     CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY,
@@ -168,9 +170,9 @@ node_priorities = [CONST_SCALE_SET_PRIORITY_REGULAR, CONST_SCALE_SET_PRIORITY_SP
 node_eviction_policies = [CONST_SPOT_EVICTION_POLICY_DELETE, CONST_SPOT_EVICTION_POLICY_DEALLOCATE]
 node_os_disk_types = [CONST_OS_DISK_TYPE_MANAGED, CONST_OS_DISK_TYPE_EPHEMERAL]
 node_mode_types = [CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER, CONST_NODEPOOL_MODE_GATEWAY]
-node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU2204]
+node_os_skus_create = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER, CONST_OS_SKU_UBUNTU2204]
 node_os_skus = node_os_skus_create + [CONST_OS_SKU_WINDOWS2019, CONST_OS_SKU_WINDOWS2022]
-node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204]
+node_os_skus_update = [CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3, CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204]
 scale_down_modes = [CONST_SCALE_DOWN_MODE_DELETE, CONST_SCALE_DOWN_MODE_DEALLOCATE]
 pod_ip_allocation_modes = [CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL, CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK]
 
@@ -180,6 +182,11 @@ sku_names = [CONST_MANAGED_CLUSTER_SKU_NAME_BASE, CONST_MANAGED_CLUSTER_SKU_NAME
 sku_tiers = [CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM]
 network_plugins = [CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_NONE]
 network_plugin_modes = [CONST_NETWORK_PLUGIN_MODE_OVERLAY]
+advanced_networkpolicies = [
+    CONST_ADVANCED_NETWORKPOLICIES_NONE,
+    CONST_ADVANCED_NETWORKPOLICIES_FQDN,
+    CONST_ADVANCED_NETWORKPOLICIES_L7,
+]
 network_dataplanes = [CONST_NETWORK_DATAPLANE_AZURE, CONST_NETWORK_DATAPLANE_CILIUM]
 network_policies = [CONST_NETWORK_POLICY_AZURE, CONST_NETWORK_POLICY_CALICO, CONST_NETWORK_POLICY_CILIUM, CONST_NETWORK_POLICY_NONE]
 outbound_types = [CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_NONE]
@@ -258,6 +265,11 @@ ingress_gateway_types = [
 ]
 
 # azure container storage
+container_storage_versions = [
+    "1",
+    "2"
+]
+
 storage_pool_types = [
     CONST_STORAGE_POOL_TYPE_AZURE_DISK,
     CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK,
@@ -515,6 +527,7 @@ def load_arguments(self, _):
         )
         c.argument(
             "container_storage_version",
+            arg_type=get_enum_type(container_storage_versions),
             help="set azure container storage version, the latest version will be installed by default",
         )
         c.argument(
@@ -554,6 +567,7 @@ def load_arguments(self, _):
         c.argument('enable_acns', action='store_true')
         c.argument('disable_acns_observability', action='store_true')
         c.argument('disable_acns_security', action='store_true')
+        c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         c.argument("if_match")
         c.argument("if_none_match")
         # node provisioning
@@ -610,6 +624,7 @@ def load_arguments(self, _):
         c.argument('disable_acns', action='store_true')
         c.argument('disable_acns_observability', action='store_true')
         c.argument('disable_acns_security', action='store_true')
+        c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         # private cluster parameters
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)
@@ -723,6 +738,7 @@ def load_arguments(self, _):
         )
         c.argument(
             "container_storage_version",
+            arg_type=get_enum_type(container_storage_versions),
             help="set azure container storage version, the latest version will be installed by default",
         )
         c.argument(

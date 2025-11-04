@@ -557,6 +557,10 @@ class NetworkPublicIpWithSku(ScenarioTest):
             self.check('publicIPAllocationMethod', 'Static')
         ])
 
+        self.cmd('network public-ip create -g {rg} -n {ip4} --sku standardv2 --allocation-method static --ip-tags FirstPartyUsage=/NonProd', checks=[
+            self.check('publicIp.sku.name', 'StandardV2'),
+        ])
+
 
 class NetworkCustomIPPrefix(ScenarioTest):
     @ResourceGroupPreparer(name_prefix="cli_test_network_custom_ip_prefix_", location="eastus2")
@@ -766,11 +770,14 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_basic')
     def test_network_app_gateway_with_defaults(self, resource_group):
-        self.cmd('network application-gateway create -g {rg} -n ag1 --priority 1001 --no-wait')
-        self.cmd('network application-gateway wait -g {rg} -n ag1 --exists')
+        self.cmd('network vnet create -n vnet1 -g {rg} --address-prefix 10.0.0.0/16')
+        self.cmd('network vnet subnet create -n subnet1 -g {rg} --vnet-name vnet1 --address-prefix 10.0.0.0/24 --default-outbound-access false')
+        self.cmd('network public-ip create -g {rg} -n pubip1 --sku standard --ip-tags FirstPartyUsage=/NonProd')
+        self.cmd('network application-gateway create -g {rg} -n ag1 --sku Standard_v2 --priority 1001 --vnet-name vnet1 --subnet subnet1 --public-ip-address pubip1 --enable-fips false')
+        self.cmd('network application-gateway show --resource-group {rg} --name ag1', checks=self.check('enableFips', False))
         self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait')
         self.cmd('network application-gateway update -g {rg} -n ag1 --no-wait '
-                 '--capacity 3 --sku standard_small --tags foo=doo --http2 Disabled')
+                 '--capacity 3 --tags foo=doo --http2 Disabled --enable-fips true')
         self.cmd('network application-gateway wait -g {rg} -n ag1 --updated')
 
         ag_list = self.cmd('network application-gateway list --resource-group {rg}', checks=[
@@ -784,8 +791,8 @@ class NetworkAppGatewayDefaultScenarioTest(ScenarioTest):
             self.check('name', 'ag1'),
             self.check('resourceGroup', resource_group),
             self.check('frontendIPConfigurations[0].privateIPAllocationMethod', 'Dynamic'),
-            self.check("frontendIPConfigurations[0].subnet.contains(id, 'default')", True),
             self.check("enableHttp2", False),
+            self.check("enableFips", True),
             self.check("contains(defaultPredefinedSslPolicy, 'AppGwSslPolicy')", True),
         ])
         self.cmd('network application-gateway show-backend-health -g {rg} -n ag1')
@@ -5656,6 +5663,57 @@ class NetworkVnetGatewayMultiAuth(ScenarioTest):
                          self.check('allowVirtualWanTraffic', False)])
 
 
+class NetworkExpressRouteGatewayScenarioTest(ScenarioTest):
+
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_no_pip')
+    def test_network_vnet_gateway_expressroute_without_public_ip(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'gw': 'gw',
+            'sku': 'Standard',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        result = self.cmd('network vnet-gateway create -g {rg} -n {gw} --vnet {vnet} '
+                          '--gateway-type ExpressRoute --sku {sku}').get_output_in_json()
+
+        ip_configs = result['vnetGateway']['ipConfigurations']
+        self.assertEqual(1, len(ip_configs))
+
+        ip_config = ip_configs[0]
+        self.assertEqual('Dynamic', ip_config['privateIPAllocationMethod'])
+        self.assertTrue(ip_config['subnet']['id'].endswith('/subnets/GatewaySubnet'))
+        self.assertFalse(ip_config.get('publicIPAddress'))
+
+    @ResourceGroupPreparer(name_prefix='test_network_vnet_gateway_with_pip')
+    def test_network_vnet_gateway_expressroute_with_public_ip(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet',
+            'pip': 'pip',
+            'gw': 'gw',
+            'sku': 'Standard',
+        })
+
+        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+        public_ip = self.cmd('network public-ip create -g {rg} -n {pip}').get_output_in_json()['publicIp']['id']
+        self.kwargs['pip_id'] = public_ip
+        print(self.kwargs['pip_id'])
+        result = self.cmd('network vnet-gateway create -g {rg} -n {gw} --vnet {vnet} '
+                          '--gateway-type ExpressRoute --sku {sku} --public-ip-addresses {pip}').get_output_in_json()
+
+        ip_configs = result['vnetGateway']['ipConfigurations']
+        self.assertEqual(1, len(ip_configs))
+
+        ip_config = ip_configs[0]
+        print(ip_config)
+        self.assertEqual('Dynamic', ip_config['privateIPAllocationMethod'])
+        self.assertTrue(ip_config['subnet']['id'].endswith('/subnets/GatewaySubnet'))
+        # public ip is ommitted by design with auto-assigned ip
+        self.assertFalse(ip_config.get('publicIPAddress'))
+
+
 class NetworkVirtualRouter(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_virtual_router', location='WestCentralUS')
@@ -7562,6 +7620,76 @@ class NetworkLoadBalancerWithSkuGateway(ScenarioTest):
                  '--backend-pools-name {bap1} ',
                  checks=[self.check('length(backendAddressPools)', 1)])
 
+class NetworkVnetGatewayFailoverAPIsTest(ScenarioTest):
+
+    @live_only()
+    def test_start_site_failover_test(self): # live_only as the express route is extremely expensive, contact service team for an available ER
+        resource_group = "shubhati_failover"  
+        vnet_gateway_name = "shubhati_failoverGw"
+        peering_location = "London2"
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'vnet_gw': vnet_gateway_name,
+            'peering_loc': peering_location
+        })
+
+        # Run the command
+        result = self.cmd(
+            'network vnet-gateway start-site-failover-test '
+            '-g {rg} --virtual-network-gateway-name {vnet_gw} --peering-location {peering_loc}'
+        ).get_output_in_json()
+
+        # Validate that result is a string (per _schema_on_200 = AAZStrType())
+        self.assertIsInstance(result, dict)
+
+    @live_only()
+    def test_stop_site_failover_test(self): # live_only as the express route is extremely expensive, contact service team for an available ER
+        import time
+
+        time.sleep(2 * 60)  # 120 seconds To wait for sometime before stopping the test failover
+        resource_group = "shubhati_failover"
+        vnet_gateway_name = "shubhati_failoverGw"
+        peering_location = "London2"
+        was_simulation_successful = True
+
+        # Construct failover test connection details
+        failover_details = [
+            {
+                "failover-connection-name": "failoverGR",
+                "failover-location": "Amsterdam",
+                "is-verified": True
+            }
+        ]
+
+        # Convert details list to CLI argument format
+        details_arg = "[" + ",".join(
+            "{{failover-connection-name:{},failover-location:{},is-verified:{}}}".format(
+                d["failover-connection-name"],
+                d["failover-location"],
+                str(d["is-verified"]).lower()
+            ) for d in failover_details
+        ) + "]"
+
+        self.kwargs.update({
+            'rg': resource_group,
+            'vnet_gw': vnet_gateway_name,
+            'peering_loc': peering_location,
+            'was_successful': was_simulation_successful,
+            'details_arg': details_arg
+        })
+
+        # Run the command
+        result = self.cmd(
+            'network vnet-gateway stop-site-failover-test '
+            '-g {rg} --virtual-network-gateway-name {vnet_gw} '
+            '--peering-location {peering_loc} '
+            '--was-simulation-successful {was_successful} '
+            '--details \'{details_arg}\''
+        ).get_output_in_json()
+
+        # Validate
+        self.assertTrue(isinstance(result, (str, dict)))
 
 class NetworkVnetGatewayRoutesAndResiliencyInfoScenarioTest(ScenarioTest):
 

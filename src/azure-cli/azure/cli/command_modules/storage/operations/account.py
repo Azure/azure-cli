@@ -56,7 +56,7 @@ def generate_sas(cmd, client, services, resource_types, permission, expiry, star
                          start=start, ip=ip, protocol=protocol, **kwargs)
 
 
-# pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument, line-too-long
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
                            encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
@@ -77,7 +77,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
-                           allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None):
+                           allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
+                           enable_smb_oauth=None, zones=None, zone_placement_policy=None,
+                           enable_blob_geo_priority_replication=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -198,6 +200,14 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                 directory_service_options='None')
         params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
 
+    if enable_smb_oauth is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+        params.azure_files_identity_based_authentication.smb_o_auth_settings = {
+            "is_smb_o_auth_enabled": enable_smb_oauth
+        }
+
     if enable_large_file_share:
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
         params.large_file_shares_state = LargeFileSharesState("Enabled")
@@ -304,6 +314,17 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if dns_endpoint_type is not None:
         params.dns_endpoint_type = dns_endpoint_type
 
+    if zones is not None:
+        params.zones = zones
+
+    if zone_placement_policy is not None:
+        Placement = cmd.get_models('Placement')
+        params.placement = Placement(zone_placement_policy=zone_placement_policy)
+
+    if enable_blob_geo_priority_replication is not None:
+        GeoPriorityReplicationStatus = cmd.get_models('GeoPriorityReplicationStatus')
+        params.geo_priority_replication_status = GeoPriorityReplicationStatus(is_blob_enabled=enable_blob_geo_priority_replication)
+
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
 
@@ -398,7 +419,8 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
-                           yes=None):
+                           yes=None, enable_smb_oauth=None, zones=None, zone_placement_policy=None,
+                           enable_blob_geo_priority_replication=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet', 'Kind')
@@ -610,6 +632,15 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 else instance.azure_files_identity_based_authentication
         params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
 
+    if enable_smb_oauth is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None') if instance.azure_files_identity_based_authentication is None \
+                else instance.azure_files_identity_based_authentication
+        params.azure_files_identity_based_authentication.smb_o_auth_settings = {
+            "is_smb_o_auth_enabled": enable_smb_oauth
+        }
+
     if assign_identity:
         params.identity = Identity(type='SystemAssigned')
     if enable_large_file_share:
@@ -691,6 +722,17 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         params.is_sftp_enabled = enable_sftp
     if enable_local_user is not None:
         params.is_local_user_enabled = enable_local_user
+
+    if zones is not None:
+        params.zones = zones
+
+    if zone_placement_policy is not None:
+        Placement = cmd.get_models('Placement')
+        params.placement = Placement(zone_placement_policy=zone_placement_policy)
+
+    if enable_blob_geo_priority_replication is not None:
+        GeoPriorityReplicationStatus = cmd.get_models('GeoPriorityReplicationStatus')
+        params.geo_priority_replication_status = GeoPriorityReplicationStatus(is_blob_enabled=enable_blob_geo_priority_replication)
 
     return params
 
@@ -988,14 +1030,18 @@ def list_encryption_scope(client, resource_group_name, account_name,
 # pylint: disable=no-member
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
-                     destination_container=None, min_creation_time=None, prefix_match=None):
+                     destination_container=None, min_creation_time=None, prefix_match=None, enable_metrics=None,
+                     priority_replication=None):
     from azure.core.exceptions import HttpResponseError
     ObjectReplicationPolicy = cmd.get_models('ObjectReplicationPolicy')
 
     if properties is None:
         rules = []
-        ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter = \
-            cmd.get_models('ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter')
+        (ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter, ObjectReplicationPolicyPropertiesMetrics,
+         ObjectReplicationPolicyPropertiesPriorityReplication) = \
+            cmd.get_models('ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter',
+                           'ObjectReplicationPolicyPropertiesMetrics',
+                           'ObjectReplicationPolicyPropertiesPriorityReplication')
         if source_container and destination_container:
             rule = ObjectReplicationPolicyRule(
                 rule_id=rule_id,
@@ -1006,7 +1052,10 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
             rules.append(rule)
         or_policy = ObjectReplicationPolicy(source_account=source_account,
                                             destination_account=destination_account,
-                                            rules=rules)
+                                            rules=rules,
+                                            metrics=ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics),
+                                            priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
+                                                enabled=priority_replication))
     else:
         or_policy = properties
     try:
@@ -1021,8 +1070,10 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
         raise ex
 
 
-def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
-                     properties=None, source_account=None, destination_account=None, ):
+# pylint: disable=line-too-long
+def update_or_policy(cmd, client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
+                     properties=None, source_account=None, destination_account=None, enable_metrics=None,
+                     priority_replication=None):
 
     if source_account is not None:
         parameters.source_account = source_account
@@ -1033,6 +1084,15 @@ def update_or_policy(client, parameters, resource_group_name, account_name, obje
         parameters = properties
         if "policyId" in properties.keys() and properties["policyId"]:
             object_replication_policy_id = properties["policyId"]
+
+    if enable_metrics is not None:
+        ObjectReplicationPolicyPropertiesMetrics = cmd.get_models('ObjectReplicationPolicyPropertiesMetrics')
+        parameters.metrics = ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics)
+
+    if priority_replication is not None:
+        ObjectReplicationPolicyPropertiesPriorityReplication = (
+            cmd.get_models('ObjectReplicationPolicyPropertiesPriorityReplication'))
+        parameters.priority_replication = ObjectReplicationPolicyPropertiesPriorityReplication(enabled=priority_replication)
 
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    object_replication_policy_id=object_replication_policy_id, properties=parameters)

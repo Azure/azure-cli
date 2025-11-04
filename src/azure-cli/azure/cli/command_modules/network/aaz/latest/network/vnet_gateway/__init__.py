@@ -12,6 +12,8 @@ from .__cmd_group import *
 from ._create import *
 from ._delete import *
 from ._disconnect_vpn_connections import *
+from ._get_failover_all_tests_detail import *
+from ._get_failover_single_test_detail import *
 from ._get_resiliency_information import *
 from ._get_routes_information import *
 from ._list import *
@@ -21,5 +23,7 @@ from ._list_learned_routes import *
 from ._reset import *
 from ._show import *
 from ._show_supported_devices import *
+from ._start_site_failover_test import *
+from ._stop_site_failover_test import *
 from ._update import *
 from ._wait import *

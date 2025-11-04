@@ -661,7 +661,7 @@ def _validate_nodepools(  # pylint: disable=too-many-branches,too-many-locals
                         'and retry the Azure Container Storage operation.'
                     )
             vm_size = agentpool.get("vm_size")
-            if vm_size is not None:
+            if vm_size is not None and vm_size != "":
                 cpu_value, nvme_enabled = get_vm_sku_details(vm_size.lower())
                 if cpu_value is None or nvme_enabled is None:
                     raise UnknownError(

@@ -52,7 +52,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
     def __init__(self, name_prefix='clitest-vault', parameter_name='vault_name',
                  resource_group_location_parameter_name='resource_group_location',
                  resource_group_parameter_name='resource_group',
-                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME', soft_delete=True, storageRedundancy = None):
+                 dev_setting_name='AZURE_CLI_TEST_DEV_BACKUP_ACCT_NAME', storageRedundancy=None):
         super().__init__(name_prefix, 24)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
@@ -62,22 +62,17 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
         self.location = None
         self.resource_group_location_parameter_name = resource_group_location_parameter_name
         self.dev_setting_value = os.environ.get(dev_setting_name, None)
-        self.soft_delete = soft_delete
         self.storageRedundancy = storageRedundancy
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_value:
             self.resource_group = self._get_resource_group(**kwargs)
             self.location = self._get_resource_group_location(**kwargs)
+
+            # Soft delete cannnot be disabled anymore.
             cmd = 'az backup vault create -n {} -g {} --location {}'.format(name, self.resource_group, self.location)
-            # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
-            # if not self.soft_delete:
-            #     cmd += ' --soft-delete-state Disable'
             execute(self.cli_ctx, cmd)
-            if not self.soft_delete:
-                cmd = 'az backup vault backup-properties set -n {} -g {} --soft-delete-feature-state Disable'.format(name, self.resource_group)
-                execute(self.cli_ctx, cmd)
-                
+
             if self.storageRedundancy:
                 cmd = 'az backup vault update -n {} -g {} --backup-storage-redundancy {}'.format(name, self.resource_group, self.storageRedundancy)
                 execute(self.cli_ctx, cmd)
@@ -106,6 +101,7 @@ class VaultPreparer(AbstractPreparer, SingleValueReplacer):  # pylint: disable=t
                                                self.resource_group_parameter_name))
 
     def _cleanup(self, vault_name, resource_group):
+        print(vault_name, resource_group)
         containers = execute(self.cli_ctx, 'az backup container list --backup-management-type AzureIaasVM -v {} -g {} --query [].properties.friendlyName'
                              .format(vault_name, resource_group)).get_output_in_json()
         for container in containers:
@@ -676,6 +672,7 @@ class AFSItemPreparer(AbstractPreparer, SingleValueReplacer):
 
     def _delete_lock(self, lock):
         lock_id = lock["id"]
+        print("deleting lock ID: ", lock_id)
         try:
             command_string = 'az lock delete --ids {}'.format(lock_id)
             execute(self.cli_ctx, command_string)

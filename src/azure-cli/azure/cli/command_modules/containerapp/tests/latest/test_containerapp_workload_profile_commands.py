@@ -483,7 +483,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
     @ResourceGroupPreparer(location="eastus")
     def test_containerapp_env_enable_workload_profiles_infer_env_type_v2(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
-        env = self.create_random_name(prefix='env', length=24)
+        env = self.create_random_name(prefix='env1', length=24)
         self.cmd('containerapp env create -g {} -n {} --logs-destination none'.format(
             resource_group, env), expect_failure=False, checks=[
             JMESPathCheck("name", env),
@@ -521,21 +521,7 @@ class ContainerAppWorkloadProfilesTest(ScenarioTest):
         ])
 
         self.cmd('containerapp env create -g {} -n {} --enable-workload-profiles false --logs-destination none'.format(
-            resource_group, env), expect_failure=False, checks=[
-            JMESPathCheck("name", env),
-            JMESPathCheck("properties.provisioningState", "Succeeded"),
-            JMESPathCheck("length(properties.workloadProfiles)", 1),
-            JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
-            JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
-        ])
-        self.cmd('containerapp env create -g {} -n {} -w false --logs-destination none'.format(resource_group, env).format(
-            resource_group, env), expect_failure=False, checks=[
-            JMESPathCheck("name", env),
-            JMESPathCheck("properties.provisioningState", "Succeeded"),
-            JMESPathCheck("length(properties.workloadProfiles)", 1),
-            JMESPathCheck('properties.workloadProfiles[0].name', "Consumption", case_sensitive=False),
-            JMESPathCheck('properties.workloadProfiles[0].workloadProfileType', "Consumption", case_sensitive=False),
-        ])
+            resource_group, env), expect_failure=True)
 
         self.cmd('containerapp env delete -g {} -n {} --yes --no-wait'.format(resource_group, env), expect_failure=False)
 

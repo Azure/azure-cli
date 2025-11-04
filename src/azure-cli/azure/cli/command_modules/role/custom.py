@@ -1332,7 +1332,7 @@ def _process_certificate(cli_ctx, years, app_start_date, app_end_date, cert, cre
 
 
 def _error_caused_by_role_assignment_exists(ex):
-    return getattr(ex, 'status_code', None) == 409 and 'role assignment already exists' in ex.message
+    return getattr(ex, 'status_code', None) == 409 and ex.error.code == 'RoleAssignmentExists'
 
 
 def _validate_app_dates(app_start_date, app_end_date, cert_start_date, cert_end_date):

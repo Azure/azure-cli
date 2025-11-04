@@ -63,7 +63,7 @@ class Create(AAZCommand):
         )
         _args_schema.logs = AAZListArg(
             options=["--logs"],
-            help="JSON encoded list of logs settings. Use '@{file}' to load from a file.For more information, visit: https://learn.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings.",
+            help="JSON encoded list of logs settings. Use '@{file}' to load from a file. For more information, visit: https://learn.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings.",
         )
         _args_schema.marketplace_partner_id = AAZStrArg(
             options=["--marketplace-partner-id"],
@@ -100,12 +100,12 @@ class Create(AAZCommand):
         )
         _element.enabled = AAZBoolArg(
             options=["enabled"],
-            help="a value indicating whether this log is enabled.",
+            help="A value indicating whether this log is enabled.",
             required=True,
         )
         _element.retention_policy = AAZObjectArg(
             options=["retention-policy"],
-            help="the retention policy for this log.",
+            help="The retention policy for this log.",
         )
         cls._build_args_retention_policy_create(_element.retention_policy)
 
@@ -119,17 +119,17 @@ class Create(AAZCommand):
         )
         _element.enabled = AAZBoolArg(
             options=["enabled"],
-            help="a value indicating whether this category is enabled.",
+            help="A value indicating whether this category is enabled.",
             required=True,
         )
         _element.retention_policy = AAZObjectArg(
             options=["retention-policy"],
-            help="the retention policy for this category.",
+            help="The retention policy for this category.",
         )
         cls._build_args_retention_policy_create(_element.retention_policy)
         _element.time_grain = AAZDurationArg(
             options=["time-grain"],
-            help="the timegrain of the metric in ISO8601 format.",
+            help="The timegrain of the metric in ISO8601 format.",
         )
 
         # define Arg Group "Target Resource"
@@ -157,7 +157,7 @@ class Create(AAZCommand):
         retention_policy_create = cls._args_retention_policy_create
         retention_policy_create.days = AAZIntArg(
             options=["days"],
-            help="the number of days for the retention in days. A value of 0 will retain the events indefinitely.",
+            help="The number of days for the retention. A value of 0 will retain the events indefinitely.",
             required=True,
             fmt=AAZIntArgFormat(
                 minimum=0,
@@ -165,7 +165,7 @@ class Create(AAZCommand):
         )
         retention_policy_create.enabled = AAZBoolArg(
             options=["enabled"],
-            help="a value indicating whether the retention policy is enabled.",
+            help="A value indicating whether the retention policy is enabled.",
             required=True,
         )
 

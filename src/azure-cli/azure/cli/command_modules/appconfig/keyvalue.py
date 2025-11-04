@@ -35,7 +35,6 @@ from ._kv_import_helpers import (
 )
 from knack.log import get_logger
 from knack.util import CLIError
-from ._constants import HttpHeaders
 
 from azure.appconfiguration import (ConfigurationSetting,
                                     ResourceReadOnlyError)
@@ -50,8 +49,10 @@ import azure.cli.core.azclierror as CLIErrors
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          SearchFilterOptions, StatusCodes,
                          ImportExportProfiles, CompareFieldsMap,
-                         JsonDiff, ImportMode)
+                         JsonDiff, ImportMode,
+                         AIConfigConstants, HttpHeaders)
 from ._featuremodels import map_keyvalue_to_featureflag
+from ._json import parse_json_with_comments
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
 from ._utils import get_appconfig_data_client, prep_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
 
@@ -507,9 +508,10 @@ def set_key(cmd,
         if retrieved_kv is None:
             if is_json_content_type(content_type):
                 try:
-                    # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
+                    # Ensure that provided value is valid JSON and strip comments if needed.
                     value = 'null' if value is None else value
-                    json.loads(value)
+
+                    __validate_json_value(value, content_type)
                 except ValueError:
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
 
@@ -523,8 +525,8 @@ def set_key(cmd,
             content_type = retrieved_kv.content_type if content_type is None else content_type
             if is_json_content_type(content_type):
                 try:
-                    # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
-                    json.loads(value)
+                    # Ensure that provided value is valid JSON and strip comments if needed.
+                    __validate_json_value(value, content_type)
                 except (TypeError, ValueError):
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}". Set the value again in valid JSON format.'.format(value, content_type))
             set_kv = ConfigurationSetting(key=key,
@@ -984,3 +986,12 @@ def list_revision(cmd,
         return retrieved_revisions
     except HttpResponseError as ex:
         raise CLIErrors.AzureResponseError('List revision operation failed.\n' + str(ex))
+
+
+def __validate_json_value(json_string, content_type):
+    # We do not allow comments in keyvault references, feature flags, and AI chat completion configs
+    if content_type in (FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE, KeyVaultConstants.KEYVAULT_CONTENT_TYPE, AIConfigConstants.AI_CHAT_COMPLETION_CONTENT_TYPE):
+        json.loads(json_string)
+
+    else:
+        parse_json_with_comments(json_string)

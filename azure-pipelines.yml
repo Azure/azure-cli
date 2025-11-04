@@ -226,7 +226,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
-    continueOnError: true
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     inputs:
       BuildDropPath: 'build_scripts/windows/out/'
 
@@ -271,7 +271,7 @@ jobs:
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
-      continueOnError: true
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
       inputs:
         BuildDropPath: 'build_scripts/windows/out/'
 
@@ -372,7 +372,7 @@ jobs:
 
     - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
       displayName: 'SBOM'
-      continueOnError: true
+      condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
       inputs:
         BuildDropPath: $(Build.ArtifactStagingDirectory)
         DockerImagesToScan: 'clibuild$BUILD_BUILDNUMBER:latest'
@@ -454,7 +454,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
-    continueOnError: true
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
@@ -625,7 +625,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
-    continueOnError: true
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
@@ -668,7 +668,12 @@ jobs:
       brew uninstall azure-cli
       
       echo == Install azure-cli.rb formula ==
-      brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
+      # Need to create a dummy homebrew tap to install the formula
+      git config --global user.email "you@example.com"
+      git config --global user.name "Your Name"
+      brew tap-new dev/azure-cli
+      cp $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/
+      brew install --build-from-source dev/homebrew-azure-cli/azure-cli
       
       echo == Az Version ==
       az --version
@@ -737,7 +742,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
-    continueOnError: true
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
@@ -834,7 +839,7 @@ jobs:
       filePath: scripts/release/rpm/pipeline.sh
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
-    continueOnError: true
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
   - task: PublishPipelineArtifact@0
@@ -962,7 +967,7 @@ jobs:
 
   - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
     displayName: 'SBOM'
-    continueOnError: true
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/heads/release')
     inputs:
       BuildDropPath: $(Build.ArtifactStagingDirectory)
 
