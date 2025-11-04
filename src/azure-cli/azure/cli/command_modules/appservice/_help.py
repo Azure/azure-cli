@@ -155,7 +155,7 @@ type: command
 short-summary: Add a storage mount to a managed instance App Service plan.
 examples:
   - name: Add a storage mount to a managed instance App Service plan.
-    text: az appservice plan managed-instance storage-mount add --name MyAppServicePlan --resource-group MyResourceGroup --mount-name MyMount --type AzureFiles --source //myaccount.file.core.windows.net/myshare --destination-path F:\ --credentials-secret-uri https://myvault.vault.azure.net/secrets/storage-credentials/myversion
+    text: az appservice plan managed-instance storage-mount add --name MyAppServicePlan --resource-group MyResourceGroup --mount-name MyMount --type AzureFiles --source //myaccount.file.core.windows.net/myshare --destination-path F:\\ --credentials-secret-uri https://myvault.vault.azure.net/secrets/storage-credentials/myversion
 """
 
 helps['appservice plan managed-instance storage-mount remove'] = """

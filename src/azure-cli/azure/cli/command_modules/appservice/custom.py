@@ -4095,18 +4095,26 @@ class PlanProgressBar(IndeterminateProgressBar):
 
 
 def is_async_response(poller, timeout_seconds=30):
-    found_initial_response = False
     for _ in range(timeout_seconds):
-        time.sleep(1)
-        if hasattr(poller._polling_method, '_initial_response'):  # pylint: disable=protected-access
-            found_initial_response = True
+        if poller.done():
             break
 
-    if not found_initial_response:
+        if hasattr(poller._polling_method, '_initial_response'):  # pylint: disable=protected-access
+            break
+
+        time.sleep(1)
+
+    # pylint: disable=protected-access
+    if (
+        not hasattr(poller._polling_method, '_initial_response') or
+        not hasattr(poller._polling_method._initial_response, 'http_response') or
+        not hasattr(poller._polling_method._initial_response.http_response, 'status_code')
+    ):
         return False
 
-    # Check if this is an asynchronous operation (202) or synchronous (200)
-    status_code = poller._polling_method._initial_response.http_response.status_code  # pylint: disable=protected-access
+    # Check if this is an asynchronous operation (202)
+    status_code = poller._polling_method._initial_response.http_response.status_code
+    # pylint: enable=protected-access
     return status_code == 202
 
 
@@ -4189,7 +4197,16 @@ has been deployed ".format(app_service_environment)
     # Transform default_identity parameter into the proper structure
     plan_default_identity = _build_plan_default_identity(default_identity)
 
-    poller = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)(command_args={
+    hosting_environment_profile = None
+    if plan_def.hosting_environment_profile:
+        hosting_environment_profile = plan_def.hosting_environment_profile.__dict__
+
+    class AppServicePlanCreateWithNoWait(AppServicePlanCreate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
+
+    poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
         "name": name,
         "resource_group": resource_group_name,
         "location": location,
@@ -4198,7 +4215,7 @@ has been deployed ".format(app_service_environment)
         "reserved": plan_def.reserved,
         "hyper_v": plan_def.hyper_v,
         "per_site_scaling": plan_def.per_site_scaling,
-        "hosting_environment_profile": plan_def.hosting_environment_profile,
+        "hosting_environment_profile": hosting_environment_profile,
         "async_scaling_enabled": plan_def.async_scaling_enabled,
         "zone_redundant": zone_redundant if zone_redundant else None,
         "is_custom_mode": is_managed_instance,
@@ -4215,7 +4232,7 @@ has been deployed ".format(app_service_environment)
     })
 
     if no_wait:
-        return poller
+        return poller.result()
 
     # Check if this is an asynchronous operation
     is_async = is_async_response(poller)

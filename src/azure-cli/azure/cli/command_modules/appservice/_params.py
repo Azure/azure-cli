@@ -133,10 +133,10 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('tags', arg_type=tags_type)
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
         c.argument('is_managed_instance', action='store_true', is_preview=True, help='host web app on managed instance')
-        c.argument('mi_system_assigned',
+        c.argument('mi_system_assigned', is_preview=True,
                    arg_type=get_three_state_flag(),
                    help="Enable system-assigned managed identity for this app service plan.")
-        c.argument('mi_user_assigned',
+        c.argument('mi_user_assigned', is_preview=True,
                    nargs='+', help="Enable user-assigned managed identities for this app service plan. "
                    "Accepts space-separated list of identity resource IDs.")
         c.argument('default_identity', is_preview=True,
