@@ -133,8 +133,12 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('tags', arg_type=tags_type)
         c.argument('async_scaling_enabled', arg_type=get_three_state_flag(), help='Enables async scaling for the app service plan. Set to "true" to create an async operation if there are insufficient workers to scale synchronously. The SKU must be Dedicated.')
         c.argument('is_managed_instance', action='store_true', is_preview=True, help='host web app on managed instance')
-        c.argument('assign_identities', nargs='*', options_list=['--assign-identity'], is_preview=True,
-                   help='accept system or user assigned identities separated by spaces. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity. Check out help for more examples')
+        c.argument('mi_system_assigned',
+                   arg_type=get_three_state_flag(),
+                   help="Enable system-assigned managed identity for this app service plan.")
+        c.argument('mi_user_assigned',
+                   nargs='+', help="Enable user-assigned managed identities for this app service plan. "
+                   "Accepts space-separated list of identity resource IDs.")
         c.argument('default_identity', is_preview=True,
                    help='accept system or user assigned identity separated. Use \'[system]\' to refer system assigned identity, or a resource id to refer user assigned identity.')
         c.argument('rdp_enabled', arg_type=get_three_state_flag(), is_preview=True,
@@ -273,15 +277,25 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('resource_group_name', arg_type=resource_group_name_type)
 
     with self.argument_context('appservice plan identity assign') as c:
-        c.argument('identities', nargs='*', options_list=['--identities'],
-                   help='Space-separated identities to assign. Use \'[system]\' to refer to the system assigned identity, or a resource ID to refer to a user assigned identity.')
+        c.argument('system_assigned',
+                   action='store_true',
+                   help="Assign system-assigned managed identity to this app service plan.")
+        c.argument('user_assigned',
+                   nargs='+', help="Assign user-assigned managed identities to this app service plan. "
+                   "Accepts space-separated list of identity resource IDs.")
 
     with self.argument_context('appservice plan identity remove') as c:
-        c.argument('identities', nargs='*', options_list=['--identities'],
-                   help='Space-separated identities to remove. Use \'[system]\' to refer to the system assigned identity, or a resource ID to refer to a user assigned identity.')
+        c.argument('system_assigned',
+                   action='store_true',
+                   help="Remove system-assigned managed identity from this app service plan.")
+        c.argument('user_assigned',
+                   nargs='*', help="Remove user-assigned managed identities from this app service plan. "
+                   "Accepts space-separated list of identity resource IDs. "
+                   "If --user-assigned is specified without any resource IDs, "
+                   "all user-assigned managed identities are removed from this app service plan.")
 
     with self.argument_context('appservice plan identity set-default') as c:
-        c.argument('identity', help='Identity to set as default. Use [system] for system-assigned identity or provide user-assigned identity resource ID.')
+        c.argument('identity', help='Identity to set as default. Use \'[system]\' for system-assigned identity or provide user-assigned identity resource ID.')
 
     with self.argument_context('webapp create') as c:
         c.argument('name', options_list=['--name', '-n'], help='Name of the new web app. Web app name can contain only allow alphanumeric characters and hyphens, it cannot start or end in a hyphen, and must be less than 64 characters.',

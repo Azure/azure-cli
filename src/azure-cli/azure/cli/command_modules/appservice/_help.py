@@ -246,11 +246,11 @@ type: command
 short-summary: Assign a managed identity to an App Service plan.
 examples:
   - name: Assign a system-assigned managed identity to an App Service plan.
-    text: az appservice plan identity assign --name MyAppServicePlan --resource-group MyResourceGroup --identities [system]
+    text: az appservice plan identity assign --name MyAppServicePlan --resource-group MyResourceGroup --system-assigned
   - name: Assign a user-assigned managed identity to an App Service plan.
-    text: az appservice plan identity assign --name MyAppServicePlan --resource-group MyResourceGroup --identities /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+    text: az appservice plan identity assign --name MyAppServicePlan --resource-group MyResourceGroup --user-assigned /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
   - name: Assign both system-assigned and user-assigned managed identities to an App Service plan.
-    text: az appservice plan identity assign --name MyAppServicePlan --resource-group MyResourceGroup --identities [system] /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+    text: az appservice plan identity assign --name MyAppServicePlan --resource-group MyResourceGroup --system-assigned --user-assigned /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
 """
 
 helps['appservice plan identity remove'] = """
@@ -258,11 +258,11 @@ type: command
 short-summary: Remove managed identities from an App Service plan.
 examples:
   - name: Remove a system-assigned managed identity from an App Service plan.
-    text: az appservice plan identity remove --name MyAppServicePlan --resource-group MyResourceGroup --identities [system]
+    text: az appservice plan identity remove --name MyAppServicePlan --resource-group MyResourceGroup --system-assigned
   - name: Remove a user-assigned managed identity from an App Service plan.
-    text: az appservice plan identity remove --name MyAppServicePlan --resource-group MyResourceGroup --identities /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+    text: az appservice plan identity remove --name MyAppServicePlan --resource-group MyResourceGroup --user-assigned /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
   - name: Remove both system-assigned and user-assigned managed identities from an App Service plan.
-    text: az appservice plan identity remove --name MyAppServicePlan --resource-group MyResourceGroup --identities [system] /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
+    text: az appservice plan identity remove --name MyAppServicePlan --resource-group MyResourceGroup --system-assigned --user-assigned /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/MyResourceGroup/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyIdentity
 """
 
 helps['appservice plan identity set-default'] = """

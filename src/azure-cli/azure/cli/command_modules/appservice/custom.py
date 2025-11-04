@@ -4113,8 +4113,8 @@ def is_async_response(poller, timeout_seconds=30):
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
                             tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
-                            is_managed_instance=None, assign_identities=None, default_identity=None,
-                            rdp_enabled=None, vnet=None, subnet=None,
+                            is_managed_instance=None, mi_system_assigned=None, mi_user_assigned=None,
+                            default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
                             registry_adapters=None, install_scripts=None, storage_mounts=None):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
@@ -4186,12 +4186,6 @@ has been deployed ".format(app_service_environment)
     else:
         subnet_resource_id = None
 
-    if assign_identities is not None:
-        _, _, user_assigned_identities, enable_system_assigned_identity = _build_identities_info(assign_identities)
-    else:
-        user_assigned_identities = None
-        enable_system_assigned_identity = None
-
     # Transform default_identity parameter into the proper structure
     plan_default_identity = _build_plan_default_identity(default_identity)
 
@@ -4212,8 +4206,8 @@ has been deployed ".format(app_service_environment)
             "virtual_network_subnet_id": subnet_resource_id,
         } if subnet_resource_id else None,
         "rdp_enabled": rdp_enabled,
-        "mi_system_assigned": str(enable_system_assigned_identity) if enable_system_assigned_identity else None,
-        "mi_user_assigned": user_assigned_identities,
+        "mi_system_assigned": str(mi_system_assigned) if mi_system_assigned else None,
+        "mi_user_assigned": mi_user_assigned,
         "plan_default_identity": plan_default_identity,
         "registry_adapters": registry_adapters,
         "install_scripts": install_scripts,
@@ -4833,21 +4827,15 @@ def _update_plan_identity(cmd, resource_group_name, name, identity_type, user_as
     return plan_result.get('identity', {})
 
 
-def assign_plan_identity(cmd, resource_group_name, name, identities=None):
+def assign_plan_identity(cmd, resource_group_name, name, system_assigned=None, user_assigned=None):
     # Parse the identities parameter similar to webapp pattern
-    if not identities:
-        raise InvalidArgumentValueError("No identities specified. Use '[system]' for system-assigned identity "
-                                        "or provide user-assigned identity resource IDs.")
+    if not system_assigned and not user_assigned:
+        raise InvalidArgumentValueError("No identities specified. "
+                                        "Either --system-assigned or --user-assigned must be specified.")
 
     # Determine what identities to assign
-    system_assigned = False
-    user_assigned_identities = []
-
-    for identity in identities:
-        if identity.lower() == '[system]':
-            system_assigned = True
-        else:
-            user_assigned_identities.append(identity)
+    system_assigned = bool(system_assigned)
+    user_assigned = user_assigned if user_assigned else []
 
     # Get the current plan to understand existing identity
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
@@ -4870,7 +4858,7 @@ def assign_plan_identity(cmd, resource_group_name, name, identities=None):
         final_user_assigned.extend(list(current_user_assigned.keys()))
 
     # Add new user-assigned identities (avoid duplicates with case-insensitive comparison)
-    for identity in user_assigned_identities:
+    for identity in user_assigned:
         if not any(existing.lower() == identity.lower() for existing in final_user_assigned):
             final_user_assigned.append(identity)
 
@@ -4883,21 +4871,20 @@ def assign_plan_identity(cmd, resource_group_name, name, identities=None):
     return _update_plan_identity(cmd, resource_group_name, name, identity_type, final_user_assigned, plan_result)
 
 
-def remove_plan_identity(cmd, resource_group_name, name, identities=None):
+def remove_plan_identity(cmd, resource_group_name, name, system_assigned=None, user_assigned=None):
     # Parse the identities parameter similar to webapp pattern
-    if not identities:
-        raise InvalidArgumentValueError("No identities specified. Use '[system]' for system-assigned identity "
-                                        "or provide user-assigned identity resource IDs.")
+    if not system_assigned and user_assigned is None:
+        raise InvalidArgumentValueError("No identities specified. "
+                                        "Either --system-assigned or --user-assigned must be specified.")
 
     # Determine what identities to remove
-    remove_system = False
-    remove_user_assigned = []
+    remove_system = bool(system_assigned)
+    remove_user_assigned = user_assigned if user_assigned else []
+    remove_all_user_assigned = user_assigned == []
 
-    for identity in identities:
-        if identity.lower() == '[system]':
-            remove_system = True
-        else:
-            remove_user_assigned.append(identity)
+    if remove_all_user_assigned:
+        logger.warning('--user-assigned specified without any resource IDs. '
+                       'Removing all user-assigned identities from app service plan.')
 
     # Get the current plan to understand existing identity
     plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
@@ -4915,7 +4902,10 @@ def remove_plan_identity(cmd, resource_group_name, name, identities=None):
     has_user = current_type and 'UserAssigned' in current_type
 
     if remove_system and not has_system:
-        raise ResourceNotFoundError(f"System-assigned identity is not associated with plan '{name}'")
+        logger.warning("System-assigned identity is not associated with plan '%s'", name)
+
+    if not has_user and (remove_user_assigned or remove_all_user_assigned):
+        logger.warning("No user-assigned identities are associated with plan '%s'", name)
 
     # Check if user-assigned identities exist
     if remove_user_assigned:
@@ -4928,14 +4918,14 @@ def remove_plan_identity(cmd, resource_group_name, name, identities=None):
             for remove_id in remove_user_assigned:
                 if remove_id.lower() in non_existing:
                     original_non_existing.append(remove_id)
-            raise ResourceNotFoundError(f"User-assigned identities '{', '.join(original_non_existing)}' "
-                                        f"are not associated with plan '{name}'")
+            logger.warning("User-assigned identities '%s' are not associated with plan '%s'",
+                           ', '.join(original_non_existing), name)
 
     # Calculate what should remain
     final_system_assigned = has_system and not remove_system
 
     final_user_assigned = []
-    if has_user and current_user_assigned:
+    if has_user and current_user_assigned and not remove_all_user_assigned:
         # Keep existing user-assigned identities except those being removed (case insensitive comparison)
         remove_user_ids_lower = set(id.lower() for id in remove_user_assigned)
         final_user_assigned = [uid for uid in current_user_assigned.keys() if uid.lower() not in remove_user_ids_lower]

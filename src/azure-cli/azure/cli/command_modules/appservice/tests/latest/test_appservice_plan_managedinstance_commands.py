@@ -53,7 +53,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         identity_id = identity_result['id']
         
         # Create plan with system and user assigned identities
-        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance --assign-identity [system] {}'.format(
+        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance --mi-system-assigned --mi-user-assigned {}'.format(
             resource_group, plan_name, identity_id), checks=[
             JMESPathCheck('name', plan_name),
             JMESPathCheckExists('id')
@@ -118,7 +118,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         ])
         
         # Assign system-assigned identity
-        self.cmd('appservice plan identity assign -g {} -n {} --identities [system]'.format(
+        self.cmd('appservice plan identity assign -g {} -n {} --system-assigned'.format(
             resource_group, plan_name), checks=[
             JMESPathCheck('type', 'SystemAssigned'),
             JMESPathCheckExists('principalId'),
@@ -133,7 +133,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         ])
         
         # Assign user-assigned identity (should now have both)
-        self.cmd('appservice plan identity assign -g {} -n {} --identities {}'.format(
+        self.cmd('appservice plan identity assign -g {} -n {} --user-assigned {}'.format(
             resource_group, plan_name, identity_id), checks=[
             JMESPathCheck('type', 'SystemAssigned, UserAssigned'),
             JMESPathCheckExists('principalId'),
@@ -141,7 +141,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         ])
         
         # Remove user-assigned identity
-        self.cmd('appservice plan identity remove -g {} -n {} --identities {}'.format(
+        self.cmd('appservice plan identity remove -g {} -n {} --user-assigned {}'.format(
             resource_group, plan_name, identity_id), checks=[
             JMESPathCheck('type', 'SystemAssigned'),
             JMESPathCheckExists('principalId'),
@@ -149,7 +149,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         ])
         
         # Remove system-assigned identity
-        self.cmd('appservice plan identity remove -g {} -n {} --identities [system]'.format(
+        self.cmd('appservice plan identity remove -g {} -n {} --system-assigned'.format(
             resource_group, plan_name), checks=[
             JMESPathCheck('type', None)
         ])
@@ -325,7 +325,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         identity_id = identity_result['id']
         
         # Create complex managed instance plan
-        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance --assign-identity [system] {} --rdp-enabled'.format(
+        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance --mi-system-assigned --mi-user-assigned {} --rdp-enabled'.format(
             resource_group, plan_name, identity_id), checks=[
             JMESPathCheck('name', plan_name),
             JMESPathCheckExists('id')
@@ -383,7 +383,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         ])
         
         # Remove user identity
-        self.cmd('appservice plan identity remove -g {} -n {} --identities {}'.format(
+        self.cmd('appservice plan identity remove -g {} -n {} --user-assigned {}'.format(
             resource_group, plan_name, identity_id), checks=[
             JMESPathCheck('type', 'SystemAssigned'),
             JMESPathCheck('userAssignedIdentities', None)
@@ -422,7 +422,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         identity_id = identity_result['id']
         
         # First assign system-assigned identity
-        self.cmd('appservice plan identity assign -g {} -n {} --identities [system]'.format(
+        self.cmd('appservice plan identity assign -g {} -n {} --system-assigned'.format(
             resource_group, plan_name), checks=[
             JMESPathCheck('type', 'SystemAssigned'),
             JMESPathCheckExists('principalId')
@@ -443,7 +443,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         ])
         
         # Now assign user-assigned identity to the plan
-        self.cmd('appservice plan identity assign -g {} -n {} --identities {}'.format(
+        self.cmd('appservice plan identity assign -g {} -n {} --user-assigned {}'.format(
             resource_group, plan_name, identity_id), checks=[
             JMESPathCheck('type', 'SystemAssigned, UserAssigned'),
             JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id))
@@ -617,7 +617,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         subnet_id = subnet_result['id']
         
         # Create comprehensive managed instance plan with all features
-        self.cmd('appservice plan create -g {} -n {} --number-of-workers 2 --sku P1V4 --location {} --is-managed-instance --assign-identity [system] {} --default-identity {} --rdp-enabled --subnet {} --registry-adapter registry-key="{}" type="String" secret-uri="{}" --install-script name="{}" source-uri="{}" type="RemoteAzureBlob" --storage-mount name="{}" source="{}" destination-path="{}" type="AzureFiles" credentials-secret-uri="{}"'.format(
+        self.cmd('appservice plan create -g {} -n {} --number-of-workers 2 --sku P1V4 --location {} --is-managed-instance --mi-system-assigned --mi-user-assigned {} --default-identity {} --rdp-enabled --subnet {} --registry-adapter registry-key="{}" type="String" secret-uri="{}" --install-script name="{}" source-uri="{}" type="RemoteAzureBlob" --storage-mount name="{}" source="{}" destination-path="{}" type="AzureFiles" credentials-secret-uri="{}"'.format(
             resource_group, plan_name, MANAGED_INSTANCE_LOCATION, identity_id, identity_id, subnet_id, 
             registry_key, secret_uri, script_name, script_uri, mount_name, source_path, destination_path, storage_secret_uri), checks=[
             JMESPathCheck('name', plan_name),
@@ -762,7 +762,7 @@ class AppServicePlanManagedInstanceTest(ScenarioTest):
         subnet_id = subnet_result['id']
         
         # Create basic managed instance plan with system-assigned identity only
-        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance --assign-identity [system]'.format(
+        self.cmd('appservice plan create -g {} -n {} --sku P1V4 --is-managed-instance --mi-system-assigned'.format(
             resource_group, plan_name), checks=[
             JMESPathCheck('name', plan_name),
             JMESPathCheck('sku.name', 'P1v4'),
