@@ -17,7 +17,7 @@ interactions:
       ParameterSetName:
       - --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/checkNameAvailability?api-version=2023-01-01-preview
   response:
@@ -31,7 +31,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:35:44 GMT
+      - Fri, 04 Jul 2025 07:54:35 GMT
       expires:
       - '-1'
       pragma:
@@ -43,18 +43,21 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 2adb0b65-54c2-4d4a-ba56-aed2de8138a2
+      - 37058cca-bb7c-4539-be76-22b16e52f6a4
       x-ms-messaging-routing-id:
-      - KOREASOUTH|KOREASOUTH|G0|2024-09-26T06:35:44
+      - JAPANEAST|JAPANEAST|G0|2025-07-04T07:54:36
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/59e38d0d-6c4f-4ab8-97dc-9cb252289a0f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: F826813269D3480B82BA2AD65D85B3A5 Ref B: OSA221030113033 Ref C: 2024-09-26T06:35:43Z'
+      - 'Ref A: EF3C79651D18417B8CECF2C95C26F8CC Ref B: TYO201151003023 Ref C: 2025-07-04T07:54:35Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"identity": {"type": "None"}, "location": "westus", "properties": {"isAutoInflateEnabled":
-      true, "maximumThroughputUnits": 4}, "sku": {"name": "Standard", "tier": "Standard"},
-      "tags": {"tag1": "value1"}}'
+    body: '{"location": "westus", "properties": {"isAutoInflateEnabled": true, "maximumThroughputUnits":
+      4}, "sku": {"name": "Standard", "tier": "Standard"}, "tags": {"tag1": "value1"}}'
     headers:
       Accept:
       - application/json
@@ -65,30 +68,34 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '204'
+      - '174'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --location --tags --sku --enable-auto-inflate --maximum-throughput-units
         --enable-kafka
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli1000004?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli1000004","name":"eventhubs-nscli1000004","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"InBuild"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli1000004","serviceBusEndpoint":"https://eventhubs-nscli1000004.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Creating","status":"Creating","createdAt":"2024-09-26T06:35:48.4782114Z","updatedAt":"2024-09-26T06:35:48.4782114Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli1000004","name":"eventhubs-nscli1000004","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"InBuild"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli1000004","serviceBusEndpoint":"https://eventhubs-nscli1000004.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Creating","status":"Creating","createdAt":"2025-07-04T07:54:41.3882284Z","updatedAt":"2025-07-04T07:54:41Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/d84e3f54-991f-4087-a973-f2d22d9f167e?isAsyncHeader=true&resourceName=eventhubs-nscli1000004&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872124820752994&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=iU3eC52VElKBRBZ8uMZOK88vCei--nXsDOzPWBQhpfDA8lqgOoXuDVr-QbKQgir8hgstSvF_RNMSZtoJFgxiP5RM_E_69OwpRz22OzXPbSRZxZorXAiV6W0_M6d83DtBa7pQ11rJIcNHqa2nvKJMIQkg1d__kqtHfN8keVCp1xIR67bMdG9tO8SYgtPGcWWdjMS9au98tmqC4B0Qo9CN7FaZ0_qhoWqDtG_FxccAalUtzI2lWIa8DvmKC5J87VwSJxrIF3i4UmPJy2wCIAdq4p_P0a6rWj5kro6T8Eg8l4N9CDaPItk752ddBdZg70H9vkAkbBwplLPjP_InfKIBAw&h=76NmA5OeagD8onhjYuEkOmKfPUFpHj8QCpKeQXe77eM
       cache-control:
       - no-cache
       content-length:
-      - '974'
+      - '966'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:35:48 GMT
+      - Fri, 04 Jul 2025 07:54:41 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/d84e3f54-991f-4087-a973-f2d22d9f167e?isAsyncHeader=false&resourceName=eventhubs-nscli1000004&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872124820752994&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=iU3eC52VElKBRBZ8uMZOK88vCei--nXsDOzPWBQhpfDA8lqgOoXuDVr-QbKQgir8hgstSvF_RNMSZtoJFgxiP5RM_E_69OwpRz22OzXPbSRZxZorXAiV6W0_M6d83DtBa7pQ11rJIcNHqa2nvKJMIQkg1d__kqtHfN8keVCp1xIR67bMdG9tO8SYgtPGcWWdjMS9au98tmqC4B0Qo9CN7FaZ0_qhoWqDtG_FxccAalUtzI2lWIa8DvmKC5J87VwSJxrIF3i4UmPJy2wCIAdq4p_P0a6rWj5kro6T8Eg8l4N9CDaPItk752ddBdZg70H9vkAkbBwplLPjP_InfKIBAw&h=76NmA5OeagD8onhjYuEkOmKfPUFpHj8QCpKeQXe77eM
       pragma:
       - no-cache
       strict-transport-security:
@@ -98,13 +105,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - f02e179a-1120-41e4-9a9e-1f497d99755a
+      - 2e1796ab-013d-4fb7-a995-15c2a98cd82a
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-26T06:35:48
+      - WESTUS|WESTUS|G4|2025-07-04T07:54:41
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/f052790e-4fa4-4e48-ab59-51e04be80fa6
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 3F4449EEDA794E7BB4D836C980059A26 Ref B: OSA221030115033 Ref C: 2024-09-26T06:35:44Z'
+      - 'Ref A: 7C674C6E3A3D4EA18ABD94C390674436 Ref B: TYO201100113045 Ref C: 2025-07-04T07:54:37Z'
     status:
       code: 201
       message: Created
@@ -123,21 +132,21 @@ interactions:
       - --resource-group --name --location --tags --sku --enable-auto-inflate --maximum-throughput-units
         --enable-kafka
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli1000004?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/d84e3f54-991f-4087-a973-f2d22d9f167e?isAsyncHeader=true&resourceName=eventhubs-nscli1000004&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872124820752994&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=iU3eC52VElKBRBZ8uMZOK88vCei--nXsDOzPWBQhpfDA8lqgOoXuDVr-QbKQgir8hgstSvF_RNMSZtoJFgxiP5RM_E_69OwpRz22OzXPbSRZxZorXAiV6W0_M6d83DtBa7pQ11rJIcNHqa2nvKJMIQkg1d__kqtHfN8keVCp1xIR67bMdG9tO8SYgtPGcWWdjMS9au98tmqC4B0Qo9CN7FaZ0_qhoWqDtG_FxccAalUtzI2lWIa8DvmKC5J87VwSJxrIF3i4UmPJy2wCIAdq4p_P0a6rWj5kro6T8Eg8l4N9CDaPItk752ddBdZg70H9vkAkbBwplLPjP_InfKIBAw&h=76NmA5OeagD8onhjYuEkOmKfPUFpHj8QCpKeQXe77eM
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli1000004","name":"eventhubs-nscli1000004","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"InBuild"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli1000004","serviceBusEndpoint":"https://eventhubs-nscli1000004.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Creating","status":"Creating","createdAt":"2024-09-26T06:35:48.4782114Z","updatedAt":"2024-09-26T06:35:48.4782114Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"name":"d84e3f54-991f-4087-a973-f2d22d9f167e","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '974'
+      - '66'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:35:48 GMT
+      - Fri, 04 Jul 2025 07:54:49 GMT
       expires:
       - '-1'
       pragma:
@@ -149,11 +158,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 32c13faa-fb3d-448b-a044-5339a8ba480e
+      - b0e37b43-8303-43bc-9ef0-d67168313a19
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G3|2024-09-26T06:35:49
+      - WESTUS|WESTUS|G2|2025-07-04T07:54:49
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/e15e6fbe-f959-4adb-94c2-42233a0e98be
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 7BD7F914D1444B17895D12E3D3D1B573 Ref B: OSA221030115033 Ref C: 2024-09-26T06:35:49Z'
+      - 'Ref A: 973ABB46728D4942B5B93816D9E37FD1 Ref B: TYO201100117049 Ref C: 2025-07-04T07:54:48Z'
     status:
       code: 200
       message: OK
@@ -172,21 +185,21 @@ interactions:
       - --resource-group --name --location --tags --sku --enable-auto-inflate --maximum-throughput-units
         --enable-kafka
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli1000004?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/d84e3f54-991f-4087-a973-f2d22d9f167e?isAsyncHeader=true&resourceName=eventhubs-nscli1000004&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872124820752994&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=iU3eC52VElKBRBZ8uMZOK88vCei--nXsDOzPWBQhpfDA8lqgOoXuDVr-QbKQgir8hgstSvF_RNMSZtoJFgxiP5RM_E_69OwpRz22OzXPbSRZxZorXAiV6W0_M6d83DtBa7pQ11rJIcNHqa2nvKJMIQkg1d__kqtHfN8keVCp1xIR67bMdG9tO8SYgtPGcWWdjMS9au98tmqC4B0Qo9CN7FaZ0_qhoWqDtG_FxccAalUtzI2lWIa8DvmKC5J87VwSJxrIF3i4UmPJy2wCIAdq4p_P0a6rWj5kro6T8Eg8l4N9CDaPItk752ddBdZg70H9vkAkbBwplLPjP_InfKIBAw&h=76NmA5OeagD8onhjYuEkOmKfPUFpHj8QCpKeQXe77eM
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli1000004","name":"eventhubs-nscli1000004","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli1000004","serviceBusEndpoint":"https://eventhubs-nscli1000004.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-26T06:35:48.4782114Z","updatedAt":"2024-09-26T06:36:19.4522643Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"name":"d84e3f54-991f-4087-a973-f2d22d9f167e","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '971'
+      - '68'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:36:20 GMT
+      - Fri, 04 Jul 2025 07:55:20 GMT
       expires:
       - '-1'
       pragma:
@@ -198,18 +211,72 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 1eed72db-5ba8-4ce9-84ae-5380cfde154a
+      - fb651ea6-ec6e-4229-a5ba-6736bf939e9e
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-26T06:36:20
+      - WESTUS|WESTUS|G2|2025-07-04T07:55:20
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/2ddf484e-0c01-40d2-b299-063c594e5362
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 92B1347A9CCF421DB4B8A67120877853 Ref B: OSA221030115033 Ref C: 2024-09-26T06:36:20Z'
+      - 'Ref A: 0E41B68AE3904C98A483940982C6D13A Ref B: TYO201100115051 Ref C: 2025-07-04T07:55:20Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"identity": {"type": "None"}, "location": "westus", "properties": {"isAutoInflateEnabled":
-      true, "maximumThroughputUnits": 4}, "sku": {"name": "Standard", "tier": "Standard"},
-      "tags": {"tag1": "value1"}}'
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --location --tags --sku --enable-auto-inflate --maximum-throughput-units
+        --enable-kafka
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli1000004?api-version=2024-05-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli1000004","name":"eventhubs-nscli1000004","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli1000004","serviceBusEndpoint":"https://eventhubs-nscli1000004.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-04T07:54:41.3882284Z","updatedAt":"2025-07-04T07:55:07Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '963'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Jul 2025 07:55:21 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 4907570b-09e4-4158-8ab6-7d72d3e7923a
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G4|2025-07-04T07:55:21
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: E97EE9E4013A4DF28BB136B192F26F90 Ref B: TYO201100116021 Ref C: 2025-07-04T07:55:21Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"location": "westus", "properties": {"isAutoInflateEnabled": true, "maximumThroughputUnits":
+      4}, "sku": {"name": "Standard", "tier": "Standard"}, "tags": {"tag1": "value1"}}'
     headers:
       Accept:
       - application/json
@@ -220,29 +287,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '204'
+      - '174'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --location --tags --sku --enable-auto-inflate --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"InBuild"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Creating","status":"Creating","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:36:27.0704009Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"InBuild"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Creating","status":"Creating","createdAt":"2025-07-04T07:55:26.5671277Z","updatedAt":"2025-07-04T07:55:26Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872125273292325&c=MIIHhzCCBm-gAwIBAgITHgbLuWlxY4-k_d1algAABsu5aTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTMxMzMyWhcNMjUxMDE2MTMxMzMyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMvHJaUg0aA6C-P-W7rBOoZfQCieq667lznMrFDPEeiLJs-W58e8I_jHbBheje2C5g9-qBPHK6VQBBfZrcs9tzrupbS7wUKQvBkbEEqj19vo7jPtiN4hWOYzxijvMpObILP6eyLeXsL3K6b3th6Mzu1YEGETh8Lh9lsKsgT-uiTSC52uYnO63jpJBr83ivLckQDLkpMN21cpEJpaenMoBGBtKAmREs19pJv5r4HQS73KA4NZgjOChwFPAD7cIPY8jFZduW--1Ej4woncGGu117cZcM1yffltg1tqs5vmfgVc4ru4VoMm2UUdWXj6t8VoG1yJ8zasfOiUeO4CjEJgU0ECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQDmHWGUrNZmFtIfL14RXoPR4LL6zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJcF-z2HGOD5vBAPAiibLynJVPemcCzI2SbO4rX-E6AhWLEMIGFO4peavwLv9iPrFKY29lbs6SxVSu5q_hj7y932SCf-JNEeue2cfiDCPv3T6f2-EAZTfMXrH_G7MaJXKiT0W9b7aewbcPT4xAGaldOb8n9yZp0vrNp9qEtWLm-_bvUf_3_eHf6Iml0lQ01vTCc-k265OG5t1GXtk819ayqNBui5LchwPrubIwRT_p2bmkDy4M-NKrweDScQY2PyCsUp_kdZXbvXoLWAHVgrY7Jq_YDJtDv71360dQ2_5FYlmToG9vPIsDq3H-rE22IKrM8CQsR3ta6g7CXSflNNquQ&s=PaI91M_eZlL07F54FRDQo7fN5hULJv9VKj954EDglCmP7CvAXBzEz7L_kJyFEq3kiJs_768a_Ca_Qi4lieiOH_3MrW_BEA3Ty7IGtVl9h7kG_j0R6GPwtB6lwzKMb0Gqho1AXSRzCPZ7zcBlhzkzsmCHNrf95uyDUiD4wTiXBwgQ-AIu0I_ZRSjm3i1NwCHaeaMANuFyZfH4gggxivlCoa5gZrxyveX1Bm7cSNo_j7N7dLws3pd04IKA71CcLMsLX_Zj0ojxqo13-L6d4kQ33fTuLC0UO0T3YXRySwOsKfkFXeeu1GO9AvYtm8lbiEJd4hhZzOATSYsym_Yedq-a0w&h=DOZep6YyLtQUFBpZ1dbzqVkbWF4P2kZZ5Lfy8zRKGlI
       cache-control:
       - no-cache
       content-length:
-      - '970'
+      - '962'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:36:27 GMT
+      - Fri, 04 Jul 2025 07:55:26 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=false&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872125273448581&c=MIIHhzCCBm-gAwIBAgITHgbLuWlxY4-k_d1algAABsu5aTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTMxMzMyWhcNMjUxMDE2MTMxMzMyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMvHJaUg0aA6C-P-W7rBOoZfQCieq667lznMrFDPEeiLJs-W58e8I_jHbBheje2C5g9-qBPHK6VQBBfZrcs9tzrupbS7wUKQvBkbEEqj19vo7jPtiN4hWOYzxijvMpObILP6eyLeXsL3K6b3th6Mzu1YEGETh8Lh9lsKsgT-uiTSC52uYnO63jpJBr83ivLckQDLkpMN21cpEJpaenMoBGBtKAmREs19pJv5r4HQS73KA4NZgjOChwFPAD7cIPY8jFZduW--1Ej4woncGGu117cZcM1yffltg1tqs5vmfgVc4ru4VoMm2UUdWXj6t8VoG1yJ8zasfOiUeO4CjEJgU0ECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQDmHWGUrNZmFtIfL14RXoPR4LL6zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJcF-z2HGOD5vBAPAiibLynJVPemcCzI2SbO4rX-E6AhWLEMIGFO4peavwLv9iPrFKY29lbs6SxVSu5q_hj7y932SCf-JNEeue2cfiDCPv3T6f2-EAZTfMXrH_G7MaJXKiT0W9b7aewbcPT4xAGaldOb8n9yZp0vrNp9qEtWLm-_bvUf_3_eHf6Iml0lQ01vTCc-k265OG5t1GXtk819ayqNBui5LchwPrubIwRT_p2bmkDy4M-NKrweDScQY2PyCsUp_kdZXbvXoLWAHVgrY7Jq_YDJtDv71360dQ2_5FYlmToG9vPIsDq3H-rE22IKrM8CQsR3ta6g7CXSflNNquQ&s=Sf2qpP0bv4uyzvUOBNrs4cel0lrqTAJoluWM4AGiuSBVr14yYjeYx6OM9Tvj5HBWUV7PRPHdcT5Wq_e8oYRfug61VMlWPD63cfuLic2hIYyldkM3ZMewcaQi48ID5G2aBOYYkBJLIGN2awayoH5V2QrOQHmsRH5Zn5PXu8l7yDaaykgn0lcl4dfMgerTxU3e1rNlPun-FYPyJ1xlhE027pkzzD-PQdhoSlXLe4XBGN_n67NsBdChwUlVIIGOWaweSm7koII855exahCprPp4T39hPf9bnrXsgwUOQaLcXorMRhs-EMbvQ74Up5joC6W6XiA6jcs8RSxsp3etmIsuIg&h=r-SlbipO5z5xO_xy3MkpYfqQIj4wt09968IiSeOkE_k
       pragma:
       - no-cache
       strict-transport-security:
@@ -252,13 +323,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 8c7f962a-0481-44c3-8f43-7f3d9ae8b37a
+      - 7cd5814a-8914-431a-87b8-58f7d3fd6f7c
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G0|2024-09-26T06:36:27
+      - WESTUS|WESTUS|G3|2025-07-04T07:55:26
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japanwest/db80a6cc-3483-4ba7-93cd-106ad2342761
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 77EA321D5A714F19B0883045AC6A440A Ref B: OSA221030113027 Ref C: 2024-09-26T06:36:21Z'
+      - 'Ref A: B4726166BEF1434EAAD372042EB277D5 Ref B: TYO201151003040 Ref C: 2025-07-04T07:55:22Z'
     status:
       code: 201
       message: Created
@@ -276,21 +349,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags --sku --enable-auto-inflate --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872125273292325&c=MIIHhzCCBm-gAwIBAgITHgbLuWlxY4-k_d1algAABsu5aTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTMxMzMyWhcNMjUxMDE2MTMxMzMyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMvHJaUg0aA6C-P-W7rBOoZfQCieq667lznMrFDPEeiLJs-W58e8I_jHbBheje2C5g9-qBPHK6VQBBfZrcs9tzrupbS7wUKQvBkbEEqj19vo7jPtiN4hWOYzxijvMpObILP6eyLeXsL3K6b3th6Mzu1YEGETh8Lh9lsKsgT-uiTSC52uYnO63jpJBr83ivLckQDLkpMN21cpEJpaenMoBGBtKAmREs19pJv5r4HQS73KA4NZgjOChwFPAD7cIPY8jFZduW--1Ej4woncGGu117cZcM1yffltg1tqs5vmfgVc4ru4VoMm2UUdWXj6t8VoG1yJ8zasfOiUeO4CjEJgU0ECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQDmHWGUrNZmFtIfL14RXoPR4LL6zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJcF-z2HGOD5vBAPAiibLynJVPemcCzI2SbO4rX-E6AhWLEMIGFO4peavwLv9iPrFKY29lbs6SxVSu5q_hj7y932SCf-JNEeue2cfiDCPv3T6f2-EAZTfMXrH_G7MaJXKiT0W9b7aewbcPT4xAGaldOb8n9yZp0vrNp9qEtWLm-_bvUf_3_eHf6Iml0lQ01vTCc-k265OG5t1GXtk819ayqNBui5LchwPrubIwRT_p2bmkDy4M-NKrweDScQY2PyCsUp_kdZXbvXoLWAHVgrY7Jq_YDJtDv71360dQ2_5FYlmToG9vPIsDq3H-rE22IKrM8CQsR3ta6g7CXSflNNquQ&s=PaI91M_eZlL07F54FRDQo7fN5hULJv9VKj954EDglCmP7CvAXBzEz7L_kJyFEq3kiJs_768a_Ca_Qi4lieiOH_3MrW_BEA3Ty7IGtVl9h7kG_j0R6GPwtB6lwzKMb0Gqho1AXSRzCPZ7zcBlhzkzsmCHNrf95uyDUiD4wTiXBwgQ-AIu0I_ZRSjm3i1NwCHaeaMANuFyZfH4gggxivlCoa5gZrxyveX1Bm7cSNo_j7N7dLws3pd04IKA71CcLMsLX_Zj0ojxqo13-L6d4kQ33fTuLC0UO0T3YXRySwOsKfkFXeeu1GO9AvYtm8lbiEJd4hhZzOATSYsym_Yedq-a0w&h=DOZep6YyLtQUFBpZ1dbzqVkbWF4P2kZZ5Lfy8zRKGlI
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"InBuild"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Creating","status":"Creating","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:36:27.0704009Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"name":"5d64ec5e-872e-4b32-b491-18932f180f27","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '970'
+      - '66'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:36:28 GMT
+      - Fri, 04 Jul 2025 07:55:27 GMT
       expires:
       - '-1'
       pragma:
@@ -302,11 +375,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 62484663-f760-4948-85eb-8b51d53d4cc7
+      - da27e073-fb7b-42eb-98a7-705ea78edbbb
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-26T06:36:28
+      - WESTUS|WESTUS|G3|2025-07-04T07:55:28
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japanwest/bdde9952-8247-47c7-b520-ad471e05b71f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: D6337C8B1B624B6C9F1C8F77245E2889 Ref B: OSA221030113027 Ref C: 2024-09-26T06:36:27Z'
+      - 'Ref A: AFAE9CA914794063A1E7640EA18A5C73 Ref B: TYO201151006060 Ref C: 2025-07-04T07:55:28Z'
     status:
       code: 200
       message: OK
@@ -324,21 +401,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags --sku --enable-auto-inflate --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872125273292325&c=MIIHhzCCBm-gAwIBAgITHgbLuWlxY4-k_d1algAABsu5aTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTMxMzMyWhcNMjUxMDE2MTMxMzMyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMvHJaUg0aA6C-P-W7rBOoZfQCieq667lznMrFDPEeiLJs-W58e8I_jHbBheje2C5g9-qBPHK6VQBBfZrcs9tzrupbS7wUKQvBkbEEqj19vo7jPtiN4hWOYzxijvMpObILP6eyLeXsL3K6b3th6Mzu1YEGETh8Lh9lsKsgT-uiTSC52uYnO63jpJBr83ivLckQDLkpMN21cpEJpaenMoBGBtKAmREs19pJv5r4HQS73KA4NZgjOChwFPAD7cIPY8jFZduW--1Ej4woncGGu117cZcM1yffltg1tqs5vmfgVc4ru4VoMm2UUdWXj6t8VoG1yJ8zasfOiUeO4CjEJgU0ECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQDmHWGUrNZmFtIfL14RXoPR4LL6zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJcF-z2HGOD5vBAPAiibLynJVPemcCzI2SbO4rX-E6AhWLEMIGFO4peavwLv9iPrFKY29lbs6SxVSu5q_hj7y932SCf-JNEeue2cfiDCPv3T6f2-EAZTfMXrH_G7MaJXKiT0W9b7aewbcPT4xAGaldOb8n9yZp0vrNp9qEtWLm-_bvUf_3_eHf6Iml0lQ01vTCc-k265OG5t1GXtk819ayqNBui5LchwPrubIwRT_p2bmkDy4M-NKrweDScQY2PyCsUp_kdZXbvXoLWAHVgrY7Jq_YDJtDv71360dQ2_5FYlmToG9vPIsDq3H-rE22IKrM8CQsR3ta6g7CXSflNNquQ&s=PaI91M_eZlL07F54FRDQo7fN5hULJv9VKj954EDglCmP7CvAXBzEz7L_kJyFEq3kiJs_768a_Ca_Qi4lieiOH_3MrW_BEA3Ty7IGtVl9h7kG_j0R6GPwtB6lwzKMb0Gqho1AXSRzCPZ7zcBlhzkzsmCHNrf95uyDUiD4wTiXBwgQ-AIu0I_ZRSjm3i1NwCHaeaMANuFyZfH4gggxivlCoa5gZrxyveX1Bm7cSNo_j7N7dLws3pd04IKA71CcLMsLX_Zj0ojxqo13-L6d4kQ33fTuLC0UO0T3YXRySwOsKfkFXeeu1GO9AvYtm8lbiEJd4hhZzOATSYsym_Yedq-a0w&h=DOZep6YyLtQUFBpZ1dbzqVkbWF4P2kZZ5Lfy8zRKGlI
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"InBuild"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Creating","status":"Creating","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:36:27.0704009Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"name":"5d64ec5e-872e-4b32-b491-18932f180f27","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '970'
+      - '68'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:36:59 GMT
+      - Fri, 04 Jul 2025 07:56:04 GMT
       expires:
       - '-1'
       pragma:
@@ -350,11 +427,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - cd57d017-60b8-461c-b8d7-7171439f8d8c
+      - cff2f3e5-36f8-477b-b409-61f9ade465da
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-26T06:36:59
+      - WESTUS|WESTUS|G2|2025-07-04T07:56:04
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/0b06c8a5-e918-477c-967b-7696230f1fe5
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 81ECF19BCA424BF2BED2F0BF00821A79 Ref B: OSA221030113027 Ref C: 2024-09-26T06:36:58Z'
+      - 'Ref A: AACB35CCDC1A4EF692C49FC1022AE946 Ref B: TYO201100114025 Ref C: 2025-07-04T07:56:04Z'
     status:
       code: 200
       message: OK
@@ -372,21 +453,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --location --tags --sku --enable-auto-inflate --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:37:04.6380752Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-04T07:55:26.5671277Z","updatedAt":"2025-07-04T07:55:55Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '967'
+      - '959'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:37:30 GMT
+      - Fri, 04 Jul 2025 07:56:05 GMT
       expires:
       - '-1'
       pragma:
@@ -398,11 +479,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - f07f0474-6c1c-4d60-8ca1-23c13116a98e
+      - 30c6dfbb-15e6-45a3-8daa-917415cb73c5
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G3|2024-09-26T06:37:30
+      - WESTUS|WESTUS|G2|2025-07-04T07:56:05
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 855407618B734FB2911BB35B967B668A Ref B: OSA221030113027 Ref C: 2024-09-26T06:37:29Z'
+      - 'Ref A: 788E9F7004FD4733AA690126C40B1D0C Ref B: TYO201151006036 Ref C: 2025-07-04T07:56:05Z'
     status:
       code: 200
       message: OK
@@ -420,12 +503,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name --enable-auto-inflate
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_namespace000001?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_eh_namespace000001?api-version=2025-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001","name":"cli_test_eh_namespace000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_eh_namespace","date":"2024-09-26T06:35:40Z","module":"eventhubs"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001","name":"cli_test_eh_namespace000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_eh_namespace","date":"2025-07-04T07:54:33Z","module":"eventhubs"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -434,7 +517,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:37:30 GMT
+      - Fri, 04 Jul 2025 07:56:06 GMT
       expires:
       - '-1'
       pragma:
@@ -445,14 +528,16 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: C4BB6C2DFAC6449DB699787560199D8A Ref B: OSA221030116011 Ref C: 2024-09-26T06:37:31Z'
+      - 'Ref A: 00305C42C1FA499E8BA8EAAD2B3FE314 Ref B: TYO201151003031 Ref C: 2025-07-04T07:56:06Z'
     status:
       code: 200
       message: OK
 - request:
-    body: '{"identity": {"type": "None"}, "location": "westus", "properties": {"isAutoInflateEnabled":
-      false}, "sku": {"name": "Standard", "tier": "Standard"}}'
+    body: '{"location": "westus", "properties": {"isAutoInflateEnabled": false}, "sku":
+      {"name": "Standard", "tier": "Standard"}}'
     headers:
       Accept:
       - application/json
@@ -463,29 +548,33 @@ interactions:
       Connection:
       - keep-alive
       Content-Length:
-      - '148'
+      - '118'
       Content-Type:
       - application/json
       ParameterSetName:
       - --resource-group --name --enable-auto-inflate
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Updating","status":"Updating","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:37:35.646731Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Updating","status":"Updating","createdAt":"2025-07-04T07:55:26.5671277Z","updatedAt":"2025-07-04T07:56:09Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872125703364338&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=f4RSEO1UnZNFrKyqaL-soyTit3zbyxN26s6UPfZz-VKfUqeYKVnBaMlzZboDsZOYVfk4n9WiUAVx0COgEZX-6eGSZint5iJvAp4gR2NeLZnKYiHkbKUK-1yd0SowP2NR8FYTziuY0i2rhAeX0-7z6v5Ddcx5Fc_2iFwthgNGCWJ1eudZd8dvxZsmS_mWYl5KGCvPdu90u6AoQngiGJ-oIbcCl5eLhBEkPvpxEWuFat05MKyo51W-g8M-R9Lrt4EzYb56GzxehbejQhFIoAKc7_jfenT5snROa5fc4Y_WXmN61BmUFzCx8D_3megOvXEz0X0zdSuYcFF5q7NXsFopAQ&h=YbJyViCcfIxSotRd4ELqhhZaPwzldgERoQmoesAx5uA
       cache-control:
       - no-cache
       content-length:
-      - '953'
+      - '946'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:37:36 GMT
+      - Fri, 04 Jul 2025 07:56:09 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=false&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872125703364338&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=f4RSEO1UnZNFrKyqaL-soyTit3zbyxN26s6UPfZz-VKfUqeYKVnBaMlzZboDsZOYVfk4n9WiUAVx0COgEZX-6eGSZint5iJvAp4gR2NeLZnKYiHkbKUK-1yd0SowP2NR8FYTziuY0i2rhAeX0-7z6v5Ddcx5Fc_2iFwthgNGCWJ1eudZd8dvxZsmS_mWYl5KGCvPdu90u6AoQngiGJ-oIbcCl5eLhBEkPvpxEWuFat05MKyo51W-g8M-R9Lrt4EzYb56GzxehbejQhFIoAKc7_jfenT5snROa5fc4Y_WXmN61BmUFzCx8D_3megOvXEz0X0zdSuYcFF5q7NXsFopAQ&h=YbJyViCcfIxSotRd4ELqhhZaPwzldgERoQmoesAx5uA
       pragma:
       - no-cache
       strict-transport-security:
@@ -495,13 +584,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 35549f2f-e95c-4642-adba-d9985180a76d
+      - 5fe2d1f1-b747-420c-99dd-efafe45d25f7
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-26T06:37:35
+      - WESTUS|WESTUS|G4|2025-07-04T07:56:09
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/fab6e89e-9829-406e-aeca-e57d5aac98a0
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 68624D52720B4930828FF11D50DDDEB2 Ref B: OSA221030114051 Ref C: 2024-09-26T06:37:31Z'
+      - 'Ref A: A9D5ECCFEAEC49CA88041FE0AE1C57B0 Ref B: TYO201151001023 Ref C: 2025-07-04T07:56:07Z'
     status:
       code: 200
       message: OK
@@ -519,21 +610,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --enable-auto-inflate
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872125703364338&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=f4RSEO1UnZNFrKyqaL-soyTit3zbyxN26s6UPfZz-VKfUqeYKVnBaMlzZboDsZOYVfk4n9WiUAVx0COgEZX-6eGSZint5iJvAp4gR2NeLZnKYiHkbKUK-1yd0SowP2NR8FYTziuY0i2rhAeX0-7z6v5Ddcx5Fc_2iFwthgNGCWJ1eudZd8dvxZsmS_mWYl5KGCvPdu90u6AoQngiGJ-oIbcCl5eLhBEkPvpxEWuFat05MKyo51W-g8M-R9Lrt4EzYb56GzxehbejQhFIoAKc7_jfenT5snROa5fc4Y_WXmN61BmUFzCx8D_3megOvXEz0X0zdSuYcFF5q7NXsFopAQ&h=YbJyViCcfIxSotRd4ELqhhZaPwzldgERoQmoesAx5uA
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Updating","status":"Updating","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:37:35.646731Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"name":"5d64ec5e-872e-4b32-b491-18932f180f27","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '953'
+      - '66'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:37:36 GMT
+      - Fri, 04 Jul 2025 07:56:18 GMT
       expires:
       - '-1'
       pragma:
@@ -545,11 +636,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 48193405-253b-4bab-945d-62feb4b4e565
+      - b8c916d7-4290-4eac-a0d5-ea4aaa4b74ef
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-26T06:37:37
+      - WESTUS|WESTUS|G4|2025-07-04T07:56:18
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/f6316541-80be-4983-9bf8-d6320dd04c65
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 36C6E8B62C7041189A8CEF2B6AC8B729 Ref B: OSA221030114051 Ref C: 2024-09-26T06:37:37Z'
+      - 'Ref A: 9C0C1476CBE54F8CB78AF60E0B9834D5 Ref B: TYO201151001062 Ref C: 2025-07-04T07:56:18Z'
     status:
       code: 200
       message: OK
@@ -567,21 +662,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --enable-auto-inflate
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872125703364338&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=f4RSEO1UnZNFrKyqaL-soyTit3zbyxN26s6UPfZz-VKfUqeYKVnBaMlzZboDsZOYVfk4n9WiUAVx0COgEZX-6eGSZint5iJvAp4gR2NeLZnKYiHkbKUK-1yd0SowP2NR8FYTziuY0i2rhAeX0-7z6v5Ddcx5Fc_2iFwthgNGCWJ1eudZd8dvxZsmS_mWYl5KGCvPdu90u6AoQngiGJ-oIbcCl5eLhBEkPvpxEWuFat05MKyo51W-g8M-R9Lrt4EzYb56GzxehbejQhFIoAKc7_jfenT5snROa5fc4Y_WXmN61BmUFzCx8D_3megOvXEz0X0zdSuYcFF5q7NXsFopAQ&h=YbJyViCcfIxSotRd4ELqhhZaPwzldgERoQmoesAx5uA
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:37:51.554712Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"name":"5d64ec5e-872e-4b32-b491-18932f180f27","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '952'
+      - '68'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:38:08 GMT
+      - Fri, 04 Jul 2025 07:56:50 GMT
       expires:
       - '-1'
       pragma:
@@ -593,11 +688,65 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - c51e6eac-763f-4b5c-9e93-54306cbcac1e
+      - c99d953a-bb62-4c97-b646-487a7a840ad4
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-26T06:38:08
+      - WESTUS|WESTUS|G1|2025-07-04T07:56:50
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/fed0f1b1-92e6-4afd-9a83-4876358fa178
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 49AC0CA7C9304B0BA51A651540AD706D Ref B: OSA221030114051 Ref C: 2024-09-26T06:38:07Z'
+      - 'Ref A: 409A842CAAD343409A57650ACA5A1125 Ref B: TYO201151001029 Ref C: 2025-07-04T07:56:49Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --enable-auto-inflate
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-04T07:55:26.5671277Z","updatedAt":"2025-07-04T07:56:23Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '945'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Jul 2025 07:56:51 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 39bfa7cb-58a9-491a-8f24-e16a5b9b2394
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G0|2025-07-04T07:56:51
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 99C49F4631164EC1BB8A5237E472CCEE Ref B: TYO201100113029 Ref C: 2025-07-04T07:56:50Z'
     status:
       code: 200
       message: OK
@@ -615,21 +764,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:37:51.554712Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-04T07:55:26.5671277Z","updatedAt":"2025-07-04T07:56:23Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '952'
+      - '945'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:38:09 GMT
+      - Fri, 04 Jul 2025 07:56:52 GMT
       expires:
       - '-1'
       pragma:
@@ -641,11 +790,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 54742c24-8d28-4238-b93e-b4677e9f7449
+      - df9c0dda-2e99-4a0b-9845-150a60f8ec68
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-26T06:38:09
+      - WESTUS|WESTUS|G1|2025-07-04T07:56:52
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 39F4C7AAFB3B4064A1F35114A1915389 Ref B: TYO201100113033 Ref C: 2024-09-26T06:38:08Z'
+      - 'Ref A: B12351CF11B24500A96AF5B2BF43B115 Ref B: TYO201100115025 Ref C: 2025-07-04T07:56:52Z'
     status:
       code: 200
       message: OK
@@ -663,21 +814,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --enable-auto-inflate --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:37:51.554712Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":false,"maximumThroughputUnits":0,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-04T07:55:26.5671277Z","updatedAt":"2025-07-04T07:56:23Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '952'
+      - '945'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:38:10 GMT
+      - Fri, 04 Jul 2025 07:56:53 GMT
       expires:
       - '-1'
       pragma:
@@ -689,11 +840,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 2f1c5d82-8ec3-446d-9c8f-af60f8a914a7
+      - 54606e2e-5fd8-484c-b5f4-b24890c1ccb7
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-26T06:38:10
+      - WESTUS|WESTUS|G1|2025-07-04T07:56:53
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: C167AA9125D1452F99469542EEA75F84 Ref B: OSA221030115021 Ref C: 2024-09-26T06:38:10Z'
+      - 'Ref A: 18FE064DB95A4E0C9B57BD7EF10FD9E7 Ref B: TYO201100117045 Ref C: 2025-07-04T07:56:53Z'
     status:
       code: 200
       message: OK
@@ -720,23 +873,27 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --enable-auto-inflate --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag2":"value2"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":5,"kafkaEnabled":true,"provisioningState":"Updating","status":"Updating","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:38:13.4455982Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag2":"value2"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":5,"kafkaEnabled":true,"provisioningState":"Updating","status":"Updating","createdAt":"2025-07-04T07:55:26.5671277Z","updatedAt":"2025-07-04T07:56:55Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872126171856586&c=MIIHhzCCBm-gAwIBAgITHgbLuWlxY4-k_d1algAABsu5aTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTMxMzMyWhcNMjUxMDE2MTMxMzMyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMvHJaUg0aA6C-P-W7rBOoZfQCieq667lznMrFDPEeiLJs-W58e8I_jHbBheje2C5g9-qBPHK6VQBBfZrcs9tzrupbS7wUKQvBkbEEqj19vo7jPtiN4hWOYzxijvMpObILP6eyLeXsL3K6b3th6Mzu1YEGETh8Lh9lsKsgT-uiTSC52uYnO63jpJBr83ivLckQDLkpMN21cpEJpaenMoBGBtKAmREs19pJv5r4HQS73KA4NZgjOChwFPAD7cIPY8jFZduW--1Ej4woncGGu117cZcM1yffltg1tqs5vmfgVc4ru4VoMm2UUdWXj6t8VoG1yJ8zasfOiUeO4CjEJgU0ECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQDmHWGUrNZmFtIfL14RXoPR4LL6zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJcF-z2HGOD5vBAPAiibLynJVPemcCzI2SbO4rX-E6AhWLEMIGFO4peavwLv9iPrFKY29lbs6SxVSu5q_hj7y932SCf-JNEeue2cfiDCPv3T6f2-EAZTfMXrH_G7MaJXKiT0W9b7aewbcPT4xAGaldOb8n9yZp0vrNp9qEtWLm-_bvUf_3_eHf6Iml0lQ01vTCc-k265OG5t1GXtk819ayqNBui5LchwPrubIwRT_p2bmkDy4M-NKrweDScQY2PyCsUp_kdZXbvXoLWAHVgrY7Jq_YDJtDv71360dQ2_5FYlmToG9vPIsDq3H-rE22IKrM8CQsR3ta6g7CXSflNNquQ&s=Fi0iyrgGeqWChWiPkKKTCJm4-jqDRaZV3fKXtkEhIYEn0O7pj0sQalKQQDJE4if8oysKBP3TUoUGu-MN98QYd6WRpedRnqq-SM5AN8Xj2jKhwrF1MUsnhc9BjM1fMTJO_fZr1CaIdxQ8LpqnbMwG-ix23YIVJj7Yy9c9gHWKbU74QwCAx6NCxh5Q986LqeMQLM9vazfZNZfbK-nwy2Z5smZaD8UzfqWAxlrY_nfFlgGsNPx0WNTdinVp_cyLlpBS8QUX11eQBGWeIUVPYevMMoubS68nYiPq4DCYVMWPTdG36uoCDj9fjYBdrwvVFMpNHfHmuaHTjsviLhMHCYJAjA&h=pGmNorbY7LjlSGxkPy9AEjr-IPIeXjBSKIrDha5htxw
       cache-control:
       - no-cache
       content-length:
-      - '968'
+      - '960'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:38:14 GMT
+      - Fri, 04 Jul 2025 07:56:56 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=false&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872126171856586&c=MIIHhzCCBm-gAwIBAgITHgbLuWlxY4-k_d1algAABsu5aTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTMxMzMyWhcNMjUxMDE2MTMxMzMyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMvHJaUg0aA6C-P-W7rBOoZfQCieq667lznMrFDPEeiLJs-W58e8I_jHbBheje2C5g9-qBPHK6VQBBfZrcs9tzrupbS7wUKQvBkbEEqj19vo7jPtiN4hWOYzxijvMpObILP6eyLeXsL3K6b3th6Mzu1YEGETh8Lh9lsKsgT-uiTSC52uYnO63jpJBr83ivLckQDLkpMN21cpEJpaenMoBGBtKAmREs19pJv5r4HQS73KA4NZgjOChwFPAD7cIPY8jFZduW--1Ej4woncGGu117cZcM1yffltg1tqs5vmfgVc4ru4VoMm2UUdWXj6t8VoG1yJ8zasfOiUeO4CjEJgU0ECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQDmHWGUrNZmFtIfL14RXoPR4LL6zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJcF-z2HGOD5vBAPAiibLynJVPemcCzI2SbO4rX-E6AhWLEMIGFO4peavwLv9iPrFKY29lbs6SxVSu5q_hj7y932SCf-JNEeue2cfiDCPv3T6f2-EAZTfMXrH_G7MaJXKiT0W9b7aewbcPT4xAGaldOb8n9yZp0vrNp9qEtWLm-_bvUf_3_eHf6Iml0lQ01vTCc-k265OG5t1GXtk819ayqNBui5LchwPrubIwRT_p2bmkDy4M-NKrweDScQY2PyCsUp_kdZXbvXoLWAHVgrY7Jq_YDJtDv71360dQ2_5FYlmToG9vPIsDq3H-rE22IKrM8CQsR3ta6g7CXSflNNquQ&s=Fi0iyrgGeqWChWiPkKKTCJm4-jqDRaZV3fKXtkEhIYEn0O7pj0sQalKQQDJE4if8oysKBP3TUoUGu-MN98QYd6WRpedRnqq-SM5AN8Xj2jKhwrF1MUsnhc9BjM1fMTJO_fZr1CaIdxQ8LpqnbMwG-ix23YIVJj7Yy9c9gHWKbU74QwCAx6NCxh5Q986LqeMQLM9vazfZNZfbK-nwy2Z5smZaD8UzfqWAxlrY_nfFlgGsNPx0WNTdinVp_cyLlpBS8QUX11eQBGWeIUVPYevMMoubS68nYiPq4DCYVMWPTdG36uoCDj9fjYBdrwvVFMpNHfHmuaHTjsviLhMHCYJAjA&h=pGmNorbY7LjlSGxkPy9AEjr-IPIeXjBSKIrDha5htxw
       pragma:
       - no-cache
       strict-transport-security:
@@ -746,13 +903,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - c27858f8-e49a-40be-8d00-d7d05bf6a07f
+      - 2158f1ee-c9e6-4776-9589-922b9ceba7f7
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G3|2024-09-26T06:38:13
+      - WESTUS|WESTUS|G4|2025-07-04T07:56:56
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japanwest/c85ef53f-5988-4b06-b714-a32c945168cd
       x-ms-ratelimit-remaining-subscription-resource-requests:
-      - '49'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 3D6FC9E7489149BE874E55FD854587BF Ref B: OSA221030115021 Ref C: 2024-09-26T06:38:10Z'
+      - 'Ref A: 78F68EBDB0DF4B3E88E8C87A0B53228A Ref B: TYO201151002034 Ref C: 2025-07-04T07:56:54Z'
     status:
       code: 200
       message: OK
@@ -770,21 +929,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --enable-auto-inflate --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872126171856586&c=MIIHhzCCBm-gAwIBAgITHgbLuWlxY4-k_d1algAABsu5aTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTMxMzMyWhcNMjUxMDE2MTMxMzMyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMvHJaUg0aA6C-P-W7rBOoZfQCieq667lznMrFDPEeiLJs-W58e8I_jHbBheje2C5g9-qBPHK6VQBBfZrcs9tzrupbS7wUKQvBkbEEqj19vo7jPtiN4hWOYzxijvMpObILP6eyLeXsL3K6b3th6Mzu1YEGETh8Lh9lsKsgT-uiTSC52uYnO63jpJBr83ivLckQDLkpMN21cpEJpaenMoBGBtKAmREs19pJv5r4HQS73KA4NZgjOChwFPAD7cIPY8jFZduW--1Ej4woncGGu117cZcM1yffltg1tqs5vmfgVc4ru4VoMm2UUdWXj6t8VoG1yJ8zasfOiUeO4CjEJgU0ECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQDmHWGUrNZmFtIfL14RXoPR4LL6zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJcF-z2HGOD5vBAPAiibLynJVPemcCzI2SbO4rX-E6AhWLEMIGFO4peavwLv9iPrFKY29lbs6SxVSu5q_hj7y932SCf-JNEeue2cfiDCPv3T6f2-EAZTfMXrH_G7MaJXKiT0W9b7aewbcPT4xAGaldOb8n9yZp0vrNp9qEtWLm-_bvUf_3_eHf6Iml0lQ01vTCc-k265OG5t1GXtk819ayqNBui5LchwPrubIwRT_p2bmkDy4M-NKrweDScQY2PyCsUp_kdZXbvXoLWAHVgrY7Jq_YDJtDv71360dQ2_5FYlmToG9vPIsDq3H-rE22IKrM8CQsR3ta6g7CXSflNNquQ&s=Fi0iyrgGeqWChWiPkKKTCJm4-jqDRaZV3fKXtkEhIYEn0O7pj0sQalKQQDJE4if8oysKBP3TUoUGu-MN98QYd6WRpedRnqq-SM5AN8Xj2jKhwrF1MUsnhc9BjM1fMTJO_fZr1CaIdxQ8LpqnbMwG-ix23YIVJj7Yy9c9gHWKbU74QwCAx6NCxh5Q986LqeMQLM9vazfZNZfbK-nwy2Z5smZaD8UzfqWAxlrY_nfFlgGsNPx0WNTdinVp_cyLlpBS8QUX11eQBGWeIUVPYevMMoubS68nYiPq4DCYVMWPTdG36uoCDj9fjYBdrwvVFMpNHfHmuaHTjsviLhMHCYJAjA&h=pGmNorbY7LjlSGxkPy9AEjr-IPIeXjBSKIrDha5htxw
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag2":"value2"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":5,"kafkaEnabled":true,"provisioningState":"Updating","status":"Updating","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:38:13.4455982Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"name":"5d64ec5e-872e-4b32-b491-18932f180f27","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '968'
+      - '66'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:38:14 GMT
+      - Fri, 04 Jul 2025 07:57:03 GMT
       expires:
       - '-1'
       pragma:
@@ -796,11 +955,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 50a481d7-fbe8-4fe8-94ee-172853f0bd20
+      - 9331fa1a-57da-4161-8edd-b80414428647
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-26T06:38:15
+      - WESTUS|WESTUS|G4|2025-07-04T07:57:04
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/42caf319-ba13-4175-b32a-65237f323f5f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 88A43BE8F44E408C978B11BE3AF1497B Ref B: OSA221030115021 Ref C: 2024-09-26T06:38:14Z'
+      - 'Ref A: 5BEC640F6D5040C8A5E260BCBFB6310A Ref B: TYO201100113011 Ref C: 2025-07-04T07:57:04Z'
     status:
       code: 200
       message: OK
@@ -818,21 +981,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --enable-auto-inflate --maximum-throughput-units
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Active&t=638872126171856586&c=MIIHhzCCBm-gAwIBAgITHgbLuWlxY4-k_d1algAABsu5aTANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTMxMzMyWhcNMjUxMDE2MTMxMzMyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMvHJaUg0aA6C-P-W7rBOoZfQCieq667lznMrFDPEeiLJs-W58e8I_jHbBheje2C5g9-qBPHK6VQBBfZrcs9tzrupbS7wUKQvBkbEEqj19vo7jPtiN4hWOYzxijvMpObILP6eyLeXsL3K6b3th6Mzu1YEGETh8Lh9lsKsgT-uiTSC52uYnO63jpJBr83ivLckQDLkpMN21cpEJpaenMoBGBtKAmREs19pJv5r4HQS73KA4NZgjOChwFPAD7cIPY8jFZduW--1Ej4woncGGu117cZcM1yffltg1tqs5vmfgVc4ru4VoMm2UUdWXj6t8VoG1yJ8zasfOiUeO4CjEJgU0ECAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBQDmHWGUrNZmFtIfL14RXoPR4LL6zAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJcF-z2HGOD5vBAPAiibLynJVPemcCzI2SbO4rX-E6AhWLEMIGFO4peavwLv9iPrFKY29lbs6SxVSu5q_hj7y932SCf-JNEeue2cfiDCPv3T6f2-EAZTfMXrH_G7MaJXKiT0W9b7aewbcPT4xAGaldOb8n9yZp0vrNp9qEtWLm-_bvUf_3_eHf6Iml0lQ01vTCc-k265OG5t1GXtk819ayqNBui5LchwPrubIwRT_p2bmkDy4M-NKrweDScQY2PyCsUp_kdZXbvXoLWAHVgrY7Jq_YDJtDv71360dQ2_5FYlmToG9vPIsDq3H-rE22IKrM8CQsR3ta6g7CXSflNNquQ&s=Fi0iyrgGeqWChWiPkKKTCJm4-jqDRaZV3fKXtkEhIYEn0O7pj0sQalKQQDJE4if8oysKBP3TUoUGu-MN98QYd6WRpedRnqq-SM5AN8Xj2jKhwrF1MUsnhc9BjM1fMTJO_fZr1CaIdxQ8LpqnbMwG-ix23YIVJj7Yy9c9gHWKbU74QwCAx6NCxh5Q986LqeMQLM9vazfZNZfbK-nwy2Z5smZaD8UzfqWAxlrY_nfFlgGsNPx0WNTdinVp_cyLlpBS8QUX11eQBGWeIUVPYevMMoubS68nYiPq4DCYVMWPTdG36uoCDj9fjYBdrwvVFMpNHfHmuaHTjsviLhMHCYJAjA&h=pGmNorbY7LjlSGxkPy9AEjr-IPIeXjBSKIrDha5htxw
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag2":"value2"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":5,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:38:29.2459611Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+      string: '{"name":"5d64ec5e-872e-4b32-b491-18932f180f27","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '967'
+      - '68'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:38:45 GMT
+      - Fri, 04 Jul 2025 07:57:40 GMT
       expires:
       - '-1'
       pragma:
@@ -844,11 +1007,65 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 2f0857e3-1c3d-462f-88a0-8f506a9e108a
+      - 4c6a2e41-1522-48f2-8478-64f08ff69729
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-26T06:38:46
+      - WESTUS|WESTUS|G4|2025-07-04T07:57:40
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/aaf87794-504d-475e-807a-b54f9a456b8b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: FCBE563C64C04588821B225FAB54C579 Ref B: OSA221030115021 Ref C: 2024-09-26T06:38:45Z'
+      - 'Ref A: 50A7E2260DDA4166A4868303F9546C41 Ref B: TYO201151006036 Ref C: 2025-07-04T07:57:40Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - eventhubs namespace update
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --tags --enable-auto-inflate --maximum-throughput-units
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag2":"value2"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":5,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-04T07:55:26.5671277Z","updatedAt":"2025-07-04T07:57:10Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '959'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Jul 2025 07:57:41 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - b5cec99b-5717-4463-899b-6997a6c249c4
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G3|2025-07-04T07:57:42
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: B70D762451AB4606B5053A7856AAFBF7 Ref B: TYO201151002031 Ref C: 2025-07-04T07:57:41Z'
     status:
       code: 200
       message: OK
@@ -866,21 +1083,21 @@ interactions:
       ParameterSetName:
       - --resource-group
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag2":"value2"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":5,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-26T06:36:27.0704009Z","updatedAt":"2024-09-26T06:38:29.2459611Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli1000004","name":"eventhubs-nscli1000004","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:eventhubs-nscli1000004","serviceBusEndpoint":"https://eventhubs-nscli1000004.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-26T06:35:48.4782114Z","updatedAt":"2024-09-26T06:36:19.4522643Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli1000004","name":"eventhubs-nscli1000004","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag1":"value1"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli1000004","serviceBusEndpoint":"https://eventhubs-nscli1000004.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":4,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-04T07:54:41.3882284Z","updatedAt":"2025-07-04T07:55:07Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002","name":"eventhubs-nscli000002","type":"Microsoft.EventHub/Namespaces","location":"westus","tags":{"tag2":"value2"},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:eventhubs-nscli000002","serviceBusEndpoint":"https://eventhubs-nscli000002.servicebus.windows.net:443/","isAutoInflateEnabled":true,"maximumThroughputUnits":5,"kafkaEnabled":true,"provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-04T07:55:26.5671277Z","updatedAt":"2025-07-04T07:57:10Z"},"sku":{"name":"Standard","tier":"Standard","capacity":1}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '1951'
+      - '1935'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:38:46 GMT
+      - Fri, 04 Jul 2025 07:57:43 GMT
       expires:
       - '-1'
       pragma:
@@ -892,11 +1109,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 1f13f5e3-0ef5-420c-9178-ddfc0eafceb9
+      - 3e4b956e-ddaa-4b74-8397-9a46d449880c
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-26T06:38:47
+      - WESTUS|WESTUS|G2|2025-07-04T07:57:43
+      x-ms-original-request-ids:
+      - ''
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 3788D054CCFB4D86AB6451FF91502FA4 Ref B: OSA221030115037 Ref C: 2024-09-26T06:38:46Z'
+      - 'Ref A: F746E827323D412EAA2438C7F735FCCE Ref B: TYO201100114019 Ref C: 2025-07-04T07:57:42Z'
     status:
       code: 200
       message: OK
@@ -918,7 +1139,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --rights
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/cliAutho000005?api-version=2023-01-01-preview
   response:
@@ -932,7 +1153,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:38:53 GMT
+      - Fri, 04 Jul 2025 07:57:50 GMT
       expires:
       - '-1'
       pragma:
@@ -944,13 +1165,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 8046ea10-f966-4241-8ea2-1ac88e4ee9f7
+      - 966dabd7-a51c-4a83-b4e5-732537a32f7a
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-26T06:38:54
+      - WESTUS|WESTUS|G4|2025-07-04T07:57:50
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/27ef4111-cf77-4bc6-892f-a4db1cc09cd2
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 84F8379CF1B34451944ABE4E70EB3D98 Ref B: TYO201100116023 Ref C: 2024-09-26T06:38:47Z'
+      - 'Ref A: D43E32F8F1EE46C5BA55EFB6448D377C Ref B: TYO201100113047 Ref C: 2025-07-04T07:57:44Z'
     status:
       code: 200
       message: OK
@@ -968,7 +1193,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/cliAutho000005?api-version=2023-01-01-preview
   response:
@@ -982,7 +1207,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:38:55 GMT
+      - Fri, 04 Jul 2025 07:57:51 GMT
       expires:
       - '-1'
       pragma:
@@ -994,11 +1219,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 4603caa5-70d6-43e6-8a46-e56c360d876c
+      - 91b6da84-0bc6-4932-a931-9a24e3ccfae0
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-26T06:38:55
+      - WESTUS|WESTUS|G0|2025-07-04T07:57:52
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/5a069785-f4db-4ca4-aad9-109fb05c001b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3747'
       x-msedge-ref:
-      - 'Ref A: B58781AF9EA34114AB7152397A29E1E5 Ref B: TYO201151002054 Ref C: 2024-09-26T06:38:54Z'
+      - 'Ref A: DC56F5CF9D614149A0EE750351D3BF2B Ref B: TYO201151006052 Ref C: 2025-07-04T07:57:51Z'
     status:
       code: 200
       message: OK
@@ -1016,7 +1245,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --rights
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/cliAutho000005?api-version=2023-01-01-preview
   response:
@@ -1030,7 +1259,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:38:56 GMT
+      - Fri, 04 Jul 2025 07:57:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1042,11 +1271,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 5c4fd077-d132-4596-adfe-b482e73f624d
+      - a68d5c86-a4fe-4a30-9e14-3e5644beae1e
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-26T06:38:56
+      - WESTUS|WESTUS|G2|2025-07-04T07:57:53
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/35d7e898-ce41-4b99-a127-1616ac81c71f
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 86D4BFD2B9DA4109AED117F187FC3EB8 Ref B: OSA221030115025 Ref C: 2024-09-26T06:38:56Z'
+      - 'Ref A: 83D0E566A3B040F797EF29F6EE857C79 Ref B: TYO201151003042 Ref C: 2025-07-04T07:57:52Z'
     status:
       code: 200
       message: OK
@@ -1068,7 +1301,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --rights
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/cliAutho000005?api-version=2023-01-01-preview
   response:
@@ -1082,7 +1315,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:39:03 GMT
+      - Fri, 04 Jul 2025 07:58:00 GMT
       expires:
       - '-1'
       pragma:
@@ -1094,13 +1327,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 7cdac7fe-aa52-49b8-9fa0-347bf59d7278
+      - ed538572-45f4-47b7-80dc-02b7eeb988ca
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-26T06:39:04
+      - WESTUS|WESTUS|G2|2025-07-04T07:58:00
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japanwest/f369eb8a-d313-4209-826f-ebf7f8c750ae
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 59C5DDA0C16E49F1B077036CC70B691A Ref B: OSA221030115025 Ref C: 2024-09-26T06:38:57Z'
+      - 'Ref A: 895EF4AD59AF4B9680DCDD99FE02FC31 Ref B: TYO201100115037 Ref C: 2025-07-04T07:57:54Z'
     status:
       code: 200
       message: OK
@@ -1118,7 +1355,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/RootManageSharedAccessKey?api-version=2023-01-01-preview
   response:
@@ -1132,7 +1369,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:39:05 GMT
+      - Fri, 04 Jul 2025 07:58:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1144,11 +1381,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - e987e433-cb2b-4a07-acfb-badd428691cb
+      - c31aa8c2-55ae-4065-83d5-c5f8d963e63d
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-26T06:39:05
+      - WESTUS|WESTUS|G4|2025-07-04T07:58:04
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japanwest/fc5b981d-f454-401f-96a5-4f04f51598ea
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: DAB01BEDC5B84AADB5175F0FB27D38F9 Ref B: TYO201100115037 Ref C: 2024-09-26T06:39:04Z'
+      - 'Ref A: 6FC0528097FD489CBEC0B7E14CDB2513 Ref B: TYO201100115037 Ref C: 2025-07-04T07:58:04Z'
     status:
       code: 200
       message: OK
@@ -1168,12 +1409,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/cliAutho000005/listKeys?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=abc001","secondaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=abc002","primaryKey":"abc001","secondaryKey":"abc002","keyName":"cliAutho000005"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=key","secondaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=key","primaryKey":"key","secondaryKey":"key","keyName":"cliAutho000005"}'
     headers:
       cache-control:
       - no-cache
@@ -1182,7 +1423,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:39:06 GMT
+      - Fri, 04 Jul 2025 07:58:05 GMT
       expires:
       - '-1'
       pragma:
@@ -1194,13 +1435,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 7ff84c54-2260-491a-ba4a-1659e86a10b6
+      - 2e94a327-d82f-4e0e-8972-2171723853d2
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-26T06:39:07
+      - WESTUS|WESTUS|G4|2025-07-04T07:58:06
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japanwest/ad19c3d8-625a-4f13-9192-c8a0a47fd8d6
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 56D275990B98495BBBDA0E51A8B03AF0 Ref B: OSA221030115049 Ref C: 2024-09-26T06:39:06Z'
+      - 'Ref A: A0CA9FFF7A6E4860BFA2CF36325CAB8E Ref B: TYO201100116047 Ref C: 2025-07-04T07:58:05Z'
     status:
       code: 200
       message: OK
@@ -1222,12 +1467,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --key
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/cliAutho000005/regenerateKeys?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=abc003","secondaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=abc002","primaryKey":"abc003","secondaryKey":"abc002","keyName":"cliAutho000005"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=key","secondaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=key","primaryKey":"key","secondaryKey":"key","keyName":"cliAutho000005"}'
     headers:
       cache-control:
       - no-cache
@@ -1236,7 +1481,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:39:14 GMT
+      - Fri, 04 Jul 2025 07:58:12 GMT
       expires:
       - '-1'
       pragma:
@@ -1248,13 +1493,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - f72a28c9-7ddc-41b6-8588-4ab8e55efe63
+      - 2a1e8a46-7d42-46ab-bc69-15916d4e62c4
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-26T06:39:14
+      - WESTUS|WESTUS|G2|2025-07-04T07:58:13
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japanwest/023e4aaf-a60c-4d67-a468-e784c0c570c0
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: EA7829D5C0FA45EFB8A83B9D16BA198A Ref B: OSA221030113025 Ref C: 2024-09-26T06:39:07Z'
+      - 'Ref A: BA56F62E97924E3182B0777CBFD50D05 Ref B: TYO201100115021 Ref C: 2025-07-04T07:58:06Z'
     status:
       code: 200
       message: OK
@@ -1276,12 +1525,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --key
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/cliAutho000005/regenerateKeys?api-version=2023-01-01-preview
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=abc003","secondaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=abc004","primaryKey":"abc003","secondaryKey":"abc004","keyName":"cliAutho000005"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=key","secondaryConnectionString":"Endpoint=sb://eventhubs-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000005;SharedAccessKey=key","primaryKey":"key","secondaryKey":"key","keyName":"cliAutho000005"}'
     headers:
       cache-control:
       - no-cache
@@ -1290,7 +1539,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:39:21 GMT
+      - Fri, 04 Jul 2025 07:58:19 GMT
       expires:
       - '-1'
       pragma:
@@ -1302,13 +1551,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 3f8e327c-ddd8-4c15-99fb-5d5b6b7bed20
+      - 34e8c47b-a5e3-43b7-b3f3-bc448b565396
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-26T06:39:21
+      - WESTUS|WESTUS|G0|2025-07-04T07:58:20
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/3681d6c3-eff8-48ac-8d6a-75c695d1c944
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 7BA6A4E7E83E4DF2B2FAD03B621E49A1 Ref B: TYO201151004011 Ref C: 2024-09-26T06:39:15Z'
+      - 'Ref A: CED5E9966A8B4D87938A35315BBE83D9 Ref B: TYO201151001025 Ref C: 2025-07-04T07:58:14Z'
     status:
       code: 200
       message: OK
@@ -1328,7 +1581,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002/authorizationRules/cliAutho000005?api-version=2023-01-01-preview
   response:
@@ -1340,7 +1593,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 26 Sep 2024 06:39:30 GMT
+      - Fri, 04 Jul 2025 07:58:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1352,13 +1605,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 00000001-0000-0000-0002-000000001788
+      - 00000001-0000-0000-0002-000000005600
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-26T06:39:28
+      - WESTUS|WESTUS|G2|2025-07-04T07:58:27
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/b6ba38d1-167d-497a-b009-e97b9d681b62
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
       x-msedge-ref:
-      - 'Ref A: 072B23D0DA7647FDBB660339B092BE91 Ref B: OSA221030116029 Ref C: 2024-09-26T06:39:22Z'
+      - 'Ref A: BE5337A1A6584A5B86DFC59EFD7A28BF Ref B: TYO201100113045 Ref C: 2025-07-04T07:58:20Z'
     status:
       code: 200
       message: OK
@@ -1378,7 +1635,7 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_eh_namespace000001/providers/Microsoft.EventHub/namespaces/eventhubs-nscli000002?api-version=2024-05-01-preview
   response:
@@ -1386,17 +1643,17 @@ interactions:
       string: ''
     headers:
       azure-asyncoperation:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5ed005aa-6460-4c9b-87ab-2a0dc9609308?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Deleted&t=638629295741081576&c=MIIHhzCCBm-gAwIBAgITfAWHizdXQLRDd48J5AAABYeLNzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwOTIyMTIwNDAzWhcNMjUwMzIxMTIwNDAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL3CpUYjuxooJSSrwK19FjzhBOC6rpM2nxEk8ZwpswjmQSs4371lD9cjpzoi1V66izrOAQO5dR4T7CBAdxC_T1La7B_GC0BLToEfDbOMLuij5eJKkGy743BYmNo5FXMcmO2f2PyZA8Q8FMkBzYwcpUlCBt0ofvjmFjb0o14-l_wkV8cVq6NA5rj5vzYRXrcBBDx0DXZzx0ey-DalD8BI5Efxzl0sFnA-qqtfi2y6thqMlNPWuGqiYFNmkko5caGs3a7hQy_mx3XdCDy2aWq0YXIqdiyYCA4MGA_vLQtjCUcC4EnHaLnPm-9OGFhKZHQZ2hQEFIYnnCNvsSRVaHBIatkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBR539nE3pOaYqC09YY5sInoMk2T-DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFQ1zkLj2l7rlyrM4j2l8rtJkHitIxnUkLkyeLRrVxZPkfV1_ABjrmrKVHwks1TT5vv190Z1rSszJ8F3BMbapuqZk7TG_eHqRVKnkNYrwXEAn99VULWloNnmsKbnii5qgA26KvYkNcrxJ4L_9pCm3mT47A_mvHkzKnovgy4XLdvqRPL1QGC_Itw4Y4QCb11tEdDabhFYx2hY0zhM3voH4pW_42NbuG3xwNLFeA2LThOsGcf_4F8bzQ6Pm__uo-XrnBE13ERimgL86M-z9h6W2bQUcKXqAf_RhKjv5ai9GEnITD2aoXBO8tu85DelvTvuH12hn2s2xEeYNMURYXNCzYc&s=S4GlXhUXWg6LINYHw5mrjiVj629GYeaHOsEHgZwfcNpA6585mq5Kj9GbAp4dm89Bbf6yVc7VY70qaFEj7EscKfD6ZMydScklgAM8FEYuFEnsio-zfyrCzyP2eDRIdwjYj9ZrGKocw0F19WH2s_xZ7w1BgjGvQMn1cckCq0a54puBjaQ1j0bufBKe_10903h8dKOqAMkfmG__abJoNq8vYHTIf4WJYgY6t7wlPaJNMhBpPST2kUpycTDAdb4UFEMA5KaauQM18I6yrjpTRmc6_WKzUhbyGEZR1KkBmauweyWHF6zsOaQaSGJjD27xZ2eYJX8D3YFFTCPYjIpa2O1ONg&h=VgxJgJbCvoSuNckUNd1wp99VcX2-XDPebi5BKkoDGJM
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Deleted&t=638872127106403529&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=iRAPxak6rdR7x6Ktgh_OGGWWW-IOX8w0cdG8LYKAe_Gl8Tj4h_wQwwZXucEE9FQqdJSyl4yaQmK9wP9rVwzevf2rrjP3hRYi71AKaRPA6nMyRChP0d_SPt94GEkD69k_RprivfRe85bJukuk4m6eaqRh7Rbluactz0Y3xFaVpVPwCsjYRoIz5ctx5M5Lt5z62Tkp4q8-SddJKlM2IvqgVeQhQVZVBlKMl2sKPt3f7EsnzvxpLRJLxePYXAcFoAtErbobT3tMCMJbtyfXhBPuky8L7az0A6-AxVw-y_EYTdcKTxvMLO9BzF0erwEbsCdvXB7feSQhtOoa8N8hsBarNg&h=lL6qt2p5s-uUtdVrrMYcKi-AxDj0J7ePvKpY4GG3aZs
       cache-control:
       - no-cache
       content-length:
       - '0'
       date:
-      - Thu, 26 Sep 2024 06:39:33 GMT
+      - Fri, 04 Jul 2025 07:58:30 GMT
       expires:
       - '-1'
       location:
-      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5ed005aa-6460-4c9b-87ab-2a0dc9609308?isAsyncHeader=false&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Deleted&t=638629295741081576&c=MIIHhzCCBm-gAwIBAgITfAWHizdXQLRDd48J5AAABYeLNzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwOTIyMTIwNDAzWhcNMjUwMzIxMTIwNDAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL3CpUYjuxooJSSrwK19FjzhBOC6rpM2nxEk8ZwpswjmQSs4371lD9cjpzoi1V66izrOAQO5dR4T7CBAdxC_T1La7B_GC0BLToEfDbOMLuij5eJKkGy743BYmNo5FXMcmO2f2PyZA8Q8FMkBzYwcpUlCBt0ofvjmFjb0o14-l_wkV8cVq6NA5rj5vzYRXrcBBDx0DXZzx0ey-DalD8BI5Efxzl0sFnA-qqtfi2y6thqMlNPWuGqiYFNmkko5caGs3a7hQy_mx3XdCDy2aWq0YXIqdiyYCA4MGA_vLQtjCUcC4EnHaLnPm-9OGFhKZHQZ2hQEFIYnnCNvsSRVaHBIatkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBR539nE3pOaYqC09YY5sInoMk2T-DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFQ1zkLj2l7rlyrM4j2l8rtJkHitIxnUkLkyeLRrVxZPkfV1_ABjrmrKVHwks1TT5vv190Z1rSszJ8F3BMbapuqZk7TG_eHqRVKnkNYrwXEAn99VULWloNnmsKbnii5qgA26KvYkNcrxJ4L_9pCm3mT47A_mvHkzKnovgy4XLdvqRPL1QGC_Itw4Y4QCb11tEdDabhFYx2hY0zhM3voH4pW_42NbuG3xwNLFeA2LThOsGcf_4F8bzQ6Pm__uo-XrnBE13ERimgL86M-z9h6W2bQUcKXqAf_RhKjv5ai9GEnITD2aoXBO8tu85DelvTvuH12hn2s2xEeYNMURYXNCzYc&s=S4GlXhUXWg6LINYHw5mrjiVj629GYeaHOsEHgZwfcNpA6585mq5Kj9GbAp4dm89Bbf6yVc7VY70qaFEj7EscKfD6ZMydScklgAM8FEYuFEnsio-zfyrCzyP2eDRIdwjYj9ZrGKocw0F19WH2s_xZ7w1BgjGvQMn1cckCq0a54puBjaQ1j0bufBKe_10903h8dKOqAMkfmG__abJoNq8vYHTIf4WJYgY6t7wlPaJNMhBpPST2kUpycTDAdb4UFEMA5KaauQM18I6yrjpTRmc6_WKzUhbyGEZR1KkBmauweyWHF6zsOaQaSGJjD27xZ2eYJX8D3YFFTCPYjIpa2O1ONg&h=VgxJgJbCvoSuNckUNd1wp99VcX2-XDPebi5BKkoDGJM
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=false&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Deleted&t=638872127106559487&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=kyNh9WDXiOk9Qo00Qm6OnFLZJ8HNMuhFfmIy2c3NVRuCUMXYOP2B1xXhiYzEj7V6QlPlCfwrhX6yhdREaeZr8vsf8HPR-EfEplBP9gYf1jxWc-xPIRdWGsKuPytxPTYEqZEWMrKol6DSx6ltamWW0w5YBUY9vngN0KpCTPO7UZe4l8BNJKxTkBJKnKcWs0u3cIjIJNaBg7EIRT10Ap8HSNgQKMpP8LTAIgQGQUu6ReK9SbtqvV3vboi4iZMYmoJZogwycEDL7A9f1iIXAiQ2ecl6sQFO-JPEdonbCI7_iK0tN4OHAfxGul7KrV1WYNBxeDd_Lzwj2u_0mGbEve9DFA&h=CfdnhS38rLGkYHrGii2Uyu9PPBeuxZrcwn1Q3gqr9hI
       pragma:
       - no-cache
       strict-transport-security:
@@ -1406,13 +1663,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 00000001-0000-0000-0002-000000006136
+      - 00000001-0000-0000-0002-000000002484
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-26T06:39:34
+      - WESTUS|WESTUS|G3|2025-07-04T07:58:30
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japaneast/906917e4-b917-412d-bd59-4a7b1f127df6
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
       x-msedge-ref:
-      - 'Ref A: A566F1043D5F455C8466870746626EDA Ref B: TYO201100115021 Ref C: 2024-09-26T06:39:32Z'
+      - 'Ref A: DA5CC149637040BFAA0AABF499B179E8 Ref B: TYO201151006036 Ref C: 2025-07-04T07:58:27Z'
     status:
       code: 202
       message: Accepted
@@ -1430,12 +1691,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5ed005aa-6460-4c9b-87ab-2a0dc9609308?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Deleted&t=638629295741081576&c=MIIHhzCCBm-gAwIBAgITfAWHizdXQLRDd48J5AAABYeLNzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwOTIyMTIwNDAzWhcNMjUwMzIxMTIwNDAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL3CpUYjuxooJSSrwK19FjzhBOC6rpM2nxEk8ZwpswjmQSs4371lD9cjpzoi1V66izrOAQO5dR4T7CBAdxC_T1La7B_GC0BLToEfDbOMLuij5eJKkGy743BYmNo5FXMcmO2f2PyZA8Q8FMkBzYwcpUlCBt0ofvjmFjb0o14-l_wkV8cVq6NA5rj5vzYRXrcBBDx0DXZzx0ey-DalD8BI5Efxzl0sFnA-qqtfi2y6thqMlNPWuGqiYFNmkko5caGs3a7hQy_mx3XdCDy2aWq0YXIqdiyYCA4MGA_vLQtjCUcC4EnHaLnPm-9OGFhKZHQZ2hQEFIYnnCNvsSRVaHBIatkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBR539nE3pOaYqC09YY5sInoMk2T-DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFQ1zkLj2l7rlyrM4j2l8rtJkHitIxnUkLkyeLRrVxZPkfV1_ABjrmrKVHwks1TT5vv190Z1rSszJ8F3BMbapuqZk7TG_eHqRVKnkNYrwXEAn99VULWloNnmsKbnii5qgA26KvYkNcrxJ4L_9pCm3mT47A_mvHkzKnovgy4XLdvqRPL1QGC_Itw4Y4QCb11tEdDabhFYx2hY0zhM3voH4pW_42NbuG3xwNLFeA2LThOsGcf_4F8bzQ6Pm__uo-XrnBE13ERimgL86M-z9h6W2bQUcKXqAf_RhKjv5ai9GEnITD2aoXBO8tu85DelvTvuH12hn2s2xEeYNMURYXNCzYc&s=S4GlXhUXWg6LINYHw5mrjiVj629GYeaHOsEHgZwfcNpA6585mq5Kj9GbAp4dm89Bbf6yVc7VY70qaFEj7EscKfD6ZMydScklgAM8FEYuFEnsio-zfyrCzyP2eDRIdwjYj9ZrGKocw0F19WH2s_xZ7w1BgjGvQMn1cckCq0a54puBjaQ1j0bufBKe_10903h8dKOqAMkfmG__abJoNq8vYHTIf4WJYgY6t7wlPaJNMhBpPST2kUpycTDAdb4UFEMA5KaauQM18I6yrjpTRmc6_WKzUhbyGEZR1KkBmauweyWHF6zsOaQaSGJjD27xZ2eYJX8D3YFFTCPYjIpa2O1ONg&h=VgxJgJbCvoSuNckUNd1wp99VcX2-XDPebi5BKkoDGJM
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Deleted&t=638872127106403529&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=iRAPxak6rdR7x6Ktgh_OGGWWW-IOX8w0cdG8LYKAe_Gl8Tj4h_wQwwZXucEE9FQqdJSyl4yaQmK9wP9rVwzevf2rrjP3hRYi71AKaRPA6nMyRChP0d_SPt94GEkD69k_RprivfRe85bJukuk4m6eaqRh7Rbluactz0Y3xFaVpVPwCsjYRoIz5ctx5M5Lt5z62Tkp4q8-SddJKlM2IvqgVeQhQVZVBlKMl2sKPt3f7EsnzvxpLRJLxePYXAcFoAtErbobT3tMCMJbtyfXhBPuky8L7az0A6-AxVw-y_EYTdcKTxvMLO9BzF0erwEbsCdvXB7feSQhtOoa8N8hsBarNg&h=lL6qt2p5s-uUtdVrrMYcKi-AxDj0J7ePvKpY4GG3aZs
   response:
     body:
-      string: '{"name":"5ed005aa-6460-4c9b-87ab-2a0dc9609308","status":"Running"}'
+      string: '{"name":"5d64ec5e-872e-4b32-b491-18932f180f27","status":"Running"}'
     headers:
       cache-control:
       - no-cache
@@ -1444,7 +1705,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:39:34 GMT
+      - Fri, 04 Jul 2025 07:58:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1456,11 +1717,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 31ad0479-4576-488a-a097-c5e7df562df4
+      - ceda7271-8cde-4245-9c91-88012326238e
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-26T06:39:34
+      - WESTUS|WESTUS|G4|2025-07-04T07:58:31
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japanwest/09627e2c-d8b3-4feb-aeb0-e62137b2967a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: F65E58058A1C450F9B0473D8823E57EE Ref B: TYO201100115021 Ref C: 2024-09-26T06:39:34Z'
+      - 'Ref A: BEE67C15BA804BD49F6126048A794D82 Ref B: TYO201100117035 Ref C: 2025-07-04T07:58:31Z'
     status:
       code: 200
       message: OK
@@ -1478,12 +1743,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5ed005aa-6460-4c9b-87ab-2a0dc9609308?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Deleted&t=638629295741081576&c=MIIHhzCCBm-gAwIBAgITfAWHizdXQLRDd48J5AAABYeLNzANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDUwHhcNMjQwOTIyMTIwNDAzWhcNMjUwMzIxMTIwNDAzWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAL3CpUYjuxooJSSrwK19FjzhBOC6rpM2nxEk8ZwpswjmQSs4371lD9cjpzoi1V66izrOAQO5dR4T7CBAdxC_T1La7B_GC0BLToEfDbOMLuij5eJKkGy743BYmNo5FXMcmO2f2PyZA8Q8FMkBzYwcpUlCBt0ofvjmFjb0o14-l_wkV8cVq6NA5rj5vzYRXrcBBDx0DXZzx0ey-DalD8BI5Efxzl0sFnA-qqtfi2y6thqMlNPWuGqiYFNmkko5caGs3a7hQy_mx3XdCDy2aWq0YXIqdiyYCA4MGA_vLQtjCUcC4EnHaLnPm-9OGFhKZHQZ2hQEFIYnnCNvsSRVaHBIatkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9DTzFQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA1LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQ08xUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNS5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0NPMVBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3J0MB0GA1UdDgQWBBR539nE3pOaYqC09YY5sInoMk2T-DAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDUuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwEwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBR61hmFKHlscXYeYPjzS--iBUIWHTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAFQ1zkLj2l7rlyrM4j2l8rtJkHitIxnUkLkyeLRrVxZPkfV1_ABjrmrKVHwks1TT5vv190Z1rSszJ8F3BMbapuqZk7TG_eHqRVKnkNYrwXEAn99VULWloNnmsKbnii5qgA26KvYkNcrxJ4L_9pCm3mT47A_mvHkzKnovgy4XLdvqRPL1QGC_Itw4Y4QCb11tEdDabhFYx2hY0zhM3voH4pW_42NbuG3xwNLFeA2LThOsGcf_4F8bzQ6Pm__uo-XrnBE13ERimgL86M-z9h6W2bQUcKXqAf_RhKjv5ai9GEnITD2aoXBO8tu85DelvTvuH12hn2s2xEeYNMURYXNCzYc&s=S4GlXhUXWg6LINYHw5mrjiVj629GYeaHOsEHgZwfcNpA6585mq5Kj9GbAp4dm89Bbf6yVc7VY70qaFEj7EscKfD6ZMydScklgAM8FEYuFEnsio-zfyrCzyP2eDRIdwjYj9ZrGKocw0F19WH2s_xZ7w1BgjGvQMn1cckCq0a54puBjaQ1j0bufBKe_10903h8dKOqAMkfmG__abJoNq8vYHTIf4WJYgY6t7wlPaJNMhBpPST2kUpycTDAdb4UFEMA5KaauQM18I6yrjpTRmc6_WKzUhbyGEZR1KkBmauweyWHF6zsOaQaSGJjD27xZ2eYJX8D3YFFTCPYjIpa2O1ONg&h=VgxJgJbCvoSuNckUNd1wp99VcX2-XDPebi5BKkoDGJM
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.EventHub/locations/westus/namespaceOperationResults/5d64ec5e-872e-4b32-b491-18932f180f27?isAsyncHeader=true&resourceName=eventhubs-nscli000002&resourceType=namespace&api-version=2024-05-01-preview&operationType=Deleted&t=638872127106403529&c=MIIHpTCCBo2gAwIBAgITOgWXBJzHWActAOyA9gAEBZcEnDANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSU5GUkEgQ0EgMDEwHhcNMjUwNDE4MDkxNjUyWhcNMjUxMDE1MDkxNjUyWjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALJ4tFzYjQAGXlMN4RVSj_Zp98bnnigeY99sbhZrAOQOjxR_04cAp0TrBwLXaA2b6MkNp3EWrqmwj8LAHlmiUmx_C5YeMG8WQUVkZMbfJNmAjSKJvmH2VO_H9OVOiiWemCFWlBXZMT6O1LsK-KI4EQtlTwXEv4-zXiqUQqjqHZQX6IJGxxcuw3R6KS00hFc9B4Ve9K9uvRk3OzuC_2evEuKFQfmIkhFu9gMtFnEBgp0E5Srek5Sh6WRO2V6wjcdtrFJ2dMStIbypiaJysxjNaLwTxBjKAJiyxkrxbuS0IPj2v4oOwkFSl9khCWu-ivje49N19yGiq_5BL-QYySfUPF0CAwEAAaOCBJIwggSOMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHaBggrBgEFBQcBAQSCAcwwggHIMGYGCCsGAQUFBzAChlpodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MFYGCCsGAQUFBzAChkpodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CWTJQS0lJTlRDQTAxLkFNRS5HQkxfQU1FJTIwSU5GUkElMjBDQSUyMDAxKDQpLmNydDBWBggrBgEFBQcwAoZKaHR0cDovL2NybDMuYW1lLmdibC9haWEvQlkyUEtJSU5UQ0EwMS5BTUUuR0JMX0FNRSUyMElORlJBJTIwQ0ElMjAwMSg0KS5jcnQwVgYIKwYBBQUHMAKGSmh0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JZMlBLSUlOVENBMDEuQU1FLkdCTF9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3J0MB0GA1UdDgQWBBQpIRfJ6SPCR16Dy9sN1AQtQKjWNDAOBgNVHQ8BAf8EBAMCBaAwggE1BgNVHR8EggEsMIIBKDCCASSgggEgoIIBHIZCaHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JshjRodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJTkZSQSUyMENBJTIwMDEoNCkuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTl2Ztn_PjsurvwwKidileIud8-YzAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBACBpx57mqT5wt5VuFMhMv-QcXTs5QrWkz021CcXp44eWUSJBLP35O0JDRyA13V3zowD9Dkl6HKRosiwIhfUwb1VWxMZt1K97bfrlhekU_IFyRNImksBTl4Hg5mL7M4PQvDu_hNxb1NW9JnL8B4LEl-FVcKtOFC8R2wp_2vglSGujfVsEzQMXxCECc_j-T0saauGgdaItgRGQ-1JrKdhZ1FvHWU2eeab0zXatBPn7nyaNmU7DK2icP38PQp3g8yPPlpv1joUzz1GMBJXhtHRWCv93tVfT5q9DZQ-_S2H_1Y2raeucg8kUfGEvVuQ27w1bGi2QRDLtEtuNHgzpR3RB7os&s=iRAPxak6rdR7x6Ktgh_OGGWWW-IOX8w0cdG8LYKAe_Gl8Tj4h_wQwwZXucEE9FQqdJSyl4yaQmK9wP9rVwzevf2rrjP3hRYi71AKaRPA6nMyRChP0d_SPt94GEkD69k_RprivfRe85bJukuk4m6eaqRh7Rbluactz0Y3xFaVpVPwCsjYRoIz5ctx5M5Lt5z62Tkp4q8-SddJKlM2IvqgVeQhQVZVBlKMl2sKPt3f7EsnzvxpLRJLxePYXAcFoAtErbobT3tMCMJbtyfXhBPuky8L7az0A6-AxVw-y_EYTdcKTxvMLO9BzF0erwEbsCdvXB7feSQhtOoa8N8hsBarNg&h=lL6qt2p5s-uUtdVrrMYcKi-AxDj0J7ePvKpY4GG3aZs
   response:
     body:
-      string: '{"name":"5ed005aa-6460-4c9b-87ab-2a0dc9609308","status":"Succeeded"}'
+      string: '{"name":"5d64ec5e-872e-4b32-b491-18932f180f27","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
@@ -1492,7 +1757,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 26 Sep 2024 06:40:04 GMT
+      - Fri, 04 Jul 2025 07:59:04 GMT
       expires:
       - '-1'
       pragma:
@@ -1504,11 +1769,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - adc9d2e9-dd31-4ea3-9d89-1bbdf31f9d6c
+      - 0ab1d553-24f9-4fce-a91e-eabe05c9595c
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G0|2024-09-26T06:40:05
+      - WESTUS|WESTUS|G4|2025-07-04T07:59:04
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/japanwest/bb0a67d6-1b5e-40d4-aa33-19f9d79943d1
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 9855B806D4904D27882B0C89074BCD8E Ref B: TYO201100115021 Ref C: 2024-09-26T06:40:04Z'
+      - 'Ref A: 9C06EA9844F247C781D6598334EBC57B Ref B: TYO201100116035 Ref C: 2025-07-04T07:59:04Z'
     status:
       code: 200
       message: OK

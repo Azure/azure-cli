@@ -13,12 +13,12 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_topic000001?api-version=2024-11-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli_test_sb_topic000001?api-version=2025-04-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001","name":"cli_test_sb_topic000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_sb_topic","date":"2024-09-29T07:38:10Z","module":"servicebus"},"properties":{"provisioningState":"Succeeded"}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001","name":"cli_test_sb_topic000001","type":"Microsoft.Resources/resourceGroups","location":"westus","tags":{"product":"azurecli","cause":"automation","test":"test_sb_topic","date":"2025-07-04T11:37:46Z","module":"servicebus"},"properties":{"provisioningState":"Succeeded"}}'
     headers:
       cache-control:
       - no-cache
@@ -27,7 +27,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:38:13 GMT
+      - Fri, 04 Jul 2025 11:37:48 GMT
       expires:
       - '-1'
       pragma:
@@ -38,8 +38,10 @@ interactions:
       - CONFIG_NOCACHE
       x-content-type-options:
       - nosniff
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: BC66F479352D4BD089E1EDC87565EEBA Ref B: OSA221030114053 Ref C: 2024-09-29T07:38:13Z'
+      - 'Ref A: EA8953D5D2C34318BFFB1E0AD131112B Ref B: MAA201060513027 Ref C: 2025-07-04T11:37:48Z'
     status:
       code: 200
       message: OK
@@ -62,24 +64,28 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2023-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"westus","tags":{"{tag1:
-        value1,":"","tag2: value2}":""},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"InBuild"}]},"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","provisioningState":"Creating","status":"Creating","createdAt":"2024-09-29T07:38:18.0370261Z","updatedAt":"2024-09-29T07:38:18.0370261Z"},"sku":{"name":"Standard","tier":"Standard"}}'
+        value1,":"","tag2: value2}":""},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"InBuild"}]},"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:sb-nscli000002","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","provisioningState":"Creating","status":"Creating","createdAt":"2025-07-04T11:37:54.9012437Z","updatedAt":"2025-07-04T11:37:54Z"},"sku":{"name":"Standard","tier":"Standard"}}'
     headers:
+      azure-asyncoperation:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceBus/locations/westus/namespaceOperationResults/548068ac-d369-4b16-a3db-efc8d1872cf7?isAsyncHeader=true&resourceName=sb-nscli000002&resourceType=namespace&api-version=2023-01-01-preview&operationType=Active&t=638872258761216305&c=MIIHhzCCBm-gAwIBAgITHgbLpY5CrldwCElOhgAABsuljjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTE1MzU0WhcNMjUxMDE2MTE1MzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALpNvED-4jjWd9x4kx_GTi05d5dwOEyeLAbBQgCxpIIQfxMZWKMWgS98VkI5brDtLvFdyuzybnfFHGKXjzX0Tj_kDiX7rHe9Ecp8UcmhtBK-MMBjWeaJBvCR7SK6SCTtvlyaeZ8FB9_gMk6nIHRJcpUpoTRpMEm5Tzfq_qkq5o093Zyt04pRQ8_rII3zDeLTzrJ0E30TItRO5v_bcDpGzVN1kqxAD3qqSwl7E6632VEw3ARXsFSfyEf_oI3rMlWSevpbQjij6GVLSsMeGh2AETpkcpBigizsUpq0TKdogZnKCWhwvc27sB1pMsNS046hLTlK4GGDFvm0Qh05CAQVZbkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSLyDV7hmU843tJz-SpbILF-RdstDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJny-giVyoS3RqKgNXSK1U5qjdx9go51dviqdGdycQ30FUQO8CDwSYqO_nnARWj5r3zOn_edK4to4pV3YcoLBcREsliXcmAzyrpOrc65uMnNd2TjLMvpc9lYmdugUhk2dY1aSbA6_khW4SOzpqplSojNWmSth6b9i0BPSfd67s_5Io8ov-ftTODImzzkcramAlGDr1WyyadbidiJbnzESwGoOBjDj7US4P9ZIIEJcgI3NyKsK4QzJb5U8ryYyyjqz4cV5V5AQ2v9OVECxR461ARHqwMAj8sJPeZYx6LgHApSzCtb3ky_y14iQDT5g8_k6w0g68zy-bCLuRbyF_O6Hgo&s=t0_FTl7ODcg-1tjcNPAW51LSpVWCfndcHmQp7WjUDC4gcRu7FzKxEyRCLb8xAXsU4NQi5UG46s6XXTt3_2ERjW9xpsFnalRQZNSmcUG8fz9a76rJnkujCalXygPDc8-imzmKdt3Kcc6ANgD0IYUQpKNoDqdzFmwxz094wvmxUnPLqaQ5VetS_ttWI23xCWA4jnPQEarmzoFrbifTfTDxteSIrEHOGbL9x2Wrum-ZEX-YRjW2n_FFGkHSOLgdHLXZ6hhUeYGsBtPRSpeDRfQ2GRCsh8ONMY5mUBQJiJyTRpA6HWSYw2WmVHThuSoT8jY-n39sr_ar3jOPoQwtYJ0s8w&h=OklxOri505DfgdKV0s4YFswSIGxDFDjxv2_zIQB4oII
       cache-control:
       - no-cache
       content-length:
-      - '908'
+      - '900'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:38:18 GMT
+      - Fri, 04 Jul 2025 11:37:56 GMT
       expires:
       - '-1'
+      location:
+      - https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceBus/locations/westus/namespaceOperationResults/548068ac-d369-4b16-a3db-efc8d1872cf7?isAsyncHeader=false&resourceName=sb-nscli000002&resourceType=namespace&api-version=2023-01-01-preview&operationType=Active&t=638872258761216305&c=MIIHhzCCBm-gAwIBAgITHgbLpY5CrldwCElOhgAABsuljjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTE1MzU0WhcNMjUxMDE2MTE1MzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALpNvED-4jjWd9x4kx_GTi05d5dwOEyeLAbBQgCxpIIQfxMZWKMWgS98VkI5brDtLvFdyuzybnfFHGKXjzX0Tj_kDiX7rHe9Ecp8UcmhtBK-MMBjWeaJBvCR7SK6SCTtvlyaeZ8FB9_gMk6nIHRJcpUpoTRpMEm5Tzfq_qkq5o093Zyt04pRQ8_rII3zDeLTzrJ0E30TItRO5v_bcDpGzVN1kqxAD3qqSwl7E6632VEw3ARXsFSfyEf_oI3rMlWSevpbQjij6GVLSsMeGh2AETpkcpBigizsUpq0TKdogZnKCWhwvc27sB1pMsNS046hLTlK4GGDFvm0Qh05CAQVZbkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSLyDV7hmU843tJz-SpbILF-RdstDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJny-giVyoS3RqKgNXSK1U5qjdx9go51dviqdGdycQ30FUQO8CDwSYqO_nnARWj5r3zOn_edK4to4pV3YcoLBcREsliXcmAzyrpOrc65uMnNd2TjLMvpc9lYmdugUhk2dY1aSbA6_khW4SOzpqplSojNWmSth6b9i0BPSfd67s_5Io8ov-ftTODImzzkcramAlGDr1WyyadbidiJbnzESwGoOBjDj7US4P9ZIIEJcgI3NyKsK4QzJb5U8ryYyyjqz4cV5V5AQ2v9OVECxR461ARHqwMAj8sJPeZYx6LgHApSzCtb3ky_y14iQDT5g8_k6w0g68zy-bCLuRbyF_O6Hgo&s=t0_FTl7ODcg-1tjcNPAW51LSpVWCfndcHmQp7WjUDC4gcRu7FzKxEyRCLb8xAXsU4NQi5UG46s6XXTt3_2ERjW9xpsFnalRQZNSmcUG8fz9a76rJnkujCalXygPDc8-imzmKdt3Kcc6ANgD0IYUQpKNoDqdzFmwxz094wvmxUnPLqaQ5VetS_ttWI23xCWA4jnPQEarmzoFrbifTfTDxteSIrEHOGbL9x2Wrum-ZEX-YRjW2n_FFGkHSOLgdHLXZ6hhUeYGsBtPRSpeDRfQ2GRCsh8ONMY5mUBQJiJyTRpA6HWSYw2WmVHThuSoT8jY-n39sr_ar3jOPoQwtYJ0s8w&h=OklxOri505DfgdKV0s4YFswSIGxDFDjxv2_zIQB4oII
       pragma:
       - no-cache
       strict-transport-security:
@@ -89,13 +95,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - f534c432-d5dd-4e9c-9dea-acac6fe03736
+      - b7396d00-bb68-4ed7-b086-7d5b8f789347
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G3|2024-09-29T07:38:18
+      - WESTUS|WESTUS|G2|2025-07-04T11:37:55
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/fd2c8d0c-d00f-49e4-8bac-e1336044d319
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 8ADAC7B3F9FB40EF9B75F727FF3A8614 Ref B: OSA221030115019 Ref C: 2024-09-29T07:38:13Z'
+      - 'Ref A: 758E65549B864CEFAE4A01B92DA03D05 Ref B: MAA201060514037 Ref C: 2025-07-04T11:37:49Z'
     status:
       code: 201
       message: Created
@@ -113,22 +123,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceBus/locations/westus/namespaceOperationResults/548068ac-d369-4b16-a3db-efc8d1872cf7?isAsyncHeader=true&resourceName=sb-nscli000002&resourceType=namespace&api-version=2023-01-01-preview&operationType=Active&t=638872258761216305&c=MIIHhzCCBm-gAwIBAgITHgbLpY5CrldwCElOhgAABsuljjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTE1MzU0WhcNMjUxMDE2MTE1MzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALpNvED-4jjWd9x4kx_GTi05d5dwOEyeLAbBQgCxpIIQfxMZWKMWgS98VkI5brDtLvFdyuzybnfFHGKXjzX0Tj_kDiX7rHe9Ecp8UcmhtBK-MMBjWeaJBvCR7SK6SCTtvlyaeZ8FB9_gMk6nIHRJcpUpoTRpMEm5Tzfq_qkq5o093Zyt04pRQ8_rII3zDeLTzrJ0E30TItRO5v_bcDpGzVN1kqxAD3qqSwl7E6632VEw3ARXsFSfyEf_oI3rMlWSevpbQjij6GVLSsMeGh2AETpkcpBigizsUpq0TKdogZnKCWhwvc27sB1pMsNS046hLTlK4GGDFvm0Qh05CAQVZbkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSLyDV7hmU843tJz-SpbILF-RdstDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJny-giVyoS3RqKgNXSK1U5qjdx9go51dviqdGdycQ30FUQO8CDwSYqO_nnARWj5r3zOn_edK4to4pV3YcoLBcREsliXcmAzyrpOrc65uMnNd2TjLMvpc9lYmdugUhk2dY1aSbA6_khW4SOzpqplSojNWmSth6b9i0BPSfd67s_5Io8ov-ftTODImzzkcramAlGDr1WyyadbidiJbnzESwGoOBjDj7US4P9ZIIEJcgI3NyKsK4QzJb5U8ryYyyjqz4cV5V5AQ2v9OVECxR461ARHqwMAj8sJPeZYx6LgHApSzCtb3ky_y14iQDT5g8_k6w0g68zy-bCLuRbyF_O6Hgo&s=t0_FTl7ODcg-1tjcNPAW51LSpVWCfndcHmQp7WjUDC4gcRu7FzKxEyRCLb8xAXsU4NQi5UG46s6XXTt3_2ERjW9xpsFnalRQZNSmcUG8fz9a76rJnkujCalXygPDc8-imzmKdt3Kcc6ANgD0IYUQpKNoDqdzFmwxz094wvmxUnPLqaQ5VetS_ttWI23xCWA4jnPQEarmzoFrbifTfTDxteSIrEHOGbL9x2Wrum-ZEX-YRjW2n_FFGkHSOLgdHLXZ6hhUeYGsBtPRSpeDRfQ2GRCsh8ONMY5mUBQJiJyTRpA6HWSYw2WmVHThuSoT8jY-n39sr_ar3jOPoQwtYJ0s8w&h=OklxOri505DfgdKV0s4YFswSIGxDFDjxv2_zIQB4oII
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"westus","tags":{"{tag1:
-        value1,":"","tag2: value2}":""},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"InBuild"}]},"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","provisioningState":"Creating","status":"Creating","createdAt":"2024-09-29T07:38:18.0370261Z","updatedAt":"2024-09-29T07:38:18.0370261Z"},"sku":{"name":"Standard","tier":"Standard"}}'
+      string: '{"name":"548068ac-d369-4b16-a3db-efc8d1872cf7","status":"Running"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '908'
+      - '66'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:38:19 GMT
+      - Fri, 04 Jul 2025 11:37:57 GMT
       expires:
       - '-1'
       pragma:
@@ -140,11 +149,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 499627f8-6235-439c-9d74-607887982a0b
+      - 66355c0b-22b3-43c3-99c7-ff9c3b4b963f
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:38:19
+      - WESTUS|WESTUS|G3|2025-07-04T11:37:57
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/414140a6-0950-4dc0-ab82-20d296a15741
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 7D6A291D05E941BA843D9F66E5D4C010 Ref B: OSA221030115019 Ref C: 2024-09-29T07:38:18Z'
+      - 'Ref A: 9D4848C3888843678094D9119A70AC14 Ref B: MAA201060513029 Ref C: 2025-07-04T11:37:56Z'
     status:
       code: 200
       message: OK
@@ -162,22 +175,21 @@ interactions:
       ParameterSetName:
       - --resource-group --name --tags --sku
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2023-01-01-preview
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/providers/Microsoft.ServiceBus/locations/westus/namespaceOperationResults/548068ac-d369-4b16-a3db-efc8d1872cf7?isAsyncHeader=true&resourceName=sb-nscli000002&resourceType=namespace&api-version=2023-01-01-preview&operationType=Active&t=638872258761216305&c=MIIHhzCCBm-gAwIBAgITHgbLpY5CrldwCElOhgAABsuljjANBgkqhkiG9w0BAQsFADBEMRMwEQYKCZImiZPyLGQBGRYDR0JMMRMwEQYKCZImiZPyLGQBGRYDQU1FMRgwFgYDVQQDEw9BTUUgSW5mcmEgQ0EgMDYwHhcNMjUwNDE5MTE1MzU0WhcNMjUxMDE2MTE1MzU0WjBAMT4wPAYDVQQDEzVhc3luY29wZXJhdGlvbnNpZ25pbmdjZXJ0aWZpY2F0ZS5tYW5hZ2VtZW50LmF6dXJlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALpNvED-4jjWd9x4kx_GTi05d5dwOEyeLAbBQgCxpIIQfxMZWKMWgS98VkI5brDtLvFdyuzybnfFHGKXjzX0Tj_kDiX7rHe9Ecp8UcmhtBK-MMBjWeaJBvCR7SK6SCTtvlyaeZ8FB9_gMk6nIHRJcpUpoTRpMEm5Tzfq_qkq5o093Zyt04pRQ8_rII3zDeLTzrJ0E30TItRO5v_bcDpGzVN1kqxAD3qqSwl7E6632VEw3ARXsFSfyEf_oI3rMlWSevpbQjij6GVLSsMeGh2AETpkcpBigizsUpq0TKdogZnKCWhwvc27sB1pMsNS046hLTlK4GGDFvm0Qh05CAQVZbkCAwEAAaOCBHQwggRwMCcGCSsGAQQBgjcVCgQaMBgwCgYIKwYBBQUHAwEwCgYIKwYBBQUHAwIwPQYJKwYBBAGCNxUHBDAwLgYmKwYBBAGCNxUIhpDjDYTVtHiE8Ys-hZvdFs6dEoFghfmRS4WsmTQCAWQCAQcwggHLBggrBgEFBQcBAQSCAb0wggG5MGMGCCsGAQUFBzAChldodHRwOi8vY3JsLm1pY3Jvc29mdC5jb20vcGtpaW5mcmEvQ2VydHMvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmwxLmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MFMGCCsGAQUFBzAChkdodHRwOi8vY3JsMi5hbWUuZ2JsL2FpYS9CTDJQS0lJTlRDQTAyLkFNRS5HQkxfQU1FJTIwSW5mcmElMjBDQSUyMDA2LmNydDBTBggrBgEFBQcwAoZHaHR0cDovL2NybDMuYW1lLmdibC9haWEvQkwyUEtJSU5UQ0EwMi5BTUUuR0JMX0FNRSUyMEluZnJhJTIwQ0ElMjAwNi5jcnQwUwYIKwYBBQUHMAKGR2h0dHA6Ly9jcmw0LmFtZS5nYmwvYWlhL0JMMlBLSUlOVENBMDIuQU1FLkdCTF9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3J0MB0GA1UdDgQWBBSLyDV7hmU843tJz-SpbILF-RdstDAOBgNVHQ8BAf8EBAMCBaAwggEmBgNVHR8EggEdMIIBGTCCARWgggERoIIBDYY_aHR0cDovL2NybC5taWNyb3NvZnQuY29tL3BraWluZnJhL0NSTC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMS5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMi5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsMy5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JshjFodHRwOi8vY3JsNC5hbWUuZ2JsL2NybC9BTUUlMjBJbmZyYSUyMENBJTIwMDYuY3JsMIGdBgNVHSAEgZUwgZIwDAYKKwYBBAGCN3sBATBmBgorBgEEAYI3ewICMFgwVgYIKwYBBQUHAgIwSh5IADMAMwBlADAAMQA5ADIAMQAtADQAZAA2ADQALQA0AGYAOABjAC0AYQAwADUANQAtADUAYgBkAGEAZgBmAGQANQBlADMAMwBkMAwGCisGAQQBgjd7AwIwDAYKKwYBBAGCN3sEAjAfBgNVHSMEGDAWgBTxRmjG8cPwKy19i2rhsvm-NfzRQTAdBgNVHSUEFjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggEBAJny-giVyoS3RqKgNXSK1U5qjdx9go51dviqdGdycQ30FUQO8CDwSYqO_nnARWj5r3zOn_edK4to4pV3YcoLBcREsliXcmAzyrpOrc65uMnNd2TjLMvpc9lYmdugUhk2dY1aSbA6_khW4SOzpqplSojNWmSth6b9i0BPSfd67s_5Io8ov-ftTODImzzkcramAlGDr1WyyadbidiJbnzESwGoOBjDj7US4P9ZIIEJcgI3NyKsK4QzJb5U8ryYyyjqz4cV5V5AQ2v9OVECxR461ARHqwMAj8sJPeZYx6LgHApSzCtb3ky_y14iQDT5g8_k6w0g68zy-bCLuRbyF_O6Hgo&s=t0_FTl7ODcg-1tjcNPAW51LSpVWCfndcHmQp7WjUDC4gcRu7FzKxEyRCLb8xAXsU4NQi5UG46s6XXTt3_2ERjW9xpsFnalRQZNSmcUG8fz9a76rJnkujCalXygPDc8-imzmKdt3Kcc6ANgD0IYUQpKNoDqdzFmwxz094wvmxUnPLqaQ5VetS_ttWI23xCWA4jnPQEarmzoFrbifTfTDxteSIrEHOGbL9x2Wrum-ZEX-YRjW2n_FFGkHSOLgdHLXZ6hhUeYGsBtPRSpeDRfQ2GRCsh8ONMY5mUBQJiJyTRpA6HWSYw2WmVHThuSoT8jY-n39sr_ar3jOPoQwtYJ0s8w&h=OklxOri505DfgdKV0s4YFswSIGxDFDjxv2_zIQB4oII
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"westus","tags":{"{tag1:
-        value1,":"","tag2: value2}":""},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-29T07:38:18.0370261Z","updatedAt":"2024-09-29T07:38:22.177798Z"},"sku":{"name":"Standard","tier":"Standard"}}'
+      string: '{"name":"548068ac-d369-4b16-a3db-efc8d1872cf7","status":"Succeeded"}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '904'
+      - '68'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:38:49 GMT
+      - Fri, 04 Jul 2025 11:38:30 GMT
       expires:
       - '-1'
       pragma:
@@ -189,11 +201,66 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 19a7aded-ca12-4207-8dc6-a61581eb169f
+      - afa76785-e0de-4048-9baf-b822ac2a1b2e
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-29T07:38:50
+      - WESTUS|WESTUS|G0|2025-07-04T11:38:30
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/b703f277-2815-4aa5-a2ce-28205ab59ee5
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: DF366962F1544B238F5B06950F718C9F Ref B: OSA221030115019 Ref C: 2024-09-29T07:38:49Z'
+      - 'Ref A: 2AAD5AA15D854911A7C8A8B23BC7723A Ref B: MAA201060513025 Ref C: 2025-07-04T11:38:29Z'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - servicebus namespace create
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --resource-group --name --tags --sku
+      User-Agent:
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2023-01-01-preview
+  response:
+    body:
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"westus","tags":{"{tag1:
+        value1,":"","tag2: value2}":""},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:sb-nscli000002","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-04T11:37:54.9012437Z","updatedAt":"2025-07-04T11:37:59Z"},"sku":{"name":"Standard","tier":"Standard"}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '897'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Fri, 04 Jul 2025 11:38:32 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-messaging-activity-id:
+      - 96fd2491-3dd7-4ebb-9680-3229b33eb882
+      x-ms-messaging-routing-id:
+      - WESTUS|WESTUS|G2|2025-07-04T11:38:32
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: BA28E13A471A45429A18EC061EFE970D Ref B: MAA201060513023 Ref C: 2025-07-04T11:38:31Z'
     status:
       code: 200
       message: OK
@@ -211,22 +278,22 @@ interactions:
       ParameterSetName:
       - --resource-group --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002?api-version=2023-01-01-preview
   response:
     body:
       string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002","name":"sb-nscli000002","type":"Microsoft.ServiceBus/Namespaces","location":"westus","tags":{"{tag1:
-        value1,":"","tag2: value2}":""},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"326100e2-f69d-4268-8503-075374f62b6e:sb-nscli000002","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","provisioningState":"Succeeded","status":"Active","createdAt":"2024-09-29T07:38:18.0370261Z","updatedAt":"2024-09-29T07:38:22.177798Z"},"sku":{"name":"Standard","tier":"Standard"}}'
+        value1,":"","tag2: value2}":""},"properties":{"geoDataReplication":{"maxReplicationLagDurationInSeconds":0,"locations":[{"locationName":"westus","roleType":"Primary","replicaState":"Ready"}]},"premiumMessagingPartitions":0,"minimumTlsVersion":"1.2","publicNetworkAccess":"Enabled","disableLocalAuth":false,"zoneRedundant":false,"metricId":"6030fb9a-6ed7-4414-b379-afd558a954e6:sb-nscli000002","serviceBusEndpoint":"https://sb-nscli000002.servicebus.windows.net:443/","provisioningState":"Succeeded","status":"Active","createdAt":"2025-07-04T11:37:54.9012437Z","updatedAt":"2025-07-04T11:37:59Z"},"sku":{"name":"Standard","tier":"Standard"}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '904'
+      - '897'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:38:50 GMT
+      - Fri, 04 Jul 2025 11:38:34 GMT
       expires:
       - '-1'
       pragma:
@@ -238,11 +305,13 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 2197cb7b-28fd-4d27-89b3-d864733e2a84
+      - af267781-c22f-439a-b529-c6b91d4421d4
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G3|2024-09-29T07:38:51
+      - WESTUS|WESTUS|G3|2025-07-04T11:38:34
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: CE9B7C860FBD4405A1DFA26733AAD3D4 Ref B: TYO201151003011 Ref C: 2024-09-29T07:38:50Z'
+      - 'Ref A: EAACC2446FD942D6908F63D0F38A6644 Ref B: MAA201060516021 Ref C: 2025-07-04T11:38:33Z'
     status:
       code: 200
       message: OK
@@ -269,21 +338,21 @@ interactions:
         --enable-duplicate-detection --duplicate-detection-history-time-window --enable-batched-operations
         --status --enable-ordering --auto-delete-on-idle --enable-partitioning
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli2000005?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli2000005","name":"sb-topiccli2000005","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":49152,"requiresDuplicateDetection":true,"duplicateDetectionHistoryTimeWindow":"PT1H3M4S","enableBatchedOperations":true,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":true,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":true,"enableExpress":false,"createdAt":"2024-09-29T07:38:54.19Z","updatedAt":"2024-09-29T07:38:54.273Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli2000005","name":"sb-topiccli2000005","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":49152,"requiresDuplicateDetection":true,"duplicateDetectionHistoryTimeWindow":"PT1H3M4S","enableBatchedOperations":true,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":true,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":true,"enableExpress":false,"createdAt":"2025-07-04T11:38:37.477Z","updatedAt":"2025-07-04T11:38:38.603Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '934'
+      - '935'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:38:54 GMT
+      - Fri, 04 Jul 2025 11:38:38 GMT
       expires:
       - '-1'
       pragma:
@@ -295,13 +364,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - a9c4884d-9ca2-49b3-8f24-a3b627c48d5f
+      - d049fd3d-92c0-4203-bc66-5546853a0839
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G3|2024-09-29T07:38:54
+      - WESTUS|WESTUS|G3|2025-07-04T11:38:39
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/752a7128-f593-4abd-aa93-9cb2d253fb55
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: F966FC468CE74011A2883559039D092B Ref B: TYO201100115007 Ref C: 2024-09-29T07:38:51Z'
+      - 'Ref A: 1B06591E7E0B4EC3AE7B7F7DD6B0EFA0 Ref B: MAA201060513047 Ref C: 2025-07-04T11:38:35Z'
     status:
       code: 200
       message: OK
@@ -323,12 +396,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --max-size --enable-express
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli3000006?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli3000006","name":"sb-topiccli3000006","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":true,"createdAt":"2024-09-29T07:38:57.683Z","updatedAt":"2024-09-29T07:38:57.71Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli3000006","name":"sb-topiccli3000006","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":true,"createdAt":"2025-07-04T11:38:43.36Z","updatedAt":"2025-07-04T11:38:44.423Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -337,7 +410,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:38:57 GMT
+      - Fri, 04 Jul 2025 11:38:44 GMT
       expires:
       - '-1'
       pragma:
@@ -349,13 +422,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 5ee5fb82-01fa-4020-bf6d-834e88ea6d90
+      - 3b408006-3a7a-4df1-a93b-a0d9cd05c23c
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-29T07:38:58
+      - WESTUS|WESTUS|G1|2025-07-04T11:38:44
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/9c6e1c3e-1907-4e11-bca8-ee1d1e91f37f
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 15DAF995C9864A56BB48A370B159344C Ref B: OSA221030113029 Ref C: 2024-09-29T07:38:55Z'
+      - 'Ref A: A1A34CBD1D714259BAB2FE06166CFDB7 Ref B: MAA201060514025 Ref C: 2025-07-04T11:38:39Z'
     status:
       code: 200
       message: OK
@@ -377,12 +454,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.333Z","updatedAt":"2024-09-29T07:39:01.363Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:38:49.397Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -391,7 +468,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:01 GMT
+      - Fri, 04 Jul 2025 11:38:49 GMT
       expires:
       - '-1'
       pragma:
@@ -403,13 +480,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 52656fbb-f22a-4abb-9c8c-005402d01aac
+      - 38d3014d-7541-4a2a-ba82-208d9d9b6b95
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:01
+      - WESTUS|WESTUS|G4|2025-07-04T11:38:49
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/centralindia/93ac2e0d-b62f-4528-830b-75683c0ab450
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: F66BDF372574443DB5D87EC77AC90664 Ref B: OSA221030115021 Ref C: 2024-09-29T07:38:58Z'
+      - 'Ref A: C7D1C67FF21F4696916F9C71AC1E47C4 Ref B: MAA201060514047 Ref C: 2025-07-04T11:38:45Z'
     status:
       code: 200
       message: OK
@@ -427,12 +508,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.333Z","updatedAt":"2024-09-29T07:39:01.363Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:38:49.397Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -441,7 +522,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:02 GMT
+      - Fri, 04 Jul 2025 11:38:51 GMT
       expires:
       - '-1'
       pragma:
@@ -453,11 +534,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - f5bce04a-b91b-4af6-884c-809f36de2bbb
+      - cf0ba956-c872-4bdc-b6ea-92fbdb235dbc
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:03
+      - WESTUS|WESTUS|G2|2025-07-04T11:38:51
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/8a15a4dc-6bb6-4690-bef8-c7f0501a9777
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 9F665D602E2B46CAAF3B867ED5D92CAB Ref B: OSA221030116047 Ref C: 2024-09-29T07:39:02Z'
+      - 'Ref A: B2FB6E357E2C4D3DB9CED3CB83349A90 Ref B: MAA201060515021 Ref C: 2025-07-04T11:38:50Z'
     status:
       code: 200
       message: OK
@@ -475,12 +560,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.333Z","updatedAt":"2024-09-29T07:39:01.363Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:38:49.397Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -489,7 +574,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:04 GMT
+      - Fri, 04 Jul 2025 11:38:53 GMT
       expires:
       - '-1'
       pragma:
@@ -501,11 +586,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 9cc1de96-292f-4c92-9b20-602dd58fd2b0
+      - ecce1960-517b-4d7f-b225-bbdf026cedbf
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:04
+      - WESTUS|WESTUS|G3|2025-07-04T11:38:54
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/ff5e1586-e231-4d82-8b3f-cbc2077b1ffe
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 3D3AA32FE67346F8A838AEA211560C28 Ref B: TYO201151003036 Ref C: 2024-09-29T07:39:03Z'
+      - 'Ref A: D567DCD5C3114AA19E95CDEA9B36E3BB Ref B: MAA201060515053 Ref C: 2025-07-04T11:38:52Z'
     status:
       code: 200
       message: OK
@@ -531,12 +620,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P7D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:05Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P7D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:38:56Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -545,7 +634,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:05 GMT
+      - Fri, 04 Jul 2025 11:38:56 GMT
       expires:
       - '-1'
       pragma:
@@ -557,13 +646,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 4acd85fd-ec50-4f83-8daa-e2fac9f520f6
+      - a14769fa-4d25-4ec3-ba1b-3706fa0191cb
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-29T07:39:05
+      - WESTUS|WESTUS|G1|2025-07-04T11:38:56
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/c2a2d191-fa3c-4f69-934d-a36fe36ab544
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 56C1AD0F25394D0F9667F415D04B6959 Ref B: TYO201151003036 Ref C: 2024-09-29T07:39:04Z'
+      - 'Ref A: 2428BFD9A15E466485444449911DED3B Ref B: MAA201060515019 Ref C: 2025-07-04T11:38:54Z'
     status:
       code: 200
       message: OK
@@ -581,12 +674,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P7D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.333Z","updatedAt":"2024-09-29T07:39:05.39Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P7D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:38:56.43Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -595,7 +688,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:06 GMT
+      - Fri, 04 Jul 2025 11:38:58 GMT
       expires:
       - '-1'
       pragma:
@@ -607,11 +700,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 60ebfec7-96ce-4e1e-94d0-9e13982ca43e
+      - 3cf8da8b-0c28-4d4c-8333-7bf3ae3f49cc
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G3|2024-09-29T07:39:07
+      - WESTUS|WESTUS|G3|2025-07-04T11:38:59
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/365c21a4-44d2-473f-85e5-c67f802fccde
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: D7C1123B90FA476081AB23AF1EE328BE Ref B: TYO201100116039 Ref C: 2024-09-29T07:39:06Z'
+      - 'Ref A: 1E0517BDBA1A4CCCA37A830DB1A27E35 Ref B: MAA201060514039 Ref C: 2025-07-04T11:38:57Z'
     status:
       code: 200
       message: OK
@@ -637,12 +734,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P2D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:08Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P2D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:01Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -651,7 +748,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:08 GMT
+      - Fri, 04 Jul 2025 11:39:01 GMT
       expires:
       - '-1'
       pragma:
@@ -663,13 +760,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - be1c0e61-e7b5-4c8d-b36a-d1c9fe1c6d33
+      - 5a4d4058-25fa-4c4a-9395-60dafa1e24bd
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G0|2024-09-29T07:39:08
+      - WESTUS|WESTUS|G2|2025-07-04T11:39:01
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/2037da9f-e1dc-47ff-a149-7ea35384ac24
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 508B4B782C0C4D6C953021A239FD22C4 Ref B: TYO201100116039 Ref C: 2024-09-29T07:39:07Z'
+      - 'Ref A: D705FA51DC8840F4915BABAF30517841 Ref B: MAA201060515051 Ref C: 2025-07-04T11:38:59Z'
     status:
       code: 200
       message: OK
@@ -687,21 +788,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P2D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:08.1810273Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P2D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:39:01.293Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '945'
+      - '937'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:08 GMT
+      - Fri, 04 Jul 2025 11:39:04 GMT
       expires:
       - '-1'
       pragma:
@@ -713,11 +814,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - d98299f2-de3e-43c0-bbe0-56cceb378c9e
+      - 337fde62-0d30-4551-a677-1856a27a7aa6
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-29T07:39:09
+      - WESTUS|WESTUS|G3|2025-07-04T11:39:04
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/5554c679-1de1-4a99-adfa-9c31712ef8ea
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: F1EFF25F3A464F3393A199E3D89E2DBB Ref B: TYO201151004036 Ref C: 2024-09-29T07:39:08Z'
+      - 'Ref A: 87C1BD70ECE34437ABF6CA1BAAA79795 Ref B: MAA201060515021 Ref C: 2025-07-04T11:39:02Z'
     status:
       code: 200
       message: OK
@@ -743,12 +848,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"PT3H4M23S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:10Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"PT3H4M23S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:06Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -757,7 +862,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:10 GMT
+      - Fri, 04 Jul 2025 11:39:06 GMT
       expires:
       - '-1'
       pragma:
@@ -769,13 +874,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - d519c6e6-6d2f-4406-bfa8-295d01b7dc74
+      - f4bb58a6-1517-4bb9-9266-273966bdc7c2
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G3|2024-09-29T07:39:10
+      - WESTUS|WESTUS|G1|2025-07-04T11:39:06
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/29e316fd-0fbe-4445-ad1f-94f16f87a8ea
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 9B1B66BACA51413A8BCAEE47555CD9F0 Ref B: TYO201151004036 Ref C: 2024-09-29T07:39:09Z'
+      - 'Ref A: 0A40BF443C2343378056F425360DCD72 Ref B: MAA201060516049 Ref C: 2025-07-04T11:39:04Z'
     status:
       code: 200
       message: OK
@@ -793,21 +902,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"PT3H4M23S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:10.3372846Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"PT3H4M23S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:39:06.197Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '951'
+      - '943'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:10 GMT
+      - Fri, 04 Jul 2025 11:39:09 GMT
       expires:
       - '-1'
       pragma:
@@ -819,11 +928,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 9b6245dc-d59f-4a93-b633-f4d3d56e7990
+      - 85b51937-7c4c-47b3-9006-9377186d4b52
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:11
+      - WESTUS|WESTUS|G2|2025-07-04T11:39:09
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/bde8d6ca-71ce-4671-832d-921dc860d07a
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: DC1CB1B1C28B4CA8BCFC10348606941C Ref B: TYO201151004060 Ref C: 2024-09-29T07:39:10Z'
+      - 'Ref A: B34E421EFECC428FB2D15908BA671E09 Ref B: MAA201060513049 Ref C: 2025-07-04T11:39:07Z'
     status:
       code: 200
       message: OK
@@ -849,12 +962,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P457D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:12Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P457D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:11Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -863,7 +976,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:11 GMT
+      - Fri, 04 Jul 2025 11:39:12 GMT
       expires:
       - '-1'
       pragma:
@@ -875,13 +988,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - ff11f4e3-89e0-461d-89ea-1cf84446b4b1
+      - d376a22a-9264-4c1f-902b-dff78687a047
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:12
+      - WESTUS|WESTUS|G1|2025-07-04T11:39:11
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/f62631da-866a-442e-8353-84cc2d472a67
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1197'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 2117816A288E4D9496AFBFF533B0869D Ref B: TYO201151004060 Ref C: 2024-09-29T07:39:11Z'
+      - 'Ref A: C95AB0A1B03B4E2CB81AA42444530881 Ref B: MAA201060514029 Ref C: 2025-07-04T11:39:10Z'
     status:
       code: 200
       message: OK
@@ -899,21 +1016,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P457D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:12.1810172Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P457D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:39:11.883Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '947'
+      - '939'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:12 GMT
+      - Fri, 04 Jul 2025 11:39:13 GMT
       expires:
       - '-1'
       pragma:
@@ -925,11 +1042,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 05f1a1d9-6ac7-4943-a563-be11d9e121b0
+      - b702eaa8-8be1-42e9-8caa-2538fe503237
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-29T07:39:13
+      - WESTUS|WESTUS|G0|2025-07-04T11:39:13
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/b866f9ed-2c58-4ee0-9a82-82608ff62322
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 1EED28BC358A451FA70A0CBD1DE3CDC4 Ref B: OSA221030114049 Ref C: 2024-09-29T07:39:12Z'
+      - 'Ref A: 697BE8E572D846ADA010118BA0E0C9AB Ref B: MAA201060514029 Ref C: 2025-07-04T11:39:12Z'
     status:
       code: 200
       message: OK
@@ -955,12 +1076,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P428DT3H11M2S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:14Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P428DT3H11M2S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:16Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -969,7 +1090,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:14 GMT
+      - Fri, 04 Jul 2025 11:39:16 GMT
       expires:
       - '-1'
       pragma:
@@ -981,13 +1102,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 426976a0-b9c3-464f-b2e4-f5d7098fd3dd
+      - 6c6d1878-40a0-4f71-aafe-cf3c46fe6b2c
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-29T07:39:14
+      - WESTUS|WESTUS|G4|2025-07-04T11:39:16
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/f8799c81-e8dd-453e-9e46-ac474d6eb5a6
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: D60C8BDDACAF48A5B6983212D0CAB0A4 Ref B: OSA221030114049 Ref C: 2024-09-29T07:39:13Z'
+      - 'Ref A: 41757CBA084A4D2F87332047F39F8C97 Ref B: MAA201060515033 Ref C: 2025-07-04T11:39:15Z'
     status:
       code: 200
       message: OK
@@ -1005,21 +1130,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P428DT3H11M2S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:14.3529343Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P428DT3H11M2S","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:39:16.757Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '955'
+      - '947'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:15 GMT
+      - Fri, 04 Jul 2025 11:39:20 GMT
       expires:
       - '-1'
       pragma:
@@ -1031,11 +1156,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - ff2df5c3-5933-4d13-b73e-64c918907bf2
+      - 7d2bfe4b-0a6f-476c-8de9-b291e1d45355
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:15
+      - WESTUS|WESTUS|G4|2025-07-04T11:39:20
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/b491eb12-8156-42cd-a3b5-47f9a4809158
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 6E09535E89884B8CA1234AEC47AEEA20 Ref B: OSA221030113037 Ref C: 2024-09-29T07:39:15Z'
+      - 'Ref A: 47EFD7AE9ACF4D19BB69EDEF466A793F Ref B: MAA201060514027 Ref C: 2025-07-04T11:39:18Z'
     status:
       code: 200
       message: OK
@@ -1061,12 +1190,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --default-message-time-to-live
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:16Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:23Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -1075,7 +1204,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:16 GMT
+      - Fri, 04 Jul 2025 11:39:22 GMT
       expires:
       - '-1'
       pragma:
@@ -1087,13 +1216,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - d8e26ea3-97ef-43b0-915c-6a9b9a155a08
+      - 4f3a1f3d-8800-458a-9ec6-0f4f04ab1452
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:16
+      - WESTUS|WESTUS|G3|2025-07-04T11:39:23
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/a262835c-7587-4c4b-a16b-244cec2c2ee8
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: F0F9646955FE4F099362654658060D92 Ref B: OSA221030113037 Ref C: 2024-09-29T07:39:15Z'
+      - 'Ref A: 6A5875E6F32E43D0B36B4C698F4824EA Ref B: MAA201060514039 Ref C: 2025-07-04T11:39:21Z'
     status:
       code: 200
       message: OK
@@ -1111,21 +1244,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --enable-batched-operations
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:16.2279155Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:39:23.36Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '947'
+      - '938'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:17 GMT
+      - Fri, 04 Jul 2025 11:39:24 GMT
       expires:
       - '-1'
       pragma:
@@ -1137,11 +1270,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 09e61542-e786-4f8c-9e27-12354ccccb80
+      - 3386a93a-4540-4980-92b7-a3849d3216ce
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-29T07:39:17
+      - WESTUS|WESTUS|G2|2025-07-04T11:39:24
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/28bd5f9a-ebbc-4f00-9cbb-5f699af05f1d
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 779B3657613F4F71BAF0151278214627 Ref B: OSA221030113047 Ref C: 2024-09-29T07:39:16Z'
+      - 'Ref A: DE1875514F5744DBB3BA4E9B28A1844E Ref B: MAA201060513025 Ref C: 2025-07-04T11:39:24Z'
     status:
       code: 200
       message: OK
@@ -1167,12 +1304,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --enable-batched-operations
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:18Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:27Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -1181,7 +1318,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:18 GMT
+      - Fri, 04 Jul 2025 11:39:26 GMT
       expires:
       - '-1'
       pragma:
@@ -1193,13 +1330,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 186defc0-7850-4ea8-b7bc-29461bc4ed49
+      - e088c00f-ba84-4b71-acc9-8b742b9dc3a2
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:18
+      - WESTUS|WESTUS|G4|2025-07-04T11:39:27
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/5ddd21e1-2ee7-43a2-96f6-9f6792019805
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2998'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '198'
       x-msedge-ref:
-      - 'Ref A: 9ABFD582BA8D44D890ED418711122B39 Ref B: OSA221030113047 Ref C: 2024-09-29T07:39:17Z'
+      - 'Ref A: FE973962AD5D47DFBED72DA9EC399291 Ref B: MAA201060516033 Ref C: 2025-07-04T11:39:25Z'
     status:
       code: 200
       message: OK
@@ -1217,21 +1358,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --enable-batched-operations
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:18.2591421Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:39:27.083Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '948'
+      - '940'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:19 GMT
+      - Fri, 04 Jul 2025 11:39:28 GMT
       expires:
       - '-1'
       pragma:
@@ -1243,11 +1384,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 7a6aefb2-c7d4-401c-8e4a-b2c591f76bfb
+      - c06e3a4b-3f36-4e33-ae37-9b9ed3ae1b80
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G0|2024-09-29T07:39:19
+      - WESTUS|WESTUS|G3|2025-07-04T11:39:29
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/5d4d90c0-a000-4fab-aa62-0787749796b0
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: E8EC290838964D42BEDA4BCD9BD895C2 Ref B: TYO201100113035 Ref C: 2024-09-29T07:39:18Z'
+      - 'Ref A: 20696E1F6A6F41FDB7CC0D10651184FC Ref B: MAA201060514049 Ref C: 2025-07-04T11:39:28Z'
     status:
       code: 200
       message: OK
@@ -1273,12 +1418,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --enable-batched-operations
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:20Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:31Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -1287,7 +1432,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:20 GMT
+      - Fri, 04 Jul 2025 11:39:31 GMT
       expires:
       - '-1'
       pragma:
@@ -1299,13 +1444,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - a5ea2bba-ca6c-42a5-8328-45e298c7f913
+      - 46849ff4-2882-4811-bbb1-98e3f243519e
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G0|2024-09-29T07:39:20
+      - WESTUS|WESTUS|G0|2025-07-04T11:39:31
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/388b0603-a06e-4517-857a-0fe8ca27a9dc
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 56DF19CF1E9846B8B10F21A60B114D1E Ref B: TYO201100113035 Ref C: 2024-09-29T07:39:19Z'
+      - 'Ref A: 97FB03066A894F44A6C1D0399A71AFB8 Ref B: MAA201060514017 Ref C: 2025-07-04T11:39:29Z'
     status:
       code: 200
       message: OK
@@ -1323,21 +1472,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --enable-ordering
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:20.3685891Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:39:31.3Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '947'
+      - '937'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:20 GMT
+      - Fri, 04 Jul 2025 11:39:32 GMT
       expires:
       - '-1'
       pragma:
@@ -1349,11 +1498,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 86bd85a8-6b9d-4a86-9b14-28e275cfa265
+      - 5b94b48c-66d7-4839-ac1f-0d4afbb66fe0
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G0|2024-09-29T07:39:21
+      - WESTUS|WESTUS|G1|2025-07-04T11:39:33
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/centralindia/dd0a4da1-e8c1-4292-a9e9-c436200d3d03
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: EEF01C501B0645089D616F4F56FE0CE8 Ref B: OSA221030115031 Ref C: 2024-09-29T07:39:20Z'
+      - 'Ref A: 79AED2A0F5754AFD9F24EBFD9E218704 Ref B: MAA201060514047 Ref C: 2025-07-04T11:39:32Z'
     status:
       code: 200
       message: OK
@@ -1379,21 +1532,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --enable-ordering
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:20.3685891Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:39:31.3Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '947'
+      - '937'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:22 GMT
+      - Fri, 04 Jul 2025 11:39:34 GMT
       expires:
       - '-1'
       pragma:
@@ -1405,13 +1558,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 4794b82a-5f80-480e-8b47-406f9c4504b2
+      - f56c4df6-5934-4501-89a9-eaadc52351f6
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G3|2024-09-29T07:39:23
+      - WESTUS|WESTUS|G1|2025-07-04T11:39:34
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/b6c20c17-383c-4982-9ee6-d08d7d596245
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: EC223B138455429DBC2E5D12370049F1 Ref B: OSA221030115031 Ref C: 2024-09-29T07:39:21Z'
+      - 'Ref A: 0997E4923B63452FAE02A51E2D529D3D Ref B: MAA201060516051 Ref C: 2025-07-04T11:39:33Z'
     status:
       code: 200
       message: OK
@@ -1429,21 +1586,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --enable-batched-operations --enable-ordering
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:20.3685891Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:39:31.3Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '947'
+      - '937'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:24 GMT
+      - Fri, 04 Jul 2025 11:39:36 GMT
       expires:
       - '-1'
       pragma:
@@ -1455,11 +1612,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - d449de37-c60b-42b3-9927-c0c7212010c2
+      - 0e04bb17-5c81-404e-9b31-e556f26cec43
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:24
+      - WESTUS|WESTUS|G0|2025-07-04T11:39:37
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/6a26bb12-b23d-431c-a24d-b992c3adebab
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: F6F5D5C304FD4385B3ADF539D4692D51 Ref B: OSA221030113017 Ref C: 2024-09-29T07:39:23Z'
+      - 'Ref A: D9B211223EC141019219F6227C009E04 Ref B: MAA201060513053 Ref C: 2025-07-04T11:39:35Z'
     status:
       code: 200
       message: OK
@@ -1485,12 +1646,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --enable-batched-operations --enable-ordering
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:24Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:40Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -1499,7 +1660,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:24 GMT
+      - Fri, 04 Jul 2025 11:39:39 GMT
       expires:
       - '-1'
       pragma:
@@ -1511,13 +1672,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - f0d0e1af-c6e1-4145-83b1-65f41e736f6c
+      - d1279a12-4b9e-4c80-b44a-c093d1e4e288
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-29T07:39:24
+      - WESTUS|WESTUS|G0|2025-07-04T11:39:40
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/383ba662-6e88-4249-92be-da5e5b48edaf
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: BE58746546D542DA867DB4BFF4D4A810 Ref B: OSA221030113017 Ref C: 2024-09-29T07:39:24Z'
+      - 'Ref A: 4F4D5BD5B6954D9AA35445A025109F7E Ref B: MAA201060514027 Ref C: 2025-07-04T11:39:37Z'
     status:
       code: 200
       message: OK
@@ -1535,21 +1700,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --max-size
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:24.9163596Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":1024,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:39:40.22Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '949'
+      - '940'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:25 GMT
+      - Fri, 04 Jul 2025 11:39:42 GMT
       expires:
       - '-1'
       pragma:
@@ -1561,11 +1726,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 90c53287-1753-4f93-95ae-b2ed54994aaa
+      - 776d759e-bd20-4225-84d3-08dc010eef85
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-29T07:39:25
+      - WESTUS|WESTUS|G2|2025-07-04T11:39:42
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/8d52c1c7-224f-43d9-b2dd-572b2aad1ddf
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 9CA4BF0E595748788B1649A6B20E7714 Ref B: TYO201100114045 Ref C: 2024-09-29T07:39:25Z'
+      - 'Ref A: 7C729F87230749818670623A195CED72 Ref B: MAA201060514029 Ref C: 2025-07-04T11:39:41Z'
     status:
       code: 200
       message: OK
@@ -1591,12 +1760,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --max-size
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:27Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:43Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -1605,7 +1774,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:26 GMT
+      - Fri, 04 Jul 2025 11:39:43 GMT
       expires:
       - '-1'
       pragma:
@@ -1617,13 +1786,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 66ce031d-c1a8-474c-8056-26dfa15b89e2
+      - d616dfbd-0493-4418-9508-c6315530a86a
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G0|2024-09-29T07:39:27
+      - WESTUS|WESTUS|G3|2025-07-04T11:39:43
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/3c103735-76f6-486e-837a-7f4f94799b61
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: E10CA21369D34DF190202B7627097A19 Ref B: TYO201100114045 Ref C: 2024-09-29T07:39:25Z'
+      - 'Ref A: 2C18915D1D22462E89BA8EE11D3F4869 Ref B: MAA201060516027 Ref C: 2025-07-04T11:39:42Z'
     status:
       code: 200
       message: OK
@@ -1641,21 +1814,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --auto-delete-on-idle
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:27.1976412Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:48.313Z","updatedAt":"2025-07-04T11:39:43.597Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '949'
+      - '941'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:27 GMT
+      - Fri, 04 Jul 2025 11:39:45 GMT
       expires:
       - '-1'
       pragma:
@@ -1667,11 +1840,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 5edc42fb-e3b7-4b10-a8be-0607d6c1f3c4
+      - 6ceac9ff-fe94-4901-95bc-5d5c94ac8bea
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-29T07:39:28
+      - WESTUS|WESTUS|G0|2025-07-04T11:39:46
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/westindia/c6768c96-6192-41a7-ae12-a05b0086a21b
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: B1FB4FDF76BA489F9D3112A3B8377E83 Ref B: OSA221030116049 Ref C: 2024-09-29T07:39:27Z'
+      - 'Ref A: 68AF40BDCB014AB896638DABF635D624 Ref B: MAA201060514027 Ref C: 2025-07-04T11:39:44Z'
     status:
       code: 200
       message: OK
@@ -1697,12 +1874,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --auto-delete-on-idle
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:28Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":false,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:48Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -1711,7 +1888,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:28 GMT
+      - Fri, 04 Jul 2025 11:39:48 GMT
       expires:
       - '-1'
       pragma:
@@ -1723,13 +1900,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - baac7296-3fa6-49f5-a363-648f3508b503
+      - 3b9d12bb-70c5-47a6-96ea-c7912c13ffab
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-29T07:39:28
+      - WESTUS|WESTUS|G1|2025-07-04T11:39:48
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/6b581272-d152-4555-867f-924aa0e44c0c
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 674D6E17AADF41C19E9DE1360B89916A Ref B: OSA221030116049 Ref C: 2024-09-29T07:39:28Z'
+      - 'Ref A: E357AEC119604BABB0B549A6F7E32B9B Ref B: MAA201060516025 Ref C: 2025-07-04T11:39:46Z'
     status:
       code: 200
       message: OK
@@ -1747,12 +1928,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --enable-express
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":false,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:28.7132437Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":false,"createdAt":"2025-07-04T11:38:49.3676401Z","updatedAt":"2025-07-04T11:39:48.2765108Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -1761,7 +1942,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:29 GMT
+      - Fri, 04 Jul 2025 11:39:50 GMT
       expires:
       - '-1'
       pragma:
@@ -1773,11 +1954,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 5e853f95-ab38-4047-9d09-d825d80e02fe
+      - 53aeb673-6b1d-4a70-8e6e-46ffce8b5ab1
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-29T07:39:30
+      - WESTUS|WESTUS|G2|2025-07-04T11:39:50
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/2f4e1d56-5678-4f02-adbb-5299b7ef77c6
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 8239F23C9DD247C6B8FFF8541161ED02 Ref B: OSA221030116011 Ref C: 2024-09-29T07:39:29Z'
+      - 'Ref A: D1361496E11F4BD4933E69A4B3B3F0DE Ref B: MAA201060516011 Ref C: 2025-07-04T11:39:49Z'
     status:
       code: 200
       message: OK
@@ -1803,12 +1988,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --enable-express
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:31Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:52Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -1817,7 +2002,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:31 GMT
+      - Fri, 04 Jul 2025 11:39:52 GMT
       expires:
       - '-1'
       pragma:
@@ -1829,13 +2014,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 7137fe15-fab7-4c2c-bb3c-b15382aa1a59
+      - 466a7c1e-3a8d-45c9-9fe4-ac115e117f71
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G0|2024-09-29T07:39:31
+      - WESTUS|WESTUS|G1|2025-07-04T11:39:52
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/3ffad7cc-64ff-4bef-a46c-93288a232790
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2998'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '198'
       x-msedge-ref:
-      - 'Ref A: 22306729ED064F3DA3F79849D99969E9 Ref B: OSA221030116011 Ref C: 2024-09-29T07:39:30Z'
+      - 'Ref A: AE11247B2F8841DFA44F1C9BF8B9E1D3 Ref B: MAA201060516035 Ref C: 2025-07-04T11:39:51Z'
     status:
       code: 200
       message: OK
@@ -1853,12 +2042,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --status
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:31.8070093Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"Active","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"2025-07-04T11:38:49.3676401Z","updatedAt":"2025-07-04T11:39:52.3546438Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -1867,7 +2056,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:32 GMT
+      - Fri, 04 Jul 2025 11:39:53 GMT
       expires:
       - '-1'
       pragma:
@@ -1879,11 +2068,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - d8f50309-2c3d-4b10-9036-43aecc253c39
+      - 3c9ad71b-c531-4b10-9113-b10d670158c5
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:33
+      - WESTUS|WESTUS|G1|2025-07-04T11:39:53
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/faa97d05-1dcd-45a2-8b83-3a74c81d81db
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: AD115942CCC84E7DBB61B049BB07CAEF Ref B: TYO201100114039 Ref C: 2024-09-29T07:39:32Z'
+      - 'Ref A: 460B53E6213C4C30B938DA1F2AC86E08 Ref B: MAA201060516035 Ref C: 2025-07-04T11:39:53Z'
     status:
       code: 200
       message: OK
@@ -1909,12 +2102,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --status
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:33Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:39:55Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -1923,7 +2116,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:33 GMT
+      - Fri, 04 Jul 2025 11:39:55 GMT
       expires:
       - '-1'
       pragma:
@@ -1935,13 +2128,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 5be77ad5-fd8c-4bc4-84dc-a90539a7f3a3
+      - 9a35a3db-d20b-4572-a02f-34c1ec0da941
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:33
+      - WESTUS|WESTUS|G4|2025-07-04T11:39:55
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/eea44088-f99f-4848-8a78-061a2265a1a4
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 2398746A175048ECB45E765524F7AE30 Ref B: TYO201100114039 Ref C: 2024-09-29T07:39:33Z'
+      - 'Ref A: 05851095926C407595DCF54BB955F205 Ref B: MAA201060514047 Ref C: 2025-07-04T11:39:54Z'
     status:
       code: 200
       message: OK
@@ -1959,12 +2156,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --duplicate-detection-history-time-window
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:33.8547716Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":false,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"2025-07-04T11:38:49.3676401Z","updatedAt":"2025-07-04T11:39:55.7296375Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -1973,7 +2170,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:34 GMT
+      - Fri, 04 Jul 2025 11:39:57 GMT
       expires:
       - '-1'
       pragma:
@@ -1985,11 +2182,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 64334c88-6e70-46ea-920c-212036e11176
+      - 838be647-f79e-44ac-95c9-4bd4e4f858a6
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G3|2024-09-29T07:39:34
+      - WESTUS|WESTUS|G2|2025-07-04T11:39:57
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/83a0ff46-5a69-4df1-8e0e-5e0e436fc369
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3748'
       x-msedge-ref:
-      - 'Ref A: B61C35EF4C8F4A2B9EF04C23EB16D856 Ref B: OSA221030114023 Ref C: 2024-09-29T07:39:34Z'
+      - 'Ref A: BB78010D4F22447AAF5855F1060E44B9 Ref B: MAA201060515031 Ref C: 2025-07-04T11:39:56Z'
     status:
       code: 200
       message: OK
@@ -2015,12 +2216,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name --duplicate-detection-history-time-window
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT3M","enableBatchedOperations":false,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"0001-01-01T00:00:00","updatedAt":"2024-09-29T07:39:35Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT3M","enableBatchedOperations":false,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"0001-01-01T00:00:00","updatedAt":"2025-07-04T11:40:00Z","accessedAt":"0001-01-01T00:00:00","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}'
     headers:
       cache-control:
       - no-cache
@@ -2029,7 +2230,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:35 GMT
+      - Fri, 04 Jul 2025 11:40:00 GMT
       expires:
       - '-1'
       pragma:
@@ -2041,13 +2242,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 0a0e3b09-6f8d-43fd-8be0-d4978a26b6d9
+      - 53c1b8a0-bb50-409c-9c0b-00767cfb2345
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:35
+      - WESTUS|WESTUS|G3|2025-07-04T11:40:00
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/6bdb67cb-bcb7-4b5e-83f8-96cbcadc1a70
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 281A7BD9B45542248D8A484EF5F2CDC7 Ref B: OSA221030114023 Ref C: 2024-09-29T07:39:34Z'
+      - 'Ref A: 1715B9D0647545B1976ABE239B12B679 Ref B: MAA201060514047 Ref C: 2025-07-04T11:39:58Z'
     status:
       code: 200
       message: OK
@@ -2065,21 +2270,21 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli2000005","name":"sb-topiccli2000005","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":49152,"requiresDuplicateDetection":true,"duplicateDetectionHistoryTimeWindow":"PT1H3M4S","enableBatchedOperations":true,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":true,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":true,"enableExpress":false,"createdAt":"2024-09-29T07:38:54.19Z","updatedAt":"2024-09-29T07:38:54.273Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli3000006","name":"sb-topiccli3000006","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":true,"createdAt":"2024-09-29T07:38:57.683Z","updatedAt":"2024-09-29T07:38:57.71Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT3M","enableBatchedOperations":false,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"2024-09-29T07:39:01.3372585Z","updatedAt":"2024-09-29T07:39:35.5891668Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}]}'
+      string: '{"value":[{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli2000005","name":"sb-topiccli2000005","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":49152,"requiresDuplicateDetection":true,"duplicateDetectionHistoryTimeWindow":"PT1H3M4S","enableBatchedOperations":true,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":true,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":true,"enableExpress":false,"createdAt":"2025-07-04T11:38:37.477Z","updatedAt":"2025-07-04T11:38:38.603Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli3000006","name":"sb-topiccli3000006","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P10675199DT2H48M5.4775807S","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT10M","enableBatchedOperations":true,"sizeInBytes":0,"status":"Active","supportOrdering":true,"autoDeleteOnIdle":"P10675199DT2H48M5.4775807S","enablePartitioning":false,"enableExpress":true,"createdAt":"2025-07-04T11:38:44.4044019Z","updatedAt":"2025-07-04T11:38:44.4044019Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}},{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004","name":"sb-topiccli000004","type":"Microsoft.ServiceBus/namespaces/topics","location":"westus","properties":{"maxMessageSizeInKilobytes":256,"defaultMessageTimeToLive":"P365D","maxSizeInMegabytes":2048,"requiresDuplicateDetection":false,"duplicateDetectionHistoryTimeWindow":"PT3M","enableBatchedOperations":false,"sizeInBytes":0,"status":"SendDisabled","supportOrdering":false,"autoDeleteOnIdle":"P428DT3H11M2S","enablePartitioning":false,"enableExpress":true,"createdAt":"2025-07-04T11:38:49.3676401Z","updatedAt":"2025-07-04T11:40:00.6827743Z","accessedAt":"0001-01-01T00:00:00Z","subscriptionCount":0,"countDetails":{"activeMessageCount":0,"deadLetterMessageCount":0,"scheduledMessageCount":0,"transferMessageCount":0,"transferDeadLetterMessageCount":0}}}]}'
     headers:
       cache-control:
       - no-cache
       content-length:
-      - '2849'
+      - '2859'
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:36 GMT
+      - Fri, 04 Jul 2025 11:40:02 GMT
       expires:
       - '-1'
       pragma:
@@ -2093,11 +2298,15 @@ interactions:
       x-ms-inline-count:
       - ''
       x-ms-messaging-activity-id:
-      - de959f50-1c44-4322-87a9-35e908d47ac7
+      - d7a25639-fe73-439d-921a-24712f081bc3
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-29T07:39:37
+      - WESTUS|WESTUS|G2|2025-07-04T11:40:03
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/centralindia/62e3f3ac-d974-490b-972f-07745a2c8c74
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 4152A9B88C7C4F4E9E7A24B48A145664 Ref B: TYO201100113029 Ref C: 2024-09-29T07:39:36Z'
+      - 'Ref A: 2607CED1F1C049788EE30CE552145C43 Ref B: MAA201060516047 Ref C: 2025-07-04T11:40:01Z'
     status:
       code: 200
       message: OK
@@ -2119,7 +2328,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --topic-name --name --rights
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/authorizationRules/cliAutho000003?api-version=2022-01-01-preview
   response:
@@ -2133,7 +2342,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:37 GMT
+      - Fri, 04 Jul 2025 11:40:05 GMT
       expires:
       - '-1'
       pragma:
@@ -2145,13 +2354,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 283b1db0-0668-4062-9eff-64fa403600a3
+      - 7c3cc112-4e65-4bfa-b341-49f75cb7faa2
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G0|2024-09-29T07:39:38
+      - WESTUS|WESTUS|G0|2025-07-04T11:40:05
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/59c85da6-250e-4346-974e-a053696e4c9f
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 13A000E2E1C342EE8AC0E1D75A7A4596 Ref B: TYO201100117021 Ref C: 2024-09-29T07:39:37Z'
+      - 'Ref A: FEF932C5548D473AAFFADB648C6E09CD Ref B: MAA201060516021 Ref C: 2025-07-04T11:40:03Z'
     status:
       code: 200
       message: OK
@@ -2169,7 +2382,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --topic-name --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/authorizationRules/cliAutho000003?api-version=2022-01-01-preview
   response:
@@ -2183,7 +2396,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:39 GMT
+      - Fri, 04 Jul 2025 11:40:06 GMT
       expires:
       - '-1'
       pragma:
@@ -2195,11 +2408,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 347a0cca-0244-4afa-8a32-8ec74136a6d3
+      - 36708038-529b-4ca2-8062-7fc583fb56e7
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G0|2024-09-29T07:39:39
+      - WESTUS|WESTUS|G3|2025-07-04T11:40:07
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/centralindia/73820922-69fa-4ee0-bba2-9d4a39eaee66
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: 6F70C327346B4F958A016E462D424499 Ref B: OSA221030113017 Ref C: 2024-09-29T07:39:38Z'
+      - 'Ref A: DCE6119BD4314E8F9C80B3649553EF71 Ref B: MAA201060513031 Ref C: 2025-07-04T11:40:06Z'
     status:
       code: 200
       message: OK
@@ -2217,7 +2434,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --topic-name --name --rights
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: GET
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/authorizationRules/cliAutho000003?api-version=2022-01-01-preview
   response:
@@ -2231,7 +2448,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:41 GMT
+      - Fri, 04 Jul 2025 11:40:09 GMT
       expires:
       - '-1'
       pragma:
@@ -2243,11 +2460,15 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 57ffe774-13c0-4f65-bb31-fcc840b85191
+      - 5f91c2d7-1a08-4723-83c8-966ca49c89c1
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:41
+      - WESTUS|WESTUS|G1|2025-07-04T11:40:09
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/48dc94ae-27b2-495c-8358-8e75607cc6bc
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
       x-msedge-ref:
-      - 'Ref A: ECE6E33216354C16A2B0141EEE14BBC4 Ref B: TYO201100117035 Ref C: 2024-09-29T07:39:40Z'
+      - 'Ref A: 38E5B35425724CF1AD5662A9FECDC2AA Ref B: MAA201060514017 Ref C: 2025-07-04T11:40:08Z'
     status:
       code: 200
       message: OK
@@ -2269,7 +2490,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --topic-name --name --rights
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: PUT
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/authorizationRules/cliAutho000003?api-version=2022-01-01-preview
   response:
@@ -2283,7 +2504,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:42 GMT
+      - Fri, 04 Jul 2025 11:40:12 GMT
       expires:
       - '-1'
       pragma:
@@ -2295,13 +2516,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 926d771e-ab06-4470-876a-ec187a7e3e38
+      - 1f276ee8-5c82-4a54-8bcb-fc3724646315
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:42
+      - WESTUS|WESTUS|G1|2025-07-04T11:40:11
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/centralindia/130fc89e-63c2-4c10-a551-a27d33332d70
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1198'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: FD52CD7AC95E4F5498BE4EB7A35B33BA Ref B: TYO201100117035 Ref C: 2024-09-29T07:39:41Z'
+      - 'Ref A: 598B6DAE82414709B973CE2712757FFF Ref B: MAA201060514035 Ref C: 2025-07-04T11:40:10Z'
     status:
       code: 200
       message: OK
@@ -2321,12 +2546,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --topic-name --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/authorizationRules/cliAutho000003/ListKeys?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR;EntityPath=sb-topiccli000004","primaryKey":"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR","secondaryKey":"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=key;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=key;EntityPath=sb-topiccli000004","primaryKey":"key","secondaryKey":"key","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
@@ -2335,7 +2560,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:43 GMT
+      - Fri, 04 Jul 2025 11:40:14 GMT
       expires:
       - '-1'
       pragma:
@@ -2347,13 +2572,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - f3af2026-7267-47e9-b651-9bf5a2292f85
+      - ad781c6b-f804-4bee-801a-4a23a5cc5a67
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G3|2024-09-29T07:39:44
+      - WESTUS|WESTUS|G0|2025-07-04T11:40:14
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/f31e5ce4-40ec-42fa-8eea-2b5d12583fc7
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: EFA3D331265C474DAABE2379BBD4D293 Ref B: TYO201100115037 Ref C: 2024-09-29T07:39:42Z'
+      - 'Ref A: 147E5982B5AB4D739A5E197689FE5E50 Ref B: MAA201060513023 Ref C: 2025-07-04T11:40:12Z'
     status:
       code: 200
       message: OK
@@ -2375,12 +2604,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --topic-name --name --key
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/authorizationRules/cliAutho000003/regenerateKeys?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR;EntityPath=sb-topiccli000004","primaryKey":"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR","secondaryKey":"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=key;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=key;EntityPath=sb-topiccli000004","primaryKey":"key","secondaryKey":"key","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
@@ -2389,7 +2618,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:44 GMT
+      - Fri, 04 Jul 2025 11:40:16 GMT
       expires:
       - '-1'
       pragma:
@@ -2401,13 +2630,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 9b0d35c6-f907-44ea-9cfa-d70445bcd84f
+      - 8c645a4d-bcce-49ae-896a-cf4317efc1a2
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-29T07:39:45
+      - WESTUS|WESTUS|G3|2025-07-04T11:40:16
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/a2975532-7e84-4f8a-89e1-4939b7911091
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: 29E1496E53324A1DB2A065AAF240D226 Ref B: OSA221030115039 Ref C: 2024-09-29T07:39:44Z'
+      - 'Ref A: BB3EE349DE1F4C57B0DD84B4EF87F082 Ref B: MAA201060516025 Ref C: 2025-07-04T11:40:15Z'
     status:
       code: 200
       message: OK
@@ -2429,12 +2662,12 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --topic-name --name --key
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: POST
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/authorizationRules/cliAutho000003/regenerateKeys?api-version=2022-01-01-preview
   response:
     body:
-      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR;EntityPath=sb-topiccli000004","primaryKey":"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR","secondaryKey":"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQR","keyName":"cliAutho000003"}'
+      string: '{"primaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=key;EntityPath=sb-topiccli000004","secondaryConnectionString":"Endpoint=sb://sb-nscli000002.servicebus.windows.net/;SharedAccessKeyName=cliAutho000003;SharedAccessKey=key;EntityPath=sb-topiccli000004","primaryKey":"key","secondaryKey":"key","keyName":"cliAutho000003"}'
     headers:
       cache-control:
       - no-cache
@@ -2443,7 +2676,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Sun, 29 Sep 2024 07:39:46 GMT
+      - Fri, 04 Jul 2025 11:40:19 GMT
       expires:
       - '-1'
       pragma:
@@ -2455,13 +2688,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 15dc135f-7043-4ca0-a8c1-0eea55aab6e7
+      - 97c44d80-bd33-4d5c-90dd-7f13a1370941
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G1|2024-09-29T07:39:46
+      - WESTUS|WESTUS|G0|2025-07-04T11:40:19
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/3e4dd10a-967b-4722-a9ee-01cfabc0abe6
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1199'
+      - '199'
       x-msedge-ref:
-      - 'Ref A: F5701AD9EC784415BF68DD71F6A92206 Ref B: TYO201151002034 Ref C: 2024-09-29T07:39:45Z'
+      - 'Ref A: 1099A76F2B83463F8B14CDC2991A68E5 Ref B: MAA201060516027 Ref C: 2025-07-04T11:40:17Z'
     status:
       code: 200
       message: OK
@@ -2481,7 +2718,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --topic-name --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004/authorizationRules/cliAutho000003?api-version=2022-01-01-preview
   response:
@@ -2493,7 +2730,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sun, 29 Sep 2024 07:39:47 GMT
+      - Fri, 04 Jul 2025 11:40:21 GMT
       expires:
       - '-1'
       pragma:
@@ -2505,13 +2742,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 00000001-0000-0000-0002-000000008960
+      - 00000001-0000-0000-0002-000000005600
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G2|2024-09-29T07:39:47
+      - WESTUS|WESTUS|G2|2025-07-04T11:40:21
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/5e377c80-11ec-4a21-baf8-78b85ead0787
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
       x-msedge-ref:
-      - 'Ref A: 099CB47AD8DE457AAFE4F351F45700DB Ref B: OSA221030114035 Ref C: 2024-09-29T07:39:46Z'
+      - 'Ref A: 239D5E0F6E7341468B525D43386FBF45 Ref B: MAA201060516027 Ref C: 2025-07-04T11:40:19Z'
     status:
       code: 200
       message: OK
@@ -2531,7 +2772,7 @@ interactions:
       ParameterSetName:
       - --resource-group --namespace-name --name
       User-Agent:
-      - AZURECLI/2.64.0 azsdk-python-core/1.28.0 Python/3.10.11 (Windows-10-10.0.22631-SP0)
+      - AZURECLI/2.75.0 azsdk-python-core/1.31.0 Python/3.10.11 (Windows-10-10.0.26100-SP0)
     method: DELETE
     uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_sb_topic000001/providers/Microsoft.ServiceBus/namespaces/sb-nscli000002/topics/sb-topiccli000004?api-version=2022-01-01-preview
   response:
@@ -2543,7 +2784,7 @@ interactions:
       content-length:
       - '0'
       date:
-      - Sun, 29 Sep 2024 07:39:48 GMT
+      - Fri, 04 Jul 2025 11:40:39 GMT
       expires:
       - '-1'
       pragma:
@@ -2555,13 +2796,17 @@ interactions:
       x-content-type-options:
       - nosniff
       x-ms-messaging-activity-id:
-      - 00000001-0000-0000-0002-000000001364
+      - 00000001-0000-0000-0002-000000007696
       x-ms-messaging-routing-id:
-      - WESTUS|WESTUS|G4|2024-09-29T07:39:48
+      - WESTUS|WESTUS|G4|2025-07-04T11:40:39
+      x-ms-operation-identifier:
+      - tenantId=213e87ed-8e08-4eb4-a63c-c073058f7b00,objectId=5c08bcb5-6bd6-45f5-b8be-e844d7d448d9/southindia/9618edf3-5bb1-431e-8358-8be899d49873
       x-ms-ratelimit-remaining-subscription-deletes:
-      - '14999'
+      - '199'
+      x-ms-ratelimit-remaining-subscription-global-deletes:
+      - '2999'
       x-msedge-ref:
-      - 'Ref A: 02D4928A397D488F9CA5E5C4513EEE47 Ref B: TYO201151003011 Ref C: 2024-09-29T07:39:48Z'
+      - 'Ref A: 114994D1BACF46FFA10F4205CAB67817 Ref B: MAA201060516053 Ref C: 2025-07-04T11:40:21Z'
     status:
       code: 200
       message: OK

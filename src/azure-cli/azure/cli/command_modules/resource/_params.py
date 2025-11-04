@@ -45,7 +45,7 @@ def load_arguments(self, _):
     deployment_template_file_type = CLIArgumentType(options_list=['--template-file', '-f'], completer=FilesCompleter(), type=file_type,
                                                     help="a path to a template file or Bicep file in the file system")
     deployment_template_uri_type = CLIArgumentType(options_list=['--template-uri', '-u'], help='a uri to a remote template file')
-    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], min_api='2019-06-01', help="The template spec resource id.")
+    deployment_template_spec_type = CLIArgumentType(options_list=['--template-spec', '-s'], help="The template spec resource id.")
     deployment_query_string_type = CLIArgumentType(options_list=['--query-string', '-q'], help="The query string (a SAS token) to be used with the template-uri in the case of linked templates.")
     deployment_parameters_type = CLIArgumentType(options_list=['--parameters', '-p'], action='append', nargs='+', completer=FilesCompleter(), help='the deployment parameters')
     deployment_validation_level_type = CLIArgumentType(options_list=['--validation-level'], arg_type=get_enum_type(ValidationLevel, None),
@@ -62,28 +62,22 @@ def load_arguments(self, _):
                                 'When the value is true, the prompt requiring users to provide missing parameter will be ignored. The default value is false.')
 
     deployment_what_if_type = CLIArgumentType(options_list=['--what-if', '-w'], action='store_true',
-                                              help='Instruct the command to run deployment What-If.',
-                                              min_api='2019-07-01')
+                                              help='Instruct the command to run deployment What-If.')
     deployment_what_if_proceed_if_no_change_type = CLIArgumentType(options_list=['--proceed-if-no-change'], action='store_true',
-                                                                   help='Instruct the command to execute the deployment if the What-If result contains no resource changes. Applicable when --confirm-with-what-if is set.',
-                                                                   min_api='2019-07-01')
+                                                                   help='Instruct the command to execute the deployment if the What-If result contains no resource changes. Applicable when --confirm-with-what-if is set.')
     deployment_what_if_result_format_type = CLIArgumentType(options_list=['--result-format', '-r'],
-                                                            arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"),
-                                                            min_api='2019-07-01')
+                                                            arg_type=get_enum_type(WhatIfResultFormat, "FullResourcePayloads"))
     deployment_what_if_no_pretty_print_type = CLIArgumentType(options_list=['--no-pretty-print'], action='store_true',
                                                               help='Disable pretty-print for What-If results. When set, the output format type will be used.')
     deployment_what_if_confirmation_type = CLIArgumentType(options_list=['--confirm-with-what-if', '-c'], action='store_true',
-                                                           help='Instruct the command to run deployment What-If before executing the deployment. It then prompts you to acknowledge resource changes before it continues.',
-                                                           min_api='2019-07-01')
+                                                           help='Instruct the command to run deployment What-If before executing the deployment. It then prompts you to acknowledge resource changes before it continues.')
     deployment_what_if_exclude_change_types_type = CLIArgumentType(nargs="+", options_list=['--exclude-change-types', '-x'],
                                                                    arg_type=get_enum_type(ChangeType),
-                                                                   help='Space-separated list of resource change types to be excluded from What-If results.',
-                                                                   min_api='2019-07-01')
+                                                                   help='Space-separated list of resource change types to be excluded from What-If results.')
     tag_name_type = CLIArgumentType(options_list=['--name', '-n'], help='The tag name.')
     tag_value_type = CLIArgumentType(options_list='--value', help='The tag value.')
     tag_resource_id_type = CLIArgumentType(options_list='--resource-id',
-                                           help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.',
-                                           min_api='2019-10-01')
+                                           help='The resource identifier for the tagged entity. A resource, a resource group or a subscription may be tagged.')
 
     latest_include_preview_type = CLIArgumentType(options_list=['--latest-include-preview', '-v'], is_preview=True,
                                                   action='store_true', arg_group='Resource Id',
@@ -381,13 +375,12 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
-        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, min_api="2019-10-01")
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
         c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
-                   arg_type=deployment_what_if_result_format_type, min_api="2019-10-01")
+                   arg_type=deployment_what_if_result_format_type)
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
-                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
-                   min_api="2019-10-01")
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
         c.argument('mode', arg_type=get_enum_type(DeploymentMode, default='incremental'), help='The mode that is used to deploy resources. This value can be either Incremental or Complete. In Incremental mode, resources are deployed without deleting existing resources that are not included in the template. In Complete mode, resources are deployed and existing resources in the resource group that are not included in the template are deleted. Be careful when using Complete mode as you may unintentionally delete resources.')
@@ -422,13 +415,12 @@ def load_arguments(self, _):
         c.argument('handle_extended_json_format', arg_type=extended_json_format_type,
                    deprecate_info=c.deprecate(target='--handle-extended-json-format/-j'))
         c.argument('no_prompt', arg_type=no_prompt)
-        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type, min_api="2019-10-01")
+        c.argument('confirm_with_what_if', arg_type=deployment_what_if_confirmation_type)
         c.argument('what_if_result_format', options_list=['--what-if-result-format', '-r'],
-                   arg_type=deployment_what_if_result_format_type, min_api="2019-10-01")
+                   arg_type=deployment_what_if_result_format_type)
         c.argument('what_if_exclude_change_types', options_list=['--what-if-exclude-change-types', '-x'],
                    arg_type=deployment_what_if_exclude_change_types_type,
-                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.",
-                   min_api="2019-10-01")
+                   help="Space-separated list of resource change types to be excluded from What-If results. Applicable when --confirm-with-what-if is set.")
         c.argument('what_if', arg_type=deployment_what_if_type)
         c.argument('proceed_if_no_change', arg_type=deployment_what_if_proceed_if_no_change_type)
         c.argument('validation_level', arg_type=deployment_validation_level_type)
@@ -465,12 +457,12 @@ def load_arguments(self, _):
                    help='name of the new resource group', completer=None,
                    local_context_attribute=LocalContextAttribute(
                        name='resource_group_name', actions=[LocalContextAction.SET], scopes=[ALL]))
-        c.argument('managed_by', min_api='2016-09-01', help='The ID of the resource that manages this resource group.')
+        c.argument('managed_by', help='The ID of the resource that manages this resource group.')
 
     with self.argument_context('group delete') as c:
         c.argument('resource_group_name', resource_group_name_type,
                    options_list=['--name', '-n', '--resource-group', '-g'], local_context_attribute=None)
-        c.argument('force_deletion_types', options_list=['--force-deletion-types', '-f'], min_api='2021-04-01',
+        c.argument('force_deletion_types', options_list=['--force-deletion-types', '-f'],
                    arg_type=get_enum_type(['Microsoft.Compute/virtualMachines', 'Microsoft.Compute/virtualMachineScaleSets', 'Microsoft.Databricks/workspaces']),
                    help='The resource types you want to force delete.')
 

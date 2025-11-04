@@ -34,6 +34,12 @@ def servicefabric_service_client_factory(cli_ctx, kwargs):
     return servicefabric_client_factory(cli_ctx, **kwargs).services
 
 
+def deployments_client_factory(cli_ctx, **_):
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.cli.core.profiles import ResourceType
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_DEPLOYMENTS)
+
+
 def resource_client_factory(cli_ctx, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType

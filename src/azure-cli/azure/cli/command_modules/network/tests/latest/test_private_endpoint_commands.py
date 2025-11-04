@@ -647,6 +647,7 @@ class NetworkPrivateLinkPrivateLinkScopeScenarioTest(ScenarioTest):
 
 
 class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
+    @unittest.skip('The provided server type value Azure Database for MariaDB - Single Server is invalid.')
     @ResourceGroupPreparer()
     @ServerPreparer(engine_type='mariadb')
     def test_mariadb_private_link_scenario(self, resource_group, server, database_engine):

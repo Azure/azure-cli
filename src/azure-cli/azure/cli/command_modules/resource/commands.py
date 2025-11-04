@@ -10,7 +10,7 @@ from collections import OrderedDict
 from knack.log import get_logger
 
 from azure.cli.core.util import empty_on_404
-from azure.cli.core.profiles import ResourceType, PROFILE_TYPE
+from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands import CliCommandType, DeploymentOutputLongRunningOperation
 from azure.cli.core.commands.arm import handle_template_based_exception
 from azure.cli.command_modules.resource._client_factory import (
@@ -334,16 +334,14 @@ def load_command_table(self, _):
         g.custom_show_command('operation show', 'show_provider_operations')
 
     # Resource feature commands
-    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features, resource_type=PROFILE_TYPE,
-                            min_api='2019-03-02-hybrid') as g:
+    with self.command_group('feature', resource_feature_sdk, client_factory=cf_features) as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
         g.custom_command('list', 'list_features', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)
         g.custom_command('register', 'register_feature')
         g.custom_command('unregister', 'unregister_feature')
 
-    with self.command_group('feature registration', resource_feature_registration_sdk, client_factory=cf_feature_registrations, resource_type=PROFILE_TYPE,
-                            min_api='2021-07-01') as g:
+    with self.command_group('feature registration', resource_feature_registration_sdk, client_factory=cf_feature_registrations) as g:
         feature_table_transform = '{Name:name, RegistrationState:properties.state}'
         g.custom_command('list', 'list_feature_registrations', table_transformer='[].' + feature_table_transform)
         g.show_command('show', 'get', table_transformer=feature_table_transform)
@@ -355,7 +353,7 @@ def load_command_table(self, _):
         g.custom_command('list', 'get_tag_at_scope')
         g.custom_command('create', 'create_or_update_tag_at_scope')
         g.custom_command('delete', 'delete_tag_at_scope', confirmation=True)
-        g.custom_command('update', 'update_tag_at_scope', min_api='2019-10-01')
+        g.custom_command('update', 'update_tag_at_scope')
         g.command('add-value', 'create_or_update_value')
         g.command('remove-value', 'delete_value')
 
@@ -537,13 +535,13 @@ def load_command_table(self, _):
         g.custom_command('list', 'list_resource_links')
         g.custom_command('update', 'update_resource_link')
 
-    with self.command_group('managedapp', resource_managedapp_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
+    with self.command_group('managedapp', resource_managedapp_sdk, resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
         g.custom_command('create', 'create_application')
         g.command('delete', 'begin_delete')
         g.custom_show_command('show', 'show_application')
         g.custom_command('list', 'list_applications')
 
-    with self.command_group('managedapp definition', resource_managedapp_def_sdk, min_api='2017-05-10', resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
+    with self.command_group('managedapp definition', resource_managedapp_def_sdk, resource_type=ResourceType.MGMT_RESOURCE_MANAGEDAPPLICATIONS) as g:
         g.custom_command('create', 'create_or_update_applicationdefinition')
         g.custom_command('update', 'create_or_update_applicationdefinition')
         g.command('delete', 'begin_delete')

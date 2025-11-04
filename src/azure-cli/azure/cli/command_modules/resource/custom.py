@@ -27,7 +27,7 @@ from azure.cli.core.util import get_file_json, read_file_content, shell_safe_jso
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.arm import raise_subdivision_deployment_error
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
-from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version, AZURE_API_PROFILES
+from azure.cli.core.profiles import ResourceType, get_sdk, get_api_version
 
 from azure.cli.command_modules.resource._client_factory import (
     _resource_client_factory, _resource_deployments_client_factory, _resource_lock_client_factory,
@@ -401,6 +401,8 @@ def _deploy_arm_template_core_unmodified(cmd, resource_group_name, template_file
 
     parameters = json.loads(json.dumps(parameters))
 
+    if mode is None:
+        mode = 'Incremental'
     properties = DeploymentProperties(template=template_for_deployment, template_link=template_link,
                                       parameters=parameters, mode=mode, on_error_deployment=on_error_deployment)
 
@@ -1219,6 +1221,8 @@ def _prepare_deployment_properties_unmodified(cmd, deployment_scope, template_fi
         parameters = _get_missing_parameters(parameters, template_obj, _prompt_for_parameters, no_prompt)
         parameters = json.loads(json.dumps(parameters))
 
+    if mode is None:
+        mode = 'Incremental'
     template_for_deployment = _get_template_for_deployment(template_uri, template_spec, template_file, template_content, template_obj, parameters)
 
     properties = DeploymentProperties(template=template_for_deployment, template_link=template_link,
@@ -1504,10 +1508,7 @@ def _update_provider(cmd, namespace, registering, wait, properties=None, mg_id=N
     if mg_id is None and registering:
         if is_rpaas and accept_terms:
             wait = True
-        if cmd.supported_api_version(min_api='2021-04-01'):
-            r = rcf.providers.register(namespace, properties=properties)
-        else:
-            r = rcf.providers.register(namespace)
+        r = rcf.providers.register(namespace, properties=properties)
     elif mg_id and registering:
         r = rcf.providers.register_at_management_group_scope(namespace, mg_id)
         if r is None:
@@ -1552,8 +1553,6 @@ def _load_file_string_or_uri(file_or_string_or_uri, name, required=True):
 
 
 def _call_subscription_get(cmd, lock_client, *args):
-    if cmd.supported_api_version(max_api='2015-01-01'):
-        return lock_client.management_locks.get(*args)
     return lock_client.management_locks.get_at_subscription_level(*args)
 
 
@@ -1624,8 +1623,7 @@ def create_resource_group(cmd, rg_name, location, tags=None, managed_by=None):
         tags=tags
     )
 
-    if cmd.supported_api_version(min_api='2016-09-01'):
-        parameters.managed_by = managed_by
+    parameters.managed_by = managed_by
 
     return rcf.resource_groups.create_or_update(rg_name, parameters)
 
@@ -1673,7 +1671,6 @@ def export_group_as_template(
     options = ','.join(export_options) if export_options else None
 
     ExportTemplateRequest = cmd.get_models('ExportTemplateRequest')
-
     if export_format is None or export_format.lower() == "json" or export_format.lower() == "arm":
         export_template_request = ExportTemplateRequest(resources=resources, options=options, output_format="Json")
     elif export_format.lower() == "bicep":
@@ -1681,22 +1678,9 @@ def export_group_as_template(
     else:
         raise InvalidArgumentValueError('az resource: error: argument --export-format: invalid ExportFormat value: \'%s\'' % export_format)
 
-    # Exporting a resource group as a template is async since API version 2019-08-01.
-    if cmd.supported_api_version(min_api='2019-08-01'):
-        if cmd.supported_api_version(min_api='2024-11-01'):
-            result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
-                                                                      parameters=export_template_request,
-                                                                      api_version='2024-11-01')
-        else:
-            if export_format.lower() == "bicep":
-                raise CLIError("Bicep export is not supported in API version < 2024-11-01")
-
-            result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
-                                                                      parameters=export_template_request)
-        result = LongRunningOperation(cmd.cli_ctx)(result_poller)
-    else:
-        result = rcf.resource_groups.begin_export_template(resource_group_name,
-                                                           parameters=export_template_request)
+    result_poller = rcf.resource_groups.begin_export_template(resource_group_name,
+                                                              parameters=export_template_request)
+    result = LongRunningOperation(cmd.cli_ctx)(result_poller)
 
     # pylint: disable=no-member
     # On error, server still returns 200, with details in the error attribute
@@ -3092,10 +3076,10 @@ def list_resources(cmd, resource_group_name=None,
 
 
 def register_provider(cmd, resource_provider_namespace, consent_to_permissions=False, mg=None, wait=False, accept_terms=None):
-    properties = None
-    if cmd.supported_api_version(min_api='2021-04-01') and consent_to_permissions:
-        ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models('ProviderRegistrationRequest', 'ProviderConsentDefinition')
-        properties = ProviderRegistrationRequest(third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_permissions))
+    ProviderRegistrationRequest, ProviderConsentDefinition = cmd.get_models('ProviderRegistrationRequest',
+                                                                            'ProviderConsentDefinition')
+    properties = ProviderRegistrationRequest(
+        third_party_provider_consent=ProviderConsentDefinition(consent_to_authorization=consent_to_permissions))
     _update_provider(cmd, resource_provider_namespace, registering=True, wait=wait, properties=properties, mg_id=mg, accept_terms=accept_terms)
 
 
@@ -3534,10 +3518,6 @@ def get_lock(cmd, lock_name=None, resource_group=None, resource_provider_namespa
         return _call_subscription_get(cmd, lock_client, lock_name)
     if resource_name is None:
         return lock_client.management_locks.get_at_resource_group_level(resource_group, lock_name)
-    if cmd.supported_api_version(max_api='2015-01-01'):
-        lock_list = list_locks(resource_group, resource_provider_namespace, parent_resource_path,
-                               resource_type, resource_name)
-        return next((lock for lock in lock_list if lock.name == lock_name), None)
     return lock_client.management_locks.get_at_resource_level(
         resource_group, resource_provider_namespace,
         parent_resource_path or '', resource_type, resource_name, lock_name)
@@ -3670,10 +3650,6 @@ def update_lock(cmd, lock_name=None, resource_group=None, resource_provider_name
         _update_lock_parameters(params, level, notes)
         return lock_client.management_locks.create_or_update_at_resource_group_level(
             resource_group, lock_name, params)
-    if cmd.supported_api_version(max_api='2015-01-01'):
-        lock_list = list_locks(resource_group, resource_provider_namespace, parent_resource_path,
-                               resource_type, resource_name)
-        return next((lock for lock in lock_list if lock.name == lock_name), None)
     params = lock_client.management_locks.get_at_resource_level(
         resource_group, resource_provider_namespace, parent_resource_path or '', resource_type,
         resource_name, lock_name)
@@ -4031,7 +4007,8 @@ class _ResourceUtils:  # pylint: disable=too-many-instance-attributes
         parts = parse_resource_id(resource_id)
 
         if len(parts) == 2 and parts['subscription'] is not None and parts['resource_group'] is not None:
-            return AZURE_API_PROFILES['latest'][ResourceType.MGMT_RESOURCE_RESOURCES]
+            return _ResourceUtils.resolve_api_version(rcf, 'Microsoft.Resources', None, 'resourceGroups',
+                                                      latest_include_preview=latest_include_preview)
 
         if 'namespace' not in parts:
             raise CLIError('The type of value entered by --ids parameter is not supported.')
