@@ -662,8 +662,8 @@ def todict(obj, post_processor=None):
     # azure-core provided new function `attribute_list` to list all attribute names
     # so that we don't need to use raw __dict__ directly
     if getattr(obj, "_is_model", False):
-        result = {to_camel_case(attr): todict(getattr(obj, attr), post_processor)
-                  for attr in attribute_list(obj) if hasattr(obj, attr)}
+        result = {rest_name: todict(getattr(obj, attr), post_processor)
+                  for attr, rest_name in attribute_rest_name_list(obj) if hasattr(obj, attr)}
         return post_processor(obj, result) if post_processor else result
     if hasattr(obj, '_asdict'):
         return todict(obj._asdict(), post_processor)
