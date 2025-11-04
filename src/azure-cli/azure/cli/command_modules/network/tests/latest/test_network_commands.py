@@ -2906,6 +2906,25 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.check('managedRuleSets[0].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp2'])
                  ])
 
+        self.kwargs.update({
+            'waf2': 'agp2',
+            'csr_grp3': 'ExcessiveRequests'
+        })
+
+        # case 6: support Microsoft_HTTPDDoSRuleSet type, Medium is default sensitivity for this type if not specified
+        self.cmd('network application-gateway waf-policy create -g {rg} -n {waf2} --version 3.2 --type owasp')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} --policy-name {waf2} '
+                 '--type Microsoft_HTTPDDoSRuleSet --version 1.0 --group-name {csr_grp3} '
+                 '--rule rule-id=500100 '
+                 '--rule rule-id=500110 sensitivity=low')
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} --policy-name {waf2}', checks=[
+            self.check('managedRuleSets[1].ruleSetType', 'Microsoft_HTTPDDoSRuleSet'),
+            self.check('managedRuleSets[1].ruleSetVersion', '1.0'),
+            self.check('managedRuleSets[1].ruleGroupOverrides[0].ruleGroupName', self.kwargs['csr_grp3']),
+            self.check('managedRuleSets[1].ruleGroupOverrides[0].rules[0].sensitivity', 'Medium'),
+            self.check('managedRuleSets[1].ruleGroupOverrides[0].rules[1].sensitivity', 'Low')
+        ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_managed_rules_exclusion')
     def test_network_app_gateway_waf_policy_managed_rules_exclusions(self, resource_group):
         self.kwargs.update({
