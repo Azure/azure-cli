@@ -694,10 +694,9 @@ class AzCliCommandInvoker(CommandInvoker):
             is_query_active=self.data['query_active'])
 
     def _what_if(self, args):
-        # DEBUG: Add logging to see if this method is called
-        print(f"DEBUG: _what_if called with command: {args}")
+        logger.debug("_what_if called with command: %s", args)
         if '--what-if' in args:
-            print("DEBUG: Entering what-if mode")
+            logger.debug("Entering what-if mode")
             from azure.cli.core.what_if import show_what_if
             try:
                 # Get subscription ID with priority: --subscription parameter > current login subscription
@@ -709,7 +708,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 else:
                     from azure.cli.core.commands.client_factory import get_subscription_id
                     subscription_id = get_subscription_id(self.cli_ctx)
-                    print(f"DEBUG: Using current login subscription ID: {subscription_id}")
+                    logger.debug("Using current login subscription ID: %s", subscription_id)
 
                 args = ["az"] + args if args[0] != 'az' else args
                 command = " ".join(args)

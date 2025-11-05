@@ -8,8 +8,10 @@ import time
 import sys
 import json
 from requests import Request, Session
+from knack.log import get_logger
 from knack.util import CLIError
 
+logger = get_logger(__name__)
 
 def read_script_file(script_path):
     try:
@@ -111,10 +113,12 @@ def _make_what_if_request(payload, headers_dict, cli_ctx=None):
         progress_thread.start()
 
         session = Session()
+        logger.debug("url: %s/api/what_if_cli_preview; payload: %s", function_app_url, payload)
         req = Request(method="POST", url=f"{function_app_url}/api/what_if_cli_preview",
                       headers=headers_dict, data=json.dumps(payload))
         prepared = session.prepare_request(req)
         response = session.send(prepared)
+        logger.debug("response: %s", response)
         request_completed.set()
         progress_thread.join(timeout=0.5)
 
@@ -215,7 +219,7 @@ def convert_json_to_what_if_result(what_if_json_result):
     return WhatIfOperationResult(changes, potential_changes, [])
 
 
-def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pretty_print=False):
+def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pretty_print=False, export_bicep=False):
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.command_modules.resource._formatters import format_what_if_operation_result
 
@@ -224,6 +228,7 @@ def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pre
 
     payload = {
         "azcli_script": azcli_script,
+        "export_bicep": export_bicep,
         "subscription_id": subscription_id
     }
 
@@ -232,6 +237,7 @@ def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pre
 
     try:
         raw_results = response.json()
+        print(raw_results)
     except ValueError as ex:
         raise CLIError(f"Failed to parse response from what-if service: {ex}, raw response: {response.text}")
 
