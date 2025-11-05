@@ -92,4 +92,3 @@ examples:
 - name: List resource groups by bringing your own access token
   text: az demo byo-access-token --access-token "eyJ0eXAiO..." --subscription-id 00000000-0000-0000-0000-000000000000
 """
-

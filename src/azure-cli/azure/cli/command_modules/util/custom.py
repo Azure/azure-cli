@@ -370,4 +370,3 @@ class AccessTokenCredential:  # pylint: disable=too-few-public-methods
         from azure.cli.core.auth.util import AccessToken
         # Assume the access token expires in 1 year / 31536000 seconds
         return AccessToken(self.access_token, int(time.time()) + 31536000)
-
