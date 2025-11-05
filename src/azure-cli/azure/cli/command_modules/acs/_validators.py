@@ -137,6 +137,7 @@ def validate_agent_pool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
     _validate_nodepool_name(namespace.agent_pool_name)
 
+
 def validate_asm_egress_name(namespace):
     if namespace.istio_egressgateway_name is None:
         return
@@ -149,6 +150,7 @@ def validate_asm_egress_name(namespace):
             f"{CONST_AZURE_SERVICE_MESH_MAX_EGRESS_NAME_LENGTH} characters, must consist of lower case alphanumeric "
             "characters, '-' or '.', and must start and end with an alphanumeric character."
         )
+
 
 def validate_kubectl_version(namespace):
     """Validates a string as a possible Kubernetes version."""

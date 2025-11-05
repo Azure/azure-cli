@@ -2588,7 +2588,7 @@ helps['aks mesh enable-egress-gateway'] = """
 
 helps['aks mesh disable-egress-gateway'] = """
     type: command
-    short-summary: Disable an Azure Service Mesh ingress gateway.
+    short-summary: Disable an Azure Service Mesh egress gateway.
     long-summary: This command disables an Azure Service Mesh egress gateway in given cluster.
     parameters:
       - name: --istio-eg-gtw-name --istio-egressgateway-name

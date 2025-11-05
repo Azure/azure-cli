@@ -41,6 +41,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
+    CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
     CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_ARTIFACT_SOURCE_CACHE,
@@ -4761,12 +4762,19 @@ class AKSManagedClusterContext(BaseAKSContext):
             # make update if the egress gateway already exists
             egress_gateway_exists = False
             for egress in new_profile.istio.components.egress_gateways:
-                 if egress.name == istio_egressgateway_name and egress.namespace == istio_egressgateway_namespace:
+                if egress.name == istio_egressgateway_name and egress.namespace == istio_egressgateway_namespace:
                     if not egress.enabled and disable_egress_gateway:
                         raise ArgumentUsageError(
                             f'Egress gateway {istio_egressgateway_name} '
                             f'in namespace {istio_egressgateway_namespace} is already disabled.'
                         )
+                    if egress.enabled and enable_egress_gateway:
+                        if egress.gateway_configuration_name == gateway_configuration_name:
+                            raise ArgumentUsageError(
+                                f'Egress gateway {istio_egressgateway_name} '
+                                f'in namespace {istio_egressgateway_namespace} is already enabled '
+                                f'with gateway configuration name {gateway_configuration_name}.'
+                            )
                     egress.enabled = enable_egress_gateway
                     # only update gateway configuration name for enabled egress gateways
                     if enable_egress_gateway:
@@ -4795,7 +4803,7 @@ class AKSManagedClusterContext(BaseAKSContext):
                 updated = True
 
         return new_profile, updated
-    
+
     def _handle_enable_disable_asm(self, new_profile: ServiceMeshProfile) -> Tuple[ServiceMeshProfile, bool]:
         updated = False
         # enable/disable
