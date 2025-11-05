@@ -1685,6 +1685,22 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self.raw_param.get('gateway_prefix_size')
 
+    def get_workload_runtime(self) -> Union[str, None]:
+        """Obtain the value of workload_runtime, default value is None.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        workload_runtime = self.raw_param.get("workload_runtime", None)
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.agentpool and self.agentpool.workload_runtime is not None:
+            workload_runtime = self.agentpool.workload_runtime
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return workload_runtime
+
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(

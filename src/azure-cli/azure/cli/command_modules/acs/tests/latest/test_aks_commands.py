@@ -28,6 +28,8 @@ from azure.cli.command_modules.acs.tests.latest.custom_preparers import (
 from azure.cli.command_modules.acs.tests.latest.data.certs import CUSTOM_CA_TEST_CERT_STR
 from azure.cli.command_modules.acs.tests.latest.recording_processors import \
     KeyReplacer
+
+from azure.cli.command_modules.acs._consts import CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION
 from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from azure.cli.core.azclierror import ClientRequestError, CLIInternalError
 from azure.cli.testsdk import ScenarioTest, live_only
@@ -2729,17 +2731,17 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             checks=[self.is_empty()],
         )
 
-    # TODO(mheberling): Add kata tests
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(
-        random_name_length=17, name_prefix="clitest", location="westcentralus"
+        random_name_length=17, name_prefix="clitest", location="westus2"
     )
-    def test_aks_create_kata_flow(self, resource_group, resource_group_location):
+    def test_aks_cluster_kata(
+        self, resource_group, resource_group_location
+    ):
         # reset the count so in replay mode the random names will start with 0
         self.test_resources_count = 0
+        # kwargs for string formatting
         aks_name = self.create_random_name("cliakstest", 16)
-        node_pool_name = self.create_random_name("c", 6)
-        # node_pool_name_second = self.create_random_name("c", 6)
         self.kwargs.update(
             {
                 "resource_group": resource_group,
@@ -2747,106 +2749,80 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 "dns_name_prefix": self.create_random_name("cliaksdns", 16),
                 "location": resource_group_location,
                 "resource_type": "Microsoft.ContainerService/ManagedClusters",
-                "node_pool_name": node_pool_name,
-                # "node_pool_name_second": node_pool_name_second,
-                # "ssh_key_value": self.generate_ssh_keys(),
+                "workload_runtime": CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
+                "ssh_key_value": self.generate_ssh_keys(),
             }
         )
 
-        # 1. create
+        # create
         create_cmd = (
             "aks create --resource-group={resource_group} --name={name} --location={location} "
-            "--nodepool-name {node_pool_name} --os-sku AzureLinux --node-count 1 --workload-runtime KataVmIsolation "
-            "--vm-size Standard_D4s_v3"
-            # "--ssh-key-value={ssh_key_value} "
-            # '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview '
-            # "--enable-fips-image"
+            "--os-sku AzureLinux --workload-runtime {workload_runtime} --node-count 1 "
+            "--ssh-key-value={ssh_key_value} --node-vm-size Standard_D4s_v3"
         )
         self.cmd(
             create_cmd,
             checks=[
+                self.exists("fqdn"),
+                self.exists("nodeResourceGroup"),
                 self.check("provisioningState", "Succeeded"),
-                self.check("agentPoolProfiles[0].enableFips", True),
+                self.check("agentPoolProfiles[0].workloadRuntime", CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION),
             ],
         )
 
-        # verify no flag no change
+        # delete
         self.cmd(
-            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name} "
-            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview',
-            checks=[
-                self.check("provisioningState", "Succeeded"),
-                self.check("enableFips", True),
-            ],
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
         )
 
-        # verify same update no change
-        self.cmd(
-            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name} "
-            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview '
-            "--enable-fips-image",
-            checks=[
-                self.check("provisioningState", "Succeeded"),
-                self.check("enableFips", True),
-            ],
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="westus2"
+    )
+    def test_aks_nodepool_add_with_kata(
+        self, resource_group, resource_group_location
+    ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name("cliakstest", 16)
+        node_pool_name = self.create_random_name('c', 6)
+        node_pool_name_second = self.create_random_name('c', 6)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "node_pool_name": node_pool_name,
+                "node_pool_name_second": node_pool_name_second,
+                "location": resource_group_location,
+                "resource_type": "Microsoft.ContainerService/ManagedClusters",
+                "workload_runtime": CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
         )
 
-        # update nodepool1 to disable
-        self.cmd(
-            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name} "
-            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview '
-            "--disable-fips-image",
-            checks=[
-                self.check("provisioningState", "Succeeded"),
-                self.check("enableFips", False),
-            ],
+        # create
+        create_cmd = (
+                "aks create --resource-group={resource_group} --name={name} "
+                "--nodepool-name {node_pool_name} -c 1 --ssh-key-value={ssh_key_value}"
+        )
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # nodepool update with kata
+        update_cmd = (
+                "aks nodepool add --cluster-name={name} --resource-group={resource_group} "
+                "--name={node_pool_name_second} --os-sku AzureLinux "
+                "--workload-runtime KataVmIsolation --node-vm-size Standard_D4s_v3"
         )
 
-        # 2. add nodepool2
         self.cmd(
-            "aks nodepool add "
-            "--resource-group={resource_group} "
-            "--cluster-name={name} "
-            "--name={node_pool_name_second} "
-            "--os-type Linux "
-            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview ',
+            update_cmd,
             checks=[
                 self.check("provisioningState", "Succeeded"),
-                self.check("enableFips", False),
-            ],
-        )
-
-        # verify no flag no change
-        self.cmd(
-            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_second} "
-            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview',
-            checks=[
-                self.check("provisioningState", "Succeeded"),
-                self.check("enableFips", False),
-            ],
-        )
-
-        # verify same update no change
-        self.cmd(
-            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_second} "
-            '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview '
-            "--disable-fips-image",
-            checks=[
-                self.check("provisioningState", "Succeeded"),
-                self.check("enableFips", False),
-            ],
-        )
-
-        # update nodepool2 to enable
-        self.cmd(
-            "aks nodepool update --resource-group={resource_group} --cluster-name={name} --name={node_pool_name_second} "
-            "--nodepool-name {node_pool_name} --os-sku AzureLinux --node-count 1 --workload-runtime KataVmIsolation "
-            "--vm-size Standard_D4s_v3"
-            # '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/MutableFipsPreview '
-            # "--enable-fips-image",
-            checks=[
-                self.check("provisioningState", "Succeeded"),
-                self.check("enableFips", True),
+                self.check("workloadRuntime", "KataVmIsolation"),
             ],
         )
 

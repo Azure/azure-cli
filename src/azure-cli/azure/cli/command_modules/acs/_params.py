@@ -65,7 +65,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODE_PROVISIONING_MODE_MANUAL,
     CONST_NODE_PROVISIONING_MODE_AUTO,
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE,
-    CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO)
+    CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO,
+    CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
@@ -329,7 +330,7 @@ app_routing_nginx_configs = [
 ]
 
 workload_runtime_types = [
-    CONST_KATA_VM_ISOLATION,
+    CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
 ]
 
 

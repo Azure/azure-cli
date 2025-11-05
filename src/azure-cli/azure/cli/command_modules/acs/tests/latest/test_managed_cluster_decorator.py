@@ -6291,7 +6291,6 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
                 "enable_encryption_at_host": True,
                 "enable_ultra_ssd": True,
                 "enable_fips_image": True,
-                # TODO(mheberling): Add kata?
                 "message_of_the_day": get_test_data_file_path("invalidconfig.json"),
                 "kubelet_config": None,
                 "linux_os_config": None,
