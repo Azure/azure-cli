@@ -1683,7 +1683,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm = get_vm_to_update(cmd, resource_group_name, vm_name)
 
     if add_proxy_agent_extension is not None:
-
         args = {
             'resource_group': resource_group_name,
             'vm_name': vm_name,
@@ -4219,7 +4218,6 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
 
     if add_proxy_agent_extension is not None:
-
         args = {
             'resource_group': resource_group_name,
             'vm_scale_set_name': name,
