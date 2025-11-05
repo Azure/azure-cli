@@ -6931,6 +6931,7 @@ class VMSecurityProfileTestForDiskEncryption(ScenarioTest):
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMDiskEncryptionTest(ScenarioTest):
 
+    @unittest.skip('SubscriptionNotRegisteredForFeature')
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption true')
     def test_vmss_disk_encryption_e2e(self, resource_group, resource_group_location, key_vault):
@@ -7161,6 +7162,7 @@ class VMDiskEncryptionTest(ScenarioTest):
             self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId}')
 
 
+    @unittest.skip('SubscriptionNotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_with_encryption_identity', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
@@ -7274,7 +7276,8 @@ class VMDiskEncryptionTest(ScenarioTest):
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'DisableEncryption'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
         ])
-        
+
+    @unittest.skip('SubscriptionNotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_with_incorrect_encryption_identity', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
@@ -7331,7 +7334,7 @@ class VMDiskEncryptionTest(ScenarioTest):
         with self.assertRaisesRegex(ArgumentUsageError, message) as context:
             self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId1}')
 
-    
+    @unittest.skip('SubscriptionNotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_with_encryption_identity', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',

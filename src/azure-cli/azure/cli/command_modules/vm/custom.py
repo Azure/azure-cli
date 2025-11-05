@@ -47,6 +47,7 @@ from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
+from .aaz.latest.vmss import Update as UpdateVMSS
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -1682,10 +1683,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         vm = get_vm_to_update(cmd, resource_group_name, vm_name)
 
     if add_proxy_agent_extension is not None:
-        from .aaz.latest.vm import Update as _Update
-
-        class Update(_Update):
-            pass
 
         args = {
             'resource_group': resource_group_name,
@@ -1698,7 +1695,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             }
         }
 
-        LongRunningOperation(cmd.cli_ctx)(Update(cli_ctx=cmd.cli_ctx)(command_args=args))
+        LongRunningOperation(cmd.cli_ctx)(UpdateVM(cli_ctx=cmd.cli_ctx)(command_args=args))
         vm = get_vm_to_update(cmd, resource_group_name, vm_name)
 
     disk_name = None
@@ -4222,10 +4219,6 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
 
     if add_proxy_agent_extension is not None:
-        from .aaz.latest.vmss import Update as _VMSSUpdate
-
-        class VMSSUpdate(_VMSSUpdate):
-            pass
 
         args = {
             'resource_group': resource_group_name,
@@ -4240,7 +4233,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             }
         }
 
-        LongRunningOperation(cmd.cli_ctx)(VMSSUpdate(cli_ctx=cmd.cli_ctx)(command_args=args))
+        LongRunningOperation(cmd.cli_ctx)(UpdateVMSS(cli_ctx=cmd.cli_ctx)(command_args=args))
         vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
 
     aux_subscriptions = None
