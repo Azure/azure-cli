@@ -6087,7 +6087,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         ))
 
     def test_handle_egress_gateways_asm(self):
-        ctx_0 = AKSPreviewManagedClusterContext(
+        ctx_0 = AKSManagedClusterContext(
             self.cmd,
             AKSManagedClusterParamDict(
                 {
