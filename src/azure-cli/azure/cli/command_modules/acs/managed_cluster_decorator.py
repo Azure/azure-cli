@@ -4659,7 +4659,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         disable_ingress_gateway = self.raw_param.get("disable_ingress_gateway", False)
         ingress_gateway_type = self.raw_param.get("ingress_gateway_type", None)
 
-        # disallow disable ingress gateway on a cluser with no asm enabled
+        # disallow disable ingress gateway on a cluster with no asm enabled
         if disable_ingress_gateway:
             if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
                 raise ArgumentUsageError(
@@ -4724,7 +4724,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         )
         gateway_configuration_name = self.raw_param.get("gateway_configuration_name", None)
 
-        # disallow disable egress gateway on a cluser with no asm enabled
+        # disallow disable egress gateway on a cluster with no asm enabled
         if disable_egress_gateway:
             if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
                 raise ArgumentUsageError(
@@ -4864,6 +4864,9 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         new_profile, updated_ingress_gateways_asm = self._handle_ingress_gateways_asm(new_profile)
         updated |= updated_ingress_gateways_asm
+
+        new_profile, updated_egress_gateways_asm = self._handle_egress_gateways_asm(new_profile)
+        updated |= updated_egress_gateways_asm
 
         new_profile, updated_pluginca_asm = self._handle_pluginca_asm(new_profile)
         updated |= updated_pluginca_asm
