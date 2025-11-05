@@ -215,7 +215,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     _complex_params('mariadb')
     _complex_params('mysql')
-    _complex_params('postgres')
 
     # Flexible-server
     # pylint: disable=too-many-locals, too-many-branches
