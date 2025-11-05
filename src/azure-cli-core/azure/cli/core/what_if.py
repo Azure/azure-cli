@@ -237,7 +237,8 @@ def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pre
 
     try:
         raw_results = response.json()
-        print(raw_results)
+        # Only print raw results in debug mode
+        logger.debug("Raw what-if service response: %s", raw_results)
     except ValueError as ex:
         raise CLIError(f"Failed to parse response from what-if service: {ex}, raw response: {response.text}")
 
@@ -247,8 +248,18 @@ def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pre
     if success is True:
         what_if_result = raw_results.get('what_if_result', {})
         what_if_operation_result = convert_json_to_what_if_result(what_if_result)
+        
+        # If export_bicep is enabled and bicep_template exists, include it in the result
+        result_data = what_if_result.copy()
+        if export_bicep and 'bicep_template' in raw_results:
+            result_data['bicep_template'] = raw_results['bicep_template']
+            logger.debug("Bicep template included in result: %s", raw_results['bicep_template'])
+        
         if no_pretty_print:
-            return what_if_result
+            return result_data
+        
+        # Print the formatted what-if result (but not bicep template unless in debug mode)
         print(format_what_if_operation_result(what_if_operation_result, cli_ctx.enable_color))
-        return what_if_result
+        
+        return result_data
     raise CLIError(f"Unexpected response from what-if service, got: {raw_results}")

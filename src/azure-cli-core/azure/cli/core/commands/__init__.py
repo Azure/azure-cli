@@ -589,6 +589,10 @@ class AzCliCommandInvoker(CommandInvoker):
         self.parser.enable_autocomplete()
         if '--what-if' in (args_copy):
             return self._what_if(args_copy)
+        elif '--export-bicep' in (args_copy):
+            # --export-bicep must be used with --what-if
+            logger.error("The --export-bicep parameter must be used together with --what-if")
+            return CommandResultItem(None, exit_code=1, error=CLIError('The --export-bicep parameter must be used together with --what-if'))
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_PARSE_ARGS, args=args)
         parsed_args = self.parser.parse_args(args)
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
@@ -699,6 +703,13 @@ class AzCliCommandInvoker(CommandInvoker):
             logger.debug("Entering what-if mode")
             from azure.cli.core.what_if import show_what_if
             try:
+                # Check if --export-bicep is present
+                export_bicep = '--export-bicep' in args
+                if export_bicep:
+                    # Remove --export-bicep from args for processing
+                    args = [arg for arg in args if arg != '--export-bicep']
+                    logger.debug("Export bicep mode enabled")
+                
                 # Get subscription ID with priority: --subscription parameter > current login subscription
                 if '--subscription' in args:
                     index = args.index('--subscription')
@@ -712,7 +723,11 @@ class AzCliCommandInvoker(CommandInvoker):
 
                 args = ["az"] + args if args[0] != 'az' else args
                 command = " ".join(args)
-                what_if_result = show_what_if(self.cli_ctx, command, subscription_id=subscription_id)
+                what_if_result = show_what_if(self.cli_ctx, command, subscription_id=subscription_id, export_bicep=export_bicep)
+                
+                # Save bicep templates if export_bicep is enabled and bicep_template exists
+                if export_bicep and isinstance(what_if_result, dict) and 'bicep_template' in what_if_result:
+                    self._save_bicep_templates(args, what_if_result['bicep_template'])
 
                 # Ensure output format is set for proper formatting
                 # Default to 'json' if not already set
@@ -733,6 +748,58 @@ class AzCliCommandInvoker(CommandInvoker):
                                          error=CLIError(f'What-if preview failed: {str(ex)}\n'
                                                         f'Note: This was a preview operation. '
                                                         f'No actual changes were made.'))
+
+    def _save_bicep_templates(self, args, bicep_template):
+        """Save bicep templates to user's .azure directory"""
+        try:
+            import os
+            from datetime import datetime
+            from azure.cli.core._environment import get_config_dir
+            
+            # Extract command name (first argument after 'az')
+            command_parts = [arg for arg in args if not arg.startswith('-') and arg != 'az']
+            if not command_parts:
+                logger.warning("Could not determine command name for bicep file naming")
+                return
+            
+            first_command = command_parts[0]
+            az_command = f"az_{first_command}"
+            
+            # Get full command for file naming (e.g., az_vm_create)
+            if len(command_parts) > 1:
+                full_command = f"az_{command_parts[0]}_{command_parts[1]}"
+            else:
+                full_command = az_command + "_command"
+            
+            # Create timestamp in yyyymmddhhMMss format
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            
+            # Get .azure config directory
+            config_dir = get_config_dir()
+            whatif_dir = os.path.join(config_dir, 'whatif', az_command)
+            
+            # Create directories if they don't exist
+            os.makedirs(whatif_dir, exist_ok=True)
+            logger.debug("Created bicep template directory: %s", whatif_dir)
+            
+            # Save main template
+            if 'main_template' in bicep_template:
+                main_file = os.path.join(whatif_dir, f"{full_command}_main_{timestamp}.bicep")
+                with open(main_file, 'w', encoding='utf-8') as f:
+                    f.write(bicep_template['main_template'])
+                logger.info("Bicep main template saved to: %s", main_file)
+            
+            # Save module templates if they exist
+            if 'module_templates' in bicep_template and bicep_template['module_templates']:
+                for i, module_template in enumerate(bicep_template['module_templates'], 1):
+                    module_suffix = f"module{i}" if i > 1 else "module"
+                    module_file = os.path.join(whatif_dir, f"{full_command}_{module_suffix}_{timestamp}.bicep")
+                    with open(module_file, 'w', encoding='utf-8') as f:
+                        f.write(module_template)
+                    logger.info("Bicep module template saved to: %s", module_file)
+                    
+        except Exception as ex:
+            logger.warning("Failed to save bicep templates: %s", str(ex))
 
     @staticmethod
     def _extract_parameter_names(args):
