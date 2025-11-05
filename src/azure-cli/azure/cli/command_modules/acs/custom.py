@@ -512,7 +512,7 @@ def aks_namespace_add(
     existedNamespace = None
     try:
         existedNamespace = client.get(resource_group_name, cluster_name, name)
-    except ResourceNotFoundError:
+    except ResourceNotFoundErrorAzCore:
         pass
 
     if existedNamespace:
@@ -555,7 +555,7 @@ def aks_namespace_update(
 ):
     try:
         existedNamespace = client.get(resource_group_name, cluster_name, name)
-    except ResourceNotFoundError:
+    except ResourceNotFoundErrorAzCore:
         raise ClientRequestError(
             f"Namespace '{name}' doesn't exist."
             "Please use 'aks namespace list' to get current list of managed namespaces"
@@ -565,12 +565,12 @@ def aks_namespace_update(
         # DO NOT MOVE: get all the original parameters and save them as a dictionary
         raw_parameters = locals()
         headers = extract_comma_separated_string(
-        aks_custom_headers,
-        enable_strip=True,
-        extract_kv=True,
-        default_value={},
-        allow_appending_values_to_same_key=True,
-    )
+            aks_custom_headers,
+            enable_strip=True,
+            extract_kv=True,
+            default_value={},
+            allow_appending_values_to_same_key=True,
+        )
         return aks_managed_namespace_update(cmd, client, raw_parameters, headers, existedNamespace, no_wait)
 
 

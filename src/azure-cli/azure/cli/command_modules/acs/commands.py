@@ -154,7 +154,7 @@ def load_command_table(self, _):
         g.custom_command('add', 'aks_maintenanceconfiguration_add')
         g.custom_command('update', 'aks_maintenanceconfiguration_update')
         g.custom_command('delete', 'aks_maintenanceconfiguration_delete')
-    
+
     # AKS managed namespace commands
     with self.command_group(
         "aks namespace",
