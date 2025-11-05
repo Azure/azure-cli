@@ -194,12 +194,15 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         os.environ["AZURE_CLI_LIVE_TEST_IDENTITY_OBJECT_ID"] = test_identity_object_id
         return test_identity_object_id
 
-    def _get_asm_supported_revision(self, location):
+    def _get_asm_supported_revision(self, location, secondLatest=False):
         mesh_revisions_cmd = f"aks mesh get-revisions -l {location}"
         mesh_revisions = self.cmd(mesh_revisions_cmd).get_output_in_json()
         assert len(mesh_revisions["meshRevisions"]) > 0
         revisions = [r["revision"] for r in mesh_revisions["meshRevisions"]]
         sorted_revisons = sort_asm_revisions(revisions)
+        lenRevisions = len(sorted_revisons)
+        if secondLatest and lenRevisions > 1:
+            return sorted_revisons[lenRevisions - 2]  # Return the second latest revision
         return sorted_revisons[0]
 
     def _get_asm_upgrade_version(self, resource_group, name):
@@ -2132,7 +2135,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
-            'revision': self._get_asm_supported_revision(resource_group_location),
+            'revision': self._get_asm_supported_revision(resource_group_location, False),
         })
 
         # create cluster without --enable-azure-service-mesh
@@ -2187,7 +2190,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
                 "name": aks_name,
                 "location": resource_group_location,
                 "ssh_key_value": self.generate_ssh_keys(),
-                "revision": self._get_asm_supported_revision("westus2"), # Temporarily set to prod region to avoid using unsupported ASM revision for centraluseap
+                "revision": self._get_asm_supported_revision(resource_group_location, True),
             }
         )
 
@@ -2449,7 +2452,7 @@ spec:
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
-            'revision': self._get_asm_supported_revision(resource_group_location),
+            'revision': self._get_asm_supported_revision(resource_group_location, False),
         })
 
         # create cluster with --enable-azure-service-mesh
@@ -2502,7 +2505,7 @@ spec:
         self.test_resources_count = 0
         # kwargs for string formatting
         aks_name = self.create_random_name("cliakstest", 16)
-        installed_revision = self._get_asm_supported_revision(resource_group_location)
+        installed_revision = self._get_asm_supported_revision(resource_group_location, False)
         self.kwargs.update(
             {
                 "resource_group": resource_group,
@@ -2623,7 +2626,7 @@ spec:
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
             'akv_resource_id': akv_resource_id,
-            'revision': self._get_asm_supported_revision(resource_group_location),
+            'revision': self._get_asm_supported_revision(resource_group_location, False),
         })
 
         # create cluster
@@ -2693,7 +2696,7 @@ spec:
             'name': aks_name,
             'location': resource_group_location,
             'ssh_key_value': self.generate_ssh_keys(),
-            'revision': self._get_asm_supported_revision(resource_group_location),
+            'revision': self._get_asm_supported_revision(resource_group_location, False),
         })
 
         # create cluster
