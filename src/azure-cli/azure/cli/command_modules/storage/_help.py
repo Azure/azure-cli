@@ -227,9 +227,12 @@ long-summary: |
     cluster will become primary after failover. For more information, please refer to
     https://learn.microsoft.com/azure/storage/common/storage-disaster-recovery-guidance.
 examples:
-  - name: Failover a storage account.
+  - name: Unplanned Failover a storage account.
     text: |
         az storage account failover -n mystorageaccount -g MyResourceGroup
+  - name: Planned Failover a storage account.
+    text: |
+        az storage account failover -n mystorageaccount -g MyResourceGroup --failover-type Planned
   - name: Failover a storage account without waiting for complete.
     text: |
         az storage account failover -n mystorageaccount -g MyResourceGroup --no-wait
