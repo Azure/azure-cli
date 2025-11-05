@@ -11,7 +11,7 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['postgres'] = """
 type: group
-short-summary: Manage Azure Database for PostgreSQL servers.
+short-summary: Manage Azure Database for PostgreSQL.
 """
 
 helps['postgres flexible-server'] = """
