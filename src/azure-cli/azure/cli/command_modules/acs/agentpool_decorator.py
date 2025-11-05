@@ -1700,6 +1700,7 @@ class AKSAgentPoolContext(BaseAKSContext):
         # this parameter does not need validation
         return workload_runtime
 
+
 class AKSAgentPoolAddDecorator:
     def __init__(
         self,
