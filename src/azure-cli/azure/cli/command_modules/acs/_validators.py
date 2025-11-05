@@ -19,6 +19,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
     CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
     CONST_NODEPOOL_MODE_GATEWAY,
+    CONST_AZURE_SERVICE_MESH_MAX_EGRESS_NAME_LENGTH,
     CONST_VIRTUAL_MACHINE_SCALE_SETS,
     CONST_AVAILABILITY_SET,
     CONST_VIRTUAL_MACHINES,
@@ -136,6 +137,18 @@ def validate_agent_pool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
     _validate_nodepool_name(namespace.agent_pool_name)
 
+def validate_asm_egress_name(namespace):
+    if namespace.istio_egressgateway_name is None:
+        return
+    name = namespace.istio_egressgateway_name
+    asm_egress_name_regex = re.compile(r'^[a-z0-9]([-a-z0-9]*[a-z0-9])?(.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$')
+    match = asm_egress_name_regex.match(name)
+    if not match or len(name) > CONST_AZURE_SERVICE_MESH_MAX_EGRESS_NAME_LENGTH:
+        raise InvalidArgumentValueError(
+            f"Istio egress name {name} is invalid. Name must be between 1 and "
+            f"{CONST_AZURE_SERVICE_MESH_MAX_EGRESS_NAME_LENGTH} characters, must consist of lower case alphanumeric "
+            "characters, '-' or '.', and must start and end with an alphanumeric character."
+        )
 
 def validate_kubectl_version(namespace):
     """Validates a string as a possible Kubernetes version."""

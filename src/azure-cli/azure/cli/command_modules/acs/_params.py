@@ -54,6 +54,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL,
+    CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
     CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_READONLY,
     CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_UNRESTRICTED,
     CONST_ARTIFACT_SOURCE_DIRECT,
@@ -115,6 +116,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_allowed_host_ports, validate_application_security_groups,
     validate_node_public_ip_tags,
     validate_disable_windows_outbound_nat,
+    validate_asm_egress_name,
     validate_crg_id, validate_apiserver_subnet_id,
     validate_azure_service_mesh_revision,
     validate_message_of_the_day,
@@ -1086,6 +1088,39 @@ def load_arguments(self, _):
     with self.argument_context('aks mesh disable-ingress-gateway') as c:
         c.argument('ingress_gateway_type',
                    arg_type=get_enum_type(ingress_gateway_types))
+
+    with self.argument_context("aks mesh enable-egress-gateway") as c:
+        c.argument(
+            "istio_egressgateway_name",
+            validator=validate_asm_egress_name,
+            required=True,
+            options_list=["--istio-egressgateway-name", "--istio-eg-gtw-name"]
+        )
+        c.argument(
+            "istio_egressgateway_namespace",
+            required=False,
+            default=CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
+            options_list=["--istio-egressgateway-namespace", "--istio-eg-gtw-ns"]
+        )
+        c.argument(
+            "gateway_configuration_name",
+            required=True,
+            options_list=["--gateway-configuration-name", "--gtw-config-name"]
+        )
+
+    with self.argument_context("aks mesh disable-egress-gateway") as c:
+        c.argument(
+            "istio_egressgateway_name",
+            validator=validate_asm_egress_name,
+            required=True,
+            options_list=["--istio-egressgateway-name", "--istio-eg-gtw-name"]
+        )
+        c.argument(
+            "istio_egressgateway_namespace",
+            required=False,
+            default=CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
+            options_list=["--istio-egressgateway-namespace", "--istio-eg-gtw-ns"]
+        )
 
     with self.argument_context('aks mesh enable') as c:
         c.argument('revision', validator=validate_azure_service_mesh_revision)

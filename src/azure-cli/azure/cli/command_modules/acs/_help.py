@@ -2564,6 +2564,46 @@ helps["aks mesh disable-ingress-gateway"] = """
         text: az aks mesh disable-ingress-gateway --resource-group MyResourceGroup --name MyManagedCluster --ingress-gateway-type Internal
 """
 
+helps['aks mesh enable-egress-gateway'] = """
+    type: command
+    short-summary: Enable an Azure Service Mesh egress gateway.
+    long-summary: This command enables an Azure Service Mesh egress gateway in given cluster.
+    parameters:
+      - name: --istio-eg-gtw-name --istio-egressgateway-name
+        type: string
+        short-summary: Specify the name of the Istio egress gateway.
+        long-summary: This required field specifies the name of the Istio egress gateway. Must be between 1 and 253 characters, must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character.
+      - name: --istio-eg-gtw-ns --istio-egressgateway-namespace
+        type: string
+        short-summary: Specify the namespace of the Istio egress gateway.
+        long-summary: This optional field specifies the namespace of the Istio egress gateway. Defaults to "aks-istio-egress" if unspecified.
+      - name: --gateway-configuration-name --gtw-config-name
+        type: string
+        short-summary: Specify the name of the StaticGatewayConfiguration resource.
+        long-summary: This required field specifies the name of the StaticGatewayConfiguration resource for the Istio egress gateway. See https://aka.ms/aks-static-egress-gateway on how to create and configure a Static Egress Gateway agentpool.
+    examples:
+      - name: Enable an Istio egress gateway. Static egress gateway must be enabled prior to creating an Istio egress gateway. See https://aka.ms/aks-static-egress-gateway on how to create and configure a Static Egress Gateway agentpool.
+        text: az aks mesh enable-egress-gateway --resource-group MyResourceGroup --name MyManagedCluster --istio-egressgateway-name my-istio-egress-1 --istio-egressgateway-namespace my-namespace-1 --gateway-configuration-name sgc-istio-egress-1
+"""
+
+helps['aks mesh disable-egress-gateway'] = """
+    type: command
+    short-summary: Disable an Azure Service Mesh ingress gateway.
+    long-summary: This command disables an Azure Service Mesh egress gateway in given cluster.
+    parameters:
+      - name: --istio-eg-gtw-name --istio-egressgateway-name
+        type: string
+        short-summary: Specify the name of the Istio egress gateway.
+        long-summary: This required field specifies the name of the Istio egress gateway. Must be between 1 and 253 characters, must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character.
+      - name: --istio-eg-gtw-ns --istio-egressgateway-namespace
+        type: string
+        short-summary: Specify the namespace of the Istio egress gateway.
+        long-summary: This optional field specifies the namespace of the Istio egress gateway. Defaults to "aks-istio-egress" if unspecified.
+    examples:
+      - name: Disable an Istio egress gateway.
+        text: az aks mesh disable-egress-gateway --resource-group MyResourceGroup --name MyManagedCluster --istio-egressgateway-name my-istio-egress-1 --istio-egressgateway-namespace my-namespace-1
+"""
+
 helps["aks mesh get-revisions"] = """
     type: command
     short-summary: Discover available Azure Service Mesh revisions and their compatibility.

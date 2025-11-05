@@ -2161,6 +2161,217 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.is_empty(),
         ])
 
+    # live only due to installing kubectl binary
+    @live_only()
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="eastus2euap"
+    )
+    def test_aks_azure_service_mesh_with_egress_gateway(
+        self, resource_group, resource_group_location
+    ):
+        """This test case exercises enabling and disabling an Istio egress gateway.
+
+        It creates a cluster with azure service mesh profile and Static Egress Gateway enabled. 
+        After that, we create a gateway nodepool and a staticgatewayconfiguration resource.
+        Then, we create an Istio egress gateway, and then delete it.
+        """
+
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "location": resource_group_location,
+                "ssh_key_value": self.generate_ssh_keys(),
+                "revision": self._get_asm_supported_revision("westus2"), # Temporarily set to prod region to avoid using unsupported ASM revision for centraluseap
+            }
+        )
+
+        # create cluster with --enable-azure-service-mesh and --enable-static-egress-gateway
+        # Static Egress Gateway is required for Istio Egress Gateway
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--aks-custom-headers=AKSHTTPCustomFeatures=Microsoft.ContainerService/AzureServiceMeshPreview,AKSHTTPCustomFeatures=Microsoft.ContainerService/StaticEgressGatewayPreview "
+            "--ssh-key-value={ssh_key_value} "
+            "--enable-static-egress-gateway "
+            "--enable-azure-service-mesh --revision={revision} --output=json"
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("serviceMeshProfile.mode", "Istio"),
+                self.check("networkProfile.staticEgressGatewayProfile.enabled", True)
+            ],
+        )
+
+        gwNodepoolName = "istiogtw"
+
+        self.kwargs.update(
+            {
+                "gwNodepoolName": gwNodepoolName
+            }
+        )
+
+        # add Gateway-mode agentpool
+        self.cmd(
+            "aks nodepool add "
+            "--resource-group={resource_group} "
+            "--cluster-name={name} "
+            "--name={gwNodepoolName} "
+            "--mode=Gateway "
+            "--node-count=2 "
+            "--gateway-prefix-size=31 "
+            "--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/StaticEgressGatewayPreview",
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("gatewayProfile.publicIpPrefixSize", 31),
+            ],
+        )
+
+        istio_egress_name = "istio-egress-1"
+        istio_egress_namespace = 'istio-ns-1'
+        istio_sgc_name = "istio-sgc-1"
+
+        self.kwargs.update(
+            {
+                "istio_egress_namespace": istio_egress_namespace,
+                "istio_egress_name": istio_egress_name,
+                "istio_sgc_name": istio_sgc_name
+            }
+        )
+        # install kubectl
+        try:
+            subprocess.call(["az", "aks", "install-cli"])
+        except subprocess.CalledProcessError as err:
+            raise CLITestError("Failed to install kubectl with error: '{}'!".format(err))
+
+        try:
+            # get credential
+            fd, browse_path = tempfile.mkstemp()
+            self.kwargs.update(
+                {
+                    "browse_path": browse_path,
+                }
+            )
+            try:
+                get_credential_cmd = "aks get-credentials -n {name} -g {resource_group} -f {browse_path}"
+                self.cmd(get_credential_cmd)
+            finally:
+                os.close(fd)
+
+            sgcResource = f"""apiVersion: egressgateway.kubernetes.azure.com/v1alpha1
+kind: StaticGatewayConfiguration
+metadata:
+  name: {istio_sgc_name}
+  namespace: {istio_egress_namespace}
+spec:
+  gatewayNodepoolName: {gwNodepoolName}
+"""
+
+            sgc_fd, sgc_browse_path = tempfile.mkstemp()
+
+            try:
+                with os.fdopen(sgc_fd, 'w') as temp_file:
+                    temp_file.write(sgcResource)
+
+                k_create_sgc_namespace_command = ["kubectl", "create", "namespace", istio_egress_namespace, "--kubeconfig", browse_path]
+                k_create_sgc_namespace_output = subprocess.check_output(
+                    k_create_sgc_namespace_command,
+                    universal_newlines=True,
+                    stderr=subprocess.STDOUT,
+                )
+                if not f"namespace/{istio_egress_namespace} created" in k_create_sgc_namespace_output:
+                    raise CLITestError(f"failed to create istio egress gateway namespace: {istio_egress_namespace}")
+
+                k_create_sgc_command = ["kubectl", "apply", "-f", sgc_browse_path, "--kubeconfig", browse_path]
+                k_create_sgc_output = subprocess.check_output(
+                    k_create_sgc_command,
+                    universal_newlines=True,
+                    stderr=subprocess.STDOUT,
+                )
+                if not f"staticgatewayconfiguration.egressgateway.kubernetes.azure.com/{istio_sgc_name} created" in k_create_sgc_output:
+                    raise CLITestError("failed to create StaticGatewayConfiguration")
+            finally:
+                # Delete files
+                if os.path.exists(browse_path):
+                    os.remove(browse_path)
+
+                if os.path.exists(sgc_browse_path):
+                    os.remove(sgc_browse_path)
+
+            # enable Istio egress gateway
+            update_cmd = (
+                "aks mesh enable-egress-gateway --resource-group={resource_group} --name={name} "
+                "--istio-egressgateway-name {istio_egress_name} --istio-egressgateway-namespace {istio_egress_namespace} "
+                "--gateway-configuration-name {istio_sgc_name}"
+            )
+            self.cmd(
+                update_cmd,
+                checks=[
+                    self.check("serviceMeshProfile.mode", "Istio"),
+                    self.check(
+                        "serviceMeshProfile.istio.components.egressGateways[0].name",
+                        istio_egress_name,
+                    ),
+                    self.check(
+                        "serviceMeshProfile.istio.components.egressGateways[0].enabled",
+                        True,
+                    ),
+                    self.check(
+                        "serviceMeshProfile.istio.components.egressGateways[0].namespace",
+                        istio_egress_namespace,
+                    ),
+                    self.check(
+                        "serviceMeshProfile.istio.components.egressGateways[0].gatewayConfigurationName",
+                        istio_sgc_name,
+                    ),
+                ],
+            )
+
+            # disable the egress gateway
+            update_cmd = (
+                "aks mesh disable-egress-gateway --resource-group={resource_group} --name={name} "
+                "--istio-egressgateway-name {istio_egress_name} --istio-egressgateway-namespace {istio_egress_namespace} --yes"
+            )
+            self.cmd(
+                update_cmd,
+                checks=[
+                    self.check("serviceMeshProfile.mode", "Istio"),
+                    self.check(
+                        "serviceMeshProfile.istio.components.egressGateways[0].name",
+                        istio_egress_name,
+                    ),
+                    self.check(
+                        "serviceMeshProfile.istio.components.egressGateways[0].enabled",
+                        None,
+                    ),
+                    self.check(
+                        "serviceMeshProfile.istio.components.egressGateways[0].namespace",
+                        istio_egress_namespace,
+                    ),
+                    self.check(
+                        "serviceMeshProfile.istio.components.egressGateways[0].gatewayConfigurationName",
+                        istio_sgc_name,
+                    ),
+                ],
+            )
+        finally:
+            # delete the cluster
+            delete_cmd = (
+                "aks delete --resource-group={resource_group} --name={name} --yes --no-wait"
+            )
+            self.cmd(
+                delete_cmd,
+                checks=[
+                    self.is_empty(),
+                ],
+            )
+
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
     def test_aks_machine_cmds(self, resource_group, resource_group_location):

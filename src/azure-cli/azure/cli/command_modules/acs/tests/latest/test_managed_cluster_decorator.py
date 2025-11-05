@@ -49,6 +49,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
     CONST_AZURE_SERVICE_MESH_MODE_DISABLED,
+    CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
     CONST_ARTIFACT_SOURCE_DIRECT,
     CONST_AVAILABILITY_SET,
     CONST_VIRTUAL_MACHINES,
@@ -6079,6 +6080,63 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                         self.models.IstioIngressGateway(
                             mode="Internal",
                             enabled=True,
+                        )
+                    ]
+                )
+            ),
+        ))
+
+    def test_handle_egress_gateways_asm(self):
+        ctx_0 = AKSPreviewManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_service_mesh": True,
+                    "enable_egress_gateway": True,
+                    "istio_egressgateway_name": "istio-egress-1",
+                    "gateway_configuration_name": "istio-sgc-1",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        old_profile = self.models.ServiceMeshProfile(
+            mode=CONST_AZURE_SERVICE_MESH_MODE_DISABLED,
+            istio=self.models.IstioServiceMesh(),
+        )
+        new_profile, updated = ctx_0._handle_egress_gateways_asm(old_profile)
+        self.assertEqual(updated, True)
+        self.assertEqual(new_profile, self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                components=self.models.IstioComponents(
+                    egress_gateways=[
+                        self.models.IstioEgressGateway(
+                            enabled=True,
+                            name="istio-egress-1",
+                            namespace=CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
+                            gateway_configuration_name="istio-sgc-1"
+                        )
+                    ]
+                )
+            ),
+        ))
+        # ASM was never enabled on the cluster
+        old_profile = self.models.ServiceMeshProfile(
+            mode=CONST_AZURE_SERVICE_MESH_MODE_DISABLED,
+        )
+        new_profile, updated = ctx_0._handle_egress_gateways_asm(old_profile)
+        self.assertEqual(updated, True)
+        self.assertEqual(new_profile, self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                components=self.models.IstioComponents(
+                    egress_gateways=[
+                        self.models.IstioEgressGateway(
+                            enabled=True,
+                            name="istio-egress-1",
+                            namespace=CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
+                            gateway_configuration_name="istio-sgc-1"
                         )
                     ]
                 )
