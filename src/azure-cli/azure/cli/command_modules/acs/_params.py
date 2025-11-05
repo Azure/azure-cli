@@ -513,7 +513,7 @@ def load_arguments(self, _):
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         c.argument('nodepool_allowed_host_ports', nargs='+', validator=validate_allowed_host_ports, help="allowed host ports for agentpool")
         c.argument('nodepool_asg_ids', nargs='+', validator=validate_application_security_groups, help="application security groups for agentpool")
-        c.argument('workload_runtime', arg_type=get_enum_type(workload_runtime_types))
+        c.argument('workload_runtime', arg_type=get_enum_type(workload_runtime_types), help="The workload runtime to use on the node pool.")
         c.argument("message_of_the_day")
 
         # azure monitor profile
@@ -978,7 +978,7 @@ def load_arguments(self, _):
         c.argument("if_none_match")
         c.argument('gpu_driver', arg_type=get_enum_type(gpu_driver_install_modes))
         c.argument("gateway_prefix_size", type=int, validator=validate_gateway_prefix_size)
-        c.argument('workload_runtime', arg_type=get_enum_type(workload_runtime_types))
+        c.argument('workload_runtime', arg_type=get_enum_type(workload_runtime_types), help="The workload runtime to use on the nodepool.")
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
