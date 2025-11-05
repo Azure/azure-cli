@@ -2811,7 +2811,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             self.check('provisioningState', 'Succeeded'),
         ])
 
-        # nodepool update with kata
+        # nodepool add with kata
         update_cmd = (
                 "aks nodepool add --cluster-name={name} --resource-group={resource_group} "
                 "--name={node_pool_name_second} --os-sku AzureLinux "
