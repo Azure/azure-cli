@@ -52,6 +52,3 @@ def load_arguments(self, _):
         c.argument('access_token', help="Your own access token")
         c.argument('subscription_id', help="Subscription ID under which to list resource groups")
 
-    with self.argument_context('what-if') as c:
-        c.argument('script_path', help="Specify the path to a script file containing Azure CLI commands to be executed.")
-        c.argument('no_pretty_print', help="Disable pretty-printing of the output.")

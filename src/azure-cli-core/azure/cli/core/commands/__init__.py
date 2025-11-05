@@ -507,7 +507,6 @@ class AzCliCommandInvoker(CommandInvoker):
     # pylint: disable=too-many-statements,too-many-locals,too-many-branches
     def execute(self, args):
         args_copy = args[:]
-        
         from knack.events import (EVENT_INVOKER_PRE_CMD_TBL_CREATE, EVENT_INVOKER_POST_CMD_TBL_CREATE,
                                   EVENT_INVOKER_CMD_TBL_LOADED, EVENT_INVOKER_PRE_PARSE_ARGS,
                                   EVENT_INVOKER_POST_PARSE_ARGS,
@@ -706,12 +705,12 @@ class AzCliCommandInvoker(CommandInvoker):
                     index = args.index('--subscription')
                     if index + 1 < len(args):
                         subscription_value = args[index + 1]
-                        subscription_id = subscription_value    
+                        subscription_id = subscription_value
                 else:
                     from azure.cli.core.commands.client_factory import get_subscription_id
                     subscription_id = get_subscription_id(self.cli_ctx)
                     print(f"DEBUG: Using current login subscription ID: {subscription_id}")
-                
+
                 args = ["az"] + args if args[0] != 'az' else args
                 command = " ".join(args)
                 what_if_result = show_what_if(self.cli_ctx, command, subscription_id=subscription_id)
@@ -724,14 +723,17 @@ class AzCliCommandInvoker(CommandInvoker):
                 # Return the formatted what-if output as the result
                 # Similar to the normal flow in execute() method
                 return CommandResultItem(
-                    what_if_result, 
+                    what_if_result,
                     table_transformer=None,
                     is_query_active=self.data.get('query_active', False),
                     exit_code=0
                 )
-            except Exception as ex:
+            except (CLIError, ValueError, KeyError) as ex:
                 # If what-if service fails, still show an informative message
-                return CommandResultItem(None, exit_code=1, error=CLIError(f'What-if preview failed: {str(ex)}\nNote: This was a preview operation. No actual changes were made.'))
+                return CommandResultItem(None, exit_code=1,
+                                         error=CLIError(f'What-if preview failed: {str(ex)}\n'
+                                                        f'Note: This was a preview operation. '
+                                                        f'No actual changes were made.'))
 
     @staticmethod
     def _extract_parameter_names(args):

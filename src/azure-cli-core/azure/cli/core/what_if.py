@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-
 import threading
 import time
 import sys
@@ -22,11 +21,11 @@ def read_script_file(script_path):
         raise CLIError(f"Error reading script file: {ex}")
 
 
-def get_auth_headers(cmd, subscription_id):
+def _get_auth_headers(cli_ctx, subscription_id):
     from azure.cli.core._profile import Profile
 
-    resource = cmd.cli_ctx.cloud.endpoints.active_directory_resource_id
-    profile = Profile(cli_ctx=cmd.cli_ctx)
+    resource = cli_ctx.cloud.endpoints.active_directory_resource_id
+    profile = Profile(cli_ctx=cli_ctx)
 
     try:
         token_result = profile.get_raw_token(resource, subscription=subscription_id)
@@ -41,19 +40,67 @@ def get_auth_headers(cmd, subscription_id):
     }
 
 
-def make_what_if_request(payload, headers_dict):
+def _make_what_if_request(payload, headers_dict, cli_ctx=None):
     request_completed = threading.Event()
 
     def _rotating_progress():
         """Simulate a rotating progress indicator."""
-        chars = ["|", "\\", "/", "-"]
+        spinner_chars = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+        fallback_chars = ["|", "\\", "/", "-"]
+
+        try:
+            "⠋".encode(sys.stderr.encoding or 'utf-8')
+            chars = spinner_chars
+        except (UnicodeEncodeError, UnicodeDecodeError, LookupError):
+            chars = fallback_chars
+
+        use_color = cli_ctx and getattr(cli_ctx, 'enable_color', False)
+        if use_color:
+            try:
+                CYAN = '\033[36m'
+                GREEN = '\033[32m'
+                YELLOW = '\033[33m'
+                BLUE = '\033[34m'
+                RESET = '\033[0m'
+                BOLD = '\033[1m'
+            except (UnicodeError, AttributeError):
+                use_color = False
+
+        if not use_color:
+            CYAN = GREEN = YELLOW = BLUE = RESET = BOLD = ''
+
         idx = 0
+        start_time = time.time()
+
+        # Simulate different stages, can be improved with real stages if available
         while not request_completed.is_set():
-            sys.stderr.write(f"\r{chars[idx % len(chars)]} Running")
+            elapsed = time.time() - start_time
+            if elapsed < 10:
+                status = f"{CYAN}Connecting to what-if service{RESET}"
+                spinner_color = CYAN
+            elif elapsed < 30:
+                status = f"{BLUE}Analyzing Azure CLI script{RESET}"
+                spinner_color = BLUE
+            elif elapsed < 60:
+                status = f"{YELLOW}Processing what-if analysis{RESET}"
+                spinner_color = YELLOW
+            else:
+                status = f"{GREEN}Finalizing results{RESET}"
+                spinner_color = GREEN
+            elapsed_str = f"{BOLD}({elapsed:.0f}s){RESET}"
+            spinner = f"{spinner_color}{chars[idx % len(chars)]}{RESET}"
+            progress_line = f"{spinner} {status}... {elapsed_str}"
+            visible_length = len(progress_line) - (progress_line.count('\033[') * 5)
+            max_width = 100
+            if visible_length > max_width:
+                truncated_status = status[:max_width - 30] + "..."
+                progress_line = f"{spinner} {truncated_status} {elapsed_str}"
+            sys.stderr.write(f"\r{' ' * 120}\r{progress_line}")
             sys.stderr.flush()
             idx += 1
-            time.sleep(0.2)
-        sys.stderr.write("\r" + " " * 20 + "\r")
+            time.sleep(0.12)
+        clear_line = f"\r{' ' * 120}\r"
+        sys.stderr.write(clear_line)
         sys.stderr.flush()
 
     try:
@@ -64,7 +111,7 @@ def make_what_if_request(payload, headers_dict):
         progress_thread.start()
 
         session = Session()
-        req = Request(method="POST", url=f"{function_app_url}/api/what_if_preview",
+        req = Request(method="POST", url=f"{function_app_url}/api/what_if_cli_preview",
                       headers=headers_dict, data=json.dumps(payload))
         prepared = session.prepare_request(req)
         response = session.send(prepared)
@@ -166,3 +213,36 @@ def convert_json_to_what_if_result(what_if_json_result):
         potential_changes.append(_create_resource_change(change_data))
 
     return WhatIfOperationResult(changes, potential_changes, [])
+
+
+def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pretty_print=False):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.cli.command_modules.resource._formatters import format_what_if_operation_result
+
+    if not subscription_id:
+        subscription_id = get_subscription_id(cli_ctx)
+
+    payload = {
+        "azcli_script": azcli_script,
+        "subscription_id": subscription_id
+    }
+
+    headers_dict = _get_auth_headers(cli_ctx, subscription_id)
+    response = _make_what_if_request(payload, headers_dict, cli_ctx)
+
+    try:
+        raw_results = response.json()
+    except ValueError as ex:
+        raise CLIError(f"Failed to parse response from what-if service: {ex}, raw response: {response.text}")
+
+    success = raw_results.get('success')
+    if success is False:
+        raise CLIError(f"Errors from what-if service: {raw_results}")
+    if success is True:
+        what_if_result = raw_results.get('what_if_result', {})
+        what_if_operation_result = convert_json_to_what_if_result(what_if_result)
+        if no_pretty_print:
+            return what_if_result
+        print(format_what_if_operation_result(what_if_operation_result, cli_ctx.enable_color))
+        return what_if_result
+    raise CLIError(f"Unexpected response from what-if service, got: {raw_results}")

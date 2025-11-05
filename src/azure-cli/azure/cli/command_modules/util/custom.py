@@ -371,37 +371,3 @@ class AccessTokenCredential:  # pylint: disable=too-few-public-methods
         # Assume the access token expires in 1 year / 31536000 seconds
         return AccessToken(self.access_token, int(time.time()) + 31536000)
 
-
-def show_what_if(cmd, script_path, no_pretty_print=False):
-    from azure.cli.core.commands.client_factory import get_subscription_id
-    from azure.cli.command_modules.resource._formatters import format_what_if_operation_result
-    from azure.cli.core.what_if import (read_script_file, get_auth_headers,
-                                        make_what_if_request, convert_json_to_what_if_result)
-
-    script_content = read_script_file(script_path)
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-
-    payload = {
-        "azcli_script": script_content,
-        "subscription_id": subscription_id
-    }
-
-    headers_dict = get_auth_headers(cmd, subscription_id)
-    response = make_what_if_request(payload, headers_dict)
-
-    try:
-        raw_results = response.json()
-    except ValueError as ex:
-        raise CLIError(f"Failed to parse response from what-if service: {ex}")
-
-    success = raw_results.get('success')
-    if success is False:
-        return raw_results
-    if success is True:
-        what_if_result = raw_results.get('what_if_result', {})
-        what_if_operation_result = convert_json_to_what_if_result(what_if_result)
-        if no_pretty_print:
-            return what_if_result
-        print(format_what_if_operation_result(what_if_operation_result, cmd.cli_ctx.enable_color))
-        return what_if_result
-    raise CLIError(f"Unexpected response from what-if service, got: {raw_results}")
