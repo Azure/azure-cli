@@ -557,7 +557,7 @@ def aks_namespace_update(
         existedNamespace = client.get(resource_group_name, cluster_name, name)
     except ResourceNotFoundErrorAzCore:
         raise ClientRequestError(
-            f"Namespace '{name}' doesn't exist."
+            f"Namespace '{name}' doesn't exist. "
             "Please use 'aks namespace list' to get current list of managed namespaces"
         )
 
