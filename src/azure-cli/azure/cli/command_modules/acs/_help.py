@@ -709,7 +709,7 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto
   - name: Create a kubernetes cluster with auto node provisioning and no default pools.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
-  - name: Create a kubernetes cluster with KataVmIsolation enabled.
+  - name: Create a Kubernetes cluster with KataVmIsolation enabled.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
 """
 
