@@ -1843,7 +1843,7 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster  --os-sku Ubuntu --pod-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet --pod-ip-allocation-mode StaticBlock
   - name: create a nodepool of type VirtualMachines
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
-  - name: Create a kubernetes cluster with KataVmIsolation enabled.
+  - name: Create a nodepool with KataVmIsolation enabled.
     text: az aks nodepool add -g MyResourceGroup -n MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
 """
 
