@@ -480,7 +480,6 @@ def agent_update(
     max_replicas=None,
     description=None,
     tags=None,
-    endpoint=None,
 ):  # pylint: disable=unused-argument
     """
     Update hosted agent deployment configuration.

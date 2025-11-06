@@ -392,3 +392,32 @@ examples:
   - name: Show all usages for Azure Cognitive Services.
     text: az cognitiveservices usage list -l centraluseuap
 """
+
+helps['cognitiveservices agent'] = """
+type: group
+short-summary: Control foundry agents.
+"""
+
+helps['cognitiveservices agent start'] = """
+type: command
+short-summary: Start a hosted agent deployment.
+examples:
+  - name: Start hosted agent deployment.
+    text: az cognitiveservices agent start --account-name myAccount --project-name myProject --name myAgent --agent-version 1
+"""
+
+helps['cognitiveservices agent stop'] = """
+type: command
+short-summary: Stop a hosted agent deployment.
+examples:
+  - name: Start hosted agent deployment.
+    text: az cognitiveservices agent stop --account-name myAccount --project-name myProject --name myAgent --agent-version 1
+"""
+
+helps['cognitiveservices agent update'] = """
+type: command
+short-summary: Update a hosted agent deployment.
+examples:
+  - name: Start hosted agent deployment.
+    text: az cognitiveservices agent update --account-name myAccount --project-name myProject --name myAgent --agent-version 1 --min-replicas 1 --max-replicas 2
+"""

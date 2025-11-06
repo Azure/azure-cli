@@ -113,4 +113,4 @@ def load_command_table(self, _):
         g.custom_command('delete', 'agent_delete')
         g.custom_command('list', 'agent_list')
         g.custom_command('list-versions', 'agent_versions_list')
-        g.custom_command('show', 'agent_show')
+        g.custom_show_command('show', 'agent_show')
