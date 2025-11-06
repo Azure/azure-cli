@@ -662,7 +662,19 @@ def todict(obj, post_processor=None):
     # azure-core provided new function `attribute_list` to list all attribute names
     # so that we don't need to use raw __dict__ directly
     if getattr(obj, "_is_model", False):
-        result = {to_camel_case(attr): todict(getattr(obj, attr), post_processor)
+        _HYBRID_MODEL_COMPATIBLE_MAP: dict[str, str] = {
+            "keys_property": "keys",
+            "values_property": "values",
+            "items_property": "items",
+            "get_property": "get",
+            "pop_property": "pop",
+            "update_property": "update",
+            "clear_property": "clear",
+            "popitem_property": "popitem",
+            "copy_property": "copy",
+            "setdefault_property": "setdefault",
+        }
+        result = {to_camel_case(_HYBRID_MODEL_COMPATIBLE_MAP.get(attr) or attr): todict(getattr(obj, attr), post_processor)
                   for attr in attribute_list(obj) if hasattr(obj, attr)}
         return post_processor(obj, result) if post_processor else result
     if hasattr(obj, '_asdict'):
