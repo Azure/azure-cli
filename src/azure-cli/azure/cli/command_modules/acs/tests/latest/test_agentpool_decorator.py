@@ -49,7 +49,6 @@ from azure.cli.core.azclierror import (
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json
 
-
 class AKSAgentPoolModelsTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -65,7 +64,6 @@ class AKSAgentPoolModelsTestCase(unittest.TestCase):
         self.assertEqual(standalone_models.UnifiedAgentPoolModel, getattr(module, "AgentPool"))
         managedcluster_models = AKSAgentPoolModels(self.cmd, self.resource_type, AgentPoolDecoratorMode.MANAGED_CLUSTER)
         self.assertEqual(managedcluster_models.UnifiedAgentPoolModel, getattr(module, "ManagedClusterAgentPoolProfile"))
-
 
 class AKSAgentPoolContextCommonTestCase(unittest.TestCase):
     def _remove_defaults_in_agentpool(self, agentpool):
@@ -3268,6 +3266,148 @@ class AKSAgentPoolUpdateDecoratorCommonTestCase(unittest.TestCase):
         with self.assertRaises(MutuallyExclusiveArgumentError):
             dec_3.update_fips_image(agentpool_2)
 
+    def common_update_localdns_profile(self):
+        import tempfile
+        import json
+        import os
+
+        # Test case 1: LocalDNS config provided - verify method is called
+        localdns_config = {
+            "mode": "Required",
+            "kubeDNSOverrides": {
+                ".": {
+                    "cacheDurationInSeconds": 3600,
+                    "protocol": "PreferUDP"
+                }
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as f:
+            json.dump(localdns_config, f)
+            f.flush()
+            config_file_path = f.name
+
+        try:
+            dec_1 = AKSAgentPoolUpdateDecorator(
+                self.cmd,
+                self.client,
+                {"localdns_config": config_file_path},
+                self.resource_type,
+                self.agentpool_decorator_mode,
+            )
+
+            agentpool_1 = self.create_initialized_agentpool_instance()
+            dec_1.context.attach_agentpool(agentpool_1)
+            dec_agentpool_1 = dec_1.update_localdns_profile(agentpool_1)
+
+            # Verify that LocalDNS profile was created and assigned
+            self.assertIsNotNone(dec_agentpool_1.local_dns_profile)
+            self.assertEqual(dec_agentpool_1.local_dns_profile.mode, "Required")
+
+        finally:
+            os.unlink(config_file_path)
+
+        # Test case 2: No LocalDNS config provided - no change
+        dec_2 = AKSAgentPoolUpdateDecorator(
+            self.cmd,
+            self.client,
+            {},
+            self.resource_type,
+            self.agentpool_decorator_mode,
+        )
+
+        agentpool_2 = self.create_initialized_agentpool_instance()
+        original_local_dns_profile = agentpool_2.local_dns_profile
+        dec_2.context.attach_agentpool(agentpool_2)
+        dec_agentpool_2 = dec_2.update_localdns_profile(agentpool_2)
+
+        # Verify LocalDNS profile wasn't changed
+        self.assertEqual(dec_agentpool_2.local_dns_profile, original_local_dns_profile)
+
+        # Test case 3: LocalDNS config with null values (should throw InvalidArgumentValueError)
+        localdns_config_with_nulls = {
+            "mode": "Required",
+            "kubeDNSOverrides": None,
+            "vnetDNSOverrides": {
+                ".": {
+                    "cacheDurationInSeconds": 1800,
+                    "protocol": "ForceTCP"
+                }
+            }
+        }
+
+        with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".json") as f:
+            json.dump(localdns_config_with_nulls, f)
+            f.flush()
+            config_file_path = f.name
+
+        try:
+            dec_3 = AKSAgentPoolUpdateDecorator(
+                self.cmd,
+                self.client,
+                {"localdns_config": config_file_path},
+                self.resource_type,
+                self.agentpool_decorator_mode,
+            )
+
+            agentpool_3 = self.create_initialized_agentpool_instance()
+            dec_3.context.attach_agentpool(agentpool_3)
+            # Test case 3 should now throw InvalidArgumentValueError when kubeDNSOverrides is None
+            with self.assertRaises(InvalidArgumentValueError) as context:
+                dec_3.update_localdns_profile(agentpool_3)
+
+            # Verify the error message contains expected text about DNS overrides
+            self.assertIn("Expected a dictionary for DNS overrides, but got NoneType: None", str(context.exception))
+
+        finally:
+            os.unlink(config_file_path)
+
+    def common_test_process_dns_overrides_helper(self):
+        from azure.cli.command_modules.acs._helpers import process_dns_overrides
+
+        # Test the process_dns_overrides utility function functionality
+
+        # Test case 1: Valid DNS overrides without nulls
+        dns_overrides = {
+            ".": {
+                "cacheDurationInSeconds": 3600,
+                "protocol": "PreferUDP"
+            }
+        }
+        target_dict = {}
+
+        def mock_build_override(override_dict):
+            return self.models.LocalDNSOverride(
+                cache_duration_in_seconds=override_dict.get("cacheDurationInSeconds"),
+                protocol=override_dict.get("protocol")
+            )
+
+        process_dns_overrides(dns_overrides, target_dict, mock_build_override)
+        self.assertEqual(len(target_dict), 1)
+        self.assertIn(".", target_dict)
+
+        # Test case 2: DNS overrides with null values (should handle gracefully)
+        dns_overrides_with_nulls = {
+            ".": {
+                "cacheDurationInSeconds": 1800,
+                "protocol": None
+            }
+        }
+        target_dict_2 = {}
+
+        process_dns_overrides(dns_overrides_with_nulls, target_dict_2, mock_build_override)
+        self.assertEqual(len(target_dict_2), 1)
+
+        # Test case 3: None input (should throw InvalidArgumentValueError)
+        target_dict_3 = {}
+        with self.assertRaises(InvalidArgumentValueError) as context:
+            process_dns_overrides(None, target_dict_3, mock_build_override)
+        self.assertIn("Expected a dictionary for DNS overrides, but got NoneType: None", str(context.exception))
+
+        # Test case 4: Empty input (should handle gracefully)
+        target_dict_4 = {}
+        process_dns_overrides({}, target_dict_4, mock_build_override)
+        self.assertEqual(len(target_dict_4), 0)
 
 class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecoratorCommonTestCase):
     def setUp(self):
@@ -3398,7 +3538,6 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
             headers={},
         )
 
-
 class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDecoratorCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -3493,7 +3632,6 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
 
     def test_update_vm_properties(self):
         self.common_update_vm_properties()
-
 
 if __name__ == "__main__":
     unittest.main()

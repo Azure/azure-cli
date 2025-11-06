@@ -128,7 +128,6 @@ class AKSManagedClusterModelsTestCase(unittest.TestCase):
             getattr(module, "ManagedClusterManagedOutboundIPProfile"),
         )
 
-
 class AKSManagedClusterContextTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -6185,7 +6184,6 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         certs_empty = ctx_4.get_custom_ca_trust_certificates()
         self.assertIsNotNone(certs_empty)
         self.assertEqual(certs_empty, [])
-
 
 class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -14013,7 +14011,6 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
-
 
 if __name__ == "__main__":
     unittest.main()
