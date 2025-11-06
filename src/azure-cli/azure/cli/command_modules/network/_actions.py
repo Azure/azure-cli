@@ -2,12 +2,13 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+# pylint: disable=line-too-long
 
 from collections import defaultdict
 
 import argparse
 from knack.util import CLIError
-from azure.cli.core.azclierror import UnrecognizedArgumentError
+from azure.cli.core.azclierror import UnrecognizedArgumentError, InvalidArgumentValueError
 from ._validators import read_base_64_file
 
 
@@ -184,7 +185,9 @@ class WAFRulesCreate(argparse._AppendAction):
             elif kl == 'state':
                 d['state'] = v[0]
             elif kl == 'sensitivity':
+                if v[0].lower() not in ['low', 'medium', 'high']:
+                    raise InvalidArgumentValueError("sensitivity must be one of 'low', 'medium', or 'high'.")
                 d['sensitivity'] = v[0]
             else:
-                raise UnrecognizedArgumentError('key error: key must be one of rule-id, action and state.')
+                raise UnrecognizedArgumentError('key error: key must be one of rule-id, action, state, and sensitivity.')
         return d

@@ -316,6 +316,60 @@ class TestLabels(unittest.TestCase):
         validators.validate_nodepool_labels(namespace)
 
 
+class ManagedNamespace:
+    def __init__(self, name=None, cpu_request=None, cpu_limit=None, memory_request=None, memory_limit=None):
+        self.name = name
+        self.cpu_request = cpu_request
+        self.cpu_limit = cpu_limit
+        self.memory_request = memory_request
+        self.memory_limit = memory_limit
+
+
+class TestValidateManagedNamespace(unittest.TestCase):
+    def test_invalid_namespace_name(self):
+        namespace = ManagedNamespace(name="Abc")
+        err = "Invalid namespace 'Abc'. Must consist of lower case alphanumeric characters or '-', and must start and end with an alphanumeric character."
+        with self.assertRaises(ValueError) as cm:
+            validators.validate_namespace_name(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_namespace_name(self):
+        namespace = ManagedNamespace(name="abc")
+        validators.validate_namespace_name(namespace)
+
+    def test_invalid_cpu_request(self):
+        namespace = ManagedNamespace(cpu_request="2t")
+        err = "--cpu-request must be specified in millicores, like 200m"
+        with self.assertRaises(ValueError) as cm:
+            validators.validate_resource_quota(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_cpu_limit(self):
+        namespace = ManagedNamespace(cpu_request="200m", cpu_limit="2t")
+        err = "--cpu-limit must be specified in millicores, like 200m"
+        with self.assertRaises(ValueError) as cm:
+            validators.validate_resource_quota(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_memory_request(self):
+        namespace = ManagedNamespace(cpu_request="200m", cpu_limit="800m", memory_request="2t")
+        err = "--memory-request must be specified in the power-of-two equivalents form:Ei, Pi, Ti, Gi, Mi, Ki."
+        with self.assertRaises(ValueError) as cm:
+            validators.validate_resource_quota(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_invalid_memory_limit(self):
+        namespace = ManagedNamespace(cpu_request="200m", cpu_limit="800m", memory_request="1Gi", memory_limit="2t")
+        err = "--memory-limit must be specified in the power-of-two equivalents form:Ei, Pi, Ti, Gi, Mi, Ki."
+        with self.assertRaises(ValueError) as cm:
+            validators.validate_resource_quota(namespace)
+        self.assertEqual(str(cm.exception), err)
+
+    def test_valid_resource_quotas(self):
+        namespace = ManagedNamespace(cpu_request="500m", cpu_limit="800m", memory_request="1Gi", memory_limit="2Gi")
+        validators.validate_resource_quota(namespace)
+
+
 class LabelsNamespace:
     def __init__(self, labels):
         self.labels = labels

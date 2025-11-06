@@ -32,6 +32,14 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODE_OS_CHANNEL_SECURITY_PATCH,
     CONST_NODEPOOL_MODE_SYSTEM, CONST_NODEPOOL_MODE_USER, CONST_NODEPOOL_MODE_GATEWAY,
     CONST_OS_DISK_TYPE_EPHEMERAL, CONST_OS_DISK_TYPE_MANAGED,
+    CONST_NAMESPACE_ADOPTION_POLICY_NEVER,
+    CONST_NAMESPACE_ADOPTION_POLICY_IFIDENTICAL,
+    CONST_NAMESPACE_ADOPTION_POLICY_ALWAYS,
+    CONST_NAMESPACE_NETWORK_POLICY_RULE_DENYALL,
+    CONST_NAMESPACE_NETWORK_POLICY_RULE_ALLOWALL,
+    CONST_NAMESPACE_NETWORK_POLICY_RULE_ALLOWSAMENAMESPACE,
+    CONST_NAMESPACE_DELETE_POLICY_KEEP,
+    CONST_NAMESPACE_DELETE_POLICY_DELETE,
     CONST_OS_SKU_AZURELINUX, CONST_OS_SKU_AZURELINUX3,
     CONST_OS_SKU_CBLMARINER, CONST_OS_SKU_MARINER,
     CONST_OS_SKU_UBUNTU, CONST_OS_SKU_UBUNTU2204,
@@ -89,6 +97,8 @@ from azure.cli.command_modules.acs._validators import (
     validate_acr, validate_agent_pool_name, validate_assign_identity,
     validate_assign_kubelet_identity, validate_azure_keyvault_kms_key_id,
     validate_azure_keyvault_kms_key_vault_resource_id,
+    validate_namespace_name,
+    validate_resource_quota,
     validate_azuremonitorworkspaceresourceid, validate_create_parameters,
     validate_azuremonitor_privatelinkscope_resourceid,
     validate_credential_format, validate_defender_config_parameter,
@@ -318,6 +328,24 @@ ephemeral_disk_nvme_perf_tiers = [
 bootstrap_artifact_source_types = [
     CONST_ARTIFACT_SOURCE_DIRECT,
     CONST_ARTIFACT_SOURCE_CACHE,
+]
+
+# consts for managed namespace
+network_policy_rule = [
+    CONST_NAMESPACE_NETWORK_POLICY_RULE_DENYALL,
+    CONST_NAMESPACE_NETWORK_POLICY_RULE_ALLOWALL,
+    CONST_NAMESPACE_NETWORK_POLICY_RULE_ALLOWSAMENAMESPACE,
+]
+
+adoption_policy = [
+    CONST_NAMESPACE_ADOPTION_POLICY_NEVER,
+    CONST_NAMESPACE_ADOPTION_POLICY_IFIDENTICAL,
+    CONST_NAMESPACE_ADOPTION_POLICY_ALWAYS,
+]
+
+delete_policy = [
+    CONST_NAMESPACE_DELETE_POLICY_KEEP,
+    CONST_NAMESPACE_DELETE_POLICY_DELETE,
 ]
 
 # consts for app routing add-on
@@ -865,6 +893,52 @@ def load_arguments(self, _):
 
     with self.argument_context('aks scale', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('nodepool_name', validator=validate_nodepool_name, help='Node pool name, up to 12 alphanumeric characters.')
+
+    # managed namespace
+    with self.argument_context("aks namespace") as c:
+        c.argument("cluster_name", help="The cluster name.")
+        c.argument(
+            "name",
+            validator=validate_namespace_name,
+            help="The managed namespace name.",
+        )
+
+    for scope in [
+        "aks namespace add",
+        "aks namespace update",
+    ]:
+        with self.argument_context(scope) as c:
+            c.argument("tags", tags_type, help="The tags to set to the managed namespace")
+            c.argument("labels", nargs="*", help="Labels set to the managed namespace")
+            c.argument(
+                "annotations",
+                nargs="*",
+                help="Annotations set to the managed namespace",
+            )
+            c.argument("cpu_request", validator=validate_resource_quota)
+            c.argument("cpu_limit", validator=validate_resource_quota)
+            c.argument("memory_request", validator=validate_resource_quota)
+            c.argument("memory_limit", validator=validate_resource_quota)
+            c.argument("ingress_policy", arg_type=get_enum_type(network_policy_rule))
+            c.argument("egress_policy", arg_type=get_enum_type(network_policy_rule))
+            c.argument("adoption_policy", arg_type=get_enum_type(adoption_policy))
+            c.argument("delete_policy", arg_type=get_enum_type(delete_policy))
+            c.argument("aks_custom_headers")
+            c.argument("no_wait", help="Do not wait for the long-running operation to finish")
+
+    with self.argument_context("aks namespace get-credentials") as c:
+        c.argument(
+            "context_name",
+            options_list=["--context"],
+            help="If specified, overwrite the default context name.",
+        )
+        c.argument(
+            "path",
+            options_list=["--file", "-f"],
+            type=file_type,
+            completer=FilesCompleter(),
+            default=os.path.join(os.path.expanduser("~"), ".kube", "config"),
+        )
 
     with self.argument_context('aks check-acr', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='managed_clusters') as c:
         c.argument('acr', validator=validate_registry_name)

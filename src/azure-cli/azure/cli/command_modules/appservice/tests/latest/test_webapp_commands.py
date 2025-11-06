@@ -3434,7 +3434,7 @@ class WebappSlotTest(ScenarioTest):
         ])
 
 class WebappStackTest(ScenarioTest):
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_list_show_details(self, resource_group):
         webapp_name = self.create_random_name(prefix='webapp-list-show-details', length=40)
