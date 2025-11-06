@@ -241,7 +241,7 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
 
         # create
         create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
-                     '--node-count=1 ' \
+                     '--node-count=1 --outbound-type=none --bootstrap-artifact-source=Cache --enable-private-cluster ' \
                      '--tags {tags} --nodepool-labels {nodepool_labels} --nodepool-tags {nodepool_tags}'
         self.cmd(create_cmd, checks=[
             self.check('provisioningState', 'Succeeded'),
