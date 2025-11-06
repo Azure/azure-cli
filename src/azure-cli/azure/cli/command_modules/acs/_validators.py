@@ -142,7 +142,7 @@ def validate_asm_egress_name(namespace):
     if namespace.istio_egressgateway_name is None:
         return
     name = namespace.istio_egressgateway_name
-    asm_egress_name_regex = re.compile(r'^[a-z0-9]([-a-z0-9]*[a-z0-9])?(.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$')
+    asm_egress_name_regex = re.compile(r'[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$')
     match = asm_egress_name_regex.match(name)
     if not match or len(name) > CONST_AZURE_SERVICE_MESH_MAX_EGRESS_NAME_LENGTH:
         raise InvalidArgumentValueError(
