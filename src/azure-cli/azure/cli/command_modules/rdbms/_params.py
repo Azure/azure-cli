@@ -340,12 +340,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                  'This value can only be updated if flexible server is using Premium SSD v2 Disks.'
         )
 
-        create_default_db_arg_type = CLIArgumentType(
-            arg_type=get_enum_type(['Enabled', 'Disabled']),
-            options_list=['--create-default-database', '-c'],
-            help='Enable or disable the creation of default database flexibleserverdb. Default value is Disabled.'
-        )
-
         cluster_option_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['Server', 'ElasticCluster']),
             options_list=['--cluster-option'],
@@ -617,7 +611,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('iops', default=None, arg_type=iops_v2_arg_type)
                 c.argument('throughput', default=None, arg_type=throughput_arg_type)
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
-                c.argument('create_default_db', default='Disabled', arg_type=create_default_db_arg_type)
                 c.argument('create_cluster', default='Server', arg_type=cluster_option_arg_type)
                 c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
             elif command_group == 'mysql':
@@ -647,7 +640,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('zone', zone_arg_type)
             c.argument('tags', tags_type)
             c.argument('standby_availability_zone', arg_type=standby_availability_zone_arg_type)
-            c.argument('database_name', arg_type=database_name_create_arg_type)
             c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server list'.format(command_group)) as c:
