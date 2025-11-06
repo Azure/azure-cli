@@ -2214,7 +2214,7 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_agentpool_gateway_profile(agentpool)
         # set up virtual machines profile
         agentpool = self.set_up_virtual_machines_profile(agentpool)
-        # set up workload_runtime 
+        # set up workload_runtime
         agentpool = self.set_up_workload_runtime(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
