@@ -5734,7 +5734,7 @@ def show_capacity_reservation_group(client, resource_group_name, capacity_reserv
                       expand=expand)
 
 
-def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
+def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, enable_automatic_upgrade=None, no_wait=False):
     from .aaz.latest.vm import Update as _VMUpdate
 
     class SetVMApplications(_VMUpdate):
@@ -5743,7 +5743,7 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
             args.no_wait = no_wait
 
         def pre_instance_update(self, instance):
-            instance.properties.application_profile.gallery_applications = [{"package_reference_id": avid} for avid in application_version_ids]
+            instance.properties.application_profile.gallery_applications = [{"package_reference_id": avid, 'enable_automatic_upgrade': enable_automatic_upgrade} for avid in application_version_ids]
 
             if order_applications:
                 index = 1
@@ -5796,7 +5796,7 @@ def list_vm_applications(cmd, vm_name, resource_group_name):
     return vm.get("applicationProfile", {})
 
 
-def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
+def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, enable_automatic_upgrade=None, no_wait=False):
     client = _compute_client_factory(cmd.cli_ctx)
     ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
     try:
@@ -5804,7 +5804,7 @@ def set_vmss_applications(cmd, vmss_name, resource_group_name, application_versi
     except ResourceNotFoundError:
         raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
 
-    vmss.virtual_machine_profile.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
+    vmss.virtual_machine_profile.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid, enable_automatic_upgrade=enable_automatic_upgrade) for avid in application_version_ids])
 
     if order_applications:
         index = 1
