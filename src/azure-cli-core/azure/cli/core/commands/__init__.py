@@ -705,30 +705,42 @@ class AzCliCommandInvoker(CommandInvoker):
             try:
                 # Check if --export-bicep is present
                 export_bicep = '--export-bicep' in args
+                
+                # Remove both --what-if and --export-bicep from args for processing
+                clean_args = [arg for arg in args if arg not in ['--what-if', '--export-bicep']]
+                
                 if export_bicep:
-                    # Remove --export-bicep from args for processing
-                    args = [arg for arg in args if arg != '--export-bicep']
                     logger.debug("Export bicep mode enabled")
                 
                 # Get subscription ID with priority: --subscription parameter > current login subscription
-                if '--subscription' in args:
-                    index = args.index('--subscription')
-                    if index + 1 < len(args):
-                        subscription_value = args[index + 1]
+                if '--subscription' in clean_args:
+                    index = clean_args.index('--subscription')
+                    if index + 1 < len(clean_args):
+                        subscription_value = clean_args[index + 1]
                         subscription_id = subscription_value
                 else:
                     from azure.cli.core.commands.client_factory import get_subscription_id
                     subscription_id = get_subscription_id(self.cli_ctx)
                     logger.debug("Using current login subscription ID: %s", subscription_id)
 
-                args = ["az"] + args if args[0] != 'az' else args
-                command = " ".join(args)
+                clean_args = ["az"] + clean_args if clean_args[0] != 'az' else clean_args
+                command = " ".join(clean_args)
                 what_if_result = show_what_if(self.cli_ctx, command, subscription_id=subscription_id, export_bicep=export_bicep)
                 
                 # Save bicep templates if export_bicep is enabled and bicep_template exists
+                bicep_files = []
                 if export_bicep and isinstance(what_if_result, dict) and 'bicep_template' in what_if_result:
-                    self._save_bicep_templates(args, what_if_result['bicep_template'])
+                    bicep_files = self._save_bicep_templates(clean_args, what_if_result['bicep_template'])
+                    what_if_result.pop('bicep_template', None)
 
+                # Print bicep file locations if any were saved
+                if bicep_files:
+                    from azure.cli.core.style import Style, print_styled_text
+                    print_styled_text((Style.WARNING, "\nBicep templates saved to:"))
+                    for file_path in bicep_files:
+                        print_styled_text((Style.WARNING, f"  {file_path}"))
+                    print("")
+                
                 # Ensure output format is set for proper formatting
                 # Default to 'json' if not already set
                 if 'output' not in self.cli_ctx.invocation.data or self.cli_ctx.invocation.data['output'] is None:
@@ -750,7 +762,10 @@ class AzCliCommandInvoker(CommandInvoker):
                                                         f'No actual changes were made.'))
 
     def _save_bicep_templates(self, args, bicep_template):
-        """Save bicep templates to user's .azure directory"""
+        """Save bicep templates to user's .azure directory
+        Returns a list of saved file paths
+        """
+        saved_files = []
         try:
             import os
             from datetime import datetime
@@ -760,7 +775,7 @@ class AzCliCommandInvoker(CommandInvoker):
             command_parts = [arg for arg in args if not arg.startswith('-') and arg != 'az']
             if not command_parts:
                 logger.warning("Could not determine command name for bicep file naming")
-                return
+                return saved_files
             
             first_command = command_parts[0]
             az_command = f"az_{first_command}"
@@ -787,7 +802,8 @@ class AzCliCommandInvoker(CommandInvoker):
                 main_file = os.path.join(whatif_dir, f"{full_command}_main_{timestamp}.bicep")
                 with open(main_file, 'w', encoding='utf-8') as f:
                     f.write(bicep_template['main_template'])
-                logger.info("Bicep main template saved to: %s", main_file)
+                logger.debug("Bicep main template saved to: %s", main_file)
+                saved_files.append(main_file)
             
             # Save module templates if they exist
             if 'module_templates' in bicep_template and bicep_template['module_templates']:
@@ -796,10 +812,13 @@ class AzCliCommandInvoker(CommandInvoker):
                     module_file = os.path.join(whatif_dir, f"{full_command}_{module_suffix}_{timestamp}.bicep")
                     with open(module_file, 'w', encoding='utf-8') as f:
                         f.write(module_template)
-                    logger.info("Bicep module template saved to: %s", module_file)
+                    logger.debug("Bicep module template saved to: %s", module_file)
+                    saved_files.append(module_file)
                     
         except Exception as ex:
             logger.warning("Failed to save bicep templates: %s", str(ex))
+        
+        return saved_files
 
     @staticmethod
     def _extract_parameter_names(args):

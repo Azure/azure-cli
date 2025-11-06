@@ -258,7 +258,6 @@ def show_what_if(cli_ctx, azcli_script: str, subscription_id: str = None, no_pre
         if no_pretty_print:
             return result_data
         
-        # Print the formatted what-if result (but not bicep template unless in debug mode)
         print(format_what_if_operation_result(what_if_operation_result, cli_ctx.enable_color))
         
         return result_data
