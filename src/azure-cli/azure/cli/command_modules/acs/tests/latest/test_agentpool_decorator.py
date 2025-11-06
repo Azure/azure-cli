@@ -3538,6 +3538,12 @@ class AKSAgentPoolUpdateDecoratorStandaloneModeTestCase(AKSAgentPoolUpdateDecora
             headers={},
         )
 
+    def test_update_localdns_profile(self):
+        self.common_update_localdns_profile()
+
+    def test_process_dns_overrides_helper(self):
+        self.common_test_process_dns_overrides_helper()
+
 class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDecoratorCommonTestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -3633,5 +3639,11 @@ class AKSAgentPoolUpdateDecoratorManagedClusterModeTestCase(AKSAgentPoolUpdateDe
     def test_update_vm_properties(self):
         self.common_update_vm_properties()
 
+    def test_update_localdns_profile(self):
+        self.common_update_localdns_profile()
+
+    def test_process_dns_overrides_helper(self):
+        self.common_test_process_dns_overrides_helper()
+        
 if __name__ == "__main__":
     unittest.main()

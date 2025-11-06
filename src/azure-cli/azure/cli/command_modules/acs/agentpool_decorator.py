@@ -63,6 +63,7 @@ IPTag = TypeVar("IPTag")
 # TODO:
 # 1. Add extra type checking for getter functions
 
+
 # pylint: disable=too-few-public-methods
 class AKSAgentPoolModels(BaseAKSModels):
     """Store the models used in aks agentpool series of commands.
@@ -87,12 +88,14 @@ class AKSAgentPoolModels(BaseAKSModels):
             return self.ManagedClusterAgentPoolProfile
         return self.AgentPool
 
+
 # pylint: disable=too-few-public-methods
 class AKSAgentPoolParamDict(BaseAKSParamDict):
     """Store the original parameters passed in by aks agentpool series of commands as an internal dictionary.
 
     Only expose the "get" method externally to obtain parameter values, while recording usage.
     """
+
 
 # pylint: disable=too-many-public-methods
 class AKSAgentPoolContext(BaseAKSContext):
@@ -1777,7 +1780,8 @@ class AKSAgentPoolContext(BaseAKSContext):
                 vnet_dns_overrides=vnet_dns_overrides,
             )
         return agentpool
-    
+
+
 class AKSAgentPoolAddDecorator:
     def __init__(
         self,
@@ -2325,6 +2329,7 @@ class AKSAgentPoolAddDecorator:
         """Set up local DNS profile for the AgentPool object if provided via --localdns-config."""
         self._ensure_agentpool(agentpool)
         return self.context.build_localdns_profile(agentpool)
+
 
 class AKSAgentPoolUpdateDecorator:
     def __init__(

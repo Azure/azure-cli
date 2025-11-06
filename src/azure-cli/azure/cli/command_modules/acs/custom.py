@@ -2602,6 +2602,7 @@ def _update_dev_spaces_extension(cmd, extension_name, extension_module):
         return False
     return True
 
+
 # legacy: dev space command
 def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
     from azure.cli.core.extension import (
@@ -2613,6 +2614,7 @@ def _get_or_add_extension(cmd, extension_name, extension_module, update=False):
     except ExtensionNotInstalledException:
         return _install_dev_spaces_extension(cmd, extension_name)
     return True
+
 
 def aks_agentpool_add(
     cmd,
@@ -2704,6 +2706,7 @@ def aks_agentpool_add(
     # send request to add a real agentpool
     return aks_agentpool_add_decorator.add_agentpool(agentpool)
 
+
 def aks_agentpool_update(
     cmd,
     client,
@@ -2765,8 +2768,10 @@ def aks_agentpool_update(
     # send request to update the real agentpool
     return aks_agentpool_update_decorator.update_agentpool(agentpool)
 
+
 def aks_agentpool_get_upgrade_profile(cmd, client, resource_group_name, cluster_name, nodepool_name):
     return client.get_upgrade_profile(resource_group_name, cluster_name, nodepool_name)
+
 
 def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
                           nodepool_name,
@@ -2878,6 +2883,7 @@ def aks_agentpool_upgrade(cmd, client, resource_group_name, cluster_name,
         if_none_match=if_none_match,
     )
 
+
 def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
                         nodepool_name,
                         node_count=3,
@@ -2905,6 +2911,7 @@ def aks_agentpool_scale(cmd, client, resource_group_name, cluster_name,
         instance,
     )
 
+
 def aks_agentpool_start(cmd,   # pylint: disable=unused-argument
                         client,
                         resource_group_name,
@@ -2926,6 +2933,7 @@ def aks_agentpool_start(cmd,   # pylint: disable=unused-argument
     power_state = PowerState(code="Running")
     instance.power_state = power_state
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance, headers=None)
+
 
 def aks_agentpool_stop(cmd,   # pylint: disable=unused-argument
                        client,
@@ -2949,6 +2957,7 @@ def aks_agentpool_stop(cmd,   # pylint: disable=unused-argument
     instance.power_state = power_state
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, cluster_name, nodepool_name, instance, headers=None)
 
+
 def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
                          nodepool_name,
                          no_wait=False,
@@ -2969,6 +2978,7 @@ def aks_agentpool_delete(cmd, client, resource_group_name, cluster_name,
         return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name)
 
     return sdk_no_wait(no_wait, client.begin_delete, resource_group_name, cluster_name, nodepool_name, if_match=if_match, ignore_pod_disruption_budget=ignore_pdb)
+
 
 def aks_agentpool_operation_abort(cmd,
                                   client,
@@ -2996,6 +3006,7 @@ def aks_agentpool_operation_abort(cmd,
     instance.power_state = power_state
     return sdk_no_wait(no_wait, client.begin_abort_latest_operation, resource_group_name, cluster_name, nodepool_name)
 
+
 def aks_operation_abort(cmd,   # pylint: disable=unused-argument
                         client,
                         resource_group_name,
@@ -3014,6 +3025,7 @@ def aks_operation_abort(cmd,   # pylint: disable=unused-argument
             "Cluster {} doesnt exist, use 'aks list' to get current cluster list".format(name))
     instance.power_state = power_state
     return sdk_no_wait(no_wait, client.begin_abort_latest_operation, resource_group_name, name)
+
 
 def aks_agentpool_delete_machines(cmd,   # pylint: disable=unused-argument
                                   client,
@@ -3057,6 +3069,7 @@ def aks_agentpool_delete_machines(cmd,   # pylint: disable=unused-argument
         machines,
     )
 
+
 def aks_agentpool_manual_scale_add(cmd,
                                    client,
                                    resource_group_name,
@@ -3088,6 +3101,7 @@ def aks_agentpool_manual_scale_add(cmd,
         nodepool_name,
         instance
     )
+
 
 def aks_agentpool_manual_scale_update(cmd,    # pylint: disable=unused-argument
                                       client,
@@ -3134,6 +3148,7 @@ def aks_agentpool_manual_scale_update(cmd,    # pylint: disable=unused-argument
         instance
     )
 
+
 def aks_agentpool_manual_scale_delete(cmd,    # pylint: disable=unused-argument
                                       client,
                                       resource_group_name,
@@ -3169,12 +3184,15 @@ def aks_agentpool_manual_scale_delete(cmd,    # pylint: disable=unused-argument
         instance
     )
 
+
 def aks_agentpool_show(cmd, client, resource_group_name, cluster_name, nodepool_name):
     instance = client.get(resource_group_name, cluster_name, nodepool_name)
     return instance
 
+
 def aks_agentpool_list(cmd, client, resource_group_name, cluster_name):
     return client.list(resource_group_name, cluster_name)
+
 
 def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-many-statements,too-many-branches
                                  client,
@@ -3223,6 +3241,7 @@ def aks_nodepool_snapshot_create(cmd,    # pylint: disable=too-many-locals,too-m
     )
     return client.create_or_update(resource_group_name, snapshot_name, snapshot, headers=aks_custom_headers)
 
+
 def aks_nodepool_snapshot_update(cmd, client, resource_group_name, snapshot_name, tags):   # pylint: disable=unused-argument
     TagsObject = cmd.get_models(
         "TagsObject",
@@ -3237,9 +3256,11 @@ def aks_nodepool_snapshot_update(cmd, client, resource_group_name, snapshot_name
         resource_group_name, snapshot_name, tagsObject)
     return snapshot
 
+
 def aks_nodepool_snapshot_show(cmd, client, resource_group_name, snapshot_name):   # pylint: disable=unused-argument
     snapshot = client.get(resource_group_name, snapshot_name)
     return snapshot
+
 
 def aks_nodepool_snapshot_delete(cmd,    # pylint: disable=unused-argument
                                  client,
@@ -3255,23 +3276,29 @@ def aks_nodepool_snapshot_delete(cmd,    # pylint: disable=unused-argument
 
     return client.delete(resource_group_name, snapshot_name)
 
+
 def aks_nodepool_snapshot_list(cmd, client, resource_group_name=None):  # pylint: disable=unused-argument
     if resource_group_name is None or resource_group_name == '':
         return client.list()
 
     return client.list_by_resource_group(resource_group_name)
 
+
 def aks_rotate_service_account_signing_keys(cmd, client, resource_group_name, name, no_wait=True):
     return sdk_no_wait(no_wait, client.begin_rotate_service_account_signing_keys, resource_group_name, name)
+
 
 def aks_trustedaccess_role_list(cmd, client, location):  # pylint: disable=unused-argument
     return client.list(location)
 
+
 def aks_trustedaccess_role_binding_list(cmd, client, resource_group_name, cluster_name):   # pylint: disable=unused-argument
     return client.list(resource_group_name, cluster_name)
 
+
 def aks_trustedaccess_role_binding_get(cmd, client, resource_group_name, cluster_name, role_binding_name):
     return client.get(resource_group_name, cluster_name, role_binding_name)
+
 
 def aks_trustedaccess_role_binding_create(cmd, client, resource_group_name, cluster_name, role_binding_name,
                                           source_resource_id, roles):
@@ -3296,6 +3323,7 @@ def aks_trustedaccess_role_binding_create(cmd, client, resource_group_name, clus
         source_resource_id=source_resource_id, roles=roleList)
     return client.begin_create_or_update(resource_group_name, cluster_name, role_binding_name, roleBinding)
 
+
 def aks_trustedaccess_role_binding_update(cmd, client, resource_group_name, cluster_name, role_binding_name, roles):
     TrustedAccessRoleBinding = cmd.get_models(
         "TrustedAccessRoleBinding",
@@ -3310,8 +3338,10 @@ def aks_trustedaccess_role_binding_update(cmd, client, resource_group_name, clus
         source_resource_id=existedBinding.source_resource_id, roles=roleList)
     return client.begin_create_or_update(resource_group_name, cluster_name, role_binding_name, roleBinding)
 
+
 def aks_trustedaccess_role_binding_delete(cmd, client, resource_group_name, cluster_name, role_binding_name):
     return client.begin_delete(resource_group_name, cluster_name, role_binding_name)
+
 
 def aks_mesh_enable(
         cmd,
@@ -3344,6 +3374,7 @@ def aks_mesh_enable(
                             revision=revision,
                             enable_azure_service_mesh=True)
 
+
 def aks_mesh_disable(
         cmd,
         client,
@@ -3351,6 +3382,7 @@ def aks_mesh_disable(
         name,
 ):
     return _aks_mesh_update(cmd, client, resource_group_name, name, disable_azure_service_mesh=True)
+
 
 def aks_mesh_enable_ingress_gateway(
         cmd,
@@ -3367,6 +3399,7 @@ def aks_mesh_enable_ingress_gateway(
         enable_ingress_gateway=True,
         ingress_gateway_type=ingress_gateway_type)
 
+
 def aks_mesh_disable_ingress_gateway(
         cmd,
         client,
@@ -3381,6 +3414,7 @@ def aks_mesh_disable_ingress_gateway(
         name,
         disable_ingress_gateway=True,
         ingress_gateway_type=ingress_gateway_type)
+
 
 def aks_mesh_get_revisions(
         cmd,
@@ -3400,6 +3434,7 @@ def aks_mesh_get_revisions(
 
     return None
 
+
 def check_iterator(iterator):
     import itertools
     try:
@@ -3409,6 +3444,7 @@ def check_iterator(iterator):
     except TypeError:       # iterator is not iterable, e.g. None
         return True, iterator
     return False, itertools.chain([first], iterator)
+
 
 def aks_mesh_get_upgrades(
         cmd,
@@ -3428,6 +3464,7 @@ def aks_mesh_get_upgrades(
         return upgrade.properties
     return None
 
+
 def aks_mesh_upgrade_start(
         cmd,
         client,
@@ -3442,6 +3479,7 @@ def aks_mesh_upgrade_start(
         name,
         revision=revision,
         mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START)
+
 
 def aks_mesh_upgrade_complete(
         cmd,
@@ -3458,6 +3496,7 @@ def aks_mesh_upgrade_complete(
         yes=yes,
         mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE)
 
+
 def aks_mesh_upgrade_rollback(
         cmd,
         client,
@@ -3473,6 +3512,7 @@ def aks_mesh_upgrade_rollback(
         yes=yes,
         mesh_upgrade_command=CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK)
 
+
 def _aks_mesh_get_supported_revisions(
         cmd,
         client,
@@ -3481,6 +3521,7 @@ def _aks_mesh_get_supported_revisions(
     revisions = aks_mesh_get_revisions(cmd, client, location)
     supported_revisions = [r.revision for r in revisions.mesh_revisions]
     return supported_revisions
+
 
 def _aks_mesh_update(
         cmd,
@@ -3543,6 +3584,7 @@ def _aks_mesh_update(
 
     return aks_update_decorator.update_mc(mc)
 
+
 def aks_approuting_enable(
         cmd,
         client,
@@ -3562,6 +3604,7 @@ def aks_approuting_enable(
         enable_kv=enable_kv,
         nginx=nginx)
 
+
 def aks_approuting_disable(
         cmd,
         client,
@@ -3574,6 +3617,7 @@ def aks_approuting_disable(
         resource_group_name,
         name,
         enable_app_routing=False)
+
 
 def aks_approuting_update(
         cmd,
@@ -3593,6 +3637,7 @@ def aks_approuting_update(
         enable_kv=enable_kv,
         nginx=nginx)
 
+
 def aks_approuting_zone_add(
         cmd,
         client,
@@ -3610,6 +3655,7 @@ def aks_approuting_zone_add(
         add_dns_zone=True,
         attach_zones=attach_zones)
 
+
 def aks_approuting_zone_delete(
         cmd,
         client,
@@ -3624,6 +3670,7 @@ def aks_approuting_zone_delete(
         name,
         dns_zone_resource_ids=dns_zone_resource_ids,
         delete_dns_zone=True)
+
 
 def aks_approuting_zone_update(
         cmd,
@@ -3641,6 +3688,7 @@ def aks_approuting_zone_update(
         dns_zone_resource_ids=dns_zone_resource_ids,
         update_dns_zone=True,
         attach_zones=attach_zones)
+
 
 def aks_approuting_zone_list(
         cmd,
@@ -3667,6 +3715,7 @@ def aks_approuting_zone_list(
             return dns_zone_list
         raise CLIError('No dns zone attached to the cluster')
     raise CLIError('App routing addon is not enabled')
+
 
 # pylint: disable=unused-argument
 def _aks_approuting_update(
@@ -3702,6 +3751,7 @@ def _aks_approuting_update(
         return None
 
     return aks_update_decorator.update_mc(mc)
+
 
 def is_monitoring_addon_enabled(addons, instance):
     monitoring_addon_enabled = False
