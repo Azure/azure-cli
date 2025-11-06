@@ -84,6 +84,11 @@ class Update(AAZCommand):
             help="Custom error configurations of the application gateway resource.",
             nullable=True,
         )
+        _args_schema.enable_fips = AAZBoolArg(
+            options=["--enable-fips"],
+            help="Whether FIPS is enabled on the application gateway resource.",
+            nullable=True,
+        )
         _args_schema.http2 = AAZBoolArg(
             options=["--http2"],
             help="Use HTTP2 for the application gateway",
@@ -610,7 +615,7 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity")
+            _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
@@ -627,6 +632,7 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("autoscaleConfiguration", AAZObjectType)
                 properties.set_prop("customErrorConfigurations", AAZListType, ".custom_error_configurations")
+                properties.set_prop("enableFips", AAZBoolType, ".enable_fips")
                 properties.set_prop("enableHttp2", AAZBoolType, ".http2")
                 properties.set_prop("sku", AAZObjectType)
                 properties.set_prop("sslProfiles", AAZListType, ".ssl_profiles")
@@ -956,7 +962,7 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         application_gateway_read.id = AAZStrType()
-        application_gateway_read.identity = AAZObjectType()
+        application_gateway_read.identity = AAZIdentityObjectType()
         application_gateway_read.location = AAZStrType()
         application_gateway_read.name = AAZStrType(
             flags={"read_only": True},
@@ -2503,6 +2509,7 @@ class _UpdateHelper:
         properties.location = AAZStrType()
         properties.outbound_rule = AAZObjectType(
             serialized_name="outboundRule",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.outbound_rule)
         properties.outbound_rules = AAZListType(
@@ -2558,6 +2565,7 @@ class _UpdateHelper:
         cls._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
         properties.network_interface_ip_configuration = AAZObjectType(
             serialized_name="networkInterfaceIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.network_interface_ip_configuration)
         properties.subnet = AAZObjectType()
@@ -2621,6 +2629,7 @@ class _UpdateHelper:
         cls._build_schema_sub_resource_read(properties.backend_address_pool)
         properties.backend_ip_configuration = AAZObjectType(
             serialized_name="backendIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_network_interface_ip_configuration_read(properties.backend_ip_configuration)
         properties.backend_port = AAZIntType(
@@ -2776,6 +2785,7 @@ class _UpdateHelper:
         )
         properties.dscp_configuration = AAZObjectType(
             serialized_name="dscpConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.dscp_configuration)
         properties.enable_accelerated_networking = AAZBoolType(
@@ -2830,6 +2840,7 @@ class _UpdateHelper:
         )
         properties.virtual_machine = AAZObjectType(
             serialized_name="virtualMachine",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.virtual_machine)
         properties.vnet_encryption_supported = AAZBoolType(
@@ -3482,6 +3493,7 @@ class _UpdateHelper:
         )
         properties.ip_configuration = AAZObjectType(
             serialized_name="ipConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_ip_configuration_read(properties.ip_configuration)
         properties.ip_tags = AAZListType(
@@ -3913,9 +3925,7 @@ class _UpdateHelper:
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
 
         private_endpoints = _schema_subnet_read.properties.private_endpoints
-        private_endpoints.Element = AAZObjectType(
-            flags={"read_only": True},
-        )
+        private_endpoints.Element = AAZObjectType()
         cls._build_schema_private_endpoint_read(private_endpoints.Element)
 
         resource_navigation_links = _schema_subnet_read.properties.resource_navigation_links
@@ -4000,6 +4010,7 @@ class _UpdateHelper:
         )
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
+            flags={"read_only": True},
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",

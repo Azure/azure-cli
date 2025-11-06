@@ -97,10 +97,10 @@ def load_command_table(self, _):
     with self.command_group('keyvault network-rule',
                             mgmt_vaults_entity.command_type,
                             client_factory=mgmt_vaults_entity.client_factory) as g:
-        g.custom_command('add', 'add_network_rule', supports_no_wait=True)
-        g.custom_command('remove', 'remove_network_rule', supports_no_wait=True)
+        g.custom_command('add', 'add_network_rule_for_vault_or_hsm', supports_no_wait=True)
+        g.custom_command('remove', 'remove_network_rule_for_vault_or_hsm', supports_no_wait=True)
         g.custom_command('list', 'list_network_rules')
-        g.wait_command('wait')
+        g.custom_wait_command('wait', 'wait_vault_or_hsm')
 
     with self.command_group('keyvault private-endpoint-connection',
                             mgmt_pec_entity.command_type,

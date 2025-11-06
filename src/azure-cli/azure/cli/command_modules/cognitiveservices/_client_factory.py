@@ -40,3 +40,23 @@ def cf_models(cli_ctx, *_):
 
 def cf_usages(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).usages
+
+
+def cf_projects(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).projects
+
+
+def cf_account_connections(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).account_connections
+
+
+def cf_account_capability_hosts(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).account_capability_hosts
+
+
+def cf_project_capability_hosts(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).project_capability_hosts
+
+
+def cf_project_connections(cli_ctx, *_):
+    return get_cognitiveservices_management_client(cli_ctx).project_connections

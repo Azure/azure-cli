@@ -176,7 +176,7 @@ def _is_serverless_slo(sku_name):
     Returns True if the sku name is a serverless sku.
     '''
 
-    return "_S_" in sku_name
+    return "_S_" in sku_name if sku_name else False
 
 
 def _get_default_server_version(location_capabilities):
@@ -1898,8 +1898,11 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
 
     # Finding out requesting compute_model
     if not compute_model:
+        # Determine compute model from the requested service objective if provided,
+        # otherwise infer from the current database SKU
+        sku_name_for_compute_model = service_objective if service_objective else instance.sku.name
         compute_model = (
-            ComputeModelType.serverless if _is_serverless_slo(instance.sku.name)
+            ComputeModelType.serverless if _is_serverless_slo(sku_name_for_compute_model)
             else ComputeModelType.provisioned)
 
     # Update sku
