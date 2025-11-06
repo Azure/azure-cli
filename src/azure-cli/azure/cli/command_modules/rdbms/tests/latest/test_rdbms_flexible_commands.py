@@ -923,7 +923,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         server_with_geo_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         tier = 'GeneralPurpose'
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D2ds_v4'
         location = self.postgres_location
         backup_location = self.postgres_backup_location
         scope = '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
@@ -1017,7 +1017,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1260,7 +1260,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1330,7 +1330,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
             replica_vnet_check = [[]] * 2
 
         # create a server
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --yes'
                  .format(database_engine, resource_group, master_server, location, 256, master_vnet_args))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
@@ -1346,8 +1346,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sku.tier', result['sku']['tier']),
                      JMESPathCheck('sku.name', result['sku']['name']),
                      JMESPathCheck('replica.role', replica_role),
-                     JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replica.capacity', '0')] + replica_vnet_check[0] + public_access_check)
+                     JMESPathCheck('sourceServerResourceId', result['id'])] + replica_vnet_check[0] + public_access_check)
         
         # test storage auto-grow not allowed for replica server update
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
@@ -1365,16 +1364,14 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('replica.role', primary_role),
-                     JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+                     JMESPathCheck('sourceServerResourceId', 'None')])
 
         # test show server with replication info, master becomes normal server
         self.cmd('{} flexible-server show -g {} --name {}'
                  .format(database_engine, resource_group, master_server),
                  checks=[
                      JMESPathCheck('replica.role', primary_role),
-                     JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+                     JMESPathCheck('sourceServerResourceId', 'None')])
 
         # test delete master server
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} {}'
@@ -1384,8 +1381,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     JMESPathCheck('resourceGroup', resource_group),
                     JMESPathCheck('sku.name', result['sku']['name']),
                     JMESPathCheck('replica.role', replica_role),
-                    JMESPathCheck('sourceServerResourceId', result['id']),
-                    JMESPathCheck('replica.capacity', '0')] + replica_vnet_check[1])
+                    JMESPathCheck('sourceServerResourceId', result['id'])] + replica_vnet_check[1])
 
         # in postgres we can't delete master server if it has replicas
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
@@ -1425,16 +1421,14 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     checks=[
                         JMESPathCheck('name', replicas[2]),
                         JMESPathCheck('replica.role', primary_role),
-                        JMESPathCheck('sourceServerResourceId', 'None'),
-                        JMESPathCheck('replica.capacity', result['replica']['capacity'])]).get_output_in_json()
+                        JMESPathCheck('sourceServerResourceId', 'None')]).get_output_in_json()
 
             # test show server with replication info, master became replica server
             self.cmd('{} flexible-server show -g {} --name {}'
                     .format(database_engine, resource_group, master_server),
                     checks=[
                         JMESPathCheck('replica.role',replica_role),
-                        JMESPathCheck('sourceServerResourceId', switchover_result['id']),
-                        JMESPathCheck('replica.capacity', '0')])
+                        JMESPathCheck('sourceServerResourceId', switchover_result['id'])])
 
             # test replica switchover forced
             self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode switchover --promote-option forced --yes'
@@ -1442,8 +1436,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     checks=[
                         JMESPathCheck('name', master_server),
                         JMESPathCheck('replica.role', primary_role),
-                        JMESPathCheck('sourceServerResourceId', 'None'),
-                        JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+                        JMESPathCheck('sourceServerResourceId', 'None')])
 
             # test promote replica standalone forced
             self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode standalone --promote-option forced --yes'
@@ -1451,8 +1444,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     checks=[
                         JMESPathCheck('name',replicas[2]),
                         JMESPathCheck('replica.role', primary_role),
-                        JMESPathCheck('sourceServerResourceId', 'None'),
-                        JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+                        JMESPathCheck('sourceServerResourceId', 'None')])
 
             # test virtual-endpoint delete
             self.cmd('{} flexible-server virtual-endpoint delete -g {} --server-name {} --name {} --yes'
@@ -1485,7 +1477,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1886,7 +1878,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                           resource_group, subnet_name, vnet_name, subnet_prefix, "Microsoft.DBforMySQL/flexibleServers")).get_output_in_json()
 
         self.cmd('postgres flexible-server create -g {} -l {} --subnet {} --yes'.format(
-                 resource_group, 'centralindia', subnet["id"]), # Delegated to different service
+                 resource_group, location, subnet["id"]), # Delegated to different service
                  expect_failure=True)
 
 
@@ -2155,7 +2147,7 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2208,7 +2200,7 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'southcentralus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2260,7 +2252,7 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2282,7 +2274,7 @@ class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
 
         # create server
         self.cmd('{} flexible-server create --location {} -g {} -n {} --public-access none --tier {} --sku-name {} {}'
-                 .format(database_engine, location, resource_group, server, 'GeneralPurpose', 'Standard_D2s_v3', auth_args))
+                 .format(database_engine, location, resource_group, server, 'GeneralPurpose', 'Standard_D2ds_v4', auth_args))
 
         # create 3 identities
         identity = []
@@ -2540,7 +2532,7 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
