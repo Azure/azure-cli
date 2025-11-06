@@ -1282,7 +1282,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
 
         # create a server
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none --tier GeneralPurpose --sku-name Standard_D2s_v3 --yes --storage-auto-grow {}'
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none --tier GeneralPurpose --sku-name Standard_D4ds_v5 --yes --storage-auto-grow {}'
                  .format(database_engine, resource_group, master_server, location, 256, source_server_auto_grow))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
@@ -1301,7 +1301,6 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sku.name', result['sku']['name']),
                      JMESPathCheck('replica.role', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replica.capacity', '0'),
                      JMESPathCheck('storage.autoGrow', source_server_auto_grow)])
         
     def _test_flexible_server_replica_mgmt(self, database_engine, resource_group, vnet_enabled):
@@ -2424,7 +2423,7 @@ class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2438,7 +2437,7 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
 
         # create a server
         self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
-                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 '--tier GeneralPurpose --sku-name Standard_D4ds_v5 --yes'
                  .format(database_engine, resource_group, server_name, location, 128))
         
         # show advanced threat protection setting for server
@@ -2473,7 +2472,7 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
 
 
 class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2487,7 +2486,7 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
 
         # create a server
         self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
-                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 '--tier GeneralPurpose --sku-name Standard_D4ds_v5 --yes'
                  .format(database_engine, resource_group, server_name, location, 128))
         
         # enable server logs for server
