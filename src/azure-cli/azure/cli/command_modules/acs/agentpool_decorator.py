@@ -2149,6 +2149,30 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
+    def set_up_workload_runtime(self, agentpool: AgentPool) -> AgentPool:
+        """Set up workload runtime for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        workload_runtime = self.context.get_workload_runtime()
+        if workload_runtime is not None:
+            agentpool.workload_runtime = workload_runtime
+
+        return agentpool
+
+   # def set_up_workload_runtime(self, agentpool: AgentPool) -> AgentPool:
+   #      """Set up workload runtime for the AgentPool object.
+   #
+   #      :return: the AgentPool object
+   #      """
+   #      self._ensure_agentpool(agentpool)
+   #
+   #      agentpool.workload_runtime = self.context.get_workload_runtime()
+   #      print("SOMETHING" + self.context.get_workload_runtime())
+   #      return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -2201,6 +2225,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_agentpool_gateway_profile(agentpool)
         # set up virtual machines profile
         agentpool = self.set_up_virtual_machines_profile(agentpool)
+        # set up workload_runtime 
+        agentpool = self.set_up_workload_runtime(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
