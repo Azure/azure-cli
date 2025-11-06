@@ -5799,7 +5799,7 @@ def list_vmss_applications(cmd, vmss_name, resource_group_name):
 
 
 # region Restore point collection
-def restore_point_create(client,
+def restore_point_create(cmd,
                          resource_group_name,
                          restore_point_collection_name,
                          restore_point_name,
@@ -5813,7 +5813,12 @@ def restore_point_create(client,
                          data_disk_restore_point_encryption_set=None,
                          data_disk_restore_point_encryption_type=None,
                          no_wait=False):
-    parameters = {}
+    parameters = {
+        'restore_point_collection_name': restore_point_collection_name,
+        'restore_point_name': restore_point_name,
+        'resource_group': resource_group_name,
+        'no_wait': no_wait
+    }
     if exclude_disks is not None:
         parameters['excludeDisks'] = []
         for disk in exclude_disks:
@@ -5937,26 +5942,29 @@ def restore_point_create(client,
 
     if storage_profile:
         parameters['sourceMetadata'] = {'storageProfile': storage_profile}
-    return sdk_no_wait(no_wait,
-                       client.begin_create,
-                       resource_group_name=resource_group_name,
-                       restore_point_collection_name=restore_point_collection_name,
-                       restore_point_name=restore_point_name,
-                       parameters=parameters)
+
+    from .aaz.latest.restore_point import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=parameters)
 
 
-def restore_point_show(client,
+def restore_point_show(cmd,
                        resource_group_name,
                        restore_point_name,
                        restore_point_collection_name,
                        expand=None,
                        instance_view=None):
+    args = {
+        'resource_group': resource_group_name,
+        'restore_point_collection_name': restore_point_collection_name,
+        'restore_point_name': restore_point_name,
+        'expand': expand
+    }
+
     if instance_view is not None:
-        expand = 'instanceView'
-    return client.get(resource_group_name=resource_group_name,
-                      restore_point_name=restore_point_name,
-                      restore_point_collection_name=restore_point_collection_name,
-                      expand=expand)
+        args['expand'] = 'instanceView'
+
+    from .aaz.latest.restore_point import Show
+    return Show(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 # endRegion
 
