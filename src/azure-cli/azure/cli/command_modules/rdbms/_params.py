@@ -598,7 +598,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('tier', default='GeneralPurpose', arg_type=tier_arg_type)
                 c.argument('sku_name', arg_type=sku_name_arg_type)
                 c.argument('storage_gb', default='128', arg_type=storage_gb_arg_type)
-                c.argument('version', default='17', arg_type=version_arg_type)
+                c.argument('version', arg_type=version_arg_type)
                 c.argument('backup_retention', default=7, arg_type=pg_backup_retention_arg_type)
                 c.argument('microsoft_entra_auth', default='Disabled', arg_type=microsoft_entra_auth_arg_type)
                 c.argument('admin_id', options_list=['--admin-object-id', '-i'], help='The unique ID of the Microsoft Entra administrator.')

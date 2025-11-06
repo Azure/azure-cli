@@ -86,17 +86,23 @@ def flexible_server_create(cmd, client,
 
     server_name = server_name.lower()
 
-    if sku_name is None:
-        # set sku_name from capability API
+    if (sku_name is None) or (version is None):
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-        tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
-        try:
-            sku_info = list_location_capability_info['sku_info']
-            skus = list(get_postgres_skus(sku_info, tier.lower()))
-            skus = sorted(skus, key=cmp_to_key(compare_sku_names))
-            sku_name = skus[0]
-        except:
-            raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
+
+        # set sku_name from capability API
+        if sku_name is None:
+            tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
+            try:
+                sku_info = list_location_capability_info['sku_info']
+                skus = list(get_postgres_skus(sku_info, tier.lower()))
+                skus = sorted(skus, key=cmp_to_key(compare_sku_names))
+                sku_name = skus[0]
+            except:
+                raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
+        # default to the latest version
+        if version is None:
+            supported_server_versions = sorted(list_location_capability_info['supported_server_versions'])
+            version = supported_server_versions[-1]
 
     pg_arguments_validator(db_context,
                            server_name=server_name,
