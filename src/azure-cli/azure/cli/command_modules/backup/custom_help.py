@@ -110,6 +110,32 @@ def get_containers(client, container_type, status, resource_group_name, vault_na
     return containers
 
 
+def extract_arm_resource_group_from_id(resource_id):
+    if not is_valid_resource_id(resource_id):
+        raise InvalidArgumentValueError("Please provide a valid resource id.")
+    id_parts = parse_resource_id(resource_id)
+    if id_parts.get('subscription') is None or id_parts.get('resource_group') is None:
+        raise InvalidArgumentValueError("The resource ID does not contain subscription or resource group information.")
+
+    arm_resource_group = (f"/subscriptions/{id_parts.get('subscription')}/"
+                          f"resourceGroups/{id_parts.get('resource_group')}")
+    return arm_resource_group
+
+
+def get_deleted_vault_parameters(deleted_vault_id):
+    if is_valid_resource_id(deleted_vault_id):
+        id_parts = parse_resource_id(deleted_vault_id)
+        deleted_vault_name = id_parts.get('child_name_1')
+        location = id_parts.get('name')
+        if deleted_vault_name is None or location is None:
+            raise InvalidArgumentValueError("Unable to fetch the deleted vault name and the location. "
+                                            "Please provide a valid deleted vault id.")
+    else:
+        raise InvalidArgumentValueError("Please provide a valid deleted vault id.")
+
+    return deleted_vault_name, location
+
+
 def get_resource_name_and_rg(resource_group_name, name_or_id):
     if is_valid_resource_id(name_or_id):
         id_parts = parse_resource_id(name_or_id)

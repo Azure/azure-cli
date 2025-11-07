@@ -7,7 +7,7 @@
 from knack.help_files import helps
 
 
-helps['aks'] = """
+helps["aks"] = """
 type: group
 short-summary: Manage Azure Kubernetes Services.
 """
@@ -26,7 +26,7 @@ examples:
     crafted: true
 """
 
-helps['aks browse'] = """
+helps["aks browse"] = """
 type: command
 short-summary: Show the dashboard for a Kubernetes cluster in a web browser.
 parameters:
@@ -46,7 +46,7 @@ examples:
     crafted: true
 """
 
-helps['aks create'] = """
+helps["aks create"] = """
 type: command
 short-summary: Create a new managed Kubernetes cluster.
 parameters:
@@ -581,6 +581,9 @@ parameters:
   - name: --disable-acns-security
     type: bool
     short-summary: Used to disable advanced networking security features on a clusters when enabling advanced networking features with "--enable-acns".
+  - name: --acns-advanced-networkpolicies
+    type: string
+    short-summary: Enable advanced network policies (None, FQDN or L7) on a cluster when enabling advanced networking features with "--enable-acns".
   - name: --nrg-lockdown-restriction-level
     type: string
     short-summary: Restriction level on the managed node resource group.
@@ -701,7 +704,7 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
 """
 
-helps['aks update'] = """
+helps["aks update"] = """
 type: command
 short-summary: Update a managed Kubernetes cluster. When called with no optional arguments this attempts to move the cluster to its goal state without changing the current cluster configuration. This can be used to move out of a non succeeded state.
 parameters:
@@ -1070,6 +1073,9 @@ parameters:
   - name: --disable-acns-security
     type: bool
     short-summary: Used to disable advanced networking security features on a clusters when enabling advanced networking features with "--enable-acns".
+  - name: --acns-advanced-networkpolicies
+    type: string
+    short-summary: Enable advanced network policies (None, FQDN or L7) on a cluster when enabling advanced networking features with "--enable-acns".
   - name: --nrg-lockdown-restriction-level
     type: string
     short-summary: Restriction level on the managed node resource group.
@@ -1181,7 +1187,7 @@ examples:
     text: az aks update --load-balancer-sku standard -g MyResourceGroup -n MyManagedCluster
 """
 
-helps['aks delete'] = """
+helps["aks delete"] = """
 type: command
 short-summary: Delete a managed Kubernetes cluster.
 examples:
@@ -1190,7 +1196,7 @@ examples:
     crafted: true
 """
 
-helps['aks disable-addons'] = """
+helps["aks disable-addons"] = """
 type: command
 short-summary: Disable Kubernetes addons.
 parameters:
@@ -1203,7 +1209,7 @@ examples:
     crafted: true
 """
 
-helps['aks enable-addons'] = """
+helps["aks enable-addons"] = """
 type: command
 short-summary: Enable Kubernetes addons.
 long-summary: |-
@@ -1279,7 +1285,7 @@ examples:
     crafted: true
 """
 
-helps['aks get-credentials'] = """
+helps["aks get-credentials"] = """
 type: command
 short-summary: Get access credentials for a managed Kubernetes cluster.
 long-summary: By default, the credentials are merged into the .kube/config file so kubectl can use them.  See -f parameter for details.
@@ -1310,7 +1316,7 @@ examples:
     crafted: true
 """
 
-helps['aks get-upgrades'] = """
+helps["aks get-upgrades"] = """
 type: command
 short-summary: Get the upgrade versions available for a managed Kubernetes cluster.
 examples:
@@ -1319,7 +1325,7 @@ examples:
     crafted: true
 """
 
-helps['aks get-versions'] = """
+helps["aks get-versions"] = """
 type: command
 short-summary: Get the versions available for creating a managed Kubernetes cluster.
 examples:
@@ -1328,37 +1334,37 @@ examples:
     crafted: true
 """
 
-helps['aks install-cli'] = """
+helps["aks install-cli"] = """
 type: command
 short-summary: Download and install kubectl, the Kubernetes command-line tool. Download and install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
 """
 
-helps['aks list'] = """
+helps["aks list"] = """
 type: command
 short-summary: List managed Kubernetes clusters.
 """
 
-helps['aks maintenanceconfiguration'] = """
+helps["aks maintenanceconfiguration"] = """
     type: group
     short-summary: Commands to manage maintenance configurations in managed Kubernetes cluster.
 """
 
-helps['aks maintenanceconfiguration show'] = """
+helps["aks maintenanceconfiguration show"] = """
     type: command
     short-summary: show the details of a maintenance configuration in managed Kubernetes cluster.
 """
 
-helps['aks maintenanceconfiguration delete'] = """
+helps["aks maintenanceconfiguration delete"] = """
     type: command
     short-summary: Delete a maintenance configuration in managed Kubernetes cluster.
 """
 
-helps['aks maintenanceconfiguration list'] = """
+helps["aks maintenanceconfiguration list"] = """
     type: command
     short-summary: List maintenance configurations in managed Kubernetes cluster.
 """
 
-helps['aks maintenanceconfiguration add'] = """
+helps["aks maintenanceconfiguration add"] = """
     type: command
     short-summary: Add a maintenance configuration in managed Kubernetes cluster.
     parameters:
@@ -1492,7 +1498,7 @@ helps['aks maintenanceconfiguration add'] = """
                 }
 """
 
-helps['aks maintenanceconfiguration update'] = """
+helps["aks maintenanceconfiguration update"] = """
     type: command
     short-summary: Update a maintenance configuration of a managed Kubernetes cluster.
     parameters:
@@ -1626,12 +1632,12 @@ helps['aks maintenanceconfiguration update'] = """
                 }
 """
 
-helps['aks nodepool'] = """
+helps["aks nodepool"] = """
 type: group
 short-summary: Commands to manage node pools in Kubernetes kubernetes cluster.
 """
 
-helps['aks nodepool add'] = """
+helps["aks nodepool add"] = """
 type: command
 short-summary: Add a node pool to the managed Kubernetes cluster.
 parameters:
@@ -1823,7 +1829,7 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
 """
 
-helps['aks nodepool delete'] = """
+helps["aks nodepool delete"] = """
 type: command
 short-summary: Delete the agent pool in the managed Kubernetes cluster.
 parameters:
@@ -1838,7 +1844,7 @@ examples:
     text: az aks nodepool delete --resource-group MyResourceGroup --cluster-name MyManagedCluster --name nodepool1 --if-match etag --ignore-pdb
 """
 
-helps['aks nodepool get-upgrades'] = """
+helps["aks nodepool get-upgrades"] = """
 type: command
 short-summary: Get the available upgrade versions for an agent pool of the managed Kubernetes cluster.
 examples:
@@ -1847,12 +1853,12 @@ examples:
     crafted: true
 """
 
-helps['aks nodepool list'] = """
+helps["aks nodepool list"] = """
 type: command
 short-summary: List node pools in the managed Kubernetes cluster. To get list of nodes in the cluster run `kubectl get nodes` command.
 """
 
-helps['aks nodepool scale'] = """
+helps["aks nodepool scale"] = """
 type: command
 short-summary: Scale the node pool in a managed Kubernetes cluster.
 parameters:
@@ -1861,12 +1867,12 @@ parameters:
     short-summary: Number of nodes in the Kubernetes node pool.
 """
 
-helps['aks nodepool show'] = """
+helps["aks nodepool show"] = """
 type: command
 short-summary: Show the details for a node pool in the managed Kubernetes cluster.
 """
 
-helps['aks nodepool update'] = """
+helps["aks nodepool update"] = """
 type: command
 short-summary: Update a node pool properties.
 long-summary: Update a node pool to enable/disable cluster-autoscaler or change min-count or max-count. When called with no optional arguments this attempts to move the node pool to its goal state without changing the current node pool configuration. This can be used to move out of a non succeeded state.
@@ -1960,7 +1966,7 @@ examples:
     text: az aks nodepool update --update-cluster-autoscaler --min-count 1 --max-count 10 -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
 """
 
-helps['aks nodepool upgrade'] = """
+helps["aks nodepool upgrade"] = """
 type: command
 short-summary: Upgrade the node pool in a managed Kubernetes cluster.
 parameters:
@@ -1999,7 +2005,7 @@ parameters:
     short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
 """
 
-helps['aks nodepool stop'] = """
+helps["aks nodepool stop"] = """
     type: command
     short-summary: Stop running agent pool in the managed Kubernetes cluster.
     parameters:
@@ -2011,7 +2017,7 @@ helps['aks nodepool stop'] = """
           text: az aks nodepool stop --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
 """
 
-helps['aks nodepool start'] = """
+helps["aks nodepool start"] = """
     type: command
     short-summary: Start stopped agent pool in the managed Kubernetes cluster.
     parameters:
@@ -2023,7 +2029,7 @@ helps['aks nodepool start'] = """
           text: az aks nodepool start --nodepool-name nodepool1 -g MyResourceGroup --cluster-name MyManagedCluster
 """
 
-helps['aks nodepool operation-abort'] = """
+helps["aks nodepool operation-abort"] = """
     type: command
     short-summary: Abort last running operation on nodepool.
     examples:
@@ -2031,7 +2037,7 @@ helps['aks nodepool operation-abort'] = """
           text: az aks nodepool operation-abort -g myResourceGroup --nodepool-name nodepool1 --cluster-name myAKSCluster
 """
 
-helps['aks operation-abort'] = """
+helps["aks operation-abort"] = """
     type: command
     short-summary: Abort last running operation on managed cluster.
     examples:
@@ -2039,7 +2045,7 @@ helps['aks operation-abort'] = """
           text: az aks operation-abort -g myResourceGroup -n myAKSCluster
 """
 
-helps['aks nodepool delete-machines'] = """
+helps["aks nodepool delete-machines"] = """
     type: command
     short-summary: Delete specific machines in an agentpool for a managed cluster.
     parameters:
@@ -2051,7 +2057,7 @@ helps['aks nodepool delete-machines'] = """
           text: az aks nodepool delete-machines -g myResourceGroup --nodepool-name nodepool1 --cluster-name myAKSCluster --machine-names machine1
 """
 
-helps['aks remove-dev-spaces'] = """
+helps["aks remove-dev-spaces"] = """
 type: command
 short-summary: Remove Azure Dev Spaces from a managed Kubernetes cluster.
 examples:
@@ -2063,7 +2069,7 @@ examples:
         az aks remove-dev-spaces -g my-aks-group -n my-aks --yes
 """
 
-helps['aks scale'] = """
+helps["aks scale"] = """
 type: command
 short-summary: Scale the node pool in a managed Kubernetes cluster.
 parameters:
@@ -2076,12 +2082,12 @@ examples:
     crafted: true
 """
 
-helps['aks nodepool manual-scale'] = """
+helps["aks nodepool manual-scale"] = """
     type: group
     short-summary: Commands to manage nodepool virtualMachineProfile.scale.manual.
 """
 
-helps['aks nodepool manual-scale add'] = """
+helps["aks nodepool manual-scale add"] = """
     type: command
     short-summary: Add a new manual to a VirtualMachines agentpool in the managed Kubernetes cluster.
     parameters:
@@ -2093,7 +2099,7 @@ helps['aks nodepool manual-scale add'] = """
           short-summary: Number of nodes in the manual.
 """
 
-helps['aks nodepool manual-scale update'] = """
+helps["aks nodepool manual-scale update"] = """
     type: command
     short-summary: Update an existing manual of a VirtualMachines agentpool in the managed Kubernetes cluster.
     parameters:
@@ -2108,7 +2114,7 @@ helps['aks nodepool manual-scale update'] = """
           short-summary: Number of nodes in the manual.
 """
 
-helps['aks nodepool manual-scale delete'] = """
+helps["aks nodepool manual-scale delete"] = """
     type: command
     short-summary: Delete an existing manual to a VirtualMachines agentpool in the managed Kubernetes cluster.
     parameters:
@@ -2117,7 +2123,7 @@ helps['aks nodepool manual-scale delete'] = """
           short-summary: Comma-separated list of sizes in the manual to be deleted.
 """
 
-helps['aks show'] = """
+helps["aks show"] = """
 type: command
 short-summary: Show the details for a managed Kubernetes cluster.
 examples:
@@ -2126,7 +2132,7 @@ examples:
     crafted: true
 """
 
-helps['aks stop'] = """
+helps["aks stop"] = """
     type: command
     short-summary: Stop a managed cluster.
     long-summary: This can only be performed on Azure Virtual Machine Scale set backed clusters. Stopping a
@@ -2136,7 +2142,7 @@ helps['aks stop'] = """
         stopping a cluster.
 """
 
-helps['aks update-credentials'] = """
+helps["aks update-credentials"] = """
 type: command
 short-summary: Update credentials for a managed Kubernetes cluster, like service principal.
 parameters:
@@ -2174,7 +2180,7 @@ examples:
     text: az aks update-credentials -g MyResourceGroup -n MyManagedCluster --reset-service-principal --service-principal MyNewServicePrincipalID --client-secret MyNewServicePrincipalSecret
 """
 
-helps['aks upgrade'] = """
+helps["aks upgrade"] = """
 type: command
 short-summary: Upgrade a managed Kubernetes cluster to a newer version.
 long-summary: "Kubernetes will be unavailable during cluster upgrades."
@@ -2219,7 +2225,7 @@ examples:
     crafted: true
 """
 
-helps['aks use-dev-spaces'] = """
+helps["aks use-dev-spaces"] = """
 type: command
 short-summary: Use Azure Dev Spaces with a managed Kubernetes cluster.
 parameters:
@@ -2249,7 +2255,7 @@ examples:
         az aks use-dev-spaces -g my-aks-group -n my-aks -e private
 """
 
-helps['aks wait'] = """
+helps["aks wait"] = """
 type: command
 short-summary: Wait for a managed Kubernetes cluster to reach a desired state.
 long-summary: If an operation on a cluster was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
@@ -2262,7 +2268,7 @@ examples:
     crafted: true
 """
 
-helps['aks nodepool wait'] = """
+helps["aks nodepool wait"] = """
 type: command
 short-summary: Wait for a node pool to reach a desired state.
 long-summary: If an operation on a node pool was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
@@ -2272,7 +2278,7 @@ examples:
         az aks nodepool wait --created --interval 60 --cluster-name MyManagedCluster --resource-group MyResourceGroup --nodepool-name MyNodePool --timeout 1800
 """
 
-helps['aks nodepool snapshot wait'] = """
+helps["aks nodepool snapshot wait"] = """
 type: command
 short-summary: Wait for a nodepool snapshot to reach a desired state.
 long-summary: If an operation on a nodepool snapshot was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
@@ -2282,18 +2288,18 @@ examples:
         az aks nodepool snapshot wait --created --interval 60 --name MySnapshot --resource-group MyResourceGroup --timeout 1800
 """
 
-helps['aks rotate-certs'] = """
+helps["aks rotate-certs"] = """
     type: command
     short-summary: Rotate certificates and keys on a managed Kubernetes cluster
     long-summary: Kubernetes will be unavailable during cluster certificate rotation.
 """
 
-helps['aks command'] = """
+helps["aks command"] = """
     type: group
     short-summary: See detail usage in 'az aks command invoke', 'az aks command result'.
 """
 
-helps['aks command invoke'] = """
+helps["aks command invoke"] = """
     type: command
     short-summary: Run a shell command (with kubectl, helm) on your aks cluster, support attaching files as well.
     parameters:
@@ -2305,7 +2311,7 @@ helps['aks command invoke'] = """
           short-summary: Files to be used by the command, use '.' to attach the current folder.
 """
 
-helps['aks command result'] = """
+helps["aks command result"] = """
     type: command
     short-summary: Fetch result from previously triggered 'aks command invoke'.
     parameters:
@@ -2314,22 +2320,22 @@ helps['aks command result'] = """
           short-summary: commandId returned from 'aks command invoke'.
 """
 
-helps['aks snapshot'] = """
+helps["aks snapshot"] = """
     type: group
     short-summary: Commands to manage nodepool snapshots.
 """
 
-helps['aks snapshot show'] = """
+helps["aks snapshot show"] = """
     type: command
     short-summary: Show the details of a nodepool snapshot.
 """
 
-helps['aks snapshot list'] = """
+helps["aks snapshot list"] = """
     type: command
     short-summary: List nodepool snapshots.
 """
 
-helps['aks snapshot create'] = """
+helps["aks snapshot create"] = """
     type: command
     short-summary: Create a nodepool snapshot.
     parameters:
@@ -2344,33 +2350,33 @@ helps['aks snapshot create'] = """
           short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
 """
 
-helps['aks snapshot delete'] = """
+helps["aks snapshot delete"] = """
     type: command
     short-summary: Delete a nodepool snapshot.
 """
 
-helps['aks snapshot wait'] = """
+helps["aks snapshot wait"] = """
 type: command
 short-summary: Wait for a nodepool snapshot to reach a desired state.
 long-summary: If an operation on a nodepool snapshot was interrupted or was started with `--no-wait`, use this command to wait for it to complete.
 """
 
-helps['aks nodepool snapshot'] = """
+helps["aks nodepool snapshot"] = """
     type: group
     short-summary: Commands to manage nodepool snapshots.
 """
 
-helps['aks nodepool snapshot show'] = """
+helps["aks nodepool snapshot show"] = """
     type: command
     short-summary: Show the details of a nodepool snapshot.
 """
 
-helps['aks nodepool snapshot list'] = """
+helps["aks nodepool snapshot list"] = """
     type: command
     short-summary: List nodepool snapshots.
 """
 
-helps['aks nodepool snapshot update'] = """
+helps["aks nodepool snapshot update"] = """
     type: command
     short-summary: Update tags on a snapshot of a nodepool.
     examples:
@@ -2380,7 +2386,7 @@ helps['aks nodepool snapshot update'] = """
           text: az aks nodepool snapshot update -g MyResourceGroup -n snapshot1 --tags ""
 """
 
-helps['aks nodepool snapshot create'] = """
+helps["aks nodepool snapshot create"] = """
     type: command
     short-summary: Create a nodepool snapshot.
     parameters:
@@ -2400,46 +2406,46 @@ helps['aks nodepool snapshot create'] = """
           text: az aks nodepool snapshot create -g MyResourceGroup -n snapshot1 --nodepool-id "/subscriptions/00000/resourceGroups/AnotherResourceGroup/providers/Microsoft.ContainerService/managedClusters/akscluster1/agentPools/nodepool1" --tags "foo=bar" "key1=val1"
 """
 
-helps['aks nodepool snapshot delete'] = """
+helps["aks nodepool snapshot delete"] = """
     type: command
     short-summary: Delete a nodepool snapshot.
 """
 
-helps['aks oidc-issuer'] = """
+helps["aks oidc-issuer"] = """
     type: group
     short-summary: oidc issuer related commands
 """
-helps['aks oidc-issuer rotate-signing-keys'] = """
+helps["aks oidc-issuer rotate-signing-keys"] = """
     type: command
     short-summary: Rotate oidc issuer service account signing keys
 """
 
-helps['aks trustedaccess'] = """
+helps["aks trustedaccess"] = """
     type: group
     short-summary: Commands to manage trusted access security features.
 """
 
-helps['aks trustedaccess role'] = """
+helps["aks trustedaccess role"] = """
     type: group
     short-summary: Commands to manage trusted access roles.
 """
 
-helps['aks trustedaccess role list'] = """
+helps["aks trustedaccess role list"] = """
     type: command
     short-summary: List trusted access roles.
 """
 
-helps['aks trustedaccess rolebinding'] = """
+helps["aks trustedaccess rolebinding"] = """
     type: group
     short-summary: Commands to manage trusted access role bindings.
 """
 
-helps['aks trustedaccess rolebinding list'] = """
+helps["aks trustedaccess rolebinding list"] = """
     type: command
     short-summary: List all the trusted access role bindings.
 """
 
-helps['aks trustedaccess rolebinding show'] = """
+helps["aks trustedaccess rolebinding show"] = """
     type: command
     short-summary: Get the specific trusted access role binding according to binding name.
     parameters:
@@ -2448,7 +2454,7 @@ helps['aks trustedaccess rolebinding show'] = """
           short-summary: Specify the role binding name.
 """
 
-helps['aks trustedaccess rolebinding create'] = """
+helps["aks trustedaccess rolebinding create"] = """
     type: command
     short-summary: Create a new trusted access role binding.
     parameters:
@@ -2467,7 +2473,7 @@ helps['aks trustedaccess rolebinding create'] = """
           text: az aks trustedaccess rolebinding create -g myResourceGroup --cluster-name myCluster -n bindingName --source-resource-id /subscriptions/0000/resourceGroups/myResourceGroup/providers/Microsoft.Demo/samples --roles Microsoft.Demo/samples/reader,Microsoft.Demo/samples/writer
 """
 
-helps['aks trustedaccess rolebinding update'] = """
+helps["aks trustedaccess rolebinding update"] = """
     type: command
     short-summary: Update a trusted access role binding.
     parameters:
@@ -2479,7 +2485,7 @@ helps['aks trustedaccess rolebinding update'] = """
           short-summary: Specify the comma-separated roles.
 """
 
-helps['aks trustedaccess rolebinding delete'] = """
+helps["aks trustedaccess rolebinding delete"] = """
     type: command
     short-summary: Delete a trusted access role binding according to name.
     parameters:
@@ -2488,13 +2494,13 @@ helps['aks trustedaccess rolebinding delete'] = """
           short-summary: Specify the role binding name.
 """
 
-helps['aks mesh'] = """
+helps["aks mesh"] = """
     type: group
     short-summary: Commands to manage Azure Service Mesh.
     long-summary: A group of commands to manage Azure Service Mesh in given cluster.
 """
 
-helps['aks mesh enable'] = """
+helps["aks mesh enable"] = """
     type: command
     short-summary: Enable Azure Service Mesh.
     long-summary: This command enables Azure Service Mesh in given cluster.
@@ -2524,13 +2530,13 @@ helps['aks mesh enable'] = """
         text: az aks mesh enable --resource-group MyResourceGroup --name MyManagedCluster --key-vault-id /subscriptions/00000/resourceGroups/foo/providers/Microsoft.KeyVault/vaults/foo --ca-cert-object-name my-ca-cert --ca-key-object-name my-ca-key --cert-chain-object-name my-cert-chain --root-cert-object-name my-root-cert
 """
 
-helps['aks mesh disable'] = """
+helps["aks mesh disable"] = """
     type: command
     short-summary: Disable Azure Service Mesh.
     long-summary: This command disables Azure Service Mesh in given cluster.
 """
 
-helps['aks mesh enable-ingress-gateway'] = """
+helps["aks mesh enable-ingress-gateway"] = """
     type: command
     short-summary: Enable an Azure Service Mesh ingress gateway.
     long-summary: This command enables an Azure Service Mesh ingress gateway in given cluster.
@@ -2544,7 +2550,7 @@ helps['aks mesh enable-ingress-gateway'] = """
         text: az aks mesh enable-ingress-gateway --resource-group MyResourceGroup --name MyManagedCluster --ingress-gateway-type Internal
 """
 
-helps['aks mesh disable-ingress-gateway'] = """
+helps["aks mesh disable-ingress-gateway"] = """
     type: command
     short-summary: Disable an Azure Service Mesh ingress gateway.
     long-summary: This command disables an Azure Service Mesh ingress gateway in given cluster.
@@ -2558,7 +2564,7 @@ helps['aks mesh disable-ingress-gateway'] = """
         text: az aks mesh disable-ingress-gateway --resource-group MyResourceGroup --name MyManagedCluster --ingress-gateway-type Internal
 """
 
-helps['aks mesh get-revisions'] = """
+helps["aks mesh get-revisions"] = """
     type: command
     short-summary: Discover available Azure Service Mesh revisions and their compatibility.
     long-summary: This command lists available Azure Service Mesh revisions and their compatibility information for the given location.
@@ -2568,7 +2574,7 @@ helps['aks mesh get-revisions'] = """
         crafted: true
 """
 
-helps['aks mesh get-upgrades'] = """
+helps["aks mesh get-upgrades"] = """
     type: command
     short-summary: Discover available Azure Service Mesh upgrades.
     long-summary: This command lists available Azure Service Mesh upgrades for the mesh revision installed on the cluster.
@@ -2577,7 +2583,7 @@ helps['aks mesh get-upgrades'] = """
         text: az aks mesh get-upgrades --resource-group MyResourceGroup --name MyManagedCluster
 """
 
-helps['aks mesh upgrade start'] = """
+helps["aks mesh upgrade start"] = """
     type: command
     short-summary: Initiate Azure Service Mesh upgrade.
     long-summary: This command initiates upgrade of Azure Service Mesh to the specified revision.
@@ -2590,13 +2596,13 @@ helps['aks mesh upgrade start'] = """
         text: az aks mesh upgrade start --resource-group MyResourceGroup --name MyManagedCluster --revision asm-1-18
 """
 
-helps['aks mesh upgrade'] = """
+helps["aks mesh upgrade"] = """
     type: group
     short-summary: Commands to manage the upgrades for Azure Service Mesh.
     long-summary: A group of commands to manage the upgrades for Azure Service Mesh in given cluster.
 """
 
-helps['aks mesh upgrade complete'] = """
+helps["aks mesh upgrade complete"] = """
     type: command
     short-summary: Complete Azure Service Mesh upgrade.
     long-summary: This command completes Azure Service Mesh canary upgrade by removing the previous revision.
@@ -2605,7 +2611,7 @@ helps['aks mesh upgrade complete'] = """
         text: az aks mesh upgrade complete --resource-group MyResourceGroup --name MyManagedCluster
 """
 
-helps['aks mesh upgrade rollback'] = """
+helps["aks mesh upgrade rollback"] = """
     type: command
     short-summary: Rollback Azure Service Mesh upgrade.
     long-summary: This command rolls back Azure Service Mesh upgrade to the previous stable revision.
@@ -2614,13 +2620,13 @@ helps['aks mesh upgrade rollback'] = """
         text: az aks mesh upgrade rollback --resource-group MyResourceGroup --name MyManagedCluster
 """
 
-helps['aks approuting'] = """
+helps["aks approuting"] = """
     type: group
     short-summary: Commands to manage App Routing addon.
     long-summary: A group of commands to manage App Routing in given cluster.
 """
 
-helps['aks approuting enable'] = """
+helps["aks approuting enable"] = """
     type: command
     short-summary: Enable App Routing.
     long-summary: This command enables App Routing in given cluster.
@@ -2639,13 +2645,13 @@ helps['aks approuting enable'] = """
         long-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
 """
 
-helps['aks approuting disable'] = """
+helps["aks approuting disable"] = """
     type: command
     short-summary: Disable App Routing addon.
     long-summary: This command disables App Routing in given cluster.
 """
 
-helps['aks approuting update'] = """
+helps["aks approuting update"] = """
     type: command
     short-summary: Update App Routing addon.
     long-summary: This command is used to update keyvault id in App Routing addon.
@@ -2664,13 +2670,13 @@ helps['aks approuting update'] = """
         long-summary: Configure default nginx ingress controller type. Valid values are annotationControlled (default behavior), external, internal, or none.
 """
 
-helps['aks approuting zone'] = """
+helps["aks approuting zone"] = """
     type: group
     short-summary: Commands to manage App Routing DNS Zones.
     long-summary: A group of commands to manage App Routing DNS zones in given cluster.
 """
 
-helps['aks approuting zone add'] = """
+helps["aks approuting zone add"] = """
     type: command
     short-summary: Add DNS Zone(s) to App Routing.
     long-summary: This command adds multiple DNS zone resource IDs to App Routing.
@@ -2683,7 +2689,7 @@ helps['aks approuting zone add'] = """
         short-summary: Grant DNS zone Contributor permissions on all zone IDs specified in --ids.
 """
 
-helps['aks approuting zone delete'] = """
+helps["aks approuting zone delete"] = """
     type: command
     short-summary: Delete DNS Zone(s) from App Routing.
     long-summary: This command deletes DNS zone resource IDs from App Routing in given cluster.
@@ -2693,7 +2699,7 @@ helps['aks approuting zone delete'] = """
         short-summary: Comma-separated list of DNS zone resource IDs to delete from App Routing.
 """
 
-helps['aks approuting zone update'] = """
+helps["aks approuting zone update"] = """
     type: command
     short-summary: Replace DNS Zone(s) in App Routing.
     long-summary: This command replaces the DNS zone resource IDs used in App Routing.
@@ -2706,17 +2712,17 @@ helps['aks approuting zone update'] = """
         short-summary: Grant DNS zone Contributor permissions on all zone IDs specified in --ids.
 """
 
-helps['aks approuting zone list'] = """
+helps["aks approuting zone list"] = """
     type: command
     short-summary: List DNS Zone IDs in App Routing.
     long-summary: This command lists the DNS zone resources used in App Routing.
 """
 
-helps['aks machine'] = """
+helps["aks machine"] = """
    type: group
    short-summary: Get information about machines in a nodepool of a managed clusters
 """
-helps['aks machine list'] = """
+helps["aks machine list"] = """
    type: command
    short-summary: Get information about IP Addresses, Hostname for all machines in an agentpool
    parameters:
@@ -2730,7 +2736,7 @@ helps['aks machine list'] = """
        - name: Get information about IP Addresses, Hostname, Availability Zones for all machines in an agentpool
          text: az aks machine list  --resource-group <rg> --cluster-name <clusterName> --nodepool-name <apName>
 """
-helps['aks machine show'] = """
+helps["aks machine show"] = """
    type: command
    short-summary: Show IP Addresses, Hostname for a specific machine in an agentpool for a managedcluster.
    parameters:

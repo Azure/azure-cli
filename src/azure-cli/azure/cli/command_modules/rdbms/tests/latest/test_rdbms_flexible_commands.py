@@ -70,8 +70,8 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
-    postgres_backup_location = 'westus'
+    postgres_location = 'centralindia'
+    postgres_backup_location = 'southindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1019,7 +1019,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1123,7 +1123,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1262,7 +1262,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1487,7 +1487,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1880,7 +1880,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  resource_group, location, vnet_name, vnet_prefix))
 
         self.cmd('postgres flexible-server create -g {} -l {} --vnet {} --yes'.format(
-                 resource_group, 'westus', vnet_name), # location of vnet and server are different
+                 resource_group, 'southindia', vnet_name), # location of vnet and server are different
                  expect_failure=True)
 
         # delegated to different service
@@ -1888,12 +1888,12 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                           resource_group, subnet_name, vnet_name, subnet_prefix, "Microsoft.DBforMySQL/flexibleServers")).get_output_in_json()
 
         self.cmd('postgres flexible-server create -g {} -l {} --subnet {} --yes'.format(
-                 resource_group, 'eastus', subnet["id"]), # Delegated to different service
+                 resource_group, 'centralindia', subnet["id"]), # Delegated to different service
                  expect_failure=True)
 
 
 class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
@@ -2085,7 +2085,7 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2157,7 +2157,7 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2262,7 +2262,7 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2434,7 +2434,7 @@ class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2483,7 +2483,7 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
 
 
 class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2542,7 +2542,7 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'centralindia'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2862,6 +2862,65 @@ class CitusOnFlexMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
+
+    postgres_location = 'eastus2euap'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_tuning_options(self, resource_group):
+        self._test_tuning_options_mgmt('postgres', resource_group)
+
+    def _test_tuning_options_mgmt(self, database_engine, resource_group):
+
+        # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        version = '16'
+        storage_size = 128
+        sku_name = 'Standard_D4s_v3'
+        tier = 'GeneralPurpose'
+
+        self.cmd('{} flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'.format(
+                 database_engine, resource_group, server_name, sku_name, tier, storage_size, version, location))
+
+        # Enable index tuning for server
+        self.cmd('{} flexible-server index-tuning update -g {} -s {} --enabled True'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # Show that index tuning is enabled
+        self.cmd('{} flexible-server index-tuning show -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # List settings associated with index tuning for server
+        self.cmd('{} flexible-server index-tuning list-settings -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # Show properties of index tuning setting for server
+        self.cmd('{} flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+                 checks=[JMESPathCheck('value', 'report')])
+        self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'pg_qs.query_capture_mode', resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'all')])
+
+        # Set new value of index tuning setting for server
+        value = '1006'
+        self.cmd('{} flexible-server index-tuning set-settings -g {} -s {} -n {} -v {}'.format(database_engine, resource_group, server_name,
+                                                                                               'unused_reads_per_table', value),
+                 checks=[JMESPathCheck('value', value)])
+
+        # List recommendations associated with index tuning for server
+        self.cmd('{} flexible-server index-tuning list-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # Disable index tuning for server
+        self.cmd('{} flexible-server index-tuning update -g {} -s {} --enabled False'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # Show properties of index tuning setting for server
+        self.cmd('{} flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+                 checks=[JMESPathCheck('value', 'off')])
+
+
+class FlexibleServerAutoTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
 
     postgres_location = 'eastus2euap'
 

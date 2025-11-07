@@ -19,6 +19,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_SKU_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_FREE,
     CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM,
     CONST_NETWORK_DATAPLANE_AZURE, CONST_NETWORK_DATAPLANE_CILIUM,
+    CONST_ADVANCED_NETWORKPOLICIES_NONE, CONST_ADVANCED_NETWORKPOLICIES_FQDN, CONST_ADVANCED_NETWORKPOLICIES_L7,
     CONST_NETWORK_POLICY_AZURE, CONST_NETWORK_POLICY_CALICO, CONST_NETWORK_POLICY_CILIUM, CONST_NETWORK_POLICY_NONE,
     CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_KUBENET,
     CONST_NETWORK_PLUGIN_MODE_OVERLAY, CONST_NETWORK_PLUGIN_NONE,
@@ -181,6 +182,11 @@ sku_names = [CONST_MANAGED_CLUSTER_SKU_NAME_BASE, CONST_MANAGED_CLUSTER_SKU_NAME
 sku_tiers = [CONST_MANAGED_CLUSTER_SKU_TIER_FREE, CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD, CONST_MANAGED_CLUSTER_SKU_TIER_PREMIUM]
 network_plugins = [CONST_NETWORK_PLUGIN_KUBENET, CONST_NETWORK_PLUGIN_AZURE, CONST_NETWORK_PLUGIN_NONE]
 network_plugin_modes = [CONST_NETWORK_PLUGIN_MODE_OVERLAY]
+advanced_networkpolicies = [
+    CONST_ADVANCED_NETWORKPOLICIES_NONE,
+    CONST_ADVANCED_NETWORKPOLICIES_FQDN,
+    CONST_ADVANCED_NETWORKPOLICIES_L7,
+]
 network_dataplanes = [CONST_NETWORK_DATAPLANE_AZURE, CONST_NETWORK_DATAPLANE_CILIUM]
 network_policies = [CONST_NETWORK_POLICY_AZURE, CONST_NETWORK_POLICY_CALICO, CONST_NETWORK_POLICY_CILIUM, CONST_NETWORK_POLICY_NONE]
 outbound_types = [CONST_OUTBOUND_TYPE_LOAD_BALANCER, CONST_OUTBOUND_TYPE_USER_DEFINED_ROUTING, CONST_OUTBOUND_TYPE_MANAGED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_USER_ASSIGNED_NAT_GATEWAY, CONST_OUTBOUND_TYPE_NONE]
@@ -561,6 +567,7 @@ def load_arguments(self, _):
         c.argument('enable_acns', action='store_true')
         c.argument('disable_acns_observability', action='store_true')
         c.argument('disable_acns_security', action='store_true')
+        c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         c.argument("if_match")
         c.argument("if_none_match")
         # node provisioning
@@ -617,6 +624,7 @@ def load_arguments(self, _):
         c.argument('disable_acns', action='store_true')
         c.argument('disable_acns_observability', action='store_true')
         c.argument('disable_acns_security', action='store_true')
+        c.argument("acns_advanced_networkpolicies", arg_type=get_enum_type(advanced_networkpolicies))
         # private cluster parameters
         c.argument('enable_apiserver_vnet_integration', action='store_true')
         c.argument('apiserver_subnet_id', validator=validate_apiserver_subnet_id)

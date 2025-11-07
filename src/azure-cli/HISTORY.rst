@@ -3,6 +3,65 @@
 Release History
 ===============
 
+2.79.0
+++++++
+
+**ACR**
+
+* `az acr create/update`: Remove preview flag for `--role-assignment-mode` (#32212)
+* `az acr check-health`: Remove preview flag for `--repository` (#32212)
+* `az acr task create/update`: Remove preview flag for `--source-acr-auth-id` (#32212)
+* `az acr build/run`: Remove preview flag for `--source-acr-auth-id` (#32212)
+* `az acr config content-trust`: Add deprecation notice (#32196)
+* `az acr config content-trust show/update`: Add deprecation notice (#32196)
+
+**AKS**
+
+* `az aks update`: Add support to remove existing certificates by setting the value of `--custom-ca-trust-certificates` to an empty file (#32201)
+* `az aks create/update`: Add `--acns-advanced-networkpolicies` parameter to support enabling advanced networking policies (`None`, `L7` or `FQDN`) (#32265)
+
+**ARM**
+
+* `az resource list`: Include `provisioningState` property in table output (#32156)
+
+**Backup**
+
+* `az backup vault deleted-vault`: Implementing List and Undelete for Deleted Backup Vaults (#32306)
+
+**Compute**
+
+* `az vm availability-set update`: Add new parameter `--enable-all-instance-down` to support setting scheduled events profile (#32285)
+* `az vm availability-set update`: Add new parameter `--scheduled-events-api-version` to support setting scheduled events profile (#32285)
+
+**Container app**
+
+* `az containerapp`: Update Api-version to 2025-07-01 (#32179)
+* `az containerapp env http-route-config`: Add command group to manage environment level http routing (#32240)
+* `az containerapp env premium-ingress`: Add command group to configure premium ingress settings for the environment (#32240)
+* Fix #32107: `az containerapp registry show`: Fix NoneType error when container app doesn't have any registry server (#32270)
+
+**HDInsight**
+
+* `az hdinsight create`: Support creating Entra-enabled clusters and creating clusters with WASB + MSI (#32273)
+* `az hdinsight credentials update`: Update cluster credentials (#32273)
+* `az hdinsight credentials show`: Show current cluster credentials (#32273)
+
+**Network**
+
+* `az network application-gateway create/update`: Add parameter `--enable-fips` (#32339)
+
+**SQL**
+
+* `az sql db update`: Prevent overwrite of SLO when updating from serverless to provisioned (#32292)
+* `az db ltr-backup/ltr-policy`: Remove preview tag for time-based immutability (#32297)
+
+**Storage**
+
+* `az storage account network-security-perimeter-configuration list/show/reconcile`: Add support for network-security-perimeter (#32294)
+* `az storage file list`: Fix file list for nfs shares, as `--include` is not supported (#32268)
+* `az storage account create/update`: Add `--enable-blob-geo-priority-replication` to support Geo SLA (#32331)
+* `az storage account or-policy create/update`: Add `--priority-replication` to support OR SLA (#32331)
+
 2.78.0
 ++++++
 
