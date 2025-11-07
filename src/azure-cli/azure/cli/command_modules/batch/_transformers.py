@@ -38,6 +38,7 @@ class Transformer:
             new_result.append(updated_obj)
         return new_result
 
+
 transform_map = {
     # cmd: az batch pool list
     # cmd: az batch pool show
