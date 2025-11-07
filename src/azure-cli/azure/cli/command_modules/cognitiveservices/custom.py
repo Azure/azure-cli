@@ -525,7 +525,9 @@ def agent_delete_deployment(
     Delete hosted agent deployment.
     Deletes the agent deployment only, agent version associated with the deployment remains.
     """
-    request = _create_agent_request("DELETE", agent_name, agent_version, container=True)
+    request = _create_agent_request(
+        "POST", agent_name, agent_version, action="delete", container=True
+    )
     response = client.send_request(request)
     response.raise_for_status()
     return response.json()
@@ -545,9 +547,7 @@ def agent_delete(
     return response.json()
 
 
-def agent_list(
-    client, account_name, project_name
-):  # pylint: disable=unused-argument
+def agent_list(client, account_name, project_name):  # pylint: disable=unused-argument
     """
     List agents.
     """
