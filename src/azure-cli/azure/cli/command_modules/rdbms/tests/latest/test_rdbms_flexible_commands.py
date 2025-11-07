@@ -2747,7 +2747,7 @@ class FlexibleServerFabricMirroringMgmtScenarioTest(ScenarioTest):
 
         # create a server
         self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
-                 '--tier GeneralPurpose --sku-name Standard_D4ds_v5 --yes'
+                 '--tier GeneralPurpose --sku-name Standard_D4ds_v5 --version 17 --yes'
                  .format(database_engine, resource_group, server_name, location, 128))
         
         
