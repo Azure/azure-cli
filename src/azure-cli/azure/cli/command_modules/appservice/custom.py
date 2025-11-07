@@ -500,7 +500,7 @@ def check_language_runtime(cmd, resource_group_name, name):
                     runtime_helper.resolve(runtime, runtime_version, functions_version, is_linux)
                 else:
                     location = app.location
-                    runtime_helper = _FunctionAppSkuStackRuntimeHelper(cmd, location, runtime, "FC1", runtime_version)
+                    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
                     runtime_helper.resolve(runtime, runtime_version)
         except ValidationError as e:
             logger.warning(e.error_msg)
@@ -1057,7 +1057,7 @@ def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, fle
     runtime = runtime_info['app_runtime']
     runtime_version = runtime_info['app_runtime_version']
 
-    runtime_helper = _FunctionAppSkuStackRuntimeHelper(cmd, normalized_site_location, runtime, "FC1")
+    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, normalized_site_location, runtime)
     runtime_helper.resolve(runtime, runtime_version)
 
     # Validating that the site does not have SSL bindings configured
@@ -2700,7 +2700,7 @@ def list_function_app_runtimes(cmd, os_type=None):
 
 
 def list_flex_function_app_runtimes(cmd, location, runtime):
-    runtime_helper = _FunctionAppSkuStackRuntimeHelper(cmd, location, runtime, "FC1")
+    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
     runtimes = [r for r in runtime_helper.stacks if runtime == r.name]
     if not runtimes:
         raise ValidationError("Runtime '{}' not supported for function apps on the Flex Consumption plan."
@@ -3220,7 +3220,7 @@ def update_runtime_config(cmd, resource_group_name, name, runtime_version):
     runtime = runtime_info['app_runtime']
 
     location = functionapp["location"]
-    runtime_helper = _FunctionAppSkuStackRuntimeHelper(cmd, location, runtime, "FC1", runtime_version)
+    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime, runtime_version)
     matched_runtime = runtime_helper.resolve(runtime, runtime_version)
     flex_sku = matched_runtime.sku
     version = flex_sku['functionAppConfigProperties']['runtime']['version']
@@ -5592,7 +5592,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         self._stacks = stacks
 
 
-class _FunctionAppSkuStackRuntimeHelper:
+class _FlexFunctionAppStackRuntimeHelper:
     class Runtime:
         def __init__(self, name, version, app_insights=False, default=False, sku=None,
                      end_of_life_date=None, github_actions_properties=None):
@@ -5609,11 +5609,10 @@ class _FunctionAppSkuStackRuntimeHelper:
             self.is_supported = is_supported
             self.supported_version = supported_version
 
-    def __init__(self, cmd, location, runtime, sku, runtime_version=None):
+    def __init__(self, cmd, location, runtime, runtime_version=None):
         self._cmd = cmd
         self._location = location
         self._runtime = runtime
-        self._sku = sku
         self._runtime_version = runtime_version
         self._stacks = []
 
@@ -5622,11 +5621,11 @@ class _FunctionAppSkuStackRuntimeHelper:
         self._load_stacks()
         return self._stacks
 
-    def get_raw_function_app_stacks(self, cmd, location, runtime, sku):
-        stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?api-version=2023-01-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}&sku={}'  # pylint: disable=line-too-long
+    def get_raw_function_app_stacks(self, cmd, location, runtime):
+        stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?api-version=2023-01-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}&sku=FC1'  # pylint: disable=line-too-long
         if runtime == "dotnet-isolated":
             runtime = "dotnet"
-        request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime, sku)
+        request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime)
         response = send_raw_request(cmd.cli_ctx, "GET", request_url)
         return response.json()['value']
 
@@ -5666,7 +5665,7 @@ class _FunctionAppSkuStackRuntimeHelper:
                         continue
 
                     for sku in skus:
-                        if sku['skuCode'] != self._sku:
+                        if sku['skuCode'] != 'FC1':
                             continue
 
                         github_actions_properties = {
@@ -5704,7 +5703,7 @@ class _FunctionAppSkuStackRuntimeHelper:
     def _load_stacks(self):
         if self._stacks:
             return
-        stacks = self.get_raw_function_app_stacks(self._cmd, self._location, self._runtime, self._sku)
+        stacks = self.get_raw_function_app_stacks(self._cmd, self._location, self._runtime)
         self._parse_raw_stacks(stacks)
 
     def _get_version_variants(self, version):
@@ -6429,8 +6428,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
     if flexconsumption_location:
-        runtime_helper = _FunctionAppSkuStackRuntimeHelper(cmd, flexconsumption_location,
-                                                           runtime, "FC1", runtime_version)
+        runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, flexconsumption_location,
+                                                           runtime, runtime_version)
         matched_runtime = runtime_helper.resolve(runtime, runtime_version)
     else:
         runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
@@ -7259,7 +7258,7 @@ def list_flex_function_app_all_runtimes(cmd, location, runtime=None):
 
 def get_runtime_details_ignore_error(cmd, location, runtime):
     try:
-        runtime_helper = _FunctionAppSkuStackRuntimeHelper(cmd, location, runtime, "FC1")
+        runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime)
         return runtime_helper.stacks
     except Exception:  # pylint: disable=broad-except
         return None
@@ -9884,7 +9883,7 @@ def _get_functionapp_runtime_version(cmd, location, name, resource_group, runtim
             helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
             matched_runtime = helper.resolve(runtime_string, runtime_version, functionapp_version, is_linux)
         else:
-            runtime_helper = _FunctionAppSkuStackRuntimeHelper(cmd, location, runtime_string, "FC1", runtime_version)
+            runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, location, runtime_string, runtime_version)
             matched_runtime = runtime_helper.resolve(runtime_string, runtime_version)
     except ValidationError as e:
         if "Invalid version" in e.error_msg:
