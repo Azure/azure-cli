@@ -107,7 +107,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          'show_storage_account_connection_string')
         g.generic_update_command('update', getter_name='get_properties', setter_name='update',
                                  custom_func_name='update_storage_account')
-        g.custom_command('failover', 'begin_failover', supports_no_wait=True, is_preview=True)
+        g.custom_command('failover', 'begin_failover', supports_no_wait=True)
         g.command('hns-migration start', 'begin_hierarchical_namespace_migration',
                   supports_no_wait=True)
         g.command('hns-migration stop', 'begin_abort_hierarchical_namespace_migration',

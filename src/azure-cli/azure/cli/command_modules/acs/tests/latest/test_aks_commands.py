@@ -28,6 +28,8 @@ from azure.cli.command_modules.acs.tests.latest.custom_preparers import (
 from azure.cli.command_modules.acs.tests.latest.data.certs import CUSTOM_CA_TEST_CERT_STR
 from azure.cli.command_modules.acs.tests.latest.recording_processors import \
     KeyReplacer
+
+from azure.cli.command_modules.acs._consts import CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION
 from azure.cli.command_modules.acs.tests.latest.utils import get_test_data_file_path
 from azure.cli.core.azclierror import ClientRequestError, CLIInternalError
 from azure.cli.testsdk import ScenarioTest, live_only
@@ -220,6 +222,52 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             StringContainCheck("KubernetesOfficial"), # every GA version should have this
             StringContainCheck("AKSLongTermSupport") # we should always have at least 1 LTS version which have this SupportPlan
         ])
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_create_no_ssh_key(self, resource_group, resource_group_location):
+        # kwargs for string formatting
+        aks_name = self.create_random_name('cliakstest', 16)
+        tags = "key1=value1"
+        nodepool_labels = "label1=value1 label2=value2"
+        nodepool_tags = "tag1=tv1 tag2=tv2"
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'name': aks_name,
+            'location': resource_group_location,
+            'tags': tags,
+            'nodepool_labels': nodepool_labels,
+            'nodepool_tags': nodepool_tags,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters'
+        })
+
+        # create
+        create_cmd = 'aks create --resource-group={resource_group} --name={name} --location={location} ' \
+                     '--node-count=1 --outbound-type=none --bootstrap-artifact-source=Cache --enable-private-cluster ' \
+                     '--tags {tags} --nodepool-labels {nodepool_labels} --nodepool-tags {nodepool_tags}'
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+        
+        # show
+        self.cmd('aks show -g {resource_group} -n {name}', checks=[
+            self.check('type', '{resource_type}'),
+            self.check('resourceGroup', '{resource_group}'),
+            self.check('name', '{name}'),
+            self.exists('nodeResourceGroup'),
+            self.exists('kubernetesVersion'),
+            self.exists('fqdn'),
+            self.check('agentPoolProfiles[0].count', 1),
+            self.check('agentPoolProfiles[0].osType', 'Linux'),
+            self.check('agentPoolProfiles[0].nodeLabels.label1', 'value1'),
+            self.check('agentPoolProfiles[0].nodeLabels.label2', 'value2'),
+            self.check('agentPoolProfiles[0].tags.tag1', 'tv1'),
+            self.check('agentPoolProfiles[0].tags.tag2', 'tv2'),
+            self.check('agentPoolProfiles[0].maxPods', 250),  # default maxPods is 250 now as default network plugin has been changed to azure
+        ])
+
+        # delete
+        self.cmd('aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
 
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
@@ -2720,6 +2768,107 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
             checks=[
                 self.check("provisioningState", "Succeeded"),
                 self.check("enableFips", True),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="westus2"
+    )
+    def test_aks_cluster_kata(
+        self, resource_group, resource_group_location
+    ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name("cliakstest", 16)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "dns_name_prefix": self.create_random_name("cliaksdns", 16),
+                "location": resource_group_location,
+                "resource_type": "Microsoft.ContainerService/ManagedClusters",
+                "workload_runtime": CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # create
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={name} --location={location} "
+            "--os-sku AzureLinux --workload-runtime {workload_runtime} --node-count 1 "
+            "--ssh-key-value={ssh_key_value} --node-vm-size Standard_D4s_v3"
+        )
+        self.cmd(
+            create_cmd,
+            checks=[
+                self.exists("fqdn"),
+                self.exists("nodeResourceGroup"),
+                self.check("provisioningState", "Succeeded"),
+                self.check("agentPoolProfiles[0].workloadRuntime", CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION),
+            ],
+        )
+
+        # delete
+        self.cmd(
+            "aks delete -g {resource_group} -n {name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(
+        random_name_length=17, name_prefix="clitest", location="westus2"
+    )
+    def test_aks_nodepool_add_with_kata(
+        self, resource_group, resource_group_location
+    ):
+        # reset the count so in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        aks_name = self.create_random_name("cliakstest", 16)
+        node_pool_name = self.create_random_name('c', 6)
+        node_pool_name_second = self.create_random_name('c', 6)
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "name": aks_name,
+                "node_pool_name": node_pool_name,
+                "node_pool_name_second": node_pool_name_second,
+                "location": resource_group_location,
+                "resource_type": "Microsoft.ContainerService/ManagedClusters",
+                "workload_runtime": CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
+                "ssh_key_value": self.generate_ssh_keys(),
+            }
+        )
+
+        # create
+        create_cmd = (
+                "aks create --resource-group={resource_group} --name={name} "
+                "--nodepool-name {node_pool_name} -c 1 --ssh-key-value={ssh_key_value}"
+        )
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        # nodepool add with kata
+        update_cmd = (
+                "aks nodepool add --cluster-name={name} --resource-group={resource_group} "
+                "--name={node_pool_name_second} --os-sku AzureLinux "
+                "--workload-runtime KataVmIsolation --node-vm-size Standard_D4s_v3"
+        )
+
+        self.cmd(
+            update_cmd,
+            checks=[
+                self.check("provisioningState", "Succeeded"),
+                self.check("workloadRuntime", "KataVmIsolation"),
             ],
         )
 
@@ -6556,6 +6705,114 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         # delete AKS cluster
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
+    
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_managed_namespace(self, resource_group, resource_group_location):
+        # reset the count so that in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        resource_name = self.create_random_name('cliakstest', 16)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'resource_name': resource_name,
+            'namespace_name': 'namespace01',
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={resource_name} --location={location} "
+            "--enable-aad --aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001 "
+            "--ssh-key-value={ssh_key_value}"
+        )
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        create_namespace_cmd = (
+            "aks namespace add --resource-group={resource_group} --cluster-name={resource_name} --name={namespace_name} "
+            "--cpu-request 500m --cpu-limit 800m --memory-request 1Gi --memory-limit 2Gi"
+        )
+
+        self.cmd(create_namespace_cmd, checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        show_namespace_cmd = (
+            "aks namespace show --resource-group={resource_group} --cluster-name={resource_name} --name={namespace_name}"
+        )
+
+        self.cmd(show_namespace_cmd, checks=[
+            self.check('properties.adoptionPolicy', 'Never'),
+            self.check('properties.deletePolicy', 'Keep'),
+            self.check('properties.defaultNetworkPolicy.ingress', 'AllowSameNamespace'),
+            self.check('properties.defaultNetworkPolicy.egress', 'AllowAll'),
+            ],
+        )
+
+        list_namespace_full_cmd = (
+            "aks namespace list --resource-group={resource_group} --cluster-name={resource_name} -o json"
+        )
+
+        namespace_list = self.cmd(list_namespace_full_cmd).get_output_in_json()
+        assert len(namespace_list) > 0
+
+        list_namespace_with_resource_group_cmd = (
+            "aks namespace list --resource-group={resource_group} -o json"
+        )
+
+        namespace_list = self.cmd(list_namespace_with_resource_group_cmd).get_output_in_json()
+        assert len(namespace_list) > 0
+
+        list_namespace_subscription_level_cmd = (
+            "aks namespace list -o json"
+        )
+
+        namespace_list = self.cmd(list_namespace_subscription_level_cmd).get_output_in_json()
+        assert len(namespace_list) > 0
+
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({"file": temp_path})
+        try:
+            self.cmd(
+                'aks namespace get-credentials --resource-group={resource_group} --cluster-name={resource_name} --name={namespace_name} --file "{file}"'
+            )
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        update_namespace_cmd = (
+            "aks namespace update --resource-group={resource_group} --cluster-name={resource_name} --name={namespace_name} "
+            "--cpu-request 700m --cpu-limit 800m --memory-request 3Gi --memory-limit 5Gi --labels x=y"
+        )
+
+        self.cmd(update_namespace_cmd, checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('properties.defaultResourceQuota.cpuRequest', '700m'),
+            self.check('properties.defaultResourceQuota.memoryRequest', '3Gi'),
+            self.check('properties.defaultResourceQuota.memoryLimit', '5Gi'),
+        ])
+
+        delete_namespace_cmd = (
+            "aks namespace delete --resource-group={resource_group} --cluster-name={resource_name} --name={namespace_name}"
+        )
+
+        self.cmd(
+            delete_namespace_cmd,
+            checks=[self.is_empty()],
+        )
+
+        time.sleep(2*60)
+
+        self.cmd(
+            "aks delete -g {resource_group} -n {resource_name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
     
     @live_only()  # live only due to workspace is not mocked correctly and role assignment is not mocked
     @AllowLargeResponse()

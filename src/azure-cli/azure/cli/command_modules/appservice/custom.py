@@ -43,7 +43,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.progress import IndeterminateProgressBar
 from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, get_json_object, \
-    ConfiguredDefaultSetter, sdk_no_wait
+    ConfiguredDefaultSetter
 from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
@@ -100,6 +100,12 @@ from .aaz.latest.relay.hyco import Show as HyCoShow
 from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
 from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
 from .aaz.latest.relay.namespace import List as NamespaceList
+from .aaz.latest.appservice.plan import (Show as AppServicePlanShow, Create as AppServicePlanCreate,
+                                         Update as AppServicePlanUpdate)
+from .aaz.latest.appservice.plan.managed_instance import (ShowRdpPassword
+                                                          as AppServicePlanManagedInstanceShowRdpPassword)
+from .aaz.latest.appservice.plan.managed_instance.instance import (List as AppServicePlanManagedInstanceList,
+                                                                   Recycle as AppServicePlanManagedInstanceRecycle)
 
 logger = get_logger(__name__)
 
@@ -383,7 +389,7 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
                                  "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
 
 
-def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
+def _get_subnet_info(cmd, resource_group_name, vnet, subnet, attached_resource="webapp"):
     from azure.cli.core.commands.client_factory import get_subscription_id
     subnet_info = {"vnet_name": None,
                    "subnet_name": None,
@@ -418,8 +424,8 @@ def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
         subscription_id = parsed_vnet["subscription"]
         subnet_info["vnet_resource_id"] = vnet
     else:
-        logger.warning("Assuming subnet resource group is the same as webapp. "
-                       "Use a resource ID for --subnet or --vnet to use a different resource group.")
+        logger.warning("Assuming subnet resource group is the same as %s. "
+                       "Use a resource ID for --subnet or --vnet to use a different resource group.", attached_resource)
         subnet_rg = resource_group_name
         vnet_name = vnet
         subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -2337,6 +2343,38 @@ def _build_identities_info(identities):
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
 
 
+def _build_plan_default_identity(default_identity):
+    """Transform default_identity parameter into the proper structure for plan creation."""
+    if not default_identity:
+        return None
+
+    if default_identity.lower() == '[system]':
+        return {
+            'identity_type': "SystemAssigned"
+        }
+
+    return {
+        'identity_type': "UserAssigned",
+        'user_assigned_identity_resource_id': default_identity
+    }
+
+
+def _build_plan_default_identity_sdk(default_identity):
+    """Transform default_identity parameter into the proper structure for SDK-style operations."""
+    if not default_identity:
+        return None
+
+    if default_identity.lower() == '[system]':
+        return {
+            'identityType': "SystemAssigned"
+        }
+
+    return {
+        'identityType': "UserAssigned",
+        'userAssignedIdentityResourceId': default_identity
+    }
+
+
 def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot):
     site_config = get_site_configs(cmd, resource_group, name, slot)
     linux_fx_version = getattr(site_config, "linux_fx_version", None)
@@ -4056,9 +4094,36 @@ class PlanProgressBar(IndeterminateProgressBar):
             self._emit("Scaling in progress...")
 
 
+def is_async_response(poller, timeout_seconds=30):
+    for _ in range(timeout_seconds):
+        if poller.done():
+            break
+
+        if hasattr(poller._polling_method, '_initial_response'):  # pylint: disable=protected-access
+            break
+
+        time.sleep(1)
+
+    # pylint: disable=protected-access
+    if (
+        not hasattr(poller._polling_method, '_initial_response') or
+        not hasattr(poller._polling_method._initial_response, 'http_response') or
+        not hasattr(poller._polling_method._initial_response.http_response, 'status_code')
+    ):
+        return False
+
+    # Check if this is an asynchronous operation (202)
+    status_code = poller._polling_method._initial_response.http_response.status_code
+    # pylint: enable=protected-access
+    return status_code == 202
+
+
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
-                            tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None):
+                            tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
+                            is_managed_instance=None, mi_system_assigned=None, mi_user_assigned=None,
+                            default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
+                            registry_adapters=None, install_scripts=None, storage_mounts=None):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
 
@@ -4111,16 +4176,69 @@ has been deployed ".format(app_service_environment)
     if zone_redundant:
         _enable_zone_redundant(plan_def, sku_def, number_of_workers)
 
+    if subnet or vnet:
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=resource_group_name,
+                                       subnet=subnet,
+                                       vnet=vnet,
+                                       attached_resource="app service plan")
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+    else:
+        subnet_resource_id = None
+
+    # Transform default_identity parameter into the proper structure
+    plan_default_identity = _build_plan_default_identity(default_identity)
+
+    hosting_environment_profile = None
+    if plan_def.hosting_environment_profile:
+        hosting_environment_profile = plan_def.hosting_environment_profile.__dict__
+
+    class AppServicePlanCreateWithNoWait(AppServicePlanCreate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
+
+    poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": name,
+        "resource_group": resource_group_name,
+        "location": location,
+        "tags": tags,
+        "sku": sku_def.__dict__,
+        "reserved": plan_def.reserved,
+        "hyper_v": plan_def.hyper_v,
+        "per_site_scaling": plan_def.per_site_scaling,
+        "hosting_environment_profile": hosting_environment_profile,
+        "async_scaling_enabled": plan_def.async_scaling_enabled,
+        "zone_redundant": zone_redundant if zone_redundant else None,
+        "is_custom_mode": is_managed_instance,
+        "network": {
+            "virtual_network_subnet_id": subnet_resource_id,
+        } if subnet_resource_id else None,
+        "rdp_enabled": rdp_enabled,
+        "mi_system_assigned": str(mi_system_assigned) if mi_system_assigned else None,
+        "mi_user_assigned": mi_user_assigned,
+        "plan_default_identity": plan_default_identity,
+        "registry_adapters": registry_adapters,
+        "install_scripts": install_scripts,
+        "storage_mounts": storage_mounts,
+    })
+
     if no_wait:
-        return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
-                           resource_group_name=resource_group_name, app_service_plan=plan_def)
+        return poller.result()
 
-    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
+    # Check if this is an asynchronous operation
+    is_async = is_async_response(poller)
 
-    # Only use progress bar for actual long-running operations (async scaling)
-    # Check if the operation is actually async by looking at the poller status
-    if poller.done():
-        # This completed synchronously (200 response), no need for progress bar
+    if not is_async:
+        # for synchronous operations, or if we are unable to get the initial response, directly return poller result
         return poller.result()
 
     # Asynchronous operation (202 response), use custom progress bar
@@ -4144,16 +4262,30 @@ def update_app_service_plan_with_progress(cmd, resource_group_name, name, app_se
 
 
 def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, elastic_scale=None,
-                            max_elastic_worker_count=None, async_scaling_enabled=None):
-    if (number_of_workers is None and sku is None and
-            elastic_scale is None and max_elastic_worker_count is None and async_scaling_enabled is None):
+                            max_elastic_worker_count=None, async_scaling_enabled=None,
+                            default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
+                            registry_adapters=None, install_scripts=None, storage_mounts=None):
+    has_updates = any(param is not None for param in [
+        number_of_workers, sku, elastic_scale, max_elastic_worker_count,
+        async_scaling_enabled, default_identity, rdp_enabled, vnet, subnet,
+        registry_adapters, install_scripts, storage_mounts
+    ])
+
+    if not has_updates:
         safe_params = cmd.cli_ctx.data['safe_params']
         if '--set' not in safe_params:
             args = ["--number-of-workers",
                     "--sku",
                     "--elastic-scale",
                     "--max-elastic-worker-count",
-                    "--async-scaling-enabled"]
+                    "--async-scaling-enabled",
+                    "--default-identity",
+                    "--rdp-enabled",
+                    "--vnet",
+                    "--subnet",
+                    "--registry-adapter",
+                    "--install-script",
+                    "--storage-mount"]
             logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
     sku_def = instance.sku
     if sku is not None:
@@ -4192,8 +4324,88 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
     if async_scaling_enabled is not None:
         instance.async_scaling_enabled = async_scaling_enabled
 
+    # Handle VNet integration
+    subnet_resource_id = None
+    if subnet or vnet:
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=instance.resource_group,
+                                       subnet=subnet,
+                                       vnet=vnet,
+                                       attached_resource="app service plan")
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=instance.location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+
+    # Transform default_identity parameter into the proper structure
+    plan_default_identity = _build_plan_default_identity_sdk(default_identity)
+
+    # Configure managed instance properties
+    _enable_managed_instance_properties(instance,
+                                        default_identity=plan_default_identity,
+                                        subnet_resource_id=subnet_resource_id,
+                                        rdp_enabled=rdp_enabled,
+                                        registry_adapters=registry_adapters,
+                                        install_scripts=install_scripts,
+                                        storage_mounts=storage_mounts)
+
     instance.sku = sku_def
     return instance
+
+
+def _enable_managed_instance_properties(plan_def, default_identity=None, subnet_resource_id=None, rdp_enabled=None,
+                                        registry_adapters=None, install_scripts=None, storage_mounts=None):
+    """Configure additional properties for managed instance App Service Plan features."""
+    # Only enable additional properties if we have managed instance features to configure
+    has_managed_instance_features = any([
+        default_identity,
+        subnet_resource_id,
+        rdp_enabled is not None,
+        registry_adapters,
+        install_scripts,
+        storage_mounts
+    ])
+
+    if not has_managed_instance_features:
+        return
+
+    plan_def.enable_additional_properties_sending()
+
+    # Only set properties if they haven't been set already (e.g., by elastic scale)
+    if "properties" not in plan_def.additional_properties:
+        existing_properties = plan_def.serialize()["properties"]
+        plan_def.additional_properties["properties"] = existing_properties
+
+    # Configure network (VNet integration)
+    if subnet_resource_id:
+        plan_def.additional_properties["properties"]["network"] = {
+            "virtualNetworkSubnetId": subnet_resource_id
+        }
+
+    # Configure RDP access
+    if rdp_enabled is not None:
+        plan_def.additional_properties["properties"]["rdpEnabled"] = rdp_enabled
+
+    # Configure default identity
+    if default_identity:
+        plan_def.additional_properties["properties"]["planDefaultIdentity"] = default_identity
+
+    # Configure registry adapters
+    if registry_adapters:
+        plan_def.additional_properties["properties"]["registryAdapters"] = registry_adapters
+
+    # Configure install scripts
+    if install_scripts:
+        plan_def.additional_properties["properties"]["installScripts"] = install_scripts
+
+    # Configure storage mounts
+    if storage_mounts:
+        plan_def.additional_properties["properties"]["storageMounts"] = storage_mounts
 
 
 def show_plan(cmd, resource_group_name, name):
@@ -4221,6 +4433,648 @@ def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_worke
         return update_flex_app_service_plan(instance)
 
     return update_app_service_plan(cmd, instance, sku, number_of_workers)
+
+
+def list_plan_managed_instance_registry_adapters(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    return plan_result.get('registryAdapters', [])
+
+
+def _update_plan_registry_adapters(cmd, resource_group_name, name, adapters, current_plan):
+    plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
+    poller = plan_create_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': current_plan.get('location'),
+        'sku': current_plan.get('sku', {}),
+        'registry_adapters': adapters
+    })
+
+    # Wait for the operation to complete and get the result
+    plan_result = poller.result()
+
+    # Return the updated registry adapters directly from the result
+    return plan_result.get('registryAdapters', [])
+
+
+def add_plan_managed_instance_registry_adapter(cmd, resource_group_name, name,
+                                               registry_key, adapter_type, secret_uri):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current adapters directly from the plan result
+    existing_adapters = plan_result.get('registryAdapters', [])
+    updated_adapters = []
+    adapter_found = False
+
+    # New adapter
+    adapter_obj = {
+        'registryKey': registry_key,
+        'type': adapter_type,
+        'keyVaultSecretReference': {
+            'secretUri': secret_uri
+        }
+    }
+
+    for adapter in existing_adapters:
+        if adapter.get('registryKey', '').lower() == registry_key.lower():
+            # Replace the existing adapter in the same position
+            updated_adapters.append(adapter_obj)
+            adapter_found = True
+        else:
+            # Keep existing adapter
+            updated_adapters.append(adapter)
+
+    if not adapter_found:
+        updated_adapters.append(adapter_obj)
+
+    return _update_plan_registry_adapters(cmd, resource_group_name, name, updated_adapters, plan_result)
+
+
+def remove_plan_managed_instance_registry_adapter(cmd, resource_group_name, name, registry_key):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current adapters directly from the plan result
+    adapters = plan_result.get('registryAdapters', [])
+
+    # Remove adapter by case-insensitive registry key
+    updated_adapters = [a for a in adapters if a.get('registryKey', '').lower() != registry_key.lower()]
+    if len(adapters) == len(updated_adapters):
+        raise ResourceNotFoundError("Registry key {} not found".format(registry_key))
+
+    return _update_plan_registry_adapters(cmd, resource_group_name, name, updated_adapters, plan_result)
+
+
+def list_plan_managed_instance_install_scripts(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    return plan_result.get('installScripts', [])
+
+
+def _update_plan_install_scripts(cmd, resource_group_name, name, scripts, current_plan):
+    plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
+    poller = plan_create_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': current_plan.get('location'),
+        'sku': current_plan.get('sku', {}),
+        'install_scripts': scripts
+    })
+
+    plan_result = poller.result()
+
+    return plan_result.get('installScripts', [])
+
+
+def add_plan_managed_instance_install_script(cmd, resource_group_name, name,
+                                             install_script_name, source_uri, install_script_type):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current scripts directly from the plan result
+    existing_scripts = plan_result.get('installScripts', [])
+    updated_scripts = []
+    script_found = False
+
+    # New script object
+    script_obj = {
+        'name': install_script_name,
+        'source': {
+            'sourceUri': source_uri,
+            'type': install_script_type
+        }
+    }
+
+    # Replace existing script in the same position or add to end
+    for script in existing_scripts:
+        if script.get('name', '').lower() == install_script_name.lower():
+            # Replace the existing script in the same position
+            updated_scripts.append(script_obj)
+            script_found = True
+        else:
+            # Keep existing script
+            updated_scripts.append(script)
+
+    # If script wasn't found, add it to the end
+    if not script_found:
+        updated_scripts.append(script_obj)
+
+    return _update_plan_install_scripts(cmd, resource_group_name, name, updated_scripts, plan_result)
+
+
+def remove_plan_managed_instance_install_script(cmd, resource_group_name, name, install_script_name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current scripts directly from the plan result
+    scripts = plan_result.get('installScripts', [])
+
+    # Remove script by case-insensitive name
+    updated_scripts = [s for s in scripts if s.get('name', '').lower() != install_script_name.lower()]
+
+    if len(scripts) == len(updated_scripts):
+        raise ResourceNotFoundError("Install script with name {} not found".format(install_script_name))
+
+    return _update_plan_install_scripts(cmd, resource_group_name, name, updated_scripts, plan_result)
+
+
+def list_plan_managed_instance_storage_mounts(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    return plan_result.get('storageMounts', [])
+
+
+def _update_plan_storage_mounts(cmd, resource_group_name, name, mounts, current_plan):
+    plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
+    poller = plan_create_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': current_plan.get('location'),
+        'sku': current_plan.get('sku', {}),
+        'storage_mounts': mounts
+    })
+
+    plan_result = poller.result()
+
+    return plan_result.get('storageMounts', [])
+
+
+def add_plan_managed_instance_storage_mount(cmd, resource_group_name, name,
+                                            mount_name, mount_type,
+                                            destination_path, source=None, credentials_secret_uri=None):
+    if not source and mount_type.lower() != "localstorage":
+        raise InvalidArgumentValueError("--source argument is required for mount type {}".format(mount_type))
+
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current mounts directly from the plan result
+    existing_mounts = plan_result.get('storageMounts', [])
+    updated_mounts = []
+    mount_found = False
+
+    # New mount object
+    mount_obj = {
+        'name': mount_name,
+        'source': source,
+        'type': mount_type,
+        'destinationPath': destination_path
+    }
+
+    # Add credentials key vault reference if provided
+    if credentials_secret_uri:
+        mount_obj['credentialsKeyVaultReference'] = {
+            'secretUri': credentials_secret_uri
+        }
+
+    # Replace existing mount in the same position or add to end
+    for mount in existing_mounts:
+        if mount.get('name', '').lower() == mount_name.lower():
+            # Replace the existing mount in the same position
+            updated_mounts.append(mount_obj)
+            mount_found = True
+        else:
+            # Keep existing mount
+            updated_mounts.append(mount)
+
+    # If mount wasn't found, add it to the end
+    if not mount_found:
+        updated_mounts.append(mount_obj)
+
+    return _update_plan_storage_mounts(cmd, resource_group_name, name, updated_mounts, plan_result)
+
+
+def remove_plan_managed_instance_storage_mount(cmd, resource_group_name, name, mount_name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current mounts directly from the plan result
+    mounts = plan_result.get('storageMounts', [])
+
+    # Remove mount by case-insensitive name
+    updated_mounts = [m for m in mounts if m.get('name', '').lower() != mount_name.lower()]
+    if len(mounts) == len(updated_mounts):
+        raise ResourceNotFoundError("Storage mount with name {} not found".format(mount_name))
+
+    return _update_plan_storage_mounts(cmd, resource_group_name, name, updated_mounts, plan_result)
+
+
+def show_plan_managed_instance_network(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Return the whole network information from the plan result
+    return plan_result.get('network', {})
+
+
+def _update_plan_network(cmd, resource_group_name, name, subnet_resource_id, current_plan):
+    plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
+
+    # Handle None, empty string, and actual resource IDs properly
+    if subnet_resource_id is None:
+        network_config = None
+    else:
+        network_config = {
+            'virtual_network_subnet_id': subnet_resource_id
+        }
+
+    poller = plan_create_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': current_plan.get('location'),
+        'sku': current_plan.get('sku', {}),
+        'network': network_config
+    })
+
+    plan_result = poller.result()
+
+    # Return the whole network information from the updated plan result
+    return plan_result.get('network', {})
+
+
+def add_plan_managed_instance_network(cmd, resource_group_name, name, vnet=None, subnet=None):
+    # Validate that both vnet and subnet are provided
+    if not subnet and not vnet:
+        raise RequiredArgumentMissingError('Either --subnet or both --vnet and --subnet arguments are required.')
+
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    location = plan_result.get('location')
+
+    if subnet or vnet:
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=resource_group_name,
+                                       subnet=subnet,
+                                       vnet=vnet,
+                                       attached_resource="app service plan")
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+    else:
+        subnet_resource_id = None
+
+    return _update_plan_network(cmd, resource_group_name, name, subnet_resource_id, plan_result)
+
+
+def remove_plan_managed_instance_network(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Explicitly set to empty string to remove network configuration
+    return _update_plan_network(cmd, resource_group_name, name, "", plan_result)
+
+
+def show_plan_identity(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    return plan_result.get('identity', {})
+
+
+def _determine_identity_type(system_assigned, user_assigned_identities):
+    has_system = system_assigned is not None and system_assigned
+    has_user = user_assigned_identities and len(user_assigned_identities) > 0
+
+    if has_system and has_user:
+        return "SystemAssigned,UserAssigned"
+    if has_system:
+        return "SystemAssigned"
+    if has_user:
+        return "UserAssigned"
+
+    return "None"
+
+
+def _update_plan_identity(cmd, resource_group_name, name, identity_type, user_assigned_identities, current_plan):
+    class IdentityUpdate(AppServicePlanUpdate):
+        def pre_instance_update(self, instance):
+            instance.properties.storageMounts = None  # need this due to backend bug
+            # Construct the appropriate identity object based on the desired identity_type
+            if identity_type == "None":
+                # Explicitly clear the identity
+                instance.identity = {"type": "None"}
+            elif identity_type == "SystemAssigned":
+                instance.identity = {"type": "SystemAssigned"}
+            elif identity_type == "UserAssigned":
+                # For user-assigned identity, we need to include the user assigned identities
+                user_assigned_dict = {}
+                if user_assigned_identities:
+                    for identity_id in user_assigned_identities:
+                        user_assigned_dict[identity_id] = {}  # Empty object as required by the API
+                instance.identity = {
+                    "type": "UserAssigned",
+                    "userAssignedIdentities": user_assigned_dict
+                }
+            elif identity_type == "SystemAssigned,UserAssigned":
+                # For combined identity, include both system and user assigned
+                user_assigned_dict = {}
+                if user_assigned_identities:
+                    for identity_id in user_assigned_identities:
+                        user_assigned_dict[identity_id] = {}  # Empty object as required by the API
+                instance.identity = {
+                    "type": "SystemAssigned,UserAssigned",
+                    "userAssignedIdentities": user_assigned_dict
+                }
+
+    identity_update_cmd = IdentityUpdate(cli_ctx=cmd.cli_ctx)
+    update_args = {
+        'resource_group': resource_group_name,
+        'location': current_plan.get('location'),
+        'sku': current_plan.get('sku', {}),
+        'name': name,
+    }
+
+    poller = identity_update_cmd(command_args=update_args)
+
+    # Wait for the operation to complete and get the result
+    plan_result = poller.result()
+
+    # Return the updated identity directly from the result
+    return plan_result.get('identity', {})
+
+
+def assign_plan_identity(cmd, resource_group_name, name, system_assigned=None, user_assigned=None):
+    # Parse the identities parameter similar to webapp pattern
+    if not system_assigned and not user_assigned:
+        raise InvalidArgumentValueError("No identities specified. "
+                                        "Either --system-assigned or --user-assigned must be specified.")
+
+    # Determine what identities to assign
+    system_assigned = bool(system_assigned)
+    user_assigned = user_assigned if user_assigned else []
+
+    # Get the current plan to understand existing identity
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    current_identity = plan_result.get('identity', {})
+    current_type = current_identity.get('type', 'None')
+    current_user_assigned = current_identity.get('userAssignedIdentities', {})
+
+    # Determine what the new identity should be
+    has_existing_system = current_type and 'SystemAssigned' in current_type
+    has_existing_user = current_type and 'UserAssigned' in current_type
+
+    # Merge existing user-assigned identities with new ones
+    final_user_assigned = []
+    if has_existing_user and current_user_assigned:
+        final_user_assigned.extend(list(current_user_assigned.keys()))
+
+    # Add new user-assigned identities (avoid duplicates with case-insensitive comparison)
+    for identity in user_assigned:
+        if not any(existing.lower() == identity.lower() for existing in final_user_assigned):
+            final_user_assigned.append(identity)
+
+    # Determine final system assignment
+    final_system_assigned = has_existing_system or system_assigned
+
+    # Determine the correct identity type
+    identity_type = _determine_identity_type(final_system_assigned, final_user_assigned)
+
+    return _update_plan_identity(cmd, resource_group_name, name, identity_type, final_user_assigned, plan_result)
+
+
+def remove_plan_identity(cmd, resource_group_name, name, system_assigned=None, user_assigned=None):
+    # Parse the identities parameter similar to webapp pattern
+    if not system_assigned and user_assigned is None:
+        raise InvalidArgumentValueError("No identities specified. "
+                                        "Either --system-assigned or --user-assigned must be specified.")
+
+    # Determine what identities to remove
+    remove_system = bool(system_assigned)
+    remove_user_assigned = user_assigned if user_assigned else []
+    remove_all_user_assigned = user_assigned == []
+
+    if remove_all_user_assigned:
+        logger.warning('--user-assigned specified without any resource IDs. '
+                       'Removing all user-assigned identities from app service plan.')
+
+    # Get the current plan to understand existing identity
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    current_identity = plan_result.get('identity', {})
+    current_type = current_identity.get('type', 'None')
+    current_user_assigned = current_identity.get('userAssignedIdentities', {})
+
+    # Validate current state
+    has_system = current_type and 'SystemAssigned' in current_type
+    has_user = current_type and 'UserAssigned' in current_type
+
+    if remove_system and not has_system:
+        logger.warning("System-assigned identity is not associated with plan '%s'", name)
+
+    if not has_user and (remove_user_assigned or remove_all_user_assigned):
+        logger.warning("No user-assigned identities are associated with plan '%s'", name)
+
+    # Check if user-assigned identities exist
+    if remove_user_assigned:
+        existing_user_ids = set(id.lower() for id in current_user_assigned.keys()) if current_user_assigned else set()
+        remove_user_ids = set(id.lower() for id in remove_user_assigned)
+        non_existing = remove_user_ids - existing_user_ids
+        if non_existing:
+            # Find the original casing for error message
+            original_non_existing = []
+            for remove_id in remove_user_assigned:
+                if remove_id.lower() in non_existing:
+                    original_non_existing.append(remove_id)
+            logger.warning("User-assigned identities '%s' are not associated with plan '%s'",
+                           ', '.join(original_non_existing), name)
+
+    # Calculate what should remain
+    final_system_assigned = has_system and not remove_system
+
+    final_user_assigned = []
+    if has_user and current_user_assigned and not remove_all_user_assigned:
+        # Keep existing user-assigned identities except those being removed (case insensitive comparison)
+        remove_user_ids_lower = set(id.lower() for id in remove_user_assigned)
+        final_user_assigned = [uid for uid in current_user_assigned.keys() if uid.lower() not in remove_user_ids_lower]
+
+    # Determine the correct identity type
+    identity_type = _determine_identity_type(final_system_assigned, final_user_assigned)
+
+    return _update_plan_identity(cmd, resource_group_name, name, identity_type, final_user_assigned, plan_result)
+
+
+def set_plan_default_identity(cmd, resource_group_name, name, identity=None):
+    # Validate that identity is provided
+    if not identity:
+        raise InvalidArgumentValueError("Identity is required. Use '[system]' for system-assigned identity "
+                                        "or provide user-assigned identity resource ID.")
+
+    # Get the current plan
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    location = plan_result.get('location')
+
+    # Determine identity type and resource ID
+    if identity.lower() == '[system]':
+        identity_type = "SystemAssigned"
+        user_assigned_identity_resource_id = None
+    else:
+        identity_type = "UserAssigned"
+        user_assigned_identity_resource_id = identity
+
+    # Update the plan with the default identity
+    plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
+    update_args = {
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': location,
+        'sku': plan_result.get('sku', {}),
+        'plan_default_identity': {
+            'identity_type': identity_type
+        }
+    }
+
+    # Add user assigned identity resource ID if it's a user-assigned identity
+    if user_assigned_identity_resource_id:
+        update_args['plan_default_identity']['user_assigned_identity_resource_id'] = user_assigned_identity_resource_id
+
+    poller = plan_create_cmd(command_args=update_args)
+
+    # Wait for the operation to complete and get the result
+    plan_result = poller.result()
+
+    # Return the updated plan default identity
+    return plan_result.get('planDefaultIdentity', {})
+
+
+def recycle_plan_managed_instance(cmd, resource_group_name, name, instance_name):
+    recycle_cmd = AppServicePlanManagedInstanceRecycle(cli_ctx=cmd.cli_ctx)
+    _ = recycle_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'worker_name': instance_name
+    })
+
+    logger.warning("Initiated recycle for instance %s", instance_name)
+
+
+def connect_to_plan_instance(cmd, resource_group_name, name, instance_name,
+                             bastion_name, bastion_resource_group_name=None):
+    from azure.cli.core.util import run_az_cmd
+
+    # 1. Default bastion RG to plan RG if not supplied
+    if not bastion_resource_group_name:
+        bastion_resource_group_name = resource_group_name
+
+    # 2. List instances to locate the target instance and its IP address
+    instances_cmd = AppServicePlanManagedInstanceList(cli_ctx=cmd.cli_ctx)
+    instances_payload = instances_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    instances = instances_payload.get('instances', []) if isinstance(instances_payload, dict) else []
+
+    # Search for the specified instance using the documented shape {"instanceName": ..., "ipAddress": ...}
+    target_instance = None
+    for inst in instances:
+        inst_instance_name = inst.get('instanceName')
+        if inst_instance_name and inst_instance_name.lower() == instance_name.lower():
+            target_instance = inst
+            break
+
+    if not target_instance:
+        raise ResourceNotFoundError(f"Instance '{instance_name}' not found in plan '{name}'.")
+
+    # Resolve IP address field (try a few possible keys)
+    target_ip = target_instance.get('ipAddress')
+    if not target_ip:
+        raise InvalidArgumentValueError("Could not determine target IP address from instance metadata.")
+
+    # 3. Retrieve RDP password after validating instance exists
+    password_cmd = AppServicePlanManagedInstanceShowRdpPassword(cli_ctx=cmd.cli_ctx)
+    password_response = password_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    password_value = password_response.get('rdpPassword')
+    if not password_value:
+        raise UnclassifiedUserFault("Double check that the app service plan is set with rdp-enabled and try again.")
+
+    logger.warning("Use the following credentials to login:")
+    logger.warning("RDP username: Administrator")
+    logger.warning("RDP password: [copied to clipboard]")
+    _copy_string_to_clipboard(password_value)
+
+    # 4. Invoke the Bastion RDP command
+    bastion_cmd = [
+        'az', 'network', 'bastion', 'rdp',
+        '--name', bastion_name,
+        '--resource-group', bastion_resource_group_name,
+        '--target-ip-address', target_ip
+    ]
+
+    run_az_cmd(bastion_cmd)
+
+
+def _copy_string_to_clipboard(string_value):
+    from azure.cli.core.util import run_cmd
+    run_cmd(["cmd.exe", "/c", "echo", "|", "set", "/p={}|".format(string_value), "clip"], check=False)
 
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
