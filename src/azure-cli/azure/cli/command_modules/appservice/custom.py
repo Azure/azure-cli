@@ -5744,7 +5744,7 @@ class _FlexFunctionAppStackRuntimeHelper:
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
             raise ValidationError('Invalid version {0} for runtime {1} for function apps on the Flex Consumption'
-                                  ' plan Supported versions for runtime {1} are {2}.'
+                                  ' plan. Supported versions for runtime {1} are {2}.'
                                   .format(version, runtime, versions))
         return matched_runtime_version
 
