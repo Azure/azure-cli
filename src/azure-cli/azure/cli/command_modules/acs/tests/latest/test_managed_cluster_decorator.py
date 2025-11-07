@@ -86,6 +86,7 @@ from knack.prompting import NoTTYException
 import datetime
 from dateutil.parser import parse
 
+
 class AKSManagedClusterModelsTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -128,6 +129,7 @@ class AKSManagedClusterModelsTestCase(unittest.TestCase):
             models.nat_gateway_models.ManagedClusterManagedOutboundIPProfile,
             getattr(module, "ManagedClusterManagedOutboundIPProfile"),
         )
+
 
 class AKSManagedClusterContextTestCase(unittest.TestCase):
     def setUp(self):
@@ -6243,6 +6245,7 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
         self.assertIsNotNone(certs_empty)
         self.assertEqual(certs_empty, [])
 
+
 class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
         self.cli_ctx = MockCLI()
@@ -8920,6 +8923,7 @@ class AKSManagedClusterCreateDecoratorTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
 
 class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
     def setUp(self):
@@ -14137,6 +14141,7 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(dec_mc_2, ground_truth_mc_2)
+
 
 if __name__ == "__main__":
     unittest.main()

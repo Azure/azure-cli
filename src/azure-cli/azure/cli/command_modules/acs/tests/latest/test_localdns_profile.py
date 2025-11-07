@@ -118,6 +118,7 @@ def assert_dns_overrides_equal(actual, expected):
             assert subkey in actual_lower[key], f"Missing subkey: {subkey} in {key}"
             assert actual_lower[key][subkey] == subval, f"Mismatch for {key}.{subkey}: {actual_lower[key][subkey]} != {subval}"
 
+
 class TestLocalDNSProfile(unittest.TestCase):
     def setUp(self):
         self.cmd = Mock()
