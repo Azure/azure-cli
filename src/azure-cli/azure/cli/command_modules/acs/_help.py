@@ -95,6 +95,10 @@ parameters:
   - name: --ssh-key-value
     type: string
     short-summary: Public key path or key contents to install on node VMs for SSH access. For example, 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'.
+    long-summary: |-
+      If omitted:
+          - The CLI will use '~/.ssh/id_rsa.pub' when present
+          - If that file is not present the CLI will default to server-side generated keys (equivalent to using --no-ssh-key)
   - name: --admin-username -u
     type: string
     short-summary: User account to create on node VMs for SSH access.
@@ -263,7 +267,7 @@ parameters:
   - name: --no-ssh-key -x
     type: string
     short-summary: Do not use or create a local SSH key.
-    long-summary: To access nodes after creating a cluster with this option, use the Azure Portal.
+    long-summary: If omitted and no local public key exists, the CLI will default to this behavior. To access nodes after creating a cluster with this option, use the Azure Portal.
   - name: --pod-cidr
     type: string
     short-summary: A CIDR notation IP range from which to assign pod IPs when Azure CNI Overlay or Kubenet is used (On 31 March 2028, Kubenet will be retired).
@@ -619,6 +623,13 @@ parameters:
         Auto: A standard set of Karpenter NodePools are provisioned.
         None: No Karpenter NodePools are provisioned.
         WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted by that action.
+  - name: --workload-runtime
+    type: string
+    short-summary: Set the workload runtime.
+    long-summary: |
+        Azure provides a different workload-runtime to enable Kata supported workloads in your nodepools. The following values can be specified:
+          - "KataVmIsolation" for Kata.
+
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -702,6 +713,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto
   - name: Create a kubernetes cluster with auto node provisioning and no default pools.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
+  - name: Create a Kubernetes cluster with KataVmIsolation enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
 """
 
 helps["aks update"] = """
@@ -1949,6 +1962,13 @@ parameters:
   - name: --gateway-prefix-size
     type: int
     short-summary: The size of Public IPPrefix attached to the Gateway-mode node pool. The node pool must be in Gateway mode.
+  - name: --workload-runtime
+    type: string
+    short-summary: Set the workload runtime.
+    long-summary: |
+        Azure provides a different workload-runtime to enable Kata supported workloads in your nodepools. The following values can be specified:
+          - "KataVmIsolation" for Kata.
+
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1970,6 +1990,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster  --os-sku Ubuntu --pod-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet --pod-ip-allocation-mode StaticBlock
   - name: create a nodepool of type VirtualMachines
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
+  - name: Create a nodepool with KataVmIsolation enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
 """
 
 helps["aks nodepool delete"] = """

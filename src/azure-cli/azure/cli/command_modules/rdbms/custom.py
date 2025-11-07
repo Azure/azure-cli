@@ -17,13 +17,11 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, sdk_no_wait
 from azure.cli.core.local_context import ALL
 from azure.mgmt.core.tools import resource_id, is_valid_resource_id, parse_resource_id
-from azure.mgmt.rdbms import postgresql, mysql, mariadb
+from azure.mgmt.rdbms import mysql, mariadb
 from azure.mgmt.rdbms.mysql.operations._servers_operations import ServersOperations as MySqlServersOperations
-from azure.mgmt.rdbms.postgresql.operations._location_based_performance_tier_operations import LocationBasedPerformanceTierOperations as PostgreSQLLocationOperations
 from azure.mgmt.rdbms.mariadb.operations._servers_operations import ServersOperations as MariaDBServersOperations
 from azure.mgmt.rdbms.mariadb.operations._location_based_performance_tier_operations import LocationBasedPerformanceTierOperations as MariaDBLocationOperations
 from ._client_factory import get_mariadb_management_client, get_mysql_management_client, cf_mysql_db, cf_mariadb_db, \
-    get_postgresql_management_client, cf_postgres_check_resource_availability_sterling, \
     cf_mysql_check_resource_availability_sterling, cf_mariadb_check_resource_availability_sterling
 from ._flexible_server_util import generate_missing_parameters, generate_password, resolve_poller
 from ._util import parse_public_network_access_input, create_firewall_rule
@@ -35,7 +33,6 @@ SKU_TIER_MAP = {'Basic': 'b', 'GeneralPurpose': 'gp', 'MemoryOptimized': 'mo'}
 DEFAULT_DB_NAME = 'defaultdb'
 MYSQL_RETIRE_WARNING_MSG = 'Azure Database for MySQL - Single Server is scheduled for retirement (https://go.microsoft.com/fwlink/?linkid=2216041) by September 16, 2024. Migrate (https://go.microsoft.com/fwlink/?linkid=2202255) to Azure Database for MySQL- Flexible Server now.'
 MARIADB_RETIRE_WARNING_MSG = 'Azure Database for MariaDB is scheduled for retirement (https://go.microsoft.com/fwlink/?linkid=2248931) by September 19, 2025. Migrate (https://go.microsoft.com/fwlink/?linkid=2263092) to Azure Database for MySQL- Flexible Server now.'
-POSTGRESQL_RETIRE_WARNING_MSG = 'Azure Database for PostgreSQL – Single Server is scheduled for retirement by March 28 2025, (https://go.microsoft.com/fwlink/?linkid=2300058). Migrate to Azure Database for PostgreSQL flexible server now, (https://go.microsoft.com/fwlink/?linkid=2197657).'
 
 
 # pylint: disable=too-many-locals, too-many-statements, raise-missing-from
@@ -43,13 +40,11 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
                    location=None, administrator_login=None, administrator_login_password=None, backup_retention=None,
                    geo_redundant_backup=None, ssl_enforcement=None, storage_mb=None, tags=None, version=None, auto_grow='Enabled',
                    assign_identity=False, public_network_access=None, infrastructure_encryption=None, minimal_tls_version=None):
-    provider = 'Microsoft.DBforPostgreSQL'
+    provider = ''
     if isinstance(client, MySqlServersOperations):
         provider = 'Microsoft.DBforMySQL'
     elif isinstance(client, MariaDBServersOperations):
         provider = 'Microsoft.DBforMariaDB'
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     server_result = firewall_id = None
     administrator_login_password = generate_password(administrator_login_password)
@@ -67,37 +62,7 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
         public_network_access = 'Enabled'
 
     # Check availability for server name if it is supplied by the user
-    if provider == 'Microsoft.DBforPostgreSQL':
-        # Populate desired parameters
-        location, resource_group_name, server_name = generate_missing_parameters(cmd, location, resource_group_name,
-                                                                                 server_name, engine_name)
-        check_name_client = cf_postgres_check_resource_availability_sterling(cmd.cli_ctx, None)
-        name_availability_resquest = postgresql.models.NameAvailabilityRequest(name=server_name, type="Microsoft.DBforPostgreSQL/servers")
-        check_server_name_availability(check_name_client, name_availability_resquest)
-        logger.warning('Creating %s Server \'%s\' in group \'%s\'...', engine_name, server_name, resource_group_name)
-        logger.warning('Your server \'%s\' is using sku \'%s\' (Paid Tier). '
-                       'Please refer to %s  for pricing details', server_name, sku_name, pricing_link)
-        parameters = postgresql.models.ServerForCreate(
-            sku=postgresql.models.Sku(name=sku_name),
-            properties=postgresql.models.ServerPropertiesForDefaultCreate(
-                administrator_login=administrator_login,
-                administrator_login_password=administrator_login_password,
-                version=version,
-                ssl_enforcement=ssl_enforcement,
-                minimal_tls_version=minimal_tls_version,
-                public_network_access=public_network_access,
-                infrastructure_encryption=infrastructure_encryption,
-                storage_profile=postgresql.models.StorageProfile(
-                    backup_retention_days=backup_retention,
-                    geo_redundant_backup=geo_redundant_backup,
-                    storage_mb=storage_mb,
-                    storage_autogrow=auto_grow)),
-            location=location,
-            tags=tags)
-        if assign_identity:
-            parameters.identity = postgresql.models.ResourceIdentity(
-                type=postgresql.models.IdentityType.system_assigned.value)
-    elif provider == 'Microsoft.DBforMySQL':
+    if provider == 'Microsoft.DBforMySQL':
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
         engine_name = 'mysql'
         pricing_link = 'https://aka.ms/mysql-pricing'
@@ -174,11 +139,6 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
 
     update_local_contexts(cmd, provider, server_name, resource_group_name, location, user)
 
-    if engine_name == 'postgres':
-        return form_response(server_result, administrator_login_password if administrator_login_password is not None else '*****',
-                             host=host,
-                             connection_string=create_postgresql_connection_string(server_name, host, user, administrator_login_password),
-                             database_name=None, firewall_id=firewall_id)
     # Serves both - MySQL and MariaDB
     # Create mysql database if it does not exist
     database_name = DEFAULT_DB_NAME
@@ -193,15 +153,13 @@ def _server_create(cmd, client, resource_group_name=None, server_name=None, sku_
 # The parameter list should be the same as that in factory to use the ParametersContext
 # arguments and validators
 def _server_restore(cmd, client, resource_group_name, server_name, source_server, restore_point_in_time, no_wait=False):
-    provider = 'Microsoft.DBforPostgreSQL'
+    provider = ''
     if isinstance(client, MySqlServersOperations):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMySQL'
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMariaDB'
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     parameters = None
     if not is_valid_resource_id(source_server):
@@ -218,12 +176,6 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
     if provider == 'Microsoft.DBforMySQL':
         parameters = mysql.models.ServerForCreate(
             properties=mysql.models.ServerPropertiesForRestore(
-                source_server_id=source_server,
-                restore_point_in_time=restore_point_in_time),
-            location=None)
-    elif provider == 'Microsoft.DBforPostgreSQL':
-        parameters = postgresql.models.ServerForCreate(
-            properties=postgresql.models.ServerPropertiesForRestore(
                 source_server_id=source_server,
                 restore_point_in_time=restore_point_in_time),
             location=None)
@@ -254,15 +206,13 @@ def _server_restore(cmd, client, resource_group_name, server_name, source_server
 # auguments and validators
 def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, location, source_server,
                        backup_retention=None, geo_redundant_backup=None, no_wait=False, **kwargs):
-    provider = 'Microsoft.DBforPostgreSQL'
+    provider = ''
     if isinstance(client, MySqlServersOperations):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMySQL'
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMariaDB'
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     parameters = None
 
@@ -281,15 +231,6 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
             sku=mysql.models.Sku(name=sku_name),
             properties=mysql.models.ServerPropertiesForGeoRestore(
                 storage_profile=mysql.models.StorageProfile(
-                    backup_retention_days=backup_retention,
-                    geo_redundant_backup=geo_redundant_backup),
-                source_server_id=source_server),
-            location=location)
-    elif provider == 'Microsoft.DBforPostgreSQL':
-        parameters = postgresql.models.ServerForCreate(
-            sku=postgresql.models.Sku(name=sku_name),
-            properties=postgresql.models.ServerPropertiesForGeoRestore(
-                storage_profile=postgresql.models.StorageProfile(
                     backup_retention_days=backup_retention,
                     geo_redundant_backup=geo_redundant_backup),
                 source_server_id=source_server),
@@ -319,15 +260,13 @@ def _server_georestore(cmd, client, resource_group_name, server_name, sku_name, 
 
 # Custom functions for server replica, will add PostgreSQL part after backend ready in future
 def _replica_create(cmd, client, resource_group_name, server_name, source_server, no_wait=False, location=None, sku_name=None, **kwargs):
-    provider = 'Microsoft.DBforPostgreSQL'
+    provider = ''
     if isinstance(client, MySqlServersOperations):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMySQL'
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
         provider = 'Microsoft.DBforMariaDB'
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
     # set source server id
     if not is_valid_resource_id(source_server):
         if len(source_server.split('/')) == 1:
@@ -357,11 +296,6 @@ def _replica_create(cmd, client, resource_group_name, server_name, source_server
             sku=mysql.models.Sku(name=sku_name),
             properties=mysql.models.ServerPropertiesForReplica(source_server_id=source_server),
             location=location)
-    elif provider == 'Microsoft.DBforPostgreSQL':
-        parameters = postgresql.models.ServerForCreate(
-            sku=postgresql.models.Sku(name=sku_name),
-            properties=postgresql.models.ServerPropertiesForReplica(source_server_id=source_server),
-            location=location)
     elif provider == 'Microsoft.DBforMariaDB':
         parameters = mariadb.models.ServerForCreate(
             sku=mariadb.models.Sku(name=sku_name),
@@ -376,8 +310,6 @@ def _replica_stop(client, resource_group_name, server_name):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     try:
         server_object = client.get(resource_group_name, server_name)
@@ -413,8 +345,6 @@ def _server_update_custom_func(client,
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     server_module_path = instance.__module__
     module = import_module(server_module_path.replace('server', 'server_update_parameters'))
@@ -447,11 +377,7 @@ def _server_update_custom_func(client,
                                     minimal_tls_version=minimal_tls_version)
 
     if assign_identity:
-        if server_module_path.find('postgres'):
-            if instance.identity is None:
-                instance.identity = postgresql.models.ResourceIdentity(type=postgresql.models.IdentityType.system_assigned.value)
-            params.identity = instance.identity
-        elif server_module_path.find('mysql'):
+        if server_module_path.find('mysql'):
             if instance.identity is None:
                 instance.identity = mysql.models.ResourceIdentity(type=mysql.models.IdentityType.system_assigned.value)
             params.identity = instance.identity
@@ -486,18 +412,10 @@ def _server_stop(cmd, client, resource_group_name, server_name):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     logger.warning("Server will be automatically started after 7 days "
                    "if you do not perform a manual start operation")
     return client.begin_stop(resource_group_name, server_name)
-
-
-def _server_postgresql_get(cmd, resource_group_name, server_name):
-    logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
-    client = get_postgresql_management_client(cmd.cli_ctx)
-    return client.servers.get(resource_group_name, server_name)
 
 
 def _server_update_get(client, resource_group_name, server_name):
@@ -505,8 +423,6 @@ def _server_update_get(client, resource_group_name, server_name):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     return client.get(resource_group_name, server_name)
 
@@ -516,19 +432,15 @@ def _server_update_set(client, resource_group_name, server_name, parameters):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     return client.begin_update(resource_group_name, server_name, parameters)
 
 
 def _server_delete(cmd, client, resource_group_name, server_name):
-    database_engine = 'postgres'
+    database_engine = ''
     if isinstance(client, MySqlServersOperations):
         database_engine = 'mysql'
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     result = client.begin_delete(resource_group_name, server_name)
 
@@ -548,8 +460,6 @@ def _firewall_rule_create(client, resource_group_name, server_name, firewall_rul
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     parameters = {'name': firewall_rule_name, 'start_ip_address': start_ip_address, 'end_ip_address': end_ip_address}
 
@@ -561,8 +471,6 @@ def _firewall_rule_custom_getter(client, resource_group_name, server_name, firew
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     return client.get(resource_group_name, server_name, firewall_rule_name)
 
@@ -572,8 +480,6 @@ def _firewall_rule_custom_setter(client, resource_group_name, server_name, firew
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
     return client.begin_create_or_update(
         resource_group_name,
         server_name,
@@ -586,8 +492,6 @@ def _firewall_rule_update_custom_func(client, instance, start_ip_address=None, e
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
     if start_ip_address is not None:
         instance.start_ip_address = start_ip_address
     if end_ip_address is not None:
@@ -600,8 +504,6 @@ def _vnet_rule_create(client, resource_group_name, server_name, virtual_network_
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     parameters = {
         'name': virtual_network_rule_name,
@@ -617,8 +519,6 @@ def _custom_vnet_update_getter(client, resource_group_name, server_name, virtual
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
     return client.get(resource_group_name, server_name, virtual_network_rule_name)
 
 
@@ -627,8 +527,6 @@ def _custom_vnet_update_setter(client, resource_group_name, server_name, virtual
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
     return client.begin_create_or_update(
         resource_group_name,
         server_name,
@@ -641,8 +539,6 @@ def _vnet_rule_update_custom_func(client, instance, virtual_network_subnet_id, i
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
     instance.virtual_network_subnet_id = virtual_network_subnet_id
     if ignore_missing_vnet_service_endpoint is not None:
         instance.ignore_missing_vnet_service_endpoint = ignore_missing_vnet_service_endpoint
@@ -654,8 +550,6 @@ def _configuration_update(client, resource_group_name, server_name, configuratio
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
     parameters = {
         'name': configuration_name,
         'value': value,
@@ -670,8 +564,6 @@ def _db_create(client, resource_group_name, server_name, database_name, charset=
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
     parameters = {
         'name': database_name,
         'charset': charset,
@@ -691,8 +583,6 @@ def _download_log_files(
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     # list all files
     files = client.list_by_server(resource_group_name, server_name)
@@ -708,8 +598,6 @@ def _list_log_files_with_filter(client, resource_group_name, server_name, filena
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     # list all files
     all_files = client.list_by_server(resource_group_name, server_name)
@@ -739,8 +627,6 @@ def _server_list_custom_func(client, resource_group_name=None):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
@@ -774,8 +660,6 @@ def approve_private_endpoint_connection(cmd, client, resource_group_name, server
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=True,
@@ -789,8 +673,6 @@ def reject_private_endpoint_connection(cmd, client, resource_group_name, server_
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
     elif isinstance(client, MariaDBServersOperations):
         logger.warning(MARIADB_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     return _update_private_endpoint_connection_status(
         cmd, client, resource_group_name, server_name, private_endpoint_connection_name, is_approved=False,
@@ -801,8 +683,6 @@ def server_key_create(client, resource_group_name, server_name, kid):
     """Create Server Key."""
     if isinstance(client, MySqlServersOperations):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     key_name = _get_server_key_name_from_uri(kid)
 
@@ -819,8 +699,6 @@ def server_key_get(client, resource_group_name, server_name, kid):
     """Get Server Key."""
     if isinstance(client, MySqlServersOperations):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     key_name = _get_server_key_name_from_uri(kid)
 
@@ -835,8 +713,6 @@ def server_key_delete(cmd, client, resource_group_name, server_name, kid):
     """Drop Server Key."""
     if isinstance(client, MySqlServersOperations):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     key_name = _get_server_key_name_from_uri(kid)
 
@@ -873,8 +749,6 @@ def server_ad_admin_set(client, resource_group_name, server_name, login=None, si
 
     if isinstance(client, MySqlServersOperations):
         logger.warning(MYSQL_RETIRE_WARNING_MSG)
-    else:
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
 
     parameters = {
         'administratorType': 'ActiveDirectory',
@@ -939,16 +813,6 @@ def form_response(server_result, password, host, connection_string, database_nam
     return result
 
 
-def create_postgresql_connection_string(server_name, host, user, password):
-    connection_kwargs = {
-        'user': user,
-        'host': host,
-        'servername': server_name,
-        'password': password if password is not None else '{password}'
-    }
-    return 'postgres://{user}%40{servername}:{password}@{host}/postgres?sslmode=require'.format(**connection_kwargs)
-
-
 def check_server_name_availability(check_name_client, parameters):
     server_availability = check_name_client.execute(parameters)
     if not server_availability.name_available:
@@ -975,9 +839,7 @@ def update_local_contexts(cmd, provider, server_name, resource_group_name, locat
 
 def get_connection_string(cmd, client, server_name='{server}', database_name='{database}', administrator_login='{username}', administrator_login_password='{password}'):
     provider = 'MySQL'
-    if isinstance(client, PostgreSQLLocationOperations):
-        provider = 'PostgreSQL'
-    elif isinstance(client, MariaDBLocationOperations):
+    if isinstance(client, MariaDBLocationOperations):
         provider = 'MariaDB'
 
     if provider == 'MySQL':
@@ -995,34 +857,6 @@ def get_connection_string(cmd, client, server_name='{server}', database_name='{d
                       "port=3306, database='{database}')",
             'ruby': "client = Mysql2::Client.new(username: '{user}@{server}', password: '{password}', "
                     "database: '{database}', host: '{host}', port: 3306)"
-        }
-
-        connection_kwargs = {
-            'host': host,
-            'user': administrator_login,
-            'password': administrator_login_password if administrator_login_password is not None else '{password}',
-            'database': database_name,
-            'server': server_name
-        }
-
-        for k, v in result.items():
-            result[k] = v.format(**connection_kwargs)
-
-    if provider == 'PostgreSQL':
-        logger.warning(POSTGRESQL_RETIRE_WARNING_MSG)
-        server_endpoint = cmd.cli_ctx.cloud.suffixes.postgresql_server_endpoint
-        host = '{}{}'.format(server_name, server_endpoint)
-        result = {
-            'psql_cmd': "postgresql://{user}@{server}:{password}@{host}/{database}?sslmode=require",
-            'C++ (libpq)': "host={host} port=5432 dbname={database} user={user}@{server} password={password} sslmode=require",
-            'ado.net': "Server={host};Database={database};Port=5432;User Id={user}@{server};Password={password};",
-            'jdbc': "jdbc:postgresql://{host}:5432/{database}?user={user}@{server}&password={password}",
-            'node.js': "var client = new pg.Client('postgres://{user}@{server}:{password}@{host}:5432/{database}');",
-            'php': "host={host} port=5432 dbname={database} user={user}@{server} password={password}",
-            'python': "cnx = psycopg2.connect(database='{database}', user='{user}@{server}', host='{host}', password='{password}', "
-                      "port='5432')",
-            'ruby': "cnx = PG::Connection.new(:host => '{host}', :user => '{user}@{server}', :dbname => '{database}', "
-                    ":port => '5432', :password => '{password}')"
         }
 
         connection_kwargs = {

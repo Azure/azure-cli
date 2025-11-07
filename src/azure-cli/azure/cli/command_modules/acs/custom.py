@@ -945,6 +945,7 @@ def aks_create(
     crg_id=None,
     gpu_instance_profile=None,
     message_of_the_day=None,
+    workload_runtime=None,
     # azure service mesh
     enable_azure_service_mesh=None,
     revision=None,
@@ -2855,6 +2856,7 @@ def aks_agentpool_add(
     asg_ids=None,
     node_public_ip_tags=None,
     disable_windows_outbound_nat=False,
+    workload_runtime=None,
     # trusted launch
     enable_vtpm=False,
     enable_secure_boot=False,

@@ -261,6 +261,9 @@ CONST_NODE_PROVISIONING_MODE_AUTO = "Auto"
 CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE = "None"
 CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO = "Auto"
 
+# consts for workloadruntime
+CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION = "KataVmIsolation"
+
 
 # consts for decorator pattern
 class DecoratorMode(Enum):

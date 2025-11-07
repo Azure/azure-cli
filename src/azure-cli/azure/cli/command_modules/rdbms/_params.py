@@ -30,8 +30,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     server_completers = {
         'mariadb': get_resource_name_completion_list('Microsoft.DBforMariaDB/servers'),
-        'mysql': get_resource_name_completion_list('Microsoft.DBforMySQL/servers'),
-        'postgres': get_resource_name_completion_list('Microsoft.DBforPostgreSQL/servers')
+        'mysql': get_resource_name_completion_list('Microsoft.DBforMySQL/servers')
     }
 
     def _complex_params(command_group):  # pylint: disable=too-many-statements
@@ -93,11 +92,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             c.argument('assign_identity', options_list=['--assign-identity'], help='Generate and assign an Microsoft Entra Identity for this server for use with key management services like Azure KeyVault.')
 
             c.argument('location', arg_type=get_location_type(self.cli_ctx))
-            if command_group == 'postgres':
-                c.argument('version', default='11',
-                           help='Server major version. https://learn.microsoft.com/en-us/azure/postgresql/single-server/concepts-supported-versions')
-            else:
-                c.argument('version', help='Server major version.')
+            c.argument('version', help='Server major version.')
 
         with self.argument_context('{} server update'.format(command_group)) as c:
             c.ignore('family', 'capacity', 'tier')
@@ -220,7 +215,6 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
 
     _complex_params('mariadb')
     _complex_params('mysql')
-    _complex_params('postgres')
 
     # Flexible-server
     # pylint: disable=too-many-locals, too-many-branches
