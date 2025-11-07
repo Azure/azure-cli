@@ -511,6 +511,8 @@ short-summary: Update a hosted agent deployment.
 examples:
   - name: Start hosted agent deployment.
     text: az cognitiveservices agent update --account-name myAccount --project-name myProject --name myAgent --agent-version 1 --min-replicas 1 --max-replicas 2
+"""
+
 helps['cognitiveservices account connection'] = """
     type: group
     short-summary: Manage Azure Cognitive Services connection and its more specific derivatives.

@@ -10,29 +10,7 @@ from knack.util import CLIError
 from knack.log import get_logger
 
 import azure.core.rest
-from azure.mgmt.cognitiveservices.models import (
-    Account as CognitiveServicesAccount,
-    Sku,
-    VirtualNetworkRule,
-    IpRule,
-    NetworkRuleSet,
-    NetworkRuleAction,
-    AccountProperties as CognitiveServicesAccountProperties,
-    ApiProperties as CognitiveServicesAccountApiProperties,
-    Identity,
-    ResourceIdentityType as IdentityType,
-    Deployment,
-    DeploymentModel,
-    DeploymentScaleSettings,
-    DeploymentProperties,
-    CommitmentPlan,
-    CommitmentPlanProperties,
-    CommitmentPeriod,
-)
-from azure.cli.command_modules.cognitiveservices._client_factory import (
-    cf_accounts,
-    cf_resource_skus,
-)
+
 from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku, \
     VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction, \
     AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties, \
@@ -595,7 +573,6 @@ def agent_show(
     response = client.send_request(request)
     response.raise_for_status()
     return response.json()
-    return client.create_or_update(resource_group_name, account_name, commitment_plan_name, plan)
 
 
 def project_create(

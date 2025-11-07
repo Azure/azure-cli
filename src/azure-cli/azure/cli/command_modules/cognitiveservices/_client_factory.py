@@ -83,6 +83,8 @@ def cf_ai_projects(cli_ctx, command_args):
 
     # Create and return the AI Projects client
     return AIProjectClient(endpoint=endpoint, credential=credential, **client_kwargs)
+
+
 def cf_projects(cli_ctx, *_):
     return get_cognitiveservices_management_client(cli_ctx).projects
 
