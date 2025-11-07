@@ -47,6 +47,7 @@ from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
+from .aaz.latest.vmss import Update as UpdateVMSS
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -873,7 +874,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_user_redeploy_scheduled_events=None, zone_placement_policy=None, include_zones=None,
               exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None):
+              key_incarnation_id=None, add_proxy_agent_extension=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1103,7 +1104,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         imds_mode=imds_mode,
         wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
         imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
-        key_incarnation_id=key_incarnation_id)
+        key_incarnation_id=key_incarnation_id, add_proxy_agent_extension=add_proxy_agent_extension)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1649,6 +1650,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
               enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
               align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
+              add_proxy_agent_extension=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
@@ -1678,6 +1680,21 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             'resource_group': resource_group_name,
             'security_profile': security_profile
         }))
+        vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+
+    if add_proxy_agent_extension is not None:
+        args = {
+            'resource_group': resource_group_name,
+            'vm_name': vm_name,
+            'no_wait': no_wait,
+            'security_profile': {
+                'proxy_agent_settings': {
+                    'add_proxy_agent_extension': add_proxy_agent_extension
+                }
+            }
+        }
+
+        LongRunningOperation(cmd.cli_ctx)(UpdateVM(cli_ctx=cmd.cli_ctx)(command_args=args))
         vm = get_vm_to_update(cmd, resource_group_name, vm_name)
 
     disk_name = None
@@ -1897,7 +1914,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                 }
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     if wire_server_access_control_profile_reference_id is not None or \
-            imds_access_control_profile_reference_id is not None:
+            imds_access_control_profile_reference_id is not None or \
+            add_proxy_agent_extension is not None:
         kwargs['parameters'] = vm
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
@@ -3407,7 +3425,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
-                imds_mode=None, wire_server_access_control_profile_reference_id=None,
+                imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
                 enable_automatic_repairs=None):
@@ -3728,6 +3746,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             skuprofile_rank=skuprofile_rank,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
             zone_balance=zone_balance, wire_server_mode=wire_server_mode, imds_mode=imds_mode,
+            add_proxy_agent_extension=add_proxy_agent_extension,
             wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
             imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
             enable_automatic_zone_balancing=enable_automatic_zone_balancing,
@@ -4166,7 +4185,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None,
-                wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
+                wire_server_mode=None, imds_mode=None, add_proxy_agent_extension=None,
+                wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
     vmss = kwargs['parameters']
@@ -4195,6 +4215,23 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 'security_profile': security_profile
             }
         }))
+        vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
+
+    if add_proxy_agent_extension is not None:
+        args = {
+            'resource_group': resource_group_name,
+            'vm_scale_set_name': name,
+            'no_wait': no_wait,
+            'virtual_machine_profile': {
+                'security_profile': {
+                    'proxy_agent_settings': {
+                        'add_proxy_agent_extension': add_proxy_agent_extension
+                    }
+                }
+            }
+        }
+
+        LongRunningOperation(cmd.cli_ctx)(UpdateVMSS(cli_ctx=cmd.cli_ctx)(command_args=args))
         vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
 
     aux_subscriptions = None
@@ -4542,7 +4579,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.zone_balance = zone_balance
 
     if wire_server_access_control_profile_reference_id is not None or \
-            imds_access_control_profile_reference_id is not None:
+            imds_access_control_profile_reference_id is not None or \
+            add_proxy_agent_extension is not None:
         kwargs['parameters'] = vmss
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,

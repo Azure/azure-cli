@@ -65,8 +65,16 @@ def validate_ssh_key(namespace):
                            "file share, back up your keys to a safe location",
                            private_key_filepath, public_key_filepath)
         else:
-            raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
-                           'You can use --generate-ssh-keys to let CLI generate one for you')
+            if (not content or str(content).strip() == "" or
+                    (content == os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))):
+                namespace.no_ssh_key = True
+                return
+            raise CLIError(
+                "The SSH key provided is not a valid RSA public key. "
+                "Provide the contents of a valid SSH public key (for example, '~/.ssh/id_rsa.pub'), "
+                "specify a path to a public key file, "
+                "or add --generate-ssh-keys as a parameter to create a new key pair."
+            )
     namespace.ssh_key_value = content
 
 
@@ -103,6 +111,44 @@ def validate_ip_ranges(namespace):
                 raise CLIError("--api-server-authorized-ip-ranges cannot be IPv6 addresses")
         except ValueError:
             raise CLIError("--api-server-authorized-ip-ranges should be a list of IPv4 addresses or CIDRs")
+
+
+def validate_namespace_name(namespace):
+    _validate_namespace_name(namespace.name)
+
+
+def _validate_namespace_name(name):
+    """
+    Validates a Kubernetes namespace name.
+    Raises ValueError if the name is invalid.
+    """
+    if name != "":
+        if len(name) < 1 or len(name) > 63:
+            raise ValueError("Namespace name must be between 1 and 63 characters.")
+        pattern = r'^[a-z0-9]([-a-z0-9]*[a-z0-9])?$'
+        if not re.match(pattern, name):
+            raise ValueError(
+                f"Invalid namespace '{name}'. Must consist of lower case alphanumeric characters or '-', "
+                "and must start and end with an alphanumeric character."
+            )
+
+
+def validate_resource_quota(namespace):
+    if namespace.cpu_request is not None:
+        if not namespace.cpu_request.endswith("m"):
+            raise ValueError("--cpu-request must be specified in millicores, like 200m")
+    if namespace.cpu_limit is not None:
+        if not namespace.cpu_limit.endswith("m"):
+            raise ValueError("--cpu-limit must be specified in millicores, like 200m")
+    pattern = r"^\d+(Ki|Mi|Gi|Ti|Pi|Ei)$"
+    if namespace.memory_request is not None:
+        if not re.match(pattern, namespace.memory_request):
+            raise ValueError("--memory-request must be specified in the power-of-two equivalents form:"
+                             "Ei, Pi, Ti, Gi, Mi, Ki.")
+    if namespace.memory_limit is not None:
+        if not re.match(pattern, namespace.memory_limit):
+            raise ValueError("--memory-limit must be specified in the power-of-two equivalents form:"
+                             "Ei, Pi, Ti, Gi, Mi, Ki.")
 
 
 def validate_k8s_version(namespace):
