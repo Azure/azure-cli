@@ -5621,8 +5621,9 @@ class _FlexFunctionAppStackRuntimeHelper:
         self._load_stacks()
         return self._stacks
 
-    def get_raw_function_app_stacks(self, cmd, location, runtime):
-        stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?api-version=2023-01-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}&sku=FC1'  # pylint: disable=line-too-long
+    def get_flex_raw_function_app_stacks(self, cmd, location, runtime):
+        stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?' \
+                         'api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}&sku=FC1'
         if runtime == "dotnet-isolated":
             runtime = "dotnet"
         request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime)
@@ -5703,7 +5704,7 @@ class _FlexFunctionAppStackRuntimeHelper:
     def _load_stacks(self):
         if self._stacks:
             return
-        stacks = self.get_raw_function_app_stacks(self._cmd, self._location, self._runtime)
+        stacks = self.get_flex_raw_function_app_stacks(self._cmd, self._location, self._runtime)
         self._parse_raw_stacks(stacks)
 
     def _get_version_variants(self, version):
@@ -5730,7 +5731,7 @@ class _FlexFunctionAppStackRuntimeHelper:
     def resolve(self, runtime, version=None):
         runtimes = [r for r in self.stacks if runtime == r.name]
         if not runtimes:
-            raise ValidationError("Runtime '{}' not supported for function apps on this plan."
+            raise ValidationError("Runtime '{}' not supported for function apps on the Flex Consumption plan."
                                   .format(runtime))
         if version is None:
             return self.get_default_version()
@@ -5742,8 +5743,8 @@ class _FlexFunctionAppStackRuntimeHelper:
 
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
-            raise ValidationError('Invalid version {0} for runtime {1} for function apps on this plan.'
-                                  'Supported versions for runtime {1} are {2}.'
+            raise ValidationError('Invalid version {0} for runtime {1} for function apps on the Flex Consumption'
+                                  ' plan Supported versions for runtime {1} are {2}.'
                                   .format(version, runtime, versions))
         return matched_runtime_version
 
@@ -6428,8 +6429,7 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
         raise ArgumentUsageError('Must specify --runtime to use --runtime-version')
 
     if flexconsumption_location:
-        runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, flexconsumption_location,
-                                                           runtime, runtime_version)
+        runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, flexconsumption_location, runtime, runtime_version)
         matched_runtime = runtime_helper.resolve(runtime, runtime_version)
     else:
         runtime_helper = _FunctionAppStackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
