@@ -6557,6 +6557,114 @@ class AzureKubernetesServiceScenarioTest(ScenarioTest):
         self.cmd(
             'aks delete -g {resource_group} -n {name} --yes --no-wait', checks=[self.is_empty()])
     
+    @AllowLargeResponse()
+    @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='westus2')
+    def test_aks_managed_namespace(self, resource_group, resource_group_location):
+        # reset the count so that in replay mode the random names will start with 0
+        self.test_resources_count = 0
+        # kwargs for string formatting
+        resource_name = self.create_random_name('cliakstest', 16)
+
+        self.kwargs.update({
+            'resource_group': resource_group,
+            'resource_name': resource_name,
+            'namespace_name': 'namespace01',
+            'location': resource_group_location,
+            'resource_type': 'Microsoft.ContainerService/ManagedClusters',
+            'ssh_key_value': self.generate_ssh_keys(),
+        })
+
+        create_cmd = (
+            "aks create --resource-group={resource_group} --name={resource_name} --location={location} "
+            "--enable-aad --aad-admin-group-object-ids 00000000-0000-0000-0000-000000000001 "
+            "--ssh-key-value={ssh_key_value}"
+        )
+
+        self.cmd(create_cmd, checks=[
+            self.check('provisioningState', 'Succeeded'),
+        ])
+
+        create_namespace_cmd = (
+            "aks namespace add --resource-group={resource_group} --cluster-name={resource_name} --name={namespace_name} "
+            "--cpu-request 500m --cpu-limit 800m --memory-request 1Gi --memory-limit 2Gi"
+        )
+
+        self.cmd(create_namespace_cmd, checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+        ])
+
+        show_namespace_cmd = (
+            "aks namespace show --resource-group={resource_group} --cluster-name={resource_name} --name={namespace_name}"
+        )
+
+        self.cmd(show_namespace_cmd, checks=[
+            self.check('properties.adoptionPolicy', 'Never'),
+            self.check('properties.deletePolicy', 'Keep'),
+            self.check('properties.defaultNetworkPolicy.ingress', 'AllowSameNamespace'),
+            self.check('properties.defaultNetworkPolicy.egress', 'AllowAll'),
+            ],
+        )
+
+        list_namespace_full_cmd = (
+            "aks namespace list --resource-group={resource_group} --cluster-name={resource_name} -o json"
+        )
+
+        namespace_list = self.cmd(list_namespace_full_cmd).get_output_in_json()
+        assert len(namespace_list) > 0
+
+        list_namespace_with_resource_group_cmd = (
+            "aks namespace list --resource-group={resource_group} -o json"
+        )
+
+        namespace_list = self.cmd(list_namespace_with_resource_group_cmd).get_output_in_json()
+        assert len(namespace_list) > 0
+
+        list_namespace_subscription_level_cmd = (
+            "aks namespace list -o json"
+        )
+
+        namespace_list = self.cmd(list_namespace_subscription_level_cmd).get_output_in_json()
+        assert len(namespace_list) > 0
+
+        fd, temp_path = tempfile.mkstemp()
+        self.kwargs.update({"file": temp_path})
+        try:
+            self.cmd(
+                'aks namespace get-credentials --resource-group={resource_group} --cluster-name={resource_name} --name={namespace_name} --file "{file}"'
+            )
+            self.assertGreater(os.path.getsize(temp_path), 0)
+        finally:
+            os.close(fd)
+            os.remove(temp_path)
+
+        update_namespace_cmd = (
+            "aks namespace update --resource-group={resource_group} --cluster-name={resource_name} --name={namespace_name} "
+            "--cpu-request 700m --cpu-limit 800m --memory-request 3Gi --memory-limit 5Gi --labels x=y"
+        )
+
+        self.cmd(update_namespace_cmd, checks=[
+            self.check('properties.provisioningState', 'Succeeded'),
+            self.check('properties.defaultResourceQuota.cpuRequest', '700m'),
+            self.check('properties.defaultResourceQuota.memoryRequest', '3Gi'),
+            self.check('properties.defaultResourceQuota.memoryLimit', '5Gi'),
+        ])
+
+        delete_namespace_cmd = (
+            "aks namespace delete --resource-group={resource_group} --cluster-name={resource_name} --name={namespace_name}"
+        )
+
+        self.cmd(
+            delete_namespace_cmd,
+            checks=[self.is_empty()],
+        )
+
+        time.sleep(2*60)
+
+        self.cmd(
+            "aks delete -g {resource_group} -n {resource_name} --yes --no-wait",
+            checks=[self.is_empty()],
+        )
+    
     @live_only()  # live only due to workspace is not mocked correctly and role assignment is not mocked
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(

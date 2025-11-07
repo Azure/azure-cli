@@ -82,6 +82,7 @@ from azure.cli.command_modules.acs._consts import (
 from azure.cli.command_modules.acs._polling import RunCommandLocationPolling
 from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, check_is_private_link_cluster
 from azure.cli.command_modules.acs._resourcegroup import get_rg_location
+from azure.cli.command_modules.acs.managednamespace import aks_managed_namespace_add, aks_managed_namespace_update
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.addonconfiguration import (
     add_ingress_appgw_addon_role_assignment,
@@ -105,7 +106,7 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.commands.client_factory import get_subscription_id
+from azure.cli.core.commands.client_factory import get_subscription_id, get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.mgmt.core.polling.arm_polling import ARMPolling
 from azure.cli.core.util import in_cloud_console, sdk_no_wait
@@ -485,6 +486,189 @@ def aks_machine_list(cmd, client, resource_group_name, cluster_name, nodepool_na
 
 def aks_machine_show(cmd, client, resource_group_name, cluster_name, nodepool_name, machine_name):
     return client.get(resource_group_name, cluster_name, nodepool_name, machine_name)
+
+
+# pylint: disable=unused-argument
+def aks_namespace_add(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    name,
+    cpu_request,
+    cpu_limit,
+    memory_request,
+    memory_limit,
+    tags=None,
+    labels=None,
+    annotations=None,
+    aks_custom_headers=None,
+    ingress_policy=None,
+    egress_policy=None,
+    adoption_policy=None,
+    delete_policy=None,
+    no_wait=False,
+):
+    existedNamespace = None
+    try:
+        existedNamespace = client.get(resource_group_name, cluster_name, name)
+    except ResourceNotFoundErrorAzCore:
+        pass
+
+    if existedNamespace:
+        raise ClientRequestError(
+            f"Namespace '{name}' already exists. Please use 'az aks namespace update' to update it."
+        )
+
+    # DO NOT MOVE: get all the original parameters and save them as a dictionary
+    raw_parameters = locals()
+    headers = extract_comma_separated_string(
+        aks_custom_headers,
+        enable_strip=True,
+        extract_kv=True,
+        default_value={},
+        allow_appending_values_to_same_key=True,
+    )
+    return aks_managed_namespace_add(cmd, client, raw_parameters, headers, no_wait)
+
+
+# pylint: disable=unused-argument
+def aks_namespace_update(
+    cmd,
+    client,
+    resource_group_name,
+    cluster_name,
+    name,
+    cpu_request=None,
+    cpu_limit=None,
+    memory_request=None,
+    memory_limit=None,
+    tags=None,
+    labels=None,
+    annotations=None,
+    aks_custom_headers=None,
+    ingress_policy=None,
+    egress_policy=None,
+    adoption_policy=None,
+    delete_policy=None,
+    no_wait=False,
+):
+    try:
+        existedNamespace = client.get(resource_group_name, cluster_name, name)
+    except ResourceNotFoundErrorAzCore:
+        raise ClientRequestError(
+            f"Namespace '{name}' doesn't exist. "
+            "Please use 'aks namespace list' to get current list of managed namespaces"
+        )
+
+    if existedNamespace:
+        # DO NOT MOVE: get all the original parameters and save them as a dictionary
+        raw_parameters = locals()
+        headers = extract_comma_separated_string(
+            aks_custom_headers,
+            enable_strip=True,
+            extract_kv=True,
+            default_value={},
+            allow_appending_values_to_same_key=True,
+        )
+        return aks_managed_namespace_update(cmd, client, raw_parameters, headers, existedNamespace, no_wait)
+
+
+def aks_namespace_show(
+    cmd,  # pylint: disable=unused-argument
+    client,
+    resource_group_name,
+    cluster_name,
+    name
+):
+    logger.warning('resource_group_name: %s, cluster_name: %s, managed_namespace_name: %s ',
+                   resource_group_name, cluster_name, name)
+    return client.get(resource_group_name, cluster_name, name)
+
+
+def aks_namespace_list(
+    cmd,  # pylint: disable=unused-argument
+    client,
+    resource_group_name=None,
+    cluster_name=None,
+):
+    if resource_group_name and cluster_name:
+        return client.list_by_managed_cluster(resource_group_name, cluster_name)
+    rcf = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
+    full_resource_type = "Microsoft.ContainerService/managedClusters/managedNamespaces"
+    filters = [f"resourceType eq '{full_resource_type}'"]
+    if resource_group_name:
+        filters.append(f"resourceGroup eq '{resource_group_name}'")
+    odata_filter = " and ".join(filters)
+    expand = "createdTime,changedTime,provisioningState"
+    resources = rcf.resources.list(filter=odata_filter, expand=expand)
+    return list(resources)
+
+
+def aks_namespace_delete(
+    cmd,  # pylint: disable=unused-argument
+    client,
+    resource_group_name,
+    cluster_name,
+    name,
+    no_wait=False,
+):
+    namespace_exists = False
+    namespace_instances = client.list_by_managed_cluster(resource_group_name, cluster_name)
+    for instance in namespace_instances:
+        if instance.name.lower() == name.lower():
+            namespace_exists = True
+            break
+
+    if not namespace_exists:
+        raise ClientRequestError(
+            f"Managed namespace {name} doesn't exist, "
+            "use 'aks namespace list' to get current managed namespace list"
+        )
+
+    return sdk_no_wait(
+        no_wait,
+        client.begin_delete,
+        resource_group_name,
+        cluster_name,
+        name,
+    )
+
+
+def aks_namespace_get_credentials(
+    cmd,  # pylint: disable=unused-argument
+    client,
+    resource_group_name,
+    cluster_name,
+    name,
+    path=os.path.join(os.path.expanduser("~"), ".kube", "config"),
+    overwrite_existing=False,
+    context_name=None,
+):
+    credentialResults = None
+    credentialResults = client.list_credential(resource_group_name, cluster_name, name)
+
+    # Check if KUBECONFIG environmental variable is set
+    # If path is different than default then that means -f/--file is passed
+    # in which case we ignore the KUBECONFIG variable
+    # KUBECONFIG can be colon separated. If we find that condition, use the first entry
+    if "KUBECONFIG" in os.environ and path == os.path.join(os.path.expanduser('~'), '.kube', 'config'):
+        kubeconfig_path = os.environ["KUBECONFIG"].split(os.pathsep)[0]
+        if kubeconfig_path:
+            logger.info("The default path '%s' is replaced by '%s' defined in KUBECONFIG.", path, kubeconfig_path)
+            path = kubeconfig_path
+        else:
+            logger.warning("Invalid path '%s' defined in KUBECONFIG.", kubeconfig_path)
+
+    if not credentialResults:
+        raise CLIError("No Kubernetes credentials found.")
+    try:
+        kubeconfig = credentialResults.kubeconfigs[0].value.decode(
+            encoding='UTF-8')
+        _print_or_merge_credentials(
+            path, kubeconfig, overwrite_existing, context_name)
+    except (IndexError, ValueError) as exc:
+        raise CLIError("Fail to find kubeconfig file.") from exc
 
 
 def aks_maintenanceconfiguration_list(

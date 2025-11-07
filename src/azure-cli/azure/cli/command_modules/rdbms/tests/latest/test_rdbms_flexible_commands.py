@@ -2805,7 +2805,7 @@ class CitusOnFlexMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        version = '16'
+        version = '17'
         storage_size = 128
         location = self.postgres_location
         sku_name = 'Standard_D2s_v3'

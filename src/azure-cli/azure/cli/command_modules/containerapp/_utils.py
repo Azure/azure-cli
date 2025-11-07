@@ -950,7 +950,8 @@ def _remove_readonly_attributes(containerapp_def):
         "customDomainVerificationId",
         "outboundIpAddresses",
         "fqdn",
-        "runningStatus"
+        "runningStatus",
+        "runningState"
     ]
 
     for unneeded_property in unneeded_properties:

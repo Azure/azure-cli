@@ -105,6 +105,44 @@ def validate_ip_ranges(namespace):
             raise CLIError("--api-server-authorized-ip-ranges should be a list of IPv4 addresses or CIDRs")
 
 
+def validate_namespace_name(namespace):
+    _validate_namespace_name(namespace.name)
+
+
+def _validate_namespace_name(name):
+    """
+    Validates a Kubernetes namespace name.
+    Raises ValueError if the name is invalid.
+    """
+    if name != "":
+        if len(name) < 1 or len(name) > 63:
+            raise ValueError("Namespace name must be between 1 and 63 characters.")
+        pattern = r'^[a-z0-9]([-a-z0-9]*[a-z0-9])?$'
+        if not re.match(pattern, name):
+            raise ValueError(
+                f"Invalid namespace '{name}'. Must consist of lower case alphanumeric characters or '-', "
+                "and must start and end with an alphanumeric character."
+            )
+
+
+def validate_resource_quota(namespace):
+    if namespace.cpu_request is not None:
+        if not namespace.cpu_request.endswith("m"):
+            raise ValueError("--cpu-request must be specified in millicores, like 200m")
+    if namespace.cpu_limit is not None:
+        if not namespace.cpu_limit.endswith("m"):
+            raise ValueError("--cpu-limit must be specified in millicores, like 200m")
+    pattern = r"^\d+(Ki|Mi|Gi|Ti|Pi|Ei)$"
+    if namespace.memory_request is not None:
+        if not re.match(pattern, namespace.memory_request):
+            raise ValueError("--memory-request must be specified in the power-of-two equivalents form:"
+                             "Ei, Pi, Ti, Gi, Mi, Ki.")
+    if namespace.memory_limit is not None:
+        if not re.match(pattern, namespace.memory_limit):
+            raise ValueError("--memory-limit must be specified in the power-of-two equivalents form:"
+                             "Ei, Pi, Ti, Gi, Mi, Ki.")
+
+
 def validate_k8s_version(namespace):
     """Validates a string as a possible Kubernetes version. An empty string is also valid, which tells the server
     to use its default version."""

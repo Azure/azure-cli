@@ -33,7 +33,17 @@ from azure.cli.command_modules.cognitiveservices._client_factory import (
     cf_accounts,
     cf_resource_skus,
 )
+from azure.mgmt.cognitiveservices.models import Account as CognitiveServicesAccount, Sku, \
+    VirtualNetworkRule, IpRule, NetworkRuleSet, NetworkRuleAction, \
+    AccountProperties as CognitiveServicesAccountProperties, ApiProperties as CognitiveServicesAccountApiProperties, \
+    Identity, ResourceIdentityType as IdentityType, \
+    Deployment, DeploymentModel, DeploymentScaleSettings, DeploymentProperties, \
+    CommitmentPlan, CommitmentPlanProperties, CommitmentPeriod, \
+    ConnectionPropertiesV2BasicResource, ConnectionUpdateContent, \
+    Project, ProjectProperties
+from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus
 from azure.cli.core.azclierror import BadRequestError
+from azure.cli.command_modules.cognitiveservices._utils import load_connection_from_source, compose_identity
 
 logger = get_logger(__name__)
 
@@ -150,18 +160,18 @@ def create(
         properties.api_properties = api_properties
     if custom_domain:
         properties.custom_sub_domain_name = custom_domain
-    properties.allow_project_management = allow_project_management
-    params = CognitiveServicesAccount(
-        sku=sku, kind=kind, location=location, properties=properties, tags=tags
-    )
-    if assign_identity or allow_project_management:
-        params.identity = Identity(type=IdentityType.system_assigned)
 
     if storage is not None:
-        params.properties.user_owned_storage = json.loads(storage)
+        properties.user_owned_storage = json.loads(storage)
 
     if encryption is not None:
-        params.properties.encryption = json.loads(encryption)
+        properties.encryption = json.loads(encryption)
+
+    properties.allow_project_management = allow_project_management
+    params = CognitiveServicesAccount(sku=sku, kind=kind, location=location,
+                                      properties=properties, tags=tags)
+    if assign_identity or allow_project_management:
+        params.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
 
     return client.begin_create(resource_group_name, account_name, params)
 
@@ -199,27 +209,20 @@ def update(
         properties.custom_sub_domain_name = custom_domain
     if allow_project_management is not None:
         properties.allow_project_management = allow_project_management
-
-    params = CognitiveServicesAccount(sku=sku, properties=properties, tags=tags)
+    if storage is not None:
+        properties.user_owned_storage = json.loads(storage)
+    if encryption is not None:
+        properties.encryption = json.loads(encryption)
 
     if kind is not None:
         if sa is None:
             sa = client.get(resource_group_name, account_name)
         if kind != sa.kind and not _is_valid_kind_change(sa.kind, kind):
-            raise BadRequestError(
-                "Changing the account kind from '{}' to '{}' is not supported.".format(
-                    sa.kind, kind
-                )
-            )
-        params.kind = kind
+            raise BadRequestError("Changing the account kind from '{}' to '{}' is not supported.".format(sa.kind, kind))
         if _kind_uses_project_management(kind) and allow_project_management is None:
-            params.properties.allow_project_management = True
+            properties.allow_project_management = True
 
-    if storage is not None:
-        params.properties.user_owned_storage = json.loads(storage)
-
-    if encryption is not None:
-        params.properties.encryption = json.loads(encryption)
+    params = CognitiveServicesAccount(kind=kind, sku=sku, properties=properties, tags=tags)
 
     return client.begin_update(resource_group_name, account_name, params)
 
@@ -320,7 +323,7 @@ def identity_assign(client, resource_group_name, account_name):
     Assign the identity for Azure Cognitive Services account.
     """
     params = CognitiveServicesAccount()
-    params.identity = Identity(type=IdentityType.system_assigned)
+    params.identity = Identity(type=IdentityType.SYSTEM_ASSIGNED)
     sa = client.begin_update(resource_group_name, account_name, params).result()
     return sa.identity if sa.identity else {}
 
@@ -330,7 +333,7 @@ def identity_remove(client, resource_group_name, account_name):
     Remove the identity for Azure Cognitive Services account.
     """
     params = CognitiveServicesAccount()
-    params.identity = Identity(type=IdentityType.none)
+    params.identity = Identity(type=IdentityType.NONE)
     return client.begin_update(resource_group_name, account_name, params)
 
 
@@ -343,19 +346,11 @@ def identity_show(client, resource_group_name, account_name):
 
 
 def deployment_begin_create_or_update(
-    client,
-    resource_group_name,
-    account_name,
-    deployment_name,
-    model_format,
-    model_name,
-    model_version,
-    model_source=None,
-    sku_name=None,
-    sku_capacity=None,
-    scale_settings_scale_type=None,
-    scale_settings_capacity=None,
-):
+        client, resource_group_name, account_name, deployment_name,
+        model_format, model_name, model_version, model_source=None,
+        sku_name=None, sku_capacity=None,
+        scale_settings_scale_type=None, scale_settings_capacity=None,
+        spillover_deployment_name=None):
     """
     Create a deployment for Azure Cognitive Services account.
     """
@@ -374,10 +369,9 @@ def deployment_begin_create_or_update(
         dpy.properties.scale_settings = DeploymentScaleSettings()
         dpy.properties.scale_settings.scale_type = scale_settings_scale_type
         dpy.properties.scale_settings.capacity = scale_settings_capacity
-
-    return client.begin_create_or_update(
-        resource_group_name, account_name, deployment_name, dpy, polling=False
-    )
+    if spillover_deployment_name is not None:
+        dpy.properties.spillover_deployment_name = spillover_deployment_name
+    return client.begin_create_or_update(resource_group_name, account_name, deployment_name, dpy, polling=False)
 
 
 def commitment_plan_create_or_update(
@@ -601,3 +595,112 @@ def agent_show(
     response = client.send_request(request)
     response.raise_for_status()
     return response.json()
+    return client.create_or_update(resource_group_name, account_name, commitment_plan_name, plan)
+
+
+def project_create(
+        client,
+        resource_group_name,
+        account_name,
+        project_name,
+        location,
+        assign_identity=False,
+        user_assigned_identity=None,
+        description=None,
+        display_name=None,
+        no_wait=False,
+):
+    """
+    Create a project for Azure Cognitive Services account.
+    """
+    project = Project(properties=ProjectProperties(display_name=display_name, description=description))
+    project.location = location
+    if user_assigned_identity is None:
+        assign_identity = True
+    project.identity = compose_identity(system_assigned=assign_identity, user_assigned_identity=user_assigned_identity)
+    return client.begin_create(resource_group_name, account_name, project_name, project, polling=no_wait)
+
+
+def project_update(
+    client,
+    resource_group_name,
+    account_name,
+    project_name,
+    description=None,
+    display_name=None,
+):
+    """
+    Update a project for Azure Cognitive Services account.
+    """
+    project_props = ProjectProperties()
+    if description is not None:
+        project_props.description = description
+    if display_name is not None:
+        project_props.display_name = display_name
+    project = Project(properties=project_props)
+    return client.begin_update(resource_group_name, account_name, project_name, project)
+
+
+def account_connection_create(
+    client,
+    resource_group_name,
+    account_name,
+    connection_name,
+    file,
+):
+    """
+    Create a connection for Azure Cognitive Services account.
+    """
+    account_connection_properties = load_connection_from_source(source=file)
+    account_connection = ConnectionPropertiesV2BasicResource(properties=account_connection_properties)
+
+    return client.create(
+        resource_group_name,
+        account_name,
+        connection_name,
+        account_connection)
+
+
+# This function is intended to be used with the 'generic_update_command' per
+# https://github.com/Azure/azure-cli/blob/0b06b4f295766bcadaebdb7cf8fc05c7d6c9a5a8/doc/authoring_command_modules/authoring_commands.md#generic-update-commands
+def account_connection_update(
+    instance,
+):
+    """
+    Update a connection for Azure Cognitive Services account.
+    """
+    account_connection = ConnectionUpdateContent(properties=instance.properties)
+    return account_connection
+
+
+def project_connection_create(
+    client,
+    resource_group_name,
+    account_name,
+    project_name,
+    connection_name,
+    file,
+):
+    """
+    Create a connection for Azure Cognitive Services account.
+    """
+    project_connection_properties = load_connection_from_source(source=file)
+    project_connection = ConnectionPropertiesV2BasicResource(properties=project_connection_properties)
+    return client.create(
+        resource_group_name,
+        account_name,
+        project_name,
+        connection_name,
+        project_connection)
+
+
+# This function is intended to be used with the 'generic_update_command' per
+# https://github.com/Azure/azure-cli/blob/0b06b4f295766bcadaebdb7cf8fc05c7d6c9a5a8/doc/authoring_command_modules/authoring_commands.md#generic-update-commands
+def project_connection_update(
+    instance,
+):
+    """
+    Update a connection for Azure Cognitive Services account.
+    """
+    project_connection = ConnectionUpdateContent(properties=instance.properties)
+    return project_connection
