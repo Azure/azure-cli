@@ -1780,6 +1780,21 @@ class AKSAgentPoolContext(BaseAKSContext):
                 vnet_dns_overrides=vnet_dns_overrides,
             )
         return agentpool
+      
+    def get_workload_runtime(self) -> Union[str, None]:
+        """Obtain the value of workload_runtime, default value is None.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        workload_runtime = self.raw_param.get("workload_runtime", None)
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.agentpool and self.agentpool.workload_runtime is not None:
+            workload_runtime = self.agentpool.workload_runtime
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return workload_runtime
 
 
 class AKSAgentPoolAddDecorator:
@@ -2230,6 +2245,19 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
+    def set_up_workload_runtime(self, agentpool: AgentPool) -> AgentPool:
+        """Set up workload runtime for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        workload_runtime = self.context.get_workload_runtime()
+        if workload_runtime is not None:
+            agentpool.workload_runtime = workload_runtime
+
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -2284,6 +2312,8 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_virtual_machines_profile(agentpool)
         # set up local DNS profile
         agentpool = self.set_up_localdns_profile(agentpool)
+        # set up workload_runtime
+        agentpool = self.set_up_workload_runtime(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)

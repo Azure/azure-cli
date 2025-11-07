@@ -2436,8 +2436,11 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
     def test_storage_account_failover(self, resource_group):
         self.kwargs = {
             'sa': self.create_random_name(prefix="storagegrzs", length=24),
+            'sa2': self.create_random_name(prefix="storagegrzs", length=24),
+            'sa3': self.create_random_name(prefix="storagegrzs", length=24),
             'rg': resource_group
         }
+        # planned failover
         self.cmd('storage account create -n {sa} -g {rg} -l eastus2 --kind StorageV2 --sku Standard_RAGRS --https-only',
                  checks=[self.check('name', '{sa}'),
                          self.check('sku.name', 'Standard_RAGRS')])
@@ -2454,11 +2457,59 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
             self.check('failoverInProgress', None)
         ])
 
-        # time.sleep(900)
         self.cmd('storage account failover -n {sa} -g {rg} --failover-type Planned --no-wait -y')
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
             self.check('name', '{sa}'),
+            self.check('failoverInProgress', True)
+        ])
+
+        # unplanned failover
+        self.cmd('storage account create -n {sa2} -g {rg} -l eastus2 --kind StorageV2 --sku Standard_RAGRS --https-only',
+                 checks=[self.check('name', '{sa2}'),
+                         self.check('sku.name', 'Standard_RAGRS')])
+
+        while True:
+            can_failover = self.cmd('storage account show -n {sa2} -g {rg} --expand geoReplicationStats --query '
+                                    'geoReplicationStats.canFailover -o tsv').output.strip('\n')
+            if can_failover == 'true':
+                break
+            time.sleep(10)
+
+        self.cmd('storage account show -n {sa2} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('geoReplicationStats.canFailover', True),
+            self.check('failoverInProgress', None)
+        ])
+
+        self.cmd('storage account failover -n {sa2} -g {rg} --failover-type Unplanned --no-wait -y')
+
+        self.cmd('storage account show -n {sa2} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa2}'),
+            self.check('failoverInProgress', True)
+        ])
+
+        # unplanned failover if not specified
+        self.cmd(
+            'storage account create -n {sa3} -g {rg} -l eastus2 --kind StorageV2 --sku Standard_RAGRS --https-only',
+            checks=[self.check('name', '{sa3}'),
+                    self.check('sku.name', 'Standard_RAGRS')])
+
+        while True:
+            can_failover = self.cmd('storage account show -n {sa3} -g {rg} --expand geoReplicationStats --query '
+                                    'geoReplicationStats.canFailover -o tsv').output.strip('\n')
+            if can_failover == 'true':
+                break
+            time.sleep(10)
+
+        self.cmd('storage account show -n {sa3} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('geoReplicationStats.canFailover', True),
+            self.check('failoverInProgress', None)
+        ])
+
+        self.cmd('storage account failover -n {sa3} -g {rg} --no-wait -y')
+
+        self.cmd('storage account show -n {sa3} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa3}'),
             self.check('failoverInProgress', True)
         ])
 

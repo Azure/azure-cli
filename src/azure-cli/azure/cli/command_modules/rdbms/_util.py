@@ -8,7 +8,7 @@ from knack.arguments import ignore_type
 from knack.log import get_logger
 from azure.cli.core.commands import AzArgumentContext
 from azure.cli.core.util import CLIError
-from ._client_factory import cf_mariadb_firewall_rules, cf_postgres_firewall_rules, cf_mysql_firewall_rules
+from ._client_factory import cf_mariadb_firewall_rules, cf_mysql_firewall_rules
 from .validators import get_combined_validator
 
 logger = get_logger(__name__)
@@ -74,10 +74,8 @@ def create_firewall_rule(cmd, resource_group_name, server_name, start_ip, end_ip
                                                                 now.second)
         logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip,
                        end_ip)
-    firewall_client = cf_postgres_firewall_rules(cmd.cli_ctx, None)
-    if db_engine == 'mysql':
-        firewall_client = cf_mysql_firewall_rules(cmd.cli_ctx, None)
-    elif db_engine == 'mariadb':
+    firewall_client = cf_mysql_firewall_rules(cmd.cli_ctx, None)
+    if db_engine == 'mariadb':
         firewall_client = cf_mariadb_firewall_rules(cmd.cli_ctx, None)
 
     parameters = {'name': firewall_name, 'start_ip_address': start_ip, 'end_ip_address': end_ip}

@@ -3868,7 +3868,6 @@ class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
             )
         )
         args_schema.private_dns_zone_id._registered = False
-        args_schema.name._required = False
 
         return args_schema
 
