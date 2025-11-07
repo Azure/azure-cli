@@ -13115,7 +13115,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         # Prepare VMSS
         self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 '
-                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
+                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible --vm-sku Standard_D2s_v3')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids')
 
@@ -13136,7 +13136,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         # Prepare VMSS
         self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 '
-                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
+                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible --vm-sku Standard_D2s_v3')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2}')
 
@@ -13156,7 +13156,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
 
         # Prepare VMSS
-        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
+        self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible --vm-sku Standard_D2s_v3')
 
         self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --order-applications', checks=[
             self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].order', 1),
@@ -13181,7 +13181,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
 
         # Prepare VMSS
         self.cmd('vmss create -l eastus -g {rg} -n {vmss} --authentication-type password --admin-username admin123 '
-                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible')
+                 '--admin-password PasswordPassword1! --image Win2022Datacenter --orchestration-mode Flexible --vm-sku Standard_D2s_v3')
 
         # wrong length of config-overrides
         message = 'usage error: --app-config-overrides should have the same number of items as --application-version-ids'
@@ -13231,26 +13231,31 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         self.cmd('vm create -g {rg} -n {vm} --image Win2022Datacenter --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
         self.cmd('vm extension set --name ApplicationHealthWindows --publisher Microsoft.ManagedServices --version 1.0 --resource-group {rg} --vm-name {vm} --settings {extension_file}')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
-        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --enable-automatic-upgrade True', checks=[
+        self.cmd('vm application set -g {rg} -n {vm} --app-version-ids {vid1} {vid2} --enable-automatic-upgrade True False', checks=[
             self.check('applicationProfile.galleryApplications[0].enableAutomaticUpgrade', True),
-            self.check('applicationProfile.galleryApplications[1].enableAutomaticUpgrade', True)
+            self.check('applicationProfile.galleryApplications[1].enableAutomaticUpgrade', False)
         ])
         self.cmd('vm application list -g {rg} -n {vm}', checks=[
             self.check('galleryApplications[0].enableAutomaticUpgrade', True),
-            self.check('galleryApplications[1].enableAutomaticUpgrade', True)
+            self.check('galleryApplications[1].enableAutomaticUpgrade', False)
         ])
-
 
         self.cmd('vmss create -g {rg} -n {vmss} --authentication-type password --admin-username admin123 --admin-password PasswordPassword1! --image Win2022Datacenter --vm-sku Standard_D2s_v3')
         self.cmd('vmss extension set --name ApplicationHealthWindows --publisher Microsoft.ManagedServices --version 1.0 --resource-group {rg} --vmss-name {vmss} --settings {extension_file}')
-        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --enable-automatic-upgrade False', checks=[
-            self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].enableAutomaticUpgrade', False),
+        self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --enable-automatic-upgrade True False', checks=[
+            self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].enableAutomaticUpgrade', True),
             self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].enableAutomaticUpgrade', False)
         ])
         self.cmd('vmss application list -g {rg} --name {vmss}', checks=[
-            self.check('galleryApplications[0].enableAutomaticUpgrade', False),
+            self.check('galleryApplications[0].enableAutomaticUpgrade', True),
             self.check('galleryApplications[1].enableAutomaticUpgrade', False)
         ])
+        message = 'usage error: --enable-automatic-upgrade should have the same number of items as --application-version-ids'
+        with self.assertRaisesRegex(ArgumentUsageError, message):
+            self.cmd('vmss application set -g {rg} -n {vmss} --app-version-ids {vid1} {vid2} --enable-automatic-upgrade True\]', checks=[
+                self.check('virtualMachineProfile.applicationProfile.galleryApplications[0].enableAutomaticUpgrade', True),
+                self.check('virtualMachineProfile.applicationProfile.galleryApplications[1].enableAutomaticUpgrade', False)
+            ])
 
 
 class DiskRPTestScenario(ScenarioTest):
