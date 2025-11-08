@@ -1780,7 +1780,7 @@ class AKSAgentPoolContext(BaseAKSContext):
                 vnet_dns_overrides=vnet_dns_overrides,
             )
         return agentpool
-      
+
     def get_workload_runtime(self) -> Union[str, None]:
         """Obtain the value of workload_runtime, default value is None.
 
