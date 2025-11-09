@@ -2313,7 +2313,7 @@ class SecurityPrivateLinkNetworkARMTemplateBasedScenarioTest(ScenarioTest):
         self.kwargs['pe_id'] = pe['id']
         self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
 
-        # Show the connection at cosmos db side
+        # Show the connection at the target resource side
         list_private_endpoint_conn = self.cmd('az network private-endpoint-connection list --name {target_resource_name} --resource-group {rg} --type {resource_type} -o json').get_output_in_json()
         self.kwargs.update({
             "pec_id": list_private_endpoint_conn[0]['id']
