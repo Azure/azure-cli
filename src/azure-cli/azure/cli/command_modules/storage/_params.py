@@ -314,8 +314,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of the storage account within the specified resource group')
 
     with self.argument_context('storage account failover') as c:
-        c.argument('failover_type', options_list=['--failover-type', '--type'], is_preview=True, default=None,
-                   help="The parameter is set to 'Planned' to indicate whether a Planned failover is requested")
+        c.argument('failover_type', options_list=['--failover-type', '--type'],
+                   arg_type=get_enum_type(['Unplanned', 'Planned']),
+                   help="Specify the failover type. Possible values are: Unplanned, Planned. "
+                        "If not specified, the default failover type is Unplanned.")
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('storage account delete') as c:

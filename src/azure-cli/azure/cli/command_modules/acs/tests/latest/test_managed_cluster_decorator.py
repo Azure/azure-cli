@@ -49,6 +49,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
     CONST_AZURE_SERVICE_MESH_MODE_DISABLED,
+    CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
     CONST_ARTIFACT_SOURCE_DIRECT,
     CONST_AVAILABILITY_SET,
     CONST_VIRTUAL_MACHINES,
@@ -6079,6 +6080,63 @@ class AKSManagedClusterContextTestCase(unittest.TestCase):
                         self.models.IstioIngressGateway(
                             mode="Internal",
                             enabled=True,
+                        )
+                    ]
+                )
+            ),
+        ))
+
+    def test_handle_egress_gateways_asm(self):
+        ctx_0 = AKSManagedClusterContext(
+            self.cmd,
+            AKSManagedClusterParamDict(
+                {
+                    "enable_azure_service_mesh": True,
+                    "enable_egress_gateway": True,
+                    "istio_egressgateway_name": "istio-egress-1",
+                    "gateway_configuration_name": "istio-sgc-1",
+                }
+            ),
+            self.models,
+            decorator_mode=DecoratorMode.UPDATE,
+        )
+        old_profile = self.models.ServiceMeshProfile(
+            mode=CONST_AZURE_SERVICE_MESH_MODE_DISABLED,
+            istio=self.models.IstioServiceMesh(),
+        )
+        new_profile, updated = ctx_0._handle_egress_gateways_asm(old_profile)
+        self.assertEqual(updated, True)
+        self.assertEqual(new_profile, self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                components=self.models.IstioComponents(
+                    egress_gateways=[
+                        self.models.IstioEgressGateway(
+                            enabled=True,
+                            name="istio-egress-1",
+                            namespace=CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
+                            gateway_configuration_name="istio-sgc-1"
+                        )
+                    ]
+                )
+            ),
+        ))
+        # ASM was never enabled on the cluster
+        old_profile = self.models.ServiceMeshProfile(
+            mode=CONST_AZURE_SERVICE_MESH_MODE_DISABLED,
+        )
+        new_profile, updated = ctx_0._handle_egress_gateways_asm(old_profile)
+        self.assertEqual(updated, True)
+        self.assertEqual(new_profile, self.models.ServiceMeshProfile(
+            mode="Istio",
+            istio=self.models.IstioServiceMesh(
+                components=self.models.IstioComponents(
+                    egress_gateways=[
+                        self.models.IstioEgressGateway(
+                            enabled=True,
+                            name="istio-egress-1",
+                            namespace=CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
+                            gateway_configuration_name="istio-sgc-1"
                         )
                     ]
                 )
@@ -12701,6 +12759,42 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         )
         self.assertEqual(dec_mc_3, ground_truth_mc_3)
 
+        dec_4 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "enable_azure_service_mesh": True,
+                "enable_egress_gateway": True,
+                "istio_egressgateway_name": "istio-egress-1",
+                "gateway_configuration_name": "istio-sgc-1",
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_4 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_4.context.attach_mc(mc_4)
+        dec_mc_4 = dec_4.update_azure_service_mesh_profile(mc_4)
+        ground_truth_mc_4 = self.models.ManagedCluster(
+            location="test_location",
+            service_mesh_profile=self.models.ServiceMeshProfile(
+                mode="Istio",
+                istio=self.models.IstioServiceMesh(
+                    components=self.models.IstioComponents(
+                        egress_gateways=[
+                            self.models.IstioEgressGateway(
+                                enabled=True,
+                                name="istio-egress-1",
+                                gateway_configuration_name="istio-sgc-1",
+                                namespace=CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
+                            )
+                        ]
+                    )
+                ),
+            ),
+        )
+        self.assertEqual(dec_mc_4, ground_truth_mc_4)
+
         # aks mesh upgrade start
         dec_5 = AKSManagedClusterUpdateDecorator(
             self.cmd,
@@ -12906,6 +13000,38 @@ class AKSManagedClusterUpdateDecoratorTestCase(unittest.TestCase):
         dec_11.context.attach_mc(mc_11)
         with self.assertRaises(ArgumentUsageError):
             dec_11.update_azure_service_mesh_profile(mc_11)
+
+        # az aks mesh disable-ingress-gateway - when azure service mesh was never enabled
+        dec_12 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_ingress_gateway": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_12 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_12.context.attach_mc(mc_12)
+        with self.assertRaises(ArgumentUsageError):
+            dec_12.update_azure_service_mesh_profile(mc_12)
+
+        # az aks mesh disable-egress-gateway - when azure service mesh was never enabled
+        dec_13 = AKSManagedClusterUpdateDecorator(
+            self.cmd,
+            self.client,
+            {
+                "disable_egress_gateway": True,
+            },
+            ResourceType.MGMT_CONTAINERSERVICE,
+        )
+        mc_13 = self.models.ManagedCluster(
+            location="test_location",
+        )
+        dec_13.context.attach_mc(mc_13)
+        with self.assertRaises(ArgumentUsageError):
+            dec_13.update_azure_service_mesh_profile(mc_13)
 
     def test_set_up_app_routing_profile(self):
         dec_1 = AKSManagedClusterCreateDecorator(

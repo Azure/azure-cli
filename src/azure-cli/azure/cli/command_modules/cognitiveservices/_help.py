@@ -392,3 +392,75 @@ examples:
   - name: Show all usages for Azure Cognitive Services.
     text: az cognitiveservices usage list -l centraluseuap
 """
+
+helps['cognitiveservices account connection'] = """
+    type: group
+    short-summary: Manage Azure Cognitive Services connection and its more specific derivatives.
+    long-summary: >
+        Azure Cognitive Services connection provides a secure way to store authentication and configuration information needed to connect and
+        interact with the external resources.
+"""
+
+helps['cognitiveservices account connection list'] = """
+    type: command
+    short-summary: List all connections.
+    long-summary: >
+        The list of connections in an Azure AI Foundry account.
+    examples:
+    - name: List all connections in an Azure AI Foundry account
+      text: az cognitiveservices account connection list --resource-group my-resource-group --name my-cogsvc-account
+    - name: List all the connections in an Azure AI Foundry account using --query argument to execute a JMESPath query on the results of commands.
+      text: az cognitiveservices account connection list --query \"[].{Name:name}\"  --output table --resource-group my-resource-group --name my-cogsvc-account
+"""
+
+helps['cognitiveservices account connection show'] = """
+    type: command
+    short-summary: Show details of a connection.
+    examples:
+    - name: Show details of a connection.
+      text: az cognitiveservices account connection show --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account
+"""
+helps['cognitiveservices account connection delete'] = """
+    type: command
+    short-summary: Delete a connection.
+    examples:
+    - name: Delete a connection.
+      text: az cognitiveservices account connection delete --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account
+"""
+
+helps['cognitiveservices account connection create'] = """
+    type: command
+    short-summary: Create a connection.
+    examples:
+    - name: Create a connection from a YAML specification file.
+      text: az cognitiveservices account connection create --file connection.yml --connection-name my-connection-name --resource-group my-resource-group --name my-cogsvc-account
+"""
+
+helps['cognitiveservices account connection update'] = """
+    type: command
+    short-summary: Update a connection.
+    examples:
+    - name: Update a connection API Key.
+      text: az cognitiveservices account connection update --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account --set properties.credentials.key=<new-key>
+"""
+helps['cognitiveservices account project'] = """
+    type: group
+    short-summary: Manage Azure Cognitive Services account projects.
+    long-summary: >
+       Projects let you organize your work, such as agents, evaluations, and files, as you build stateful apps and explore new ideas. It is a container for access management,
+       data upload and integration, and monitoring
+"""
+helps['cognitiveservices account project connection'] = """
+    type: group
+    short-summary: Manage Azure Cognitive Services connection associated with a project.
+    long-summary: >
+        Azure Cognitive Services connection provides a secure way to store authentication and configuration information needed to connect and
+        interact with the external resources.
+"""
+helps['cognitiveservices account project connection update'] = """
+    type: command
+    short-summary: Update a project connection.
+    examples:
+    - name: Update a connection API Key.
+      text: az cognitiveservices account project connection update --resource-group my-resource-group --connection-name my-connection-name --name my-cogsvc-account --project-name my-project --set properties.credentials.key=<new-key>
+"""

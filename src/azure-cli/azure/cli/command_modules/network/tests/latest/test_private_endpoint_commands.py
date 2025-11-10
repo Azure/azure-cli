@@ -660,12 +660,6 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
         self._test_private_link_resource(resource_group, server, 'Microsoft.DBforMySQL/servers', 'mysqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine, 'Microsoft.DBforMySQL/servers')
 
-    @ResourceGroupPreparer()
-    @ServerPreparer(engine_type='postgres')
-    def test_postgres_private_link_scenario(self, resource_group, server, database_engine):
-        self._test_private_link_resource(resource_group, server, 'Microsoft.DBforPostgreSQL/servers', 'postgresqlServer')
-        self._test_private_endpoint_connection(resource_group, server, database_engine, 'Microsoft.DBforPostgreSQL/servers')
-
     def _test_private_link_resource(self, resource_group, server, database_engine, group_id):
         result = self.cmd('network private-link-resource list -g {} --name {} --type {}'
                           .format(resource_group, server, database_engine)).get_output_in_json()

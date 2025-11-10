@@ -121,6 +121,20 @@ def _validate_subnet(cmd, namespace):
             child_name_1=subnet)
 
 
+def _validate_user_assigned_identity(cmd, namespace):
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    if namespace.user_assigned_identity:
+        identity = namespace.user_assigned_identity
+        if not is_valid_resource_id(identity):
+            namespace.user_assigned_identity = resource_id(
+                subscription=get_subscription_id(cmd.cli_ctx),
+                resource_group=namespace.resource_group_name,
+                namespace='Microsoft.ManagedIdentity',
+                type='userAssignedIdentities',
+                name=identity)
+
+
 @Completer
 def sku_name_completer(cmd, prefix, namespace, **kwargs):  # pylint: disable=unused-argument
     names = {x.name for x in _sku_filter(cmd, namespace)}
@@ -183,6 +197,9 @@ def load_arguments(self, _):
 
     with self.argument_context('cognitiveservices account deployment') as c:
         c.argument('deployment_name', help='Cognitive Services account deployment name')
+        c.argument('spillover_deployment_name',
+                   options_list=['--spillover-deployment-name', '--spillover-name'],
+                   help='The name of the standard deployment to use as a spillover when at capacity.')
 
     with self.argument_context('cognitiveservices account deployment', arg_group='DeploymentModel') as c:
         c.argument('model_name', help='Cognitive Services account deployment model name.')
@@ -214,3 +231,32 @@ def load_arguments(self, _):
     with self.argument_context('cognitiveservices account commitment-plan', arg_group='Next CommitmentPeriod') as c:
         c.argument('next_count', help='Cognitive Services account commitment plan next commitment period count.')
         c.argument('next_tier', help='Cognitive Services account commitment plan next commitment period tier.')
+
+    with self.argument_context('cognitiveservices account project') as c:
+        c.argument('project_name', help='Cognitive Services account project name')
+        c.argument('location', arg_type=get_location_type(self.cli_ctx),
+                   completer=location_completer)
+        c.argument('description', help='Description of the project.')
+        c.argument('display_name', help='Display name of the project.')
+
+    with self.argument_context('cognitiveservices account project', arg_group='Project Identity') as c:
+        c.argument("assign_identity",
+                   options_list=['--include-system-identity', '--assign-identity'],
+                   help=('Use with --user-assigned-identity to generate and assign a '
+                         'system managed Azure Active Directory Identity for this project.'))
+        c.argument('user_assigned_identity',
+                   help=('User assigned identity resource ID to use for the project. '
+                         'If not specified, a system assigned identity will be used.'),
+                   validator=_validate_user_assigned_identity)
+
+    with self.argument_context('cognitiveservices account project create') as c:
+        c.argument('description', help='Description of the project.')
+        c.argument('display_name', help='Display name of the project.')
+
+    with self.argument_context('cognitiveservices account project connection') as c:
+        c.argument('connection_name', help='Cognitive Services account connection name')
+        c.argument('file', help='Path to the connection file in JSON or YAML format.')
+
+    with self.argument_context('cognitiveservices account connection') as c:
+        c.argument('connection_name', help='Cognitive Services account connection name')
+        c.argument('file', help='Path to the connection file in JSON or YAML format.')

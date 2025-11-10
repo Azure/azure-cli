@@ -12,14 +12,17 @@ from azure.cli.core.aaz import *
 
 
 class Update(AAZCommand):
-    """Update a VM scale set.
-    """
+    """Update a VM scale set."""
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2025-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}", "2024-11-01"],
-        ]
+            [
+                "mgmt-plane",
+                "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}",
+                "2025-04-01",
+            ],
+        ],
     }
 
     AZ_SUPPORT_NO_WAIT = True
@@ -74,6 +77,12 @@ class Update(AAZCommand):
             help="The identity of the virtual machine scale set, if configured.",
             nullable=True,
         )
+        _args_schema.placement = AAZObjectArg(
+            options=["--placement"],
+            arg_group="Parameters",
+            help="Placement section specifies the user-defined constraints for virtual machine scale set hardware placement. This property cannot be changed once VMSS is provisioned. Minimum api-version: 2025-04-01.",
+            nullable=True,
+        )
         _args_schema.plan = AAZObjectArg(
             options=["--plan"],
             arg_group="Parameters",
@@ -117,7 +126,12 @@ class Update(AAZCommand):
             options=["type"],
             help="The type of identity used for the virtual machine scale set. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual machine scale set.",
             nullable=True,
-            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
+            enum={
+                "None": "None",
+                "SystemAssigned": "SystemAssigned",
+                "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned",
+                "UserAssigned": "UserAssigned",
+            },
         )
         identity.user_assigned_identities = AAZDictArg(
             options=["user-assigned-identities"],
@@ -129,6 +143,34 @@ class Update(AAZCommand):
         user_assigned_identities.Element = AAZObjectArg(
             nullable=True,
             blank={},
+        )
+
+        placement = cls._args_schema.placement
+        placement.exclude_zones = AAZListArg(
+            options=["exclude-zones"],
+            help="This property supplements the 'zonePlacementPolicy' property. If 'zonePlacementPolicy' is set to 'Any'/'Auto', availability zone selected by the system must not be present in the list of availability zones passed with 'excludeZones'. If 'excludeZones' is not provided, all availability zones in region will be considered for selection.",
+            nullable=True,
+        )
+        placement.include_zones = AAZListArg(
+            options=["include-zones"],
+            help="This property supplements the 'zonePlacementPolicy' property. If 'zonePlacementPolicy' is set to 'Any'/'Auto', availability zone selected by the system must be present in the list of availability zones passed with 'includeZones'. If 'includeZones' is not provided, all availability zones in region will be considered for selection.",
+            nullable=True,
+        )
+        placement.zone_placement_policy = AAZStrArg(
+            options=["zone-placement-policy"],
+            help="Specifies the policy for resource's placement in availability zone. Possible values are: **Any** (used for Virtual Machines), **Auto** (used for Virtual Machine Scale Sets) - An availability zone will be automatically picked by system as part of resource creation.",
+            nullable=True,
+            enum={"Any": "Any", "Auto": "Auto"},
+        )
+
+        exclude_zones = cls._args_schema.placement.exclude_zones
+        exclude_zones.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        include_zones = cls._args_schema.placement.include_zones
+        include_zones.Element = AAZStrArg(
+            nullable=True,
         )
 
         plan = cls._args_schema.plan
@@ -206,6 +248,13 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="When Overprovision is enabled, extensions are launched only on the requested number of VMs which are finally kept. This property will hence ensure that the extensions do not run on the extra overprovisioned VMs.",
             nullable=True,
+        )
+        _args_schema.high_speed_interconnect_placement = AAZStrArg(
+            options=["--high-speed-interconnect-placement"],
+            arg_group="Properties",
+            help="Specifies the high speed interconnect placement for the virtual machine scale set.",
+            nullable=True,
+            enum={"None": "None", "Trunk": "Trunk"},
         )
         _args_schema.host_group = AAZObjectArg(
             options=["--host-group"],
@@ -309,6 +358,11 @@ class Update(AAZCommand):
         )
 
         additional_capabilities = cls._args_schema.additional_capabilities
+        additional_capabilities.enable_fips1403_encryption = AAZBoolArg(
+            options=["enable-fips1403-encryption"],
+            help="The flag enables the usage of FIPS 140-3 compliant cryptography on the protectedSettings of an extension. Learn more at: https://aka.ms/linuxagentfipssupport.",
+            nullable=True,
+        )
         additional_capabilities.hibernation_enabled = AAZBoolArg(
             options=["hibernation-enabled"],
             help="The flag that enables or disables hibernation capability on the VM.",
@@ -343,9 +397,6 @@ class Update(AAZCommand):
             options=["base-regular-priority-count"],
             help="The base number of regular priority VMs that will be created in this scale set as it scales out.",
             nullable=True,
-            fmt=AAZIntArgFormat(
-                minimum=0,
-            ),
         )
         priority_mix_policy.regular_priority_percentage_above_base = AAZIntArg(
             options=["regular-priority-percentage-above-base"],
@@ -353,7 +404,6 @@ class Update(AAZCommand):
             nullable=True,
             fmt=AAZIntArgFormat(
                 maximum=100,
-                minimum=0,
             ),
         )
 
@@ -371,6 +421,11 @@ class Update(AAZCommand):
         resiliency_policy.resilient_vm_deletion_policy = AAZObjectArg(
             options=["resilient-vm-deletion-policy"],
             help="The configuration parameters used while performing resilient VM deletion.",
+            nullable=True,
+        )
+        resiliency_policy.zone_allocation_policy = AAZObjectArg(
+            options=["zone-allocation-policy"],
+            help="The configuration parameters used while performing zone allocation.",
             nullable=True,
         )
 
@@ -407,6 +462,35 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        zone_allocation_policy = cls._args_schema.resiliency_policy.zone_allocation_policy
+        zone_allocation_policy.max_instance_percent_per_zone_policy = AAZObjectArg(
+            options=["max-instance-percent-per-zone-policy"],
+            help="The configuration parameters used to limit the number of virtual machines per availability zone in the virtual machine scale set.",
+            nullable=True,
+        )
+        zone_allocation_policy.max_zone_count = AAZIntArg(
+            options=["max-zone-count"],
+            help="The maximum number of availability zones to use if the ZonePlacementPolicy is 'Auto'. If not specified, all availability zones will be used.",
+            nullable=True,
+        )
+
+        max_instance_percent_per_zone_policy = (
+            cls._args_schema.resiliency_policy.zone_allocation_policy.max_instance_percent_per_zone_policy
+        )
+        max_instance_percent_per_zone_policy.enabled = AAZBoolArg(
+            options=["enabled"],
+            help="Specifies whether maxInstancePercentPerZonePolicy should be enabled on the virtual machine scale set.",
+            nullable=True,
+        )
+        max_instance_percent_per_zone_policy.value = AAZIntArg(
+            options=["value"],
+            help="Limit on the number of instances in each zone as a percentage of the total capacity of the virtual machine scale set.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=100,
+            ),
+        )
+
         scale_in_policy = cls._args_schema.scale_in_policy
         scale_in_policy.force_deletion = AAZBoolArg(
             options=["force-deletion"],
@@ -431,6 +515,11 @@ class Update(AAZCommand):
         )
 
         scheduled_events_policy = cls._args_schema.scheduled_events_policy
+        scheduled_events_policy.all_instances_down = AAZObjectArg(
+            options=["all-instances-down"],
+            help="The configuration parameters used while creating AllInstancesDown scheduled event setting creation.",
+            nullable=True,
+        )
         scheduled_events_policy.scheduled_events_additional_publishing_targets = AAZObjectArg(
             options=["scheduled-events-additional-publishing-targets"],
             help="The configuration parameters used while publishing scheduledEventsAdditionalPublishingTargets.",
@@ -447,17 +536,33 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        scheduled_events_additional_publishing_targets = cls._args_schema.scheduled_events_policy.scheduled_events_additional_publishing_targets
+        all_instances_down = cls._args_schema.scheduled_events_policy.all_instances_down
+        all_instances_down.automatically_approve = AAZBoolArg(
+            options=["automatically-approve"],
+            help="Specifies if Scheduled Events should be auto-approved when all instances are down. its default value is true",
+            nullable=True,
+        )
+
+        scheduled_events_additional_publishing_targets = (
+            cls._args_schema.scheduled_events_policy.scheduled_events_additional_publishing_targets
+        )
         scheduled_events_additional_publishing_targets.event_grid_and_resource_graph = AAZObjectArg(
             options=["event-grid-and-resource-graph"],
             help="The configuration parameters used while creating eventGridAndResourceGraph Scheduled Event setting.",
             nullable=True,
         )
 
-        event_grid_and_resource_graph = cls._args_schema.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
+        event_grid_and_resource_graph = (
+            cls._args_schema.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
+        )
         event_grid_and_resource_graph.enable = AAZBoolArg(
             options=["enable"],
             help="Specifies if event grid and resource graph is enabled for Scheduled event related configurations.",
+            nullable=True,
+        )
+        event_grid_and_resource_graph.scheduled_events_api_version = AAZStrArg(
+            options=["scheduled-events-api-version"],
+            help="Specifies the api-version to determine which Scheduled Events configuration schema version will be delivered.",
             nullable=True,
         )
 
@@ -503,9 +608,6 @@ class Update(AAZCommand):
             options=["rank"],
             help="Specifies the rank (a.k.a priority) associated with the VM Size.",
             nullable=True,
-            fmt=AAZIntArgFormat(
-                minimum=0,
-            ),
         )
 
         spot_restore_policy = cls._args_schema.spot_restore_policy
@@ -595,7 +697,6 @@ class Update(AAZCommand):
             nullable=True,
             fmt=AAZIntArgFormat(
                 maximum=100,
-                minimum=0,
             ),
         )
         rolling_upgrade_policy.pause_time_between_batches = AAZStrArg(
@@ -818,7 +919,7 @@ class Update(AAZCommand):
             help="If a value is provided and is different from the previous value, the extension handler will be forced to update even if the extension configuration has not changed.",
             nullable=True,
         )
-        _element.protected_settings = AAZFreeFormDictArg(
+        _element.protected_settings = AAZAnyTypeArg(
             options=["protected-settings"],
             help="The extension can contain either protectedSettings or protectedSettingsFromKeyVault or no protected settings at all.",
             nullable=True,
@@ -839,7 +940,7 @@ class Update(AAZCommand):
             help="The name of the extension handler publisher.",
             nullable=True,
         )
-        _element.settings = AAZFreeFormDictArg(
+        _element.settings = AAZAnyTypeArg(
             options=["settings"],
             help="Json formatted public settings for the extension.",
             nullable=True,
@@ -852,7 +953,7 @@ class Update(AAZCommand):
         )
         _element.type = AAZStrArg(
             options=["type"],
-            help="Specifies the type of the extension; an example is \"CustomScriptExtension\".",
+            help='Specifies the type of the extension; an example is "CustomScriptExtension".',
             nullable=True,
         )
         _element.type_handler_version = AAZStrArg(
@@ -861,7 +962,9 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        protected_settings_from_key_vault = cls._args_schema.virtual_machine_profile.extension_profile.extensions.Element.protected_settings_from_key_vault
+        protected_settings_from_key_vault = (
+            cls._args_schema.virtual_machine_profile.extension_profile.extensions.Element.protected_settings_from_key_vault
+        )
         protected_settings_from_key_vault.secret_url = AAZStrArg(
             options=["secret-url"],
             help="The URL referencing a secret in a Key Vault.",
@@ -873,7 +976,9 @@ class Update(AAZCommand):
         )
         cls._build_args_sub_resource_update(protected_settings_from_key_vault.source_vault)
 
-        provision_after_extensions = cls._args_schema.virtual_machine_profile.extension_profile.extensions.Element.provision_after_extensions
+        provision_after_extensions = (
+            cls._args_schema.virtual_machine_profile.extension_profile.extensions.Element.provision_after_extensions
+        )
         provision_after_extensions.Element = AAZStrArg(
             nullable=True,
         )
@@ -916,7 +1021,9 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        network_interface_configurations = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations
+        network_interface_configurations = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations
+        )
         network_interface_configurations.Element = AAZObjectArg(
             nullable=True,
         )
@@ -984,25 +1091,38 @@ class Update(AAZCommand):
             help="Specifies the primary network interface in case the virtual machine has more than 1 network interface.",
             nullable=True,
         )
+        _element.tags = AAZDictArg(
+            options=["tags"],
+            help="Resource tags applied to the networkInterface address created by this NetworkInterfaceConfiguration",
+            nullable=True,
+        )
 
-        dns_settings = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.dns_settings
+        dns_settings = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.dns_settings
+        )
         dns_settings.dns_servers = AAZListArg(
             options=["dns-servers"],
             help="List of DNS servers IP addresses",
             nullable=True,
         )
 
-        dns_servers = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.dns_settings.dns_servers
+        dns_servers = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.dns_settings.dns_servers
+        )
         dns_servers.Element = AAZStrArg(
             nullable=True,
         )
 
-        ip_configurations = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations
+        ip_configurations = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations
+        )
         ip_configurations.Element = AAZObjectArg(
             nullable=True,
         )
 
-        _element = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element
+        _element = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element
+        )
         _element.name = AAZStrArg(
             options=["name"],
             help="The IP configuration name.",
@@ -1050,31 +1170,41 @@ class Update(AAZCommand):
         )
         cls._build_args_api_entity_reference_update(_element.subnet)
 
-        application_gateway_backend_address_pools = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.application_gateway_backend_address_pools
+        application_gateway_backend_address_pools = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.application_gateway_backend_address_pools
+        )
         application_gateway_backend_address_pools.Element = AAZObjectArg(
             nullable=True,
         )
         cls._build_args_sub_resource_update(application_gateway_backend_address_pools.Element)
 
-        application_security_groups = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.application_security_groups
+        application_security_groups = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.application_security_groups
+        )
         application_security_groups.Element = AAZObjectArg(
             nullable=True,
         )
         cls._build_args_sub_resource_update(application_security_groups.Element)
 
-        load_balancer_backend_address_pools = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.load_balancer_backend_address_pools
+        load_balancer_backend_address_pools = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.load_balancer_backend_address_pools
+        )
         load_balancer_backend_address_pools.Element = AAZObjectArg(
             nullable=True,
         )
         cls._build_args_sub_resource_update(load_balancer_backend_address_pools.Element)
 
-        load_balancer_inbound_nat_pools = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.load_balancer_inbound_nat_pools
+        load_balancer_inbound_nat_pools = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.load_balancer_inbound_nat_pools
+        )
         load_balancer_inbound_nat_pools.Element = AAZObjectArg(
             nullable=True,
         )
         cls._build_args_sub_resource_update(load_balancer_inbound_nat_pools.Element)
 
-        public_ip_address_configuration = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration
+        public_ip_address_configuration = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration
+        )
         public_ip_address_configuration.name = AAZStrArg(
             options=["name"],
             help="The publicIP address configuration name.",
@@ -1117,8 +1247,15 @@ class Update(AAZCommand):
             help="Describes the public IP Sku. It can only be set with OrchestrationMode as Flexible.",
             nullable=True,
         )
+        public_ip_address_configuration.tags = AAZDictArg(
+            options=["tags"],
+            help="Resource tags applied to the publicIP address created by this PublicIPAddressConfiguration",
+            nullable=True,
+        )
 
-        dns_settings = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.dns_settings
+        dns_settings = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.dns_settings
+        )
         dns_settings.domain_name_label = AAZStrArg(
             options=["domain-name-label"],
             help="The Domain name label.The concatenation of the domain name label and vm index will be the domain name labels of the PublicIPAddress resources that will be created",
@@ -1127,15 +1264,24 @@ class Update(AAZCommand):
             options=["domain-name-label-scope"],
             help="The Domain name label scope.The concatenation of the hashed domain name label that generated according to the policy from domain name label scope and vm index will be the domain name labels of the PublicIPAddress resources that will be created",
             nullable=True,
-            enum={"NoReuse": "NoReuse", "ResourceGroupReuse": "ResourceGroupReuse", "SubscriptionReuse": "SubscriptionReuse", "TenantReuse": "TenantReuse"},
+            enum={
+                "NoReuse": "NoReuse",
+                "ResourceGroupReuse": "ResourceGroupReuse",
+                "SubscriptionReuse": "SubscriptionReuse",
+                "TenantReuse": "TenantReuse",
+            },
         )
 
-        ip_tags = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.ip_tags
+        ip_tags = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.ip_tags
+        )
         ip_tags.Element = AAZObjectArg(
             nullable=True,
         )
 
-        _element = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.ip_tags.Element
+        _element = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.ip_tags.Element
+        )
         _element.ip_tag_type = AAZStrArg(
             options=["ip-tag-type"],
             help="IP tag type. Example: FirstPartyUsage.",
@@ -1147,7 +1293,9 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        sku = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.sku
+        sku = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.sku
+        )
         sku.name = AAZStrArg(
             options=["name"],
             help="Specify public IP sku name",
@@ -1161,15 +1309,30 @@ class Update(AAZCommand):
             enum={"Global": "Global", "Regional": "Regional"},
         )
 
-        os_profile = cls._args_schema.virtual_machine_profile.os_profile
-        os_profile.admin_password = AAZStrArg(
-            options=["admin-password"],
-            help="Specifies the password of the administrator account. <br><br> **Minimum-length (Windows):** 8 characters <br><br> **Minimum-length (Linux):** 6 characters <br><br> **Max-length (Windows):** 123 characters <br><br> **Max-length (Linux):** 72 characters <br><br> **Complexity requirements:** 3 out of 4 conditions below need to be fulfilled <br> Has lower characters <br>Has upper characters <br> Has a digit <br> Has a special character (Regex match [\\W_]) <br><br> **Disallowed values:** \"abc@123\", \"P@$$w0rd\", \"P@ssw0rd\", \"P@ssword123\", \"Pa$$word\", \"pass@word1\", \"Password!\", \"Password1\", \"Password22\", \"iloveyou!\" <br><br> For resetting the password, see [How to reset the Remote Desktop service or its login password in a Windows VM](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/reset-rdp) <br><br> For resetting root password, see [Manage users, SSH, and check or repair disks on Azure Linux VMs using the VMAccess Extension](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/troubleshoot-ssh-connection)",
+        tags = (
+            cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.tags
+        )
+        tags.Element = AAZStrArg(
             nullable=True,
+        )
+
+        tags = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        os_profile = cls._args_schema.virtual_machine_profile.os_profile
+        os_profile.admin_password = AAZPasswordArg(
+            options=["admin-password"],
+            help='Specifies the password of the administrator account. <br><br> **Minimum-length (Windows):** 8 characters <br><br> **Minimum-length (Linux):** 6 characters <br><br> **Max-length (Windows):** 123 characters <br><br> **Max-length (Linux):** 72 characters <br><br> **Complexity requirements:** 3 out of 4 conditions below need to be fulfilled <br> Has lower characters <br>Has upper characters <br> Has a digit <br> Has a special character (Regex match [\\W_]) <br><br> **Disallowed values:** "abc@123", "P@$$w0rd", "P@ssw0rd", "P@ssword123", "Pa$$word", "pass@word1", "Password!", "Password1", "Password22", "iloveyou!" <br><br> For resetting the password, see [How to reset the Remote Desktop service or its login password in a Windows VM](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/reset-rdp) <br><br> For resetting root password, see [Manage users, SSH, and check or repair disks on Azure Linux VMs using the VMAccess Extension](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/troubleshoot-ssh-connection)',
+            nullable=True,
+            blank=AAZPromptPasswordInput(
+                msg="Password:",
+            ),
         )
         os_profile.admin_username = AAZStrArg(
             options=["admin-username"],
-            help="Specifies the name of the administrator account. <br><br> **Windows-only restriction:** Cannot end in \".\" <br><br> **Disallowed values:** \"administrator\", \"admin\", \"user\", \"user1\", \"test\", \"user2\", \"test1\", \"user3\", \"admin1\", \"1\", \"123\", \"a\", \"actuser\", \"adm\", \"admin2\", \"aspnet\", \"backup\", \"console\", \"david\", \"guest\", \"john\", \"owner\", \"root\", \"server\", \"sql\", \"support\", \"support_388945a0\", \"sys\", \"test2\", \"test3\", \"user4\", \"user5\". <br><br> **Minimum-length (Linux):** 1  character <br><br> **Max-length (Linux):** 64 characters <br><br> **Max-length (Windows):** 20 characters",
+            help='Specifies the name of the administrator account. <br><br> **Windows-only restriction:** Cannot end in "." <br><br> **Disallowed values:** "administrator", "admin", "user", "user1", "test", "user2", "test1", "user3", "admin1", "1", "123", "a", "actuser", "adm", "admin2", "aspnet", "backup", "console", "david", "guest", "john", "owner", "root", "server", "sql", "support", "support_388945a0", "sys", "test2", "test3", "user4", "user5". <br><br> **Minimum-length (Linux):** 1  character <br><br> **Max-length (Linux):** 64 characters <br><br> **Max-length (Windows):** 20 characters',
             nullable=True,
         )
         os_profile.allow_extension_operations = AAZBoolArg(
@@ -1254,7 +1417,9 @@ class Update(AAZCommand):
             enum={"AutomaticByPlatform": "AutomaticByPlatform", "ImageDefault": "ImageDefault"},
         )
 
-        automatic_by_platform_settings = cls._args_schema.virtual_machine_profile.os_profile.linux_configuration.patch_settings.automatic_by_platform_settings
+        automatic_by_platform_settings = (
+            cls._args_schema.virtual_machine_profile.os_profile.linux_configuration.patch_settings.automatic_by_platform_settings
+        )
         automatic_by_platform_settings.bypass_platform_safety_checks_on_user_schedule = AAZBoolArg(
             options=["bypass-platform-safety-checks-on-user-schedule"],
             help="Enables customer to schedule patching without accidental upgrades",
@@ -1322,7 +1487,7 @@ class Update(AAZCommand):
         )
         _element.certificate_url = AAZStrArg(
             options=["certificate-url"],
-            help="This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://learn.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be It is the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  \"data\":\"<Base64-encoded-certificate>\",<br>  \"dataType\":\"pfx\",<br>  \"password\":\"<pfx-file-password>\"<br>} <br> To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://learn.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://learn.microsoft.com/azure/virtual-machines/extensions/key-vault-windows).",
+            help='This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://learn.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be It is the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  "data":"<Base64-encoded-certificate>",<br>  "dataType":"pfx",<br>  "password":"<pfx-file-password>"<br>} <br> To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://learn.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://learn.microsoft.com/azure/virtual-machines/extensions/key-vault-windows).',
             nullable=True,
         )
 
@@ -1349,7 +1514,7 @@ class Update(AAZCommand):
         )
         windows_configuration.time_zone = AAZStrArg(
             options=["time-zone"],
-            help="Specifies the time zone of the virtual machine. e.g. \"Pacific Standard Time\". Possible values can be [TimeZoneInfo.Id](https://learn.microsoft.com/dotnet/api/system.timezoneinfo.id?#System_TimeZoneInfo_Id) value from time zones returned by [TimeZoneInfo.GetSystemTimeZones](https://learn.microsoft.com/dotnet/api/system.timezoneinfo.getsystemtimezones).",
+            help='Specifies the time zone of the virtual machine. e.g. "Pacific Standard Time". Possible values can be [TimeZoneInfo.Id](https://learn.microsoft.com/dotnet/api/system.timezoneinfo.id?#System_TimeZoneInfo_Id) value from time zones returned by [TimeZoneInfo.GetSystemTimeZones](https://learn.microsoft.com/dotnet/api/system.timezoneinfo.getsystemtimezones).',
             nullable=True,
         )
         windows_configuration.win_rm = AAZObjectArg(
@@ -1358,12 +1523,16 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        additional_unattend_content = cls._args_schema.virtual_machine_profile.os_profile.windows_configuration.additional_unattend_content
+        additional_unattend_content = (
+            cls._args_schema.virtual_machine_profile.os_profile.windows_configuration.additional_unattend_content
+        )
         additional_unattend_content.Element = AAZObjectArg(
             nullable=True,
         )
 
-        _element = cls._args_schema.virtual_machine_profile.os_profile.windows_configuration.additional_unattend_content.Element
+        _element = (
+            cls._args_schema.virtual_machine_profile.os_profile.windows_configuration.additional_unattend_content.Element
+        )
         _element.component_name = AAZStrArg(
             options=["component-name"],
             help="The component name. Currently, the only allowable value is Microsoft-Windows-Shell-Setup.",
@@ -1412,7 +1581,9 @@ class Update(AAZCommand):
             enum={"AutomaticByOS": "AutomaticByOS", "AutomaticByPlatform": "AutomaticByPlatform", "Manual": "Manual"},
         )
 
-        automatic_by_platform_settings = cls._args_schema.virtual_machine_profile.os_profile.windows_configuration.patch_settings.automatic_by_platform_settings
+        automatic_by_platform_settings = (
+            cls._args_schema.virtual_machine_profile.os_profile.windows_configuration.patch_settings.automatic_by_platform_settings
+        )
         automatic_by_platform_settings.bypass_platform_safety_checks_on_user_schedule = AAZBoolArg(
             options=["bypass-platform-safety-checks-on-user-schedule"],
             help="Enables customer to schedule patching without accidental upgrades",
@@ -1440,7 +1611,7 @@ class Update(AAZCommand):
         _element = cls._args_schema.virtual_machine_profile.os_profile.windows_configuration.win_rm.listeners.Element
         _element.certificate_url = AAZStrArg(
             options=["certificate-url"],
-            help="This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://learn.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  \"data\":\"<Base64-encoded-certificate>\",<br>  \"dataType\":\"pfx\",<br>  \"password\":\"<pfx-file-password>\"<br>} <br> To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://learn.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://learn.microsoft.com/azure/virtual-machines/extensions/key-vault-windows).",
+            help='This is the URL of a certificate that has been uploaded to Key Vault as a secret. For adding a secret to the Key Vault, see [Add a key or secret to the key vault](https://learn.microsoft.com/azure/key-vault/key-vault-get-started/#add). In this case, your certificate needs to be the Base64 encoding of the following JSON Object which is encoded in UTF-8: <br><br> {<br>  "data":"<Base64-encoded-certificate>",<br>  "dataType":"pfx",<br>  "password":"<pfx-file-password>"<br>} <br> To install certificates on a virtual machine it is recommended to use the [Azure Key Vault virtual machine extension for Linux](https://learn.microsoft.com/azure/virtual-machines/extensions/key-vault-linux) or the [Azure Key Vault virtual machine extension for Windows](https://learn.microsoft.com/azure/virtual-machines/extensions/key-vault-windows).',
             nullable=True,
         )
         _element.protocol = AAZStrArg(
@@ -1462,7 +1633,9 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        os_image_notification_profile = cls._args_schema.virtual_machine_profile.scheduled_events_profile.os_image_notification_profile
+        os_image_notification_profile = (
+            cls._args_schema.virtual_machine_profile.scheduled_events_profile.os_image_notification_profile
+        )
         os_image_notification_profile.enable = AAZBoolArg(
             options=["enable"],
             help="Specifies whether the OS Image Scheduled event is enabled or disabled.",
@@ -1474,7 +1647,9 @@ class Update(AAZCommand):
             nullable=True,
         )
 
-        terminate_notification_profile = cls._args_schema.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile
+        terminate_notification_profile = (
+            cls._args_schema.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile
+        )
         terminate_notification_profile.enable = AAZBoolArg(
             options=["enable"],
             help="Specifies whether the Terminate Scheduled event is enabled or disabled.",
@@ -1543,6 +1718,11 @@ class Update(AAZCommand):
         )
 
         proxy_agent_settings = cls._args_schema.virtual_machine_profile.security_profile.proxy_agent_settings
+        proxy_agent_settings.add_proxy_agent_extension = AAZBoolArg(
+            options=["add-proxy-agent-extension"],
+            help="Specify whether to implicitly install the ProxyAgent Extension. This option is currently applicable only for Linux Os.",
+            nullable=True,
+        )
         proxy_agent_settings.enabled = AAZBoolArg(
             options=["enabled"],
             help="Specifies whether ProxyAgent feature should be enabled on the virtual machine or virtual machine scale set.",
@@ -1599,7 +1779,9 @@ class Update(AAZCommand):
         )
         storage_profile.disk_controller_type = AAZStrArg(
             options=["disk-controller-type"],
+            help="Specifies the disk controller type configured for the virtual machines in the scale set. Minimum api-version: 2022-08-01",
             nullable=True,
+            enum={"NVMe": "NVMe", "SCSI": "SCSI"},
         )
         storage_profile.image_reference = AAZObjectArg(
             options=["image-reference"],
@@ -1843,7 +2025,9 @@ class Update(AAZCommand):
     @classmethod
     def _build_args_host_endpoint_settings_update(cls, _schema):
         if cls._args_host_endpoint_settings_update is not None:
-            _schema.in_vm_access_control_profile_reference_id = cls._args_host_endpoint_settings_update.in_vm_access_control_profile_reference_id
+            _schema.in_vm_access_control_profile_reference_id = (
+                cls._args_host_endpoint_settings_update.in_vm_access_control_profile_reference_id
+            )
             _schema.mode = cls._args_host_endpoint_settings_update.mode
             return
 
@@ -1864,7 +2048,9 @@ class Update(AAZCommand):
             enum={"Audit": "Audit", "Disabled": "Disabled", "Enforce": "Enforce"},
         )
 
-        _schema.in_vm_access_control_profile_reference_id = cls._args_host_endpoint_settings_update.in_vm_access_control_profile_reference_id
+        _schema.in_vm_access_control_profile_reference_id = (
+            cls._args_host_endpoint_settings_update.in_vm_access_control_profile_reference_id
+        )
         _schema.mode = cls._args_host_endpoint_settings_update.mode
 
     _args_sub_resource_update = None
@@ -1893,22 +2079,32 @@ class Update(AAZCommand):
     @classmethod
     def _build_args_virtual_machine_scale_set_managed_disk_parameters_update(cls, _schema):
         if cls._args_virtual_machine_scale_set_managed_disk_parameters_update is not None:
-            _schema.disk_encryption_set = cls._args_virtual_machine_scale_set_managed_disk_parameters_update.disk_encryption_set
-            _schema.security_profile = cls._args_virtual_machine_scale_set_managed_disk_parameters_update.security_profile
-            _schema.storage_account_type = cls._args_virtual_machine_scale_set_managed_disk_parameters_update.storage_account_type
+            _schema.disk_encryption_set = (
+                cls._args_virtual_machine_scale_set_managed_disk_parameters_update.disk_encryption_set
+            )
+            _schema.security_profile = (
+                cls._args_virtual_machine_scale_set_managed_disk_parameters_update.security_profile
+            )
+            _schema.storage_account_type = (
+                cls._args_virtual_machine_scale_set_managed_disk_parameters_update.storage_account_type
+            )
             return
 
         cls._args_virtual_machine_scale_set_managed_disk_parameters_update = AAZObjectArg(
             nullable=True,
         )
 
-        virtual_machine_scale_set_managed_disk_parameters_update = cls._args_virtual_machine_scale_set_managed_disk_parameters_update
+        virtual_machine_scale_set_managed_disk_parameters_update = (
+            cls._args_virtual_machine_scale_set_managed_disk_parameters_update
+        )
         virtual_machine_scale_set_managed_disk_parameters_update.disk_encryption_set = AAZObjectArg(
             options=["disk-encryption-set"],
             help="Specifies the customer managed disk encryption set resource id for the managed disk.",
             nullable=True,
         )
-        cls._build_args_disk_encryption_set_parameters_update(virtual_machine_scale_set_managed_disk_parameters_update.disk_encryption_set)
+        cls._build_args_disk_encryption_set_parameters_update(
+            virtual_machine_scale_set_managed_disk_parameters_update.disk_encryption_set
+        )
         virtual_machine_scale_set_managed_disk_parameters_update.security_profile = AAZObjectArg(
             options=["security-profile"],
             help="Specifies the security profile for the managed disk.",
@@ -1918,7 +2114,15 @@ class Update(AAZCommand):
             options=["storage-account-type"],
             help="Specifies the storage account type for the managed disk. NOTE: UltraSSD_LRS can only be used with data disks, it cannot be used with OS Disk.",
             nullable=True,
-            enum={"PremiumV2_LRS": "PremiumV2_LRS", "Premium_LRS": "Premium_LRS", "Premium_ZRS": "Premium_ZRS", "StandardSSD_LRS": "StandardSSD_LRS", "StandardSSD_ZRS": "StandardSSD_ZRS", "Standard_LRS": "Standard_LRS", "UltraSSD_LRS": "UltraSSD_LRS"},
+            enum={
+                "PremiumV2_LRS": "PremiumV2_LRS",
+                "Premium_LRS": "Premium_LRS",
+                "Premium_ZRS": "Premium_ZRS",
+                "StandardSSD_LRS": "StandardSSD_LRS",
+                "StandardSSD_ZRS": "StandardSSD_ZRS",
+                "Standard_LRS": "Standard_LRS",
+                "UltraSSD_LRS": "UltraSSD_LRS",
+            },
         )
 
         security_profile = cls._args_virtual_machine_scale_set_managed_disk_parameters_update.security_profile
@@ -1932,12 +2136,20 @@ class Update(AAZCommand):
             options=["security-encryption-type"],
             help="Specifies the EncryptionType of the managed disk. It is set to DiskWithVMGuestState for encryption of the managed disk along with VMGuestState blob, and VMGuestStateOnly for encryption of just the VMGuestState blob. **Note:** It can be set for only Confidential VMs.",
             nullable=True,
-            enum={"DiskWithVMGuestState": "DiskWithVMGuestState", "NonPersistedTPM": "NonPersistedTPM", "VMGuestStateOnly": "VMGuestStateOnly"},
+            enum={
+                "DiskWithVMGuestState": "DiskWithVMGuestState",
+                "NonPersistedTPM": "NonPersistedTPM",
+                "VMGuestStateOnly": "VMGuestStateOnly",
+            },
         )
 
-        _schema.disk_encryption_set = cls._args_virtual_machine_scale_set_managed_disk_parameters_update.disk_encryption_set
+        _schema.disk_encryption_set = (
+            cls._args_virtual_machine_scale_set_managed_disk_parameters_update.disk_encryption_set
+        )
         _schema.security_profile = cls._args_virtual_machine_scale_set_managed_disk_parameters_update.security_profile
-        _schema.storage_account_type = cls._args_virtual_machine_scale_set_managed_disk_parameters_update.storage_account_type
+        _schema.storage_account_type = (
+            cls._args_virtual_machine_scale_set_managed_disk_parameters_update.storage_account_type
+        )
 
     def _execute_operations(self):
         self.pre_operations()
@@ -1999,15 +2211,18 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName",
+                    self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
+                    "subscriptionId",
+                    self.ctx.subscription_id,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "vmScaleSetName", self.ctx.args.vm_scale_set_name,
+                    "vmScaleSetName",
+                    self.ctx.args.vm_scale_set_name,
                     required=True,
                 ),
             }
@@ -2017,7 +2232,8 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version",
+                    "2025-04-01",
                     required=True,
                 ),
             }
@@ -2027,18 +2243,15 @@ class Update(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "Accept", "application/json",
+                    "Accept",
+                    "application/json",
                 ),
             }
             return parameters
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
+            self.ctx.set_var("instance", data, schema_builder=self._build_schema_on_200)
 
         _schema_on_200 = None
 
@@ -2064,7 +2277,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200, 201]:
@@ -2073,7 +2286,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -2098,15 +2311,18 @@ class Update(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
+                    "resourceGroupName",
+                    self.ctx.args.resource_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
+                    "subscriptionId",
+                    self.ctx.subscription_id,
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "vmScaleSetName", self.ctx.args.vm_scale_set_name,
+                    "vmScaleSetName",
+                    self.ctx.args.vm_scale_set_name,
                     required=True,
                 ),
             }
@@ -2116,7 +2332,8 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version",
+                    "2025-04-01",
                     required=True,
                 ),
             }
@@ -2126,16 +2343,20 @@ class Update(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
-                    "If-Match", self.ctx.args.if_match,
+                    "If-Match",
+                    self.ctx.args.if_match,
                 ),
                 **self.serialize_header_param(
-                    "If-None-Match", self.ctx.args.if_none_match,
+                    "If-None-Match",
+                    self.ctx.args.if_none_match,
                 ),
                 **self.serialize_header_param(
-                    "Content-Type", "application/json",
+                    "Content-Type",
+                    "application/json",
                 ),
                 **self.serialize_header_param(
-                    "Accept", "application/json",
+                    "Accept",
+                    "application/json",
                 ),
             }
             return parameters
@@ -2151,11 +2372,7 @@ class Update(AAZCommand):
 
         def on_200_201(self, session):
             data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200_201
-            )
+            self.ctx.set_var("instance", data, schema_builder=self._build_schema_on_200_201)
 
         _schema_on_200_201 = None
 
@@ -2175,13 +2392,10 @@ class Update(AAZCommand):
             self._update_instance(self.ctx.vars.instance)
 
         def _update_instance(self, instance):
-            _instance_value, _builder = self.new_content_builder(
-                self.ctx.args,
-                value=instance,
-                typ=AAZObjectType
-            )
+            _instance_value, _builder = self.new_content_builder(self.ctx.args, value=instance, typ=AAZObjectType)
             _builder.set_prop("extendedLocation", AAZObjectType, ".extended_location")
             _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
+            _builder.set_prop("placement", AAZObjectType, ".placement")
             _builder.set_prop("plan", AAZObjectType, ".plan")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".sku")
@@ -2202,6 +2416,20 @@ class Update(AAZCommand):
             if user_assigned_identities is not None:
                 user_assigned_identities.set_elements(AAZObjectType, ".")
 
+            placement = _builder.get(".placement")
+            if placement is not None:
+                placement.set_prop("excludeZones", AAZListType, ".exclude_zones")
+                placement.set_prop("includeZones", AAZListType, ".include_zones")
+                placement.set_prop("zonePlacementPolicy", AAZStrType, ".zone_placement_policy")
+
+            exclude_zones = _builder.get(".placement.excludeZones")
+            if exclude_zones is not None:
+                exclude_zones.set_elements(AAZStrType, ".")
+
+            include_zones = _builder.get(".placement.includeZones")
+            if include_zones is not None:
+                include_zones.set_elements(AAZStrType, ".")
+
             plan = _builder.get(".plan")
             if plan is not None:
                 plan.set_prop("name", AAZStrType, ".name")
@@ -2214,13 +2442,22 @@ class Update(AAZCommand):
                 properties.set_prop("additionalCapabilities", AAZObjectType, ".additional_capabilities")
                 properties.set_prop("automaticRepairsPolicy", AAZObjectType, ".automatic_repairs_policy")
                 properties.set_prop("constrainedMaximumCapacity", AAZBoolType, ".constrained_maximum_capacity")
-                properties.set_prop("doNotRunExtensionsOnOverprovisionedVMs", AAZBoolType, ".do_not_run_extensions_on_overprovisioned_v_ms")
-                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("hostGroup", AAZObjectType, ".host_group"))
+                properties.set_prop(
+                    "doNotRunExtensionsOnOverprovisionedVMs",
+                    AAZBoolType,
+                    ".do_not_run_extensions_on_overprovisioned_v_ms",
+                )
+                properties.set_prop("highSpeedInterconnectPlacement", AAZStrType, ".high_speed_interconnect_placement")
+                _UpdateHelper._build_schema_sub_resource_update(
+                    properties.set_prop("hostGroup", AAZObjectType, ".host_group")
+                )
                 properties.set_prop("orchestrationMode", AAZStrType, ".orchestration_mode")
                 properties.set_prop("overprovision", AAZBoolType, ".overprovision")
                 properties.set_prop("platformFaultDomainCount", AAZIntType, ".platform_fault_domain_count")
                 properties.set_prop("priorityMixPolicy", AAZObjectType, ".priority_mix_policy")
-                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("proximityPlacementGroup", AAZObjectType, ".proximity_placement_group"))
+                _UpdateHelper._build_schema_sub_resource_update(
+                    properties.set_prop("proximityPlacementGroup", AAZObjectType, ".proximity_placement_group")
+                )
                 properties.set_prop("resiliencyPolicy", AAZObjectType, ".resiliency_policy")
                 properties.set_prop("scaleInPolicy", AAZObjectType, ".scale_in_policy")
                 properties.set_prop("scheduledEventsPolicy", AAZObjectType, ".scheduled_events_policy")
@@ -2229,11 +2466,14 @@ class Update(AAZCommand):
                 properties.set_prop("spotRestorePolicy", AAZObjectType, ".spot_restore_policy")
                 properties.set_prop("upgradePolicy", AAZObjectType, ".upgrade_policy")
                 properties.set_prop("virtualMachineProfile", AAZObjectType, ".virtual_machine_profile")
-                properties.set_prop("zonalPlatformFaultDomainAlignMode", AAZStrType, ".zonal_platform_fault_domain_align_mode")
+                properties.set_prop(
+                    "zonalPlatformFaultDomainAlignMode", AAZStrType, ".zonal_platform_fault_domain_align_mode"
+                )
                 properties.set_prop("zoneBalance", AAZBoolType, ".zone_balance")
 
             additional_capabilities = _builder.get(".properties.additionalCapabilities")
             if additional_capabilities is not None:
+                additional_capabilities.set_prop("enableFips1403Encryption", AAZBoolType, ".enable_fips1403_encryption")
                 additional_capabilities.set_prop("hibernationEnabled", AAZBoolType, ".hibernation_enabled")
                 additional_capabilities.set_prop("ultraSSDEnabled", AAZBoolType, ".ultra_ssd_enabled")
 
@@ -2246,15 +2486,22 @@ class Update(AAZCommand):
             priority_mix_policy = _builder.get(".properties.priorityMixPolicy")
             if priority_mix_policy is not None:
                 priority_mix_policy.set_prop("baseRegularPriorityCount", AAZIntType, ".base_regular_priority_count")
-                priority_mix_policy.set_prop("regularPriorityPercentageAboveBase", AAZIntType, ".regular_priority_percentage_above_base")
+                priority_mix_policy.set_prop(
+                    "regularPriorityPercentageAboveBase", AAZIntType, ".regular_priority_percentage_above_base"
+                )
 
             resiliency_policy = _builder.get(".properties.resiliencyPolicy")
             if resiliency_policy is not None:
-                resiliency_policy.set_prop("automaticZoneRebalancingPolicy", AAZObjectType, ".automatic_zone_rebalancing_policy")
+                resiliency_policy.set_prop(
+                    "automaticZoneRebalancingPolicy", AAZObjectType, ".automatic_zone_rebalancing_policy"
+                )
                 resiliency_policy.set_prop("resilientVMCreationPolicy", AAZObjectType, ".resilient_vm_creation_policy")
                 resiliency_policy.set_prop("resilientVMDeletionPolicy", AAZObjectType, ".resilient_vm_deletion_policy")
+                resiliency_policy.set_prop("zoneAllocationPolicy", AAZObjectType, ".zone_allocation_policy")
 
-            automatic_zone_rebalancing_policy = _builder.get(".properties.resiliencyPolicy.automaticZoneRebalancingPolicy")
+            automatic_zone_rebalancing_policy = _builder.get(
+                ".properties.resiliencyPolicy.automaticZoneRebalancingPolicy"
+            )
             if automatic_zone_rebalancing_policy is not None:
                 automatic_zone_rebalancing_policy.set_prop("enabled", AAZBoolType, ".enabled")
                 automatic_zone_rebalancing_policy.set_prop("rebalanceBehavior", AAZStrType, ".rebalance_behavior")
@@ -2268,6 +2515,20 @@ class Update(AAZCommand):
             if resilient_vm_deletion_policy is not None:
                 resilient_vm_deletion_policy.set_prop("enabled", AAZBoolType, ".enabled")
 
+            zone_allocation_policy = _builder.get(".properties.resiliencyPolicy.zoneAllocationPolicy")
+            if zone_allocation_policy is not None:
+                zone_allocation_policy.set_prop(
+                    "maxInstancePercentPerZonePolicy", AAZObjectType, ".max_instance_percent_per_zone_policy"
+                )
+                zone_allocation_policy.set_prop("maxZoneCount", AAZIntType, ".max_zone_count")
+
+            max_instance_percent_per_zone_policy = _builder.get(
+                ".properties.resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy"
+            )
+            if max_instance_percent_per_zone_policy is not None:
+                max_instance_percent_per_zone_policy.set_prop("enabled", AAZBoolType, ".enabled")
+                max_instance_percent_per_zone_policy.set_prop("value", AAZIntType, ".value")
+
             scale_in_policy = _builder.get(".properties.scaleInPolicy")
             if scale_in_policy is not None:
                 scale_in_policy.set_prop("forceDeletion", AAZBoolType, ".force_deletion")
@@ -2280,17 +2541,35 @@ class Update(AAZCommand):
 
             scheduled_events_policy = _builder.get(".properties.scheduledEventsPolicy")
             if scheduled_events_policy is not None:
-                scheduled_events_policy.set_prop("scheduledEventsAdditionalPublishingTargets", AAZObjectType, ".scheduled_events_additional_publishing_targets")
+                scheduled_events_policy.set_prop("allInstancesDown", AAZObjectType, ".all_instances_down")
+                scheduled_events_policy.set_prop(
+                    "scheduledEventsAdditionalPublishingTargets",
+                    AAZObjectType,
+                    ".scheduled_events_additional_publishing_targets",
+                )
                 scheduled_events_policy.set_prop("userInitiatedReboot", AAZObjectType, ".user_initiated_reboot")
                 scheduled_events_policy.set_prop("userInitiatedRedeploy", AAZObjectType, ".user_initiated_redeploy")
 
-            scheduled_events_additional_publishing_targets = _builder.get(".properties.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets")
-            if scheduled_events_additional_publishing_targets is not None:
-                scheduled_events_additional_publishing_targets.set_prop("eventGridAndResourceGraph", AAZObjectType, ".event_grid_and_resource_graph")
+            all_instances_down = _builder.get(".properties.scheduledEventsPolicy.allInstancesDown")
+            if all_instances_down is not None:
+                all_instances_down.set_prop("automaticallyApprove", AAZBoolType, ".automatically_approve")
 
-            event_grid_and_resource_graph = _builder.get(".properties.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph")
+            scheduled_events_additional_publishing_targets = _builder.get(
+                ".properties.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets"
+            )
+            if scheduled_events_additional_publishing_targets is not None:
+                scheduled_events_additional_publishing_targets.set_prop(
+                    "eventGridAndResourceGraph", AAZObjectType, ".event_grid_and_resource_graph"
+                )
+
+            event_grid_and_resource_graph = _builder.get(
+                ".properties.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph"
+            )
             if event_grid_and_resource_graph is not None:
                 event_grid_and_resource_graph.set_prop("enable", AAZBoolType, ".enable")
+                event_grid_and_resource_graph.set_prop(
+                    "scheduledEventsApiVersion", AAZStrType, ".scheduled_events_api_version"
+                )
 
             user_initiated_reboot = _builder.get(".properties.scheduledEventsPolicy.userInitiatedReboot")
             if user_initiated_reboot is not None:
@@ -2327,21 +2606,37 @@ class Update(AAZCommand):
 
             automatic_os_upgrade_policy = _builder.get(".properties.upgradePolicy.automaticOSUpgradePolicy")
             if automatic_os_upgrade_policy is not None:
-                automatic_os_upgrade_policy.set_prop("disableAutomaticRollback", AAZBoolType, ".disable_automatic_rollback")
-                automatic_os_upgrade_policy.set_prop("enableAutomaticOSUpgrade", AAZBoolType, ".enable_automatic_os_upgrade")
-                automatic_os_upgrade_policy.set_prop("osRollingUpgradeDeferral", AAZBoolType, ".os_rolling_upgrade_deferral")
-                automatic_os_upgrade_policy.set_prop("useRollingUpgradePolicy", AAZBoolType, ".use_rolling_upgrade_policy")
+                automatic_os_upgrade_policy.set_prop(
+                    "disableAutomaticRollback", AAZBoolType, ".disable_automatic_rollback"
+                )
+                automatic_os_upgrade_policy.set_prop(
+                    "enableAutomaticOSUpgrade", AAZBoolType, ".enable_automatic_os_upgrade"
+                )
+                automatic_os_upgrade_policy.set_prop(
+                    "osRollingUpgradeDeferral", AAZBoolType, ".os_rolling_upgrade_deferral"
+                )
+                automatic_os_upgrade_policy.set_prop(
+                    "useRollingUpgradePolicy", AAZBoolType, ".use_rolling_upgrade_policy"
+                )
 
             rolling_upgrade_policy = _builder.get(".properties.upgradePolicy.rollingUpgradePolicy")
             if rolling_upgrade_policy is not None:
                 rolling_upgrade_policy.set_prop("enableCrossZoneUpgrade", AAZBoolType, ".enable_cross_zone_upgrade")
                 rolling_upgrade_policy.set_prop("maxBatchInstancePercent", AAZIntType, ".max_batch_instance_percent")
                 rolling_upgrade_policy.set_prop("maxSurge", AAZBoolType, ".max_surge")
-                rolling_upgrade_policy.set_prop("maxUnhealthyInstancePercent", AAZIntType, ".max_unhealthy_instance_percent")
-                rolling_upgrade_policy.set_prop("maxUnhealthyUpgradedInstancePercent", AAZIntType, ".max_unhealthy_upgraded_instance_percent")
+                rolling_upgrade_policy.set_prop(
+                    "maxUnhealthyInstancePercent", AAZIntType, ".max_unhealthy_instance_percent"
+                )
+                rolling_upgrade_policy.set_prop(
+                    "maxUnhealthyUpgradedInstancePercent", AAZIntType, ".max_unhealthy_upgraded_instance_percent"
+                )
                 rolling_upgrade_policy.set_prop("pauseTimeBetweenBatches", AAZStrType, ".pause_time_between_batches")
-                rolling_upgrade_policy.set_prop("prioritizeUnhealthyInstances", AAZBoolType, ".prioritize_unhealthy_instances")
-                rolling_upgrade_policy.set_prop("rollbackFailedInstancesOnPolicyBreach", AAZBoolType, ".rollback_failed_instances_on_policy_breach")
+                rolling_upgrade_policy.set_prop(
+                    "prioritizeUnhealthyInstances", AAZBoolType, ".prioritize_unhealthy_instances"
+                )
+                rolling_upgrade_policy.set_prop(
+                    "rollbackFailedInstancesOnPolicyBreach", AAZBoolType, ".rollback_failed_instances_on_policy_breach"
+                )
 
             virtual_machine_profile = _builder.get(".properties.virtualMachineProfile")
             if virtual_machine_profile is not None:
@@ -2357,9 +2652,13 @@ class Update(AAZCommand):
                 virtual_machine_profile.set_prop("osProfile", AAZObjectType, ".os_profile")
                 virtual_machine_profile.set_prop("priority", AAZStrType, ".priority")
                 virtual_machine_profile.set_prop("scheduledEventsProfile", AAZObjectType, ".scheduled_events_profile")
-                virtual_machine_profile.set_prop("securityPostureReference", AAZObjectType, ".security_posture_reference")
+                virtual_machine_profile.set_prop(
+                    "securityPostureReference", AAZObjectType, ".security_posture_reference"
+                )
                 virtual_machine_profile.set_prop("securityProfile", AAZObjectType, ".security_profile")
-                virtual_machine_profile.set_prop("serviceArtifactReference", AAZObjectType, ".service_artifact_reference")
+                virtual_machine_profile.set_prop(
+                    "serviceArtifactReference", AAZObjectType, ".service_artifact_reference"
+                )
                 virtual_machine_profile.set_prop("storageProfile", AAZObjectType, ".storage_profile")
                 virtual_machine_profile.set_prop("userData", AAZStrType, ".user_data")
 
@@ -2367,7 +2666,9 @@ class Update(AAZCommand):
             if application_profile is not None:
                 application_profile.set_prop("galleryApplications", AAZListType, ".gallery_applications")
 
-            gallery_applications = _builder.get(".properties.virtualMachineProfile.applicationProfile.galleryApplications")
+            gallery_applications = _builder.get(
+                ".properties.virtualMachineProfile.applicationProfile.galleryApplications"
+            )
             if gallery_applications is not None:
                 gallery_applications.set_elements(AAZObjectType, ".")
 
@@ -2376,9 +2677,13 @@ class Update(AAZCommand):
                 _elements.set_prop("configurationReference", AAZStrType, ".configuration_reference")
                 _elements.set_prop("enableAutomaticUpgrade", AAZBoolType, ".enable_automatic_upgrade")
                 _elements.set_prop("order", AAZIntType, ".order")
-                _elements.set_prop("packageReferenceId", AAZStrType, ".package_reference_id", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop(
+                    "packageReferenceId", AAZStrType, ".package_reference_id", typ_kwargs={"flags": {"required": True}}
+                )
                 _elements.set_prop("tags", AAZStrType, ".tags")
-                _elements.set_prop("treatFailureAsDeploymentFailure", AAZBoolType, ".treat_failure_as_deployment_failure")
+                _elements.set_prop(
+                    "treatFailureAsDeploymentFailure", AAZBoolType, ".treat_failure_as_deployment_failure"
+                )
 
             billing_profile = _builder.get(".properties.virtualMachineProfile.billingProfile")
             if billing_profile is not None:
@@ -2386,7 +2691,11 @@ class Update(AAZCommand):
 
             capacity_reservation = _builder.get(".properties.virtualMachineProfile.capacityReservation")
             if capacity_reservation is not None:
-                _UpdateHelper._build_schema_sub_resource_update(capacity_reservation.set_prop("capacityReservationGroup", AAZObjectType, ".capacity_reservation_group"))
+                _UpdateHelper._build_schema_sub_resource_update(
+                    capacity_reservation.set_prop(
+                        "capacityReservationGroup", AAZObjectType, ".capacity_reservation_group"
+                    )
+                )
 
             diagnostics_profile = _builder.get(".properties.virtualMachineProfile.diagnosticsProfile")
             if diagnostics_profile is not None:
@@ -2416,31 +2725,35 @@ class Update(AAZCommand):
                 properties.set_prop("autoUpgradeMinorVersion", AAZBoolType, ".auto_upgrade_minor_version")
                 properties.set_prop("enableAutomaticUpgrade", AAZBoolType, ".enable_automatic_upgrade")
                 properties.set_prop("forceUpdateTag", AAZStrType, ".force_update_tag")
-                properties.set_prop("protectedSettings", AAZFreeFormDictType, ".protected_settings")
-                properties.set_prop("protectedSettingsFromKeyVault", AAZObjectType, ".protected_settings_from_key_vault")
+                properties.set_prop("protectedSettings", AAZAnyType, ".protected_settings")
+                properties.set_prop(
+                    "protectedSettingsFromKeyVault", AAZObjectType, ".protected_settings_from_key_vault"
+                )
                 properties.set_prop("provisionAfterExtensions", AAZListType, ".provision_after_extensions")
                 properties.set_prop("publisher", AAZStrType, ".publisher")
-                properties.set_prop("settings", AAZFreeFormDictType, ".settings")
+                properties.set_prop("settings", AAZAnyType, ".settings")
                 properties.set_prop("suppressFailures", AAZBoolType, ".suppress_failures")
                 properties.set_prop("type", AAZStrType, ".type")
                 properties.set_prop("typeHandlerVersion", AAZStrType, ".type_handler_version")
 
-            protected_settings = _builder.get(".properties.virtualMachineProfile.extensionProfile.extensions[].properties.protectedSettings")
-            if protected_settings is not None:
-                protected_settings.set_anytype_elements(".")
-
-            protected_settings_from_key_vault = _builder.get(".properties.virtualMachineProfile.extensionProfile.extensions[].properties.protectedSettingsFromKeyVault")
+            protected_settings_from_key_vault = _builder.get(
+                ".properties.virtualMachineProfile.extensionProfile.extensions[].properties.protectedSettingsFromKeyVault"
+            )
             if protected_settings_from_key_vault is not None:
-                protected_settings_from_key_vault.set_prop("secretUrl", AAZStrType, ".secret_url", typ_kwargs={"flags": {"required": True}})
-                _UpdateHelper._build_schema_sub_resource_update(protected_settings_from_key_vault.set_prop("sourceVault", AAZObjectType, ".source_vault", typ_kwargs={"flags": {"required": True}}))
+                protected_settings_from_key_vault.set_prop(
+                    "secretUrl", AAZStrType, ".secret_url", typ_kwargs={"flags": {"required": True}}
+                )
+                _UpdateHelper._build_schema_sub_resource_update(
+                    protected_settings_from_key_vault.set_prop(
+                        "sourceVault", AAZObjectType, ".source_vault", typ_kwargs={"flags": {"required": True}}
+                    )
+                )
 
-            provision_after_extensions = _builder.get(".properties.virtualMachineProfile.extensionProfile.extensions[].properties.provisionAfterExtensions")
+            provision_after_extensions = _builder.get(
+                ".properties.virtualMachineProfile.extensionProfile.extensions[].properties.provisionAfterExtensions"
+            )
             if provision_after_extensions is not None:
                 provision_after_extensions.set_elements(AAZStrType, ".")
-
-            settings = _builder.get(".properties.virtualMachineProfile.extensionProfile.extensions[].properties.settings")
-            if settings is not None:
-                settings.set_anytype_elements(".")
 
             hardware_profile = _builder.get(".properties.virtualMachineProfile.hardwareProfile")
             if hardware_profile is not None:
@@ -2453,20 +2766,31 @@ class Update(AAZCommand):
 
             network_profile = _builder.get(".properties.virtualMachineProfile.networkProfile")
             if network_profile is not None:
-                _UpdateHelper._build_schema_api_entity_reference_update(network_profile.set_prop("healthProbe", AAZObjectType, ".health_probe"))
+                _UpdateHelper._build_schema_api_entity_reference_update(
+                    network_profile.set_prop("healthProbe", AAZObjectType, ".health_probe")
+                )
                 network_profile.set_prop("networkApiVersion", AAZStrType, ".network_api_version")
-                network_profile.set_prop("networkInterfaceConfigurations", AAZListType, ".network_interface_configurations")
+                network_profile.set_prop(
+                    "networkInterfaceConfigurations", AAZListType, ".network_interface_configurations"
+                )
 
-            network_interface_configurations = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations")
+            network_interface_configurations = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations"
+            )
             if network_interface_configurations is not None:
                 network_interface_configurations.set_elements(AAZObjectType, ".")
 
-            _elements = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[]")
+            _elements = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[]"
+            )
             if _elements is not None:
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("tags", AAZDictType, ".tags")
 
-            properties = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties")
+            properties = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties"
+            )
             if properties is not None:
                 properties.set_prop("auxiliaryMode", AAZStrType, ".auxiliary_mode")
                 properties.set_prop("auxiliarySku", AAZStrType, ".auxiliary_sku")
@@ -2476,91 +2800,162 @@ class Update(AAZCommand):
                 properties.set_prop("enableAcceleratedNetworking", AAZBoolType, ".enable_accelerated_networking")
                 properties.set_prop("enableFpga", AAZBoolType, ".enable_fpga")
                 properties.set_prop("enableIPForwarding", AAZBoolType, ".enable_ip_forwarding")
-                properties.set_prop("ipConfigurations", AAZListType, ".ip_configurations", typ_kwargs={"flags": {"required": True}})
-                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("networkSecurityGroup", AAZObjectType, ".network_security_group"))
+                properties.set_prop(
+                    "ipConfigurations", AAZListType, ".ip_configurations", typ_kwargs={"flags": {"required": True}}
+                )
+                _UpdateHelper._build_schema_sub_resource_update(
+                    properties.set_prop("networkSecurityGroup", AAZObjectType, ".network_security_group")
+                )
                 properties.set_prop("primary", AAZBoolType, ".primary")
 
-            dns_settings = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.dnsSettings")
+            dns_settings = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.dnsSettings"
+            )
             if dns_settings is not None:
                 dns_settings.set_prop("dnsServers", AAZListType, ".dns_servers")
 
-            dns_servers = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.dnsSettings.dnsServers")
+            dns_servers = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.dnsSettings.dnsServers"
+            )
             if dns_servers is not None:
                 dns_servers.set_elements(AAZStrType, ".")
 
-            ip_configurations = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations")
+            ip_configurations = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations"
+            )
             if ip_configurations is not None:
                 ip_configurations.set_elements(AAZObjectType, ".")
 
-            _elements = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[]")
+            _elements = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[]"
+            )
             if _elements is not None:
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
-            properties = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties")
+            properties = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties"
+            )
             if properties is not None:
-                properties.set_prop("applicationGatewayBackendAddressPools", AAZListType, ".application_gateway_backend_address_pools")
+                properties.set_prop(
+                    "applicationGatewayBackendAddressPools", AAZListType, ".application_gateway_backend_address_pools"
+                )
                 properties.set_prop("applicationSecurityGroups", AAZListType, ".application_security_groups")
-                properties.set_prop("loadBalancerBackendAddressPools", AAZListType, ".load_balancer_backend_address_pools")
+                properties.set_prop(
+                    "loadBalancerBackendAddressPools", AAZListType, ".load_balancer_backend_address_pools"
+                )
                 properties.set_prop("loadBalancerInboundNatPools", AAZListType, ".load_balancer_inbound_nat_pools")
                 properties.set_prop("primary", AAZBoolType, ".primary")
                 properties.set_prop("privateIPAddressVersion", AAZStrType, ".private_ip_address_version")
                 properties.set_prop("publicIPAddressConfiguration", AAZObjectType, ".public_ip_address_configuration")
-                _UpdateHelper._build_schema_api_entity_reference_update(properties.set_prop("subnet", AAZObjectType, ".subnet"))
+                _UpdateHelper._build_schema_api_entity_reference_update(
+                    properties.set_prop("subnet", AAZObjectType, ".subnet")
+                )
 
-            application_gateway_backend_address_pools = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.applicationGatewayBackendAddressPools")
+            application_gateway_backend_address_pools = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.applicationGatewayBackendAddressPools"
+            )
             if application_gateway_backend_address_pools is not None:
-                _UpdateHelper._build_schema_sub_resource_update(application_gateway_backend_address_pools.set_elements(AAZObjectType, "."))
+                _UpdateHelper._build_schema_sub_resource_update(
+                    application_gateway_backend_address_pools.set_elements(AAZObjectType, ".")
+                )
 
-            application_security_groups = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.applicationSecurityGroups")
+            application_security_groups = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.applicationSecurityGroups"
+            )
             if application_security_groups is not None:
-                _UpdateHelper._build_schema_sub_resource_update(application_security_groups.set_elements(AAZObjectType, "."))
+                _UpdateHelper._build_schema_sub_resource_update(
+                    application_security_groups.set_elements(AAZObjectType, ".")
+                )
 
-            load_balancer_backend_address_pools = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.loadBalancerBackendAddressPools")
+            load_balancer_backend_address_pools = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.loadBalancerBackendAddressPools"
+            )
             if load_balancer_backend_address_pools is not None:
-                _UpdateHelper._build_schema_sub_resource_update(load_balancer_backend_address_pools.set_elements(AAZObjectType, "."))
+                _UpdateHelper._build_schema_sub_resource_update(
+                    load_balancer_backend_address_pools.set_elements(AAZObjectType, ".")
+                )
 
-            load_balancer_inbound_nat_pools = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.loadBalancerInboundNatPools")
+            load_balancer_inbound_nat_pools = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.loadBalancerInboundNatPools"
+            )
             if load_balancer_inbound_nat_pools is not None:
-                _UpdateHelper._build_schema_sub_resource_update(load_balancer_inbound_nat_pools.set_elements(AAZObjectType, "."))
+                _UpdateHelper._build_schema_sub_resource_update(
+                    load_balancer_inbound_nat_pools.set_elements(AAZObjectType, ".")
+                )
 
-            public_ip_address_configuration = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration")
+            public_ip_address_configuration = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration"
+            )
             if public_ip_address_configuration is not None:
-                public_ip_address_configuration.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
-                public_ip_address_configuration.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                public_ip_address_configuration.set_prop(
+                    "name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}}
+                )
+                public_ip_address_configuration.set_prop(
+                    "properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}}
+                )
                 public_ip_address_configuration.set_prop("sku", AAZObjectType, ".sku")
+                public_ip_address_configuration.set_prop("tags", AAZDictType, ".tags")
 
-            properties = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.properties")
+            properties = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.properties"
+            )
             if properties is not None:
                 properties.set_prop("deleteOption", AAZStrType, ".delete_option")
                 properties.set_prop("dnsSettings", AAZObjectType, ".dns_settings")
                 properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout_in_minutes")
                 properties.set_prop("ipTags", AAZListType, ".ip_tags")
                 properties.set_prop("publicIPAddressVersion", AAZStrType, ".public_ip_address_version")
-                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("publicIPPrefix", AAZObjectType, ".public_ip_prefix"))
+                _UpdateHelper._build_schema_sub_resource_update(
+                    properties.set_prop("publicIPPrefix", AAZObjectType, ".public_ip_prefix")
+                )
 
-            dns_settings = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.properties.dnsSettings")
+            dns_settings = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.properties.dnsSettings"
+            )
             if dns_settings is not None:
-                dns_settings.set_prop("domainNameLabel", AAZStrType, ".domain_name_label", typ_kwargs={"flags": {"required": True}})
+                dns_settings.set_prop(
+                    "domainNameLabel", AAZStrType, ".domain_name_label", typ_kwargs={"flags": {"required": True}}
+                )
                 dns_settings.set_prop("domainNameLabelScope", AAZStrType, ".domain_name_label_scope")
 
-            ip_tags = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.properties.ipTags")
+            ip_tags = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.properties.ipTags"
+            )
             if ip_tags is not None:
                 ip_tags.set_elements(AAZObjectType, ".")
 
-            _elements = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.properties.ipTags[]")
+            _elements = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.properties.ipTags[]"
+            )
             if _elements is not None:
                 _elements.set_prop("ipTagType", AAZStrType, ".ip_tag_type")
                 _elements.set_prop("tag", AAZStrType, ".tag")
 
-            sku = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.sku")
+            sku = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.sku"
+            )
             if sku is not None:
                 sku.set_prop("name", AAZStrType, ".name")
                 sku.set_prop("tier", AAZStrType, ".tier")
 
+            tags = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.tags"
+            )
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            tags = _builder.get(
+                ".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].tags"
+            )
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
             os_profile = _builder.get(".properties.virtualMachineProfile.osProfile")
             if os_profile is not None:
-                os_profile.set_prop("adminPassword", AAZStrType, ".admin_password", typ_kwargs={"flags": {"secret": True}})
+                os_profile.set_prop(
+                    "adminPassword", AAZStrType, ".admin_password", typ_kwargs={"flags": {"secret": True}}
+                )
                 os_profile.set_prop("adminUsername", AAZStrType, ".admin_username")
                 os_profile.set_prop("allowExtensionOperations", AAZBoolType, ".allow_extension_operations")
                 os_profile.set_prop("computerNamePrefix", AAZStrType, ".computer_name_prefix")
@@ -2572,21 +2967,33 @@ class Update(AAZCommand):
 
             linux_configuration = _builder.get(".properties.virtualMachineProfile.osProfile.linuxConfiguration")
             if linux_configuration is not None:
-                linux_configuration.set_prop("disablePasswordAuthentication", AAZBoolType, ".disable_password_authentication")
-                linux_configuration.set_prop("enableVMAgentPlatformUpdates", AAZBoolType, ".enable_vm_agent_platform_updates")
+                linux_configuration.set_prop(
+                    "disablePasswordAuthentication", AAZBoolType, ".disable_password_authentication"
+                )
+                linux_configuration.set_prop(
+                    "enableVMAgentPlatformUpdates", AAZBoolType, ".enable_vm_agent_platform_updates"
+                )
                 linux_configuration.set_prop("patchSettings", AAZObjectType, ".patch_settings")
                 linux_configuration.set_prop("provisionVMAgent", AAZBoolType, ".provision_vm_agent")
                 linux_configuration.set_prop("ssh", AAZObjectType, ".ssh")
 
-            patch_settings = _builder.get(".properties.virtualMachineProfile.osProfile.linuxConfiguration.patchSettings")
+            patch_settings = _builder.get(
+                ".properties.virtualMachineProfile.osProfile.linuxConfiguration.patchSettings"
+            )
             if patch_settings is not None:
                 patch_settings.set_prop("assessmentMode", AAZStrType, ".assessment_mode")
                 patch_settings.set_prop("automaticByPlatformSettings", AAZObjectType, ".automatic_by_platform_settings")
                 patch_settings.set_prop("patchMode", AAZStrType, ".patch_mode")
 
-            automatic_by_platform_settings = _builder.get(".properties.virtualMachineProfile.osProfile.linuxConfiguration.patchSettings.automaticByPlatformSettings")
+            automatic_by_platform_settings = _builder.get(
+                ".properties.virtualMachineProfile.osProfile.linuxConfiguration.patchSettings.automaticByPlatformSettings"
+            )
             if automatic_by_platform_settings is not None:
-                automatic_by_platform_settings.set_prop("bypassPlatformSafetyChecksOnUserSchedule", AAZBoolType, ".bypass_platform_safety_checks_on_user_schedule")
+                automatic_by_platform_settings.set_prop(
+                    "bypassPlatformSafetyChecksOnUserSchedule",
+                    AAZBoolType,
+                    ".bypass_platform_safety_checks_on_user_schedule",
+                )
                 automatic_by_platform_settings.set_prop("rebootSetting", AAZStrType, ".reboot_setting")
 
             ssh = _builder.get(".properties.virtualMachineProfile.osProfile.linuxConfiguration.ssh")
@@ -2608,7 +3015,9 @@ class Update(AAZCommand):
 
             _elements = _builder.get(".properties.virtualMachineProfile.osProfile.secrets[]")
             if _elements is not None:
-                _UpdateHelper._build_schema_sub_resource_update(_elements.set_prop("sourceVault", AAZObjectType, ".source_vault"))
+                _UpdateHelper._build_schema_sub_resource_update(
+                    _elements.set_prop("sourceVault", AAZObjectType, ".source_vault")
+                )
                 _elements.set_prop("vaultCertificates", AAZListType, ".vault_certificates")
 
             vault_certificates = _builder.get(".properties.virtualMachineProfile.osProfile.secrets[].vaultCertificates")
@@ -2629,27 +3038,39 @@ class Update(AAZCommand):
                 windows_configuration.set_prop("timeZone", AAZStrType, ".time_zone")
                 windows_configuration.set_prop("winRM", AAZObjectType, ".win_rm")
 
-            additional_unattend_content = _builder.get(".properties.virtualMachineProfile.osProfile.windowsConfiguration.additionalUnattendContent")
+            additional_unattend_content = _builder.get(
+                ".properties.virtualMachineProfile.osProfile.windowsConfiguration.additionalUnattendContent"
+            )
             if additional_unattend_content is not None:
                 additional_unattend_content.set_elements(AAZObjectType, ".")
 
-            _elements = _builder.get(".properties.virtualMachineProfile.osProfile.windowsConfiguration.additionalUnattendContent[]")
+            _elements = _builder.get(
+                ".properties.virtualMachineProfile.osProfile.windowsConfiguration.additionalUnattendContent[]"
+            )
             if _elements is not None:
                 _elements.set_prop("componentName", AAZStrType, ".component_name")
                 _elements.set_prop("content", AAZStrType, ".content")
                 _elements.set_prop("passName", AAZStrType, ".pass_name")
                 _elements.set_prop("settingName", AAZStrType, ".setting_name")
 
-            patch_settings = _builder.get(".properties.virtualMachineProfile.osProfile.windowsConfiguration.patchSettings")
+            patch_settings = _builder.get(
+                ".properties.virtualMachineProfile.osProfile.windowsConfiguration.patchSettings"
+            )
             if patch_settings is not None:
                 patch_settings.set_prop("assessmentMode", AAZStrType, ".assessment_mode")
                 patch_settings.set_prop("automaticByPlatformSettings", AAZObjectType, ".automatic_by_platform_settings")
                 patch_settings.set_prop("enableHotpatching", AAZBoolType, ".enable_hotpatching")
                 patch_settings.set_prop("patchMode", AAZStrType, ".patch_mode")
 
-            automatic_by_platform_settings = _builder.get(".properties.virtualMachineProfile.osProfile.windowsConfiguration.patchSettings.automaticByPlatformSettings")
+            automatic_by_platform_settings = _builder.get(
+                ".properties.virtualMachineProfile.osProfile.windowsConfiguration.patchSettings.automaticByPlatformSettings"
+            )
             if automatic_by_platform_settings is not None:
-                automatic_by_platform_settings.set_prop("bypassPlatformSafetyChecksOnUserSchedule", AAZBoolType, ".bypass_platform_safety_checks_on_user_schedule")
+                automatic_by_platform_settings.set_prop(
+                    "bypassPlatformSafetyChecksOnUserSchedule",
+                    AAZBoolType,
+                    ".bypass_platform_safety_checks_on_user_schedule",
+                )
                 automatic_by_platform_settings.set_prop("rebootSetting", AAZStrType, ".reboot_setting")
 
             win_rm = _builder.get(".properties.virtualMachineProfile.osProfile.windowsConfiguration.winRM")
@@ -2660,22 +3081,32 @@ class Update(AAZCommand):
             if listeners is not None:
                 listeners.set_elements(AAZObjectType, ".")
 
-            _elements = _builder.get(".properties.virtualMachineProfile.osProfile.windowsConfiguration.winRM.listeners[]")
+            _elements = _builder.get(
+                ".properties.virtualMachineProfile.osProfile.windowsConfiguration.winRM.listeners[]"
+            )
             if _elements is not None:
                 _elements.set_prop("certificateUrl", AAZStrType, ".certificate_url")
                 _elements.set_prop("protocol", AAZStrType, ".protocol")
 
             scheduled_events_profile = _builder.get(".properties.virtualMachineProfile.scheduledEventsProfile")
             if scheduled_events_profile is not None:
-                scheduled_events_profile.set_prop("osImageNotificationProfile", AAZObjectType, ".os_image_notification_profile")
-                scheduled_events_profile.set_prop("terminateNotificationProfile", AAZObjectType, ".terminate_notification_profile")
+                scheduled_events_profile.set_prop(
+                    "osImageNotificationProfile", AAZObjectType, ".os_image_notification_profile"
+                )
+                scheduled_events_profile.set_prop(
+                    "terminateNotificationProfile", AAZObjectType, ".terminate_notification_profile"
+                )
 
-            os_image_notification_profile = _builder.get(".properties.virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile")
+            os_image_notification_profile = _builder.get(
+                ".properties.virtualMachineProfile.scheduledEventsProfile.osImageNotificationProfile"
+            )
             if os_image_notification_profile is not None:
                 os_image_notification_profile.set_prop("enable", AAZBoolType, ".enable")
                 os_image_notification_profile.set_prop("notBeforeTimeout", AAZStrType, ".not_before_timeout")
 
-            terminate_notification_profile = _builder.get(".properties.virtualMachineProfile.scheduledEventsProfile.terminateNotificationProfile")
+            terminate_notification_profile = _builder.get(
+                ".properties.virtualMachineProfile.scheduledEventsProfile.terminateNotificationProfile"
+            )
             if terminate_notification_profile is not None:
                 terminate_notification_profile.set_prop("enable", AAZBoolType, ".enable")
                 terminate_notification_profile.set_prop("notBeforeTimeout", AAZStrType, ".not_before_timeout")
@@ -2686,7 +3117,9 @@ class Update(AAZCommand):
                 security_posture_reference.set_prop("id", AAZStrType, ".id", typ_kwargs={"flags": {"required": True}})
                 security_posture_reference.set_prop("isOverridable", AAZBoolType, ".is_overridable")
 
-            exclude_extensions = _builder.get(".properties.virtualMachineProfile.securityPostureReference.excludeExtensions")
+            exclude_extensions = _builder.get(
+                ".properties.virtualMachineProfile.securityPostureReference.excludeExtensions"
+            )
             if exclude_extensions is not None:
                 exclude_extensions.set_elements(AAZStrType, ".")
 
@@ -2700,15 +3133,22 @@ class Update(AAZCommand):
 
             encryption_identity = _builder.get(".properties.virtualMachineProfile.securityProfile.encryptionIdentity")
             if encryption_identity is not None:
-                encryption_identity.set_prop("userAssignedIdentityResourceId", AAZStrType, ".user_assigned_identity_resource_id")
+                encryption_identity.set_prop(
+                    "userAssignedIdentityResourceId", AAZStrType, ".user_assigned_identity_resource_id"
+                )
 
             proxy_agent_settings = _builder.get(".properties.virtualMachineProfile.securityProfile.proxyAgentSettings")
             if proxy_agent_settings is not None:
+                proxy_agent_settings.set_prop("addProxyAgentExtension", AAZBoolType, ".add_proxy_agent_extension")
                 proxy_agent_settings.set_prop("enabled", AAZBoolType, ".enabled")
-                _UpdateHelper._build_schema_host_endpoint_settings_update(proxy_agent_settings.set_prop("imds", AAZObjectType, ".imds"))
+                _UpdateHelper._build_schema_host_endpoint_settings_update(
+                    proxy_agent_settings.set_prop("imds", AAZObjectType, ".imds")
+                )
                 proxy_agent_settings.set_prop("keyIncarnationId", AAZIntType, ".key_incarnation_id")
                 proxy_agent_settings.set_prop("mode", AAZStrType, ".mode")
-                _UpdateHelper._build_schema_host_endpoint_settings_update(proxy_agent_settings.set_prop("wireServer", AAZObjectType, ".wire_server"))
+                _UpdateHelper._build_schema_host_endpoint_settings_update(
+                    proxy_agent_settings.set_prop("wireServer", AAZObjectType, ".wire_server")
+                )
 
             uefi_settings = _builder.get(".properties.virtualMachineProfile.securityProfile.uefiSettings")
             if uefi_settings is not None:
@@ -2733,13 +3173,17 @@ class Update(AAZCommand):
             _elements = _builder.get(".properties.virtualMachineProfile.storageProfile.dataDisks[]")
             if _elements is not None:
                 _elements.set_prop("caching", AAZStrType, ".caching")
-                _elements.set_prop("createOption", AAZStrType, ".create_option", typ_kwargs={"flags": {"required": True}})
+                _elements.set_prop(
+                    "createOption", AAZStrType, ".create_option", typ_kwargs={"flags": {"required": True}}
+                )
                 _elements.set_prop("deleteOption", AAZStrType, ".delete_option")
                 _elements.set_prop("diskIOPSReadWrite", AAZIntType, ".disk_iops_read_write")
                 _elements.set_prop("diskMBpsReadWrite", AAZIntType, ".disk_m_bps_read_write")
                 _elements.set_prop("diskSizeGB", AAZIntType, ".disk_size_gb")
                 _elements.set_prop("lun", AAZIntType, ".lun", typ_kwargs={"flags": {"required": True}})
-                _UpdateHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_update(_elements.set_prop("managedDisk", AAZObjectType, ".managed_disk"))
+                _UpdateHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_update(
+                    _elements.set_prop("managedDisk", AAZObjectType, ".managed_disk")
+                )
                 _elements.set_prop("name", AAZStrType, ".name")
                 _elements.set_prop("writeAcceleratorEnabled", AAZBoolType, ".write_accelerator_enabled")
 
@@ -2761,13 +3205,17 @@ class Update(AAZCommand):
                 os_disk.set_prop("diffDiskSettings", AAZObjectType, ".diff_disk_settings")
                 os_disk.set_prop("diskSizeGB", AAZIntType, ".disk_size_gb")
                 os_disk.set_prop("image", AAZObjectType, ".image")
-                _UpdateHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_update(os_disk.set_prop("managedDisk", AAZObjectType, ".managed_disk"))
+                _UpdateHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_update(
+                    os_disk.set_prop("managedDisk", AAZObjectType, ".managed_disk")
+                )
                 os_disk.set_prop("name", AAZStrType, ".name")
                 os_disk.set_prop("osType", AAZStrType, ".os_type")
                 os_disk.set_prop("vhdContainers", AAZListType, ".vhd_containers")
                 os_disk.set_prop("writeAcceleratorEnabled", AAZBoolType, ".write_accelerator_enabled")
 
-            diff_disk_settings = _builder.get(".properties.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings")
+            diff_disk_settings = _builder.get(
+                ".properties.virtualMachineProfile.storageProfile.osDisk.diffDiskSettings"
+            )
             if diff_disk_settings is not None:
                 diff_disk_settings.set_prop("option", AAZStrType, ".option")
                 diff_disk_settings.set_prop("placement", AAZStrType, ".placement")
@@ -2799,10 +3247,7 @@ class Update(AAZCommand):
     class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance_by_generic(
-                self.ctx.vars.instance,
-                self.ctx.generic_update_args
-            )
+            self._update_instance_by_generic(self.ctx.vars.instance, self.ctx.generic_update_args)
 
 
 class _UpdateHelper:
@@ -2824,7 +3269,9 @@ class _UpdateHelper:
     def _build_schema_host_endpoint_settings_update(cls, _builder):
         if _builder is None:
             return
-        _builder.set_prop("inVMAccessControlProfileReferenceId", AAZStrType, ".in_vm_access_control_profile_reference_id")
+        _builder.set_prop(
+            "inVMAccessControlProfileReferenceId", AAZStrType, ".in_vm_access_control_profile_reference_id"
+        )
         _builder.set_prop("mode", AAZStrType, ".mode")
 
     @classmethod
@@ -2837,13 +3284,17 @@ class _UpdateHelper:
     def _build_schema_virtual_machine_scale_set_managed_disk_parameters_update(cls, _builder):
         if _builder is None:
             return
-        cls._build_schema_disk_encryption_set_parameters_update(_builder.set_prop("diskEncryptionSet", AAZObjectType, ".disk_encryption_set"))
+        cls._build_schema_disk_encryption_set_parameters_update(
+            _builder.set_prop("diskEncryptionSet", AAZObjectType, ".disk_encryption_set")
+        )
         _builder.set_prop("securityProfile", AAZObjectType, ".security_profile")
         _builder.set_prop("storageAccountType", AAZStrType, ".storage_account_type")
 
         security_profile = _builder.get(".securityProfile")
         if security_profile is not None:
-            cls._build_schema_disk_encryption_set_parameters_update(security_profile.set_prop("diskEncryptionSet", AAZObjectType, ".disk_encryption_set"))
+            cls._build_schema_disk_encryption_set_parameters_update(
+                security_profile.set_prop("diskEncryptionSet", AAZObjectType, ".disk_encryption_set")
+            )
             security_profile.set_prop("securityEncryptionType", AAZStrType, ".security_encryption_type")
 
     _schema_api_entity_reference_read = None
@@ -2881,7 +3332,9 @@ class _UpdateHelper:
     @classmethod
     def _build_schema_host_endpoint_settings_read(cls, _schema):
         if cls._schema_host_endpoint_settings_read is not None:
-            _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+            _schema.in_vm_access_control_profile_reference_id = (
+                cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+            )
             _schema.mode = cls._schema_host_endpoint_settings_read.mode
             return
 
@@ -2893,7 +3346,9 @@ class _UpdateHelper:
         )
         host_endpoint_settings_read.mode = AAZStrType()
 
-        _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+        _schema.in_vm_access_control_profile_reference_id = (
+            cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+        )
         _schema.mode = cls._schema_host_endpoint_settings_read.mode
 
     _schema_sub_resource_read = None
@@ -2916,18 +3371,30 @@ class _UpdateHelper:
     @classmethod
     def _build_schema_virtual_machine_scale_set_managed_disk_parameters_read(cls, _schema):
         if cls._schema_virtual_machine_scale_set_managed_disk_parameters_read is not None:
-            _schema.disk_encryption_set = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.disk_encryption_set
-            _schema.security_profile = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.security_profile
-            _schema.storage_account_type = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.storage_account_type
+            _schema.disk_encryption_set = (
+                cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.disk_encryption_set
+            )
+            _schema.security_profile = (
+                cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.security_profile
+            )
+            _schema.storage_account_type = (
+                cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.storage_account_type
+            )
             return
 
-        cls._schema_virtual_machine_scale_set_managed_disk_parameters_read = _schema_virtual_machine_scale_set_managed_disk_parameters_read = AAZObjectType()
+        cls._schema_virtual_machine_scale_set_managed_disk_parameters_read = (
+            _schema_virtual_machine_scale_set_managed_disk_parameters_read
+        ) = AAZObjectType()
 
-        virtual_machine_scale_set_managed_disk_parameters_read = _schema_virtual_machine_scale_set_managed_disk_parameters_read
+        virtual_machine_scale_set_managed_disk_parameters_read = (
+            _schema_virtual_machine_scale_set_managed_disk_parameters_read
+        )
         virtual_machine_scale_set_managed_disk_parameters_read.disk_encryption_set = AAZObjectType(
             serialized_name="diskEncryptionSet",
         )
-        cls._build_schema_disk_encryption_set_parameters_read(virtual_machine_scale_set_managed_disk_parameters_read.disk_encryption_set)
+        cls._build_schema_disk_encryption_set_parameters_read(
+            virtual_machine_scale_set_managed_disk_parameters_read.disk_encryption_set
+        )
         virtual_machine_scale_set_managed_disk_parameters_read.security_profile = AAZObjectType(
             serialized_name="securityProfile",
         )
@@ -2944,9 +3411,13 @@ class _UpdateHelper:
             serialized_name="securityEncryptionType",
         )
 
-        _schema.disk_encryption_set = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.disk_encryption_set
+        _schema.disk_encryption_set = (
+            cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.disk_encryption_set
+        )
         _schema.security_profile = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.security_profile
-        _schema.storage_account_type = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.storage_account_type
+        _schema.storage_account_type = (
+            cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.storage_account_type
+        )
 
     _schema_virtual_machine_scale_set_read = None
 
@@ -2959,9 +3430,11 @@ class _UpdateHelper:
             _schema.identity = cls._schema_virtual_machine_scale_set_read.identity
             _schema.location = cls._schema_virtual_machine_scale_set_read.location
             _schema.name = cls._schema_virtual_machine_scale_set_read.name
+            _schema.placement = cls._schema_virtual_machine_scale_set_read.placement
             _schema.plan = cls._schema_virtual_machine_scale_set_read.plan
             _schema.properties = cls._schema_virtual_machine_scale_set_read.properties
             _schema.sku = cls._schema_virtual_machine_scale_set_read.sku
+            _schema.system_data = cls._schema_virtual_machine_scale_set_read.system_data
             _schema.tags = cls._schema_virtual_machine_scale_set_read.tags
             _schema.type = cls._schema_virtual_machine_scale_set_read.type
             _schema.zones = cls._schema_virtual_machine_scale_set_read.zones
@@ -2986,11 +3459,16 @@ class _UpdateHelper:
         virtual_machine_scale_set_read.name = AAZStrType(
             flags={"read_only": True},
         )
+        virtual_machine_scale_set_read.placement = AAZObjectType()
         virtual_machine_scale_set_read.plan = AAZObjectType()
         virtual_machine_scale_set_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
         virtual_machine_scale_set_read.sku = AAZObjectType()
+        virtual_machine_scale_set_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
         virtual_machine_scale_set_read.tags = AAZDictType()
         virtual_machine_scale_set_read.type = AAZStrType(
             flags={"read_only": True},
@@ -3028,6 +3506,23 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
+        placement = _schema_virtual_machine_scale_set_read.placement
+        placement.exclude_zones = AAZListType(
+            serialized_name="excludeZones",
+        )
+        placement.include_zones = AAZListType(
+            serialized_name="includeZones",
+        )
+        placement.zone_placement_policy = AAZStrType(
+            serialized_name="zonePlacementPolicy",
+        )
+
+        exclude_zones = _schema_virtual_machine_scale_set_read.placement.exclude_zones
+        exclude_zones.Element = AAZStrType()
+
+        include_zones = _schema_virtual_machine_scale_set_read.placement.include_zones
+        include_zones.Element = AAZStrType()
+
         plan = _schema_virtual_machine_scale_set_read.plan
         plan.name = AAZStrType()
         plan.product = AAZStrType()
@@ -3048,6 +3543,9 @@ class _UpdateHelper:
         )
         properties.do_not_run_extensions_on_overprovisioned_v_ms = AAZBoolType(
             serialized_name="doNotRunExtensionsOnOverprovisionedVMs",
+        )
+        properties.high_speed_interconnect_placement = AAZStrType(
+            serialized_name="highSpeedInterconnectPlacement",
         )
         properties.host_group = AAZObjectType(
             serialized_name="hostGroup",
@@ -3111,6 +3609,9 @@ class _UpdateHelper:
         )
 
         additional_capabilities = _schema_virtual_machine_scale_set_read.properties.additional_capabilities
+        additional_capabilities.enable_fips1403_encryption = AAZBoolType(
+            serialized_name="enableFips1403Encryption",
+        )
         additional_capabilities.hibernation_enabled = AAZBoolType(
             serialized_name="hibernationEnabled",
         )
@@ -3145,8 +3646,13 @@ class _UpdateHelper:
         resiliency_policy.resilient_vm_deletion_policy = AAZObjectType(
             serialized_name="resilientVMDeletionPolicy",
         )
+        resiliency_policy.zone_allocation_policy = AAZObjectType(
+            serialized_name="zoneAllocationPolicy",
+        )
 
-        automatic_zone_rebalancing_policy = _schema_virtual_machine_scale_set_read.properties.resiliency_policy.automatic_zone_rebalancing_policy
+        automatic_zone_rebalancing_policy = (
+            _schema_virtual_machine_scale_set_read.properties.resiliency_policy.automatic_zone_rebalancing_policy
+        )
         automatic_zone_rebalancing_policy.enabled = AAZBoolType()
         automatic_zone_rebalancing_policy.rebalance_behavior = AAZStrType(
             serialized_name="rebalanceBehavior",
@@ -3155,11 +3661,31 @@ class _UpdateHelper:
             serialized_name="rebalanceStrategy",
         )
 
-        resilient_vm_creation_policy = _schema_virtual_machine_scale_set_read.properties.resiliency_policy.resilient_vm_creation_policy
+        resilient_vm_creation_policy = (
+            _schema_virtual_machine_scale_set_read.properties.resiliency_policy.resilient_vm_creation_policy
+        )
         resilient_vm_creation_policy.enabled = AAZBoolType()
 
-        resilient_vm_deletion_policy = _schema_virtual_machine_scale_set_read.properties.resiliency_policy.resilient_vm_deletion_policy
+        resilient_vm_deletion_policy = (
+            _schema_virtual_machine_scale_set_read.properties.resiliency_policy.resilient_vm_deletion_policy
+        )
         resilient_vm_deletion_policy.enabled = AAZBoolType()
+
+        zone_allocation_policy = (
+            _schema_virtual_machine_scale_set_read.properties.resiliency_policy.zone_allocation_policy
+        )
+        zone_allocation_policy.max_instance_percent_per_zone_policy = AAZObjectType(
+            serialized_name="maxInstancePercentPerZonePolicy",
+        )
+        zone_allocation_policy.max_zone_count = AAZIntType(
+            serialized_name="maxZoneCount",
+        )
+
+        max_instance_percent_per_zone_policy = (
+            _schema_virtual_machine_scale_set_read.properties.resiliency_policy.zone_allocation_policy.max_instance_percent_per_zone_policy
+        )
+        max_instance_percent_per_zone_policy.enabled = AAZBoolType()
+        max_instance_percent_per_zone_policy.value = AAZIntType()
 
         scale_in_policy = _schema_virtual_machine_scale_set_read.properties.scale_in_policy
         scale_in_policy.force_deletion = AAZBoolType(
@@ -3174,6 +3700,9 @@ class _UpdateHelper:
         rules.Element = AAZStrType()
 
         scheduled_events_policy = _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy
+        scheduled_events_policy.all_instances_down = AAZObjectType(
+            serialized_name="allInstancesDown",
+        )
         scheduled_events_policy.scheduled_events_additional_publishing_targets = AAZObjectType(
             serialized_name="scheduledEventsAdditionalPublishingTargets",
         )
@@ -3184,20 +3713,38 @@ class _UpdateHelper:
             serialized_name="userInitiatedRedeploy",
         )
 
-        scheduled_events_additional_publishing_targets = _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets
+        all_instances_down = (
+            _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.all_instances_down
+        )
+        all_instances_down.automatically_approve = AAZBoolType(
+            serialized_name="automaticallyApprove",
+        )
+
+        scheduled_events_additional_publishing_targets = (
+            _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets
+        )
         scheduled_events_additional_publishing_targets.event_grid_and_resource_graph = AAZObjectType(
             serialized_name="eventGridAndResourceGraph",
         )
 
-        event_grid_and_resource_graph = _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
+        event_grid_and_resource_graph = (
+            _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
+        )
         event_grid_and_resource_graph.enable = AAZBoolType()
+        event_grid_and_resource_graph.scheduled_events_api_version = AAZStrType(
+            serialized_name="scheduledEventsApiVersion",
+        )
 
-        user_initiated_reboot = _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.user_initiated_reboot
+        user_initiated_reboot = (
+            _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.user_initiated_reboot
+        )
         user_initiated_reboot.automatically_approve = AAZBoolType(
             serialized_name="automaticallyApprove",
         )
 
-        user_initiated_redeploy = _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.user_initiated_redeploy
+        user_initiated_redeploy = (
+            _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.user_initiated_redeploy
+        )
         user_initiated_redeploy.automatically_approve = AAZBoolType(
             serialized_name="automaticallyApprove",
         )
@@ -3232,7 +3779,9 @@ class _UpdateHelper:
             serialized_name="rollingUpgradePolicy",
         )
 
-        automatic_os_upgrade_policy = _schema_virtual_machine_scale_set_read.properties.upgrade_policy.automatic_os_upgrade_policy
+        automatic_os_upgrade_policy = (
+            _schema_virtual_machine_scale_set_read.properties.upgrade_policy.automatic_os_upgrade_policy
+        )
         automatic_os_upgrade_policy.disable_automatic_rollback = AAZBoolType(
             serialized_name="disableAutomaticRollback",
         )
@@ -3327,15 +3876,21 @@ class _UpdateHelper:
             serialized_name="userData",
         )
 
-        application_profile = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.application_profile
+        application_profile = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.application_profile
+        )
         application_profile.gallery_applications = AAZListType(
             serialized_name="galleryApplications",
         )
 
-        gallery_applications = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.application_profile.gallery_applications
+        gallery_applications = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.application_profile.gallery_applications
+        )
         gallery_applications.Element = AAZObjectType()
 
-        _element = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.application_profile.gallery_applications.Element
+        _element = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.application_profile.gallery_applications.Element
+        )
         _element.configuration_reference = AAZStrType(
             serialized_name="configurationReference",
         )
@@ -3357,18 +3912,24 @@ class _UpdateHelper:
             serialized_name="maxPrice",
         )
 
-        capacity_reservation = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.capacity_reservation
+        capacity_reservation = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.capacity_reservation
+        )
         capacity_reservation.capacity_reservation_group = AAZObjectType(
             serialized_name="capacityReservationGroup",
         )
         cls._build_schema_sub_resource_read(capacity_reservation.capacity_reservation_group)
 
-        diagnostics_profile = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.diagnostics_profile
+        diagnostics_profile = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.diagnostics_profile
+        )
         diagnostics_profile.boot_diagnostics = AAZObjectType(
             serialized_name="bootDiagnostics",
         )
 
-        boot_diagnostics = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.diagnostics_profile.boot_diagnostics
+        boot_diagnostics = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.diagnostics_profile.boot_diagnostics
+        )
         boot_diagnostics.enabled = AAZBoolType()
         boot_diagnostics.storage_uri = AAZStrType(
             serialized_name="storageUri",
@@ -3380,10 +3941,14 @@ class _UpdateHelper:
             serialized_name="extensionsTimeBudget",
         )
 
-        extensions = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.extension_profile.extensions
+        extensions = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.extension_profile.extensions
+        )
         extensions.Element = AAZObjectType()
 
-        _element = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.extension_profile.extensions.Element
+        _element = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.extension_profile.extensions.Element
+        )
         _element.id = AAZStrType(
             flags={"read_only": True},
         )
@@ -3395,7 +3960,9 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
-        properties = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.extension_profile.extensions.Element.properties
+        properties = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.extension_profile.extensions.Element.properties
+        )
         properties.auto_upgrade_minor_version = AAZBoolType(
             serialized_name="autoUpgradeMinorVersion",
         )
@@ -3405,7 +3972,7 @@ class _UpdateHelper:
         properties.force_update_tag = AAZStrType(
             serialized_name="forceUpdateTag",
         )
-        properties.protected_settings = AAZFreeFormDictType(
+        properties.protected_settings = AAZAnyType(
             serialized_name="protectedSettings",
         )
         properties.protected_settings_from_key_vault = AAZObjectType(
@@ -3419,7 +3986,7 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         properties.publisher = AAZStrType()
-        properties.settings = AAZFreeFormDictType()
+        properties.settings = AAZAnyType()
         properties.suppress_failures = AAZBoolType(
             serialized_name="suppressFailures",
         )
@@ -3428,7 +3995,9 @@ class _UpdateHelper:
             serialized_name="typeHandlerVersion",
         )
 
-        protected_settings_from_key_vault = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.extension_profile.extensions.Element.properties.protected_settings_from_key_vault
+        protected_settings_from_key_vault = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.extension_profile.extensions.Element.properties.protected_settings_from_key_vault
+        )
         protected_settings_from_key_vault.secret_url = AAZStrType(
             serialized_name="secretUrl",
             flags={"required": True},
@@ -3439,7 +4008,9 @@ class _UpdateHelper:
         )
         cls._build_schema_sub_resource_read(protected_settings_from_key_vault.source_vault)
 
-        provision_after_extensions = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.extension_profile.extensions.Element.properties.provision_after_extensions
+        provision_after_extensions = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.extension_profile.extensions.Element.properties.provision_after_extensions
+        )
         provision_after_extensions.Element = AAZStrType()
 
         hardware_profile = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.hardware_profile
@@ -3447,7 +4018,9 @@ class _UpdateHelper:
             serialized_name="vmSizeProperties",
         )
 
-        vm_size_properties = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.hardware_profile.vm_size_properties
+        vm_size_properties = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.hardware_profile.vm_size_properties
+        )
         vm_size_properties.v_cp_us_available = AAZIntType(
             serialized_name="vCPUsAvailable",
         )
@@ -3467,18 +4040,25 @@ class _UpdateHelper:
             serialized_name="networkInterfaceConfigurations",
         )
 
-        network_interface_configurations = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations
+        network_interface_configurations = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations
+        )
         network_interface_configurations.Element = AAZObjectType()
 
-        _element = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element
+        _element = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element
+        )
         _element.name = AAZStrType(
             flags={"required": True},
         )
         _element.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
+        _element.tags = AAZDictType()
 
-        properties = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties
+        properties = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties
+        )
         properties.auxiliary_mode = AAZStrType(
             serialized_name="auxiliaryMode",
         )
@@ -3513,18 +4093,26 @@ class _UpdateHelper:
         cls._build_schema_sub_resource_read(properties.network_security_group)
         properties.primary = AAZBoolType()
 
-        dns_settings = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.dns_settings
+        dns_settings = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.dns_settings
+        )
         dns_settings.dns_servers = AAZListType(
             serialized_name="dnsServers",
         )
 
-        dns_servers = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.dns_settings.dns_servers
+        dns_servers = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.dns_settings.dns_servers
+        )
         dns_servers.Element = AAZStrType()
 
-        ip_configurations = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations
+        ip_configurations = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations
+        )
         ip_configurations.Element = AAZObjectType()
 
-        _element = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element
+        _element = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element
+        )
         _element.name = AAZStrType(
             flags={"required": True},
         )
@@ -3532,7 +4120,9 @@ class _UpdateHelper:
             flags={"client_flatten": True},
         )
 
-        properties = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties
+        properties = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties
+        )
         properties.application_gateway_backend_address_pools = AAZListType(
             serialized_name="applicationGatewayBackendAddressPools",
         )
@@ -3555,23 +4145,33 @@ class _UpdateHelper:
         properties.subnet = AAZObjectType()
         cls._build_schema_api_entity_reference_read(properties.subnet)
 
-        application_gateway_backend_address_pools = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.application_gateway_backend_address_pools
+        application_gateway_backend_address_pools = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.application_gateway_backend_address_pools
+        )
         application_gateway_backend_address_pools.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(application_gateway_backend_address_pools.Element)
 
-        application_security_groups = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.application_security_groups
+        application_security_groups = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.application_security_groups
+        )
         application_security_groups.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(application_security_groups.Element)
 
-        load_balancer_backend_address_pools = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.load_balancer_backend_address_pools
+        load_balancer_backend_address_pools = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.load_balancer_backend_address_pools
+        )
         load_balancer_backend_address_pools.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(load_balancer_backend_address_pools.Element)
 
-        load_balancer_inbound_nat_pools = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.load_balancer_inbound_nat_pools
+        load_balancer_inbound_nat_pools = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.load_balancer_inbound_nat_pools
+        )
         load_balancer_inbound_nat_pools.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(load_balancer_inbound_nat_pools.Element)
 
-        public_ip_address_configuration = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration
+        public_ip_address_configuration = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration
+        )
         public_ip_address_configuration.name = AAZStrType(
             flags={"required": True},
         )
@@ -3579,8 +4179,11 @@ class _UpdateHelper:
             flags={"client_flatten": True},
         )
         public_ip_address_configuration.sku = AAZObjectType()
+        public_ip_address_configuration.tags = AAZDictType()
 
-        properties = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties
+        properties = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties
+        )
         properties.delete_option = AAZStrType(
             serialized_name="deleteOption",
         )
@@ -3601,7 +4204,9 @@ class _UpdateHelper:
         )
         cls._build_schema_sub_resource_read(properties.public_ip_prefix)
 
-        dns_settings = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.dns_settings
+        dns_settings = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.dns_settings
+        )
         dns_settings.domain_name_label = AAZStrType(
             serialized_name="domainNameLabel",
             flags={"required": True},
@@ -3610,18 +4215,34 @@ class _UpdateHelper:
             serialized_name="domainNameLabelScope",
         )
 
-        ip_tags = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.ip_tags
+        ip_tags = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.ip_tags
+        )
         ip_tags.Element = AAZObjectType()
 
-        _element = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.ip_tags.Element
+        _element = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.ip_tags.Element
+        )
         _element.ip_tag_type = AAZStrType(
             serialized_name="ipTagType",
         )
         _element.tag = AAZStrType()
 
-        sku = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.sku
+        sku = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.sku
+        )
         sku.name = AAZStrType()
         sku.tier = AAZStrType()
+
+        tags = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.tags
+        )
+        tags.Element = AAZStrType()
+
+        tags = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.tags
+        )
+        tags.Element = AAZStrType()
 
         os_profile = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile
         os_profile.admin_password = AAZStrType(
@@ -3651,7 +4272,9 @@ class _UpdateHelper:
             serialized_name="windowsConfiguration",
         )
 
-        linux_configuration = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration
+        linux_configuration = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration
+        )
         linux_configuration.disable_password_authentication = AAZBoolType(
             serialized_name="disablePasswordAuthentication",
         )
@@ -3666,7 +4289,9 @@ class _UpdateHelper:
         )
         linux_configuration.ssh = AAZObjectType()
 
-        patch_settings = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration.patch_settings
+        patch_settings = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration.patch_settings
+        )
         patch_settings.assessment_mode = AAZStrType(
             serialized_name="assessmentMode",
         )
@@ -3677,7 +4302,9 @@ class _UpdateHelper:
             serialized_name="patchMode",
         )
 
-        automatic_by_platform_settings = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration.patch_settings.automatic_by_platform_settings
+        automatic_by_platform_settings = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration.patch_settings.automatic_by_platform_settings
+        )
         automatic_by_platform_settings.bypass_platform_safety_checks_on_user_schedule = AAZBoolType(
             serialized_name="bypassPlatformSafetyChecksOnUserSchedule",
         )
@@ -3685,15 +4312,21 @@ class _UpdateHelper:
             serialized_name="rebootSetting",
         )
 
-        ssh = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration.ssh
+        ssh = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration.ssh
+        )
         ssh.public_keys = AAZListType(
             serialized_name="publicKeys",
         )
 
-        public_keys = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration.ssh.public_keys
+        public_keys = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration.ssh.public_keys
+        )
         public_keys.Element = AAZObjectType()
 
-        _element = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration.ssh.public_keys.Element
+        _element = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.linux_configuration.ssh.public_keys.Element
+        )
         _element.key_data = AAZStrType(
             serialized_name="keyData",
         )
@@ -3711,10 +4344,14 @@ class _UpdateHelper:
             serialized_name="vaultCertificates",
         )
 
-        vault_certificates = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.secrets.Element.vault_certificates
+        vault_certificates = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.secrets.Element.vault_certificates
+        )
         vault_certificates.Element = AAZObjectType()
 
-        _element = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.secrets.Element.vault_certificates.Element
+        _element = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.secrets.Element.vault_certificates.Element
+        )
         _element.certificate_store = AAZStrType(
             serialized_name="certificateStore",
         )
@@ -3722,7 +4359,9 @@ class _UpdateHelper:
             serialized_name="certificateUrl",
         )
 
-        windows_configuration = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration
+        windows_configuration = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration
+        )
         windows_configuration.additional_unattend_content = AAZListType(
             serialized_name="additionalUnattendContent",
         )
@@ -3746,10 +4385,14 @@ class _UpdateHelper:
             serialized_name="winRM",
         )
 
-        additional_unattend_content = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.additional_unattend_content
+        additional_unattend_content = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.additional_unattend_content
+        )
         additional_unattend_content.Element = AAZObjectType()
 
-        _element = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.additional_unattend_content.Element
+        _element = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.additional_unattend_content.Element
+        )
         _element.component_name = AAZStrType(
             serialized_name="componentName",
         )
@@ -3761,7 +4404,9 @@ class _UpdateHelper:
             serialized_name="settingName",
         )
 
-        patch_settings = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.patch_settings
+        patch_settings = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.patch_settings
+        )
         patch_settings.assessment_mode = AAZStrType(
             serialized_name="assessmentMode",
         )
@@ -3775,7 +4420,9 @@ class _UpdateHelper:
             serialized_name="patchMode",
         )
 
-        automatic_by_platform_settings = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.patch_settings.automatic_by_platform_settings
+        automatic_by_platform_settings = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.patch_settings.automatic_by_platform_settings
+        )
         automatic_by_platform_settings.bypass_platform_safety_checks_on_user_schedule = AAZBoolType(
             serialized_name="bypassPlatformSafetyChecksOnUserSchedule",
         )
@@ -3783,19 +4430,27 @@ class _UpdateHelper:
             serialized_name="rebootSetting",
         )
 
-        win_rm = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.win_rm
+        win_rm = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.win_rm
+        )
         win_rm.listeners = AAZListType()
 
-        listeners = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.win_rm.listeners
+        listeners = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.win_rm.listeners
+        )
         listeners.Element = AAZObjectType()
 
-        _element = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.win_rm.listeners.Element
+        _element = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile.windows_configuration.win_rm.listeners.Element
+        )
         _element.certificate_url = AAZStrType(
             serialized_name="certificateUrl",
         )
         _element.protocol = AAZStrType()
 
-        scheduled_events_profile = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.scheduled_events_profile
+        scheduled_events_profile = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.scheduled_events_profile
+        )
         scheduled_events_profile.os_image_notification_profile = AAZObjectType(
             serialized_name="osImageNotificationProfile",
         )
@@ -3803,19 +4458,25 @@ class _UpdateHelper:
             serialized_name="terminateNotificationProfile",
         )
 
-        os_image_notification_profile = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.scheduled_events_profile.os_image_notification_profile
+        os_image_notification_profile = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.scheduled_events_profile.os_image_notification_profile
+        )
         os_image_notification_profile.enable = AAZBoolType()
         os_image_notification_profile.not_before_timeout = AAZStrType(
             serialized_name="notBeforeTimeout",
         )
 
-        terminate_notification_profile = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile
+        terminate_notification_profile = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile
+        )
         terminate_notification_profile.enable = AAZBoolType()
         terminate_notification_profile.not_before_timeout = AAZStrType(
             serialized_name="notBeforeTimeout",
         )
 
-        security_posture_reference = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_posture_reference
+        security_posture_reference = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_posture_reference
+        )
         security_posture_reference.exclude_extensions = AAZListType(
             serialized_name="excludeExtensions",
         )
@@ -3826,7 +4487,9 @@ class _UpdateHelper:
             serialized_name="isOverridable",
         )
 
-        exclude_extensions = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_posture_reference.exclude_extensions
+        exclude_extensions = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_posture_reference.exclude_extensions
+        )
         exclude_extensions.Element = AAZStrType()
 
         security_profile = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_profile
@@ -3846,12 +4509,19 @@ class _UpdateHelper:
             serialized_name="uefiSettings",
         )
 
-        encryption_identity = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_profile.encryption_identity
+        encryption_identity = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_profile.encryption_identity
+        )
         encryption_identity.user_assigned_identity_resource_id = AAZStrType(
             serialized_name="userAssignedIdentityResourceId",
         )
 
-        proxy_agent_settings = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_profile.proxy_agent_settings
+        proxy_agent_settings = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_profile.proxy_agent_settings
+        )
+        proxy_agent_settings.add_proxy_agent_extension = AAZBoolType(
+            serialized_name="addProxyAgentExtension",
+        )
         proxy_agent_settings.enabled = AAZBoolType()
         proxy_agent_settings.imds = AAZObjectType()
         cls._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
@@ -3864,7 +4534,9 @@ class _UpdateHelper:
         )
         cls._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
 
-        uefi_settings = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_profile.uefi_settings
+        uefi_settings = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_profile.uefi_settings
+        )
         uefi_settings.secure_boot_enabled = AAZBoolType(
             serialized_name="secureBootEnabled",
         )
@@ -3872,7 +4544,9 @@ class _UpdateHelper:
             serialized_name="vTpmEnabled",
         )
 
-        service_artifact_reference = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.service_artifact_reference
+        service_artifact_reference = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.service_artifact_reference
+        )
         service_artifact_reference.id = AAZStrType()
 
         storage_profile = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile
@@ -3889,10 +4563,14 @@ class _UpdateHelper:
             serialized_name="osDisk",
         )
 
-        data_disks = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile.data_disks
+        data_disks = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile.data_disks
+        )
         data_disks.Element = AAZObjectType()
 
-        _element = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile.data_disks.Element
+        _element = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile.data_disks.Element
+        )
         _element.caching = AAZStrType()
         _element.create_option = AAZStrType(
             serialized_name="createOption",
@@ -3922,7 +4600,9 @@ class _UpdateHelper:
             serialized_name="writeAcceleratorEnabled",
         )
 
-        image_reference = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile.image_reference
+        image_reference = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile.image_reference
+        )
         image_reference.community_gallery_image_id = AAZStrType(
             serialized_name="communityGalleryImageId",
         )
@@ -3970,20 +4650,44 @@ class _UpdateHelper:
             serialized_name="writeAcceleratorEnabled",
         )
 
-        diff_disk_settings = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings
+        diff_disk_settings = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings
+        )
         diff_disk_settings.option = AAZStrType()
         diff_disk_settings.placement = AAZStrType()
 
         image = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile.os_disk.image
         image.uri = AAZStrType()
 
-        vhd_containers = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile.os_disk.vhd_containers
+        vhd_containers = (
+            _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.storage_profile.os_disk.vhd_containers
+        )
         vhd_containers.Element = AAZStrType()
 
         sku = _schema_virtual_machine_scale_set_read.sku
         sku.capacity = AAZIntType()
         sku.name = AAZStrType()
         sku.tier = AAZStrType()
+
+        system_data = _schema_virtual_machine_scale_set_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
 
         tags = _schema_virtual_machine_scale_set_read.tags
         tags.Element = AAZStrType()
@@ -3997,9 +4701,11 @@ class _UpdateHelper:
         _schema.identity = cls._schema_virtual_machine_scale_set_read.identity
         _schema.location = cls._schema_virtual_machine_scale_set_read.location
         _schema.name = cls._schema_virtual_machine_scale_set_read.name
+        _schema.placement = cls._schema_virtual_machine_scale_set_read.placement
         _schema.plan = cls._schema_virtual_machine_scale_set_read.plan
         _schema.properties = cls._schema_virtual_machine_scale_set_read.properties
         _schema.sku = cls._schema_virtual_machine_scale_set_read.sku
+        _schema.system_data = cls._schema_virtual_machine_scale_set_read.system_data
         _schema.tags = cls._schema_virtual_machine_scale_set_read.tags
         _schema.type = cls._schema_virtual_machine_scale_set_read.type
         _schema.zones = cls._schema_virtual_machine_scale_set_read.zones
