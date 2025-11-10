@@ -1286,7 +1286,7 @@ def aks_upgrade(cmd,
                 return None
             upgrade_all = True
         else:
-            msg = ("Since control-plane-only argument is specified, this will upgrade only the kubernetes version of the control plane to {}. "
+            msg = ("Since --control-plane-only parameter is specified, this will upgrade only the kubernetes version of the control plane to {}. "
                    "Kubernetes versions of the node pools will remain unchanged, "
                    "but node image version may be upgraded if there has been cluster config change that requires VM reimage. "
                    "Continue?").format(instance.kubernetes_version)
