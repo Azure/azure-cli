@@ -357,7 +357,7 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         self.assertIn(filename,
                       self.storage_cmd('storage file list -s {} --query "[].name"',
                                        account_info, share).get_output_in_json())
-        file_list = self.storage_cmd('storage file list -s {}',account_info, share).get_output_in_json()
+        file_list = self.storage_cmd('storage file list -s {}', account_info, share).get_output_in_json()
         self.assertIsNotNone(file_list[0]['lastAccessTime'])
 
         from datetime import datetime, timedelta
