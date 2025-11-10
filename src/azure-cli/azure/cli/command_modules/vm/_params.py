@@ -1254,6 +1254,7 @@ def load_arguments(self, _):
             c.argument('wire_server_access_control_profile_reference_id', options_list=['--wire-server-access-control-profile-reference-id', '--wire-server-profile-id'], min_api='2024-11-01', help='Specify the access control profile version resource id of wire server.')
             c.argument('imds_mode', arg_type=get_enum_type(self.get_models('Mode')), min_api='2024-11-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
             c.argument('imds_access_control_profile_reference_id', options_list=['--imds-access-control-profile-reference-id', '--imds-profile-id'], min_api='2024-11-01', help='Specify the access control profile version resource id resource id of imds.')
+            c.argument('add_proxy_agent_extension', options_list=['--add-proxy-agent-extension', '--add-proxy-agent-ext'], arg_type=get_three_state_flag(), help="Specify whether to implicitly install the ProxyAgent Extension. This option is currently applicable only for Linux OS. Use with --enable-proxy-agent.")
 
     with self.argument_context('vm update') as c:
         c.argument('license_type', license_type)
@@ -1516,16 +1517,6 @@ def load_arguments(self, _):
     # endRegion
 
     # region Restore point collection
-    with self.argument_context('restore-point collection create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-        c.argument('source_id', help='Resource Id of the source resource used to create this restore point collection',
-                   arg_group='Source')
-
-    with self.argument_context('restore-point collection update') as c:
-        c.argument('tags', tags_type)
-
     with self.argument_context('restore-point collection show') as c:
         c.argument('expand', help='The expand expression to apply on the operation.',
                    deprecate_info=c.deprecate(hide=True))

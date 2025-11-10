@@ -1337,15 +1337,13 @@ def load_arguments(self, _):
         c.argument('time_based_immutability',
                    options_list=['--make-backups-immutable', '--tb-immutability'],
                    help='Whether to enable time based immutability on the LTR backups. '
-                   'Possible values are: \'True\', \'False\', \'Enabled\', \'Disabled\'.',
-                   is_preview=True)
+                   'Possible values are: \'True\', \'False\', \'Enabled\', \'Disabled\'.')
 
         c.argument('time_based_immutability_mode',
                    options_list=['--tb-immutability-mode'],
                    help='The mode of time based immutability to be set on the LTR backups. '
                    'Possible values are: \'Locked\', \'Unlocked\'. '
-                   'This is only valid if make-backups-immutable is enabled',
-                   is_preview=True)
+                   'This is only valid if make-backups-immutable is enabled')
 
         c.argument('yes',
                    options_list=['--yes', '-y'],

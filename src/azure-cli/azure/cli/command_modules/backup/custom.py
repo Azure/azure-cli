@@ -19,7 +19,8 @@ from azure.cli.core.profiles import ResourceType
 from azure.mgmt.recoveryservices.models import Vault, VaultProperties, Sku, SkuName, PatchVault, IdentityData, \
     CmkKeyVaultProperties, CmkKekIdentity, VaultPropertiesEncryption, UserIdentity, MonitoringSettings, \
     AzureMonitorAlertSettings, ClassicAlertSettings, SecuritySettings, ImmutabilitySettings, RestoreSettings, \
-    CrossSubscriptionRestoreSettings
+    CrossSubscriptionRestoreSettings, DeletedVaultUndeleteInputProperties, DeletedVaultUndeleteInput, \
+    SoftDeleteSettings
 from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemResource, \
     AzureIaaSComputeVMProtectedItem, AzureIaaSClassicComputeVMProtectedItem, ProtectionState, IaasVMBackupRequest, \
     BackupRequestResource, IaasVMRestoreRequest, RestoreRequestResource, BackupManagementType, WorkloadType, \
@@ -87,6 +88,7 @@ secondary_region_map = {
     "koreasouth": "koreacentral",
     "malaysiasouth": "japanwest",
     "northcentralus": "southcentralus",
+    "northeastus5": "centralus",
     "northeurope": "westeurope",
     "norwayeast": "norwaywest",
     "norwaywest": "norwayeast",
@@ -222,12 +224,13 @@ def create_vault(cmd, client, vault_name, resource_group_name, location, tags=No
 
     vault_sku = Sku(name=SkuName.standard)
 
+    # We always need to get the soft-delete settings, so we always pass this.
+    vault_properties.security_settings = _get_vault_security_settings(immutability_state)
+
     vault_properties.public_network_access = _get_vault_public_network_access(public_network_access)
+
     vault_properties.monitoring_settings = _get_vault_monitoring_settings(
         azure_monitor_alerts_for_job_failures, classic_alerts)
-
-    if immutability_state is not None:
-        vault_properties.security_settings = _get_vault_security_settings(immutability_state)
 
     if cross_subscription_restore_state is not None:
         vault_properties.restore_settings = _get_vault_restore_settings(cross_subscription_restore_state)
@@ -287,68 +290,21 @@ def _get_vault_redunancy_settings(backup_storage_redundancy, cross_region_restor
 # TODO Remove pylint supress once the new SDK is in place
 # pylint: disable=unused-argument
 def _get_vault_security_settings(immutability_state, existing_vault=None):
-    security_settings = None
+    security_settings = SecuritySettings()
+    if existing_vault is not None:
+        security_settings = existing_vault.properties.security_settings
+    else:
+        # Passing AlwaysOn as default for soft delete settings and enhanced security state. Where it isn't GA,
+        # this will be discarded by the service in favour of the existing defaults.
+        soft_delete_settings = SoftDeleteSettings()
+        soft_delete_settings.enhanced_security_state = "AlwaysOn"
+        soft_delete_settings.soft_delete_state = "AlwaysOn"
+        soft_delete_settings.soft_delete_retention_period_in_days = 14
+
+        security_settings.soft_delete_settings = soft_delete_settings
+
     if immutability_state is not None:
-        security_settings = SecuritySettings()
         security_settings.immutability_settings = ImmutabilitySettings(state=immutability_state)
-
-    # TODO Re-add once the new SDK is in place
-    # Using updated process (defaults for soft delete need to be set in create function):
-    # security_settings = SecuritySettings()
-    # if existing_vault is not None:
-    #     security_settings = existing_vault.properties.security_settings
-
-    # if immutability_state is not None:
-    #     security_settings.immutability_settings = ImmutabilitySettings(state=immutability_state)
-
-    # if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
-    #     soft_delete_settings = security_settings.soft_delete_settings
-
-    #     if soft_delete_state is not None:
-    #         soft_delete_settings.soft_delete_state = help.transform_softdelete_parameters(soft_delete_state)
-    #     if soft_delete_retention_period_in_days is not None:
-    #         soft_delete_settings.soft_delete_retention_period_in_days = soft_delete_retention_period_in_days
-
-    #     security_settings.soft_delete_settings = soft_delete_settings
-    # Old process
-    # security_settings = None
-    # if immutability_state is not None or soft_delete_state is not None or \
-    #         soft_delete_retention_period_in_days is not None:
-    #     immutability_settings = None
-    #     soft_delete_settings = None
-
-    #     if immutability_state is not None:
-    #         immutability_settings = ImmutabilitySettings(state=immutability_state)
-
-    #     if soft_delete_state is not None or soft_delete_retention_period_in_days is not None:
-    #         # Both soft delete state and retention period need to be passed, so we need to fetch the existing values
-    #         # if not provided in the input. If the vault does not exist, the default values are Enabled/14 days
-    #         if soft_delete_state is None:
-    #             try:
-    #                 existing_vault_if_any = client.get(resource_group_name, vault_name)
-    #                 existing_soft_delete_state = existing_vault_if_any.properties.security_settings.\
-    #                     soft_delete_settings.soft_delete_state
-    #                 soft_delete_state = cust_help.transform_enable_parameters(existing_soft_delete_state)
-    #             except CoreResourceNotFoundError:
-    #                 soft_delete_state = "Enable"
-    #         if soft_delete_retention_period_in_days is None:
-    #             try:
-    #                 existing_vault_if_any = client.get(resource_group_name, vault_name)
-    #                 existing_soft_delete_retention_period_in_days = existing_vault_if_any.properties.\
-    #                     security_settings.soft_delete_settings.soft_delete_retention_period_in_days
-    #                 soft_delete_retention_period_in_days = existing_soft_delete_retention_period_in_days
-    #             except CoreResourceNotFoundError:
-    #                 soft_delete_retention_period_in_days = 14
-
-    #         soft_delete_settings = SoftDeleteSettings(
-    #             soft_delete_state=cust_help.transform_softdelete_parameters(soft_delete_state),
-    #             soft_delete_retention_period_in_days=soft_delete_retention_period_in_days
-    #         )
-
-    #     security_settings = SecuritySettings(
-    #         immutability_settings=None if immutability_settings is None else immutability_settings,
-    #         soft_delete_settings=None if soft_delete_settings is None else soft_delete_settings
-    #     )
 
     return security_settings
 
@@ -447,6 +403,80 @@ def list_vaults(client, resource_group_name=None):
     if resource_group_name:
         return client.list_by_resource_group(resource_group_name)
     return client.list_by_subscription_id()
+
+
+def list_deleted_vaults(cmd, client, location):
+    return client.list_by_subscription_id(location=location)
+
+
+def get_deleted_vault(cmd, client, deleted_vault_name=None, location=None, deleted_vault_id=None):
+    if deleted_vault_name is None or location is None:
+        # Parse the deleted vault ID to extract name and location
+        deleted_vault_name, location = cust_help.get_deleted_vault_parameters(deleted_vault_id)
+
+    return client.get(location, deleted_vault_name)
+
+
+def undelete_vault(cmd, client, deleted_vault_name=None, location=None, deleted_vault_id=None):
+    if deleted_vault_name is None or location is None:
+        # Parse the deleted vault ID to extract name and location
+        deleted_vault_name, location = cust_help.get_deleted_vault_parameters(deleted_vault_id)
+
+    deleted_vault_entity = get_deleted_vault(cmd, client, deleted_vault_name, location)
+    if deleted_vault_entity is None:
+        raise ResourceNotFoundError(f"Deleted vault '{deleted_vault_name}' not found in location '{location}'.")
+
+    resource_group = cust_help.extract_arm_resource_group_from_id(deleted_vault_entity.properties['vaultId'])
+    request_body = DeletedVaultUndeleteInput(
+        properties=DeletedVaultUndeleteInputProperties(
+            recovery_resource_group_id=resource_group
+        )
+    )
+
+    # Start the undelete operation and wait for completion
+    return client.begin_undelete(location, deleted_vault_name, request_body).result()
+
+
+def list_deleted_vault_containers(cmd, client, deleted_vault_name=None, location=None, deleted_vault_id=None):
+    """List backup containers in a soft-deleted vault using Azure Resource Graph."""
+    from ._arg_client import ARGClient, QueryBody
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+
+    # Build the KQL query dynamically based on input parameters
+    query = '''recoveryservicesresources
+| where type == "microsoft.recoveryservices/locations/deletedvaults/backupfabrics/protectioncontainers/protecteditems"
+| extend dataSourceType = strcat(properties.backupManagementType, '/', properties.workloadType)'''
+
+    # Add filtering based on provided parameters
+    if deleted_vault_id:
+        # If vault ID is provided, filter by it
+        query += f'''
+| where tostring(id) contains "{deleted_vault_id}"'''
+    elif deleted_vault_name:
+        # If vault name is provided, filter by name
+        query += f'''
+| where tostring(id) contains "{deleted_vault_name}"'''
+
+        # Also filter by location if provided
+        if location:
+            query += f'''
+| where tostring(id) contains "{location}"'''
+
+    query += '''
+| project id, type, name, location, resourceGroup, subscriptionId, dataSourceType, properties, tags'''
+
+    # Create query body with subscription filter
+    query_body = QueryBody(query)
+    query_body.options = {
+        "subscriptions": [subscription_id]
+    }
+
+    try:
+        response = ARGClient(cmd.cli_ctx).send(query_body)
+        return response.get('data', [])
+    except Exception as ex:
+        raise CLIError(f"Failed to query backup containers: {str(ex)}")
 
 
 def assign_identity(client, resource_group_name, vault_name, system_assigned=None, user_assigned=None):
@@ -1937,3 +1967,80 @@ def _run_client_script_for_linux(client_scripts):
 def _validate_restore_disk_parameters(restore_only_osdisk, diskslist):
     if restore_only_osdisk and diskslist is not None:
         logger.warning("Value of diskslist parameter will be ignored as restore-only-osdisk is set to be true.")
+
+
+def reconfigure_vm_protection(cmd, item, source_vault_name, source_vault_resource_group,
+                              new_vault_name, new_vault_resource_group,
+                              new_policy_name, retain_as_per_policy, tenant_id):
+    """Workload-specific implementation: Reconfigure Azure IaaS VM protection to a new vault.
+
+    Assumes all high-level validations and item retrieval already performed in custom_base.reconfigure_backup_protection.
+    """
+    logger.warning("(VM) Starting backup protection reconfiguration from source vault '%s' to destination vault '%s'...",
+                   source_vault_name, new_vault_name)
+
+    # Step 1: Stop protection in old vault (retain data)
+    logger.warning("Step 1: Stopping protection in old vault...")
+    _disable_protection_in_old_vault(cmd, source_vault_resource_group, source_vault_name,
+                                     item, retain_as_per_policy, tenant_id)
+
+    # Step 2: Enable protection in new vault
+    logger.warning("Step 2: Enabling protection in new vault...")
+    enable_result = _enable_vm_protection_in_new_vault(cmd, new_vault_resource_group, new_vault_name,
+                                                       item, new_policy_name)
+
+    logger.warning("(VM) Backup protection reconfiguration completed successfully.")
+    return enable_result
+
+
+def _disable_protection_in_old_vault(cmd, vault_resource_group, vault_name, item, retain_as_per_policy, tenant_id):
+    """Stop protection in the old vault"""
+    protected_items_client = protected_items_cf(cmd.cli_ctx)
+
+    # Use the existing disable_protection function
+    return disable_protection(cmd, protected_items_client, vault_resource_group, vault_name, item,
+                              retain_as_per_policy, tenant_id)
+
+
+def _enable_vm_protection_in_new_vault(cmd, vault_resource_group, vault_name, old_item, policy_name):
+    """Enable VM protection in new vault"""
+
+    # Extract VM information from the protected item
+    vm_id = _extract_vm_id_from_protected_item(old_item)
+
+    diskslist = _extract_disk_list_from_protected_item(old_item)
+
+    # Use the existing enable_protection_for_vm function
+    protected_items_client = protected_items_cf(cmd.cli_ctx)
+    return enable_protection_for_vm(cmd, protected_items_client, vault_resource_group, vault_name,
+                                    vm_id, policy_name, diskslist)
+
+
+def _extract_vm_id_from_protected_item(protected_item):
+    """Extract VM resource ID from protected item"""
+    # The VM ID is typically in the sourceResourceId property
+    if hasattr(protected_item.properties, 'source_resource_id'):
+        return protected_item.properties.source_resource_id
+
+    # Fallback: try to extract from the virtual machine id property
+    if hasattr(protected_item.properties, 'virtual_machine_id'):
+        return protected_item.properties.virtual_machine_id
+
+    raise CLIError("Could not extract VM resource ID from protected item")
+
+
+def _extract_disk_list_from_protected_item(protected_item):
+    """Extract the list of protected disks from the protected item"""
+    if (hasattr(protected_item.properties, 'extended_info') and
+            protected_item.properties.extended_info and
+            hasattr(protected_item.properties.extended_info, 'disk_exclusion_properties') and
+            protected_item.properties.extended_info.disk_exclusion_properties):
+
+        disk_props = protected_item.properties.extended_info.disk_exclusion_properties
+
+        # Return the list of LUNs that were originally protected
+        if hasattr(disk_props, 'disk_lun_list'):
+            return disk_props.disk_lun_list
+
+    # If we can't extract disk info, return None to protect all disks
+    return None

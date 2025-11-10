@@ -5,7 +5,8 @@
 
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus, \
-    cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers, cf_models, cf_usages
+    cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers, cf_models, cf_usages, \
+    cf_account_connections, cf_projects, cf_project_connections
 
 
 def load_command_table(self, _):
@@ -37,6 +38,20 @@ def load_command_table(self, _):
     usages_type = CliCommandType(
         operations_tmpl='azure.mgmt.cognitiveservices.operations#UsagesOperations.{}',
         client_factory=cf_usages
+    )
+
+    projects_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#ProjectsOperations.{}',
+        client_factory=cf_projects
+    )
+
+    account_connections_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#AccountConnectionsOperations.{}',
+        client_factory=cf_account_connections
+    )
+    project_connections_type = CliCommandType(
+        operations_tmpl='azure.mgmt.cognitiveservices.operations#ProjectConnectionsOperations.{}',
+        client_factory=cf_project_connections
     )
 
     with self.command_group('cognitiveservices account', accounts_type, client_factory=cf_accounts) as g:
@@ -103,3 +118,38 @@ def load_command_table(self, _):
 
     with self.command_group('cognitiveservices usage', usages_type) as g:
         g.command('list', 'list')
+
+    with self.command_group(
+            'cognitiveservices account project', projects_type,
+            client_factory=cf_projects) as g:
+        g.custom_command('create', 'project_create')
+        g.command('delete', 'begin_delete')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.custom_command('update', 'project_update')
+
+    with self.command_group(
+            'cognitiveservices account project connection', project_connections_type,
+            client_factory=cf_project_connections) as g:
+        g.custom_command('create', 'project_connection_create')
+        g.command('delete', 'delete')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.generic_update_command(
+            'update',
+            setter_name='update',
+            setter_arg_name='connection',
+            custom_func_name='project_connection_update')
+
+    with self.command_group(
+            'cognitiveservices account connection', account_connections_type,
+            client_factory=cf_account_connections) as g:
+        g.custom_command('create', 'account_connection_create')
+        g.command('delete', 'delete')
+        g.show_command('show', 'get')
+        g.command('list', 'list')
+        g.generic_update_command(
+            'update',
+            setter_name='update',
+            setter_arg_name='connection',
+            custom_func_name='account_connection_update')

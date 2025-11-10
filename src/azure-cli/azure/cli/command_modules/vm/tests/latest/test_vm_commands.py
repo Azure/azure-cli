@@ -14,6 +14,7 @@ from unittest import mock
 import uuid
 
 from azure.cli.testsdk.exceptions import JMESPathCheckAssertionError
+from azure.core.exceptions import HttpResponseError
 from knack.util import CLIError
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse, record_only, live_only
 from azure.cli.core.azclierror import ArgumentUsageError, RequiredArgumentMissingError, \
@@ -2236,6 +2237,20 @@ class VMAvailSetScenarioTest(ScenarioTest):
             self.check('scheduledEventsPolicy.userInitiatedReboot.automaticallyApprove', False)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_avset_scheduled_events_policy_parameters', location='eastus')
+    def test_vm_avset_scheduled_events_policy_parameters(self, resource_group):
+        self.kwargs.update({
+            'avset': self.create_random_name('avset', 15)
+        })
+
+        self.cmd('vm availability-set create -g {rg} -n {avset} --platform-fault-domain-count 1 --platform-update-domain-count 1')
+        self.cmd('vm availability-set update -g {rg} -n {avset} --enable-all-instance-down True', checks=[
+            self.check('scheduledEventsPolicy.allInstancesDown.automaticallyApprove', True)
+        ])
+        with self.assertRaises(HttpResponseError): # No available regions found
+            self.cmd('vm availability-set update -g {rg} -n {avset} --scheduled-events-api-version 2020-07-01', checks=[
+                self.check('scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph.scheduledEventsApiVersion', '2020-07-01')
+            ])
 
 class VMAvailSetLiveScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_availset_live')
@@ -6566,7 +6581,8 @@ class VMRunCommandScenarioTest(ScenarioTest):
         self.cmd(
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $0 $1" --parameters hello world')
+        r = self.cmd('vm run-command invoke -g {rg} -n{vm} --command-id RunShellScript  --scripts "echo $1 $2, this is a test" --parameters hello world').get_output_in_json()
+        self.assertIn('hello world, this is a test', r['value'][0]['message'])
 
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_run_command_v2')
@@ -6915,6 +6931,7 @@ class VMSecurityProfileTestForDiskEncryption(ScenarioTest):
 @api_version_constraint(ResourceType.MGMT_COMPUTE, min_api='2017-03-30')
 class VMDiskEncryptionTest(ScenarioTest):
 
+    @unittest.skip('SubscriptionNotRegisteredForFeature')
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption true')
     def test_vmss_disk_encryption_e2e(self, resource_group, resource_group_location, key_vault):
@@ -7145,6 +7162,7 @@ class VMDiskEncryptionTest(ScenarioTest):
             self.cmd('vm encryption enable -g {rg} -n {vm} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId}')
 
 
+    @unittest.skip('SubscriptionNotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_with_encryption_identity', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
@@ -7258,7 +7276,8 @@ class VMDiskEncryptionTest(ScenarioTest):
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.EncryptionOperation', 'DisableEncryption'),
             self.check('virtualMachineProfile.extensionProfile.extensions[0].settings.VolumeType', 'ALL')
         ])
-        
+
+    @unittest.skip('SubscriptionNotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_with_incorrect_encryption_identity', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
@@ -7315,7 +7334,7 @@ class VMDiskEncryptionTest(ScenarioTest):
         with self.assertRaisesRegex(ArgumentUsageError, message) as context:
             self.cmd('vmss encryption enable -g {rg} -n {vmss} --disk-encryption-keyvault {vault} --encryption-identity {encryptionIdentityId1}')
 
-    
+    @unittest.skip('SubscriptionNotRegisteredForFeature')
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_encryption_with_encryption_identity', location='westus')
     @KeyVaultPreparer(name_prefix='vault', name_len=10, key='vault',
@@ -12391,7 +12410,7 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus2euap')
+    @ResourceGroupPreparer(name_prefix='cli_vm_vmss_proxy_agent_', location='eastus')
     def test_vm_vmss_proxy_agent(self, resource_group):
         self.kwargs.update({
             'nsg1': self.create_random_name('nsg', 10),
@@ -12403,9 +12422,8 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             'subnet': self.create_random_name('subnet', 15),
             'vnet': self.create_random_name('vnet', 15)
         })
-        self.cmd('network nsg create -g {rg} -n {nsg1}')
-        self.cmd('vm create -g {rg} -n {vm1} --image Win2022Datacenter --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
-
+        self.cmd('network nsg create -g {rg} -n {nsg1}')        
+        self.cmd('vm create -g {rg} -n {vm1} --image Ubuntu2204 --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --key-incarnation-id 1 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-username azureuser --generate-ssh-keys --nsg-rule NONE --add-proxy-agent-extension true')
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
@@ -12413,7 +12431,8 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.enabled', True),
             self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
-            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1),
+            self.check('securityProfile.proxyAgentSettings.addProxyAgentExtension', True),
         ])
 
         self.cmd('vm update -g {rg} -n {vm1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 2', checks=[
@@ -12423,13 +12442,14 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 2)
         ])
 
-        self.cmd('vm create -g {rg} -n {vm2} --image Win2022Datacenter --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-password Password001! --nsg-rule NONE')
-        self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent True --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 1')
+        self.cmd('vm create -g {rg} -n {vm2} --image Ubuntu2204 --size Standard_D2s_v3 --subnet {subnet} --vnet-name {vnet} --admin-username azureuser --generate-ssh-keys --nsg-rule NONE')
+        self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent True --wire-server-mode Enforce --imds-mode Enforce --key-incarnation-id 1 --add-proxy-agent-extension true')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('securityProfile.proxyAgentSettings.enabled', True),
             self.check('securityProfile.proxyAgentSettings.wireServer.mode', 'Enforce'),
             self.check('securityProfile.proxyAgentSettings.imds.mode', 'Enforce'),
-            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1)
+            self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 1),
+            self.check('securityProfile.proxyAgentSettings.addProxyAgentExtension', True)
         ])
         self.cmd('vm update -g {rg} -n {vm2} --enable-proxy-agent False')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
@@ -12446,10 +12466,13 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
             self.check('securityProfile.proxyAgentSettings.keyIncarnationId', 2)
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Win2022Datacenter --nsg {nsg1} --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Ubuntu2204 --nsg {nsg1} --enable-proxy-agent --wire-server-mode Audit --imds-mode Audit --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-username azureuser --generate-ssh-keys --add-proxy-agent-extension true', checks=[
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
             self.check('vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
+            self.check(
+                'vmss.virtualMachineProfile.securityProfile.proxyAgentSettings.addProxyAgentExtension', True
+            ),
         ])
 
         self.cmd('vmss update -g {rg} -n {vmss1} --enable-proxy-agent False --wire-server-mode Enforce --imds-mode Enforce', checks=[
@@ -12459,11 +12482,12 @@ class VMTrustedLaunchScenarioTest(ScenarioTest):
         ])
 
         self.cmd('network nsg create -g {rg} -n {nsg2}')
-        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Win2022Datacenter --nsg {nsg2} --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-password Password001!')
-        self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --wire-server-mode Audit --imds-mode Audit', checks=[
+        self.cmd( 'vmss create -g {rg} -n {vmss2} --image Ubuntu2204 --nsg {nsg2} --vm-sku Standard_D2s_v3 --orchestration-mode Flexible --admin-username azureuser --generate-ssh-keys')
+        self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent True --wire-server-mode Audit --imds-mode Audit --add-proxy-agent-extension true', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', True),
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.wireServer.mode', 'Audit'),
-            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit')
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.imds.mode', 'Audit'),
+            self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.addProxyAgentExtension', True)
         ])
         self.cmd('vmss update -g {rg} -n {vmss2} --enable-proxy-agent False', checks=[
             self.check('virtualMachineProfile.securityProfile.proxyAgentSettings.enabled', False),
@@ -12969,7 +12993,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
         # Prepare VM
         self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
-                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -12995,7 +13019,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
         # Prepare VM
         self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 '
-                 '--admin-password Test123456789# --license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password Test123456789# --license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -13020,7 +13044,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
         # Prepare VM
         self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
-                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -13049,7 +13073,7 @@ class VMVMSSAddApplicationTestScenario(ScenarioTest):
         })
         # Prepare VM
         self.cmd('vm create -l eastus -g {rg} -n {vm} --image Win2022Datacenter --admin-username clitest1234 --admin-password Test123456789# '
-                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--license-type Windows_Server --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_D2s_v3')
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -13391,7 +13415,7 @@ class RestorePointScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --admin-username vmtest '
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --size Standard_B2ms --admin-username vmtest '
                       '--admin-password testPassword0 --nsg-rule NONE --tag EnableCrashConsistentRestorePoint=True --subnet {subnet} --vnet-name {vnet}').get_output_in_json()
 
         # Disable default outbound access
@@ -13446,7 +13470,7 @@ class RestorePointScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest '
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:UbuntuServer:18.04-LTS:latest --size Standard_B2ms '
                       '--admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
 
         # Disable default outbound access
@@ -13507,7 +13531,7 @@ class RestorePointScenarioTest(ScenarioTest):
             'vnet': 'vnet1'
         })
 
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image ubuntu2204 --admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+        vm = self.cmd('vm create -n {vm_name} -g {rg} --image ubuntu2204 --size Standard_B2ms --admin-username vmtest --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
@@ -13607,7 +13631,7 @@ class RestorePointScenarioTest(ScenarioTest):
                      '--os-restore-point-encryption-set {des1_id} --source-data-disk-resource {data_disk1_id} {data_disk2_id} '
                      '--data-disk-restore-point-encryption-type EncryptionAtRestWithCustomerKey')
 
-    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption_remote', location='EastUS2EUAP')
+    @ResourceGroupPreparer(name_prefix='cli_test_restore_point_encryption_remote', location='eastus2')
     def test_restore_point_encryption_remote(self, resource_group):
         self.kwargs.update({
             'vault1': self.create_random_name('vault', 15),
@@ -13666,14 +13690,14 @@ class RestorePointScenarioTest(ScenarioTest):
             'source_collection_id': source_collection['id'],
             'source_point_id': source_point['id']
         })
-        self.cmd('keyvault create -g {rg} -n {remote_vault1} --enabled-for-disk-encryption true --enable-purge-protection -l CentralUSEUAP --enable-rbac-authorization false')
+        self.cmd('keyvault create -g {rg} -n {remote_vault1} --enabled-for-disk-encryption true --enable-purge-protection -l northeurope --enable-rbac-authorization false')
         remote_key1 = self.cmd('keyvault key create -n {remote_key1} --vault {remote_vault1} --protection software').get_output_in_json()
         self.kwargs.update({
             'remote_kid': remote_key1['key']['kid']
 
         })
-        remote_des1 = self.cmd('disk-encryption-set create -g {rg} -n {remote_des1} --key-url {remote_kid} --source-vault {remote_vault1} -l CentralUSEUAP').get_output_in_json()
-        remote_des2 = self.cmd('disk-encryption-set create -g {rg} -n {remote_des2} --key-url {remote_kid} --source-vault {remote_vault1} -l CentralUSEUAP').get_output_in_json()
+        remote_des1 = self.cmd('disk-encryption-set create -g {rg} -n {remote_des1} --key-url {remote_kid} --source-vault {remote_vault1} -l northeurope').get_output_in_json()
+        remote_des2 = self.cmd('disk-encryption-set create -g {rg} -n {remote_des2} --key-url {remote_kid} --source-vault {remote_vault1} -l northeurope').get_output_in_json()
         self.kwargs.update({
             'remote_des1_id': remote_des1['id'],
             'remote_des2_id': remote_des2['id'],
@@ -13686,7 +13710,7 @@ class RestorePointScenarioTest(ScenarioTest):
         self.cmd('keyvault set-policy --name {remote_vault1} -g {rg} --key-permissions wrapkey unwrapkey get --object-id {remote_des1_obj_id}')
         self.cmd('keyvault set-policy --name {remote_vault1} -g {rg} --key-permissions wrapkey unwrapkey get --object-id {remote_des2_obj_id}')
 
-        self.cmd('restore-point collection create -g {rg} --collection-name {remote_collection_name} --source-id {source_collection_id} -l CentralUSEUAP')
+        self.cmd('restore-point collection create -g {rg} --collection-name {remote_collection_name} --source-id {source_collection_id} -l northeurope')
         self.cmd('restore-point create -g {rg} -n {remote_point_name1} --collection-name {remote_collection_name} --source-restore-point {source_point_id} '
                  '--source-os-resource {remote_os_disk_id} --os-restore-point-encryption-set {remote_des1_id} --os-restore-point-encryption-type EncryptionAtRestWithCustomerKey --source-data-disk-resource {remote_data_disk_id1} {remote_data_disk_id2} '
                  '--data-disk-restore-point-encryption-set {remote_des1_id} {remote_des2_id} --data-disk-restore-point-encryption-type EncryptionAtRestWithCustomerKey EncryptionAtRestWithCustomerKey', checks=[

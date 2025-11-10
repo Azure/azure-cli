@@ -7,13 +7,15 @@
 
 import json
 import os
+
+from unittest import TestCase
 import yaml
 
 from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
-from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants
+from azure.cli.command_modules.appconfig._constants import AIConfigConstants, FeatureFlagConstants, KeyVaultConstants
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
@@ -272,6 +274,50 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         with self.assertRaisesRegex(CLIError, "Set the value again in valid JSON format."):
             self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --content-type {content_type} -y')
 
+        # Create a JSON value with both single-line and multiline comments and confirm it can be successfully set though sanitized
+        entry_key = "Key15"
+
+        json_with_comments = """{"key1": "value1 is of the type \\"string\\"",// single-line comment\n"key2": "value2"
+/* multiline 
+ comment */}"""
+
+        self.kwargs.update({
+            'key': entry_key,
+            'value': json.dumps(json_with_comments).replace('\\n', '\n'), # Escape quotes again to pass as input to CLI command template
+            'content_type': json_content_type_01
+        })
+
+        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y',
+                 checks=[self.check('key', entry_key),
+                         self.check('value', f"{{{json_with_comments}}}"),
+                         self.check('contentType', json_content_type_01)])
+        
+        # Ensure this request fails with keyvault content type
+        self.kwargs.update({
+            'content_type': KeyVaultConstants.KEYVAULT_CONTENT_TYPE
+        })
+
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+            self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
+
+        # Ensure this request fails with Feature flag content type
+        self.kwargs.update({
+            'content_type': FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE
+        })
+
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+            self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
+        
+
+        # Ensure this request fails with AI Chat Completion content type
+        self.kwargs.update({
+            'content_type': AIConfigConstants.AI_CHAT_COMPLETION_CONTENT_TYPE
+        })
+
+        with self.assertRaisesRegex(CLIError, "is not a valid JSON object, which conflicts with the content type."):
+            self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --content-type {content_type} -y')
+
+
         """
         Test Scenario 2: AppConfig <--> AppConfig Import/Export
             - Add Feature Flag and Key vault Reference
@@ -450,3 +496,18 @@ class AppConfigJsonContentTypeScenarioTest(ScenarioTest):
         assert exported_yaml_file == exported_json_file
         os.remove(exported_yaml_file_path)
         os.remove(exported_file_path)
+
+class AppConfigJsonCommentsTest(TestCase):
+    def test_azconfig_strip_json_comments(self):
+        from azure.cli.command_modules.appconfig._json import parse_json_with_comments
+
+        json_with_comments_file_path = os.path.join(TEST_DIR, 'json_with_comments.json')
+        clean_json_file_path = os.path.join(TEST_DIR, 'json_with_comments_stripped.json')
+
+        with open(json_with_comments_file_path) as json_file:
+            parsed_json = parse_json_with_comments(json_file.read())
+
+        with open(clean_json_file_path) as json_file:
+            expected_json = json.load(json_file)
+
+        self.assertEqual(parsed_json, expected_json)
