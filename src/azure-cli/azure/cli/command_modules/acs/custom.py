@@ -1280,7 +1280,7 @@ def aks_upgrade(cmd,
         upgrade_all = True
     else:
         if not control_plane_only:
-            msg = ("Since --control-plane-only argument parameter is not specified, this will upgrade the control plane "
+            msg = ("Since --control-plane-only parameter is not specified, this will upgrade the control plane "
                    "AND all nodepools to version {}. Continue?").format(instance.kubernetes_version)
             if not yes and not prompt_y_n(msg, default="n"):
                 return None
