@@ -13,7 +13,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class CognitiveServicesProjectConnectionsTests(ScenarioTest):
 
-    INPUT_DATA_PATH=os.path.join(TEST_DIR, 'input_data', 'connections')
+    INPUT_DATA_PATH=os.path.join(TEST_DIR, 'data')
     
     @ResourceGroupPreparer()
     def test_project_connections_from_file(self, resource_group):
