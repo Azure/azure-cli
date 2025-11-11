@@ -763,10 +763,9 @@ class AzCliCommandInvoker(CommandInvoker):
                 )
             except (CLIError, ValueError, KeyError) as ex:
                 # If what-if service fails, still show an informative message
+                logger.error("What-if preview failed: %s", str(ex))
                 return CommandResultItem(None, exit_code=1,
-                                         error=CLIError(f'What-if preview failed: {str(ex)}\n'
-                                                        f'Note: This was a preview operation. '
-                                                        f'No actual changes were made.'))
+                                         error=CLIError(f'What-if preview failed: {str(ex)}'))
 
     def _is_command_supported_for_what_if(self, args):
         """Check if the command is in the what-if whitelist
@@ -789,7 +788,9 @@ class AzCliCommandInvoker(CommandInvoker):
             'storage account network-rule add',
             'vm disk attach',
             'vm disk detach',
-            'vm nic remove'
+            'vm nic remove',
+            'sql server create',
+            'sql server update',
         }
         
         # Extract command parts (skip 'az' and flags)
