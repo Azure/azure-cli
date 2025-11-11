@@ -701,6 +701,13 @@ class AzCliCommandInvoker(CommandInvoker):
         logger.debug("_what_if called with command: %s", args)
         if '--what-if' in args:
             logger.debug("Entering what-if mode")
+            
+            # Check if command is in whitelist
+            if not self._is_command_supported_for_what_if(args):
+                error_msg = ("\"--what-if\" argument is not supported for this command.")
+                logger.error(error_msg)
+                return CommandResultItem(None, exit_code=1, error=CLIError(error_msg))
+            
             from azure.cli.core.what_if import show_what_if
             try:
                 # Check if --export-bicep is present
@@ -760,6 +767,47 @@ class AzCliCommandInvoker(CommandInvoker):
                                          error=CLIError(f'What-if preview failed: {str(ex)}\n'
                                                         f'Note: This was a preview operation. '
                                                         f'No actual changes were made.'))
+
+    def _is_command_supported_for_what_if(self, args):
+        """Check if the command is in the what-if whitelist
+        
+        Args:
+            args: List of command arguments
+            
+        Returns:
+            bool: True if command is supported, False otherwise
+        """
+        # Define supported commands for what-if functionality
+        WHAT_IF_SUPPORTED_COMMANDS = {
+            'vm create',
+            'vm update', 
+            'storage account create',
+            'storage container create',
+            'storage share create',
+            'network vnet create',
+            'network vnet update',
+            'storage account network-rule add',
+            'vm disk attach',
+            'vm disk detach',
+            'vm nic remove'
+        }
+        
+        # Extract command parts (skip 'az' and flags)
+        command_parts = []
+        for arg in args:
+            if arg == 'az':
+                continue
+            if arg.startswith('-'):
+                break
+            command_parts.append(arg)
+        
+        # Join command parts to form the command string
+        if command_parts:
+            command = ' '.join(command_parts)
+            logger.debug("Checking what-if support for command: %s", command)
+            return command in WHAT_IF_SUPPORTED_COMMANDS
+        
+        return False
 
     def _save_bicep_templates(self, args, bicep_template):
         """Save bicep templates to user's .azure directory

@@ -79,7 +79,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
                            enable_smb_oauth=None, zones=None, zone_placement_policy=None,
-                           enable_blob_geo_priority_replication=None):
+                           enable_blob_geo_priority_replication=None, what_if=None, export_bicep=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')

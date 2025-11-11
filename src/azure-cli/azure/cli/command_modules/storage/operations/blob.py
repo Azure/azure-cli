@@ -120,7 +120,8 @@ def container_rm_exists(client, resource_group_name, account_name, container_nam
 # pylint: disable=unused-argument
 def create_container(client, container_name, resource_group_name=None,
                      metadata=None, public_access=None, fail_on_exist=False, timeout=None,
-                     default_encryption_scope=None, prevent_encryption_scope_override=None):
+                     default_encryption_scope=None, prevent_encryption_scope_override=None,
+                     what_if=None, export_bicep=None):
     encryption_scope = None
     if default_encryption_scope is not None or prevent_encryption_scope_override is not None:
         encryption_scope = {

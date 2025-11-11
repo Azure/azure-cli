@@ -278,6 +278,16 @@ def get_what_if_type():
     return what_if_type
 
 
+def get_export_bicep_type():
+    export_bicep_type = CLIArgumentType(
+        options_list=['--export-bicep'],
+        help="Export the Bicep template corresponding to the what-if analysis. "
+             "This parameter must be used together with --what-if.",
+        is_preview=True
+    )
+    return export_bicep_type
+
+
 deployment_name_type = CLIArgumentType(
     help=argparse.SUPPRESS,
     required=False,
