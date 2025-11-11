@@ -6,14 +6,12 @@ Release History
 2.80.0
 ++++++
 
-**ACS**
-
-* [BREAKING CHANGE] `az aks create`: Make `--no-ssh-key` default behaviour (#32254)
-
 **AKS**
 
+* [BREAKING CHANGE] `az aks create`: Make `--no-ssh-key` default behaviour (#32254)
 * `az aks namespace add/update/show/list/delete/get-credentials`: Add namespace command to support managed namespace feature (#32387)
-* `az command aks`: Add `KataVmIsolation` option for `--workload-runtime` parameter (#32020)
+* `az aks create`: Add `KataVmIsolation` option for `--workload-runtime` parameter (#32020)
+* `az aks nodepool add`: Add `KataVmIsolation` option for `--workload-runtime` parameter (#32020)
 * `az aks mesh enable-egress-gateway/disable-egress-gateway`: Add commands to manage Azure Service Mesh egress gateway (#32386)
 * `az aks nodepool add/update`: Add parameter `--localdns-config` to config local dns profile for the nodepool (#32392)
 * `az aks upgrade`: Update user confirmation prompt of `--control-plane-only` parameter (#32404)
@@ -49,8 +47,7 @@ Release History
 
 **NetAppFiles**
 
-* [BREAKING CHANGE] `az netappfiles volume create`: Remove deprecated argument `--endpoint-type`, this property is readOnly (#32395)
-* [BREAKING CHANGE] `az netappfiles volume update`: Remove deprecated argument `--endpoint-type`, this property is readOnly (#32395)
+* [BREAKING CHANGE] `az netappfiles volume create/update`: Remove deprecated argument `--endpoint-type`, this property is readOnly (#32395)
 
 **Network**
 
@@ -65,7 +62,7 @@ Release History
 
 **RDBMS**
 
-* [BREAKING CHANGE] `az postgres server/db/server-logs`: Removal of single server commands (#32388)
+* [BREAKING CHANGE] `az postgres server/db/server-logs`: Remove single server commands (#32388)
 * [BREAKING CHANGE] `az postgres flexible-server create`: Remove default value to `--version` and remove arguments `--create-default-database` and `--database-name` (#32398)
 
 **Service Fabric**
