@@ -47,10 +47,6 @@ Release History
 
 * `az dms project create`: Change location parameter to be optional (#31465)
 
-**Lab**
-
-* Fix #7903 Help updated (`az lab vm`): Add double quotes with escape character to `--expand` (#32354)
-
 **NetAppFiles**
 
 * [BREAKING CHANGE] `az netappfiles volume create`: Remove deprecated argument `--endpoint-type`, this property is readOnly (#32395)
