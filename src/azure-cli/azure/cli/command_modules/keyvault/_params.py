@@ -426,7 +426,7 @@ def load_arguments(self, _):
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(SignatureAlgorithm),
                        help='Algorithm identifier')
-            c.argument('digest', help='The value to sign')
+            c.argument('digest', help='The value to sign (base64 encoded)')
             c.argument('signature', help='signature to verify')
 
     with self.argument_context('keyvault key random') as c:

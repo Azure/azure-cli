@@ -1252,7 +1252,8 @@ def begin_failover(client, resource_group_name, account_name, failover_type=None
             3. Once you re-enable GRS/GZRS for your storage account, Microsoft will replicate data to your new secondary region. Replication time is dependent on the amount of data to replicate. Please note that there are bandwidth charges for the bootstrap. Please refer to doc: https://azure.microsoft.com/pricing/details/bandwidth/
         """
         user_confirmation(message, yes)
-    return client.begin_failover(resource_group_name=resource_group_name, account_name=account_name, failover_type=failover_type, **kwargs)
+    return client.begin_failover(resource_group_name=resource_group_name, account_name=account_name,
+                                 failover_type=failover_type, **kwargs)
 
 
 def list_blob_cors_rules(client, resource_group_name, account_name):

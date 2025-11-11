@@ -13,7 +13,6 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
-                                                          cf_restore_point,
                                                           cf_community_gallery)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
@@ -195,7 +194,6 @@ def load_command_table(self, _):
 
     restore_point = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#RestorePointsOperations.{}',
-        client_factory=cf_restore_point
     )
 
     restore_point_collection = CliCommandType(
@@ -556,7 +554,7 @@ def load_command_table(self, _):
         self.command_table['capacity reservation update'] = CapacityReservationUpdate(loader=self)
         self.command_table['capacity reservation show'] = CapacityReservationShow(loader=self)
 
-    with self.command_group('restore-point', restore_point, client_factory=cf_restore_point, min_api='2021-03-01') as g:
+    with self.command_group('restore-point', restore_point) as g:
         g.custom_show_command('show', 'restore_point_show')
         g.custom_command('create', 'restore_point_create', supports_no_wait=True)
         g.wait_command('wait')

@@ -130,9 +130,9 @@ See [Extension Metadata](metadata.md) for more information.
 
 ### Test your extension on Python 3
 
-- The Azure CLI supports Python 3.9 ~ 3.13 so verify that your extension does the same.
+- The Azure CLI supports Python 3.10 ~ 3.13 so verify that your extension does the same.
 - You can create virtual environments for different versions and run your extension in them.
-- e.g. `python3.9 -m venv env38` and `python3.10 -m venv env310`.
+- e.g. `python3.13 -m venv env313`.
 
 
 Also, see the [FAQ](faq.md).
