@@ -746,7 +746,8 @@ def list_network_rules(client, resource_group_name, account_name):
 
 
 def add_network_rule(cmd, client, resource_group_name, account_name, action='Allow', subnet=None,
-                     vnet_name=None, ip_address=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
+                     vnet_name=None, ip_address=None, tenant_id=None, resource_id=None, 
+                     what_if=False, export_bicep=False):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
     if not subnet and not ip_address:
