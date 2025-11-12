@@ -47,6 +47,7 @@ from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
+from .aaz.latest.vmss import Update as UpdateVMSS
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -382,7 +383,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         public_network_access=None, accelerated_network=None, architecture=None,
                         data_access_auth_mode=None, gallery_image_reference_type=None, security_data_uri=None,
                         upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None,
-                        optimized_for_frequent_attach=None, security_metadata_uri=None):
+                        optimized_for_frequent_attach=None, security_metadata_uri=None, action_on_disk_delay=None,
+                        supported_security_option=None):
 
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -557,20 +559,24 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         args["supports_hibernation"] = support_hibernation
     if public_network_access is not None:
         args["public_network_access"] = public_network_access
-    if accelerated_network is not None or architecture is not None:
+    if accelerated_network is not None or architecture is not None or supported_security_option is not None:
         if args.get("supported_capabilities", None) is None:
             supported_capabilities = {
                 "accelerated_network": accelerated_network,
-                "architecture": architecture
+                "architecture": architecture,
+                "supported_security_option": supported_security_option
             }
             args["supported_capabilities"] = supported_capabilities
         else:
             args["supported_capabilities"]["accelerated_network"] = accelerated_network
             args["supported_capabilities"]["architecture"] = architecture
+            args["supported_capabilities"]["supported_security_option"] = supported_security_option
     if data_access_auth_mode is not None:
         args["data_access_auth_mode"] = data_access_auth_mode
     if optimized_for_frequent_attach is not None:
         args["optimized_for_frequent_attach"] = optimized_for_frequent_attach
+    if action_on_disk_delay is not None:
+        args["availability_policy"] = {'action_on_disk_delay': action_on_disk_delay}
 
     args["no_wait"] = no_wait
     args["disk_name"] = disk_name
@@ -868,7 +874,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_user_redeploy_scheduled_events=None, zone_placement_policy=None, include_zones=None,
               exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None):
+              key_incarnation_id=None, add_proxy_agent_extension=None):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1098,7 +1104,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         imds_mode=imds_mode,
         wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
         imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
-        key_incarnation_id=key_incarnation_id)
+        key_incarnation_id=key_incarnation_id, add_proxy_agent_extension=add_proxy_agent_extension)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1644,6 +1650,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
               enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
               align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
+              add_proxy_agent_extension=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
@@ -1673,6 +1680,21 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             'resource_group': resource_group_name,
             'security_profile': security_profile
         }))
+        vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+
+    if add_proxy_agent_extension is not None:
+        args = {
+            'resource_group': resource_group_name,
+            'vm_name': vm_name,
+            'no_wait': no_wait,
+            'security_profile': {
+                'proxy_agent_settings': {
+                    'add_proxy_agent_extension': add_proxy_agent_extension
+                }
+            }
+        }
+
+        LongRunningOperation(cmd.cli_ctx)(UpdateVM(cli_ctx=cmd.cli_ctx)(command_args=args))
         vm = get_vm_to_update(cmd, resource_group_name, vm_name)
 
     disk_name = None
@@ -1892,7 +1914,8 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                 }
     client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     if wire_server_access_control_profile_reference_id is not None or \
-            imds_access_control_profile_reference_id is not None:
+            imds_access_control_profile_reference_id is not None or \
+            add_proxy_agent_extension is not None:
         kwargs['parameters'] = vm
     return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
 # endregion
@@ -2124,7 +2147,8 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 # region VirtualMachines Disks (Managed)
 def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=None, disks=None, new=False, sku=None,
                              size_gb=None, lun=None, caching=None, enable_write_accelerator=False, disk_ids=None,
-                             source_snapshots_or_disks=None, source_disk_restore_point=None):
+                             source_snapshots_or_disks=None, source_disk_restore_point=None,
+                             new_names_of_source_snapshots_or_disks=None, new_names_of_source_disk_restore_point=None):
     # attach multiple managed disks using disk attach API
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
     if not new and not sku and not size_gb and disk_ids is not None:
@@ -2182,14 +2206,17 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
             vm.storage_profile.data_disks.append(data_disk)
         disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
         if source_snapshots_or_disks is not None:
-            for disk_item in source_snapshots_or_disks:
+            if new_names_of_source_snapshots_or_disks is None:
+                new_names_of_source_snapshots_or_disks = [None] * len(source_snapshots_or_disks)
+            for disk_id, disk_name in zip(source_snapshots_or_disks, new_names_of_source_snapshots_or_disks):
                 disk = {
+                    'name': disk_name,
                     'create_option': 'Copy',
                     'caching': caching,
                     'lun': disk_lun,
                     'writeAcceleratorEnabled': enable_write_accelerator,
                     "sourceResource": {
-                        "id": disk_item
+                        "id": disk_id
                     }
                 }
                 if size_gb is not None:
@@ -2205,14 +2232,17 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 disk_lun += 1
                 vm.storage_profile.data_disks.append(disk)
         if source_disk_restore_point is not None:
-            for disk_item in source_disk_restore_point:
+            if new_names_of_source_disk_restore_point is None:
+                new_names_of_source_disk_restore_point = [None] * len(source_disk_restore_point)
+            for disk_id, disk_name in zip(source_disk_restore_point, new_names_of_source_disk_restore_point):
                 disk = {
+                    'name': disk_name,
                     'create_option': 'Restore',
                     'caching': caching,
                     'lun': disk_lun,
                     'writeAcceleratorEnabled': enable_write_accelerator,
                     "sourceResource": {
-                        "id": disk_item
+                        "id": disk_id
                     }
                 }
                 if size_gb is not None:
@@ -2761,13 +2791,9 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
 
 
 # region VirtualMachines RunCommand
-
-# todo: cleanup this method after both vmss and vm parts are migrated to AAZ
 def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scripts=None, parameters=None, instance_id=None):  # pylint: disable=line-too-long
-    RunCommandInput, RunCommandInputParameter = cmd.get_models('RunCommandInput', 'RunCommandInputParameter')
-
-    parameters = parameters or []
-    run_command_input_parameters = []
+    parameters = parameters or []  # CLI user input arg "parameters"
+    params = []  # AAZCommand arg for "parameters"
     auto_arg_name_num = 0
     for p in parameters:
         if '=' in p:
@@ -2779,43 +2805,33 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
             auto_arg_name_num += 1
             n = 'arg{}'.format(auto_arg_name_num)
             v = p
-        run_command_input_parameters.append(RunCommandInputParameter(name=n, value=v))
-
-    client = _compute_client_factory(cmd.cli_ctx)
+        params.append({'name': n, 'value': v})
 
     # if instance_id, this is a vmss instance
     if instance_id:
-        return client.virtual_machine_scale_set_vms.begin_run_command(
-            resource_group_name, vm_vmss_name, instance_id,
-            RunCommandInput(command_id=command_id, script=scripts, parameters=run_command_input_parameters))  # pylint: disable=line-too-long
+        from .aaz.latest.vmss.run_command import Invoke
+        return Invoke(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            'vmss_name': vm_vmss_name,
+            'instance_id': instance_id,
+            'command_id': command_id,
+            'script': scripts,
+            'parameters': params
+        })
+
     # otherwise this is a regular vm instance
-    return client.virtual_machines.begin_run_command(
-        resource_group_name, vm_vmss_name,
-        RunCommandInput(command_id=command_id, script=scripts, parameters=run_command_input_parameters))
+    from .aaz.latest.vm.run_command import Invoke
+    return Invoke(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_vmss_name,
+        'command_id': command_id,
+        'script': scripts,
+        'parameters': params
+    })
 
 
 def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None):
-    from .aaz.latest.vm.run_command import Invoke
-
-    parameters = parameters or []  # CLI user input arg
-    params = []  # AAZCommand arg
-    auto_arg_name_num = 0
-    for p in parameters:
-        if '=' in p:
-            n, v = p.split('=', 1)
-        else:
-            auto_arg_name_num += 1
-            n = 'arg{}'.format(auto_arg_name_num)
-            v = p
-        params.append({'name': n, 'value': v})
-
-    return Invoke(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'vm_name': vm_name,
-        'command_id': command_id,
-        'scripts': scripts,
-        'parameters': params
-    })
+    return run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts, parameters)
 
 
 def vm_run_command_create(cmd,
@@ -3409,7 +3425,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
-                imds_mode=None, wire_server_access_control_profile_reference_id=None,
+                imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
                 enable_automatic_repairs=None):
@@ -3730,6 +3746,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             skuprofile_rank=skuprofile_rank,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
             zone_balance=zone_balance, wire_server_mode=wire_server_mode, imds_mode=imds_mode,
+            add_proxy_agent_extension=add_proxy_agent_extension,
             wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
             imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
             enable_automatic_zone_balancing=enable_automatic_zone_balancing,
@@ -4168,7 +4185,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None,
-                wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
+                wire_server_mode=None, imds_mode=None, add_proxy_agent_extension=None,
+                wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
     vmss = kwargs['parameters']
@@ -4197,6 +4215,23 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 'security_profile': security_profile
             }
         }))
+        vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
+
+    if add_proxy_agent_extension is not None:
+        args = {
+            'resource_group': resource_group_name,
+            'vm_scale_set_name': name,
+            'no_wait': no_wait,
+            'virtual_machine_profile': {
+                'security_profile': {
+                    'proxy_agent_settings': {
+                        'add_proxy_agent_extension': add_proxy_agent_extension
+                    }
+                }
+            }
+        }
+
+        LongRunningOperation(cmd.cli_ctx)(UpdateVMSS(cli_ctx=cmd.cli_ctx)(command_args=args))
         vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
 
     aux_subscriptions = None
@@ -4544,7 +4579,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         vmss.zone_balance = zone_balance
 
     if wire_server_access_control_profile_reference_id is not None or \
-            imds_access_control_profile_reference_id is not None:
+            imds_access_control_profile_reference_id is not None or \
+            add_proxy_agent_extension is not None:
         kwargs['parameters'] = vmss
 
     return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
@@ -4784,7 +4820,7 @@ def vmss_run_command_invoke(cmd, resource_group_name, vmss_name, command_id, ins
     return run_command_invoke(cmd, resource_group_name, vmss_name, command_id, scripts, parameters, instance_id)
 
 
-def vmss_run_command_create(client,
+def vmss_run_command_create(cmd,
                             resource_group_name,
                             vmss_name,
                             instance_id,
@@ -4803,21 +4839,25 @@ def vmss_run_command_create(client,
                             output_blob_uri=None,
                             error_blob_uri=None,
                             no_wait=False):
-    run_command = {}
-    run_command['location'] = location
+    from .aaz.latest.vmss.run_command import Create
+    args = {}
+    args['location'] = location
+    args['resource_group'] = resource_group_name
+    args['run_command_name'] = run_command_name
+    args['instance_id'] = instance_id
+    args['vmss_name'] = vmss_name
+    args['no_wait'] = no_wait
     if tags is not None:
-        run_command['tags'] = tags
-    source = {}
+        args['tags'] = tags
     if script is not None:
-        source['script'] = script
+        args['script'] = script
     if script_uri is not None:
-        source['script_uri'] = script_uri
+        args['script_uri'] = script_uri
     if command_id is not None:
-        source['command_id'] = command_id
-    run_command['source'] = source
+        args['command_id'] = command_id
     if parameters is not None:
         auto_arg_name_num = 0
-        run_command['parameters'] = []
+        args['parameters'] = []
         for p in parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
@@ -4825,10 +4865,10 @@ def vmss_run_command_create(client,
                 auto_arg_name_num += 1
                 n = 'arg{}'.format(auto_arg_name_num)
                 v = p
-            run_command['parameters'].append({'name': n, 'value': v})
+            args['parameters'].append({'name': n, 'value': v})
     if protected_parameters is not None:
         auto_arg_name_num = 0
-        run_command['protected_parameters'] = []
+        args['protected_parameters'] = []
         for p in protected_parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
@@ -4836,31 +4876,25 @@ def vmss_run_command_create(client,
                 auto_arg_name_num += 1
                 n = 'arg{}'.format(auto_arg_name_num)
                 v = p
-            run_command['protected_parameters'].append({'name': n, 'value': v})
+            args['protected_parameters'].append({'name': n, 'value': v})
     if async_execution is not None:
-        run_command['async_execution'] = async_execution
+        args['async_execution'] = async_execution
     else:
-        run_command['async_execution'] = False
+        args['async_execution'] = False
     if run_as_user is not None:
-        run_command['run_as_user'] = run_as_user
+        args['run_as_user'] = run_as_user
     if run_as_password is not None:
-        run_command['run_as_password'] = run_as_password
+        args['run_as_password'] = run_as_password
     if timeout_in_seconds is not None:
-        run_command['timeout_in_seconds'] = timeout_in_seconds
+        args['timeout_in_seconds'] = timeout_in_seconds
     if output_blob_uri is not None:
-        run_command['output_blob_uri'] = output_blob_uri
+        args['output_blob_uri'] = output_blob_uri
     if error_blob_uri is not None:
-        run_command['error_blob_uri'] = error_blob_uri
-    return sdk_no_wait(no_wait,
-                       client.begin_create_or_update,
-                       resource_group_name=resource_group_name,
-                       vm_scale_set_name=vmss_name,
-                       instance_id=instance_id,
-                       run_command_name=run_command_name,
-                       run_command=run_command)
+        args['error_blob_uri'] = error_blob_uri
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
-def vmss_run_command_update(client,
+def vmss_run_command_update(cmd,
                             resource_group_name,
                             vmss_name,
                             instance_id,
@@ -4879,102 +4913,86 @@ def vmss_run_command_update(client,
                             output_blob_uri=None,
                             error_blob_uri=None,
                             no_wait=False):
-    run_command = {}
-    run_command['location'] = location
-    if tags is not None:
-        run_command['tags'] = tags
-    source = {}
-    if script is not None:
-        source['script'] = script
-    if script_uri is not None:
-        source['script_uri'] = script_uri
-    if command_id is not None:
-        source['command_id'] = command_id
-    run_command['source'] = source
-    if parameters is not None:
-        auto_arg_name_num = 0
-        run_command['parameters'] = []
-        for p in parameters:
-            if '=' in p:
-                n, v = p.split('=', 1)
+    from .aaz.latest.vmss.run_command import Update as _Update
+
+    class Update(_Update):
+        def pre_instance_update(self, instance):
+            if tags is not None:
+                instance.tags = tags
+            if location is not None:
+                instance.location = location
+            if script is not None:
+                instance.properties.source.script = script
+            if script_uri is not None:
+                instance.properties.source.script_uri = script_uri
+            if command_id is not None:
+                instance.properties.source.command_id = command_id
+            if parameters is not None:
+                auto_arg_name_num = 0
+                _params = []
+                for p in parameters:
+                    if '=' in p:
+                        n, v = p.split('=', 1)
+                    else:
+                        auto_arg_name_num += 1
+                        n = 'arg{}'.format(auto_arg_name_num)
+                        v = p
+                    _params.append({'name': n, 'value': v})
+                instance.properties.parameters = _params
+            if protected_parameters is not None:
+                auto_arg_name_num = 0
+                _params = []
+                for p in protected_parameters:
+                    if '=' in p:
+                        n, v = p.split('=', 1)
+                    else:
+                        auto_arg_name_num += 1
+                        n = 'arg{}'.format(auto_arg_name_num)
+                        v = p
+                    _params.append({'name': n, 'value': v})
+                instance.properties.protected_parameters = _params
+            if async_execution is not None:
+                instance.properties.async_execution = async_execution
             else:
-                auto_arg_name_num += 1
-                n = 'arg{}'.format(auto_arg_name_num)
-                v = p
-            run_command['parameters'].append({'name': n, 'value': v})
-    if protected_parameters is not None:
-        auto_arg_name_num = 0
-        run_command['protected_parameters'] = []
-        for p in protected_parameters:
-            if '=' in p:
-                n, v = p.split('=', 1)
-            else:
-                auto_arg_name_num += 1
-                n = 'arg{}'.format(auto_arg_name_num)
-                v = p
-            run_command['protected_parameters'].append({'name': n, 'value': v})
-    if async_execution is not None:
-        run_command['async_execution'] = async_execution
-    else:
-        run_command['async_execution'] = False
-    if run_as_user is not None:
-        run_command['run_as_user'] = run_as_user
-    if run_as_password is not None:
-        run_command['run_as_password'] = run_as_password
-    if timeout_in_seconds is not None:
-        run_command['timeout_in_seconds'] = timeout_in_seconds
-    if output_blob_uri is not None:
-        run_command['output_blob_uri'] = output_blob_uri
-    if error_blob_uri is not None:
-        run_command['error_blob_uri'] = error_blob_uri
-    return sdk_no_wait(no_wait,
-                       client.begin_update,
-                       resource_group_name=resource_group_name,
-                       vm_scale_set_name=vmss_name,
-                       instance_id=instance_id,
-                       run_command_name=run_command_name,
-                       run_command=run_command)
+                instance.properties.async_execution = False
+            if run_as_user is not None:
+                instance.properties.run_as_user = run_as_user
+            if run_as_password is not None:
+                instance.properties.run_as_password = run_as_password
+            if timeout_in_seconds is not None:
+                instance.properties.timeout_in_seconds = timeout_in_seconds
+            if output_blob_uri is not None:
+                instance.properties.output_blob_uri = output_blob_uri
+            if error_blob_uri is not None:
+                instance.properties.error_blob_uri = error_blob_uri
+
+    args = {}
+    args['resource_group'] = resource_group_name
+    args['run_command_name'] = run_command_name
+    args['instance_id'] = instance_id
+    args['vmss_name'] = vmss_name
+    args['no_wait'] = no_wait
+
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
-def vmss_run_command_delete(client,
-                            resource_group_name,
-                            vmss_name,
-                            instance_id,
-                            run_command_name,
-                            no_wait=False):
-    return sdk_no_wait(no_wait,
-                       client.begin_delete,
-                       resource_group_name=resource_group_name,
-                       vm_scale_set_name=vmss_name,
-                       instance_id=instance_id,
-                       run_command_name=run_command_name)
-
-
-def vmss_run_command_list(client,
-                          resource_group_name,
-                          vmss_name,
-                          instance_id,
-                          expand=None):
-    return client.list(resource_group_name=resource_group_name,
-                       vm_scale_set_name=vmss_name,
-                       instance_id=instance_id,
-                       expand=expand)
-
-
-def vmss_run_command_show(client,
+def vmss_run_command_show(cmd,
                           resource_group_name,
                           vmss_name,
                           instance_id,
                           run_command_name,
                           expand=None,
                           instance_view=False):
+    from .aaz.latest.vmss.run_command import Show
     if instance_view:
         expand = 'instanceView'
-    return client.get(resource_group_name=resource_group_name,
-                      vm_scale_set_name=vmss_name,
-                      instance_id=instance_id,
-                      run_command_name=run_command_name,
-                      expand=expand)
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vmss_name': vmss_name,
+        'instance_id': instance_id,
+        'run_command_name': run_command_name,
+        'expand': expand
+    })
 # endregion
 
 
@@ -5819,7 +5837,7 @@ def list_vmss_applications(cmd, vmss_name, resource_group_name):
 
 
 # region Restore point collection
-def restore_point_create(client,
+def restore_point_create(cmd,
                          resource_group_name,
                          restore_point_collection_name,
                          restore_point_name,
@@ -5833,15 +5851,20 @@ def restore_point_create(client,
                          data_disk_restore_point_encryption_set=None,
                          data_disk_restore_point_encryption_type=None,
                          no_wait=False):
-    parameters = {}
+    parameters = {
+        'restore_point_collection_name': restore_point_collection_name,
+        'restore_point_name': restore_point_name,
+        'resource_group': resource_group_name,
+        'no_wait': no_wait
+    }
     if exclude_disks is not None:
-        parameters['excludeDisks'] = []
+        parameters['exclude_disks'] = []
         for disk in exclude_disks:
-            parameters['excludeDisks'].append({'id': disk})
+            parameters['exclude_disks'].append({'id': disk})
     if source_restore_point is not None:
-        parameters['sourceRestorePoint'] = {'id': source_restore_point}
+        parameters['source_restore_point'] = {'id': source_restore_point}
     if consistency_mode is not None:
-        parameters['consistencyMode'] = consistency_mode
+        parameters['consistency_mode'] = consistency_mode
 
     storage_profile = {}
     # Local restore point
@@ -5851,7 +5874,7 @@ def restore_point_create(client,
             managed_disk = {
                 'id': source_os_resource
             }
-            os_disk['managedDisk'] = managed_disk
+            os_disk['managed_disk'] = managed_disk
             if os_restore_point_encryption_set is None and os_restore_point_encryption_type is None:
                 raise ArgumentUsageError('usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource')
 
@@ -5859,7 +5882,7 @@ def restore_point_create(client,
         if os_restore_point_encryption_set is not None or os_restore_point_encryption_type is not None:
             encryption = {}
             if os_restore_point_encryption_set is not None:
-                encryption['diskEncryptionSet'] = {
+                encryption['disk_encryption_set'] = {
                     'id': os_restore_point_encryption_set
                 }
             if os_restore_point_encryption_type is not None:
@@ -5869,10 +5892,10 @@ def restore_point_create(client,
                 disk_restore_point['encryption'] = encryption
 
         if disk_restore_point:
-            os_disk['diskRestorePoint'] = disk_restore_point
+            os_disk['disk_restore_point'] = disk_restore_point
 
         if os_disk:
-            storage_profile['osDisk'] = os_disk
+            storage_profile['os_disk'] = os_disk
 
         data_disks = []
         if source_data_disk_resource is not None:
@@ -5885,10 +5908,10 @@ def restore_point_create(client,
 
             for i, v in enumerate(source_data_disk_resource):
                 data_disks.append({
-                    'managedDisk': {
+                    'managed_disk': {
                         'id': v
                     },
-                    'diskRestorePoint': {
+                    'disk_restore_point': {
                         'encryption': {
                             'disk_encryption_set': {
                                 'id': data_disk_restore_point_encryption_set[i] if data_disk_restore_point_encryption_set is not None else None
@@ -5899,7 +5922,7 @@ def restore_point_create(client,
                 })
 
         if data_disks:
-            storage_profile['dataDisks'] = data_disks
+            storage_profile['data_disks'] = data_disks
 
     # Remote restore point
     if source_restore_point is not None:
@@ -5909,14 +5932,14 @@ def restore_point_create(client,
             source_disk_restore_point = {
                 'id': source_os_resource
             }
-            disk_restore_point['sourceDiskRestorePoint'] = source_disk_restore_point
+            disk_restore_point['source_disk_restore_point'] = source_disk_restore_point
             if os_restore_point_encryption_set is None and os_restore_point_encryption_type is None:
                 raise ArgumentUsageError('usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource')
 
         if os_restore_point_encryption_set is not None or os_restore_point_encryption_type is not None:
             encryption = {}
             if os_restore_point_encryption_set is not None:
-                encryption['diskEncryptionSet'] = {
+                encryption['disk_encryption_set'] = {
                     'id': os_restore_point_encryption_set
                 }
             if os_restore_point_encryption_type is not None:
@@ -5925,9 +5948,9 @@ def restore_point_create(client,
             if encryption:
                 disk_restore_point['encryption'] = encryption
         if disk_restore_point:
-            os_disk['diskRestorePoint'] = disk_restore_point
+            os_disk['disk_restore_point'] = disk_restore_point
         if os_disk:
-            storage_profile['osDisk'] = os_disk
+            storage_profile['os_disk'] = os_disk
 
         data_disks = []
         if source_data_disk_resource is not None:
@@ -5940,8 +5963,8 @@ def restore_point_create(client,
 
             for i, v in enumerate(source_data_disk_resource):
                 data_disks.append({
-                    'diskRestorePoint': {
-                        'sourceDiskRestorePoint': {
+                    'disk_restore_point': {
+                        'source_disk_restore_point': {
                             'id': v
                         },
                         'encryption': {
@@ -5953,75 +5976,51 @@ def restore_point_create(client,
                     }
                 })
         if data_disks:
-            storage_profile['dataDisks'] = data_disks
+            storage_profile['data_disks'] = data_disks
 
     if storage_profile:
-        parameters['sourceMetadata'] = {'storageProfile': storage_profile}
-    return sdk_no_wait(no_wait,
-                       client.begin_create,
-                       resource_group_name=resource_group_name,
-                       restore_point_collection_name=restore_point_collection_name,
-                       restore_point_name=restore_point_name,
-                       parameters=parameters)
+        parameters['source_metadata'] = {'storage_profile': storage_profile}
+
+    from .aaz.latest.restore_point import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=parameters)
 
 
-def restore_point_show(client,
+def restore_point_show(cmd,
                        resource_group_name,
                        restore_point_name,
                        restore_point_collection_name,
                        expand=None,
                        instance_view=None):
+    args = {
+        'resource_group': resource_group_name,
+        'restore_point_collection_name': restore_point_collection_name,
+        'restore_point_name': restore_point_name,
+        'expand': expand
+    }
+
     if instance_view is not None:
-        expand = 'instanceView'
-    return client.get(resource_group_name=resource_group_name,
-                      restore_point_name=restore_point_name,
-                      restore_point_collection_name=restore_point_collection_name,
-                      expand=expand)
+        args['expand'] = 'instanceView'
+
+    from .aaz.latest.restore_point import Show
+    return Show(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 # endRegion
 
 
 # region Restore point collection
-def restore_point_collection_show(client,
+def restore_point_collection_show(cmd,
                                   resource_group_name,
                                   restore_point_collection_name,
                                   expand=None,
                                   restore_points=None):
+    from .aaz.latest.restore_point.collection import Show
+    args = {
+        "resource_group": resource_group_name,
+        "restore_point_collection_name": restore_point_collection_name,
+    }
     if restore_points is not None:
-        expand = 'restorePoints'
-    return client.get(resource_group_name=resource_group_name,
-                      restore_point_collection_name=restore_point_collection_name,
-                      expand=expand)
-
-
-def restore_point_collection_create(client,
-                                    resource_group_name,
-                                    restore_point_collection_name,
-                                    location,
-                                    source_id,
-                                    tags=None):
-    parameters = {}
-    properties = {}
-    parameters['location'] = location
-    if tags is not None:
-        parameters['tags'] = tags
-    properties['source'] = {'id': source_id}
-    parameters['properties'] = properties
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   restore_point_collection_name=restore_point_collection_name,
-                                   parameters=parameters)
-
-
-def restore_point_collection_update(client,
-                                    resource_group_name,
-                                    restore_point_collection_name,
-                                    tags=None):
-    parameters = {}
-    if tags is not None:
-        parameters['tags'] = tags
-    return client.update(resource_group_name=resource_group_name,
-                         restore_point_collection_name=restore_point_collection_name,
-                         parameters=parameters)
+        args['expand'] = 'restorePoints'
+    return Show(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 # endRegion
 

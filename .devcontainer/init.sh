@@ -4,11 +4,13 @@ source .venv/bin/activate
 # Logout default account
 export GITHUB_TOKEN=
 
-# Check `repo` scope exists or not
-if gh auth status -a 2>/dev/null | grep "Token scopes: " | grep -q "repo"; then
-    echo "You now have access to GitHub."
-else
-    gh auth login -p https -w
+if [[ $- == *i* ]]; then  # Interactive shell only
+    # Check `repo` scope exists or not
+    if gh auth status -a 2>/dev/null | grep "Token scopes: " | grep -q "repo"; then
+        echo "You now have access to GitHub."
+    else
+        gh auth login -p https -w
+    fi
 fi
 
 # Check `aaz-dev` is available or not
@@ -66,9 +68,7 @@ if ! command -v aaz-dev &> /dev/null; then
     ELAPSED_TIME=$SECONDS
 
     echo -e "\n${YELLOW}Elapsed time: $((ELAPSED_TIME / 60))m $((ELAPSED_TIME % 60))s.${NC}"
-    echo -e "\n${GREEN}Finished setup! Please launch the codegen tool via:${NC}"
-    echo -e "${GREEN}\$ aaz-dev run -c azure-cli -e azure-cli-extensions -s azure-rest-api-specs -a aaz${NC}\n"
+    echo -e "\n${GREEN}Finished setup! Please launch the codegen tool via: aaz-dev run${NC}\n"
 else
-    echo -e "\nPlease launch the codegen tool via:"
-    echo -e "$ aaz-dev run -c azure-cli -e azure-cli-extensions -s azure-rest-api-specs -a aaz\n"
+    echo -e "\nPlease launch the codegen tool via: aaz-dev run\n"
 fi
