@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor dashboard show",
 )
 class Show(AAZCommand):
-    """Get the properties of a specific dashboard for grafana resource.
+    """Get the properties of a specific Dashboard with Grafana resource.
     """
 
     _aaz_info = {

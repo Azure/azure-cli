@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor dashboard list",
 )
 class List(AAZCommand):
-    """List all resources of dashboards under the specified resource group.
+    """List all Dashboard with Grafana resources under the specified resource group.
     """
 
     _aaz_info = {

@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor dashboard create",
 )
 class Create(AAZCommand):
-    """Create a dashboard for grafana resource. This API is idempotent, so user can either create a new dashboard or update an existing dashboard.
+    """Create a Dashboard with Grafana resource. This API is idempotent, so user can either create a new dashboard or update an existing dashboard.
     """
 
     _aaz_info = {
