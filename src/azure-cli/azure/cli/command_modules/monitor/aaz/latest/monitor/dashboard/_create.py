@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a Dashboard with Grafana resource. This API is idempotent, so user can either create a new dashboard or update an existing dashboard.
+
+    :example: Create a Dashboard with Grafana
+        az monitor dashboard create --resource-group myResourceGroup --dashboard-name myDashboard --location westus
     """
 
     _aaz_info = {
