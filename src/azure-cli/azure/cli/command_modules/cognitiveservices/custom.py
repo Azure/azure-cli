@@ -5,6 +5,10 @@
 
 import json
 import urllib.parse
+import os
+import subprocess
+import sys
+import re
 
 from knack.util import CLIError
 from knack.log import get_logger
@@ -389,6 +393,328 @@ def commitment_plan_create_or_update(
 AGENT_API_VERSION_PARAMS = {"api-version": "2025-11-15-preview"}
 
 
+def _extract_version_from_image(image_uri):
+    """
+    Extract version from Docker image URI.
+
+    Args:
+        image_uri: Full or partial image URI (e.g., 'myregistry.azurecr.io/myagent:v1')
+
+    Returns:
+        str: The image tag (version)
+
+    Raises:
+        CLIError: If image URI does not contain a tag
+
+    Examples:
+        >>> _extract_version_from_image('myregistry.azurecr.io/myagent:v1')
+        'v1'
+        >>> _extract_version_from_image('myagent:latest')
+        'latest'
+    """
+    if ':' not in image_uri:
+        raise CLIError(
+            "Image URI must include a tag (e.g., 'myagent:v1'). "
+            "The image tag becomes the agent version in Azure AI Foundry."
+        )
+
+    # Split on last colon to handle registry URLs with ports
+    parts = image_uri.rsplit(':', 1)
+    if len(parts) != 2 or not parts[1].strip():
+        raise CLIError(
+            "Image URI must include a non-empty tag (e.g., 'myagent:v1'). "
+            "The image tag becomes the agent version in Azure AI Foundry."
+        )
+
+    return parts[1]
+
+
+def _has_dockerfile(source_dir, dockerfile_name='Dockerfile'):
+    """
+    Check if a Dockerfile exists in the source directory.
+
+    Args:
+        source_dir: Path to source directory
+        dockerfile_name: Name of the Dockerfile (default: 'Dockerfile')
+
+    Returns:
+        bool: True if Dockerfile exists, False otherwise
+    """
+    if not source_dir or not os.path.isdir(source_dir):
+        return False
+
+    dockerfile_path = os.path.join(source_dir, dockerfile_name)
+    return os.path.isfile(dockerfile_path)
+
+
+def _is_docker_running():
+    """
+    Check if Docker daemon is accessible.
+
+    Returns:
+        bool: True if Docker is running, False otherwise
+    """
+    try:
+        result = subprocess.run(
+            ['docker', 'info'],
+            capture_output=True,
+            text=True,
+            timeout=5
+        )
+        return result.returncode == 0
+    except (subprocess.TimeoutExpired, FileNotFoundError, PermissionError, OSError):
+        return False
+    except Exception as e:  # pylint: disable=broad-except
+        # Unexpected errors should be logged but not fail the check
+        logger.warning("Unexpected error checking Docker status: %s", str(e))
+        return False
+
+
+def _build_image_locally(cmd, source_dir, image_name, dockerfile_name='Dockerfile'):  # pylint: disable=unused-argument
+    """
+    Build Docker image locally using docker build command.
+
+    Args:
+        cmd: CLI command context
+        source_dir: Path to source directory containing Dockerfile
+        image_name: Full image name with tag (e.g., 'myregistry.azurecr.io/myagent:v1')
+        dockerfile_name: Name of the Dockerfile (default: 'Dockerfile')
+
+    Returns:
+        str: The built image name
+
+    Raises:
+        CLIError: If build fails
+    """
+    logger.info("Building Docker image locally: %s", image_name)
+
+    dockerfile_path = os.path.join(source_dir, dockerfile_name)
+    if not os.path.isfile(dockerfile_path):
+        raise CLIError(f"Dockerfile not found at: {dockerfile_path}")
+
+    try:
+        # Build the image
+        build_cmd = [
+            'docker', 'build',
+            '-t', image_name,
+            '-f', dockerfile_path,
+            source_dir
+        ]
+
+        logger.info("Running: %s", ' '.join(build_cmd))
+        logger.warning("Building Docker image locally...")
+
+        # Stream output to show build progress
+        # Output goes directly to terminal for user visibility
+        subprocess.run(
+            build_cmd,
+            encoding='utf-8',
+            errors='replace',
+            check=True
+        )
+
+        logger.warning("Docker build completed successfully")
+
+        return image_name
+
+    except subprocess.CalledProcessError as e:
+        raise CLIError(
+            f"Docker build failed with exit code {e.returncode}. "
+            f"Check the output above for details."
+        )
+    except Exception as e:
+        raise CLIError(f"Failed to build Docker image: {str(e)}")
+
+
+def _push_image_to_registry(cmd, image_name, registry_name):  # pylint: disable=unused-argument
+    """
+    Push built image to Azure Container Registry with authentication.
+
+    Args:
+        cmd: CLI command context
+        image_name: Full image name with tag (e.g., 'myregistry.azurecr.io/myagent:v1')
+        registry_name: Short name of ACR (without .azurecr.io)
+
+    Raises:
+        CLIError: If push fails
+    """
+    logger.info("Pushing image to registry: %s", image_name)
+
+    registry_uri = f"{registry_name}.azurecr.io"
+
+    try:
+        # Login to ACR using Azure CLI credentials
+        # Use Python executable path to run az CLI in dev environment
+        az_cmd = [sys.executable, '-m', 'azure.cli', 'acr', 'login', '--name', registry_name]
+        logger.info("Logging into ACR: %s", registry_name)
+
+        subprocess.run(
+            az_cmd,
+            capture_output=True,
+            encoding='utf-8',
+            errors='replace',
+            check=True
+        )
+        logger.info("ACR login successful")
+
+        # Push the image
+        push_cmd = ['docker', 'push', image_name]
+        logger.warning("Pushing image to ACR: %s", registry_uri)
+        logger.info("Running: %s", ' '.join(push_cmd))
+
+        # Stream output to show push progress
+        # Output goes directly to terminal for user visibility
+        subprocess.run(
+            push_cmd,
+            encoding='utf-8',
+            errors='replace',
+            check=True
+        )
+
+        logger.warning("Successfully pushed image to %s", registry_uri)
+
+    except subprocess.CalledProcessError as e:
+        error_parts = ["Failed to push image to registry."]
+        error_parts.append(f"Command: {' '.join(e.cmd)}")
+        error_parts.append(f"Exit code: {e.returncode}")
+        if e.stdout:
+            error_parts.append(f"Output: {e.stdout}")
+        if e.stderr:
+            error_parts.append(f"Error: {e.stderr}")
+        raise CLIError('\n'.join(error_parts))
+    except Exception as e:
+        raise CLIError(f"Failed to push image: {str(e)}")
+
+
+# pylint: disable=too-many-locals
+def _build_image_remotely(cmd, source_dir, image_name,
+                          registry_name, dockerfile_name='Dockerfile'):
+    """
+    Build Docker image using Azure Container Registry Task.
+    Uses buildpacks (az acr pack build) if no Dockerfile exists,
+    otherwise uses traditional Docker build (az acr build).
+
+    Args:
+        cmd: CLI command context
+        source_dir: Path to source directory
+        image_name: Full image name with tag
+        registry_name: Short name of ACR (without .azurecr.io)
+        dockerfile_name: Name of the Dockerfile
+
+    Returns:
+        str: The built image name
+
+    Raises:
+        CLIError: If remote build fails
+    """
+    # Import ACR command module internals - these are internal APIs within the same CLI repo
+    # and provide the necessary functionality for ACR Task builds and log streaming.
+    # Using these rather than duplicating ACR build logic ensures consistency with az acr commands.
+    from azure.cli.command_modules.acr._client_factory import cf_acr_registries, cf_acr_runs
+    from azure.cli.command_modules.acr._stream_utils import stream_logs
+    from azure.cli.command_modules.acr._utils import prepare_source_location, get_resource_group_name_by_registry_name
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    import base64
+
+    logger.warning("Building image remotely using ACR Task: %s", image_name)
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    client_registries = cf_acr_registries(cmd.cli_ctx, subscription_id)
+    client_runs = cf_acr_runs(cmd.cli_ctx, subscription_id)
+
+    # Get resource group from registry name
+    resource_group_name = get_resource_group_name_by_registry_name(
+        cmd.cli_ctx, registry_name)
+
+    try:
+        # Extract just the image name and tag (without registry)
+        if '/' in image_name:
+            image_without_registry = image_name.split('/', 1)[1]
+        else:
+            image_without_registry = image_name
+
+        # Prepare source location (uploads source and returns URL)
+        logger.warning("Uploading source code to ACR...")
+        source_location = prepare_source_location(
+            cmd, source_dir, client_registries, registry_name, resource_group_name)
+
+        # Check if Dockerfile exists
+        has_dockerfile = _has_dockerfile(source_dir, dockerfile_name)
+
+        if has_dockerfile:
+            # Traditional Docker build
+            logger.warning("Dockerfile found - using Docker build")
+            logger.warning("Queueing build task...")
+
+            from azure.mgmt.containerregistry.models import (
+                DockerBuildRequest, PlatformProperties
+            )
+
+            docker_build_request = DockerBuildRequest(
+                image_names=[image_without_registry],
+                is_push_enabled=True,
+                source_location=source_location,
+                platform=PlatformProperties(os='Linux', architecture='amd64'),
+                docker_file_path=dockerfile_name,
+                timeout=3600
+            )
+
+            queued = client_registries.schedule_run(
+                resource_group_name=resource_group_name,
+                registry_name=registry_name,
+                run_request=docker_build_request)
+        else:
+            # Buildpacks for auto-detection
+            logger.warning("No Dockerfile - using Cloud Native Buildpacks (auto-detect)")
+            logger.warning("Buildpacks will detect Python, Node.js, .NET, etc.")
+            logger.warning("Queueing build task...")
+
+            from azure.mgmt.containerregistry.models import (
+                EncodedTaskRunRequest, PlatformProperties
+            )
+
+            # Pack task YAML format - need full registry path for push
+            PACK_TASK_YAML = """version: v1.1.0
+steps:
+  - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name_full} --builder {builder} --env REGISTRY_NAME=$Registry -p .
+    timeout: 28800
+  - push: ["{image_name_full}"]
+    timeout: 1800
+"""
+            yaml_body = PACK_TASK_YAML.format(
+                image_name_full=image_name,
+                builder='paketobuildpacks/builder:base')
+
+            request = EncodedTaskRunRequest(
+                encoded_task_content=base64.b64encode(yaml_body.encode()).decode(),
+                source_location=source_location,
+                timeout=3600,
+                platform=PlatformProperties(os='Linux', architecture='amd64')
+            )
+
+            queued = client_registries.schedule_run(
+                resource_group_name=resource_group_name,
+                registry_name=registry_name,
+                run_request=request)
+
+        run_id = queued.run_id
+        logger.warning("Queued build with ID: %s", run_id)
+        logger.warning("Waiting for agent and streaming build logs...")
+
+        # Stream logs for real-time progress
+        stream_logs(cmd, client_runs, run_id, registry_name,
+                    resource_group_name, timeout=3600, no_format=False,
+                    raise_error_on_failure=True)
+
+        logger.warning("Build completed successfully")
+        return image_name
+
+    except Exception as e:
+        # Log full traceback for debugging
+        logger.exception("ACR build failed")
+        raise CLIError(f"ACR build failed: {str(e)}")
+
+
 def _create_agent_request(
     method: str,
     agent_name: str,
@@ -413,6 +739,67 @@ def _create_agent_request(
     return azure.core.rest.HttpRequest(
         method, url, json=body, params=AGENT_API_VERSION_PARAMS
     )
+
+
+def _get_agent_container_status(client, agent_name, agent_version):
+    """Get the status of an agent container deployment."""
+    request = _create_agent_request(
+        "GET",
+        agent_name,
+        agent_version,
+        container=True,
+    )
+    response = client.send_request(request)
+    response.raise_for_status()
+    return response.json()
+
+
+def _wait_for_agent_deployment_ready(
+        client, agent_name, agent_version, timeout=300, poll_interval=5, status_interval=30):
+    """
+    Wait for agent deployment to be ready.
+
+    Args:
+        timeout: Maximum time to wait in seconds (default 5 minutes)
+        poll_interval: Time between status checks in seconds
+        status_interval: Time between user-visible status messages in seconds (default 30)
+
+    Returns:
+        dict: The final deployment status
+    """
+    import time
+
+    start_time = time.time()
+    last_status = None
+    last_status_message_time = start_time
+
+    while time.time() - start_time < timeout:
+        try:
+            status = _get_agent_container_status(client, agent_name, agent_version)
+            current_state = status.get("status", "unknown")  # API uses "status" not "state"
+            last_status = status
+            elapsed = int(time.time() - start_time)
+
+            logger.debug("Deployment status: %s", current_state)
+
+            # Show periodic status updates to user
+            if time.time() - last_status_message_time >= status_interval:
+                logger.warning("Still waiting for deployment (status: %s, elapsed: %ds)...", current_state, elapsed)
+                last_status_message_time = time.time()
+
+            if current_state.lower() == "running":
+                logger.info("Deployment is ready (total time: %ds)", elapsed)
+                return status
+
+            if current_state.lower() in ["failed", "error"]:
+                raise CLIError(f"Deployment failed with status: {current_state}")
+
+        except Exception as e:  # pylint: disable=broad-exception-caught
+            logger.debug("Error checking deployment status: %s", str(e))
+
+        time.sleep(poll_interval)
+
+    raise CLIError(f"Deployment did not become ready within {timeout} seconds. Last status: {last_status}")
 
 
 def _invoke_agent_container_operation(
@@ -573,6 +960,526 @@ def agent_show(
     response = client.send_request(request)
     response.raise_for_status()
     return response.json()
+
+
+def _get_resource_group_by_account_name(cmd, account_name):
+    """
+    Get resource group name for a Cognitive Services account by querying ARM.
+
+    Args:
+        cmd: CLI command context
+        account_name: Cognitive Services account name
+
+    Returns:
+        str: Resource group name
+    """
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.cli.core.commands.client_factory import get_mgmt_service_client
+    from azure.mgmt.resource import ResourceManagementClient
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceManagementClient)
+
+    # Query for the Cognitive Services account
+    resource_type = "Microsoft.CognitiveServices/accounts"
+    filter_str = f"resourceType eq '{resource_type}' and name eq '{account_name}'"
+
+    resources = list(resource_client.resources.list(filter=filter_str))
+
+    if not resources:
+        raise CLIError(f"Cognitive Services account '{account_name}' not found in subscription '{subscription_id}'")
+
+    if len(resources) > 1:
+        raise CLIError(
+            f"Multiple Cognitive Services accounts found with name '{account_name}'. "
+            "This should not happen."
+        )
+
+    # Extract resource group from resource ID
+    resource_id = resources[0].id
+    parts = resource_id.split('/')
+    rg_index = parts.index('resourceGroups') + 1
+    return parts[rg_index]
+
+
+def _check_project_acr_access(cmd, client, account_name, project_name, registry_name):  # pylint: disable=unused-argument
+    """
+    Check if AI Foundry project's managed identity has AcrPull access to container registry.
+
+    Args:
+        cmd: CLI command context
+        client: Service client
+        account_name: Cognitive Services account name
+        project_name: AI Foundry project name
+        registry_name: ACR registry name (without .azurecr.io)
+
+    Returns:
+        tuple: (has_access: bool, principal_id: str, error_message: str)
+    """
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.cli.command_modules.role.custom import list_role_assignments
+
+    try:
+        # Get resource group from account name
+        resource_group_name = _get_resource_group_by_account_name(cmd, account_name)
+
+        # Get project to find its managed identity
+        from azure.cli.command_modules.cognitiveservices._client_factory import cf_projects
+        projects_client = cf_projects(cmd.cli_ctx)
+
+        # Get project resource (project-level identity, not account-level)
+        project = projects_client.get(
+            resource_group_name=resource_group_name,
+            account_name=account_name,
+            project_name=project_name
+        )
+
+        # Check if project has system-assigned managed identity
+        if not project.identity or not project.identity.principal_id:
+            return (False, None,
+                    f"Project '{project_name}' does not have a system-assigned managed identity enabled. "
+                    f"A project identity is automatically created when the project is created.")
+
+        principal_id = project.identity.principal_id
+
+        # Get ACR resource ID
+        from azure.cli.command_modules.acr._utils import get_resource_group_name_by_registry_name
+        subscription_id = get_subscription_id(cmd.cli_ctx)
+        acr_resource_group = get_resource_group_name_by_registry_name(
+            cmd.cli_ctx, registry_name)
+        acr_resource_id = (
+            f"/subscriptions/{subscription_id}/resourceGroups/{acr_resource_group}/"
+            f"providers/Microsoft.ContainerRegistry/registries/{registry_name}"
+        )
+
+        # Check role assignments for AcrPull or higher permissions
+        #
+        # KNOWN LIMITATION: This checks for well-known role names rather than checking
+        # the actual permissions (actions) of assigned roles. This means:
+        # - Custom roles with pull permissions may not be detected
+        # - Inherited permissions from parent scopes (resource group, subscription) are not checked
+        #
+        # A more robust approach would be to:
+        # 1. Fetch the role definition for each assigned role
+        # 2. Check if it includes Microsoft.ContainerRegistry/registries/pull/read action
+        # 3. Check parent scopes for inherited permissions
+        #
+        # However, this is significantly more complex and slower. The current approach
+        # follows the pattern used by AKS (see acs/_roleassignments.py) and covers
+        # the most common scenarios. Users with custom roles can use --skip-acr-check.
+        #
+        # Acceptable roles include:
+        # - AcrPull: Can pull images
+        # - AcrPush: Can pull and push images
+        # - Reader: Can view resources (includes pull)
+        # - Contributor, Owner: Full access
+        acceptable_roles = ['AcrPull', 'AcrPush', 'Reader', 'Contributor', 'Owner']
+
+        # Get role assignments for the principal on the ACR
+        assignments = list_role_assignments(cmd, assignee=principal_id, scope=acr_resource_id)
+
+        # Check if any assignment has acceptable role
+        for assignment in assignments:
+            role_name = assignment.get('roleDefinitionName', '')
+            if role_name in acceptable_roles:
+                logger.info(
+                    "Found %s role for project identity on ACR %s",
+                    role_name, registry_name)
+                return (True, principal_id, None)
+
+        # No suitable role found
+        return (
+            False, principal_id,
+            f"Project managed identity does not have AcrPull access to '{registry_name}'"
+        )
+
+    except Exception as e:  # pylint: disable=broad-exception-caught
+        # If we can't check, fail safely - require explicit --skip-acr-check to proceed
+        error_msg = (
+            f"Unable to verify ACR access: {str(e)}. "
+            "If you have configured ACR access through other means, "
+            "use --skip-acr-check to bypass this validation."
+        )
+        logger.error("ACR access check failed: %s", str(e))
+        return (False, None, error_msg)
+
+
+# pylint: disable=too-many-branches,too-many-locals
+def agent_create(
+    cmd,
+    client,
+    account_name,
+    project_name,
+    agent_name,
+    image=None,
+    source=None,
+    dockerfile='Dockerfile',
+    build_remote=False,
+    registry=None,
+    skip_acr_check=False,
+    cpu="1",
+    memory="2Gi",
+    environment_variables=None,
+    protocol="responses",
+    protocol_version="v1",
+    description=None,
+    min_replicas=None,
+    max_replicas=None,
+    no_wait=False,
+    no_start=False,
+):  # pylint: disable=unused-argument,too-many-locals,too-many-arguments
+    """
+    Create a new hosted agent from a container image or source code.
+
+    Creates an agent version with the specified configuration and optionally
+    deploys it with horizontal scaling parameters. Can either use an existing
+    container image or build one from source code.
+
+    Args:
+        cmd: CLI command context
+        client: Service client
+        account_name: Cognitive Services account name
+        project_name: AI Foundry project name
+        agent_name: Name for the new agent
+        image: Container image URI with tag (mutually exclusive with source)
+        source: Path to source directory (mutually exclusive with image)
+        dockerfile: Name of Dockerfile in source directory
+        build_remote: Force remote build using ACR Task
+        registry: Optional ACR registry name
+        skip_acr_check: Skip validation that project has ACR access
+        cpu: CPU cores allocation
+        memory: Memory allocation with units
+        environment_variables: List of environment variable dicts
+        protocol: Agent communication protocol
+        protocol_version: Protocol version
+        description: Agent description
+        min_replicas: Minimum replicas for scaling
+        max_replicas: Maximum replicas for scaling
+        no_wait: Don't wait for completion
+        no_start: Skip automatic deployment after version creation
+
+    Returns:
+        dict: Created agent details
+    """
+    # Validate mutually exclusive parameters
+    if image and source:
+        raise CLIError(
+            "Parameters --image and --source are mutually exclusive. "
+            "Provide either --image for an existing container image, or --source to build from source code."
+        )
+
+    if not image and not source:
+        raise CLIError(
+            "Either --image or --source must be provided. "
+            "Use --image for an existing container image, or --source to build from source code."
+        )
+
+    # Validate --no-start with replica parameters
+    if no_start and (min_replicas is not None or max_replicas is not None):
+        raise CLIError(
+            "Cannot use --no-start with --min-replicas or --max-replicas. "
+            "Replica configuration requires the agent to be deployed. "
+            "Either remove --no-start to deploy with scaling, or remove replica parameters."
+        )
+
+    # Determine registry name for ACR access check
+    registry_name = None
+    if source and registry:
+        # Building from source - registry is required
+        registry_name = registry.replace('.azurecr.io', '')
+    elif image and not source:
+        # Using existing image - extract registry if it's an ACR image
+        if '.azurecr.io' in image:
+            # Extract registry from image URI (e.g., myregistry.azurecr.io/image:tag -> myregistry)
+            registry_name = image.split('.azurecr.io')[0].split('/')[-1]
+
+    # Check ACR access before building (fail fast)
+    if registry_name and not skip_acr_check:
+        logger.info("Checking if project has access to ACR %s...", registry_name)
+
+        has_access, principal_id, error_msg = _check_project_acr_access(
+            cmd, client, account_name, project_name, registry_name
+        )
+
+        if not has_access:
+            from azure.cli.core.commands.client_factory import get_subscription_id
+            subscription_id = get_subscription_id(cmd.cli_ctx)
+
+            # Get ACR resource group for the command
+            from azure.cli.command_modules.acr._utils import (
+                get_resource_group_name_by_registry_name
+            )
+            try:
+                acr_rg = get_resource_group_name_by_registry_name(
+                    cmd.cli_ctx, registry_name)
+            except Exception:  # pylint: disable=broad-exception-caught
+                acr_rg = '<acr-resource-group>'
+
+            error_message = (
+                f"{error_msg}\n\n"
+                f"AI Foundry needs permission to pull the container image from ACR.\n"
+                f"Grant AcrPull role to the project's managed identity:\n\n"
+                f"  az role assignment create --assignee {principal_id} "
+                f"--role AcrPull "
+                f"--scope /subscriptions/{subscription_id}/resourceGroups/{acr_rg}/"
+                f"providers/Microsoft.ContainerRegistry/registries/{registry_name}\n\n"
+                f"Or use Azure Portal:\n"
+                f"  1. Open ACR '{registry_name}' → Access Control (IAM)\n"
+                f"  2. Add role assignment → AcrPull\n"
+                f"  3. Assign access to: Managed Identity\n"
+                f"  4. Select the project's managed identity\n\n"
+                f"To skip this check (not recommended), use: --skip-acr-check"
+            )
+            raise CLIError(error_message)
+
+    # Handle source build workflow
+    if source:
+        # Validate source directory exists
+        if not os.path.isdir(source):
+            raise CLIError(f"Source directory not found: {source}")
+
+        # Validate registry is provided for builds
+        if not registry:
+            raise CLIError(
+                "Parameter --registry is required when using --source. "
+                "Specify the Azure Container Registry where the built image will be stored."
+            )
+
+        # Generate image name from agent name if not provided
+        # Use agent_name as the image name, with 'latest' tag initially
+        # The tag will be extracted and used as the version
+        import datetime
+        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+        image_tag = f"v{timestamp}"
+
+        # Normalize registry name
+        registry_normalized = registry.replace('.azurecr.io', '')
+        image_uri = f"{registry_normalized}.azurecr.io/{agent_name}:{image_tag}"
+
+        logger.info("Building container image from source: %s", source)
+        logger.info("Target image: %s", image_uri)
+
+        # Decide build method: auto-detect or forced remote
+        if build_remote:
+            logger.info("Using remote build (forced via --build-remote)")
+            _build_image_remotely(
+                cmd, source, image_uri, registry_normalized, dockerfile)
+            logger.info("Image built successfully: %s", image_uri)
+            image = image_uri
+        else:
+            # Auto-detect: try local if Docker is available, otherwise remote
+            docker_running = _is_docker_running()
+
+            if docker_running:
+                logger.info("Docker is available - building locally")
+                try:
+                    _build_image_locally(cmd, source, image_uri, dockerfile)
+                except Exception as build_err:  # pylint: disable=broad-exception-caught
+                    logger.warning(
+                        "Local build failed, falling back to remote build: %s",
+                        str(build_err))
+                    _build_image_remotely(
+                        cmd, source, image_uri, registry_normalized, dockerfile)
+                    # Image is already in registry after remote build
+                    logger.info("Image built successfully: %s", image_uri)
+                    image = image_uri
+                else:
+                    # Local build succeeded, now push to registry
+                    try:
+                        _push_image_to_registry(cmd, image_uri, registry_normalized)
+                        logger.info("Image built successfully: %s", image_uri)
+                        image = image_uri
+                    except Exception as push_err:  # pylint: disable=broad-exception-caught
+                        raise CLIError(
+                            f"Failed to push image to registry: {str(push_err)}"
+                        )
+            else:
+                logger.info("Docker not available - building remotely using ACR Task")
+                _build_image_remotely(
+                    cmd, source, image_uri, registry_normalized, dockerfile)
+                logger.info("Image built successfully: %s", image_uri)
+                image = image_uri
+
+    # Construct full image URI if registry is provided
+    if registry and not source:
+        # Handle both 'myregistry' and 'myregistry.azurecr.io' formats
+        if not registry.endswith('.azurecr.io'):
+            image_uri = f"{registry}.azurecr.io/{image}"
+        else:
+            image_uri = f"{registry}/{image}"
+    else:
+        image_uri = image
+
+    # Extract agent version from image tag
+    # This validates that image has a tag and will raise CLIError if missing
+    _extract_version_from_image(image_uri)
+
+    # Validate memory format with regex
+    if memory and not re.match(r'^\d+(\.\d+)?(Gi|Mi)$', memory):
+        raise CLIError(
+            f"Invalid memory value '{memory}'. "
+            "Memory must be a positive number with units 'Gi' or 'Mi' (e.g., '2Gi', '512Mi', '1.5Gi')"
+        )
+
+    # Validate CPU format
+    try:
+        cpu_float = float(cpu)
+    except (ValueError, TypeError):
+        raise CLIError(
+            f"Invalid CPU value '{cpu}'. "
+            "CPU must be a number (e.g., '1', '2', '0.5')"
+        )
+
+    if cpu_float <= 0:
+        raise CLIError(
+            f"CPU must be positive. Got: '{cpu}'"
+        )
+
+    # Prepare environment variables
+    # environment_variables is a list of dicts from _environment_variables_type
+    # Convert to simple dict for API: [{'key': 'FOO', 'value': 'bar'}] -> {'FOO': 'bar'}
+    env_vars = {}
+    if environment_variables:
+        for env_var in environment_variables:
+            env_vars[env_var['key']] = env_var['value']
+
+    # Prepare protocol configuration
+    # Note: These should match the API's expected format
+    protocol_records = [{
+        "protocol": protocol.upper(),  # 'RESPONSES' or 'STREAMING'
+        "version": protocol_version
+    }]
+
+    # Build the agent definition
+    definition = {
+        "kind": "hosted",  # Required: specifies this is a hosted container agent in Foundry
+        "container_protocol_versions": protocol_records,
+        "cpu": cpu,
+        "memory": memory,
+        "image": image_uri,
+    }
+
+    # Add environment variables if provided
+    if env_vars:
+        definition["environment_variables"] = env_vars
+
+    # Construct request body
+    request_body = {
+        "definition": definition
+    }
+
+    # Add optional metadata
+    if description:
+        request_body["description"] = description
+
+    # Note: Scaling configuration (min/max replicas) is applied via deployment update after version creation
+
+    # Create the agent version (version is derived from image tag)
+    # API endpoint: POST /agents/{agentName}/versions?api-version=...
+    # Note: Using POST without version in URL, as version is in the request body
+    request = azure.core.rest.HttpRequest(
+        "POST",
+        f"/agents/{urllib.parse.quote(agent_name)}/versions",
+        json=request_body,
+        params=AGENT_API_VERSION_PARAMS
+    )
+
+    # Send the request
+    response = None
+    try:
+        response = client.send_request(request)
+        response.raise_for_status()
+    except Exception as e:
+        # Enhanced error message with details
+        error_parts = [f"Failed to create agent version: {str(e)}"]
+
+        if response:
+            if hasattr(response, 'status_code'):
+                error_parts.append(f"Status Code: {response.status_code}")
+                if response.status_code == 405:
+                    error_parts.append(
+                        "Hint: Method Not Allowed - "
+                        "The API endpoint may not support this HTTP method."
+                    )
+
+            try:
+                body = response.text() if callable(response.text) else str(response.text)
+                error_parts.append(f"Response: {body}")
+            except Exception as body_err:  # pylint: disable=broad-except
+                logger.debug("Could not read response body: %s", body_err)
+
+        error_parts.append(f"Request URL: {request.url}")
+        error_parts.append(f"Request Method: {request.method}")
+        raise CLIError('\n'.join(error_parts))
+
+    # Handle no-wait flag
+    if no_wait:
+        logger.warning(
+            "Agent creation initiated. Use "
+            "'az cognitiveservices agent show -a %s --project-name %s -n %s' "
+            "to check status.",
+            account_name, project_name, agent_name
+        )
+        return {
+            "status": "InProgress",
+            "agentName": agent_name,
+            "message": "Agent creation is in progress"
+        }
+
+    # Parse response to get the created version
+    version_response = response.json()
+    created_version = version_response.get("version")
+
+    logger.debug("Version response: %s", json.dumps(version_response, indent=2))
+    logger.debug("Extracted version: %s", created_version)
+
+    # Start deployment automatically unless --no-start is specified
+    if created_version and not no_start:
+        # Use defaults if not specified (min=0, max=3)
+        effective_min_replicas = min_replicas if min_replicas is not None else 0
+        effective_max_replicas = max_replicas if max_replicas is not None else 3
+
+        logger.info("Starting agent deployment (min_replicas=%s, max_replicas=%s)...",
+                    effective_min_replicas, effective_max_replicas)
+        try:
+            # First, start the deployment (creates the container)
+            logger.debug("Starting deployment for agent %s version %s", agent_name, created_version)
+            start_response = _invoke_agent_container_operation(
+                client,
+                agent_name,
+                created_version,
+                action="start",
+            )
+            logger.debug("Deployment started: %s", json.dumps(start_response, indent=2))
+
+            # Wait for deployment to be ready before updating configuration
+            logger.warning("Waiting for deployment to be ready (this may take up to 5 minutes)...")
+            _wait_for_agent_deployment_ready(client, agent_name, created_version)
+
+            # Update replica counts if non-default values were specified
+            if min_replicas is not None or max_replicas is not None:
+                logger.debug("Updating replica configuration")
+                update_response = _invoke_agent_container_operation(
+                    client,
+                    agent_name,
+                    created_version,
+                    action="update",
+                    min_replicas=effective_min_replicas,
+                    max_replicas=effective_max_replicas,
+                )
+                logger.debug("Update response: %s", json.dumps(update_response, indent=2))
+
+            logger.info("Agent deployment started successfully")
+        except Exception as deploy_err:  # pylint: disable=broad-exception-caught
+            logger.warning("Failed to start deployment: %s", str(deploy_err))
+            logger.warning("Agent version created but not deployed. "
+                           "Use 'az cognitiveservices agent start' to deploy the agent.")
+    elif created_version and no_start:
+        logger.info("Agent version created but not deployed (--no-start specified). "
+                    "Use 'az cognitiveservices agent start' to deploy the agent.")
+
+    # Return the version response
+    return version_response
 
 
 def project_create(

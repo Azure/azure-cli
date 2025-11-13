@@ -120,6 +120,7 @@ def load_command_table(self, _):
         g.command('list', 'list')
 
     with self.command_group('cognitiveservices agent', client_factory=cf_ai_projects, is_preview=True) as g:
+        g.custom_command('create', 'agent_create')
         g.custom_command('update', 'agent_update')
         g.custom_command('stop', 'agent_stop')
         g.custom_command('start', 'agent_start')
