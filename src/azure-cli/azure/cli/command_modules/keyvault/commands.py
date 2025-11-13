@@ -12,7 +12,7 @@ from azure.cli.command_modules.keyvault._client_factory import (
     get_client, get_client_factory, Clients)
 
 from azure.cli.command_modules.keyvault._transformers import (
-    filter_out_managed_resources,
+    filter_out_managed_resources, transform_vault_output, transform_vault_list,
     multi_transformers, transform_key_decryption_output, keep_max_results, transform_key_list_output,
     transform_key_output, transform_key_encryption_output, transform_key_random_output,
     transform_secret_list, transform_deleted_secret_list, transform_secret_set,
@@ -70,14 +70,14 @@ def load_command_table(self, _):
     # Management Plane Commands
     with self.command_group('keyvault', mgmt_vaults_entity.command_type,
                             client_factory=mgmt_vaults_entity.client_factory) as g:
-        g.custom_command('create', 'create_vault_or_hsm', supports_no_wait=True)
-        g.custom_command('recover', 'recover_vault_or_hsm', supports_no_wait=True)
-        g.custom_command('list', 'list_vault_or_hsm')
-        g.custom_show_command('show', 'get_vault_or_hsm')
+        g.custom_command('create', 'create_vault_or_hsm', supports_no_wait=True, transform=transform_vault_output)
+        g.custom_command('recover', 'recover_vault_or_hsm', supports_no_wait=True, transform=transform_vault_output)
+        g.custom_command('list', 'list_vault_or_hsm', transform=transform_vault_list)
+        g.custom_show_command('show', 'get_vault_or_hsm', transform=transform_vault_output)
         g.custom_command('delete', 'delete_vault_or_hsm', supports_no_wait=True)
         g.custom_command('purge', 'purge_vault_or_hsm', supports_no_wait=True)
-        g.custom_command('set-policy', 'set_policy', supports_no_wait=True)
-        g.custom_command('delete-policy', 'delete_policy', supports_no_wait=True)
+        g.custom_command('set-policy', 'set_policy', supports_no_wait=True, transform=transform_vault_output)
+        g.custom_command('delete-policy', 'delete_policy', supports_no_wait=True, transform=transform_vault_output)
         g.custom_command('list-deleted', 'list_deleted_vault_or_hsm')
         g.custom_command('show-deleted', 'get_deleted_vault_or_hsm')
         g.generic_update_command(

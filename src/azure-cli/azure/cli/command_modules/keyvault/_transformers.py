@@ -484,3 +484,29 @@ def transform_certificate_issuer_admin_list(result, **command_args):
         } for contact in admin_contacts]
         return ret
     return result
+
+
+def transform_vault_output(result, **command_args):  # pylint: disable=unused-argument
+    from azure.mgmt.keyvault.models import Vault
+    if not result or not isinstance(result, Vault):
+        return result
+
+    from azure.cli.core.util import todict
+    output = todict(result)
+    if output.get('properties', None) and output['properties'].get('accessPolicies', None):
+        for policy in output['properties']['accessPolicies']:
+            if policy.get('permissions') and 'keysProperty' in policy['permissions']:
+                keys = policy['permissions']['keysProperty']
+                policy['permissions']['keys'] = keys
+                del policy['permissions']['keysProperty']
+    return output
+
+
+def transform_vault_list(result, **command_args):  # pylint: disable=unused-argument
+    if not result:
+        return result
+    output = []
+    for item in result:
+        new_item = transform_vault_output(item)
+        output.append(new_item)
+    return output

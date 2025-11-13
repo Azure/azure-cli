@@ -43,7 +43,7 @@ logger = get_logger(__name__)
 
 def _default_certificate_profile(cmd):
     def get_model(x):
-        return cmd.loader.get_sdk(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES, mod='_generated_models')
+        return cmd.loader.get_models(x, resource_type=ResourceType.DATA_KEYVAULT_CERTIFICATES, mod='_generated_models')
 
     Action = get_model('Action')
     ActionType = get_model('ActionType')
@@ -354,7 +354,7 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        vault_name=vault_name,
-                       parameters=params)
+                       parameters=params).result()
 
 
 def _parse_network_acls(cmd, resource_group_name, network_acls_json, network_acls_ips, network_acls_vnets,
@@ -623,7 +623,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     if no_self_perms or enable_rbac_authorization:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.all],
+        permissions = Permissions(keys_property=[KeyPermissions.all],
                                   secrets=[SecretPermissions.all],
                                   certificates=[CertificatePermissions.all],
                                   storage=[StoragePermissions.all])
@@ -661,7 +661,7 @@ def create_vault(cmd, client,  # pylint: disable=too-many-locals, too-many-state
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
                        vault_name=vault_name,
-                       parameters=parameters)
+                       parameters=parameters).result()
 
 
 def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name, no_wait=False):
@@ -673,7 +673,7 @@ def update_vault_setter(cmd, client, parameters, resource_group_name, vault_name
                        parameters=VaultCreateOrUpdateParameters(
                            location=parameters.location,
                            tags=parameters.tags,
-                           properties=parameters.properties))
+                           properties=parameters.properties)).result()
 
 
 def update_hsm_setter(cmd, client, parameters, resource_group_name, name, no_wait=False):
@@ -820,19 +820,19 @@ def set_policy(cmd, client, resource_group_name, vault_name,
             tenant_id=vault.properties.tenant_id,
             object_id=object_id,
             application_id=application_id,
-            permissions=Permissions(keys=key_permissions,
+            permissions=Permissions(keys_property=key_permissions,
                                     secrets=secret_permissions,
                                     certificates=certificate_permissions,
                                     storage=storage_permissions)))
     else:
         # Modify existing policy.
         # If key_permissions is not set, use prev. value (similarly with secret_permissions).
-        keys = policy.permissions.keys if key_permissions is None else key_permissions
+        keys = policy.permissions.keys_property if key_permissions is None else key_permissions
         secrets = policy.permissions.secrets if secret_permissions is None else secret_permissions
         certs = policy.permissions.certificates \
             if certificate_permissions is None else certificate_permissions
         storage = policy.permissions.storage if storage_permissions is None else storage_permissions
-        policy.permissions = Permissions(keys=keys, secrets=secrets, certificates=certs, storage=storage)
+        policy.permissions = Permissions(keys_property=keys, secrets=secrets, certificates=certs, storage=storage)
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
@@ -840,7 +840,7 @@ def set_policy(cmd, client, resource_group_name, vault_name,
                        parameters=VaultCreateOrUpdateParameters(
                            location=vault.location,
                            tags=vault.tags,
-                           properties=vault.properties))
+                           properties=vault.properties)).result()
 
 
 def add_network_rule_for_vault_or_hsm(cmd, client, resource_group_name, vault_name=None, hsm_name=None,
@@ -909,7 +909,7 @@ def add_vault_network_rule(cmd, client, resource_group_name, vault_name, ip_addr
                        parameters=VaultCreateOrUpdateParameters(
                            location=vault.location,
                            tags=vault.tags,
-                           properties=vault.properties))
+                           properties=vault.properties)).result()
 
 
 def add_hsm_network_rule(cmd, client, resource_group_name, hsm_name,
@@ -1001,7 +1001,7 @@ def remove_vault_network_rule(cmd, client, resource_group_name, vault_name, ip_a
                        parameters=VaultCreateOrUpdateParameters(
                            location=vault.location,
                            tags=vault.tags,
-                           properties=vault.properties))
+                           properties=vault.properties)).result()
 
 
 def remove_hsm_network_rule(client, resource_group_name, hsm_name,
@@ -1079,7 +1079,7 @@ def delete_policy(cmd, client, resource_group_name, vault_name,
                        parameters=VaultCreateOrUpdateParameters(
                            location=vault.location,
                            tags=vault.tags,
-                           properties=vault.properties))
+                           properties=vault.properties)).result()
 # endregion
 
 
