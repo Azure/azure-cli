@@ -12,7 +12,7 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class CognitiveServicesConnectionLoadingTests(unittest.TestCase):
-    INPUT_DATA_PATH: str = os.path.join(TEST_DIR, 'input_data', 'connections')
+    INPUT_DATA_PATH: str = os.path.join(TEST_DIR, 'data')
 
     def test_load_connections(self):
         from azure.cli.command_modules.cognitiveservices._utils import load_connection_from_source
@@ -24,7 +24,7 @@ class CognitiveServicesConnectionLoadingTests(unittest.TestCase):
 
 class CognitiveServicesAccountConnectionsTests(ScenarioTest):
 
-    INPUT_DATA_PATH: str = os.path.join(TEST_DIR, 'input_data', 'connections')
+    INPUT_DATA_PATH: str = os.path.join(TEST_DIR, 'data')
     
     @ResourceGroupPreparer()
     def test_account_connections_from_file(self, resource_group):
