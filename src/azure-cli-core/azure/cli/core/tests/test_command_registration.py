@@ -389,6 +389,42 @@ class TestCommandRegistration(unittest.TestCase):
         del INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE]
         del INDEX[CommandIndex._COMMAND_INDEX]
 
+    def test_command_index_case_sensitivity(self):
+        """Test that CommandIndex.get() method is case-insensitive for command arguments."""
+        from azure.cli.core._session import INDEX
+        from azure.cli.core import CommandIndex, __version__
+
+        cli = DummyCli()
+        command_index = CommandIndex(cli)
+        
+        # Set up a command index with lowercase entries
+        INDEX[CommandIndex._COMMAND_INDEX_VERSION] = __version__
+        INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = cli.cloud.profile
+        INDEX[CommandIndex._COMMAND_INDEX] = {
+            "hello": ["azure.cli.command_modules.hello"],
+            "account": ["azure.cli.command_modules.account"],
+            "version": ["azure.cli.command_modules.version"]
+        }
+        
+        # Test lowercase - should work
+        result_lower = command_index.get(["hello", "world"])
+        self.assertIsNotNone(result_lower, "Lowercase 'hello' should be found in index")
+        
+        # Test uppercase - should work with case sensitivity fix, fail without it
+        result_upper = command_index.get(["HELLO", "world"])
+        
+        # Test mixed case - should work with case sensitivity fix, fail without it  
+        result_mixed = command_index.get(["Hello", "world"])
+        
+        # These should work the same as lowercase (this will FAIL without the fix)
+        self.assertEqual(result_lower, result_upper, "Uppercase 'HELLO' should work same as lowercase 'hello'")
+        self.assertEqual(result_lower, result_mixed, "Mixed case 'Hello' should work same as lowercase 'hello'")
+            
+        # Clean up
+        del INDEX[CommandIndex._COMMAND_INDEX_VERSION]
+        del INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] 
+        del INDEX[CommandIndex._COMMAND_INDEX]
+
     @mock.patch('importlib.import_module', _mock_import_lib)
     @mock.patch('pkgutil.iter_modules', _mock_iter_modules)
     @mock.patch('azure.cli.core.commands._load_command_loader', _mock_load_command_loader)
