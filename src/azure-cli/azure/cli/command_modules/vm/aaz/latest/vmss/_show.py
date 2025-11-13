@@ -11,14 +11,12 @@
 from azure.cli.core.aaz import *
 
 
-@register_command(
-    "vmss wait",
-)
-class Wait(AAZWaitCommand):
-    """Place the CLI in a waiting state until a condition is met.
+class Show(AAZCommand):
+    """Get information about a virtual machine scale set.
     """
 
     _aaz_info = {
+        "version": "2025-04-01",
         "resources": [
             ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}", "2025-04-01"],
         ]
@@ -70,7 +68,7 @@ class Wait(AAZWaitCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
     class VirtualMachineScaleSetsGet(AAZHttpOperation):
@@ -264,7 +262,7 @@ class Wait(AAZWaitCommand):
             properties.host_group = AAZObjectType(
                 serialized_name="hostGroup",
             )
-            _WaitHelper._build_schema_sub_resource_read(properties.host_group)
+            _ShowHelper._build_schema_sub_resource_read(properties.host_group)
             properties.orchestration_mode = AAZStrType(
                 serialized_name="orchestrationMode",
             )
@@ -282,7 +280,7 @@ class Wait(AAZWaitCommand):
             properties.proximity_placement_group = AAZObjectType(
                 serialized_name="proximityPlacementGroup",
             )
-            _WaitHelper._build_schema_sub_resource_read(properties.proximity_placement_group)
+            _ShowHelper._build_schema_sub_resource_read(properties.proximity_placement_group)
             properties.resiliency_policy = AAZObjectType(
                 serialized_name="resiliencyPolicy",
             )
@@ -602,7 +600,7 @@ class Wait(AAZWaitCommand):
             capacity_reservation.capacity_reservation_group = AAZObjectType(
                 serialized_name="capacityReservationGroup",
             )
-            _WaitHelper._build_schema_sub_resource_read(capacity_reservation.capacity_reservation_group)
+            _ShowHelper._build_schema_sub_resource_read(capacity_reservation.capacity_reservation_group)
 
             diagnostics_profile = cls._schema_on_200.properties.virtual_machine_profile.diagnostics_profile
             diagnostics_profile.boot_diagnostics = AAZObjectType(
@@ -678,7 +676,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="sourceVault",
                 flags={"required": True},
             )
-            _WaitHelper._build_schema_sub_resource_read(protected_settings_from_key_vault.source_vault)
+            _ShowHelper._build_schema_sub_resource_read(protected_settings_from_key_vault.source_vault)
 
             provision_after_extensions = cls._schema_on_200.properties.virtual_machine_profile.extension_profile.extensions.Element.properties.provision_after_extensions
             provision_after_extensions.Element = AAZStrType()
@@ -700,7 +698,7 @@ class Wait(AAZWaitCommand):
             network_profile.health_probe = AAZObjectType(
                 serialized_name="healthProbe",
             )
-            _WaitHelper._build_schema_api_entity_reference_read(network_profile.health_probe)
+            _ShowHelper._build_schema_api_entity_reference_read(network_profile.health_probe)
             network_profile.network_api_version = AAZStrType(
                 serialized_name="networkApiVersion",
             )
@@ -752,7 +750,7 @@ class Wait(AAZWaitCommand):
             properties.network_security_group = AAZObjectType(
                 serialized_name="networkSecurityGroup",
             )
-            _WaitHelper._build_schema_sub_resource_read(properties.network_security_group)
+            _ShowHelper._build_schema_sub_resource_read(properties.network_security_group)
             properties.primary = AAZBoolType()
 
             dns_settings = cls._schema_on_200.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.dns_settings
@@ -795,23 +793,23 @@ class Wait(AAZWaitCommand):
                 serialized_name="publicIPAddressConfiguration",
             )
             properties.subnet = AAZObjectType()
-            _WaitHelper._build_schema_api_entity_reference_read(properties.subnet)
+            _ShowHelper._build_schema_api_entity_reference_read(properties.subnet)
 
             application_gateway_backend_address_pools = cls._schema_on_200.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.application_gateway_backend_address_pools
             application_gateway_backend_address_pools.Element = AAZObjectType()
-            _WaitHelper._build_schema_sub_resource_read(application_gateway_backend_address_pools.Element)
+            _ShowHelper._build_schema_sub_resource_read(application_gateway_backend_address_pools.Element)
 
             application_security_groups = cls._schema_on_200.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.application_security_groups
             application_security_groups.Element = AAZObjectType()
-            _WaitHelper._build_schema_sub_resource_read(application_security_groups.Element)
+            _ShowHelper._build_schema_sub_resource_read(application_security_groups.Element)
 
             load_balancer_backend_address_pools = cls._schema_on_200.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.load_balancer_backend_address_pools
             load_balancer_backend_address_pools.Element = AAZObjectType()
-            _WaitHelper._build_schema_sub_resource_read(load_balancer_backend_address_pools.Element)
+            _ShowHelper._build_schema_sub_resource_read(load_balancer_backend_address_pools.Element)
 
             load_balancer_inbound_nat_pools = cls._schema_on_200.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.load_balancer_inbound_nat_pools
             load_balancer_inbound_nat_pools.Element = AAZObjectType()
-            _WaitHelper._build_schema_sub_resource_read(load_balancer_inbound_nat_pools.Element)
+            _ShowHelper._build_schema_sub_resource_read(load_balancer_inbound_nat_pools.Element)
 
             public_ip_address_configuration = cls._schema_on_200.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration
             public_ip_address_configuration.name = AAZStrType(
@@ -842,7 +840,7 @@ class Wait(AAZWaitCommand):
             properties.public_ip_prefix = AAZObjectType(
                 serialized_name="publicIPPrefix",
             )
-            _WaitHelper._build_schema_sub_resource_read(properties.public_ip_prefix)
+            _ShowHelper._build_schema_sub_resource_read(properties.public_ip_prefix)
 
             dns_settings = cls._schema_on_200.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties.dns_settings
             dns_settings.domain_name_label = AAZStrType(
@@ -955,7 +953,7 @@ class Wait(AAZWaitCommand):
             _element.source_vault = AAZObjectType(
                 serialized_name="sourceVault",
             )
-            _WaitHelper._build_schema_sub_resource_read(_element.source_vault)
+            _ShowHelper._build_schema_sub_resource_read(_element.source_vault)
             _element.vault_certificates = AAZListType(
                 serialized_name="vaultCertificates",
             )
@@ -1106,7 +1104,7 @@ class Wait(AAZWaitCommand):
             )
             proxy_agent_settings.enabled = AAZBoolType()
             proxy_agent_settings.imds = AAZObjectType()
-            _WaitHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
+            _ShowHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
             proxy_agent_settings.key_incarnation_id = AAZIntType(
                 serialized_name="keyIncarnationId",
             )
@@ -1114,7 +1112,7 @@ class Wait(AAZWaitCommand):
             proxy_agent_settings.wire_server = AAZObjectType(
                 serialized_name="wireServer",
             )
-            _WaitHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
+            _ShowHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
 
             uefi_settings = cls._schema_on_200.properties.virtual_machine_profile.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(
@@ -1168,7 +1166,7 @@ class Wait(AAZWaitCommand):
             _element.managed_disk = AAZObjectType(
                 serialized_name="managedDisk",
             )
-            _WaitHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_read(_element.managed_disk)
+            _ShowHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_read(_element.managed_disk)
             _element.name = AAZStrType()
             _element.write_accelerator_enabled = AAZBoolType(
                 serialized_name="writeAcceleratorEnabled",
@@ -1210,7 +1208,7 @@ class Wait(AAZWaitCommand):
             os_disk.managed_disk = AAZObjectType(
                 serialized_name="managedDisk",
             )
-            _WaitHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_read(os_disk.managed_disk)
+            _ShowHelper._build_schema_virtual_machine_scale_set_managed_disk_parameters_read(os_disk.managed_disk)
             os_disk.name = AAZStrType()
             os_disk.os_type = AAZStrType(
                 serialized_name="osType",
@@ -1266,8 +1264,8 @@ class Wait(AAZWaitCommand):
             return cls._schema_on_200
 
 
-class _WaitHelper:
-    """Helper class for Wait"""
+class _ShowHelper:
+    """Helper class for Show"""
 
     _schema_api_entity_reference_read = None
 
@@ -1372,4 +1370,4 @@ class _WaitHelper:
         _schema.storage_account_type = cls._schema_virtual_machine_scale_set_managed_disk_parameters_read.storage_account_type
 
 
-__all__ = ["Wait"]
+__all__ = ["Show"]
