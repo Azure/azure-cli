@@ -396,7 +396,7 @@ class TestCommandRegistration(unittest.TestCase):
 
         cli = DummyCli()
         command_index = CommandIndex(cli)
-        
+
         # Set up a command index with lowercase entries
         INDEX[CommandIndex._COMMAND_INDEX_VERSION] = __version__
         INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] = cli.cloud.profile
@@ -405,24 +405,24 @@ class TestCommandRegistration(unittest.TestCase):
             "account": ["azure.cli.command_modules.account"],
             "version": ["azure.cli.command_modules.version"]
         }
-        
+
         # Test lowercase - should work
         result_lower = command_index.get(["hello", "world"])
         self.assertIsNotNone(result_lower, "Lowercase 'hello' should be found in index")
-        
+
         # Test uppercase - should work with case sensitivity fix, fail without it
         result_upper = command_index.get(["HELLO", "world"])
-        
+
         # Test mixed case - should work with case sensitivity fix, fail without it  
         result_mixed = command_index.get(["Hello", "world"])
-        
+
         # These should work the same as lowercase (this will FAIL without the fix)
         self.assertEqual(result_lower, result_upper, "Uppercase 'HELLO' should work same as lowercase 'hello'")
         self.assertEqual(result_lower, result_mixed, "Mixed case 'Hello' should work same as lowercase 'hello'")
-            
+
         # Clean up
         del INDEX[CommandIndex._COMMAND_INDEX_VERSION]
-        del INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE] 
+        del INDEX[CommandIndex._COMMAND_INDEX_CLOUD_PROFILE]
         del INDEX[CommandIndex._COMMAND_INDEX]
 
     @mock.patch('importlib.import_module', _mock_import_lib)
