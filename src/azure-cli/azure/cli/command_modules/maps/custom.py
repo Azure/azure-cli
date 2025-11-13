@@ -7,8 +7,6 @@ from knack.log import get_logger
 from knack.prompting import prompt_y_n
 from knack.util import CLIError
 
-ACCOUNT_LOCATION = 'global'
-
 logger = get_logger(__name__)
 
 
@@ -18,6 +16,7 @@ def maps_account_create(client,
                         name,
                         tags=None,
                         kind=None,
+                        location=None,
                         disable_local_auth=None,
                         linked_resources=None,
                         type_=None,
@@ -44,15 +43,13 @@ def maps_account_create(client,
         option = prompt_y_n(hint)
         if not option:
             raise CLIError(client_denied_terms)
-    if kind is None:
-        kind = "Gen1"
     if disable_local_auth is None:
         disable_local_auth = False
     maps_account = {}
     if tags is not None:
         maps_account['tags'] = tags
-    maps_account['location'] = ACCOUNT_LOCATION
-    maps_account['kind'] = "Gen1" if kind is None else kind
+    maps_account['kind'] = kind or 'Gen2'
+    maps_account['location'] = location or 'eastus'
     maps_account['properties'] = {}
     maps_account['properties']['disable_local_auth'] = False if disable_local_auth is None else disable_local_auth
     if linked_resources is not None:
