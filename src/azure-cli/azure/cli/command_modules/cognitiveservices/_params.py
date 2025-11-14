@@ -375,7 +375,11 @@ def load_arguments(self, _):
             options_list=["--account-name", "-a"],
             help="cognitive service account name."
         )
-        c.argument("project_name", help="AI Project name")
+        c.argument(
+            "project_name",
+            options_list=["--project-name", "-p"],
+            help="AI Project name"
+        )
         c.argument(
             "agent_name",
             options_list=["--name", "-n"],
@@ -496,6 +500,16 @@ def load_arguments(self, _):
                 'Use this to create the agent version without starting the deployment. '
                 'Cannot be used with --min-replicas or --max-replicas.'
             )
+        )
+        c.argument(
+            'timeout',
+            type=int,
+            help=(
+                'Maximum time in seconds to wait for deployment to be ready. '
+                'Default: 600 seconds (10 minutes). '
+                'Increase for large container images or slow network conditions.'
+            ),
+            default=600
         )
 
     with self.argument_context("cognitiveservices agent update") as c:

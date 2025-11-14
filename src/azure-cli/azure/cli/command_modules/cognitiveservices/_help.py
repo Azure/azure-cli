@@ -496,7 +496,7 @@ long-summary: |
 parameters:
   - name: --account-name -a
     short-summary: Name of the Cognitive Services account.
-  - name: --project-name
+  - name: --project-name -p
     short-summary: Name of the AI Foundry project.
   - name: --name -n
     short-summary: Name of the agent to create.
@@ -544,6 +544,12 @@ parameters:
     short-summary: Communication protocol (responses or streaming).
   - name: --protocol-version
     short-summary: Protocol version (default is v1).
+  - name: --timeout
+    short-summary: Maximum time in seconds to wait for deployment to be ready.
+    long-summary: |
+        Default is 600 seconds (10 minutes). Increase for large container images
+        or slow network conditions. The deployment process includes pulling the
+        container image, starting the container, and health checks.
 examples:
   - name: Create agent from existing container image
     text: |
@@ -621,6 +627,14 @@ examples:
           --name my-agent \\
           --image my-agent:v1.0 \\
           --registry myregistry
+  - name: Create agent with extended timeout for large images
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --image myregistry.azurecr.io/my-large-agent:v1.0 \\
+          --timeout 1200
 """
 
 helps[

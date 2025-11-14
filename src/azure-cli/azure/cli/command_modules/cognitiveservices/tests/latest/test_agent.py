@@ -44,57 +44,69 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.testsdk.scenario_tests.decorators import live_only
 from knack.util import CLIError
+from azure.cli.core.azclierror import InvalidArgumentValueError
 
-from azure.cli.command_modules.cognitiveservices.custom import _extract_version_from_image, _has_dockerfile, _is_docker_running
+from azure.cli.command_modules.cognitiveservices.custom import (
+    _validate_image_tag,
+    _has_dockerfile,
+    _is_docker_running,
+    _is_fully_qualified_image,
+    _validate_path_for_subprocess,
+)
 from azure.cli.command_modules.cognitiveservices._params import _environment_variables_type
 
 
 class CognitiveServicesAgentHelperTests(unittest.TestCase):
     """Unit tests for agent helper functions."""
     
-    def test_extract_version_from_image_valid(self):
-        """Test version extraction from valid image URIs."""
+    def test_validate_image_tag_valid(self):
+        """Test tag validation and extraction from valid image URIs."""
         # Full ACR URI with version
         self.assertEqual(
-            _extract_version_from_image('myregistry.azurecr.io/myagent:v1.0'),
+            _validate_image_tag('myregistry.azurecr.io/myagent:v1.0'),
             'v1.0'
         )
         
         # Short image name with version
         self.assertEqual(
-            _extract_version_from_image('myagent:v2.5'),
+            _validate_image_tag('myagent:v2.5'),
             'v2.5'
         )
         
         # Version with special characters
         self.assertEqual(
-            _extract_version_from_image('myregistry.azurecr.io/myagent:v1.0-beta'),
+            _validate_image_tag('myregistry.azurecr.io/myagent:v1.0-beta'),
             'v1.0-beta'
         )
         
         # Numeric version
         self.assertEqual(
-            _extract_version_from_image('myagent:123'),
+            _validate_image_tag('myagent:123'),
             '123'
         )
         
-        # Latest tag
+        # Latest tag (should warn but succeed)
         self.assertEqual(
-            _extract_version_from_image('myregistry.azurecr.io/myagent:latest'),
+            _validate_image_tag('myregistry.azurecr.io/myagent:latest'),
             'latest'
         )
     
-    def test_extract_version_from_image_invalid(self):
-        """Test version extraction error handling."""
+    def test_validate_image_tag_invalid(self):
+        """Test tag validation error handling."""
         # Missing tag
-        with self.assertRaises(CLIError) as context:
-            _extract_version_from_image('myregistry.azurecr.io/myagent')
+        with self.assertRaises(InvalidArgumentValueError) as context:
+            _validate_image_tag('myregistry.azurecr.io/myagent')
         self.assertIn('must include a', str(context.exception).lower())
         
         # Empty tag
-        with self.assertRaises(CLIError) as context:
-            _extract_version_from_image('myagent:')
+        with self.assertRaises(InvalidArgumentValueError) as context:
+            _validate_image_tag('myagent:')
         self.assertIn('must include a', str(context.exception).lower())
+
+    def test_is_fully_qualified_image(self):
+        self.assertTrue(_is_fully_qualified_image('myregistry.azurecr.io/myagent:v1'))
+        self.assertTrue(_is_fully_qualified_image('localhost:5000/myagent:v1'))
+        self.assertFalse(_is_fully_qualified_image('myagent:v1'))
     
     def test_environment_variables_type_valid(self):
         """Test environment variable parsing with valid inputs."""
@@ -193,6 +205,95 @@ class CognitiveServicesAgentHelperTests(unittest.TestCase):
         
         # Log the result for debugging purposes in test output
         print(f"Docker running status: {result}")
+    
+    def test_agent_create_timeout_parameter_default(self):
+        """Test that agent_create accepts timeout parameter with default value."""
+        # This test verifies the function signature includes timeout parameter
+        from inspect import signature
+        from azure.cli.command_modules.cognitiveservices.custom import agent_create
+        
+        sig = signature(agent_create)
+        self.assertIn('timeout', sig.parameters)
+        self.assertEqual(sig.parameters['timeout'].default, 600)
+    
+    def test_deploy_agent_version_timeout_parameter(self):
+        """Test that _deploy_agent_version accepts timeout parameter."""
+        from inspect import signature
+        from azure.cli.command_modules.cognitiveservices.custom import _deploy_agent_version
+        
+        sig = signature(_deploy_agent_version)
+        self.assertIn('timeout', sig.parameters)
+        self.assertEqual(sig.parameters['timeout'].default, 600)
+    
+    def test_wait_for_agent_deployment_ready_timeout_parameter(self):
+        """Test that _wait_for_agent_deployment_ready accepts timeout and cmd parameters."""
+        from inspect import signature
+        from azure.cli.command_modules.cognitiveservices.custom import _wait_for_agent_deployment_ready
+        
+        sig = signature(_wait_for_agent_deployment_ready)
+        # Verify cmd parameter exists (needed for progress indicator)
+        self.assertIn('cmd', sig.parameters)
+        # Verify timeout parameter exists with correct default
+        self.assertIn('timeout', sig.parameters)
+        self.assertEqual(sig.parameters['timeout'].default, 600)
+
+    def test_validate_path_for_subprocess_valid_paths(self):
+        """Test that valid paths pass validation."""
+        from azure.cli.command_modules.cognitiveservices.custom import _validate_path_for_subprocess
+        
+        # These should all pass without raising exceptions
+        valid_paths = [
+            '/home/user/project',
+            '/tmp/build',
+            'C:\\Users\\user\\project',
+            './relative/path',
+            '../parent/dir',
+            '/path/with-dashes_and.dots',
+        ]
+        
+        for path in valid_paths:
+            try:
+                _validate_path_for_subprocess(path, "test path")
+            except Exception as e:
+                self.fail(f"Valid path '{path}' failed validation: {e}")
+    
+    def test_validate_path_for_subprocess_dangerous_chars(self):
+        """Test that paths with dangerous shell metacharacters are rejected."""
+        from azure.cli.command_modules.cognitiveservices.custom import _validate_path_for_subprocess
+        
+        # These should all raise InvalidArgumentValueError
+        dangerous_paths = [
+            '/tmp; rm -rf /',
+            '/tmp && malicious_command',
+            '/tmp | cat /etc/passwd',
+            '/tmp`whoami`',
+            '/tmp$(whoami)',
+            '/tmp<file',
+            '/tmp>file',
+            '/tmp&background',
+            '/tmp\nmalicious',
+        ]
+        
+        for path in dangerous_paths:
+            with self.assertRaises(InvalidArgumentValueError, msg=f"Path '{path}' should have been rejected"):
+                _validate_path_for_subprocess(path, "test path")
+    
+    def test_validate_path_for_subprocess_null_bytes(self):
+        """Test that paths with null bytes are rejected."""
+        from azure.cli.command_modules.cognitiveservices.custom import _validate_path_for_subprocess
+        
+        with self.assertRaises(InvalidArgumentValueError):
+            _validate_path_for_subprocess('/tmp/test\0file', "test path")
+    
+    def test_validate_path_for_subprocess_empty_path(self):
+        """Test that empty paths are rejected."""
+        from azure.cli.command_modules.cognitiveservices.custom import _validate_path_for_subprocess
+        
+        with self.assertRaises(InvalidArgumentValueError):
+            _validate_path_for_subprocess('', "test path")
+        
+        with self.assertRaises(InvalidArgumentValueError):
+            _validate_path_for_subprocess(None, "test path")
 
 
 class CognitiveServicesAgentTests(ScenarioTest):
@@ -632,6 +733,7 @@ CMD ["python", "app.py"]
         - Invalid CPU value
         - Invalid memory format
         - Conflicting --no-start with replica parameters
+        - Invalid --build-remote with --image (should only be used with --source)
         """
         account_name = self.create_random_name(prefix='cs_agent_', length=20)
         project_name = self.create_random_name(prefix='proj_', length=15)
@@ -693,6 +795,24 @@ CMD ["python", "app.py"]
                     '--name {agent} '
                     '--image myregistry.azurecr.io/test-agent:v1.0 '
                     '--no-start --max-replicas 5')
+
+        # Test 6: Fully-qualified image plus --registry
+        with self.assertRaisesRegex(CLIError, 'omit --registry'):
+            self.cmd('az cognitiveservices agent create --skip-acr-check '
+                    '-a {account} '
+                    '--project-name {project} '
+                    '--name {agent} '
+                    '--image myregistry.azurecr.io/test-agent:v1.0 '
+                    '--registry myregistry')
+
+        # Test 7: --build-remote with --image (should only be used with --source)
+        with self.assertRaisesRegex(CLIError, '--build-remote can only be used with --source'):
+            self.cmd('az cognitiveservices agent create --skip-acr-check '
+                    '-a {account} '
+                    '--project-name {project} '
+                    '--name {agent} '
+                    '--image myregistry.azurecr.io/test-agent:v1.0 '
+                    '--build-remote')
 
         # Cleanup
         self.cmd('az cognitiveservices account delete -n {account} -g {rg}')
