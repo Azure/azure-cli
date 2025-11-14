@@ -788,7 +788,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             required=False,
         )
         args_schema.shared_network_features = AAZStrArg(
-            options=["--shared-network-features"],
+            options=["--shared-network-features --network-features"],
             arg_group="Shared Volume",
             help="Network features available to the volumes in the volume group.",
             default="Basic",
