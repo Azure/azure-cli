@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-06-01", "properties.exportPolicy.rules"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-09-01", "properties.exportPolicy.rules"],
         ]
     }
 
@@ -92,7 +92,7 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
 
     class SubresourceSelector(AAZJsonSelector):
@@ -162,7 +162,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -306,6 +306,7 @@ class _ListHelper:
         )
         properties.effective_network_features = AAZStrType(
             serialized_name="effectiveNetworkFeatures",
+            flags={"read_only": True},
         )
         properties.enable_subvolumes = AAZStrType(
             serialized_name="enableSubvolumes",
@@ -348,8 +349,12 @@ class _ListHelper:
         properties.key_vault_private_endpoint_resource_id = AAZStrType(
             serialized_name="keyVaultPrivateEndpointResourceId",
         )
+        properties.language = AAZStrType()
         properties.ldap_enabled = AAZBoolType(
             serialized_name="ldapEnabled",
+        )
+        properties.ldap_server_type = AAZStrType(
+            serialized_name="ldapServerType",
         )
         properties.maximum_number_of_files = AAZIntType(
             serialized_name="maximumNumberOfFiles",
@@ -476,6 +481,22 @@ class _ListHelper:
         )
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
+            flags={"read_only": True},
+        )
+        replication.external_replication_setup_info = AAZStrType(
+            serialized_name="externalReplicationSetupInfo",
+            flags={"read_only": True},
+        )
+        replication.external_replication_setup_status = AAZStrType(
+            serialized_name="externalReplicationSetupStatus",
+            flags={"read_only": True},
+        )
+        replication.mirror_state = AAZStrType(
+            serialized_name="mirrorState",
+            flags={"read_only": True},
+        )
+        replication.relationship_status = AAZStrType(
+            serialized_name="relationshipStatus",
             flags={"read_only": True},
         )
         replication.remote_path = AAZObjectType(

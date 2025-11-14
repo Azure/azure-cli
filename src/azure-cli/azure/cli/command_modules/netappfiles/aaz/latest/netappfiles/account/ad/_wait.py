@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-06-01", "properties.activeDirectories[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-09-01", "properties.activeDirectories[]"],
         ]
     }
 
@@ -119,7 +119,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -243,6 +243,9 @@ class _WaitHelper:
             flags={"read_only": True},
         )
         properties.encryption = AAZObjectType()
+        properties.ldap_configuration = AAZObjectType(
+            serialized_name="ldapConfiguration",
+        )
         properties.multi_ad_status = AAZStrType(
             serialized_name="multiAdStatus",
             flags={"read_only": True},
@@ -383,6 +386,26 @@ class _WaitHelper:
         key_vault_properties.status = AAZStrType(
             flags={"read_only": True},
         )
+
+        ldap_configuration = _schema_net_app_account_read.properties.ldap_configuration
+        ldap_configuration.certificate_cn_host = AAZStrType(
+            serialized_name="certificateCNHost",
+            nullable=True,
+        )
+        ldap_configuration.domain = AAZStrType()
+        ldap_configuration.ldap_over_tls = AAZBoolType(
+            serialized_name="ldapOverTLS",
+        )
+        ldap_configuration.ldap_servers = AAZListType(
+            serialized_name="ldapServers",
+        )
+        ldap_configuration.server_ca_certificate = AAZStrType(
+            serialized_name="serverCACertificate",
+            flags={"secret": True},
+        )
+
+        ldap_servers = _schema_net_app_account_read.properties.ldap_configuration.ldap_servers
+        ldap_servers.Element = AAZStrType()
 
         system_data = _schema_net_app_account_read.system_data
         system_data.created_at = AAZStrType(

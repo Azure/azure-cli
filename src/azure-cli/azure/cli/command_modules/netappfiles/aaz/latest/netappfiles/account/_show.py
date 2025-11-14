@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-09-01"],
         ]
     }
 
@@ -123,7 +123,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -222,6 +222,9 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
             properties.encryption = AAZObjectType()
+            properties.ldap_configuration = AAZObjectType(
+                serialized_name="ldapConfiguration",
+            )
             properties.multi_ad_status = AAZStrType(
                 serialized_name="multiAdStatus",
                 flags={"read_only": True},
@@ -362,6 +365,26 @@ class Show(AAZCommand):
             key_vault_properties.status = AAZStrType(
                 flags={"read_only": True},
             )
+
+            ldap_configuration = cls._schema_on_200.properties.ldap_configuration
+            ldap_configuration.certificate_cn_host = AAZStrType(
+                serialized_name="certificateCNHost",
+                nullable=True,
+            )
+            ldap_configuration.domain = AAZStrType()
+            ldap_configuration.ldap_over_tls = AAZBoolType(
+                serialized_name="ldapOverTLS",
+            )
+            ldap_configuration.ldap_servers = AAZListType(
+                serialized_name="ldapServers",
+            )
+            ldap_configuration.server_ca_certificate = AAZStrType(
+                serialized_name="serverCACertificate",
+                flags={"secret": True},
+            )
+
+            ldap_servers = cls._schema_on_200.properties.ldap_configuration.ldap_servers
+            ldap_servers.Element = AAZStrType()
 
             system_data = cls._schema_on_200.system_data
             system_data.created_at = AAZStrType(
