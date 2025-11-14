@@ -262,6 +262,54 @@ def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):  # pylint: d
     return None
 
 
+def get_hyper_v_generation_from_vmss_by_aaz(cli_ctx, image_ref, location):  # pylint: disable=too-many-return-statements
+    from ._vm_utils import (is_valid_image_version_id, parse_gallery_image_id, is_valid_vm_image_id, parse_vm_image_id,
+                            parse_shared_gallery_image_id, parse_community_gallery_image_id)
+    if image_ref is None:
+        return None
+    if image_ref.get("id", None) is not None:
+        from ._client_factory import _compute_client_factory
+        if is_valid_image_version_id(image_ref["id"]):
+            image_info = parse_gallery_image_id(image_ref["id"])
+            client = _compute_client_factory(cli_ctx, subscription_id=image_info[0]).gallery_images
+            gallery_image_info = client.get(
+                resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
+            return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+        if is_valid_vm_image_id(image_ref["id"]):
+            sub, rg, image_name = parse_vm_image_id(image_ref["id"])
+            client = _compute_client_factory(cli_ctx, subscription_id=sub).images
+            image_info = client.get(rg, image_name)
+            return image_info.hyper_v_generation if hasattr(image_info, 'hyper_v_generation') else None
+
+    if image_ref.get("shared_gallery_image_id", None) is not None:
+        from ._client_factory import cf_shared_gallery_image
+        image_info = parse_shared_gallery_image_id(image_ref["shared_gallery_image_id"])
+        gallery_image_info = cf_shared_gallery_image(cli_ctx).get(
+            location=location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+        return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+
+    if image_ref.get("community_gallery_image_id", None) is not None:
+        from ._client_factory import cf_community_gallery_image
+        image_info = parse_community_gallery_image_id(image_ref["community_gallery_image_id"])
+        gallery_image_info = cf_community_gallery_image(cli_ctx).get(
+            location=location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+        return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+
+    if (image_ref.get("offer", None) is not None and image_ref.get("publisher", None) is not None
+            and image_ref.get("sku", None) is not None and image_ref.get("version", None) is not None):
+        from ._client_factory import cf_vm_image
+        version = image_ref["version"]
+        if version.lower() == 'latest':
+            from ._actions import _get_latest_image_version
+            version = _get_latest_image_version(cli_ctx, location, image_ref["publisher"], image_ref["offer"],
+                                                image_ref["sku"])
+        vm_image_info = cf_vm_image(cli_ctx, '').get(
+            location, image_ref["publisher"], image_ref["offer"], image_ref["sku"], version)
+        return vm_image_info.hyper_v_generation if hasattr(vm_image_info, 'hyper_v_generation') else None
+
+    return None
+
+
 def _is_linux_os(vm):
     os_type = None
     if vm and vm.storage_profile and vm.storage_profile.os_disk and vm.storage_profile.os_disk.os_type:
@@ -1893,14 +1941,14 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             vm["hardware_profile"] = {}
         if vm["hardware_profile"].get("vm_size_properties", None) is None:
             vm["hardware_profile"]["vm_size_properties"] = {}
-        vm["hardware_profile"]["vm_size_properties"]["v_cpus_available"] = v_cpus_available
+        vm["hardware_profile"]["vm_size_properties"]["v_cp_us_available"] = v_cpus_available
 
     if v_cpus_per_core is not None:
         if vm.get("hardware_profile", None) is None:
             vm["hardware_profile"] = {}
         if vm["hardware_profile"].get("vm_size_properties", None) is None:
             vm["hardware_profile"]["vm_size_properties"] = {}
-        vm["hardware_profile"]["vm_size_properties"]["v_cpus_per_core"] = v_cpus_per_core
+        vm["hardware_profile"]["vm_size_properties"]["v_cp_us_per_core"] = v_cpus_per_core
 
     if ephemeral_os_disk_placement is not None:
         if vm.get("storage_profile", {}).get("os_disk", {}).get("diff_disk_settings", None) is not None:
@@ -3996,6 +4044,23 @@ def _check_vmss_hyper_v_generation(cli_ctx, vmss):
                                         "TrustedLaunch.".format(vmss.name, security_type))
 
 
+def _check_vmss_hyper_v_generation_by_aaz(cli_ctx, vmss):
+    hyper_v_generation = get_hyper_v_generation_from_vmss_by_aaz(
+        cli_ctx, vmss.get("virtual_machine_profile", {}).get("storage_profile", {}).get("image_reference", {}), vmss["location"])
+    security_profile = vmss.get("virtual_machine_profile", {}).get("security_profile", {})
+    security_type = security_profile.get("security_type", None)
+
+    if hyper_v_generation == "V1" or (hyper_v_generation == "V2" and security_type is None):
+        logger.warning("Trusted Launch security type is supported on Hyper-V Generation 2 OS Images. "
+                       "To know more please visit "
+                       "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch")
+    elif hyper_v_generation == "V2" and security_type == "ConfidentialVM":
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError("{} is already configured with {}. "
+                                        "Security Configuration cannot be updated from ConfidentialVM to "
+                                        "TrustedLaunch.".format(vmss["name"], security_type))
+
+
 def get_vmss_modified(cmd, resource_group_name, name, instance_id=None, security_type=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is not None:
@@ -4017,34 +4082,36 @@ def get_vmss_modified(cmd, resource_group_name, name, instance_id=None, security
 
 
 def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, security_type=None):
-    # from .aaz.latest.vmss import Show as VMSSShow
-    from .operations.vmss import convert_show_result_to_sneak_case
-
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is not None:
         from .aaz.latest.vmss.vms import Show as VMSSVMSShow
+        from .operations.vmss_vms import convert_show_result_to_sneak_case as vmss_vms_convert_show_result_to_sneak_case
         vms = VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args={
             'resource_group': resource_group_name,
             "vm_scale_set_name": name,
             "instance_id": instance_id
         })
-        converted_vm = convert_show_result_to_sneak_case(vms)
+        converted_vms = vmss_vms_convert_show_result_to_sneak_case(vms)
 
         # To avoid unnecessary permission check of image
-        # if hasattr(vms, "storage_profile") and vms.storage_profile:
-        #     vms.storage_profile.image_reference = None
-        if vms.get("storage_profile", None) is not None:
-            vms["storage_profile"]["image_reference"] = None
-        return vms
+        if converted_vms.get("storage_profile", None) is not None:
+            converted_vms["storage_profile"]["image_reference"] = None
+        return converted_vms
 
-    vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
+    from .aaz.latest.vmss import Show as VMSSShow
+    from .operations.vmss import convert_show_result_to_sneak_case as vmss_convert_show_result_to_sneak_case
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        "vm_scale_set_name": name,
+    })
+    converted_vmss = vmss_convert_show_result_to_sneak_case(vmss)
+
     if security_type == 'TrustedLaunch':
-        _check_vmss_hyper_v_generation(cmd.cli_ctx, vmss)
+        _check_vmss_hyper_v_generation_by_aaz(cmd.cli_ctx, converted_vmss)
     # To avoid unnecessary permission check of image
-    if hasattr(vmss, "virtual_machine_profile") and vmss.virtual_machine_profile \
-            and vmss.virtual_machine_profile.storage_profile:
-        vmss.virtual_machine_profile.storage_profile.image_reference = None
-    return vmss
+    if converted_vmss.get("virtual_machine_profile", {}).get("storage_profile", None) is not None:
+        converted_vmss["virtual_machine_profile"]["storage_profile"]["image_reference"] = None
+    return converted_vmss
 
 
 def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
@@ -4286,270 +4353,322 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 'security_profile': security_profile
             }
         }))
-        vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
+        vmss = get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id, security_type)
 
     if add_proxy_agent_extension is not None:
-        args = {
-            'resource_group': resource_group_name,
-            'vm_scale_set_name': name,
-            'no_wait': no_wait,
-            'virtual_machine_profile': {
-                'security_profile': {
-                    'proxy_agent_settings': {
-                        'add_proxy_agent_extension': add_proxy_agent_extension
-                    }
-                }
-            }
-        }
+        if instance_id:
+            if vmss.get("security_profile", None) is None:
+                vmss["security_profile"] = {}
+            if vmss["security_profile"].get("proxy_agent_settings", None) is None:
+                vmss["security_profile"]["proxy_agent_settings"] = {}
 
-        LongRunningOperation(cmd.cli_ctx)(UpdateVMSS(cli_ctx=cmd.cli_ctx)(command_args=args))
-        vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
+            vmss["security_profile"]["proxy_agent_settings"]["add_proxy_agent_extension"] = add_proxy_agent_extension
+        else:
+            if vmss.get("virtual_machine_profile", None) is None:
+                vmss["virtual_machine_profile"] = {}
+            if vmss["virtual_machine_profile"].get("security_profile", None) is None:
+                vmss["virtual_machine_profile"]["security_profile"] = {}
+            if vmss["virtual_machine_profile"]["security_profile"].get("proxy_agent_settings", None) is None:
+                vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"] = {}
 
-    aux_subscriptions = None
-    # pylint: disable=too-many-boolean-expressions
-    if vmss and hasattr(vmss, 'virtual_machine_profile') and vmss.virtual_machine_profile and \
-            vmss.virtual_machine_profile.storage_profile and \
-            vmss.virtual_machine_profile.storage_profile.image_reference and \
-            'id' in vmss.virtual_machine_profile.storage_profile.image_reference:
-        aux_subscriptions = _parse_aux_subscriptions(vmss.virtual_machine_profile.storage_profile.image_reference['id'])
-    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
-
-    VMProtectionPolicy = cmd.get_models('VirtualMachineScaleSetVMProtectionPolicy')
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["add_proxy_agent_extension"] = \
+                add_proxy_agent_extension
 
     # handle vmss instance update
     from azure.cli.core.util import b64encode
 
     if instance_id is not None:
         if license_type is not None:
-            vmss.license_type = license_type
+            vmss["license_type"] = license_type
 
         if user_data is not None:
-            vmss.user_data = b64encode(user_data)
+            vmss["user_data"] = b64encode(user_data)
 
-        if not vmss.protection_policy:
-            vmss.protection_policy = VMProtectionPolicy()
+        if vmss.get("protection_policy", None) is None:
+            vmss["protection_policy"] = {}
 
         if protect_from_scale_in is not None:
-            vmss.protection_policy.protect_from_scale_in = protect_from_scale_in
+            vmss["protection_policy"]["protect_from_scale_in"] = protect_from_scale_in
 
         if protect_from_scale_set_actions is not None:
-            vmss.protection_policy.protect_from_scale_set_actions = protect_from_scale_set_actions
+            vmss["protection_policy"]["protect_from_scale_set_actions"] = protect_from_scale_set_actions
 
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_update,
-                           resource_group_name, name, instance_id, **kwargs)
+        vmss["resource_group"] = resource_group_name
+        vmss["vm_scale_set_name"] = name
+        vmss["instance_id"] = instance_id
+        vmss["no_wait"] = no_wait
+
+        from .operations.vmss_vms import VMSSVMSCreate
+        return VMSSVMSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
     # else handle vmss update
     if license_type is not None:
-        vmss.virtual_machine_profile.license_type = license_type
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        vmss["virtual_machine_profile"]["license_type"] = license_type
 
     if user_data is not None:
-        vmss.virtual_machine_profile.user_data = b64encode(user_data)
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        vmss["virtual_machine_profile"]["user_data"] = b64encode(user_data)
 
     if v_cpus_available is not None or v_cpus_per_core is not None:
-        HardwareProfile = cmd.get_models('HardwareProfile')
-        VMSizeProperties = cmd.get_models('VMSizeProperties')
-        hardware_profile = HardwareProfile(vm_size_properties=VMSizeProperties(v_cpus_available=v_cpus_available,
-                                                                               v_cpus_per_core=v_cpus_per_core))
-        vmss.virtual_machine_profile.hardware_profile = hardware_profile
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("hardware_profile", None) is None:
+            vmss["virtual_machine_profile"]["hardware_profile"] = {}
+        if vmss["virtual_machine_profile"]["hardware_profile"].get("vm_size_properties", None) is None:
+            vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"] = {}
+
+        if v_cpus_available is not None:
+            vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_available"] = v_cpus_available
+        if v_cpus_per_core is not None:
+            vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_per_core"] = v_cpus_per_core
 
     if capacity_reservation_group is not None:
-        CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
-        SubResource = cmd.get_models('SubResource')
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
         if capacity_reservation_group == 'None':
             capacity_reservation_group = None
-        sub_resource = SubResource(id=capacity_reservation_group)
-        capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
-        vmss.virtual_machine_profile.capacity_reservation = capacity_reservation
+
+        sub_resource = {"id": capacity_reservation_group}
+        capacity_reservation = {"capacity_reservation_group": sub_resource}
+        vmss["virtual_machine_profile"]["capacity_reservation"] = capacity_reservation
 
     if enable_terminate_notification is not None or terminate_notification_time is not None:
-        if vmss.virtual_machine_profile.scheduled_events_profile is None:
-            ScheduledEventsProfile = cmd.get_models('ScheduledEventsProfile')
-            vmss.virtual_machine_profile.scheduled_events_profile = ScheduledEventsProfile()
-        TerminateNotificationProfile = cmd.get_models('TerminateNotificationProfile')
-        vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
-            TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
-                                         enable=enable_terminate_notification)
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("scheduled_events_profile", None) is None:
+            vmss["virtual_machine_profile"]["scheduled_events_profile"] = {}
+        vmss["virtual_machine_profile"]["scheduled_events_profile"]["terminate_notification_profile"] = \
+            {"not_before_timeout": terminate_notification_time,
+             "enable": enable_terminate_notification}
 
     if additional_scheduled_events is not None or \
             enable_user_reboot_scheduled_events is not None or enable_user_redeploy_scheduled_events is not None:
-        if vmss.scheduled_events_policy is None:
-            ScheduledEventsPolicy = cmd.get_models('ScheduledEventsPolicy')
-            UserInitiatedRedeploy = cmd.get_models('UserInitiatedRedeploy')
-            UserInitiatedReboot = cmd.get_models('UserInitiatedReboot')
-            EventGridAndResourceGraph = cmd.get_models('EventGridAndResourceGraph')
-            ScheduledEventsAdditionalPublishingTargets = cmd.get_models('ScheduledEventsAdditionalPublishingTargets')
-            vmss.scheduled_events_policy = ScheduledEventsPolicy()
-            vmss.scheduled_events_policy.scheduled_events_additional_publishing_targets = \
-                ScheduledEventsAdditionalPublishingTargets()
-            vmss.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
-                event_grid_and_resource_graph = EventGridAndResourceGraph()
-            vmss.scheduled_events_policy.user_initiated_reboot = UserInitiatedReboot()
-            vmss.scheduled_events_policy.user_initiated_redeploy = UserInitiatedRedeploy()
-        vmss.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
-            event_grid_and_resource_graph.enable = additional_scheduled_events
-        vmss.scheduled_events_policy.user_initiated_redeploy.automatically_approve = \
-            enable_user_redeploy_scheduled_events
-        vmss.scheduled_events_policy.user_initiated_reboot.automatically_approve = enable_user_reboot_scheduled_events
+        if vmss.get("scheduled_events_policy", None) is None:
+            vmss["scheduled_events_policy"] = {}
+
+        if additional_scheduled_events is not None:
+            if vmss["scheduled_events_policy"].get("scheduled_events_additional_publishing_targets", None) is None:
+                vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"] = {}
+            if vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"].get("event_grid_and_resource_graph", None) is None:
+                vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"]["event_grid_and_resource_graph"] = {}
+            vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"][
+                "event_grid_and_resource_graph"]["enable"] = additional_scheduled_events
+
+        if enable_user_redeploy_scheduled_events is not None:
+            if vmss["scheduled_events_policy"].get("user_initiated_redeploy", None) is None:
+                vmss["scheduled_events_policy"]["user_initiated_redeploy"] = {}
+            vmss["scheduled_events_policy"]["user_initiated_redeploy"]["automatically_approve"] = enable_user_redeploy_scheduled_events
+
+        if enable_user_reboot_scheduled_events is not None:
+            if vmss["scheduled_events_policy"].get("user_initiated_reboot", None) is None:
+                vmss["scheduled_events_policy"]["user_initiated_reboot"] = {}
+            vmss["scheduled_events_policy"]["user_initiated_reboot"][
+                "automatically_approve"] = enable_user_reboot_scheduled_events
+        #
+        # vmss.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
+        #     event_grid_and_resource_graph.enable = additional_scheduled_events
+        # vmss.scheduled_events_policy.user_initiated_redeploy.automatically_approve = \
+        #     enable_user_redeploy_scheduled_events
+        # vmss.scheduled_events_policy.user_initiated_reboot.automatically_approve = enable_user_reboot_scheduled_events
 
     if enable_osimage_notification is not None:
-        if vmss.virtual_machine_profile.scheduled_events_profile is None:
-            vmss.virtual_machine_profile.scheduled_events_profile = cmd.get_models('ScheduledEventsProfile')()
-        OSImageNotificationProfile = cmd.get_models('OSImageNotificationProfile')
-        vmss.virtual_machine_profile.scheduled_events_profile.os_image_notification_profile = \
-            OSImageNotificationProfile(enable=enable_osimage_notification)
-    if enable_automatic_repairs is not None or \
-            automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
-        AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
-        vmss.automatic_repairs_policy = \
-            AutomaticRepairsPolicy(enabled=enable_automatic_repairs,
-                                   grace_period=automatic_repairs_grace_period,
-                                   repair_action=automatic_repairs_action)
+        # if vmss.virtual_machine_profile.scheduled_events_profile is None:
+        #     vmss.virtual_machine_profile.scheduled_events_profile = cmd.get_models('ScheduledEventsProfile')()
+        # OSImageNotificationProfile = cmd.get_models('OSImageNotificationProfile')
+        # vmss.virtual_machine_profile.scheduled_events_profile.os_image_notification_profile = \
+        #     OSImageNotificationProfile(enable=enable_osimage_notification)
+
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("scheduled_events_profile", None) is None:
+            vmss["virtual_machine_profile"]["scheduled_events_profile"] = {}
+        vmss["virtual_machine_profile"]["scheduled_events_profile"]["os_image_notification_profile"] = {
+            "enable": enable_osimage_notification
+        }
+
+    if enable_automatic_repairs is not None or automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
+        # AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
+        # vmss.automatic_repairs_policy = \
+        #     AutomaticRepairsPolicy(enabled=enable_automatic_repairs,
+        #                            grace_period=automatic_repairs_grace_period,
+        #                            repair_action=automatic_repairs_action)
+        if vmss.get("automatic_repairs_policy", None) is None:
+            vmss["automatic_repairs_policy"] = {}
+        if enable_automatic_repairs is not None:
+            vmss["automatic_repairs_policy"]["enabled"] = enable_automatic_repairs
+        if automatic_repairs_grace_period is not None:
+            vmss["automatic_repairs_policy"]["grace_period"] = automatic_repairs_grace_period
+        if automatic_repairs_action is not None:
+            vmss["automatic_repairs_policy"]["repair_action"] = automatic_repairs_action
 
     if ultra_ssd_enabled is not None:
-        if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
-            if vmss.additional_capabilities is None:
-                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
-                vmss.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
-            else:
-                vmss.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+        if vmss.get("additional_capabilities", None) is None:
+            vmss["additional_capabilities"] = {"ultra_ssd_enabled": ultra_ssd_enabled}
         else:
-            if vmss.virtual_machine_profile.additional_capabilities is None:
-                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
-                vmss.virtual_machine_profile.additional_capabilities = AdditionalCapabilities(
-                    ultra_ssd_enabled=ultra_ssd_enabled)
-            else:
-                vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+            vmss["additional_capabilities"]["ultra_ssd_enabled"] = ultra_ssd_enabled
 
     if scale_in_policy is not None or force_deletion is not None:
-        ScaleInPolicy = cmd.get_models('ScaleInPolicy')
-        vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy, force_deletion=force_deletion)
+        if vmss.get("scale_in_policy", None) is None:
+            vmss["scale_in_policy"] = {}
+        if scale_in_policy is not None:
+            vmss["scale_in_policy"]["rules"] = scale_in_policy
+        if force_deletion is not None:
+            vmss["scale_in_policy"]["force_deletion"] = force_deletion
 
     if enable_spot_restore is not None:
-        vmss.spot_restore_policy.enabled = enable_spot_restore
+        if vmss.get("spot_restore_policy", None) is None:
+            vmss["spot_restore_policy"] = {}
+        vmss["spot_restore_policy"]["enabled"] = enable_spot_restore
 
     if spot_restore_timeout is not None:
-        vmss.spot_restore_policy.restore_timeout = spot_restore_timeout
+        if vmss.get("spot_restore_policy", None) is None:
+            vmss["spot_restore_policy"] = {}
+        vmss["spot_restore_policy"]["restore_timeout"] = spot_restore_timeout
 
     if priority is not None:
-        vmss.virtual_machine_profile.priority = priority
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        vmss["virtual_machine_profile"]["priority"] = priority
 
     if max_price is not None:
-        if vmss.virtual_machine_profile.billing_profile is None:
-            BillingProfile = cmd.get_models('BillingProfile')
-            vmss.virtual_machine_profile.billing_profile = BillingProfile(max_price=max_price)
-        else:
-            vmss.virtual_machine_profile.billing_profile.max_price = max_price
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("billing_profile", None) is None:
+            vmss["virtual_machine_profile"]["billing_profile"] = {}
+        vmss["virtual_machine_profile"]["billing_profile"]["max_price"] = max_price
 
     if security_type is not None or enable_secure_boot is not None or enable_vtpm is not None:
-        security_profile = vmss.virtual_machine_profile.security_profile
-        prev_security_type = security_profile.security_type if security_profile else None
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+
+        security_profile = vmss["virtual_machine_profile"].get("security_profile", None)
+        prev_security_type = security_profile.get("security_type", None)
         # At present, `SecurityType` has options `TrustedLaunch` and `Standard`
         if security_type == 'TrustedLaunch' and prev_security_type != security_type:
-            vmss.virtual_machine_profile.security_profile = {
-                'securityType': security_type,
-                'uefiSettings': {
-                    'secureBootEnabled': enable_secure_boot if enable_secure_boot is not None else False,
-                    'vTpmEnabled': enable_vtpm if enable_vtpm is not None else True
+            vmss["virtual_machine_profile"]["security_profile"] = {
+                'security_type': security_type,
+                'uefi_settings': {
+                    'secure_boot_enabled': enable_secure_boot if enable_secure_boot is not None else False,
+                    'v_tpm_enabled': enable_vtpm if enable_vtpm is not None else True
                 }
             }
         elif security_type == 'Standard':
             if prev_security_type == 'TrustedLaunch':
                 logger.warning('Turning off Trusted launch disables foundational security for your VMs. '
                                'For more information, visit https://aka.ms/TrustedLaunch')
-            vmss.virtual_machine_profile.security_profile = {
-                'securityType': security_type,
-                'uefiSettings': None
+            vmss["virtual_machine_profile"]["security_profile"] = {
+                'security_type': security_type,
+                'uefi_settings': None
             }
         else:
-            vmss.virtual_machine_profile.security_profile = {'uefiSettings': {
-                'secureBootEnabled': enable_secure_boot,
-                'vTpmEnabled': enable_vtpm
-            }}
+            vmss["virtual_machine_profile"]["security_profile"] = {
+                'uefi_settings': {
+                    'secure_boot_enabled': enable_secure_boot,
+                    'v_tpm_enabled': enable_vtpm
+                }}
 
     if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None:
-        SecurityProfile = cmd.get_models('SecurityProfile')
-        ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
-        HostEndpointSettings = cmd.get_models('HostEndpointSettings')
-        wire_server = HostEndpointSettings()
-        imds = HostEndpointSettings()
-        if vmss.virtual_machine_profile.security_profile is None:
-            vmss.virtual_machine_profile.security_profile = SecurityProfile()
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                wire_server=wire_server, imds=imds)
-        elif vmss.virtual_machine_profile.security_profile.proxy_agent_settings is None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                wire_server=wire_server, imds=imds)
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+
+        if vmss["virtual_machine_profile"].get("security_profile", None) is None:
+            vmss["virtual_machine_profile"]["security_profile"] = {
+                "proxy_agent_settings": {
+                    "wire_server": {},
+                    "imds": {}
+                }
+            }
+        elif vmss["virtual_machine_profile"]["security_profile"].get("proxy_agent_settings", None) is None:
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"] = {
+                "wire_server": {}, "imds": {}
+            }
         else:
-            if vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server is None:
-                vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server = wire_server
-            if vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds is None:
-                vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds = imds
+            if vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"].get("wire_server", None) is None:
+                vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["wire_server"] = {}
+            if vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"].get("imds", None) is None:
+                vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["imds"] = {}
 
         if enable_proxy_agent is not None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["enabled"] = enable_proxy_agent
         if wire_server_mode is not None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["wire_server"]["mode"] = wire_server_mode
         if imds_mode is not None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds.mode = imds_mode
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["imds"]["mode"] = imds_mode
 
     if regular_priority_count is not None or regular_priority_percentage is not None:
-        if vmss.orchestration_mode != 'Flexible':
+        if vmss.get("orchestration_mode", None) != 'Flexible':
             raise ValidationError("--regular-priority-count/--regular-priority-percentage is only available for"
                                   " VMSS with flexible orchestration mode")
-        if vmss.priority_mix_policy is None:
-            vmss.priority_mix_policy = {
-                'baseRegularPriorityCount': regular_priority_count,
-                'regularPriorityPercentageAboveBase': regular_priority_percentage
+        if vmss.get("priority_mix_policy", None) is None:
+            vmss["priority_mix_policy"] = {
+                'base_regular_priority_count': regular_priority_count,
+                'regular_priority_percentage_above_base': regular_priority_percentage
             }
         else:
             if regular_priority_count is not None:
-                vmss.priority_mix_policy.base_regular_priority_count = regular_priority_count
+                vmss["priority_mix_policy"]["base_regular_priority_count"] = regular_priority_count
             if regular_priority_percentage is not None:
-                vmss.priority_mix_policy.regular_priority_percentage_above_base = regular_priority_percentage
+                vmss["priority_mix_policy"]["regular_priority_percentage_above_base"] = regular_priority_percentage
 
     if proximity_placement_group is not None:
-        vmss.proximity_placement_group = {'id': proximity_placement_group}
+        vmss["proximity_placement_group"] = {'id': proximity_placement_group}
 
     if max_batch_instance_percent is not None or max_unhealthy_instance_percent is not None \
             or max_unhealthy_upgraded_instance_percent is not None or pause_time_between_batches is not None \
             or enable_cross_zone_upgrade is not None or prioritize_unhealthy_instances is not None \
             or max_surge is not None:
-        if vmss.upgrade_policy is None:
-            vmss.upgrade_policy = {'rolling_upgrade_policy': None}
-        if vmss.upgrade_policy.rolling_upgrade_policy is None:
-            vmss.upgrade_policy.rolling_upgrade_policy = {
-                'maxBatchInstancePercent': max_batch_instance_percent,
-                'maxUnhealthyInstancePercent': max_unhealthy_instance_percent,
-                'maxUnhealthyUpgradedInstancePercent': max_unhealthy_upgraded_instance_percent,
-                'pauseTimeBetweenBatches': pause_time_between_batches,
-                'enableCrossZoneUpgrade': enable_cross_zone_upgrade,
-                'prioritizeUnhealthyInstances': prioritize_unhealthy_instances,
-                'maxSurge': max_surge
+        if vmss.get("upgrade_policy", None) is None:
+            vmss["upgrade_policy"] = {"rolling_upgrade_policy": None}
+        if vmss["upgrade_policy"].get("rolling_upgrade_policy", None) is None:
+            vmss["upgrade_policy"]["rolling_upgrade_policy"] = {
+                'max_batch_instance_percent': max_batch_instance_percent,
+                'max_unhealthy_instance_percent': max_unhealthy_instance_percent,
+                'max_unhealthy_upgraded_instance_percent': max_unhealthy_upgraded_instance_percent,
+                'pause_time_between_batches': pause_time_between_batches,
+                'enable_cross_zone_upgrade': enable_cross_zone_upgrade,
+                'prioritize_unhealthy_instances': prioritize_unhealthy_instances,
+                'max_surge': max_surge
             }
         else:
-            vmss.upgrade_policy.rolling_upgrade_policy.max_batch_instance_percent = max_batch_instance_percent
-            vmss.upgrade_policy.rolling_upgrade_policy.max_unhealthy_instance_percent = max_unhealthy_instance_percent
-            vmss.upgrade_policy.rolling_upgrade_policy.max_unhealthy_upgraded_instance_percent = \
+            if max_batch_instance_percent is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_batch_instance_percent"] = max_batch_instance_percent
+            if max_unhealthy_instance_percent is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_unhealthy_instance_percent"] = max_unhealthy_instance_percent
+            if max_unhealthy_upgraded_instance_percent is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_unhealthy_upgraded_instance_percent"] = \
                 max_unhealthy_upgraded_instance_percent
-            vmss.upgrade_policy.rolling_upgrade_policy.pause_time_between_batches = pause_time_between_batches
-            vmss.upgrade_policy.rolling_upgrade_policy.enable_cross_zone_upgrade = enable_cross_zone_upgrade
-            vmss.upgrade_policy.rolling_upgrade_policy.prioritize_unhealthy_instances = prioritize_unhealthy_instances
-            vmss.upgrade_policy.rolling_upgrade_policy.max_surge = max_surge
+            if pause_time_between_batches is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["pause_time_between_batches"] = pause_time_between_batches
+            if enable_cross_zone_upgrade is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["enable_cross_zone_upgrade"] = enable_cross_zone_upgrade
+            if prioritize_unhealthy_instances is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["prioritize_unhealthy_instances"] = prioritize_unhealthy_instances
+            if max_surge is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_surge"] = max_surge
 
     if upgrade_policy_mode is not None:
-        vmss.upgrade_policy.mode = upgrade_policy_mode
+        if vmss.get("upgrade_policy", None) is None:
+            vmss["upgrade_policy"] = {}
+        vmss["upgrade_policy"]["mode"] = upgrade_policy_mode
 
     if enable_auto_os_upgrade is not None:
-        if vmss.upgrade_policy.automatic_os_upgrade_policy is None:
-            vmss.upgrade_policy.automatic_os_upgrade_policy = {'enableAutomaticOSUpgrade': enable_auto_os_upgrade}
+        if vmss.get("upgrade_policy", None) is None:
+            vmss["upgrade_policy"] = {}
+        if vmss["upgrade_policy"].get("automatic_os_upgrade_policy", None) is None:
+            vmss["upgrade_policy"]["automatic_os_upgrade_policy"] = {'enable_automatic_os_upgrade': enable_auto_os_upgrade}
         else:
-            vmss.upgrade_policy.automatic_os_upgrade_policy.enable_automatic_os_upgrade = enable_auto_os_upgrade
+            vmss["upgrade_policy"]["automatic_os_upgrade_policy"]["enable_automatic_os_upgrade"] = enable_auto_os_upgrade
 
     if vm_sku is not None:
-        if vmss.sku.name == vm_sku:
+        if vmss.get("sku", {}).get("name", None) == vm_sku:
             logger.warning("VMSS sku is already %s", vm_sku)
         else:
-            vmss.sku.name = vm_sku
+            if vmss.get("sku", None) is None:
+                vmss["sku"] = {}
+            vmss["sku"]["name"] = vm_sku
 
     sku_profile = {}
     if skuprofile_vmsizes is not None or skuprofile_allostrat is not None:
@@ -4560,102 +4679,104 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                     'name': vm_size
                 }
                 sku_profile_vmsizes_list.append(vmsize_obj)
-            sku_profile['vmSizes'] = sku_profile_vmsizes_list
+            sku_profile['vm_sizes'] = sku_profile_vmsizes_list
 
             if skuprofile_rank:
                 for vm_size, rank in zip(sku_profile_vmsizes_list, skuprofile_rank):
                     vm_size['rank'] = rank
 
         if skuprofile_allostrat is not None:
-            sku_profile['allocationStrategy'] = skuprofile_allostrat
-        vmss.sku_profile = sku_profile
+            sku_profile['allocation_strategy'] = skuprofile_allostrat
+        vmss["sku_profile"] = sku_profile
 
-    if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None:
-        if vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings is not None:
-            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings.placement = \
-                ephemeral_os_disk_placement
-            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings.option = \
-                ephemeral_os_disk_option
-        else:
-            DiffDiskSettings = cmd.get_models('DiffDiskSettings')
-            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings = DiffDiskSettings(
-                option=ephemeral_os_disk_option, placement=ephemeral_os_disk_placement)
+    if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None or ephemeral_os_disk is not None:
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("storage_profile", None) is None:
+            vmss["virtual_machine_profile"]["storage_profile"] = {}
+        if vmss["virtual_machine_profile"]["storage_profile"].get("os_disk", None) is None:
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"] = {}
+        if vmss["virtual_machine_profile"]["storage_profile"]["os_disk"].get("diff_disk_settings", None) is None:
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"] = {}
 
-    if ephemeral_os_disk is False:
-        vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings = {}
+        if ephemeral_os_disk_placement is not None:
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"]["placement"] = ephemeral_os_disk_placement
+        if ephemeral_os_disk_option is not None:
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"]["option"] = ephemeral_os_disk_option
+        if ephemeral_os_disk is False:
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"] = {}
 
     if disk_controller_type is not None:
-        vmss.virtual_machine_profile.storage_profile.disk_controller_type = disk_controller_type
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("storage_profile", None) is None:
+            vmss["virtual_machine_profile"]["storage_profile"] = {}
+        vmss["virtual_machine_profile"]["storage_profile"]["disk_controller_type"] = disk_controller_type
 
     if custom_data is not None:
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("os_profile", None) is None:
+            vmss["virtual_machine_profile"]["os_profile"] = {}
         custom_data = read_content_if_is_file(custom_data)
-        vmss.virtual_machine_profile.os_profile.custom_data = b64encode(custom_data)
+        vmss["virtual_machine_profile"]["os_profile"]["custom_data"] = b64encode(custom_data)
 
     if enable_hibernation is not None:
-        if vmss.additional_capabilities is None:
-            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
-            vmss.additional_capabilities = AdditionalCapabilities(hibernation_enabled=enable_hibernation)
+        if vmss.get("additional_capabilities", None) is None:
+            vmss["additional_capabilities"] = {"hibernation_enabled": enable_hibernation}
         else:
-            vmss.additional_capabilities.hibernation_enabled = enable_hibernation
+            vmss["additional_capabilities"]["hibernation_enabled"] = enable_hibernation
 
     if security_posture_reference_id is not None or security_posture_reference_exclude_extensions is not None or \
             security_posture_reference_is_overridable is not None:
-        security_posture_reference = vmss.virtual_machine_profile.security_posture_reference
-        if security_posture_reference is None:
-            SecurityPostureReference = cmd.get_models('SecurityPostureReference')
-            security_posture_reference = SecurityPostureReference()
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("security_posture_reference", None) is None:
+            vmss["virtual_machine_profile"]["security_posture_reference"] = {}
 
         if security_posture_reference_id is not None:
-            security_posture_reference.id = security_posture_reference_id
+            vmss["virtual_machine_profile"]["security_posture_reference"]["id"] = security_posture_reference_id
         if security_posture_reference_exclude_extensions is not None:
-            security_posture_reference.exclude_extensions = security_posture_reference_exclude_extensions
+            vmss["virtual_machine_profile"]["security_posture_reference"]["exclude_extensions"] = security_posture_reference_exclude_extensions
         if security_posture_reference_is_overridable is not None:
-            security_posture_reference.is_overridable = security_posture_reference_is_overridable
-
-        vmss.virtual_machine_profile.security_posture_reference = security_posture_reference
+            vmss["virtual_machine_profile"]["security_posture_reference"]["is_overridable"] = security_posture_reference_is_overridable
 
     if enable_resilient_creation is not None or enable_resilient_deletion is not None:
-        resiliency_policy = vmss.resiliency_policy
+        if vmss.get("resiliency_policy", None) is None:
+            vmss["resiliency_policy"] = {}
         if enable_resilient_creation is not None:
-            resiliency_policy.resilient_vm_creation_policy = {'enabled': enable_resilient_creation}
+            vmss["resiliency_policy"]["resilient_vm_creation_policy"] = {'enabled': enable_resilient_creation}
         if enable_resilient_deletion is not None:
-            resiliency_policy.resilient_vm_deletion_policy = {'enabled': enable_resilient_deletion}
+            vmss["resiliency_policy"]["resilient_vm_deletion_policy"] = {'enabled': enable_resilient_deletion}
 
     if enable_automatic_zone_balancing is not None or automatic_zone_balancing_strategy is not None or \
             automatic_zone_balancing_behavior is not None:
-        resiliency_policy = vmss.resiliency_policy
-        if resiliency_policy is None:
-            ResiliencyPolicy = cmd.get_models('ResiliencyPolicy')
-            AutomaticZoneRebalancingPolicy = cmd.get_models('AutomaticZoneRebalancingPolicy')
-            resiliency_policy = ResiliencyPolicy()
-            resiliency_policy.automatic_zone_rebalancing_policy = AutomaticZoneRebalancingPolicy()
-        elif resiliency_policy.automatic_zone_rebalancing_policy is None:
-            AutomaticZoneRebalancingPolicy = cmd.get_models('AutomaticZoneRebalancingPolicy')
-            resiliency_policy.automatic_zone_rebalancing_policy = AutomaticZoneRebalancingPolicy()
+        if vmss.get("resiliency_policy", None) is None:
+            vmss["resiliency_policy"] = {}
+        if vmss["resiliency_policy"].get("automatic_zone_rebalancing_policy", None) is None:
+            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"] = {}
 
         if enable_automatic_zone_balancing is not None:
-            resiliency_policy.automatic_zone_rebalancing_policy.enabled = enable_automatic_zone_balancing
+            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"]["enabled"] = enable_automatic_zone_balancing
 
         if automatic_zone_balancing_strategy is not None:
-            resiliency_policy.automatic_zone_rebalancing_policy.rebalance_strategy = automatic_zone_balancing_strategy
+            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"]["rebalance_strategy"] = automatic_zone_balancing_strategy
 
         if automatic_zone_balancing_behavior is not None:
-            resiliency_policy.automatic_zone_rebalancing_policy.rebalance_behavior = automatic_zone_balancing_behavior
-        vmss.resiliency_policy = resiliency_policy
+            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"]["rebalance_behavior"] = automatic_zone_balancing_behavior
 
     if zones is not None:
-        vmss.zones = zones
+        vmss["zones"] = zones
 
     if zone_balance is not None:
-        vmss.zone_balance = zone_balance
+        vmss["zone_balance"] = zone_balance
 
-    if wire_server_access_control_profile_reference_id is not None or \
-            imds_access_control_profile_reference_id is not None or \
-            add_proxy_agent_extension is not None:
-        kwargs['parameters'] = vmss
+    vmss["resource_group"] = resource_group_name
+    vmss["vm_scale_set_name"] = name
+    vmss["no_wait"] = no_wait
 
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
-                       resource_group_name, name, **kwargs)
+    from .aaz.latest.vmss import Create as VMSSCreate
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
 # endregion
 
