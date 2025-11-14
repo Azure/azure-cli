@@ -1794,7 +1794,7 @@ class Update(AAZCommand):
             help="Specified the community gallery image unique id for vm deployment. This can be fetched from community gallery image GET call.",
             nullable=True,
         )
-        image_reference.id = AAZStrArg(
+        image_reference.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
             nullable=True,
@@ -1947,7 +1947,7 @@ class Update(AAZCommand):
         )
 
         disk_encryption_set_parameters_update = cls._args_disk_encryption_set_parameters_update
-        disk_encryption_set_parameters_update.id = AAZStrArg(
+        disk_encryption_set_parameters_update.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
             nullable=True,
@@ -1997,7 +1997,7 @@ class Update(AAZCommand):
         )
 
         sub_resource_update = cls._args_sub_resource_update
-        sub_resource_update.id = AAZStrArg(
+        sub_resource_update.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
             nullable=True,

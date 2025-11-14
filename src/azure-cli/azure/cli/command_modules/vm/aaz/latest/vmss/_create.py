@@ -1510,7 +1510,7 @@ class Create(AAZCommand):
             options=["community-gallery-image-id"],
             help="Specified the community gallery image unique id for vm deployment. This can be fetched from community gallery image GET call.",
         )
-        image_reference.id = AAZStrArg(
+        image_reference.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
         )
@@ -1638,7 +1638,7 @@ class Create(AAZCommand):
         cls._args_disk_encryption_set_parameters_create = AAZObjectArg()
 
         disk_encryption_set_parameters_create = cls._args_disk_encryption_set_parameters_create
-        disk_encryption_set_parameters_create.id = AAZStrArg(
+        disk_encryption_set_parameters_create.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
         )
@@ -1681,7 +1681,7 @@ class Create(AAZCommand):
         cls._args_sub_resource_create = AAZObjectArg()
 
         sub_resource_create = cls._args_sub_resource_create
-        sub_resource_create.id = AAZStrArg(
+        sub_resource_create.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
         )

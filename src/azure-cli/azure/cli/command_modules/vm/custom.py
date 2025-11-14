@@ -1334,8 +1334,7 @@ def get_vm_to_update(cmd, resource_group_name, vm_name):
 
 
 def get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name):
-    from .aaz.latest.vm import Show as VMShow
-    from .operations.vm import convert_show_result_to_sneak_case
+    from .operations.vm import convert_show_result_to_sneak_case, VMShow
 
     vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
@@ -4005,6 +4004,37 @@ def get_vmss_modified(cmd, resource_group_name, name, instance_id=None, security
         # To avoid unnecessary permission check of image
         if hasattr(vms, "storage_profile") and vms.storage_profile:
             vms.storage_profile.image_reference = None
+        return vms
+
+    vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)
+    if security_type == 'TrustedLaunch':
+        _check_vmss_hyper_v_generation(cmd.cli_ctx, vmss)
+    # To avoid unnecessary permission check of image
+    if hasattr(vmss, "virtual_machine_profile") and vmss.virtual_machine_profile \
+            and vmss.virtual_machine_profile.storage_profile:
+        vmss.virtual_machine_profile.storage_profile.image_reference = None
+    return vmss
+
+
+def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, security_type=None):
+    # from .aaz.latest.vmss import Show as VMSSShow
+    from .operations.vmss import convert_show_result_to_sneak_case
+
+    client = _compute_client_factory(cmd.cli_ctx)
+    if instance_id is not None:
+        from .aaz.latest.vmss.vms import Show as VMSSVMSShow
+        vms = VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            "vm_scale_set_name": name,
+            "instance_id": instance_id
+        })
+        converted_vm = convert_show_result_to_sneak_case(vms)
+
+        # To avoid unnecessary permission check of image
+        # if hasattr(vms, "storage_profile") and vms.storage_profile:
+        #     vms.storage_profile.image_reference = None
+        if vms.get("storage_profile", None) is not None:
+            vms["storage_profile"]["image_reference"] = None
         return vms
 
     vmss = client.virtual_machine_scale_sets.get(resource_group_name, name)

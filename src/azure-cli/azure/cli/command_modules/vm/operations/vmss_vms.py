@@ -5,84 +5,13 @@
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from knack.log import get_logger
 
-from azure.cli.core.aaz import AAZStrType
-from ..aaz.latest.vm import (Show as _VMShow, ListSizes as _VMListSizes,
-                             Update as _VMUpdate, Capture as _VMCapture, Create as _VMCreate)
+from azure.cli.core.aaz import AAZUndefined, has_value
+from ..aaz.latest.vmss.vms import Create as _VMSSVMSCreate
 
 logger = get_logger(__name__)
 
 
-class VMUpdate(_VMUpdate):
-    class VirtualMachinesGet(_VMUpdate.VirtualMachinesGet):
-        # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing
-        @classmethod
-        def _build_schema_on_200(cls):
-            schema = super()._build_schema_on_200()
-
-            del schema.resources.Element.properties._fields['type']
-            schema.resources.Element.properties.type = AAZStrType(
-                serialized_name="typePropertiesType",
-            )
-            return schema
-
-    def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined, has_value
-
-        # Resolve flatten conflict
-        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
-        if has_value(self.ctx.vars.instance.resources):
-            for resource in self.ctx.vars.instance.resources:
-                if has_value(resource.type):
-                    resource.type = AAZUndefined
-
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class VMShow(_VMShow):
-    class VirtualMachinesGet(_VMShow.VirtualMachinesGet):
-        # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing
-        @classmethod
-        def _build_schema_on_200(cls):
-            schema = super()._build_schema_on_200()
-
-            del schema.resources.Element.properties._fields['type']
-            schema.resources.Element.properties.type = AAZStrType(
-                serialized_name="typePropertiesType",
-            )
-            return schema
-
-    def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined, has_value
-
-        # Resolve flatten conflict
-        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
-        if has_value(self.ctx.vars.instance.resources):
-            for resource in self.ctx.vars.instance.resources:
-                if has_value(resource.type):
-                    resource.type = AAZUndefined
-
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        return result
-
-
-class VMListSizes(_VMListSizes):
-    @classmethod
-    def _build_arguments_schema(cls, *args, **kwargs):
-        args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.location._id_part = None
-
-        return args_schema
-
-
-class VMCapture(_VMCapture):
-    def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
-        result = result.get('output', None) or result.get('resources', [None])[0]
-        return result
-
-
-class VMCreate(_VMCreate):
+class VMSSVMSCreate(_VMSSVMSCreate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg, AAZDictArg, AAZObjectArg
@@ -115,36 +44,21 @@ class VMCreate(_VMCreate):
 
 def convert_show_result_to_sneak_case(result):
     new_result = {}
-    if "extendedLocation" in result:
-        new_result["extended_location"] = result["extendedLocation"]
+    if "instanceId" in result:
+        new_result["instance_id"] = result["instanceId"]
     if "identity" in result:
         new_result["identity"] = result["identity"]
     if "location" in result:
         new_result["location"] = result["location"]
-    if "placement" in result:
-        new_result["placement"] = result["placement"]
     if "plan" in result:
         new_result["plan"] = result["plan"]
     if "tags" in result:
         new_result["tags"] = result["tags"]
-    if "zones" in result:
-        new_result["zones"] = result["zones"]
 
     identity = new_result.get("identity", {}) or {}
     if "userAssignedIdentities" in identity:
         identity["user_assigned_identities"] = identity["userAssignedIdentities"]
         identity.pop("userAssignedIdentities")
-
-    placement = new_result.get("placement", {}) or {}
-    if "excludeZones" in placement:
-        placement["exclude_zones"] = placement["excludeZones"]
-        placement.pop("excludeZones")
-    if "includeZones" in placement:
-        placement["include_zones"] = placement["includeZones"]
-        placement.pop("includeZones")
-    if "zonePlacementPolicy" in placement:
-        placement["zone_placement_policy"] = placement["zonePlacementPolicy"]
-        placement.pop("zonePlacementPolicy")
 
     plan = new_result.get("plan", {}) or {}
     if "promotionCode" in plan:
@@ -153,50 +67,30 @@ def convert_show_result_to_sneak_case(result):
 
     if "additionalCapabilities" in result:
         new_result["additional_capabilities"] = result["additionalCapabilities"]
-    if "applicationProfile" in result:
-        new_result["application_profile"] = result["applicationProfile"]
     if "availabilitySet" in result:
         new_result["availability_set"] = result["availabilitySet"]
-    if "billingProfile" in result:
-        new_result["billing_profile"] = result["billingProfile"]
-    if "capacityReservation" in result:
-        new_result["capacity_reservation"] = result["capacityReservation"]
     if "diagnosticsProfile" in result:
         new_result["diagnostics_profile"] = result["diagnosticsProfile"]
-    if "evictionPolicy" in result:
-        new_result["eviction_policy"] = result["evictionPolicy"]
-    if "extensionsTimeBudget" in result:
-        new_result["extensions_time_budget"] = result["extensionsTimeBudget"]
     if "hardwareProfile" in result:
         new_result["hardware_profile"] = result["hardwareProfile"]
-    if "host" in result:
-        new_result["host"] = result["host"]
-    if "hostGroup" in result:
-        new_result["host_group"] = result["hostGroup"]
     if "licenseType" in result:
         new_result["license_type"] = result["licenseType"]
     if "networkProfile" in result:
         new_result["network_profile"] = result["networkProfile"]
-    if "osProfile" in result:
-        new_result["os_profile"] = result["osProfile"]
-    if "platformFaultDomain" in result:
-        new_result["platform_fault_domain"] = result["platformFaultDomain"]
-    if "priority" in result:
-        new_result["priority"] = result["priority"]
-    if "proximityPlacementGroup" in result:
-        new_result["proximity_placement_group"] = result["proximityPlacementGroup"]
-    if "scheduledEventsPolicy" in result:
-        new_result["scheduled_events_policy"] = result["scheduledEventsPolicy"]
-    if "scheduledEventsProfile" in result:
-        new_result["scheduled_events_profile"] = result["scheduledEventsProfile"]
+    if "networkProfileConfiguration" in result:
+        new_result["network_profile_configuration"] = result["networkProfileConfiguration"]
+    if "osprofile" in result:
+        new_result["os_profile"] = result["osprofile"]
+    if "protectionPolicy" in result:
+        new_result["protection_policy"] = result["protectionPolicy"]
+    if "resilientVMDeletionStatus" in result:
+        new_result["resilient_vm_deletion_status"] = result["resilientVMDeletionStatus"]
     if "securityProfile" in result:
         new_result["security_profile"] = result["securityProfile"]
     if "storageProfile" in result:
         new_result["storage_profile"] = result["storageProfile"]
     if "userData" in result:
         new_result["user_data"] = result["userData"]
-    if "virtualMachineScaleSet" in result:
-        new_result["virtual_machine_scale_set"] = result["virtualMachineScaleSet"]
 
     additional_capabilities = new_result.get("additional_capabilities", {}) or {}
     if "enableFips1403Encryption" in additional_capabilities:
@@ -209,7 +103,279 @@ def convert_show_result_to_sneak_case(result):
         additional_capabilities["ultra_ssd_enabled"] = additional_capabilities["ultraSSDEnabled"]
         additional_capabilities.pop("ultraSSDEnabled")
 
-    application_profile = new_result.get("application_profile", {}) or {}
+
+
+
+
+
+
+
+    if "placement" in result:
+        new_result["placement"] = result["placement"]
+    if "sku" in result:
+        new_result["sku"] = result["sku"]
+    if "zones" in result:
+        new_result["zones"] = result["zones"]
+
+
+    placement = new_result.get("placement", {}) or {}
+    if "excludeZones" in placement:
+        placement["exclude_zones"] = placement["excludeZones"]
+        placement.pop("excludeZones")
+    if "includeZones" in placement:
+        placement["include_zones"] = placement["includeZones"]
+        placement.pop("includeZones")
+    if "zonePlacementPolicy" in placement:
+        placement["zone_placement_policy"] = placement["zonePlacementPolicy"]
+        placement.pop("zonePlacementPolicy")
+
+    if "automaticRepairsPolicy" in result:
+        new_result["automatic_repairs_policy"] = result["automaticRepairsPolicy"]
+    if "constrainedMaximumCapacity" in result:
+        new_result["constrained_maximum_capacity"] = result["constrainedMaximumCapacity"]
+    if "doNotRunExtensionsOnOverprovisionedVMs" in result:
+        new_result["do_not_run_extensions_on_overprovisioned_v_ms"] = result["doNotRunExtensionsOnOverprovisionedVMs"]
+    if "highSpeedInterconnectPlacement" in result:
+        new_result["high_speed_interconnect_placement"] = result["highSpeedInterconnectPlacement"]
+    if "hostGroup" in result:
+        new_result["host_group"] = result["hostGroup"]
+    if "orchestrationMode" in result:
+        new_result["orchestration_mode"] = result["orchestrationMode"]
+    if "overprovision" in result:
+        new_result["overprovision"] = result["overprovision"]
+    if "platformFaultDomainCount" in result:
+        new_result["platform_fault_domain_count"] = result["platformFaultDomainCount"]
+    if "priorityMixPolicy" in result:
+        new_result["priority_mix_policy"] = result["priorityMixPolicy"]
+    if "proximityPlacementGroup" in result:
+        new_result["proximity_placement_group"] = result["proximityPlacementGroup"]
+    if "resiliencyPolicy" in result:
+        new_result["resiliency_policy"] = result["resiliencyPolicy"]
+    if "scaleInPolicy" in result:
+        new_result["scale_in_policy"] = result["scaleInPolicy"]
+    if "scheduledEventsPolicy" in result:
+        new_result["scheduled_events_policy"] = result["scheduledEventsPolicy"]
+    if "singlePlacementGroup" in result:
+        new_result["single_placement_group"] = result["singlePlacementGroup"]
+    if "skuProfile" in result:
+        new_result["sku_profile"] = result["skuProfile"]
+    if "spotRestorePolicy" in result:
+        new_result["spot_restore_policy"] = result["spotRestorePolicy"]
+    if "upgradePolicy" in result:
+        new_result["upgrade_policy"] = result["upgradePolicy"]
+    if "virtualMachineProfile" in result:
+        new_result["virtual_machine_profile"] = result["virtualMachineProfile"]
+    if "zonalPlatformFaultDomainAlignMode" in result:
+        new_result["zonal_platform_fault_domain_align_mode"] = result["zonalPlatformFaultDomainAlignMode"]
+    if "zoneBalance" in result:
+        new_result["zone_balance"] = result["zoneBalance"]
+
+    automatic_repairs_policy = new_result.get("automatic_repairs_policy", {}) or {}
+    if "gracePeriod" in automatic_repairs_policy:
+        automatic_repairs_policy["grace_period"] = automatic_repairs_policy["gracePeriod"]
+        automatic_repairs_policy.pop("gracePeriod")
+    if "repairAction" in automatic_repairs_policy:
+        automatic_repairs_policy["repair_action"] = automatic_repairs_policy["repairAction"]
+        automatic_repairs_policy.pop("repairAction")
+
+    priority_mix_policy = new_result.get("priority_mix_policy", {}) or {}
+    if "baseRegularPriorityCount" in priority_mix_policy:
+        priority_mix_policy["base_regular_priority_count"] = priority_mix_policy["baseRegularPriorityCount"]
+        priority_mix_policy.pop("baseRegularPriorityCount")
+    if "regularPriorityPercentageAboveBase" in priority_mix_policy:
+        priority_mix_policy["regular_priority_percentage_above_base"] = priority_mix_policy["regularPriorityPercentageAboveBase"]
+        priority_mix_policy.pop("regularPriorityPercentageAboveBase")
+
+    resiliency_policy = new_result.get("resiliency_policy", {}) or {}
+    if "automaticZoneRebalancingPolicy" in resiliency_policy:
+        resiliency_policy["automatic_zone_rebalancing_policy"] = resiliency_policy["automaticZoneRebalancingPolicy"]
+        resiliency_policy.pop("automaticZoneRebalancingPolicy")
+    if "resilientVMCreationPolicy" in resiliency_policy:
+        resiliency_policy["resilient_vm_creation_policy"] = resiliency_policy["resilientVMCreationPolicy"]
+        resiliency_policy.pop("resilientVMCreationPolicy")
+    if "resilientVMDeletionPolicy" in resiliency_policy:
+        resiliency_policy["resilient_vm_deletion_policy"] = resiliency_policy["resilientVMDeletionPolicy"]
+        resiliency_policy.pop("resilientVMDeletionPolicy")
+    if "zoneAllocationPolicy" in resiliency_policy:
+        resiliency_policy["zone_allocation_policy"] = resiliency_policy["zoneAllocationPolicy"]
+        resiliency_policy.pop("zoneAllocationPolicy")
+
+    automatic_zone_rebalancing_policy = resiliency_policy.get("automatic_zone_rebalancing_policy", {}) or {}
+    if "rebalanceBehavior" in automatic_zone_rebalancing_policy:
+        automatic_zone_rebalancing_policy["rebalance_behavior"] = automatic_zone_rebalancing_policy["rebalanceBehavior"]
+        automatic_zone_rebalancing_policy.pop("rebalanceBehavior")
+    if "rebalanceStrategy" in automatic_zone_rebalancing_policy:
+        automatic_zone_rebalancing_policy["rebalance_strategy"] = automatic_zone_rebalancing_policy["rebalanceStrategy"]
+        automatic_zone_rebalancing_policy.pop("rebalanceStrategy")
+
+    zone_allocation_policy = resiliency_policy.get("zone_allocation_policy", {}) or {}
+    if "maxInstancePercentPerZonePolicy" in zone_allocation_policy:
+        zone_allocation_policy["max_instance_percent_per_zone_policy"] = zone_allocation_policy["maxInstancePercentPerZonePolicy"]
+        zone_allocation_policy.pop("maxInstancePercentPerZonePolicy")
+    if "maxZoneCount" in zone_allocation_policy:
+        zone_allocation_policy["max_zone_count"] = zone_allocation_policy["maxZoneCount"]
+        zone_allocation_policy.pop("maxZoneCount")
+
+    scale_in_policy = new_result.get("scale_in_policy", {}) or {}
+    if "forceDeletion" in scale_in_policy:
+        scale_in_policy["force_deletion"] = scale_in_policy["forceDeletion"]
+        scale_in_policy.pop("forceDeletion")
+    if "prioritizeUnhealthyVMs" in scale_in_policy:
+        scale_in_policy["prioritize_unhealthy_v_ms"] = scale_in_policy["prioritizeUnhealthyVMs"]
+        scale_in_policy.pop("prioritizeUnhealthyVMs")
+
+    scheduled_events_policy = new_result.get("scheduled_events_policy", {}) or {}
+    if "allInstancesDown" in scheduled_events_policy:
+        scheduled_events_policy["all_instances_down"] = scheduled_events_policy["allInstancesDown"]
+        scheduled_events_policy.pop("allInstancesDown")
+    if "scheduledEventsAdditionalPublishingTargets" in scheduled_events_policy:
+        scheduled_events_policy["scheduled_events_additional_publishing_targets"] = scheduled_events_policy[
+            "scheduledEventsAdditionalPublishingTargets"]
+        scheduled_events_policy.pop("scheduledEventsAdditionalPublishingTargets")
+    if "userInitiatedReboot" in scheduled_events_policy:
+        scheduled_events_policy["user_initiated_reboot"] = scheduled_events_policy["userInitiatedReboot"]
+        scheduled_events_policy.pop("userInitiatedReboot")
+    if "userInitiatedRedeploy" in scheduled_events_policy:
+        scheduled_events_policy["user_initiated_redeploy"] = scheduled_events_policy["userInitiatedRedeploy"]
+        scheduled_events_policy.pop("userInitiatedRedeploy")
+
+    all_instances_down = scheduled_events_policy.get("all_instances_down", {}) or {}
+    if "automaticallyApprove" in all_instances_down:
+        all_instances_down["automatically_approve"] = all_instances_down["automaticallyApprove"]
+        all_instances_down.pop("automaticallyApprove")
+
+    scheduled_events_additional_publishing_targets = scheduled_events_policy.get("scheduled_events_additional_publishing_targets", {}) or {}
+    if "eventGridAndResourceGraph" in scheduled_events_additional_publishing_targets:
+        scheduled_events_additional_publishing_targets["event_grid_and_resource_graph"] = scheduled_events_additional_publishing_targets["eventGridAndResourceGraph"]
+        scheduled_events_additional_publishing_targets.pop("eventGridAndResourceGraph")
+
+    event_grid_and_resource_graph = scheduled_events_additional_publishing_targets.get("event_grid_and_resource_graph", {}) or {}
+    if "scheduledEventsApiVersion" in event_grid_and_resource_graph:
+        event_grid_and_resource_graph["scheduled_events_api_version"] = event_grid_and_resource_graph["scheduledEventsApiVersion"]
+        event_grid_and_resource_graph.pop("scheduledEventsApiVersion")
+
+    user_initiated_reboot = scheduled_events_policy.get("user_initiated_reboot", {}) or {}
+    if "automaticallyApprove" in user_initiated_reboot:
+        user_initiated_reboot["automatically_approve"] = user_initiated_reboot["automaticallyApprove"]
+        user_initiated_reboot.pop("automaticallyApprove")
+
+    user_initiated_redeploy = scheduled_events_policy.get("user_initiated_redeploy", {}) or {}
+    if "automaticallyApprove" in user_initiated_redeploy:
+        user_initiated_redeploy["automatically_approve"] = user_initiated_redeploy["automaticallyApprove"]
+        user_initiated_redeploy.pop("automaticallyApprove")
+
+    sku_profile = new_result.get("sku_profile", {}) or {}
+    if "allocationStrategy" in sku_profile:
+        sku_profile["allocation_strategy"] = sku_profile["allocationStrategy"]
+        sku_profile.pop("allocationStrategy")
+    if "vmSizes" in sku_profile:
+        sku_profile["vm_sizes"] = sku_profile["vmSizes"]
+        sku_profile.pop("vmSizes")
+
+    spot_restore_policy = new_result.get("spot_restore_policy", {}) or {}
+    if "restoreTimeout" in spot_restore_policy:
+        spot_restore_policy["restore_timeout"] = spot_restore_policy["restoreTimeout"]
+        spot_restore_policy.pop("restoreTimeout")
+
+    upgrade_policy = new_result.get("upgrade_policy", {}) or {}
+    if "automaticOSUpgradePolicy" in upgrade_policy:
+        upgrade_policy["automatic_os_upgrade_policy"] = upgrade_policy["automaticOSUpgradePolicy"]
+        upgrade_policy.pop("automaticOSUpgradePolicy")
+    if "rollingUpgradePolicy" in upgrade_policy:
+        upgrade_policy["rolling_upgrade_policy"] = upgrade_policy["rollingUpgradePolicy"]
+        upgrade_policy.pop("rollingUpgradePolicy")
+
+    automatic_os_upgrade_policy = upgrade_policy.get("automatic_os_upgrade_policy", {}) or {}
+    if "disableAutomaticRollback" in automatic_os_upgrade_policy:
+        automatic_os_upgrade_policy["disable_automatic_rollback"] = automatic_os_upgrade_policy["disableAutomaticRollback"]
+        automatic_os_upgrade_policy.pop("disableAutomaticRollback")
+    if "enableAutomaticOSUpgrade" in automatic_os_upgrade_policy:
+        automatic_os_upgrade_policy["enable_automatic_os_upgrade"] = automatic_os_upgrade_policy["enableAutomaticOSUpgrade"]
+        automatic_os_upgrade_policy.pop("enableAutomaticOSUpgrade")
+    if "osRollingUpgradeDeferral" in automatic_os_upgrade_policy:
+        automatic_os_upgrade_policy["os_rolling_upgrade_deferral"] = automatic_os_upgrade_policy["osRollingUpgradeDeferral"]
+        automatic_os_upgrade_policy.pop("osRollingUpgradeDeferral")
+    if "useRollingUpgradePolicy" in automatic_os_upgrade_policy:
+        automatic_os_upgrade_policy["use_rolling_upgrade_policy"] = automatic_os_upgrade_policy["useRollingUpgradePolicy"]
+        automatic_os_upgrade_policy.pop("useRollingUpgradePolicy")
+
+    rolling_upgrade_policy = upgrade_policy.get("rolling_upgrade_policy", {}) or {}
+    if "enableCrossZoneUpgrade" in rolling_upgrade_policy:
+        rolling_upgrade_policy["enable_cross_zone_upgrade"] = rolling_upgrade_policy["enableCrossZoneUpgrade"]
+        rolling_upgrade_policy.pop("enableCrossZoneUpgrade")
+    if "maxBatchInstancePercent" in rolling_upgrade_policy:
+        rolling_upgrade_policy["max_batch_instance_percent"] = rolling_upgrade_policy["maxBatchInstancePercent"]
+        rolling_upgrade_policy.pop("maxBatchInstancePercent")
+    if "maxSurge" in rolling_upgrade_policy:
+        rolling_upgrade_policy["max_surge"] = rolling_upgrade_policy["maxSurge"]
+        rolling_upgrade_policy.pop("maxSurge")
+    if "maxUnhealthyInstancePercent" in rolling_upgrade_policy:
+        rolling_upgrade_policy["max_unhealthy_instance_percent"] = rolling_upgrade_policy["maxUnhealthyInstancePercent"]
+        rolling_upgrade_policy.pop("maxUnhealthyInstancePercent")
+    if "maxUnhealthyUpgradedInstancePercent" in rolling_upgrade_policy:
+        rolling_upgrade_policy["max_unhealthy_upgraded_instance_percent"] = rolling_upgrade_policy["maxUnhealthyUpgradedInstancePercent"]
+        rolling_upgrade_policy.pop("maxUnhealthyUpgradedInstancePercent")
+    if "pauseTimeBetweenBatches" in rolling_upgrade_policy:
+        rolling_upgrade_policy["pause_time_between_batches"] = rolling_upgrade_policy["pauseTimeBetweenBatches"]
+        rolling_upgrade_policy.pop("pauseTimeBetweenBatches")
+    if "prioritizeUnhealthyInstances" in rolling_upgrade_policy:
+        rolling_upgrade_policy["prioritize_unhealthy_instances"] = rolling_upgrade_policy["prioritizeUnhealthyInstances"]
+        rolling_upgrade_policy.pop("prioritizeUnhealthyInstances")
+    if "rollbackFailedInstancesOnPolicyBreach" in rolling_upgrade_policy:
+        rolling_upgrade_policy["rollback_failed_instances_on_policy_breach"] = rolling_upgrade_policy["rollbackFailedInstancesOnPolicyBreach"]
+        rolling_upgrade_policy.pop("rollbackFailedInstancesOnPolicyBreach")
+
+    virtual_machine_profile = new_result.get("virtual_machine_profile", {}) or {}
+    if "applicationProfile" in virtual_machine_profile:
+        virtual_machine_profile["application_profile"] = virtual_machine_profile["applicationProfile"]
+        virtual_machine_profile.pop("applicationProfile")
+    if "billingProfile" in virtual_machine_profile:
+        virtual_machine_profile["billing_profile"] = virtual_machine_profile["billingProfile"]
+        virtual_machine_profile.pop("billingProfile")
+    if "capacityReservation" in virtual_machine_profile:
+        virtual_machine_profile["capacity_reservation"] = virtual_machine_profile["capacityReservation"]
+        virtual_machine_profile.pop("capacityReservation")
+    if "diagnosticsProfile" in virtual_machine_profile:
+        virtual_machine_profile["diagnostics_profile"] = virtual_machine_profile["diagnosticsProfile"]
+        virtual_machine_profile.pop("diagnosticsProfile")
+    if "evictionPolicy" in virtual_machine_profile:
+        virtual_machine_profile["eviction_policy"] = virtual_machine_profile["evictionPolicy"]
+        virtual_machine_profile.pop("evictionPolicy")
+    if "extensionProfile" in virtual_machine_profile:
+        virtual_machine_profile["extension_profile"] = virtual_machine_profile["extensionProfile"]
+        virtual_machine_profile.pop("extensionProfile")
+    if "hardwareProfile" in virtual_machine_profile:
+        virtual_machine_profile["hardware_profile"] = virtual_machine_profile["hardwareProfile"]
+        virtual_machine_profile.pop("hardwareProfile")
+    if "licenseType" in virtual_machine_profile:
+        virtual_machine_profile["license_type"] = virtual_machine_profile["licenseType"]
+        virtual_machine_profile.pop("licenseType")
+    if "networkProfile" in virtual_machine_profile:
+        virtual_machine_profile["network_profile"] = virtual_machine_profile["networkProfile"]
+        virtual_machine_profile.pop("networkProfile")
+    if "osProfile" in virtual_machine_profile:
+        virtual_machine_profile["os_profile"] = virtual_machine_profile["osProfile"]
+        virtual_machine_profile.pop("osProfile")
+    if "scheduledEventsProfile" in virtual_machine_profile:
+        virtual_machine_profile["scheduled_events_profile"] = virtual_machine_profile["scheduledEventsProfile"]
+        virtual_machine_profile.pop("scheduledEventsProfile")
+    if "securityPostureReference" in virtual_machine_profile:
+        virtual_machine_profile["security_posture_reference"] = virtual_machine_profile["securityPostureReference"]
+        virtual_machine_profile.pop("securityPostureReference")
+    if "securityProfile" in virtual_machine_profile:
+        virtual_machine_profile["security_profile"] = virtual_machine_profile["securityProfile"]
+        virtual_machine_profile.pop("securityProfile")
+    if "serviceArtifactReference" in virtual_machine_profile:
+        virtual_machine_profile["service_artifact_reference"] = virtual_machine_profile["serviceArtifactReference"]
+        virtual_machine_profile.pop("serviceArtifactReference")
+    if "storageProfile" in virtual_machine_profile:
+        virtual_machine_profile["storage_profile"] = virtual_machine_profile["storageProfile"]
+        virtual_machine_profile.pop("storageProfile")
+    if "userData" in virtual_machine_profile:
+        virtual_machine_profile["user_data"] = virtual_machine_profile["userData"]
+        virtual_machine_profile.pop("userData")
+
+    application_profile = virtual_machine_profile.get("application_profile", {}) or {}
     if "galleryApplications" in application_profile:
         application_profile["gallery_applications"] = application_profile["galleryApplications"]
         application_profile.pop("galleryApplications")
@@ -229,17 +395,17 @@ def convert_show_result_to_sneak_case(result):
             gallery_application["treat_failure_as_deployment_failure"] = gallery_application["treatFailureAsDeploymentFailure"]
             gallery_application.pop("treatFailureAsDeploymentFailure")
 
-    billing_profile = new_result.get("billing_profile", {}) or {}
+    billing_profile = virtual_machine_profile.get("billing_profile", {}) or {}
     if "maxPrice" in billing_profile:
         billing_profile["max_price"] = billing_profile["maxPrice"]
         billing_profile.pop("maxPrice")
 
-    capacity_reservation = new_result.get("capacity_reservation", {}) or {}
+    capacity_reservation = virtual_machine_profile.get("capacity_reservation", {}) or {}
     if "capacityReservationGroup" in capacity_reservation:
         capacity_reservation["capacity_reservation_group"] = capacity_reservation["capacityReservationGroup"]
         capacity_reservation.pop("capacityReservationGroup")
 
-    diagnostics_profile = new_result.get("diagnostics_profile", {}) or {}
+    diagnostics_profile = virtual_machine_profile.get("diagnostics_profile", {}) or {}
     if "bootDiagnostics" in diagnostics_profile:
         diagnostics_profile["boot_diagnostics"] = diagnostics_profile["bootDiagnostics"]
         diagnostics_profile.pop("bootDiagnostics")
@@ -249,10 +415,47 @@ def convert_show_result_to_sneak_case(result):
         boot_diagnostics["storage_uri"] = boot_diagnostics["storageUri"]
         boot_diagnostics.pop("storageUri")
 
-    hardware_profile = new_result.get("hardware_profile", {}) or {}
-    if "vmSize" in hardware_profile:
-        hardware_profile["vm_size"] = hardware_profile["vmSize"]
-        hardware_profile.pop("vmSize")
+    extension_profile = virtual_machine_profile.get("extension_profile", {}) or {}
+    if "extensionsTimeBudget" in extension_profile:
+        extension_profile["extensions_time_budget"] = extension_profile["extensionsTimeBudget"]
+        extension_profile.pop("extensionsTimeBudget")
+
+    extensions = extension_profile.get("extensions", []) or []
+    for extension in extensions:
+        if "autoUpgradeMinorVersion" in extension:
+            extension["auto_upgrade_minor_version"] = extension["autoUpgradeMinorVersion"]
+            extension.pop("autoUpgradeMinorVersion")
+        if "enableAutomaticUpgrade" in extension:
+            extension["enable_automatic_upgrade"] = extension["enableAutomaticUpgrade"]
+            extension.pop("enableAutomaticUpgrade")
+        if "forceUpdateTag" in extension:
+            extension["force_update_tag"] = extension["forceUpdateTag"]
+            extension.pop("forceUpdateTag")
+        if "protectedSettings" in extension:
+            extension["protected_settings"] = extension["protectedSettings"]
+            extension.pop("protectedSettings")
+        if "protectedSettingsFromKeyVault" in extension:
+            extension["protected_settings_from_key_vault"] = extension["protectedSettingsFromKeyVault"]
+            extension.pop("protectedSettingsFromKeyVault")
+        if "provisionAfterExtensions" in extension:
+            extension["provision_after_extensions"] = extension["provisionAfterExtensions"]
+            extension.pop("provisionAfterExtensions")
+        if "suppressFailures" in extension:
+            extension["suppress_failures"] = extension["suppressFailures"]
+            extension.pop("suppressFailures")
+        if "typeHandlerVersion" in extension:
+            extension["type_handler_version"] = extension["typeHandlerVersion"]
+            extension.pop("typeHandlerVersion")
+
+        protected_settings_from_key_vault = extension.get("protected_settings_from_key_vault", {}) or {}
+        if "secretUrl" in protected_settings_from_key_vault:
+            protected_settings_from_key_vault["secret_url"] = protected_settings_from_key_vault["secretUrl"]
+            protected_settings_from_key_vault.pop("secretUrl")
+        if "sourceVault" in protected_settings_from_key_vault:
+            protected_settings_from_key_vault["source_vault"] = protected_settings_from_key_vault["sourceVault"]
+            protected_settings_from_key_vault.pop("sourceVault")
+
+    hardware_profile = virtual_machine_profile.get("hardware_profile", {}) or {}
     if "vmSizeProperties" in hardware_profile:
         hardware_profile["vm_size_properties"] = hardware_profile["vmSizeProperties"]
         hardware_profile.pop("vmSizeProperties")
@@ -265,16 +468,16 @@ def convert_show_result_to_sneak_case(result):
         vm_size_properties["v_cp_us_per_core"] = vm_size_properties["vCPUsPerCore"]
         vm_size_properties.pop("vCPUsPerCore")
 
-    network_profile = new_result.get("network_profile", {}) or {}
+    network_profile = virtual_machine_profile.get("network_profile", {}) or {}
+    if "healthProbe" in network_profile:
+        network_profile["health_probe"] = network_profile["healthProbe"]
+        network_profile.pop("healthProbe")
     if "networkApiVersion" in network_profile:
         network_profile["network_api_version"] = network_profile["networkApiVersion"]
         network_profile.pop("networkApiVersion")
     if "networkInterfaceConfigurations" in network_profile:
         network_profile["network_interface_configurations"] = network_profile["networkInterfaceConfigurations"]
         network_profile.pop("networkInterfaceConfigurations")
-    if "networkInterfaces" in network_profile:
-        network_profile["network_interfaces"] = network_profile["networkInterfaces"]
-        network_profile.pop("networkInterfaces")
 
     network_interface_configurations = network_profile.get("network_interface_configurations", []) or []
     for network_interface_configuration in network_interface_configurations:
@@ -293,9 +496,6 @@ def convert_show_result_to_sneak_case(result):
         if "dnsSettings" in network_interface_configuration:
             network_interface_configuration["dns_settings"] = network_interface_configuration["dnsSettings"]
             network_interface_configuration.pop("dnsSettings")
-        if "dscpConfiguration" in network_interface_configuration:
-            network_interface_configuration["dscp_configuration"] = network_interface_configuration["dscpConfiguration"]
-            network_interface_configuration.pop("dscpConfiguration")
         if "enableAcceleratedNetworking" in network_interface_configuration:
             network_interface_configuration["enable_accelerated_networking"] = network_interface_configuration["enableAcceleratedNetworking"]
             network_interface_configuration.pop("enableAcceleratedNetworking")
@@ -328,6 +528,9 @@ def convert_show_result_to_sneak_case(result):
             if "loadBalancerBackendAddressPools" in ip_configuration:
                 ip_configuration["load_balancer_backend_address_pools"] = ip_configuration["loadBalancerBackendAddressPools"]
                 ip_configuration.pop("loadBalancerBackendAddressPools")
+            if "loadBalancerInboundNatPools" in ip_configuration:
+                ip_configuration["load_balancer_inbound_nat_pools"] = ip_configuration["loadBalancerInboundNatPools"]
+                ip_configuration.pop("loadBalancerInboundNatPools")
             if "privateIPAddressVersion" in ip_configuration:
                 ip_configuration["private_ip_address_version"] = ip_configuration["privateIPAddressVersion"]
                 ip_configuration.pop("privateIPAddressVersion")
@@ -350,16 +553,10 @@ def convert_show_result_to_sneak_case(result):
                 public_ip_address_configuration["ip_tags"] = public_ip_address_configuration["ipTags"]
                 public_ip_address_configuration.pop("ipTags")
             if "publicIPAddressVersion" in public_ip_address_configuration:
-                public_ip_address_configuration["public_ip_address_version"] = public_ip_address_configuration[
-                    "publicIPAddressVersion"]
+                public_ip_address_configuration["public_ip_address_version"] = public_ip_address_configuration["publicIPAddressVersion"]
                 public_ip_address_configuration.pop("publicIPAddressVersion")
-            if "publicIPAllocationMethod" in public_ip_address_configuration:
-                public_ip_address_configuration["public_ip_allocation_method"] = public_ip_address_configuration[
-                    "publicIPAllocationMethod"]
-                public_ip_address_configuration.pop("publicIPAllocationMethod")
             if "publicIPPrefix" in public_ip_address_configuration:
-                public_ip_address_configuration["public_ip_prefix"] = public_ip_address_configuration[
-                    "publicIPPrefix"]
+                public_ip_address_configuration["public_ip_prefix"] = public_ip_address_configuration["publicIPPrefix"]
                 public_ip_address_configuration.pop("publicIPPrefix")
 
             dns_settings = public_ip_address_configuration.get("dns_settings", {}) or {}
@@ -376,13 +573,7 @@ def convert_show_result_to_sneak_case(result):
                     ip_tag["ip_tag_type"] = ip_tag["ipTagType"]
                     ip_tag.pop("ipTagType")
 
-    network_interfaces = network_profile.get("network_interfaces", []) or []
-    for network_interface in network_interfaces:
-        if "deleteOption" in network_interface:
-            network_interface["delete_option"] = network_interface["deleteOption"]
-            network_interface.pop("deleteOption")
-
-    os_profile = new_result.get("os_profile", {}) or {}
+    os_profile = virtual_machine_profile.get("os_profile", {}) or {}
     if "adminPassword" in os_profile:
         os_profile["admin_password"] = os_profile["adminPassword"]
         os_profile.pop("adminPassword")
@@ -392,9 +583,9 @@ def convert_show_result_to_sneak_case(result):
     if "allowExtensionOperations" in os_profile:
         os_profile["allow_extension_operations"] = os_profile["allowExtensionOperations"]
         os_profile.pop("allowExtensionOperations")
-    if "computerName" in os_profile:
-        os_profile["computer_name"] = os_profile["computerName"]
-        os_profile.pop("computerName")
+    if "computerNamePrefix" in os_profile:
+        os_profile["computer_name_prefix"] = os_profile["computerNamePrefix"]
+        os_profile.pop("computerNamePrefix")
     if "customData" in os_profile:
         os_profile["custom_data"] = os_profile["customData"]
         os_profile.pop("customData")
@@ -410,10 +601,12 @@ def convert_show_result_to_sneak_case(result):
 
     linux_configuration = os_profile.get("linux_configuration", {}) or {}
     if "disablePasswordAuthentication" in linux_configuration:
-        linux_configuration["disable_password_authentication"] = linux_configuration["disablePasswordAuthentication"]
+        linux_configuration["disable_password_authentication"] = linux_configuration[
+            "disablePasswordAuthentication"]
         linux_configuration.pop("disablePasswordAuthentication")
     if "enableVMAgentPlatformUpdates" in linux_configuration:
-        linux_configuration["enable_vm_agent_platform_updates"] = linux_configuration["enableVMAgentPlatformUpdates"]
+        linux_configuration["enable_vm_agent_platform_updates"] = linux_configuration[
+            "enableVMAgentPlatformUpdates"]
         linux_configuration.pop("enableVMAgentPlatformUpdates")
     if "patchSettings" in linux_configuration:
         linux_configuration["patch_settings"] = linux_configuration["patchSettings"]
@@ -435,7 +628,8 @@ def convert_show_result_to_sneak_case(result):
 
     automatic_by_platform_settings = patch_settings.get("automatic_by_platform_settings", {}) or {}
     if "bypassPlatformSafetyChecksOnUserSchedule" in automatic_by_platform_settings:
-        automatic_by_platform_settings["bypass_platform_safety_checks_on_user_schedule"] = automatic_by_platform_settings["bypassPlatformSafetyChecksOnUserSchedule"]
+        automatic_by_platform_settings["bypass_platform_safety_checks_on_user_schedule"] = \
+        automatic_by_platform_settings["bypassPlatformSafetyChecksOnUserSchedule"]
         automatic_by_platform_settings.pop("bypassPlatformSafetyChecksOnUserSchedule")
     if "rebootSetting" in automatic_by_platform_settings:
         automatic_by_platform_settings["reboot_setting"] = automatic_by_platform_settings["rebootSetting"]
@@ -531,46 +725,7 @@ def convert_show_result_to_sneak_case(result):
             listener["certificate_url"] = listener["certificateUrl"]
             listener.pop("certificateUrl")
 
-    scheduled_events_policy = new_result.get("scheduled_events_policy", {}) or {}
-    if "allInstancesDown" in scheduled_events_policy:
-        scheduled_events_policy["all_instances_down"] = scheduled_events_policy["allInstancesDown"]
-        scheduled_events_policy.pop("allInstancesDown")
-    if "scheduledEventsAdditionalPublishingTargets" in scheduled_events_policy:
-        scheduled_events_policy["scheduled_events_additional_publishing_targets"] = scheduled_events_policy["scheduledEventsAdditionalPublishingTargets"]
-        scheduled_events_policy.pop("scheduledEventsAdditionalPublishingTargets")
-    if "userInitiatedReboot" in scheduled_events_policy:
-        scheduled_events_policy["user_initiated_reboot"] = scheduled_events_policy["userInitiatedReboot"]
-        scheduled_events_policy.pop("userInitiatedReboot")
-    if "userInitiatedRedeploy" in scheduled_events_policy:
-        scheduled_events_policy["user_initiated_redeploy"] = scheduled_events_policy["userInitiatedRedeploy"]
-        scheduled_events_policy.pop("userInitiatedRedeploy")
-
-    all_instances_down = scheduled_events_policy.get("all_instances_down", {}) or {}
-    if "automaticallyApprove" in all_instances_down:
-        all_instances_down["automatically_approve"] = all_instances_down["automaticallyApprove"]
-        all_instances_down.pop("automaticallyApprove")
-
-    scheduled_events_additional_publishing_targets = scheduled_events_policy.get("scheduled_events_additional_publishing_targets", {}) or {}
-    if "eventGridAndResourceGraph" in scheduled_events_additional_publishing_targets:
-        scheduled_events_additional_publishing_targets["event_grid_and_resource_graph"] = scheduled_events_additional_publishing_targets["eventGridAndResourceGraph"]
-        scheduled_events_additional_publishing_targets.pop("eventGridAndResourceGraph")
-
-    event_grid_and_resource_graph = scheduled_events_additional_publishing_targets.get("event_grid_and_resource_graph", {}) or {}
-    if "scheduledEventsApiVersion" in event_grid_and_resource_graph:
-        event_grid_and_resource_graph["scheduled_events_api_version"] = event_grid_and_resource_graph["scheduledEventsApiVersion"]
-        event_grid_and_resource_graph.pop("scheduledEventsApiVersion")
-
-    user_initiated_reboot = scheduled_events_policy.get("user_initiated_reboot", {}) or {}
-    if "automaticallyApprove" in user_initiated_reboot:
-        user_initiated_reboot["automatically_approve"] = user_initiated_reboot["automaticallyApprove"]
-        user_initiated_reboot.pop("automaticallyApprove")
-
-    user_initiated_redeploy = scheduled_events_policy.get("user_initiated_redeploy", {}) or {}
-    if "automaticallyApprove" in user_initiated_redeploy:
-        user_initiated_redeploy["automatically_approve"] = user_initiated_redeploy["automaticallyApprove"]
-        user_initiated_redeploy.pop("automaticallyApprove")
-
-    scheduled_events_profile = new_result.get("scheduled_events_profile", {}) or {}
+    scheduled_events_profile = virtual_machine_profile.get("scheduled_events_profile", {}) or {}
     if "osImageNotificationProfile" in scheduled_events_profile:
         scheduled_events_profile["os_image_notification_profile"] = scheduled_events_profile["osImageNotificationProfile"]
         scheduled_events_profile.pop("osImageNotificationProfile")
@@ -588,7 +743,15 @@ def convert_show_result_to_sneak_case(result):
         terminate_notification_profile["not_before_timeout"] = terminate_notification_profile["notBeforeTimeout"]
         terminate_notification_profile.pop("notBeforeTimeout")
 
-    security_profile = new_result.get("security_profile", {}) or {}
+    security_posture_reference = virtual_machine_profile.get("security_posture_reference", {}) or {}
+    if "excludeExtensions" in security_posture_reference:
+        security_posture_reference["exclude_extensions"] = security_posture_reference["excludeExtensions"]
+        security_posture_reference.pop("excludeExtensions")
+    if "isOverridable" in security_posture_reference:
+        security_posture_reference["is_overridable"] = security_posture_reference["isOverridable"]
+        security_posture_reference.pop("isOverridable")
+
+    security_profile = virtual_machine_profile.get("security_profile", {}) or {}
     if "encryptionAtHost" in security_profile:
         security_profile["encryption_at_host"] = security_profile["encryptionAtHost"]
         security_profile.pop("encryptionAtHost")
@@ -639,10 +802,7 @@ def convert_show_result_to_sneak_case(result):
         uefi_settings["v_tpm_enabled"] = uefi_settings["vTpmEnabled"]
         uefi_settings.pop("vTpmEnabled")
 
-    storage_profile = new_result.get("storage_profile", {}) or {}
-    if "alignRegionalDisksToVMZone" in storage_profile:
-        storage_profile["align_regional_disks_to_vm_zone"] = storage_profile["alignRegionalDisksToVMZone"]
-        storage_profile.pop("alignRegionalDisksToVMZone")
+    storage_profile = virtual_machine_profile.get("storage_profile", {}) or {}
     if "dataDisks" in storage_profile:
         storage_profile["data_disks"] = storage_profile["dataDisks"]
         storage_profile.pop("dataDisks")
@@ -664,9 +824,6 @@ def convert_show_result_to_sneak_case(result):
         if "deleteOption" in data_disk:
             data_disk["delete_option"] = data_disk["deleteOption"]
             data_disk.pop("deleteOption")
-        if "detachOption" in data_disk:
-            data_disk["detach_option"] = data_disk["detachOption"]
-            data_disk.pop("detachOption")
         if "diskIOPSReadWrite" in data_disk:
             data_disk["disk_iops_read_write"] = data_disk["diskIOPSReadWrite"]
             data_disk.pop("diskIOPSReadWrite")
@@ -679,12 +836,6 @@ def convert_show_result_to_sneak_case(result):
         if "managedDisk" in data_disk:
             data_disk["managed_disk"] = data_disk["managedDisk"]
             data_disk.pop("managedDisk")
-        if "sourceResource" in data_disk:
-            data_disk["source_resource"] = data_disk["sourceResource"]
-            data_disk.pop("sourceResource")
-        if "toBeDetached" in data_disk:
-            data_disk["to_be_detached"] = data_disk["toBeDetached"]
-            data_disk.pop("toBeDetached")
         if "writeAcceleratorEnabled" in data_disk:
             data_disk["write_accelerator_enabled"] = data_disk["writeAcceleratorEnabled"]
             data_disk.pop("writeAcceleratorEnabled")
@@ -700,7 +851,7 @@ def convert_show_result_to_sneak_case(result):
             managed_disk["storage_account_type"] = managed_disk["storageAccountType"]
             managed_disk.pop("storageAccountType")
 
-        security_profile = managed_disk.get("security_profile", {})
+        security_profile = managed_disk.get("security_profile", {}) or {}
         if "diskEncryptionSet" in security_profile:
             security_profile["disk_encryption_set"] = security_profile["diskEncryptionSet"]
             security_profile.pop("diskEncryptionSet")
@@ -729,15 +880,15 @@ def convert_show_result_to_sneak_case(result):
     if "diskSizeGB" in os_disk:
         os_disk["disk_size_gb"] = os_disk["diskSizeGB"]
         os_disk.pop("diskSizeGB")
-    if "encryptionSettings" in os_disk:
-        os_disk["encryption_settings"] = os_disk["encryptionSettings"]
-        os_disk.pop("encryptionSettings")
     if "managedDisk" in os_disk:
         os_disk["managed_disk"] = os_disk["managedDisk"]
         os_disk.pop("managedDisk")
     if "osType" in os_disk:
         os_disk["os_type"] = os_disk["osType"]
         os_disk.pop("osType")
+    if "vhdContainers" in os_disk:
+        os_disk["vhd_containers"] = os_disk["vhdContainers"]
+        os_disk.pop("vhdContainers")
     if "writeAcceleratorEnabled" in os_disk:
         os_disk["write_accelerator_enabled"] = os_disk["writeAcceleratorEnabled"]
         os_disk.pop("writeAcceleratorEnabled")
@@ -753,36 +904,12 @@ def convert_show_result_to_sneak_case(result):
         managed_disk["storage_account_type"] = managed_disk["storageAccountType"]
         managed_disk.pop("storageAccountType")
 
-    security_profile = managed_disk.get("security_profile", {})
+    security_profile = managed_disk.get("security_profile", {}) or {}
     if "diskEncryptionSet" in security_profile:
         security_profile["disk_encryption_set"] = security_profile["diskEncryptionSet"]
         security_profile.pop("diskEncryptionSet")
     if "securityEncryptionType" in security_profile:
         security_profile["security_encryption_type"] = security_profile["securityEncryptionType"]
         security_profile.pop("securityEncryptionType")
-
-    encryption_settings = os_disk.get("encryption_settings", {}) or {}
-    if "diskEncryptionKey" in encryption_settings:
-        encryption_settings["disk_encryption_key"] = encryption_settings["diskEncryptionKey"]
-        encryption_settings.pop("diskEncryptionKey")
-    if "keyEncryptionKey" in encryption_settings:
-        encryption_settings["key_encryption_key"] = encryption_settings["keyEncryptionKey"]
-        encryption_settings.pop("keyEncryptionKey")
-
-    disk_encryption_key = encryption_settings.get("disk_encryption_key", {}) or {}
-    if "secretUrl" in disk_encryption_key:
-        disk_encryption_key["secret_url"] = disk_encryption_key["secretUrl"]
-        disk_encryption_key.pop("secretUrl")
-    if "sourceVault" in disk_encryption_key:
-        disk_encryption_key["source_vault"] = disk_encryption_key["sourceVault"]
-        disk_encryption_key.pop("sourceVault")
-
-    key_encryption_key = encryption_settings.get("key_encryption_key", {}) or {}
-    if "keyUrl" in key_encryption_key:
-        key_encryption_key["key_url"] = key_encryption_key["keyUrl"]
-        key_encryption_key.pop("keyUrl")
-    if "sourceVault" in key_encryption_key:
-        key_encryption_key["source_vault"] = key_encryption_key["sourceVault"]
-        key_encryption_key.pop("sourceVault")
 
     return new_result
