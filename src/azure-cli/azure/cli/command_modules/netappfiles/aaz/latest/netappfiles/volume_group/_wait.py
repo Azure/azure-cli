@@ -338,8 +338,12 @@ class Wait(AAZWaitCommand):
             properties.key_vault_private_endpoint_resource_id = AAZStrType(
                 serialized_name="keyVaultPrivateEndpointResourceId",
             )
+            properties.language = AAZStrType()
             properties.ldap_enabled = AAZBoolType(
                 serialized_name="ldapEnabled",
+            )
+            properties.ldap_server_type = AAZStrType(
+                serialized_name="ldapServerType",
             )
             properties.maximum_number_of_files = AAZIntType(
                 serialized_name="maximumNumberOfFiles",
@@ -466,6 +470,22 @@ class Wait(AAZWaitCommand):
             )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
+                flags={"read_only": True},
+            )
+            replication.external_replication_setup_info = AAZStrType(
+                serialized_name="externalReplicationSetupInfo",
+                flags={"read_only": True},
+            )
+            replication.external_replication_setup_status = AAZStrType(
+                serialized_name="externalReplicationSetupStatus",
+                flags={"read_only": True},
+            )
+            replication.mirror_state = AAZStrType(
+                serialized_name="mirrorState",
+                flags={"read_only": True},
+            )
+            replication.relationship_status = AAZStrType(
+                serialized_name="relationshipStatus",
                 flags={"read_only": True},
             )
             replication.remote_path = AAZObjectType(
