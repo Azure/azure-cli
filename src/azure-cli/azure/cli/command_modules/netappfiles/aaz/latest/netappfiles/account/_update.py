@@ -152,12 +152,6 @@ class Update(AAZCommand):
             help="Active Directories",
             nullable=True,
         )
-        _args_schema.ldap_configuration = AAZObjectArg(
-            options=["--ldap-configuration"],
-            arg_group="Properties",
-            help="LDAP Configuration for the account.",
-            nullable=True,
-        )
         _args_schema.nfs_v4_id_domain = AAZStrArg(
             options=["--nfs-v4-id-domain"],
             arg_group="Properties",
@@ -359,49 +353,6 @@ class Update(AAZCommand):
                 max_length=255,
                 min_length=1,
             ),
-        )
-
-        ldap_configuration = cls._args_schema.ldap_configuration
-        ldap_configuration.certificate_cn_host = AAZStrArg(
-            options=["certificate-cn-host"],
-            help="The CN host name used while generating the certificate, LDAP Over TLS requires the CN host name to create DNS host entry.",
-            nullable=True,
-        )
-        ldap_configuration.domain = AAZStrArg(
-            options=["domain"],
-            help="Name of the LDAP configuration domain",
-            nullable=True,
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9.-]{0,253}[a-zA-Z0-9]$",
-                max_length=255,
-            ),
-        )
-        ldap_configuration.ldap_over_tls = AAZBoolArg(
-            options=["ldap-over-tls"],
-            help="Specifies whether or not the LDAP traffic needs to be secured via TLS.",
-            nullable=True,
-        )
-        ldap_configuration.ldap_servers = AAZListArg(
-            options=["ldap-servers"],
-            help="List of LDAP server IP addresses (IPv4 only) for the LDAP domain.",
-            nullable=True,
-        )
-        ldap_configuration.server_ca_certificate = AAZPasswordArg(
-            options=["server-ca-certificate"],
-            help="When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded ldap servers CA certificate.",
-            nullable=True,
-            fmt=AAZStrArgFormat(
-                max_length=10240,
-                min_length=1,
-            ),
-            blank=AAZPromptPasswordInput(
-                msg="Password:",
-            ),
-        )
-
-        ldap_servers = cls._args_schema.ldap_configuration.ldap_servers
-        ldap_servers.Element = AAZStrArg(
-            nullable=True,
         )
         return cls._args_schema
 
@@ -657,7 +608,6 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("activeDirectories", AAZListType, ".active_directories")
                 properties.set_prop("encryption", AAZObjectType)
-                properties.set_prop("ldapConfiguration", AAZObjectType, ".ldap_configuration")
                 properties.set_prop("nfsV4IDDomain", AAZStrType, ".nfs_v4_id_domain", typ_kwargs={"nullable": True})
 
             active_directories = _builder.get(".properties.activeDirectories")
@@ -722,18 +672,6 @@ class Update(AAZCommand):
                 key_vault_properties.set_prop("keyName", AAZStrType, ".key_name", typ_kwargs={"flags": {"required": True}})
                 key_vault_properties.set_prop("keyVaultResourceId", AAZStrType, ".key_vault_resource_id")
                 key_vault_properties.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri", typ_kwargs={"flags": {"required": True}})
-
-            ldap_configuration = _builder.get(".properties.ldapConfiguration")
-            if ldap_configuration is not None:
-                ldap_configuration.set_prop("certificateCNHost", AAZStrType, ".certificate_cn_host", typ_kwargs={"nullable": True})
-                ldap_configuration.set_prop("domain", AAZStrType, ".domain")
-                ldap_configuration.set_prop("ldapOverTLS", AAZBoolType, ".ldap_over_tls")
-                ldap_configuration.set_prop("ldapServers", AAZListType, ".ldap_servers")
-                ldap_configuration.set_prop("serverCACertificate", AAZStrType, ".server_ca_certificate", typ_kwargs={"flags": {"secret": True}})
-
-            ldap_servers = _builder.get(".properties.ldapConfiguration.ldapServers")
-            if ldap_servers is not None:
-                ldap_servers.set_elements(AAZStrType, ".")
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -838,9 +776,6 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         properties.encryption = AAZObjectType()
-        properties.ldap_configuration = AAZObjectType(
-            serialized_name="ldapConfiguration",
-        )
         properties.multi_ad_status = AAZStrType(
             serialized_name="multiAdStatus",
             flags={"read_only": True},
@@ -981,26 +916,6 @@ class _UpdateHelper:
         key_vault_properties.status = AAZStrType(
             flags={"read_only": True},
         )
-
-        ldap_configuration = _schema_net_app_account_read.properties.ldap_configuration
-        ldap_configuration.certificate_cn_host = AAZStrType(
-            serialized_name="certificateCNHost",
-            nullable=True,
-        )
-        ldap_configuration.domain = AAZStrType()
-        ldap_configuration.ldap_over_tls = AAZBoolType(
-            serialized_name="ldapOverTLS",
-        )
-        ldap_configuration.ldap_servers = AAZListType(
-            serialized_name="ldapServers",
-        )
-        ldap_configuration.server_ca_certificate = AAZStrType(
-            serialized_name="serverCACertificate",
-            flags={"secret": True},
-        )
-
-        ldap_servers = _schema_net_app_account_read.properties.ldap_configuration.ldap_servers
-        ldap_servers.Element = AAZStrType()
 
         system_data = _schema_net_app_account_read.system_data
         system_data.created_at = AAZStrType(

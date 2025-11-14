@@ -299,13 +299,6 @@ class Update(AAZCommand):
             help="Specifies if default quota is enabled for the volume.",
             nullable=True,
         )
-        _args_schema.language = AAZStrArg(
-            options=["--language"],
-            arg_group="Properties",
-            help="Language supported for volume.",
-            nullable=True,
-            enum={"ar": "ar", "ar.utf-8": "ar.utf-8", "c": "c", "c.utf-8": "c.utf-8", "cs": "cs", "cs.utf-8": "cs.utf-8", "da": "da", "da.utf-8": "da.utf-8", "de": "de", "de.utf-8": "de.utf-8", "en": "en", "en-us": "en-us", "en-us.utf-8": "en-us.utf-8", "en.utf-8": "en.utf-8", "es": "es", "es.utf-8": "es.utf-8", "fi": "fi", "fi.utf-8": "fi.utf-8", "fr": "fr", "fr.utf-8": "fr.utf-8", "he": "he", "he.utf-8": "he.utf-8", "hr": "hr", "hr.utf-8": "hr.utf-8", "hu": "hu", "hu.utf-8": "hu.utf-8", "it": "it", "it.utf-8": "it.utf-8", "ja": "ja", "ja-jp.932": "ja-jp.932", "ja-jp.932.utf-8": "ja-jp.932.utf-8", "ja-jp.pck": "ja-jp.pck", "ja-jp.pck-v2": "ja-jp.pck-v2", "ja-jp.pck-v2.utf-8": "ja-jp.pck-v2.utf-8", "ja-jp.pck.utf-8": "ja-jp.pck.utf-8", "ja-v1": "ja-v1", "ja-v1.utf-8": "ja-v1.utf-8", "ja.utf-8": "ja.utf-8", "ko": "ko", "ko.utf-8": "ko.utf-8", "nl": "nl", "nl.utf-8": "nl.utf-8", "no": "no", "no.utf-8": "no.utf-8", "pl": "pl", "pl.utf-8": "pl.utf-8", "pt": "pt", "pt.utf-8": "pt.utf-8", "ro": "ro", "ro.utf-8": "ro.utf-8", "ru": "ru", "ru.utf-8": "ru.utf-8", "sk": "sk", "sk.utf-8": "sk.utf-8", "sl": "sl", "sl.utf-8": "sl.utf-8", "sv": "sv", "sv.utf-8": "sv.utf-8", "tr": "tr", "tr.utf-8": "tr.utf-8", "utf8mb4": "utf8mb4", "zh": "zh", "zh-tw": "zh-tw", "zh-tw.big5": "zh-tw.big5", "zh-tw.big5.utf-8": "zh-tw.big5.utf-8", "zh-tw.utf-8": "zh-tw.utf-8", "zh.gbk": "zh.gbk", "zh.gbk.utf-8": "zh.gbk.utf-8", "zh.utf-8": "zh.utf-8"},
-        )
         _args_schema.placement_rules = AAZListArg(
             options=["--placement-rules"],
             arg_group="Properties",
@@ -728,7 +721,6 @@ class Update(AAZCommand):
                 properties.set_prop("exportPolicy", AAZObjectType)
                 properties.set_prop("isDefaultQuotaEnabled", AAZBoolType, ".is_default_quota_enabled")
                 properties.set_prop("keyVaultPrivateEndpointResourceId", AAZStrType, ".key_vault_private_endpoint_resource_id")
-                properties.set_prop("language", AAZStrType, ".language")
                 properties.set_prop("placementRules", AAZListType, ".placement_rules")
                 properties.set_prop("protocolTypes", AAZListType, ".protocol_types")
                 properties.set_prop("proximityPlacementGroup", AAZStrType, ".proximity_placement_group")
@@ -975,12 +967,8 @@ class _UpdateHelper:
         properties.key_vault_private_endpoint_resource_id = AAZStrType(
             serialized_name="keyVaultPrivateEndpointResourceId",
         )
-        properties.language = AAZStrType()
         properties.ldap_enabled = AAZBoolType(
             serialized_name="ldapEnabled",
-        )
-        properties.ldap_server_type = AAZStrType(
-            serialized_name="ldapServerType",
         )
         properties.maximum_number_of_files = AAZIntType(
             serialized_name="maximumNumberOfFiles",
@@ -1107,22 +1095,6 @@ class _UpdateHelper:
         )
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
-            flags={"read_only": True},
-        )
-        replication.external_replication_setup_info = AAZStrType(
-            serialized_name="externalReplicationSetupInfo",
-            flags={"read_only": True},
-        )
-        replication.external_replication_setup_status = AAZStrType(
-            serialized_name="externalReplicationSetupStatus",
-            flags={"read_only": True},
-        )
-        replication.mirror_state = AAZStrType(
-            serialized_name="mirrorState",
-            flags={"read_only": True},
-        )
-        replication.relationship_status = AAZStrType(
-            serialized_name="relationshipStatus",
             flags={"read_only": True},
         )
         replication.remote_path = AAZObjectType(
