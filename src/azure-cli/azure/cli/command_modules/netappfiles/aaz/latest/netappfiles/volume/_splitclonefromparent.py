@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles volume splitclonefromparent",
-    is_preview=True,
 )
 class Splitclonefromparent(AAZCommand):
     """Split operation to convert clone volume to an independent volume.
