@@ -91,6 +91,8 @@ Release History
 
 * `az aks update`: Add support to remove existing certificates by setting the value of `--custom-ca-trust-certificates` to an empty file (#32201)
 * `az aks create/update`: Add `--acns-advanced-networkpolicies` parameter to support enabling advanced networking policies (`None`, `L7` or `FQDN`) (#32265)
+* `az aks safeguards create/update`: Add `--pss-level` parameter to support Pod Security Standards (`Baseline`, `Privileged`, or `Restricted`)
+* `az aks safeguards create`: Add validation to prevent duplicate resource creation
 
 **ARM**
 

@@ -25,13 +25,21 @@ class Update(AAZCommand):
 
     :example: Update a DeploymentSafeguards resource by adding 2 new namespaces to ignore
         az aks safeguards update -g rg1 -n mc1 --excluded-ns ns1 ns2
+
+    :example: Update Pod Security Standards level to Restricted
+        az aks safeguards update --managed-cluster /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1 --pss-level Restricted
+
+    :example: Update PSS level to Baseline using -g/-n pattern
+        az aks safeguards update -g rg1 -n cluster1 --pss-level Baseline
+
+    :example: Update both safeguards level and PSS level
+        az aks safeguards update -g rg1 -n cluster1 --level Enforce --pss-level Restricted
     """
 
     _aaz_info = {
-        "version": "2025-04-01",
+        "version": "2025-05-02-preview",
         "resources": [
-            ["mgmt-plane",
-                "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-04-01"],
+            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-05-02-preview"],
         ]
     }
 
@@ -57,7 +65,7 @@ class Update(AAZCommand):
         _args_schema.managed_cluster = AAZStrArg(
             options=["-c", "--cluster", "--managed-cluster"],
             help="The fully qualified Azure Resource manager identifier of the Managed Cluster.",
-            required=False,
+            required=False,  # Set to False to allow -g/-n syntax via parent class processing
         )
 
         # define Arg Group "Properties"
@@ -74,6 +82,13 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="The deployment safeguards level. Possible values are Warn and Enforce",
             enum={"Enforce": "Enforce", "Warn": "Warn"},
+        )
+        _args_schema.pod_security_standards_level = AAZStrArg(
+            options=["--pss-level"],
+            arg_group="Properties",
+            help="The pod security standards level",
+            nullable=True,
+            enum={"Baseline": "Baseline", "Privileged": "Privileged", "Restricted": "Restricted"},
         )
 
         excluded_namespaces = cls._args_schema.excluded_namespaces
@@ -109,8 +124,7 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(
-            self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
     class DeploymentSafeguardsGet(AAZHttpOperation):
@@ -118,8 +132,7 @@ class Update(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
-            session = self.client.send_request(
-                request=request, stream=False, **kwargs)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [200]:
                 return self.on_200(session)
 
@@ -145,6 +158,7 @@ class Update(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "resourceUri", self.ctx.args.managed_cluster,
+                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -154,7 +168,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-05-02-preview",
                     required=True,
                 ),
             }
@@ -185,68 +199,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.e_tag = AAZStrType(
-                serialized_name="eTag",
-                flags={"read_only": True},
-            )
-            _schema_on_200.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.properties = AAZObjectType()
-            _schema_on_200.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _schema_on_200.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.properties
-            properties.excluded_namespaces = AAZListType(
-                serialized_name="excludedNamespaces",
-            )
-            properties.level = AAZStrType(
-                flags={"required": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.system_excluded_namespaces = AAZListType(
-                serialized_name="systemExcludedNamespaces",
-                flags={"read_only": True},
-            )
-
-            excluded_namespaces = cls._schema_on_200.properties.excluded_namespaces
-            excluded_namespaces.Element = AAZStrType()
-
-            system_excluded_namespaces = cls._schema_on_200.properties.system_excluded_namespaces
-            system_excluded_namespaces.Element = AAZStrType()
-
-            system_data = cls._schema_on_200.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
-            )
+            _UpdateHelper._build_schema_deployment_safeguard_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -255,8 +208,7 @@ class Update(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
-            session = self.client.send_request(
-                request=request, stream=False, **kwargs)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [202]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
@@ -298,6 +250,7 @@ class Update(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "resourceUri", self.ctx.args.managed_cluster,
+                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -307,7 +260,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-05-02-preview",
                     required=True,
                 ),
             }
@@ -350,68 +303,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-
-            _schema_on_200_201 = cls._schema_on_200_201
-            _schema_on_200_201.e_tag = AAZStrType(
-                serialized_name="eTag",
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.properties = AAZObjectType()
-            _schema_on_200_201.system_data = AAZObjectType(
-                serialized_name="systemData",
-                flags={"read_only": True},
-            )
-            _schema_on_200_201.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200_201.properties
-            properties.excluded_namespaces = AAZListType(
-                serialized_name="excludedNamespaces",
-            )
-            properties.level = AAZStrType(
-                flags={"required": True},
-            )
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.system_excluded_namespaces = AAZListType(
-                serialized_name="systemExcludedNamespaces",
-                flags={"read_only": True},
-            )
-
-            excluded_namespaces = cls._schema_on_200_201.properties.excluded_namespaces
-            excluded_namespaces.Element = AAZStrType()
-
-            system_excluded_namespaces = cls._schema_on_200_201.properties.system_excluded_namespaces
-            system_excluded_namespaces.Element = AAZStrType()
-
-            system_data = cls._schema_on_200_201.system_data
-            system_data.created_at = AAZStrType(
-                serialized_name="createdAt",
-            )
-            system_data.created_by = AAZStrType(
-                serialized_name="createdBy",
-            )
-            system_data.created_by_type = AAZStrType(
-                serialized_name="createdByType",
-            )
-            system_data.last_modified_at = AAZStrType(
-                serialized_name="lastModifiedAt",
-            )
-            system_data.last_modified_by = AAZStrType(
-                serialized_name="lastModifiedBy",
-            )
-            system_data.last_modified_by_type = AAZStrType(
-                serialized_name="lastModifiedByType",
-            )
+            _UpdateHelper._build_schema_deployment_safeguard_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -426,17 +318,15 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("properties", AAZObjectType)
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("excludedNamespaces",
-                                    AAZListType, ".excluded_namespaces")
-                properties.set_prop("level", AAZStrType, ".level", typ_kwargs={
-                                    "flags": {"required": True}})
+                properties.set_prop("excludedNamespaces", AAZListType, ".excluded_namespaces")
+                properties.set_prop("level", AAZStrType, ".level", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("podSecurityStandardsLevel", AAZStrType, ".pod_security_standards_level")
 
-            excluded_namespaces = _builder.get(
-                ".properties.excludedNamespaces")
+            excluded_namespaces = _builder.get(".properties.excludedNamespaces")
             if excluded_namespaces is not None:
                 excluded_namespaces.set_elements(AAZStrType, ".")
 
@@ -453,6 +343,95 @@ class Update(AAZCommand):
 
 class _UpdateHelper:
     """Helper class for Update"""
+
+    _schema_deployment_safeguard_read = None
+
+    @classmethod
+    def _build_schema_deployment_safeguard_read(cls, _schema):
+        if cls._schema_deployment_safeguard_read is not None:
+            _schema.e_tag = cls._schema_deployment_safeguard_read.e_tag
+            _schema.id = cls._schema_deployment_safeguard_read.id
+            _schema.name = cls._schema_deployment_safeguard_read.name
+            _schema.properties = cls._schema_deployment_safeguard_read.properties
+            _schema.system_data = cls._schema_deployment_safeguard_read.system_data
+            _schema.type = cls._schema_deployment_safeguard_read.type
+            return
+
+        cls._schema_deployment_safeguard_read = _schema_deployment_safeguard_read = AAZObjectType()
+
+        deployment_safeguard_read = _schema_deployment_safeguard_read
+        deployment_safeguard_read.e_tag = AAZStrType(
+            serialized_name="eTag",
+            flags={"read_only": True},
+        )
+        deployment_safeguard_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        deployment_safeguard_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        deployment_safeguard_read.properties = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+        deployment_safeguard_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
+        deployment_safeguard_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
+
+        properties = _schema_deployment_safeguard_read.properties
+        properties.excluded_namespaces = AAZListType(
+            serialized_name="excludedNamespaces",
+        )
+        properties.level = AAZStrType(
+            flags={"required": True},
+        )
+        properties.pod_security_standards_level = AAZStrType(
+            serialized_name="podSecurityStandardsLevel",
+        )
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.system_excluded_namespaces = AAZListType(
+            serialized_name="systemExcludedNamespaces",
+            flags={"read_only": True},
+        )
+
+        excluded_namespaces = _schema_deployment_safeguard_read.properties.excluded_namespaces
+        excluded_namespaces.Element = AAZStrType()
+
+        system_excluded_namespaces = _schema_deployment_safeguard_read.properties.system_excluded_namespaces
+        system_excluded_namespaces.Element = AAZStrType()
+
+        system_data = _schema_deployment_safeguard_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        _schema.e_tag = cls._schema_deployment_safeguard_read.e_tag
+        _schema.id = cls._schema_deployment_safeguard_read.id
+        _schema.name = cls._schema_deployment_safeguard_read.name
+        _schema.properties = cls._schema_deployment_safeguard_read.properties
+        _schema.system_data = cls._schema_deployment_safeguard_read.system_data
+        _schema.type = cls._schema_deployment_safeguard_read.type
 
 
 __all__ = ["Update"]

@@ -25,10 +25,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-04-01",
+        "version": "2025-05-02-preview",
         "resources": [
-            ["mgmt-plane",
-                "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-04-01"],
+            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-05-02-preview"],
         ]
     }
 
@@ -51,7 +50,7 @@ class Show(AAZCommand):
         _args_schema.managed_cluster = AAZStrArg(
             options=["-c", "--cluster", "--managed-cluster"],
             help="The fully qualified Azure Resource manager identifier of the Managed Cluster.",
-            required=False,
+            required=False,  # Set to False to allow -g/-n syntax via parent class processing
         )
         return cls._args_schema
 
@@ -69,8 +68,7 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(
-            self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
     class DeploymentSafeguardsGet(AAZHttpOperation):
@@ -78,8 +76,7 @@ class Show(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
-            session = self.client.send_request(
-                request=request, stream=False, **kwargs)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [200]:
                 return self.on_200(session)
 
@@ -105,6 +102,7 @@ class Show(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "resourceUri", self.ctx.args.managed_cluster,
+                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -114,7 +112,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-05-02-preview",
                     required=True,
                 ),
             }
@@ -157,7 +155,9 @@ class Show(AAZCommand):
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.properties = AAZObjectType()
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _schema_on_200.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
@@ -172,6 +172,9 @@ class Show(AAZCommand):
             )
             properties.level = AAZStrType(
                 flags={"required": True},
+            )
+            properties.pod_security_standards_level = AAZStrType(
+                serialized_name="podSecurityStandardsLevel",
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",

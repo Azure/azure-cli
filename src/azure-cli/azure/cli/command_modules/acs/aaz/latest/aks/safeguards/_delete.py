@@ -18,17 +18,17 @@ from azure.cli.core.aaz import *
 class Delete(AAZCommand):
     """Disable Deployment Safeguards for a Managed Cluster
 
-    :example: Delete a DeploymentSafeguard resource by managed cluster id
+    :example: Deletes a DeploymentSafeguard resource by managed cluster id
         az aks safeguards delete -c subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1
 
-    :example: Delete a DeploymentSafeguard resource with resourceGroup and clusterName arguments
+    :example: Deletes a DeploymentSafeguard resource with resourceGroup and clusterName arguments
         az aks safeguards delete -g rg1 -n cluster1
     """
 
     _aaz_info = {
-        "version": "2025-04-01",
+        "version": "2025-05-02-preview",
         "resources": [
-            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-04-01"],
+            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-05-02-preview"],
         ]
     }
 
@@ -52,7 +52,7 @@ class Delete(AAZCommand):
         _args_schema.managed_cluster = AAZStrArg(
             options=["-c", "--cluster", "--managed-cluster"],
             help="The fully qualified Azure Resource manager identifier of the Managed Cluster.",
-            required=False,
+            required=False,  # Set to False to allow -g/-n syntax via parent class processing
         )
         return cls._args_schema
 
@@ -125,6 +125,7 @@ class Delete(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "resourceUri", self.ctx.args.managed_cluster,
+                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -134,7 +135,7 @@ class Delete(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-05-02-preview",
                     required=True,
                 ),
             }

@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-04-01"],
+            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-05-02-preview"],
         ]
     }
 
@@ -43,7 +43,7 @@ class Wait(AAZWaitCommand):
         _args_schema.managed_cluster = AAZStrArg(
             options=["-c", "--cluster", "--managed-cluster"],
             help="The fully qualified Azure Resource manager identifier of the Managed Cluster.",
-            required=True,
+            required=False,  # Set to False to allow -g/-n syntax via parent class processing
         )
         return cls._args_schema
 
@@ -95,6 +95,7 @@ class Wait(AAZWaitCommand):
             parameters = {
                 **self.serialize_url_param(
                     "resourceUri", self.ctx.args.managed_cluster,
+                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -104,7 +105,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-05-02-preview",
                     required=True,
                 ),
             }
@@ -147,7 +148,9 @@ class Wait(AAZWaitCommand):
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.properties = AAZObjectType()
+            _schema_on_200.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _schema_on_200.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
@@ -162,6 +165,9 @@ class Wait(AAZWaitCommand):
             )
             properties.level = AAZStrType(
                 flags={"required": True},
+            )
+            properties.pod_security_standards_level = AAZStrType(
+                serialized_name="podSecurityStandardsLevel",
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",

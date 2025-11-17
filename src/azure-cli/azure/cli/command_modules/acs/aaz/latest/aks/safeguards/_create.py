@@ -17,21 +17,26 @@ from azure.cli.core.aaz import *
 class Create(AAZCommand):
     """Enable Deployment Safeguards for a Managed Cluster
 
-    :example: Create a DeploymentSafeguards resource at Warn level with a managed cluster resource id
+    :example: Creates a DeploymentSafeguards resource at Warn level with a managed cluster resource id
         az aks safeguards create --resource /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1 --level Warn
 
-    :example: Create a DeploymentSafeguards resource at Warn level using subscription, resourcegroup, and name tags
+    :example: Creates a DeploymentSafeguards resource at Warn level using subscription, resourcegroup, and name tags
         az aks safeguards create --subscription subid1 -g rg1 -n cluster1 --level Warn
 
     :example: Create a DeploymentSafeguards resource at Warn level with ignored namespaces
         az aks safeguards create -g rg1 -n mc1 --excluded-ns ns1 ns2 --level Warn
+
+    :example: Creates a DeploymentSafeguards resource at Warn level with Pod Security Standards level set to Baseline
+        az aks safeguards create --managed-cluster /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1 --level Warn --pss-level Baseline
+
+    :example: Creates a DeploymentSafeguards resource with PSS level set to Restricted using -g/-n pattern
+        az aks safeguards create -g rg1 -n cluster1 --level Enforce --pss-level Restricted
     """
 
     _aaz_info = {
-        "version": "2025-04-01",
+        "version": "2025-05-02-preview",
         "resources": [
-            ["mgmt-plane",
-                "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-04-01"],
+            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-05-02-preview"],
         ]
     }
 
@@ -55,7 +60,7 @@ class Create(AAZCommand):
         _args_schema.managed_cluster = AAZStrArg(
             options=["-c", "--cluster", "--managed-cluster"],
             help="The fully qualified Azure Resource manager identifier of the Managed Cluster.",
-            required=False,
+            required=False,  # Will be validated in custom class
         )
 
         # define Arg Group "Properties"
@@ -72,12 +77,61 @@ class Create(AAZCommand):
             help="The deployment safeguards level. Possible values are Warn and Enforce",
             enum={"Enforce": "Enforce", "Warn": "Warn"},
         )
+        _args_schema.pss_level = AAZStrArg(
+            options=["--pss-level"],
+            arg_group="Properties",
+            help="The pod security standards level",
+            enum={"Baseline": "Baseline", "Privileged": "Privileged", "Restricted": "Restricted"},
+        )
 
         excluded_namespaces = cls._args_schema.excluded_namespaces
         excluded_namespaces.Element = AAZStrArg()
         return cls._args_schema
 
     def _execute_operations(self):
+        # Check if Deployment Safeguards already exists before attempting create
+        from azure.cli.core.util import send_raw_request
+        from knack.util import CLIError
+        
+        # Get the resource URI - check if managed_cluster is set, otherwise build from -g/-n
+        resource_uri = self.ctx.args.managed_cluster
+        
+        # If managed_cluster is "Undefined" or not set, build from resource_group and cluster_name
+        if not resource_uri or str(resource_uri) == "Undefined":
+            # Access raw data which has resource_group and cluster_name from -g/-n
+            data = self.ctx.args._data
+            if 'resource_group' in data and 'cluster_name' in data:
+                subscription = self.ctx.subscription_id
+                resource_uri = f"/subscriptions/{subscription}/resourceGroups/{data['resource_group']}/providers/Microsoft.ContainerService/managedClusters/{data['cluster_name']}"
+        
+        if not resource_uri or str(resource_uri) == "Undefined":
+            raise CLIError("Resource URI not found. Please provide either --managed-cluster or both --resource-group and --name.")
+        
+        # Construct the GET URL to check if resource already exists
+        safeguards_url = f"https://management.azure.com{resource_uri}/providers/Microsoft.ContainerService/deploymentSafeguards/default?api-version=2025-05-02-preview"
+        
+        # Check if resource already exists
+        resource_exists = False
+        try:
+            response = send_raw_request(self.ctx.cli_ctx, "GET", safeguards_url)
+            if response.status_code == 200:
+                resource_exists = True
+        except Exception as ex:
+            # Any exception (404, etc) means resource doesn't exist - that's fine for create
+            error_str = str(ex).lower()
+            if "404" not in error_str and "not found" not in error_str and "resourcenotfound" not in error_str:
+                # If it's not a "not found" error, it might be a real problem - but let the create operation handle it
+                pass
+        
+        # If resource exists, block the create
+        if resource_exists:
+            raise CLIError(
+                f"Deployment Safeguards instance already exists for this cluster. "
+                f"Please use 'az aks safeguards update' to modify the configuration, "
+                f"or 'az aks safeguards delete' to remove it before creating a new one."
+            )
+        
+        # If we get here, resource doesn't exist - proceed with create
         self.pre_operations()
         yield self.DeploymentSafeguardsCreate(ctx=self.ctx)()
         self.post_operations()
@@ -91,8 +145,7 @@ class Create(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(
-            self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
     class DeploymentSafeguardsCreate(AAZHttpOperation):
@@ -100,8 +153,7 @@ class Create(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             request = self.make_request()
-            session = self.client.send_request(
-                request=request, stream=False, **kwargs)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
             if session.http_response.status_code in [202]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
@@ -143,6 +195,7 @@ class Create(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "resourceUri", self.ctx.args.managed_cluster,
+                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -152,7 +205,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-04-01",
+                    "api-version", "2025-05-02-preview",
                     required=True,
                 ),
             }
@@ -175,20 +228,17 @@ class Create(AAZCommand):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 typ=AAZObjectType,
-                typ_kwargs={
-                    "flags": {"required": True, "client_flatten": True}}
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("properties", AAZObjectType)
+            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("excludedNamespaces",
-                                    AAZListType, ".excluded_namespaces")
-                properties.set_prop("level", AAZStrType, ".level", typ_kwargs={
-                                    "flags": {"required": True}})
+                properties.set_prop("excludedNamespaces", AAZListType, ".excluded_namespaces")
+                properties.set_prop("level", AAZStrType, ".level", typ_kwargs={"flags": {"required": True}})
+                properties.set_prop("podSecurityStandardsLevel", AAZStrType, ".pss_level")
 
-            excluded_namespaces = _builder.get(
-                ".properties.excludedNamespaces")
+            excluded_namespaces = _builder.get(".properties.excludedNamespaces")
             if excluded_namespaces is not None:
                 excluded_namespaces.set_elements(AAZStrType, ".")
 
@@ -222,7 +272,9 @@ class Create(AAZCommand):
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.properties = AAZObjectType()
+            _schema_on_200_201.properties = AAZObjectType(
+                flags={"client_flatten": True},
+            )
             _schema_on_200_201.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
@@ -237,6 +289,9 @@ class Create(AAZCommand):
             )
             properties.level = AAZStrType(
                 flags={"required": True},
+            )
+            properties.pod_security_standards_level = AAZStrType(
+                serialized_name="podSecurityStandardsLevel",
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
