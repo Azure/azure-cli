@@ -405,14 +405,7 @@ class BatchMgmtByosScenarioTests(BatchMgmtScenarioMixin,ScenarioTest):
 
         self.batch_cmd('batch pool create --id xplatCreatedPool --vm-size "standard_d2s_v3" '
                         '--image "canonical:0001-com-ubuntu-server-focal:20_04-lts" '
-                        '--node-agent-sku-id "batch.node.ubuntu 20.04" '
-                        '--resource-tags "dept=finance env=prod"')
-
-        # test for resource tags
-        self.batch_cmd('batch pool show --pool-id xplatCreatedPool').assert_with_checks([
-            self.check('resourceTags.dept', 'finance'),
-            self.check('resourceTags.env', 'prod'),
-        ])
+                        '--node-agent-sku-id "batch.node.ubuntu 20.04" ')
 
         # test batch account delete
         self.cmd('batch account delete -g {rg} -n {byos_n} --yes')

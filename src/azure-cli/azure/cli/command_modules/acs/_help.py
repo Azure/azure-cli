@@ -95,6 +95,10 @@ parameters:
   - name: --ssh-key-value
     type: string
     short-summary: Public key path or key contents to install on node VMs for SSH access. For example, 'ssh-rsa AAAAB...snip...UcyupgH azureuser@linuxvm'.
+    long-summary: |-
+      If omitted:
+          - The CLI will use '~/.ssh/id_rsa.pub' when present
+          - If that file is not present the CLI will default to server-side generated keys (equivalent to using --no-ssh-key)
   - name: --admin-username -u
     type: string
     short-summary: User account to create on node VMs for SSH access.
@@ -263,7 +267,7 @@ parameters:
   - name: --no-ssh-key -x
     type: string
     short-summary: Do not use or create a local SSH key.
-    long-summary: To access nodes after creating a cluster with this option, use the Azure Portal.
+    long-summary: If omitted and no local public key exists, the CLI will default to this behavior. To access nodes after creating a cluster with this option, use the Azure Portal.
   - name: --pod-cidr
     type: string
     short-summary: A CIDR notation IP range from which to assign pod IPs when Azure CNI Overlay or Kubenet is used (On 31 March 2028, Kubenet will be retired).
@@ -619,6 +623,13 @@ parameters:
         Auto: A standard set of Karpenter NodePools are provisioned.
         None: No Karpenter NodePools are provisioned.
         WARNING: Changing this from Auto to None on an existing cluster will cause the default Karpenter NodePools to be deleted, which will in turn drain and delete the nodes associated with those pools. It is strongly recommended to not do this unless there are idle nodes ready to take the pods evicted by that action.
+  - name: --workload-runtime
+    type: string
+    short-summary: Set the workload runtime.
+    long-summary: |
+        Azure provides a different workload-runtime to enable Kata supported workloads in your nodepools. The following values can be specified:
+          - "KataVmIsolation" for Kata.
+
 examples:
   - name: Create a Kubernetes cluster with an existing SSH public key.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --ssh-key-value /path/to/publickey
@@ -702,6 +713,8 @@ examples:
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto
   - name: Create a kubernetes cluster with auto node provisioning and no default pools.
     text: az aks create -g MyResourceGroup -n MyManagedCluster --node-provisioning-mode Auto --node-provisioning-default-pools None
+  - name: Create a Kubernetes cluster with KataVmIsolation enabled.
+    text: az aks create -g MyResourceGroup -n MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
 """
 
 helps["aks update"] = """
@@ -1632,6 +1645,149 @@ helps["aks maintenanceconfiguration update"] = """
                 }
 """
 
+helps['aks namespace'] = """
+    type: group
+    short-summary: Commands to manage namespace in managed Kubernetes cluster.
+"""
+
+helps['aks namespace add'] = """
+    type: command
+    short-summary: Add namespace to the managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name
+          type: string
+          short-summary: Name of the managed cluster.
+        - name: --tags
+          type: string
+          short-summary: The tags of the managed namespace.
+        - name: --labels
+          type: string
+          short-summary: Labels for the managed namespace.
+        - name: --annotations
+          type: string
+          short-summary: Annotations for the managed namespace.
+        - name: --cpu-request
+          type: string
+          short-summary: CPU request of the namespace.
+        - name: --cpu-limit
+          type: string
+          short-summary: CPU limit of the namespace.
+        - name: --memory-request
+          type: string
+          short-summary: Memory request of the namespace.
+        - name: --memory-limit
+          type: string
+          short-summary: Memory limit of the namespace.
+        - name: --ingress-policy
+          type: string
+          short-summary: Ingress policy for the network. The default value is AllowSameNamespace.
+        - name: --egress-policy
+          type: string
+          short-summary: Egress policy for the network. The default value is AllowAll.
+        - name: --adoption-policy
+          type: string
+          short-summary: Action if Kubernetes namespace with same name already exists. The default value is Never.
+        - name: --delete-policy
+          type: string
+          short-summary: Delete options of a namespace. The default value is Keep.
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2.
+        - name: --no-wait
+          type: bool
+          short-summary: Do not wait for the long-running operation to finish.
+    examples:
+        - name: Create a namespace in an existing AKS cluster.
+          text: az aks namespace add -g MyResourceGroup --cluster-name MyClusterName --name NamespaceName --cpu-request 500m --cpu-limit 800m --memory-request 1Gi --memory-limit 2Gi
+        - name: Create a namespace in an existing AKS cluster with labels, annotations and tags
+          text: az aks namespace add -g MyResourceGroup --cluster-name MyClusterName --name NamespaceName --labels a=b p=q --annotations a=b p=q --tags a=b p=q --cpu-request 500m --cpu-limit 800m --memory-request 1Gi --memory-limit 2Gi
+"""
+
+helps['aks namespace update'] = """
+    type: command
+    short-summary: Update namespace on the managed Kubernetes cluster.
+    parameters:
+        - name: --cluster-name
+          type: string
+          short-summary: Name of the managed cluster.
+        - name: --tags
+          type: string
+          short-summary: The tags of the managed namespace.
+        - name: --labels
+          type: string
+          short-summary: Labels for the managed namespace.
+        - name: --annotations
+          type: string
+          short-summary: Annotations for the managed namespace.
+        - name: --cpu-request
+          type: string
+          short-summary: CPU request of the namespace.
+        - name: --cpu-limit
+          type: string
+          short-summary: CPU limit of the namespace.
+        - name: --memory-request
+          type: string
+          short-summary: Memory request of the namespace.
+        - name: --memory-limit
+          type: string
+          short-summary: Memory limit of the namespace.
+        - name: --ingress-policy
+          type: string
+          short-summary: Ingress policy rule for the network.
+        - name: --egress-policy
+          type: string
+          short-summary: Egress policy rule for the network.
+        - name: --adoption-policy
+          type: string
+          short-summary: Action if Kubernetes namespace with same name already exists.
+        - name: --delete-policy
+          type: string
+          short-summary: Delete options of a namespace
+        - name: --aks-custom-headers
+          type: string
+          short-summary: Send custom headers. When specified, format should be Key1=Value1,Key2=Value2
+        - name: --no-wait
+          type: bool
+          short-summary: Do not wait for the long-running operation to finish
+    examples:
+        - name: update namespace in an existing AKS cluster.
+          text: az aks namespace update -g MyResourceGroup --cluster-name MyClusterName --name NamespaceName --labels a=b p=q --annotations a=b p=q --tags a=b p=q --cpu-request 600m --cpu-limit 800m --memory-request 2Gi --memory-limit 3Gi --adoption-policy Always
+"""
+
+helps['aks namespace show'] = """
+    type: command
+    short-summary: show the details of a managed namespace in managed Kubernetes cluster.
+"""
+
+helps['aks namespace list'] = """
+    type: command
+    short-summary: List managed namespaces in managed Kubernetes cluster.
+"""
+
+helps['aks namespace delete'] = """
+    type: command
+    short-summary: Delete a managed namespace in managed Kubernetes cluster.
+"""
+
+helps['aks namespace get-credentials'] = """
+    type: command
+    short-summary: Get access credentials for a managed namespace.
+    parameters:
+        - name: --file -f
+          type: string
+          short-summary: Kubernetes configuration file to update. Use "-" to print YAML to stdout instead.
+        - name: --overwrite-existing
+          type: bool
+          short-summary: Overwrite any existing cluster entry with the same name.
+        - name: --output -o
+          type: string
+          long-summary: Credentials are always in YAML format, so this argument is effectively ignored.
+    examples:
+        - name: Get access credentials for a managed namespace. (autogenerated)
+          text: az aks namespace get-credentials --resource-group MyResourceGroup --cluster-name MyManagedCluster --name ManagedNamespaceName
+          crafted: true
+"""
+
 helps["aks nodepool"] = """
 type: group
 short-summary: Commands to manage node pools in Kubernetes kubernetes cluster.
@@ -1806,6 +1962,16 @@ parameters:
   - name: --gateway-prefix-size
     type: int
     short-summary: The size of Public IPPrefix attached to the Gateway-mode node pool. The node pool must be in Gateway mode.
+  - name: --localdns-config
+    type: string
+    short-summary: Set the localDNS Profile for a nodepool with a JSON config file.
+  - name: --workload-runtime
+    type: string
+    short-summary: Set the workload runtime.
+    long-summary: |
+        Azure provides a different workload-runtime to enable Kata supported workloads in your nodepools. The following values can be specified:
+          - "KataVmIsolation" for Kata.
+
 examples:
   - name: Create a nodepool in an existing AKS cluster with ephemeral os enabled.
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --node-osdisk-type Ephemeral --node-osdisk-size 48
@@ -1827,6 +1993,8 @@ examples:
     text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster  --os-sku Ubuntu --pod-subnet-id /subscriptions/SubID/resourceGroups/AnotherResourceGroup/providers/Microsoft.Network/virtualNetworks/MyVnet/subnets/MySubnet --pod-ip-allocation-mode StaticBlock
   - name: create a nodepool of type VirtualMachines
     text: az aks nodepool add -g MyResourceGroup -n MyNodePool --cluster-name MyMC --vm-set-type VirtualMachines --vm-sizes "VMSize1,VMSize2" --node-count 3
+  - name: Create a nodepool with KataVmIsolation enabled.
+    text: az aks nodepool add -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster --os-sku AzureLinux --vm-size Standard_D4s_v3 --workload-runtime KataVmIsolation --node-count 1
 """
 
 helps["aks nodepool delete"] = """
@@ -1955,6 +2123,9 @@ parameters:
   - name: --if-none-match
     type: string
     short-summary: Set to '*' to allow a new node pool to be created, but to prevent updating an existing node pool. Other values will be ignored.
+  - name: --localdns-config
+    type: string
+    short-summary: Set the localDNS Profile for a nodepool with a JSON config file.
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
@@ -2562,6 +2733,46 @@ helps["aks mesh disable-ingress-gateway"] = """
     examples:
       - name: Disable an internal ingress gateway.
         text: az aks mesh disable-ingress-gateway --resource-group MyResourceGroup --name MyManagedCluster --ingress-gateway-type Internal
+"""
+
+helps['aks mesh enable-egress-gateway'] = """
+    type: command
+    short-summary: Enable an Azure Service Mesh egress gateway.
+    long-summary: This command enables an Azure Service Mesh egress gateway in given cluster.
+    parameters:
+      - name: --istio-eg-gtw-name --istio-egressgateway-name
+        type: string
+        short-summary: Specify the name of the Istio egress gateway.
+        long-summary: This required field specifies the name of the Istio egress gateway. Must be between 1 and 253 characters, must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character.
+      - name: --istio-eg-gtw-ns --istio-egressgateway-namespace
+        type: string
+        short-summary: Specify the namespace of the Istio egress gateway.
+        long-summary: This optional field specifies the namespace of the Istio egress gateway. Defaults to "aks-istio-egress" if unspecified.
+      - name: --gateway-configuration-name --gtw-config-name
+        type: string
+        short-summary: Specify the name of the StaticGatewayConfiguration resource.
+        long-summary: This required field specifies the name of the StaticGatewayConfiguration resource for the Istio egress gateway. See https://aka.ms/aks-static-egress-gateway on how to create and configure a Static Egress Gateway agentpool.
+    examples:
+      - name: Enable an Istio egress gateway. Static egress gateway must be enabled prior to creating an Istio egress gateway. See https://aka.ms/aks-static-egress-gateway on how to create and configure a Static Egress Gateway agentpool.
+        text: az aks mesh enable-egress-gateway --resource-group MyResourceGroup --name MyManagedCluster --istio-egressgateway-name my-istio-egress-1 --istio-egressgateway-namespace my-namespace-1 --gateway-configuration-name sgc-istio-egress-1
+"""
+
+helps['aks mesh disable-egress-gateway'] = """
+    type: command
+    short-summary: Disable an Azure Service Mesh egress gateway.
+    long-summary: This command disables an Azure Service Mesh egress gateway in given cluster.
+    parameters:
+      - name: --istio-eg-gtw-name --istio-egressgateway-name
+        type: string
+        short-summary: Specify the name of the Istio egress gateway.
+        long-summary: This required field specifies the name of the Istio egress gateway. Must be between 1 and 253 characters, must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character.
+      - name: --istio-eg-gtw-ns --istio-egressgateway-namespace
+        type: string
+        short-summary: Specify the namespace of the Istio egress gateway.
+        long-summary: This optional field specifies the namespace of the Istio egress gateway. Defaults to "aks-istio-egress" if unspecified.
+    examples:
+      - name: Disable an Istio egress gateway.
+        text: az aks mesh disable-egress-gateway --resource-group MyResourceGroup --name MyManagedCluster --istio-egressgateway-name my-istio-egress-1 --istio-egressgateway-namespace my-namespace-1
 """
 
 helps["aks mesh get-revisions"] = """
