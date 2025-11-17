@@ -378,7 +378,7 @@ def load_arguments(self, _):
         c.argument(
             "project_name",
             options_list=["--project-name", "-p"],
-            help="AI Project name"
+            help="AI project name"
         )
         c.argument(
             "agent_name",

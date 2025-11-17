@@ -10,6 +10,7 @@ import subprocess
 import sys
 import re
 import datetime
+from pathlib import Path
 
 from knack.log import get_logger
 from azure.cli.core.decorators import retry
@@ -40,6 +41,16 @@ from azure.cli.core.azclierror import (
 from azure.cli.command_modules.cognitiveservices._utils import load_connection_from_source, compose_identity
 
 logger = get_logger(__name__)
+
+# ACR Pack task YAML template for buildpack-based image builds
+# Used when no Dockerfile exists - automatically detects Python, Node.js, .NET, etc.
+PACK_TASK_YAML = """version: v1.1.0
+steps:
+  - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name_full} --builder {builder} --env REGISTRY_NAME=$Registry -p .
+    timeout: 28800
+  - push: ["{image_name_full}"]
+    timeout: 1800
+"""
 
 
 def list_resources(client, resource_group_name=None):
@@ -494,15 +505,15 @@ def _validate_path_for_subprocess(path, path_description="path"):
             f"Please use a path without special shell characters."
         )
 
-    # Check for suspicious patterns that might indicate command injection attempts
-    suspicious_patterns = ['../', '~/', '${', '$(']
-    found_patterns = [pattern for pattern in suspicious_patterns if pattern in path]
+    # Check for shell expansion patterns that could be dangerous
+    # Note: Relative paths (../) are legitimate and common, so only check for shell expansions
+    dangerous_patterns = ['${', '$(']
+    found_patterns = [pattern for pattern in dangerous_patterns if pattern in path]
 
     if found_patterns:
-        logger.warning(
-            "The %s contains suspicious patterns: %s. "
-            "Ensure this is intentional and the path is from a trusted source.",
-            path_description, ', '.join(found_patterns)
+        raise InvalidArgumentValueError(
+            f"The {path_description} contains shell expansion patterns: {', '.join(found_patterns)}. "
+            f"These could be used for command injection and are not allowed."
         )
 
 
@@ -582,8 +593,8 @@ def _build_image_locally(cmd, source_dir, image_name, dockerfile_name='Dockerfil
 
     try:
         # Build the image
-        # NOTE: Docker expects forward slashes even on Windows
-        docker_file_arg = dockerfile_path.replace("\\", "/")
+        # Docker expects forward slashes even on Windows - use pathlib for cross-platform compatibility
+        docker_file_arg = Path(dockerfile_path).as_posix()
 
         # Force AMD64/x86_64 platform for Azure compatibility
         # Azure Container Apps/Foundry runs on AMD64, not ARM64
@@ -665,7 +676,10 @@ def _push_image_to_registry(_cmd, image_name, registry_name):  # pylint: disable
 
     try:
         # Login to ACR using Azure CLI credentials
-        # Use Python executable path to run az CLI in dev environment
+        # We use sys.executable + '-m azure.cli' instead of 'az' command to ensure
+        # compatibility when developing/testing the CLI from source. In development
+        # environments, 'az' may not be in PATH or may point to a different installation.
+        # In production, sys.executable will still correctly invoke the installed CLI.
         az_cmd = [sys.executable, '-m', 'azure.cli', 'acr', 'login', '--name', registry_name]
         logger.info("Logging into ACR: %s", registry_name)
 
@@ -820,14 +834,7 @@ def _build_image_remotely(cmd, source_dir, image_name,  # pylint: disable=too-ma
                 EncodedTaskRunRequest, PlatformProperties
             )
 
-            # Pack task YAML format - need full registry path for push
-            PACK_TASK_YAML = """version: v1.1.0
-steps:
-  - cmd: mcr.microsoft.com/oryx/pack:stable build {image_name_full} --builder {builder} --env REGISTRY_NAME=$Registry -p .
-    timeout: 28800
-  - push: ["{image_name_full}"]
-    timeout: 1800
-"""
+            # Use module-level PACK_TASK_YAML constant
             yaml_body = PACK_TASK_YAML.format(
                 image_name_full=image_name,
                 builder='paketobuildpacks/builder:base')
@@ -1118,14 +1125,14 @@ def _convert_environment_variables(environment_variables):
 
 
 def _create_agent_definition(cpu, memory, protocol, protocol_version, image_uri, env_vars):
-    protocol_records = [{
+    protocol_record = {
         "protocol": protocol.upper(),
         "version": protocol_version
-    }]
+    }
 
     definition = {
         "kind": "hosted",
-        "container_protocol_versions": protocol_records,
+        "container_protocol_versions": [protocol_record],
         "cpu": cpu,
         "memory": memory,
         "image": image_uri,
@@ -1441,6 +1448,12 @@ def _check_project_acr_access(cmd, client, account_name, project_name, registry_
 
     Returns:
         tuple: (has_access: bool, principal_id: str, error_message: str)
+
+    Limitations:
+        - Only validates well-known role names (AcrPull, AcrPush, Reader, Contributor, Owner, etc.)
+        - Custom roles with pull permissions may not be detected
+        - Inherited permissions from parent scopes (resource group, subscription) are not checked
+        - Only validates direct role assignments on the ACR resource
     """
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.command_modules.role.custom import list_role_assignments

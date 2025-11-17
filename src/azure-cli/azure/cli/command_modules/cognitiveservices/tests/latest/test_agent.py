@@ -43,8 +43,11 @@ import shutil
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.testsdk.scenario_tests.decorators import live_only
-from knack.util import CLIError
-from azure.cli.core.azclierror import InvalidArgumentValueError
+from azure.cli.core.azclierror import (
+    InvalidArgumentValueError,
+    MutuallyExclusiveArgumentError,
+    RequiredArgumentMissingError
+)
 
 from azure.cli.command_modules.cognitiveservices.custom import (
     _validate_image_tag,
@@ -753,7 +756,7 @@ CMD ["python", "app.py"]
                  checks=[self.check('properties.provisioningState', 'Succeeded')])
 
         # Test 1: Missing image tag
-        with self.assertRaisesRegex(CLIError, 'must include a tag'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'must include a tag'):
             self.cmd('az cognitiveservices agent create --skip-acr-check '
                     '-a {account} '
                     '--project-name {project} '
@@ -761,7 +764,7 @@ CMD ["python", "app.py"]
                     '--image myregistry.azurecr.io/test-agent')
 
         # Test 2: Invalid CPU (negative)
-        with self.assertRaisesRegex(CLIError, 'CPU.*positive'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'CPU.*positive'):
             self.cmd('az cognitiveservices agent create --skip-acr-check '
                     '-a {account} '
                     '--project-name {project} '
@@ -770,7 +773,7 @@ CMD ["python", "app.py"]
                     '--cpu -1')
 
         # Test 3: Invalid memory format
-        with self.assertRaisesRegex(CLIError, 'Memory.*Gi.*Mi'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'Memory.*Gi.*Mi'):
             self.cmd('az cognitiveservices agent create --skip-acr-check '
                     '-a {account} '
                     '--project-name {project} '
@@ -779,7 +782,7 @@ CMD ["python", "app.py"]
                     '--memory 2GB')
 
         # Test 4: --no-start with --min-replicas
-        with self.assertRaisesRegex(CLIError, 'Cannot use --no-start with --min-replicas'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'Cannot use --no-start with --min-replicas'):
             self.cmd('az cognitiveservices agent create --skip-acr-check '
                     '-a {account} '
                     '--project-name {project} '
@@ -788,7 +791,7 @@ CMD ["python", "app.py"]
                     '--no-start --min-replicas 2')
 
         # Test 5: --no-start with --max-replicas
-        with self.assertRaisesRegex(CLIError, 'Cannot use --no-start with.*--max-replicas'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'Cannot use --no-start with.*--max-replicas'):
             self.cmd('az cognitiveservices agent create --skip-acr-check '
                     '-a {account} '
                     '--project-name {project} '
@@ -797,7 +800,7 @@ CMD ["python", "app.py"]
                     '--no-start --max-replicas 5')
 
         # Test 6: Fully-qualified image plus --registry
-        with self.assertRaisesRegex(CLIError, 'omit --registry'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, 'omit --registry'):
             self.cmd('az cognitiveservices agent create --skip-acr-check '
                     '-a {account} '
                     '--project-name {project} '
@@ -806,7 +809,7 @@ CMD ["python", "app.py"]
                     '--registry myregistry')
 
         # Test 7: --build-remote with --image (should only be used with --source)
-        with self.assertRaisesRegex(CLIError, '--build-remote can only be used with --source'):
+        with self.assertRaisesRegex(InvalidArgumentValueError, '--build-remote can only be used with --source'):
             self.cmd('az cognitiveservices agent create --skip-acr-check '
                     '-a {account} '
                     '--project-name {project} '
