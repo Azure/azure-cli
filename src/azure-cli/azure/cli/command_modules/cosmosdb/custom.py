@@ -1830,7 +1830,8 @@ def cli_cosmosdb_restore(cmd,
                          gremlin_databases_to_restore=None,
                          tables_to_restore=None,
                          public_network_access=None,
-                         disable_ttl=None):
+                         disable_ttl=None,
+                         source_backup_location=None):
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
@@ -1880,7 +1881,8 @@ def cli_cosmosdb_restore(cmd,
                                     tables_to_restore=tables_to_restore,
                                     arm_location=target_restorable_account.location,
                                     public_network_access=public_network_access,
-                                    disable_ttl=disable_ttl)
+                                    disable_ttl=disable_ttl,
+                                    source_backup_location=source_backup_location)
 
 
 def _convert_to_utc_timestamp(timestamp_string):
