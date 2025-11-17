@@ -83,10 +83,10 @@ class Update(AAZCommand):
             help="The deployment safeguards level. Possible values are Warn and Enforce",
             enum={"Enforce": "Enforce", "Warn": "Warn"},
         )
-        _args_schema.pod_security_standards_level = AAZStrArg(
+        _args_schema.pss_level = AAZStrArg(
             options=["--pss-level"],
             arg_group="Properties",
-            help="The pod security standards level",
+            help="The pod security standards level. Possible values are Baseline, Privileged, and Restricted",
             nullable=True,
             enum={"Baseline": "Baseline", "Privileged": "Privileged", "Restricted": "Restricted"},
         )
@@ -124,7 +124,7 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
     class DeploymentSafeguardsGet(AAZHttpOperation):
@@ -318,13 +318,13 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("properties", AAZObjectType)
 
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("excludedNamespaces", AAZListType, ".excluded_namespaces")
                 properties.set_prop("level", AAZStrType, ".level", typ_kwargs={"flags": {"required": True}})
-                properties.set_prop("podSecurityStandardsLevel", AAZStrType, ".pod_security_standards_level")
+                properties.set_prop("podSecurityStandardsLevel", AAZStrType, ".pss_level")
 
             excluded_namespaces = _builder.get(".properties.excludedNamespaces")
             if excluded_namespaces is not None:

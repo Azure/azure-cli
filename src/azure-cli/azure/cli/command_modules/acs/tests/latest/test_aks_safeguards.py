@@ -57,30 +57,30 @@ class AksSafeguardsScenario(ScenarioTest):
         ]).get_output_in_json()
 
         # Enable safeguards
-        self.cmd(f'aks safeguards create -c {aks_cluster["id"]} --level Warn', checks=[
-            self.check('level', 'Warn'),
+        self.cmd(f'aks safeguards create --managed-cluster {aks_cluster["id"]} --level Warn', checks=[
+            self.check('properties.level', 'Warn'),
         ])
 
         # Get Safeguards
-        self.cmd(f'aks safeguards show -c {aks_cluster["id"]}', checks=[
-            self.check('level', 'Warn'),
-            self.check('excludedNamespaces', None),
+        self.cmd(f'aks safeguards show --managed-cluster {aks_cluster["id"]}', checks=[
+            self.check('properties.level', 'Warn'),
+            self.check('properties.excludedNamespaces', None),
         ])
 
-        self.cmd(f'aks safeguards list -c {aks_cluster["id"]}', checks=[
+        self.cmd(f'aks safeguards list --managed-cluster {aks_cluster["id"]}', checks=[
             self.check('length(@)', 1),
-            self.check('[0].level', 'Warn'),
-            self.check('[0].excludedNamespaces', None),
+            self.check('[0].properties.level', 'Warn'),
+            self.check('[0].properties.excludedNamespaces', None),
         ])
 
         # Change excluded namespaces
-        self.cmd(f'aks safeguards update -c {aks_cluster["id"]} --excluded-namespaces ns1', checks=[
-            self.check('excludedNamespaces[0]', 'ns1'),
+        self.cmd(f'aks safeguards update --managed-cluster {aks_cluster["id"]} --excluded-namespaces ns1', checks=[
+            self.check('properties.excludedNamespaces[0]', 'ns1'),
         ])
 
         # Disable Safeguards
 
-        self.cmd(f'aks safeguards delete -c {aks_cluster["id"]} --yes')
+        self.cmd(f'aks safeguards delete --managed-cluster {aks_cluster["id"]} --yes')
 
         # delete the aks cluster
         self.cmd('aks delete -g {rg} -n {aks_name} --yes --no-wait')

@@ -69,7 +69,7 @@ class List(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=False)
         next_link = self.deserialize_output(self.ctx.vars.instance.next_link)
         return result, next_link
 
@@ -168,9 +168,7 @@ class List(AAZCommand):
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _element.properties = AAZObjectType()
             _element.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},

@@ -58,9 +58,10 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.managed_cluster = AAZStrArg(
-            options=["-c", "--cluster", "--managed-cluster"],
-            help="The fully qualified Azure Resource manager identifier of the Managed Cluster.",
-            required=False,  # Will be validated in custom class
+            options=["--managed-cluster"],
+            arg_group="",
+            help="The name or ID of the managed cluster.",
+            required=False,  # Either this or -g/-n is required, validated in _execute_operations
         )
 
         # define Arg Group "Properties"
@@ -80,7 +81,8 @@ class Create(AAZCommand):
         _args_schema.pss_level = AAZStrArg(
             options=["--pss-level"],
             arg_group="Properties",
-            help="The pod security standards level",
+            help="The pod security standards level. Possible values are Baseline, Privileged, and Restricted",
+            nullable=True,
             enum={"Baseline": "Baseline", "Privileged": "Privileged", "Restricted": "Restricted"},
         )
 
@@ -91,21 +93,29 @@ class Create(AAZCommand):
     def _execute_operations(self):
         # Check if Deployment Safeguards already exists before attempting create
         from azure.cli.core.util import send_raw_request
+        from azure.cli.core.azclierror import HTTPError
         from knack.util import CLIError
         
         # Get the resource URI - check if managed_cluster is set, otherwise build from -g/-n
-        resource_uri = self.ctx.args.managed_cluster
+        resource_uri = None
         
-        # If managed_cluster is "Undefined" or not set, build from resource_group and cluster_name
-        if not resource_uri or str(resource_uri) == "Undefined":
-            # Access raw data which has resource_group and cluster_name from -g/-n
-            data = self.ctx.args._data
-            if 'resource_group' in data and 'cluster_name' in data:
+        # If managed_cluster is not set, build from resource_group and cluster_name
+        if has_value(self.ctx.args.managed_cluster):
+            resource_uri = self.ctx.args.managed_cluster.to_serialized_data()
+        else:
+            # Access resource_group and cluster_name from arguments
+            resource_group = getattr(self.ctx.args, "resource_group", None)
+            cluster_name = getattr(self.ctx.args, "cluster_name", None)
+            if resource_group and cluster_name:
                 subscription = self.ctx.subscription_id
-                resource_uri = f"/subscriptions/{subscription}/resourceGroups/{data['resource_group']}/providers/Microsoft.ContainerService/managedClusters/{data['cluster_name']}"
+                resource_uri = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
         
-        if not resource_uri or str(resource_uri) == "Undefined":
+        if not resource_uri:
             raise CLIError("Resource URI not found. Please provide either --managed-cluster or both --resource-group and --name.")
+        
+        # Validate resource_uri format to prevent URL injection
+        if not resource_uri.startswith('/subscriptions/'):
+            raise CLIError(f"Invalid managed cluster resource ID format: {resource_uri}")
         
         # Construct the GET URL to check if resource already exists
         safeguards_url = f"https://management.azure.com{resource_uri}/providers/Microsoft.ContainerService/deploymentSafeguards/default?api-version=2025-05-02-preview"
@@ -116,12 +126,11 @@ class Create(AAZCommand):
             response = send_raw_request(self.ctx.cli_ctx, "GET", safeguards_url)
             if response.status_code == 200:
                 resource_exists = True
-        except Exception as ex:
-            # Any exception (404, etc) means resource doesn't exist - that's fine for create
-            error_str = str(ex).lower()
-            if "404" not in error_str and "not found" not in error_str and "resourcenotfound" not in error_str:
-                # If it's not a "not found" error, it might be a real problem - but let the create operation handle it
-                pass
+        except HTTPError as ex:
+            # 404 means resource doesn't exist, which is expected for create
+            if ex.response.status_code != 404:
+                # Re-raise if it's not a 404 - could be auth issue, network problem, etc.
+                raise
         
         # If resource exists, block the create
         if resource_exists:
@@ -145,7 +154,7 @@ class Create(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
         return result
 
     class DeploymentSafeguardsCreate(AAZHttpOperation):
@@ -228,9 +237,9 @@ class Create(AAZCommand):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
+                typ_kwargs={"flags": {"required": True}}
             )
-            _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+            _builder.set_prop("properties", AAZObjectType)
 
             properties = _builder.get(".properties")
             if properties is not None:

@@ -15,8 +15,6 @@ Release History
 * `az aks mesh enable-egress-gateway/disable-egress-gateway`: Add commands to manage Azure Service Mesh egress gateway (#32386)
 * `az aks nodepool add/update`: Add parameter `--localdns-config` to config local dns profile for the nodepool (#32392)
 * `az aks upgrade`: Update user confirmation prompt of `--control-plane-only` parameter (#32404)
-* `az aks safeguards create/update`: Add `--pss-level` parameter to support Pod Security Standards (`Baseline`, `Privileged`, or `Restricted`)
-* `az aks safeguards create`: Add validation to prevent duplicate resource creation
 
 **App Service**
 
