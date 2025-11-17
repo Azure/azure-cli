@@ -8,14 +8,12 @@ import base64
 import binascii
 import getpass
 import json
-import yaml
 import logging
 import os
 import platform
 import re
 import ssl
 import sys
-from urllib.request import urlopen
 
 from knack.log import get_logger
 from knack.util import CLIError, to_snake_case, to_camel_case
@@ -534,6 +532,7 @@ def get_file_json(file_path, throw_on_empty=True, preserve_order=False):
 
 
 def get_file_yaml(file_path, throw_on_empty=True):
+    import yaml
     content = read_file_content(file_path)
     if not content:
         if throw_on_empty:
@@ -1168,6 +1167,7 @@ def _ssl_context():
 
 
 def urlretrieve(url):
+    from urllib.request import urlopen
     req = urlopen(url, context=_ssl_context())
     return req.read()
 
