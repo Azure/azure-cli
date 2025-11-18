@@ -127,7 +127,7 @@ logger = get_logger(__name__)
 
 def _validate_and_set_managed_cluster_argument(ctx):
     from azure.mgmt.core.tools import is_valid_resource_id
-    
+
     args = ctx.args
     has_managed_cluster = has_value(args.managed_cluster)
     has_rg_and_cluster = has_value(
