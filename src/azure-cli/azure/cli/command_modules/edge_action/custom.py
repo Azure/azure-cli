@@ -91,22 +91,27 @@ class EdgeActionVersionDeployFromFile(_DeployVersionCode):
                 raise CLIError('--name is required when using --content.')
 
     def _process_zip_file(self, file_path):
-        """Process zip file - verify it's a zip or create one from file/directory"""
-        if os.path.isfile(file_path) and zipfile.is_zipfile(file_path):
-            # Already a zip file, just encode it
+        """Process zip file - accept zip or non-zip files (auto-zip), reject directories"""
+        # Reject directories
+        if os.path.isdir(file_path):
+            raise CLIError(
+                f'--file-type "zip" cannot be used with directories: {file_path}\n'
+                'Please zip the directory first and provide the zip file path.'
+            )
+
+        # Check if path exists
+        if not os.path.isfile(file_path):
+            raise CLIError(f'File not found: {file_path}')
+
+        # If already a zip file, just encode it
+        if zipfile.is_zipfile(file_path):
             logger.info("File is already a zip, encoding: %s", file_path)
             with open(file_path, 'rb') as f:
                 zip_content = f.read()
-        elif os.path.isfile(file_path):
-            # Single file, create zip containing it
+        else:
+            # Single non-zip file, create zip containing it
             logger.info("Creating zip from file: %s", file_path)
             zip_content = self._create_zip_from_file(file_path)
-        elif os.path.isdir(file_path):
-            # Directory, create zip from all contents
-            logger.info("Creating zip from directory: %s", file_path)
-            zip_content = self._create_zip_from_directory(file_path)
-        else:
-            raise CLIError(f'Invalid path: {file_path}')
 
         encoded = base64.b64encode(zip_content).decode('utf-8')
         logger.info("Zip file encoded to base64 (length: %d)", len(encoded))
@@ -123,6 +128,13 @@ class EdgeActionVersionDeployFromFile(_DeployVersionCode):
         if not os.path.isfile(file_path):
             raise CLIError(f'File not found: {file_path}')
 
+        # Check if file is actually a zip when user specified 'file' mode
+        if zipfile.is_zipfile(file_path):
+            raise CLIError(
+                f'File type mismatch: --file-type is "file" but "{file_path}" is a zip file.\n'
+                f'Use --file-type "zip" to deploy zip files.'
+            )
+
         logger.info("Reading and encoding file: %s", file_path)
         with open(file_path, 'rb') as f:
             file_content = f.read()
@@ -138,27 +150,6 @@ class EdgeActionVersionDeployFromFile(_DeployVersionCode):
         try:
             with zipfile.ZipFile(temp_zip.name, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 zipf.write(file_path, os.path.basename(file_path))
-
-            with open(temp_zip.name, 'rb') as f:
-                zip_content = f.read()
-
-            return zip_content
-        finally:
-            if os.path.exists(temp_zip.name):
-                os.unlink(temp_zip.name)
-
-    def _create_zip_from_directory(self, directory_path):
-        """Create a zip file from all files in a directory"""
-        temp_zip = tempfile.NamedTemporaryFile(delete=False, suffix='.zip')
-
-        try:
-            with zipfile.ZipFile(temp_zip.name, 'w', zipfile.ZIP_DEFLATED) as zipf:
-                for root, _, files in os.walk(directory_path):
-                    for file in files:
-                        file_path = os.path.join(root, file)
-                        arcname = os.path.relpath(file_path, directory_path)
-                        zipf.write(file_path, arcname)
-                        logger.debug("Added to zip: %s", arcname)
 
             with open(temp_zip.name, 'rb') as f:
                 zip_content = f.read()
