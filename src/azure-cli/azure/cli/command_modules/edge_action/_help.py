@@ -13,9 +13,9 @@ from knack.help_files import helps  # pylint: disable=unused-import
 
 helps['edge-action'] = """
     type: group
-    short-summary: Manage Edge Actions for Azure CDN
+    short-summary: Manage Edge Actions for Azure Front Door
     long-summary: |
-        Edge Actions allow you to deploy and manage custom code that runs at the edge of Azure CDN.
+        Edge Actions allow you to deploy and manage custom code that runs at the edge of Azure Front Door.
 """
 
 helps['edge-action version'] = """
