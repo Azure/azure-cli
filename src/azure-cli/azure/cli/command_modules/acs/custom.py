@@ -252,9 +252,9 @@ class AKSSafeguardsCreateCustom(Create):
         # If resource exists, block the create
         if resource_exists:
             raise CLIError(
-                f"Deployment Safeguards instance already exists for this cluster. "
-                f"Please use 'az aks safeguards update' to modify the configuration, "
-                f"or 'az aks safeguards delete' to remove it before creating a new one."
+                "Deployment Safeguards instance already exists for this cluster. "
+                "Please use 'az aks safeguards update' to modify the configuration, "
+                "or 'az aks safeguards delete' to remove it before creating a new one."
             )
 
 
