@@ -8746,6 +8746,120 @@ class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
 
+class SqlManagedInstanceMemorySizeInGBCreateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_memorysizeingb_create(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'uroskrstic'
+        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
+        subnet_name = 'ManagedInstance'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'westeurope',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'memory_size_in_gb': '64',
+            'storage_size_in_gb': '256',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'True',
+            'family': 'Gen8IM'
+        })
+
+        # Create Hermes
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --iops {storage_iops} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} '
+                                    '--memory {memory_size_in_gb}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('memorySizeInGb', '{memory_size_in_gb}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('storageIops', '{storage_iops}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}')])
+
+        # Get the managed instance and check GPv2 flag
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['memorySizeInGb'], 64)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
+class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_memorysizeingb_update(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'uroskrstic'
+        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
+        subnet_name = 'ManagedInstance'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'westeurope',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'memory_size_in_gb': '80',
+            'storage_size_in_gb': '128',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'False',
+            'family': 'Gen8IM'
+        })
+
+        # # Create GPv1
+        # self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+        #                             '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+        #                             '--storage {storage_size_in_gb} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} ',
+        #                             checks=[
+        #                                 self.check('name', '{managed_instance_name}'),
+        #                                 self.check('resourceGroup', '{rg}'),
+        #                                 self.check('administratorLogin', '{username}'),
+        #                                 self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+        #                                 self.check('vCores', '{v_cores}'),
+        #                                 self.check('storageSizeInGb', '{storage_size_in_gb}'),
+        #                                 self.check('licenseType', '{license_type}'),
+        #                                 self.check('sku.tier', '{edition}'),
+        #                                 self.check('sku.family', '{family}'),
+        #                                 self.check('sku.capacity', '{v_cores}')])
+
+        # # Get the managed instance and check GPv2 flag
+        # managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        # self.assertEqual(managed_instance['zoneRedundant'], False)
+
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --capacity {v_cores} --memory {memory_size_in_gb}',
+                 checks=[self.check('memorySizeInGB', '{memory_size_in_gb}')])
+
+        # Get the managed instance and check GPv2 flag
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['memorySizeInGB'], 80)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
 class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer(parameter_name="mi")
