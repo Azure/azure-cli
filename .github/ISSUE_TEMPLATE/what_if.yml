@@ -35,7 +35,8 @@ body:
       label: Command or Script
       description: Provide the command or script that demonstrates the issue
       placeholder: |
-        az vm create --what-if --export-bicep ...
+        - az vm create --what-if --export-bicep
+        - N/A if not applicable
       render: shell
     validations:
       required: true
@@ -45,7 +46,9 @@ body:
     attributes:
       label: Expected Behavior
       description: What did you expect to happen?
-      placeholder: Describe the expected outcome
+      placeholder: |
+        - Describe the expected outcome
+        - N/A if not applicable
     validations:
       required: true
 
@@ -54,7 +57,9 @@ body:
     attributes:
       label: Actual Behavior
       description: What actually happened?
-      placeholder: Describe what actually occurred
+      placeholder: |
+        - Describe what actually occurred
+        - N/A if not applicable
     validations:
       required: true
 
@@ -67,6 +72,7 @@ body:
         - OS: Windows 11 / Ubuntu 22.04 / macOS 14
         - Tool Version: Azure CLI 2.80.0
         - Python Version: 3.12.10
+        - N/A if not applicable
     validations:
       required: true
 
