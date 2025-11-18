@@ -39,7 +39,7 @@ helps['edge-action version deploy-version-code'] = """
           short-summary: The version code name
           long-summary: |
               The name of the version code being deployed.
-              When using --file-path, this defaults to the version name if not specified.
+              When using --file-path, this parameter is optional and defaults to the --version value.
               When using --content, this parameter is required.
         - name: --file-path
           short-summary: Path to the file or directory to deploy
@@ -63,7 +63,7 @@ helps['edge-action version deploy-version-code'] = """
                 --version v1 \\
                 --name MyCodeV1 \\
                 --content "UEsDBBQAAAAIAI1NzkQAAAAABQAAAA=="
-        - name: Deploy a single JavaScript file
+        - name: Deploy a single JavaScript file (name defaults to version)
           text: |
               az edge-action version deploy-version-code \\
                 --resource-group MyResourceGroup \\
@@ -71,21 +71,21 @@ helps['edge-action version deploy-version-code'] = """
                 --version v1 \\
                 --file-path ./my-edge-code.js \\
                 --file-type file
-        - name: Deploy an existing zip file
+        - name: Deploy a file and auto-zip it (name defaults to version)
+          text: |
+              az edge-action version deploy-version-code \\
+                --resource-group MyResourceGroup \\
+                --edge-action-name MyEdgeAction \\
+                --version v1 \\
+                --file-path ./my-edge-code.js \\
+                --file-type zip
+        - name: Deploy an existing zip file (name defaults to version)
           text: |
               az edge-action version deploy-version-code \\
                 --resource-group MyResourceGroup \\
                 --edge-action-name MyEdgeAction \\
                 --version v1 \\
                 --file-path ./my-code.zip \\
-                --file-type zip
-        - name: Deploy a directory (will be automatically zipped)
-          text: |
-              az edge-action version deploy-version-code \\
-                --resource-group MyResourceGroup \\
-                --edge-action-name MyEdgeAction \\
-                --version v1 \\
-                --file-path ./my-code-directory \\
                 --file-type zip
         - name: Deploy a file and override the version code name
           text: |
