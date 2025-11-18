@@ -122,6 +122,21 @@ helps['edge-action version deploy-from-file'] = """
                 --file-path ./my-code.zip
 """
 
+helps['edge-action version swap-default'] = """
+    type: command
+    short-summary: Swap the default version of an Edge Action
+    long-summary: |
+        Swap the default version of an Edge Action to a different version.
+        This operation changes which version is used by default for the Edge Action.
+    examples:
+        - name: Swap default version to a new version
+          text: |
+              az edge-action version swap-default \\
+                --resource-group MyResourceGroup \\
+                --edge-action-name MyEdgeAction \\
+                --version v2
+"""
+
 helps['edge-action execution-filter'] = """
     type: group
     short-summary: Manage Edge Action execution filters
