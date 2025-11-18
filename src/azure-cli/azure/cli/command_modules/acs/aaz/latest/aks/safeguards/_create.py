@@ -58,7 +58,7 @@ class Create(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.managed_cluster = AAZStrArg(
-            options=["--managed-cluster"],
+            options=["-c", "--cluster", "--managed-cluster"],
             arg_group="",
             help="The name or ID of the managed cluster.",
             required=False,  # Either this or -g/-n is required, validated in _execute_operations
@@ -91,6 +91,9 @@ class Create(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
+        # Call pre_operations first to allow custom class to set managed_cluster
+        self.pre_operations()
+        
         # Check if Deployment Safeguards already exists before attempting create
         from azure.cli.core.util import send_raw_request
         from azure.cli.core.azclierror import HTTPError
@@ -141,7 +144,6 @@ class Create(AAZCommand):
             )
         
         # If we get here, resource doesn't exist - proceed with create
-        self.pre_operations()
         yield self.DeploymentSafeguardsCreate(ctx=self.ctx)()
         self.post_operations()
 

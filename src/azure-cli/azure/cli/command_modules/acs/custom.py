@@ -126,6 +126,8 @@ logger = get_logger(__name__)
 
 
 def _validate_and_set_managed_cluster_argument(ctx):
+    from azure.mgmt.core.tools import is_valid_resource_id
+    
     args = ctx.args
     has_managed_cluster = has_value(args.managed_cluster)
     has_rg_and_cluster = has_value(
@@ -138,7 +140,18 @@ def _validate_and_set_managed_cluster_argument(ctx):
 
     if not has_managed_cluster:
         # pylint: disable=line-too-long
-        args.managed_cluster = f"subscriptions/{ctx.subscription_id}/resourceGroups/{args.resource_group}/providers/Microsoft.ContainerService/managedClusters/{args.cluster_name}"
+        args.managed_cluster = f"/subscriptions/{ctx.subscription_id}/resourceGroups/{args.resource_group}/providers/Microsoft.ContainerService/managedClusters/{args.cluster_name}"
+    else:
+        # If managed_cluster is provided but is not a full resource ID, treat it as a cluster name
+        # and require resource_group to be provided
+        managed_cluster_value = args.managed_cluster.to_serialized_data()
+        if not is_valid_resource_id(managed_cluster_value):
+            # It's just a cluster name, need resource group
+            if not has_value(args.resource_group):
+                raise ArgumentUsageError(
+                    "When providing cluster name via -c/--cluster, you must also provide -g/--resource-group.")
+            # Build the full resource ID
+            args.managed_cluster = f"/subscriptions/{ctx.subscription_id}/resourceGroups/{args.resource_group}/providers/Microsoft.ContainerService/managedClusters/{managed_cluster_value}"
 
 
 def _add_resource_group_cluster_name_subscription_id_args(_args_schema):
@@ -195,45 +208,14 @@ class AKSSafeguardsUpdateCustom(Update):
 
 class AKSSafeguardsCreateCustom(Create):
 
-    def pre_operations(self):
-        from azure.cli.core.util import send_raw_request
-
-        # Validate and set managed cluster argument first
-        _validate_and_set_managed_cluster_argument(self.ctx)
-
-        # Check if Deployment Safeguards already exists
-        resource_group_name = self.ctx.args.resource_group
-        cluster_name = self.ctx.args.cluster_name
-        subscription_id = self.ctx.subscription_id
-
-        # Construct the URL to check if safeguards already exists
-        safeguards_url = (
-            "https://management.azure.com/subscriptions/{}/resourceGroups/{}/providers/"
-            "Microsoft.ContainerService/managedClusters/{}/providers/Microsoft.ContainerService/"
-            "deploymentSafeguards/default?api-version=2025-05-02-preview"
-        ).format(subscription_id, resource_group_name, cluster_name)
-
-        # Check if resource already exists
-        resource_exists = False
-        try:
-            response = send_raw_request(self.ctx.cli_ctx, "GET", safeguards_url)
-            if response.status_code == 200:
-                resource_exists = True
-        except Exception:  # pylint: disable=broad-exception-caught
-            # 404 or any error means resource doesn't exist
-            pass
-
-        if resource_exists:
-            raise ClientRequestError(
-                "Deployment Safeguards instance already exists for this cluster. "
-                "Please use 'az aks safeguards update' to modify the configuration, "
-                "or 'az aks safeguards delete' to remove it before creating a new one."
-            )
-
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         _args_schema = super()._build_arguments_schema(*args, **kwargs)
         return _add_resource_group_cluster_name_subscription_id_args(_args_schema)
+
+    def pre_operations(self):
+        # Validate and set managed cluster argument
+        _validate_and_set_managed_cluster_argument(self.ctx)
 
 
 class AKSSafeguardsListCustom(List):
