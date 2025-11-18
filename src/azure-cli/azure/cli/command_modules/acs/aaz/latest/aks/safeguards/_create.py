@@ -91,59 +91,7 @@ class Create(AAZCommand):
         return cls._args_schema
 
     def _execute_operations(self):
-        # Call pre_operations first to allow custom class to set managed_cluster
         self.pre_operations()
-        
-        # Check if Deployment Safeguards already exists before attempting create
-        from azure.cli.core.util import send_raw_request
-        from azure.cli.core.azclierror import HTTPError
-        from knack.util import CLIError
-        
-        # Get the resource URI - check if managed_cluster is set, otherwise build from -g/-n
-        resource_uri = None
-        
-        # If managed_cluster is not set, build from resource_group and cluster_name
-        if has_value(self.ctx.args.managed_cluster):
-            resource_uri = self.ctx.args.managed_cluster.to_serialized_data()
-        else:
-            # Access resource_group and cluster_name from arguments
-            resource_group = getattr(self.ctx.args, "resource_group", None)
-            cluster_name = getattr(self.ctx.args, "cluster_name", None)
-            if resource_group and cluster_name:
-                subscription = self.ctx.subscription_id
-                resource_uri = f"/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.ContainerService/managedClusters/{cluster_name}"
-        
-        if not resource_uri:
-            raise CLIError("Resource URI not found. Please provide either --managed-cluster or both --resource-group and --name.")
-        
-        # Validate resource_uri format to prevent URL injection
-        if not resource_uri.startswith('/subscriptions/'):
-            raise CLIError(f"Invalid managed cluster resource ID format: {resource_uri}")
-        
-        # Construct the GET URL to check if resource already exists
-        safeguards_url = f"https://management.azure.com{resource_uri}/providers/Microsoft.ContainerService/deploymentSafeguards/default?api-version=2025-05-02-preview"
-        
-        # Check if resource already exists
-        resource_exists = False
-        try:
-            response = send_raw_request(self.ctx.cli_ctx, "GET", safeguards_url)
-            if response.status_code == 200:
-                resource_exists = True
-        except HTTPError as ex:
-            # 404 means resource doesn't exist, which is expected for create
-            if ex.response.status_code != 404:
-                # Re-raise if it's not a 404 - could be auth issue, network problem, etc.
-                raise
-        
-        # If resource exists, block the create
-        if resource_exists:
-            raise CLIError(
-                f"Deployment Safeguards instance already exists for this cluster. "
-                f"Please use 'az aks safeguards update' to modify the configuration, "
-                f"or 'az aks safeguards delete' to remove it before creating a new one."
-            )
-        
-        # If we get here, resource doesn't exist - proceed with create
         yield self.DeploymentSafeguardsCreate(ctx=self.ctx)()
         self.post_operations()
 

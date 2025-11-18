@@ -221,8 +221,41 @@ class AKSSafeguardsCreateCustom(Create):
         return _add_resource_group_cluster_name_subscription_id_args(_args_schema)
 
     def pre_operations(self):
+        from azure.cli.core.util import send_raw_request
+        from azure.cli.core.azclierror import HTTPError
+
         # Validate and set managed cluster argument
         _validate_and_set_managed_cluster_argument(self.ctx)
+
+        # Check if Deployment Safeguards already exists before attempting create
+        resource_uri = self.ctx.args.managed_cluster.to_serialized_data()
+
+        # Validate resource_uri format to prevent URL injection
+        if not resource_uri.startswith('/subscriptions/'):
+            raise CLIError(f"Invalid managed cluster resource ID format: {resource_uri}")
+
+        # Construct the GET URL to check if resource already exists
+        safeguards_url = f"https://management.azure.com{resource_uri}/providers/Microsoft.ContainerService/deploymentSafeguards/default?api-version=2025-05-02-preview"
+
+        # Check if resource already exists
+        resource_exists = False
+        try:
+            response = send_raw_request(self.ctx.cli_ctx, "GET", safeguards_url)
+            if response.status_code == 200:
+                resource_exists = True
+        except HTTPError as ex:
+            # 404 means resource doesn't exist, which is expected for create
+            if ex.response.status_code != 404:
+                # Re-raise if it's not a 404 - could be auth issue, network problem, etc.
+                raise
+
+        # If resource exists, block the create
+        if resource_exists:
+            raise CLIError(
+                f"Deployment Safeguards instance already exists for this cluster. "
+                f"Please use 'az aks safeguards update' to modify the configuration, "
+                f"or 'az aks safeguards delete' to remove it before creating a new one."
+            )
 
 
 class AKSSafeguardsListCustom(List):
