@@ -9,3 +9,105 @@
 # pylint: disable=too-many-lines
 
 from knack.help_files import helps  # pylint: disable=unused-import
+
+
+helps['edge-action'] = """
+    type: group
+    short-summary: Manage Edge Actions for Azure CDN
+    long-summary: |
+        Edge Actions allow you to deploy and manage custom code that runs at the edge of Azure CDN.
+"""
+
+helps['edge-action version'] = """
+    type: group
+    short-summary: Manage Edge Action versions
+"""
+
+helps['edge-action version deploy-version-code'] = """
+    type: command
+    short-summary: Deploy version code to an Edge Action version
+    long-summary: |
+        Deploy code to an Edge Action version using either direct base64-encoded content or a file path.
+        When using --file-path, the CLI will automatically handle file reading, zipping (if needed), and base64 encoding.
+    parameters:
+        - name: --content
+          short-summary: Base64-encoded content to deploy
+          long-summary: |
+              The version code deployment content as a base64-encoded string.
+              This parameter is mutually exclusive with --file-path.
+        - name: --name
+          short-summary: The version code name
+          long-summary: |
+              The name of the version code being deployed.
+              When using --file-path, this defaults to the version name if not specified.
+              When using --content, this parameter is required.
+        - name: --file-path
+          short-summary: Path to the file or directory to deploy
+          long-summary: |
+              Path to a file or directory to deploy. The CLI will automatically read, encode, and optionally zip the content.
+              This parameter is mutually exclusive with --content.
+        - name: --file-type
+          short-summary: Type of file deployment (zip or file)
+          long-summary: |
+              Specifies how to process the file:
+              - "file": Deploy the file as-is (base64 encoded, no zipping). Cannot be used with directories.
+              - "zip": Ensure content is zipped before deployment. If the file is already a zip, it will be used directly.
+                       If it's a single file or directory, it will be zipped first.
+              Default is "file".
+    examples:
+        - name: Deploy using base64-encoded content (original method)
+          text: |
+              az edge-action version deploy-version-code \\
+                --resource-group MyResourceGroup \\
+                --edge-action-name MyEdgeAction \\
+                --version v1 \\
+                --name MyCodeV1 \\
+                --content "UEsDBBQAAAAIAI1NzkQAAAAABQAAAA=="
+        - name: Deploy a single JavaScript file
+          text: |
+              az edge-action version deploy-version-code \\
+                --resource-group MyResourceGroup \\
+                --edge-action-name MyEdgeAction \\
+                --version v1 \\
+                --file-path ./my-edge-code.js \\
+                --file-type file
+        - name: Deploy an existing zip file
+          text: |
+              az edge-action version deploy-version-code \\
+                --resource-group MyResourceGroup \\
+                --edge-action-name MyEdgeAction \\
+                --version v1 \\
+                --file-path ./my-code.zip \\
+                --file-type zip
+        - name: Deploy a directory (will be automatically zipped)
+          text: |
+              az edge-action version deploy-version-code \\
+                --resource-group MyResourceGroup \\
+                --edge-action-name MyEdgeAction \\
+                --version v1 \\
+                --file-path ./my-code-directory \\
+                --file-type zip
+        - name: Deploy a file and override the version code name
+          text: |
+              az edge-action version deploy-version-code \\
+                --resource-group MyResourceGroup \\
+                --edge-action-name MyEdgeAction \\
+                --version v1 \\
+                --name CustomCodeName \\
+                --file-path ./code.js \\
+                --file-type file
+        - name: Deploy with no-wait option
+          text: |
+              az edge-action version deploy-version-code \\
+                --resource-group MyResourceGroup \\
+                --edge-action-name MyEdgeAction \\
+                --version v1 \\
+                --file-path ./code.js \\
+                --file-type file \\
+                --no-wait
+"""
+
+helps['edge-action execution-filter'] = """
+    type: group
+    short-summary: Manage Edge Action execution filters
+"""
