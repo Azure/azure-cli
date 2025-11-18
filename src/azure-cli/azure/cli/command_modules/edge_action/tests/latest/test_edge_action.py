@@ -144,7 +144,7 @@ class EdgeActionScenarioTest(ScenarioTest):
         self.cmd('edge-action version create -g {} --edge-action-name {} -n {} --deployment-type file --location global --is-default-version False'.format(
             resource_group, edge_action_name, version_name))
 
-        # Test deploy with base64 content (original method)
+        # Test deploy with base64 content
         import base64
         test_content = base64.b64encode(b'console.log("test");').decode('utf-8')
         self.cmd('edge-action version deploy-version-code -g {} --edge-action-name {} --version {} --name testcode --content "{}"'.format(
