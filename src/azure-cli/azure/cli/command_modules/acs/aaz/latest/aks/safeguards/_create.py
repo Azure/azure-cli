@@ -17,19 +17,19 @@ from azure.cli.core.aaz import *
 class Create(AAZCommand):
     """Enable Deployment Safeguards for a Managed Cluster
 
-    :example: Creates a DeploymentSafeguards resource at Warn level with a managed cluster resource id
-        az aks safeguards create --resource /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1 --level Warn
+    :example: Create a DeploymentSafeguards resource at Warn level with a managed cluster resource id
+        az aks safeguards create -c /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1 --level Warn
 
-    :example: Creates a DeploymentSafeguards resource at Warn level using subscription, resourcegroup, and name tags
+    :example: Create a DeploymentSafeguards resource at Warn level using subscription, resourcegroup, and name tags
         az aks safeguards create --subscription subid1 -g rg1 -n cluster1 --level Warn
 
     :example: Create a DeploymentSafeguards resource at Warn level with ignored namespaces
         az aks safeguards create -g rg1 -n mc1 --excluded-ns ns1 ns2 --level Warn
 
-    :example: Creates a DeploymentSafeguards resource at Warn level with Pod Security Standards level set to Baseline
+    :example: Create a DeploymentSafeguards resource at Warn level with Pod Security Standards level set to Baseline
         az aks safeguards create --managed-cluster /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1 --level Warn --pss-level Baseline
 
-    :example: Creates a DeploymentSafeguards resource with PSS level set to Restricted using -g/-n pattern
+    :example: Create a DeploymentSafeguards resource with PSS level set to Restricted using -g/-n pattern
         az aks safeguards create -g rg1 -n cluster1 --level Enforce --pss-level Restricted
     """
 

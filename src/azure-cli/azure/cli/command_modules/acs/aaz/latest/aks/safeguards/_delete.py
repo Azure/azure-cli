@@ -16,12 +16,12 @@ from azure.cli.core.aaz import *
     confirmation="Are you sure you want to perform this operation?",
 )
 class Delete(AAZCommand):
-    """Disable Deployment Safeguards for a Managed Cluster
+    """Disable Deployment Safeguards for a Managed Cluster.
 
-    :example: Deletes a DeploymentSafeguard resource by managed cluster id
-        az aks safeguards delete -c subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1
+    :example: Delete a DeploymentSafeguard resource by managed cluster id
+        az aks safeguards delete -c /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1
 
-    :example: Deletes a DeploymentSafeguard resource with resourceGroup and clusterName arguments
+    :example: Delete a DeploymentSafeguard resource with resourceGroup and clusterName arguments
         az aks safeguards delete -g rg1 -n cluster1
     """
 

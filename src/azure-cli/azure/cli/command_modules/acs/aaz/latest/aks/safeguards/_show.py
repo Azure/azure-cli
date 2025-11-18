@@ -17,10 +17,10 @@ from azure.cli.core.aaz import *
 class Show(AAZCommand):
     """Show Deployment Safeguards Configuration for a Managed Cluster
 
-    :example: Gets a DeploymentSafeguard resource by managed cluster id
-        az aks safeguards show --managed-cluster subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1
+    :example: Get a DeploymentSafeguard resource by managed cluster id
+        az aks safeguards show -c /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1
 
-    :example: Gets a DeploymentSafeguard resource with resourceGroup and clusterName arguments
+    :example: Get a DeploymentSafeguard resource with resourceGroup and clusterName arguments
         az aks safeguards show -g rg1 -n cluster1
     """
 
