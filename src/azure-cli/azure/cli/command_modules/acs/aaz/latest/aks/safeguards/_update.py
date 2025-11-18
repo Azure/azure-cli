@@ -370,9 +370,7 @@ class _UpdateHelper:
         deployment_safeguard_read.name = AAZStrType(
             flags={"read_only": True},
         )
-        deployment_safeguard_read.properties = AAZObjectType(
-            flags={"client_flatten": True},
-        )
+        deployment_safeguard_read.properties = AAZObjectType()
         deployment_safeguard_read.system_data = AAZObjectType(
             serialized_name="systemData",
             flags={"read_only": True},

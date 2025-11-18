@@ -283,9 +283,7 @@ class Create(AAZCommand):
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.properties = AAZObjectType(
-                flags={"client_flatten": True},
-            )
+            _schema_on_200_201.properties = AAZObjectType()
             _schema_on_200_201.system_data = AAZObjectType(
                 serialized_name="systemData",
                 flags={"read_only": True},
