@@ -14,4 +14,4 @@ def load_command_table(self, _):  # pylint: disable=unused-argument
         operations_tmpl='azure.cli.command_modules.edge_action.custom#{}')
 
     with self.command_group('edge-action version', edge_action_custom) as g:
-        g.custom_command('deploy-from-file', 'deploy_edge_action_version')
+        g.custom_command('deploy-from-file', 'deploy_edge_action_version', supports_no_wait=True)

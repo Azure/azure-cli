@@ -86,7 +86,7 @@ class EdgeActionScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(additional_tags={'owner': 'edgeaction'})
     def test_edge_action_version_deploy_with_file(self, resource_group):
-        """Test Edge Action Version deployment with file path"""
+        """Test Edge Action Version deployment with file path using custom command"""
         edge_action_name = self.create_random_name(prefix='edgeaction', length=20)
         version_name = 'v1'
 
@@ -99,8 +99,8 @@ class EdgeActionScenarioTest(ScenarioTest):
         # Use test fixture file
         test_file = os.path.join(TEST_DIR, 'test_files', 'sample_edge_action.js')
 
-        # Test deploy with file path (file mode)
-        self.cmd('edge-action version deploy-version-code -g {} --edge-action-name {} --version {} --file-path "{}" --file-type file'.format(
+        # Test deploy with file path using custom deploy-from-file command (file mode)
+        self.cmd('edge-action version deploy-from-file -g {} --edge-action-name {} --version {} --file-path "{}" --deployment-type file'.format(
             resource_group, edge_action_name, version_name, test_file))
 
         # Clean up
@@ -110,21 +110,21 @@ class EdgeActionScenarioTest(ScenarioTest):
 
     @ResourceGroupPreparer(additional_tags={'owner': 'edgeaction'})
     def test_edge_action_version_deploy_with_zip(self, resource_group):
-        """Test Edge Action Version deployment with zip file"""
+        """Test Edge Action Version deployment with zip file using custom command"""
         edge_action_name = self.create_random_name(prefix='edgeaction', length=20)
         version_name = 'v1'
 
         # Create edge action and version
         self.cmd('edge-action create -g {} -n {} --sku name=Standard tier=Standard --location global'.format(
             resource_group, edge_action_name))
-        self.cmd('edge-action version create -g {} --edge-action-name {} -n {} --deployment-type file --location global --is-default-version False'.format(
+        self.cmd('edge-action version create -g {} --edge-action-name {} -n {} --deployment-type zip --location global --is-default-version False'.format(
             resource_group, edge_action_name, version_name))
 
         # Use test fixture zip file
         test_zip = os.path.join(TEST_DIR, 'test_files', 'sample_edge_action.zip')
 
-        # Test deploy with zip file path (zip mode)
-        self.cmd('edge-action version deploy-version-code -g {} --edge-action-name {} --version {} --file-path "{}" --file-type zip'.format(
+        # Test deploy with zip file path using custom deploy-from-file command (auto-detects zip)
+        self.cmd('edge-action version deploy-from-file -g {} --edge-action-name {} --version {} --file-path "{}"'.format(
             resource_group, edge_action_name, version_name, test_zip))
 
         # Clean up
