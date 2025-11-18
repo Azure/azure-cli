@@ -4,8 +4,10 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-import tempfile
 from azure.cli.testsdk import ResourceGroupPreparer, JMESPathCheck, ScenarioTest
+
+
+TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class EdgeActionScenarioTest(ScenarioTest):
@@ -94,19 +96,12 @@ class EdgeActionScenarioTest(ScenarioTest):
         self.cmd('edge-action version create -g {} --edge-action-name {} -n {} --deployment-type file --location global --is-default-version False'.format(
             resource_group, edge_action_name, version_name))
 
-        # Create a temporary JavaScript file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.js', delete=False) as f:
-            f.write('console.log("Hello from Edge Action");')
-            temp_file = f.name
+        # Use test fixture file
+        test_file = os.path.join(TEST_DIR, 'test_files', 'sample_edge_action.js')
 
-        try:
-            # Test deploy with file path (file mode)
-            self.cmd('edge-action version deploy-version-code -g {} --edge-action-name {} --version {} --file-path {} --file-type file'.format(
-                resource_group, edge_action_name, version_name, temp_file))
-        finally:
-            # Clean up temp file
-            if os.path.exists(temp_file):
-                os.unlink(temp_file)
+        # Test deploy with file path (file mode)
+        self.cmd('edge-action version deploy-version-code -g {} --edge-action-name {} --version {} --file-path "{}" --file-type file'.format(
+            resource_group, edge_action_name, version_name, test_file))
 
         # Clean up
         self.cmd('edge-action version delete -g {} --edge-action-name {} -n {} -y'.format(
@@ -125,19 +120,12 @@ class EdgeActionScenarioTest(ScenarioTest):
         self.cmd('edge-action version create -g {} --edge-action-name {} -n {} --deployment-type file --location global --is-default-version False'.format(
             resource_group, edge_action_name, version_name))
 
-        # Create a temporary file to zip
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.js', delete=False) as f:
-            f.write('console.log("Hello from zipped Edge Action");')
-            temp_file = f.name
+        # Use test fixture zip file
+        test_zip = os.path.join(TEST_DIR, 'test_files', 'sample_edge_action.zip')
 
-        try:
-            # Test deploy with file path (zip mode - will create zip)
-            self.cmd('edge-action version deploy-version-code -g {} --edge-action-name {} --version {} --file-path {} --file-type zip'.format(
-                resource_group, edge_action_name, version_name, temp_file))
-        finally:
-            # Clean up temp file
-            if os.path.exists(temp_file):
-                os.unlink(temp_file)
+        # Test deploy with zip file path (zip mode)
+        self.cmd('edge-action version deploy-version-code -g {} --edge-action-name {} --version {} --file-path "{}" --file-type zip'.format(
+            resource_group, edge_action_name, version_name, test_zip))
 
         # Clean up
         self.cmd('edge-action version delete -g {} --edge-action-name {} -n {} -y'.format(
