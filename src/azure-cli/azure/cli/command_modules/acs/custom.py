@@ -145,13 +145,20 @@ def _validate_and_set_managed_cluster_argument(ctx):
         # If managed_cluster is provided but is not a full resource ID, treat it as a cluster name
         # and require resource_group to be provided
         managed_cluster_value = args.managed_cluster.to_serialized_data()
+        
+        # Normalize resource ID: add leading slash if missing for backward compatibility
+        if managed_cluster_value and not managed_cluster_value.startswith('/'):
+            managed_cluster_value = f"/{managed_cluster_value}"
+        
         if not is_valid_resource_id(managed_cluster_value):
             # It's just a cluster name, need resource group
             if not has_value(args.resource_group):
                 raise ArgumentUsageError(
                     "When providing cluster name via -c/--cluster, you must also provide -g/--resource-group.")
             # Build the full resource ID
-            args.managed_cluster = f"/subscriptions/{ctx.subscription_id}/resourceGroups/{args.resource_group}/providers/Microsoft.ContainerService/managedClusters/{managed_cluster_value}"
+            managed_cluster_value = f"/subscriptions/{ctx.subscription_id}/resourceGroups/{args.resource_group}/providers/Microsoft.ContainerService/managedClusters/{managed_cluster_value.lstrip('/')}"
+        
+        args.managed_cluster = managed_cluster_value
 
 
 def _add_resource_group_cluster_name_subscription_id_args(_args_schema):
