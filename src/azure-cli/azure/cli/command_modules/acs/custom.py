@@ -43,7 +43,8 @@ import colorama
 import requests
 import yaml
 from azure.cli.command_modules.acs._client_factory import (
-    cf_agent_pools
+    cf_agent_pools,
+    get_container_service_client,
 )
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
@@ -196,7 +197,36 @@ class AKSSafeguardsUpdateCustom(Update):
 class AKSSafeguardsCreateCustom(Create):
 
     def pre_operations(self):
+        from azure.cli.core.azclierror import ClientRequestError
+        from azure.cli.core.util import send_raw_request
+        
+        # Validate and set managed cluster argument first
         _validate_and_set_managed_cluster_argument(self.ctx)
+        
+        # Check if Deployment Safeguards already exists
+        resource_group_name = self.ctx.args.resource_group
+        cluster_name = self.ctx.args.cluster_name
+        subscription_id = self.ctx.subscription_id
+        
+        # Construct the URL to check if safeguards already exists
+        safeguards_url = f"https://management.azure.com/subscriptions/{subscription_id}/resourceGroups/{resource_group_name}/providers/Microsoft.ContainerService/managedClusters/{cluster_name}/providers/Microsoft.ContainerService/deploymentSafeguards/default?api-version=2025-05-02-preview"
+        
+        # Check if resource already exists
+        resource_exists = False
+        try:
+            response = send_raw_request(self.ctx.cli_ctx, "GET", safeguards_url)
+            if response.status_code == 200:
+                resource_exists = True
+        except Exception:
+            # 404 or any error means resource doesn't exist
+            pass
+        
+        if resource_exists:
+            raise ClientRequestError(
+                f"Deployment Safeguards instance already exists for this cluster. "
+                f"Please use 'az aks safeguards update' to modify the configuration, "
+                f"or 'az aks safeguards delete' to remove it before creating a new one."
+            )
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
