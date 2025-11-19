@@ -1145,6 +1145,11 @@ def create_service_principal_for_rbac(
         show_auth_in_json=None, skip_assignment=False, keyvault=None):
     import time
 
+    logger.warning("The `az ad sp create-for-rbac` command can modify an existing application or service principal "
+                   "if another object shares the same **display name**. Display names aren't unique and can change, "
+                   "which could result in credential loss or incorrect RBAC assignments. "
+                   "Use a **unique object ID or app ID** instead.")
+
     if role and not scopes or not role and scopes:
         raise ArgumentUsageError("Usage error: To create role assignments, specify both --role and --scopes.")
 
