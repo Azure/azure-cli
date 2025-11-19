@@ -1941,7 +1941,12 @@ class WAFCreate(_WAFCreate):
             options=["--type"],
             help="Type of the web application firewall rule set.",
             default="Microsoft_DefaultRuleSet",
-            enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet", "OWASP": "OWASP"},
+            enum={
+                "Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet",
+                "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet",
+                "OWASP": "OWASP",
+                "Microsoft_HTTPDDoSRuleSet": "Microsoft_HTTPDDoSRuleSet"
+            },
         )
         args_schema.rule_set_version = AAZStrArg(
             options=["--version"],
@@ -2030,6 +2035,11 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
         managed_rule_overrides = []
     else:
         managed_rule_overrides = rules
+
+    if rule_set_type.lower() == "microsoft_httpddosruleset":
+        for r in managed_rule_overrides:
+            if not r.get('sensitivity', None):
+                r['sensitivity'] = 'Medium'
 
     rule_group_override = None
     if rule_group_name is not None:
@@ -3858,7 +3868,6 @@ class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
             )
         )
         args_schema.private_dns_zone_id._registered = False
-        args_schema.name._required = False
 
         return args_schema
 
