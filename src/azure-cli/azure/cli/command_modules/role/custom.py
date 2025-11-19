@@ -1018,9 +1018,9 @@ def app_federated_credential_delete(client, app_identifier, federated_identity_c
 
 def create_service_principal(cmd, identifier):
     logger.warning("The `az ad sp create` command can modify an existing application or service principal "
-                   "if another object shares the same **display name**. Display names aren't unique and can change, "
+                   "if another object shares the same display name. Display names aren't unique and can change, "
                    "which could result in credential loss or incorrect RBAC assignments. "
-                   "Use a **unique object ID or app ID** instead.")
+                   "Use a unique object ID or app ID instead.")
     return _create_service_principal(cmd.cli_ctx, identifier)
 
 
@@ -1150,9 +1150,9 @@ def create_service_principal_for_rbac(
     import time
 
     logger.warning("The `az ad sp create-for-rbac` command can modify an existing application or service principal "
-                   "if another object shares the same **display name**. Display names aren't unique and can change, "
+                   "if another object shares the same display name. Display names aren't unique and can change, "
                    "which could result in credential loss or incorrect RBAC assignments. "
-                   "Use a **unique object ID or app ID** instead.")
+                   "Use a unique object ID or app ID instead.")
 
     if role and not scopes or not role and scopes:
         raise ArgumentUsageError("Usage error: To create role assignments, specify both --role and --scopes.")
