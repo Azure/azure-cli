@@ -1388,11 +1388,6 @@ def get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name):
         'resource_group': resource_group_name,
         "vm_name": vm_name
     })
-    # converted_vm = convert_show_result_to_sneak_case(vm)
-    #
-    # # To avoid unnecessary permission check of image
-    # storage_profile = converted_vm.get('storage_profile', {})
-    # storage_profile['image_reference'] = None
 
     # To avoid unnecessary permission check of image
     storage_profile = vm.get('storageProfile', {})
@@ -4097,12 +4092,6 @@ def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, s
             "vm_scale_set_name": name,
             "instance_id": instance_id
         })
-        # converted_vms = vmss_vms_convert_show_result_to_sneak_case(vms)
-        #
-        # # To avoid unnecessary permission check of image
-        # if converted_vms.get("storage_profile", None) is not None:
-        #     converted_vms["storage_profile"]["image_reference"] = None
-        # return converted_vms
 
         # To avoid unnecessary permission check of image
         if vms.get("storageProfile", None) is not None:
@@ -4114,14 +4103,6 @@ def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, s
         'resource_group': resource_group_name,
         "vm_scale_set_name": name,
     })
-    # converted_vmss = vmss_convert_show_result_to_sneak_case(vmss)
-    #
-    # if security_type == 'TrustedLaunch':
-    #     _check_vmss_hyper_v_generation_by_aaz(cmd.cli_ctx, converted_vmss)
-    # # To avoid unnecessary permission check of image
-    # if converted_vmss.get("virtual_machine_profile", {}).get("storage_profile", None) is not None:
-    #     converted_vmss["virtual_machine_profile"]["storage_profile"]["image_reference"] = None
-    # return converted_vmss
 
     if security_type == 'TrustedLaunch':
         _check_vmss_hyper_v_generation_by_aaz(cmd.cli_ctx, vmss)
