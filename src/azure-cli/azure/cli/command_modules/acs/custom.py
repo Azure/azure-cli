@@ -235,7 +235,8 @@ class AKSSafeguardsCreateCustom(Create):
             raise CLIError(f"Invalid managed cluster resource ID format: {resource_uri}")
 
         # Construct the GET URL to check if resource already exists
-        safeguards_url = f"https://management.azure.com{resource_uri}/providers/Microsoft.ContainerService/deploymentSafeguards/default?api-version=2025-05-02-preview"
+        api_version = self._aaz_info['version']
+        safeguards_url = f"https://management.azure.com{resource_uri}/providers/Microsoft.ContainerService/deploymentSafeguards/default?api-version={api_version}"
 
         # Check if resource already exists
         resource_exists = False
