@@ -12,7 +12,7 @@ TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 class EdgeActionScenarioTest(ScenarioTest):
 
-    @ResourceGroupPreparer(additional_tags={'owner': 'edgeaction'})
+    @ResourceGroupPreparer(name_prefix='clitests', location='eastus', additional_tags={'owner': 'edgeaction'})
     def test_edge_action_crud(self, resource_group):
         """Test Edge Action CRUD operations"""
         edge_action_name = self.create_random_name(prefix='edgeaction', length=20)
@@ -146,7 +146,7 @@ class EdgeActionScenarioTest(ScenarioTest):
 
         # Test deploy with base64 content
         import base64
-        test_content = base64.b64encode(b'console.log("test");').decode('utf-8')
+        test_content = base64.b64encode(b'function handler(event) { return event; }').decode('utf-8')
         self.cmd('edge-action version deploy-version-code -g {} --edge-action-name {} --version {} --name testcode --content "{}"'.format(
             resource_group, edge_action_name, version_name, test_content))
 
