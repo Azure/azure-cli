@@ -62,10 +62,6 @@ helps['edge-action version deploy-from-file'] = """
         'zip' for zip archives (or auto-zipped JS files). The deployment name
         defaults to the version name.
     parameters:
-        - name: --resource-group
-          type: string
-          short-summary: Name of resource group
-          long-summary: Resource group name for the edge action
         - name: --edge-action-name
           type: string
           short-summary: Name of the edge action
