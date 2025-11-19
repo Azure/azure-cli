@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Enable Deployment Safeguards for a Managed Cluster
 
     :example: Create a DeploymentSafeguards resource at Warn level with a managed cluster resource id
-        az aks safeguards create -c /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1 --level Warn
+        az aks safeguards create --resource /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1 --level Warn
 
     :example: Create a DeploymentSafeguards resource at Warn level using subscription, resourcegroup, and name tags
         az aks safeguards create --subscription subid1 -g rg1 -n cluster1 --level Warn
@@ -34,9 +34,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-05-02-preview",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-05-02-preview"],
+            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-07-01"],
         ]
     }
 
@@ -59,9 +59,8 @@ class Create(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.managed_cluster = AAZStrArg(
             options=["-c", "--cluster", "--managed-cluster"],
-            arg_group="",
-            help="The name or ID of the managed cluster.",
-            required=False,  # Either this or -g/-n is required, validated in _execute_operations
+            help="The fully qualified Azure Resource manager identifier of the Managed Cluster.",
+            required=False,  # Set to False to allow -g/-n syntax via parent class processing
         )
 
         # define Arg Group "Properties"
@@ -81,8 +80,7 @@ class Create(AAZCommand):
         _args_schema.pss_level = AAZStrArg(
             options=["--pss-level"],
             arg_group="Properties",
-            help="The pod security standards level. Possible values are Baseline, Privileged, and Restricted",
-            nullable=True,
+            help="The pod security standards level",
             enum={"Baseline": "Baseline", "Privileged": "Privileged", "Restricted": "Restricted"},
         )
 
@@ -104,7 +102,7 @@ class Create(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
     class DeploymentSafeguardsCreate(AAZHttpOperation):
@@ -154,7 +152,6 @@ class Create(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "resourceUri", self.ctx.args.managed_cluster,
-                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -164,7 +161,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-05-02-preview",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }
@@ -187,7 +184,7 @@ class Create(AAZCommand):
             _content_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 typ=AAZObjectType,
-                typ_kwargs={"flags": {"required": True}}
+                typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
             _builder.set_prop("properties", AAZObjectType)
 

@@ -18,16 +18,16 @@ class Show(AAZCommand):
     """Show Deployment Safeguards Configuration for a Managed Cluster
 
     :example: Get a DeploymentSafeguard resource by managed cluster id
-        az aks safeguards show -c /subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1
+        az aks safeguards show --managed-cluster subscriptions/subid1/resourceGroups/rg1/providers/Microsoft.ContainerService/managedClusters/cluster1
 
     :example: Get a DeploymentSafeguard resource with resourceGroup and clusterName arguments
         az aks safeguards show -g rg1 -n cluster1
     """
 
     _aaz_info = {
-        "version": "2025-05-02-preview",
+        "version": "2025-07-01",
         "resources": [
-            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-05-02-preview"],
+            ["mgmt-plane", "/{resourceuri}/providers/microsoft.containerservice/deploymentsafeguards/default", "2025-07-01"],
         ]
     }
 
@@ -68,7 +68,7 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=False)
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
 
     class DeploymentSafeguardsGet(AAZHttpOperation):
@@ -102,7 +102,6 @@ class Show(AAZCommand):
             parameters = {
                 **self.serialize_url_param(
                     "resourceUri", self.ctx.args.managed_cluster,
-                    skip_quote=True,
                     required=True,
                 ),
             }
@@ -112,7 +111,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-05-02-preview",
+                    "api-version", "2025-07-01",
                     required=True,
                 ),
             }

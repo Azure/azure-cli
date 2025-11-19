@@ -13,6 +13,7 @@ from azure.cli.core.aaz import *
 
 @register_command_group(
     "aks",
+    is_preview=True,
 )
 class __CMDGroup(AAZCommandGroup):
     """Azure Kubernetes Service
