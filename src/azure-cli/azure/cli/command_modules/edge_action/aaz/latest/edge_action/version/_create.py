@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create EdgeActionVersion version
 
     :example: CreateEdgeActionVersion
-        az cdn edge-action version create --resource-group testrg --edge-action-name edgeAction1 --version version2 --location global --deployment-type zip --is-default-version True
+        az edge-action version create --resource-group testrg --edge-action-name edgeAction1 --version version2 --location global --deployment-type zip --is-default-version True
     """
 
     _aaz_info = {

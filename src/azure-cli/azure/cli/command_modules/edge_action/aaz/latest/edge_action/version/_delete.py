@@ -19,7 +19,7 @@ class Delete(AAZCommand):
     """Delete EdgeActionVersion resource
 
     :example: DeleteEdgeActionVersion
-        az cdn edge-action version delete --resource-group testrg --edge-action-name edgeAction1 --version version1
+        az edge-action version delete --resource-group testrg --edge-action-name edgeAction1 --version version1
     """
 
     _aaz_info = {

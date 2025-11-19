@@ -18,7 +18,7 @@ class Show(AAZCommand):
     """Get EdgeActionExecutionFilter resource
 
     :example: GetEdgeActionExecutionFilter
-        az cdn edge-action execution-filter show --resource-group testrg --edge-action-name edgeAction1 --execution-filter executionFilter1
+        az edge-action execution-filter show --resource-group testrg --edge-action-name edgeAction1 --execution-filter executionFilter1
     """
 
     _aaz_info = {

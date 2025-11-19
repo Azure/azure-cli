@@ -18,7 +18,7 @@ class Create(AAZCommand):
     """Create EdgeAction resource
 
     :example: CreateEdgeAction
-        az cdn edge-action create --resource-group testrg --edge-action-name edgeAction1 --location global --sku "{name:Standard,tier:Standard}"
+        az edge-action create --resource-group testrg --edge-action-name edgeAction1 --location global --sku "{name:Standard,tier:Standard}"
     """
 
     _aaz_info = {

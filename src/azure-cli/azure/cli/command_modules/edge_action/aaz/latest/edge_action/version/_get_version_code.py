@@ -18,7 +18,7 @@ class GetVersionCode(AAZCommand):
     """A long-running operation to get versioncode deployed to EdgeActionVersion resource.
 
     :example: GetEdgeActionVersionCode
-        az cdn edge-action version get-version-code --resource-group testrg --edge-action-name edgeAction1 --version version1
+        az edge-action version get-version-code --resource-group testrg --edge-action-name edgeAction1 --version version1
     """
 
     _aaz_info = {

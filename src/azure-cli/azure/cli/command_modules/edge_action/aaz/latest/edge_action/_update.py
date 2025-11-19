@@ -18,7 +18,7 @@ class Update(AAZCommand):
     """Update EdgeAction resource
 
     :example: UpdateEdgeAction
-        az az cdn edge-action Update --resource-group testrg --edge-action-name edgeAction1 --location global --sku "{name:Standard,tier:Standard}"
+        az edge-action Update --resource-group testrg --edge-action-name edgeAction1 --location global --sku "{name:Standard,tier:Standard}"
     """
 
     _aaz_info = {

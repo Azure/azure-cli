@@ -18,7 +18,7 @@ class List(AAZCommand):
     """List EdgeActionExecutionFilter resources by EdgeAction
 
     :example: ListEdgeActionsExecutionFilters_byEdgeAction
-        az cdn edge-action execution-filter list --resource-group testrg --edge-action-name edgeAction1
+        az edge-action execution-filter list --resource-group testrg --edge-action-name edgeAction1
     """
 
     _aaz_info = {

@@ -18,7 +18,7 @@ class List(AAZCommand):
     """List EdgeAction resources by subscription ID
 
     :example: ListEdgeActions_bySubscription
-        az cdn edge-action list
+        az edge-action list
     """
 
     _aaz_info = {

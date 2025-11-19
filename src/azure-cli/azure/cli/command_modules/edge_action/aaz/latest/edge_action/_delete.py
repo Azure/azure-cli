@@ -19,7 +19,7 @@ class Delete(AAZCommand):
     """Delete EdgeAction resource
 
     :example: DeleteEdgeAction
-        az cdn edge-action delete --resource-group testrg --edge-action-name edgeAction1
+        az edge-action delete --resource-group testrg --edge-action-name edgeAction1
     """
 
     _aaz_info = {

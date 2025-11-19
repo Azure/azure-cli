@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class SwapDefault(AAZCommand):
     """A long-running resource action.
+
+    :example: SwapDefaultEdgeActionVersion
+        az edge-action version swap-default --resource-group myResourceGroup --edge-action-name myEdgeAction --version v2
     """
 
     _aaz_info = {

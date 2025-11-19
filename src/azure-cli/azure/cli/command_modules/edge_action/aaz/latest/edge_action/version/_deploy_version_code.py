@@ -18,7 +18,7 @@ class DeployVersionCode(AAZCommand):
     """A long-running operation to deploy versioncode to EdgeActionVersion resource.
 
     :example: DeployEdgeActionVersionCode
-        az cdn edge-action version deploy-version-code --resource-group testrg --edge-action-name edgeAction1 --version version2 --name zippedFile --content UEsDBBQAAAAIAI1NzkQAAAAABQAAAA==
+        az edge-action version deploy-version-code --resource-group testrg --edge-action-name edgeAction1 --version version2 --name version2 --content UEsDBBQAAAAIAI1NzkQAAAAABQAAAA==
     """
 
     _aaz_info = {

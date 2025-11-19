@@ -18,7 +18,7 @@ class Show(AAZCommand):
     """Get EdgeAction resource
 
     :example: GetEdgeAction
-        az cdn edge-action show --resource-group testrg --edge-action-name edgeAction1
+        az edge-action show --resource-group testrg --edge-action-name edgeAction1
     """
 
     _aaz_info = {
