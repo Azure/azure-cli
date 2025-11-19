@@ -13,11 +13,16 @@ from azure.cli.core.commands.parameters import get_enum_type
 
 def load_arguments(self, _):  # pylint: disable=unused-argument
     from azure.cli.core.commands.parameters import resource_group_name_type
-    
+
     with self.argument_context('edge-action version deploy-from-file') as c:
         c.argument('resource_group', resource_group_name_type)
-        c.argument('edge_action_name', options_list=['--edge-action-name'], help='Name of the edge action')
+        c.argument('edge_action_name', options_list=['--edge-action-name'],
+                   help='Name of the edge action')
         c.argument('version', options_list=['--version'], help='Version name')
-        c.argument('file_path', options_list=['--file-path'], help='Path to JavaScript or zip file')
-        c.argument('deployment_type', options_list=['--deployment-type'], arg_type=get_enum_type(['file', 'zip']), help='Deployment type (file or zip)')
-        c.argument('no_wait', options_list=['--no-wait'], action='store_true', help="Do not wait for the long-running operation to finish")
+        c.argument('file_path', options_list=['--file-path'],
+                   help='Path to JavaScript or zip file')
+        c.argument('deployment_type', options_list=['--deployment-type'],
+                   arg_type=get_enum_type(['file', 'zip']),
+                   help='Deployment type (file or zip)')
+        c.argument('no_wait', options_list=['--no-wait'], action='store_true',
+                   help="Do not wait for the long-running operation to finish")
