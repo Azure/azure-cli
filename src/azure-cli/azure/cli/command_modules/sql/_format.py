@@ -267,6 +267,39 @@ def elastic_pool_transform(result):
 
 
 #####
+#           sql deleted-server transformers for json
+#####
+
+
+def deleted_server_list_transform(results):
+    '''
+    Transforms the json response for a list of deleted servers.
+    '''
+    return [deleted_server_transform(r) for r in results]
+
+
+def deleted_server_transform(result):
+    '''
+    Transforms the json response for a deleted server.
+    Parses original_id to extract subscription ID, resource group, and server name.
+    '''
+    if result.original_id:
+        try:
+            # Parse original_id format:
+            # /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/servers/{name}
+            parts = result.original_id.split('/')
+            if len(parts) >= 9:
+                result.subscription_id = parts[2]
+                result.resource_group = parts[4]
+                result.name = parts[8]
+        except (ValueError, IndexError):
+            # If parsing fails, just continue without adding the fields
+            pass
+
+    return result
+
+
+#####
 #           sql elastic-pool table formatters
 #####
 
