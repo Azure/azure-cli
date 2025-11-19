@@ -5,8 +5,11 @@
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
 from knack.log import get_logger
 
-from ..aaz.latest.vmss import ListInstances as _VMSSListInstances
-from ..aaz.latest.vmss import Start as _Start
+from ..aaz.latest.vmss import (ListInstances as _VMSSListInstances,
+                               Start as _Start,
+                               Create as _VMSSCreate,
+                               Update as _VMSSUpdate,
+                               Show as _VMSSShow)
 from azure.cli.core.aaz import AAZUndefined, has_value
 
 logger = get_logger(__name__)
@@ -36,6 +39,54 @@ class VMSSStart(_Start):
         if not has_value(args.instance_ids):
             # if instance id is not provide, override with '*'
             args.instance_ids = ["*"]
+
+
+class VMSSCreate(_VMSSCreate):
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):
+            for extension in self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions:
+                if has_value(extension.type):
+                    extension.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class VMSSUpdate(_VMSSUpdate):
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):
+            for extension in self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions:
+                if has_value(extension.type):
+                    extension.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class VMSSShow(_VMSSShow):
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):
+            for extension in self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions:
+                if has_value(extension.type):
+                    extension.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
 def convert_show_result_to_sneak_case(result):

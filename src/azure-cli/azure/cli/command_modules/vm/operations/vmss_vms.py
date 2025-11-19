@@ -6,7 +6,7 @@
 from knack.log import get_logger
 
 from azure.cli.core.aaz import AAZUndefined, has_value
-from ..aaz.latest.vmss.vms import Create as _VMSSVMSCreate
+from ..aaz.latest.vmss.vms import Create as _VMSSVMSCreate, Show as _VMSSVMSShow, Update as _VMSSVMSUpdate
 
 logger = get_logger(__name__)
 
@@ -40,6 +40,51 @@ class VMSSVMSCreate(_VMSSVMSCreate):
         )
 
         return args_schema
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.resources):
+            for resource in self.ctx.vars.instance.resources:
+                if has_value(resource.type):
+                    resource.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class VMSSVMSShow(_VMSSVMSShow):
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.resources):
+            for resource in self.ctx.vars.instance.resources:
+                if has_value(resource.type):
+                    resource.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class VMSSVMSUpdate(_VMSSVMSUpdate):
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.resources):
+            for resource in self.ctx.vars.instance.resources:
+                if has_value(resource.type):
+                    resource.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
 def convert_show_result_to_sneak_case(result):

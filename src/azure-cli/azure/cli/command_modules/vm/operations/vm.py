@@ -13,6 +13,35 @@ logger = get_logger(__name__)
 
 
 class VMUpdate(_VMUpdate):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        from azure.cli.core.aaz import AAZStrArg, AAZDictArg, AAZObjectArg
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+
+        args_schema.identity = AAZObjectArg(
+            options=["--identity"],
+            arg_group="Parameters",
+            help="The identity of the virtual machine scale set, if configured.",
+        )
+
+        identity = args_schema.identity
+        identity.type = AAZStrArg(
+            options=["type"],
+            help="The type of identity used for the virtual machine scale set. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual machine scale set.",
+            enum={"None": "None", "SystemAssigned": "SystemAssigned",
+                  "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
+        )
+        identity.user_assigned_identities = AAZDictArg(
+            options=["user-assigned-identities"],
+            help="The list of user identities associated with the virtual machine scale set. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
+        )
+        user_assigned_identities = args_schema.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectArg(
+            blank={},
+        )
+
+        return args_schema
+
     class VirtualMachinesGet(_VMUpdate.VirtualMachinesGet):
         # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing
         @classmethod
@@ -111,6 +140,19 @@ class VMCreate(_VMCreate):
         )
 
         return args_schema
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.resources):
+            for resource in self.ctx.vars.instance.resources:
+                if has_value(resource.type):
+                    resource.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
 
 
 def convert_show_result_to_sneak_case(result):

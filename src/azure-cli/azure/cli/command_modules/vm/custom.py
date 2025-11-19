@@ -281,16 +281,16 @@ def get_hyper_v_generation_from_vmss_by_aaz(cli_ctx, image_ref, location):  # py
             image_info = client.get(rg, image_name)
             return image_info.hyper_v_generation if hasattr(image_info, 'hyper_v_generation') else None
 
-    if image_ref.get("shared_gallery_image_id", None) is not None:
+    if image_ref.get("sharedGalleryImageId", None) is not None:
         from ._client_factory import cf_shared_gallery_image
-        image_info = parse_shared_gallery_image_id(image_ref["shared_gallery_image_id"])
+        image_info = parse_shared_gallery_image_id(image_ref["sharedGalleryImageId"])
         gallery_image_info = cf_shared_gallery_image(cli_ctx).get(
             location=location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
         return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
 
-    if image_ref.get("community_gallery_image_id", None) is not None:
+    if image_ref.get("communityGalleryImageId", None) is not None:
         from ._client_factory import cf_community_gallery_image
-        image_info = parse_community_gallery_image_id(image_ref["community_gallery_image_id"])
+        image_info = parse_community_gallery_image_id(image_ref["communityGalleryImageId"])
         gallery_image_info = cf_community_gallery_image(cli_ctx).get(
             location=location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
         return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
@@ -1388,13 +1388,17 @@ def get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name):
         'resource_group': resource_group_name,
         "vm_name": vm_name
     })
-    converted_vm = convert_show_result_to_sneak_case(vm)
+    # converted_vm = convert_show_result_to_sneak_case(vm)
+    #
+    # # To avoid unnecessary permission check of image
+    # storage_profile = converted_vm.get('storage_profile', {})
+    # storage_profile['image_reference'] = None
 
     # To avoid unnecessary permission check of image
-    storage_profile = converted_vm.get('storage_profile', {})
-    storage_profile['image_reference'] = None
+    storage_profile = vm.get('storageProfile', {})
+    storage_profile["imageReference"] = None
 
-    return converted_vm
+    return vm
 
 
 def get_vm_details(cmd, resource_group_name, vm_name, include_user_data=False):
@@ -1731,7 +1735,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               key_incarnation_id=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching
+    from .operations.vm import convert_show_result_to_sneak_case as vm_convert_show_result_to_sneak_case
     vm = kwargs['parameters']
+    vm = vm_convert_show_result_to_sneak_case(vm)
 
     if wire_server_access_control_profile_reference_id is not None or \
             imds_access_control_profile_reference_id is not None:
@@ -1756,6 +1762,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             'security_profile': security_profile
         }))
         vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+        vm = vm_convert_show_result_to_sneak_case(vm)
 
     if add_proxy_agent_extension is not None:
         if vm.get("security_profile", None) is None:
@@ -4046,9 +4053,9 @@ def _check_vmss_hyper_v_generation(cli_ctx, vmss):
 
 def _check_vmss_hyper_v_generation_by_aaz(cli_ctx, vmss):
     hyper_v_generation = get_hyper_v_generation_from_vmss_by_aaz(
-        cli_ctx, vmss.get("virtual_machine_profile", {}).get("storage_profile", {}).get("image_reference", {}), vmss["location"])
-    security_profile = vmss.get("virtual_machine_profile", {}).get("security_profile", {})
-    security_type = security_profile.get("security_type", None)
+        cli_ctx, vmss.get("virtualMachineProfile", {}).get("storageProfile", {}).get("imageReference", {}), vmss["location"])
+    security_profile = vmss.get("virtualMachineProfile", {}).get("securityProfile", {})
+    security_type = security_profile.get("securityType", None)
 
     if hyper_v_generation == "V1" or (hyper_v_generation == "V2" and security_type is None):
         logger.warning("Trusted Launch security type is supported on Hyper-V Generation 2 OS Images. "
@@ -4084,34 +4091,44 @@ def get_vmss_modified(cmd, resource_group_name, name, instance_id=None, security
 def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, security_type=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is not None:
-        from .aaz.latest.vmss.vms import Show as VMSSVMSShow
-        from .operations.vmss_vms import convert_show_result_to_sneak_case as vmss_vms_convert_show_result_to_sneak_case
+        from .operations.vmss_vms import convert_show_result_to_sneak_case as vmss_vms_convert_show_result_to_sneak_case, VMSSVMSShow
         vms = VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args={
             'resource_group': resource_group_name,
             "vm_scale_set_name": name,
             "instance_id": instance_id
         })
-        converted_vms = vmss_vms_convert_show_result_to_sneak_case(vms)
+        # converted_vms = vmss_vms_convert_show_result_to_sneak_case(vms)
+        #
+        # # To avoid unnecessary permission check of image
+        # if converted_vms.get("storage_profile", None) is not None:
+        #     converted_vms["storage_profile"]["image_reference"] = None
+        # return converted_vms
 
         # To avoid unnecessary permission check of image
-        if converted_vms.get("storage_profile", None) is not None:
-            converted_vms["storage_profile"]["image_reference"] = None
-        return converted_vms
+        if vms.get("storageProfile", None) is not None:
+            vms["storageProfile"]["imageReference"] = None
+        return vms
 
-    from .aaz.latest.vmss import Show as VMSSShow
-    from .operations.vmss import convert_show_result_to_sneak_case as vmss_convert_show_result_to_sneak_case
+    from .operations.vmss import convert_show_result_to_sneak_case as vmss_convert_show_result_to_sneak_case, VMSSShow
     vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         "vm_scale_set_name": name,
     })
-    converted_vmss = vmss_convert_show_result_to_sneak_case(vmss)
+    # converted_vmss = vmss_convert_show_result_to_sneak_case(vmss)
+    #
+    # if security_type == 'TrustedLaunch':
+    #     _check_vmss_hyper_v_generation_by_aaz(cmd.cli_ctx, converted_vmss)
+    # # To avoid unnecessary permission check of image
+    # if converted_vmss.get("virtual_machine_profile", {}).get("storage_profile", None) is not None:
+    #     converted_vmss["virtual_machine_profile"]["storage_profile"]["image_reference"] = None
+    # return converted_vmss
 
     if security_type == 'TrustedLaunch':
-        _check_vmss_hyper_v_generation_by_aaz(cmd.cli_ctx, converted_vmss)
+        _check_vmss_hyper_v_generation_by_aaz(cmd.cli_ctx, vmss)
     # To avoid unnecessary permission check of image
-    if converted_vmss.get("virtual_machine_profile", {}).get("storage_profile", None) is not None:
-        converted_vmss["virtual_machine_profile"]["storage_profile"]["image_reference"] = None
-    return converted_vmss
+    if vmss.get("virtualMachineProfile", {}).get("storageProfile", None) is not None:
+        vmss["virtualMachineProfile"]["storageProfile"]["imageReference"] = None
+    return vmss
 
 
 def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
@@ -4327,7 +4344,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
+    from .operations.vmss_vms import convert_show_result_to_sneak_case as vmss_vms_convert_show_result_to_sneak_case
+    from .operations.vmss import convert_show_result_to_sneak_case as vmss_convert_show_result_to_sneak_case
     vmss = kwargs['parameters']
+    if instance_id:
+        vmss = vmss_vms_convert_show_result_to_sneak_case(vmss)
+    else:
+        vmss = vmss_convert_show_result_to_sneak_case(vmss)
 
     if wire_server_access_control_profile_reference_id is not None or \
             imds_access_control_profile_reference_id is not None:
@@ -4354,6 +4377,10 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             }
         }))
         vmss = get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id, security_type)
+        if instance_id:
+            vmss = vmss_vms_convert_show_result_to_sneak_case(vmss)
+        else:
+            vmss = vmss_convert_show_result_to_sneak_case(vmss)
 
     if add_proxy_agent_extension is not None:
         if instance_id:
@@ -4467,20 +4494,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 vmss["scheduled_events_policy"]["user_initiated_reboot"] = {}
             vmss["scheduled_events_policy"]["user_initiated_reboot"][
                 "automatically_approve"] = enable_user_reboot_scheduled_events
-        #
-        # vmss.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
-        #     event_grid_and_resource_graph.enable = additional_scheduled_events
-        # vmss.scheduled_events_policy.user_initiated_redeploy.automatically_approve = \
-        #     enable_user_redeploy_scheduled_events
-        # vmss.scheduled_events_policy.user_initiated_reboot.automatically_approve = enable_user_reboot_scheduled_events
 
     if enable_osimage_notification is not None:
-        # if vmss.virtual_machine_profile.scheduled_events_profile is None:
-        #     vmss.virtual_machine_profile.scheduled_events_profile = cmd.get_models('ScheduledEventsProfile')()
-        # OSImageNotificationProfile = cmd.get_models('OSImageNotificationProfile')
-        # vmss.virtual_machine_profile.scheduled_events_profile.os_image_notification_profile = \
-        #     OSImageNotificationProfile(enable=enable_osimage_notification)
-
         if vmss.get("virtual_machine_profile", None) is None:
             vmss["virtual_machine_profile"] = {}
         if vmss["virtual_machine_profile"].get("scheduled_events_profile", None) is None:
@@ -4490,11 +4505,6 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         }
 
     if enable_automatic_repairs is not None or automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
-        # AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
-        # vmss.automatic_repairs_policy = \
-        #     AutomaticRepairsPolicy(enabled=enable_automatic_repairs,
-        #                            grace_period=automatic_repairs_grace_period,
-        #                            repair_action=automatic_repairs_action)
         if vmss.get("automatic_repairs_policy", None) is None:
             vmss["automatic_repairs_policy"] = {}
         if enable_automatic_repairs is not None:
@@ -4544,7 +4554,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if vmss.get("virtual_machine_profile", None) is None:
             vmss["virtual_machine_profile"] = {}
 
-        security_profile = vmss["virtual_machine_profile"].get("security_profile", None)
+        security_profile = vmss["virtual_machine_profile"].get("security_profile", {})
         prev_security_type = security_profile.get("security_type", None)
         # At present, `SecurityType` has options `TrustedLaunch` and `Standard`
         if security_type == 'TrustedLaunch' and prev_security_type != security_type:
@@ -4775,7 +4785,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     vmss["vm_scale_set_name"] = name
     vmss["no_wait"] = no_wait
 
-    from .aaz.latest.vmss import Create as VMSSCreate
+    from .operations.vmss import VMSSCreate
     return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
 # endregion
