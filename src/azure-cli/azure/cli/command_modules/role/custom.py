@@ -1017,6 +1017,10 @@ def app_federated_credential_delete(client, app_identifier, federated_identity_c
 
 
 def create_service_principal(cmd, identifier):
+    logger.warning("The `az ad sp create` command can modify an existing application or service principal "
+                   "if another object shares the same **display name**. Display names aren't unique and can change, "
+                   "which could result in credential loss or incorrect RBAC assignments. "
+                   "Use a **unique object ID or app ID** instead.")
     return _create_service_principal(cmd.cli_ctx, identifier)
 
 
