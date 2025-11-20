@@ -269,7 +269,7 @@ class Common:
     def SetUndefinedNone(value):
         from azure.cli.core.aaz import AAZUndefined
         if isinstance(value, dict):
-            for key, item in value.items():
+            for _, item in value.items():
                 Common.SetUndefinedNone(item)
         elif isinstance(value, list):
             for item in value:
@@ -336,6 +336,7 @@ class PolicyAssignmentCreate(AssignmentCreate):
 
         @staticmethod
         def serialize_content(value, required=False):
+            # pylint: disable=protected-access
             Common.SetUndefinedNone(value._data)
             content = AssignmentCreate.PolicyAssignmentsCreate.serialize_content(value, required)
             return content
@@ -695,8 +696,10 @@ class PolicyDefinitionCreate(DefinitionCreate):
 
         @staticmethod
         def serialize_content(value, required=False):
+            # pylint: disable=protected-access
             Common.SetUndefinedNone(value._data)
-            content = DefinitionCreate.PolicyDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(value, required)
+            content = DefinitionCreate.PolicyDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(
+                value, required)
             return content
 
     class PolicyDefinitionsCreateOrUpdate(DefinitionCreate.PolicyDefinitionsCreateOrUpdate):
@@ -709,6 +712,7 @@ class PolicyDefinitionCreate(DefinitionCreate):
 
         @staticmethod
         def serialize_content(value, required=False):
+            # pylint: disable=protected-access
             Common.SetUndefinedNone(value._data)
             content = DefinitionCreate.PolicyDefinitionsCreateOrUpdate.serialize_content(value, required)
             return content
@@ -871,7 +875,8 @@ class PolicyDefinitionUpdate(DefinitionUpdate):
         @staticmethod
         def serialize_content(value, required=False):
             Common.SetUndefinedNone(value._data)
-            content = DefinitionUpdate.PolicyDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(value, required)
+            content = DefinitionUpdate.PolicyDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(
+                value, required)
             return content
 
     class PolicyDefinitionsCreateOrUpdate(DefinitionUpdate.PolicyDefinitionsCreateOrUpdate):
@@ -1090,8 +1095,10 @@ class PolicySetDefinitionCreate(SetDefinitionCreate):
 
         @staticmethod
         def serialize_content(value, required=False):
+            # pylint: disable=protected-access
             Common.SetUndefinedNone(value._data)
-            content = DefinitionCreate.PolicyDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(value, required)
+            content = DefinitionCreate.PolicyDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(
+                value, required)
             return content
 
     class PolicySetDefinitionsCreateOrUpdate(SetDefinitionCreate.PolicySetDefinitionsCreateOrUpdate):
@@ -1104,6 +1111,7 @@ class PolicySetDefinitionCreate(SetDefinitionCreate):
 
         @staticmethod
         def serialize_content(value, required=False):
+            # pylint: disable=protected-access
             Common.SetUndefinedNone(value._data)
             content = DefinitionCreate.PolicyDefinitionsCreateOrUpdate.serialize_content(value, required)
             return content
@@ -1265,7 +1273,8 @@ class PolicySetDefinitionUpdate(SetDefinitionUpdate):
         @staticmethod
         def serialize_content(value, required=False):
             Common.SetUndefinedNone(value._data)
-            content = SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(value, required)
+            content = SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdateAtManagementGroup.serialize_content(
+                value, required)
             return content
 
     class PolicySetDefinitionsCreateOrUpdate(SetDefinitionUpdate.PolicySetDefinitionsCreateOrUpdate):
