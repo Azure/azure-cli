@@ -35,7 +35,7 @@ from azure.cli.command_modules.cosmosdb.actions import (
 from azure.cli.command_modules.cosmosdb.custom import (
     CosmosKeyTypes)
 from azure.mgmt.cosmosdb.models import (
-    ContinuousTier, MinimalTlsVersion)
+    ContinuousTier, MinimalTlsVersion, DefaultPriorityLevel)
 
 GREMLIN_INDEXING_POLICY_EXAMPLE = """--idx "{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{ \\"path\\": \\"/headquarters/employees/?\\"}, { \\"path\\": \\"/\\\\"_etag\\\\"/?\\"}]}"
 """
@@ -131,6 +131,8 @@ def load_arguments(self, _):
             c.argument('enable_partition_merge', arg_type=get_three_state_flag(), help="Flag to enable partition merge on the account.")
             c.argument('enable_burst_capacity', arg_type=get_three_state_flag(), help="Flag to enable burst capacity on the account.")
             c.argument('enable_prpp_autoscale', arg_type=get_three_state_flag(), help="Enable or disable PerRegionPerPartitionAutoscale.")
+            c.argument('enable_priority_based_execution', arg_type=get_three_state_flag(), help="Flag to enable priority based execution on the account.")
+            c.argument('default_priority_level', arg_type=get_enum_type(DefaultPriorityLevel), help="Default Priority Level of Request if not specified.")
             c.argument('continuous_tier', arg_type=get_enum_type(ContinuousTier), help="The tier of Continuous backup", arg_group='Backup Policy')
             c.argument('minimal_tls_version', arg_type=get_enum_type(MinimalTlsVersion), help="Indicates the minimum allowed TLS version")
 
