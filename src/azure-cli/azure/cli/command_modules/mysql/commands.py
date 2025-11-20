@@ -204,7 +204,7 @@ def load_command_table(self, _):
                             custom_command_type=mysql_custom,
                             client_factory=cf_mysql_flexible_export, 
                             is_preview=True,
-                            deprecate_info=self.deprecate(..., hide=True)) as g:
+                            deprecate_info=self.deprecate(hide=True)) as g:
         g.custom_command('create', 'flexible_server_export_create')
 
     with self.command_group('mysql flexible-server identity', mysql_flexible_servers_sdk,
