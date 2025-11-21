@@ -174,11 +174,12 @@ def _add_resource_group_cluster_name_subscription_id_args(_args_schema):
         help="The name of the Managed Cluster.You may provide either 'managed_cluster' or both 'resource_group' and name', but not both.",
         required=False,
     )
-    _args_schema.managed_cluster.required = False
+    _args_schema.managed_cluster._required = False
     return _args_schema
 
 
 class AKSSafeguardsShowCustom(Show):
+    _args_schema = None
 
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
@@ -192,6 +193,7 @@ class AKSSafeguardsShowCustom(Show):
 
 
 class AKSSafeguardsDeleteCustom(Delete):
+    _args_schema = None
 
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
@@ -203,6 +205,7 @@ class AKSSafeguardsDeleteCustom(Delete):
 
 
 class AKSSafeguardsUpdateCustom(Update):
+    _args_schema = None
 
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
@@ -214,6 +217,7 @@ class AKSSafeguardsUpdateCustom(Update):
 
 
 class AKSSafeguardsCreateCustom(Create):
+    _args_schema = None
 
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
@@ -260,6 +264,7 @@ class AKSSafeguardsCreateCustom(Create):
 
 
 class AKSSafeguardsListCustom(List):
+    _args_schema = None
 
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
@@ -271,6 +276,7 @@ class AKSSafeguardsListCustom(List):
 
 
 class AKSSafeguardsWaitCustom(Wait):
+    _args_schema = None
 
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
