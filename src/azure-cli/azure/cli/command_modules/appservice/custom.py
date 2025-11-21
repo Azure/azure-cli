@@ -101,6 +101,7 @@ from .aaz.latest.relay.hyco import Show as HyCoShow
 from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
 from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
 from .aaz.latest.relay.namespace import List as NamespaceList
+from .aaz.latest.appservice import ListLocations as AppServiceListLocations
 from .aaz.latest.appservice.plan import (Show as AppServicePlanShow, Create as AppServicePlanCreate,
                                          Update as AppServicePlanUpdate)
 from .aaz.latest.appservice.plan.managed_instance import (ShowRdpPassword
@@ -8135,7 +8136,6 @@ def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=
         # and due to additional validation needed for SKU
         web_client_geo_regions = _list_managed_instance_locations(cmd, full_sku)
     else:
-        # Temporary fix due to regression in this specific API with 2021-03-01, should be removed with the next SDK update
         web_client_geo_regions = web_client.list_geo_regions(sku=full_sku,
                                                              linux_workers_enabled=linux_workers_enabled,
                                                              xenon_workers_enabled=hyperv_workers_enabled)
@@ -8151,8 +8151,17 @@ def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=
 
 
 def _list_managed_instance_locations(cmd, sku_tier):
+    from types import SimpleNamespace
+
     if not is_sku_tier_enabled_for_managed_instance(sku_tier):
         return []
+
+    list_locations_cmd = AppServiceListLocations(cli_ctx=cmd.cli_ctx)
+    locations = list_locations_cmd(command_args={
+        'custom_mode_workers_enabled': True
+    })
+
+    return [SimpleNamespace(**location) for location in locations]
 
 
 def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot, timeout=None):
