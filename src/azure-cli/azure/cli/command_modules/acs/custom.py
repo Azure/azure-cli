@@ -174,7 +174,7 @@ def _add_resource_group_cluster_name_subscription_id_args(_args_schema):
         help="The name of the Managed Cluster.You may provide either 'managed_cluster' or both 'resource_group' and name', but not both.",
         required=False,
     )
-    _args_schema.managed_cluster._required = False
+    _args_schema.managed_cluster._required = False  # pylint: disable=protected-access
     return _args_schema
 
 
