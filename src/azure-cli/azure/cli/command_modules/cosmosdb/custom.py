@@ -246,7 +246,8 @@ def _create_database_account(client,
                              enable_burst_capacity=None,
                              enable_prpp_autoscale=None,
                              minimal_tls_version=None,
-                             disable_ttl=None):
+                             disable_ttl=None,
+                             source_backup_location=None):
 
     consistency_policy = None
     if default_consistency_level is not None:
@@ -384,7 +385,8 @@ def _create_database_account(client,
         enable_partition_merge=enable_partition_merge,
         enable_burst_capacity=enable_burst_capacity,
         enable_per_region_per_partition_autoscale=enable_prpp_autoscale,
-        minimal_tls_version=minimal_tls_version
+        minimal_tls_version=minimal_tls_version,
+        source_backup_location=source_backup_location
     )
 
     async_docdb_create = client.begin_create_or_update(resource_group_name, account_name, params)
