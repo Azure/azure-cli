@@ -8156,6 +8156,8 @@ def _list_managed_instance_locations(cmd, sku_tier):
     if not is_sku_tier_enabled_for_managed_instance(sku_tier):
         return []
 
+    # SKU is validated separately above and not passed into API call
+    # due to how the API handles SKU for managed instance
     list_locations_cmd = AppServiceListLocations(cli_ctx=cmd.cli_ctx)
     locations = list_locations_cmd(command_args={
         'custom_mode_workers_enabled': True
