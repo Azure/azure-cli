@@ -16,9 +16,6 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete settings.
-
-    :example: Delete settings.
-        az network application-gateway settings delete -g MyResourceGroup --gateway-name MyAppGateway -n MyHttpSettings
     """
 
     _aaz_info = {
