@@ -16,9 +16,6 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get the details of a probe.
-
-    :example: Get the details of a probe.
-        az network application-gateway probe show -g MyResourceGroup --gateway-name MyAppGateway -n MyProbe
     """
 
     _aaz_info = {

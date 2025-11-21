@@ -16,9 +16,6 @@ from azure.cli.core.aaz import *
 )
 class Show(AAZCommand):
     """Get the details of settings.
-
-    :example: Get the details of settings.
-        az network application-gateway settings show -g MyResourceGroup --gateway-name MyAppGateway -n MySettings
     """
 
     _aaz_info = {
