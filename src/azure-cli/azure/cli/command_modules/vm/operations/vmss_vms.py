@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-# pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument
+# pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument, too-many-statements, too-many-branches, too-many-locals
 from knack.log import get_logger
 
 from azure.cli.core.aaz import AAZUndefined, has_value
@@ -42,8 +42,6 @@ class VMSSVMSCreate(_VMSSVMSCreate):
         return args_schema
 
     def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined, has_value
-
         # Resolve flatten conflict
         # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
         if has_value(self.ctx.vars.instance.resources):
@@ -56,10 +54,7 @@ class VMSSVMSCreate(_VMSSVMSCreate):
 
 
 class VMSSVMSShow(_VMSSVMSShow):
-
     def _output(self, *args, **kwargs):
-        from azure.cli.core.aaz import AAZUndefined, has_value
-
         # Resolve flatten conflict
         # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
         if has_value(self.ctx.vars.instance.resources):
@@ -435,8 +430,7 @@ def convert_show_result_to_sneak_case(result):
 
     automatic_by_platform_settings = patch_settings.get("automatic_by_platform_settings", {}) or {}
     if "bypassPlatformSafetyChecksOnUserSchedule" in automatic_by_platform_settings:
-        automatic_by_platform_settings["bypass_platform_safety_checks_on_user_schedule"] = \
-        automatic_by_platform_settings["bypassPlatformSafetyChecksOnUserSchedule"]
+        automatic_by_platform_settings["bypass_platform_safety_checks_on_user_schedule"] = automatic_by_platform_settings["bypassPlatformSafetyChecksOnUserSchedule"]
         automatic_by_platform_settings.pop("bypassPlatformSafetyChecksOnUserSchedule")
     if "rebootSetting" in automatic_by_platform_settings:
         automatic_by_platform_settings["reboot_setting"] = automatic_by_platform_settings["rebootSetting"]

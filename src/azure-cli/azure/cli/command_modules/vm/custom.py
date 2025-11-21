@@ -47,7 +47,6 @@ from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
 from .aaz.latest.vm import Update as UpdateVM
-from .aaz.latest.vmss import Update as UpdateVMSS
 
 from .generated.custom import *  # noqa: F403, pylint: disable=unused-wildcard-import,wildcard-import
 try:
@@ -295,8 +294,8 @@ def get_hyper_v_generation_from_vmss_by_aaz(cli_ctx, image_ref, location):  # py
             location=location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
         return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
 
-    if (image_ref.get("offer", None) is not None and image_ref.get("publisher", None) is not None
-            and image_ref.get("sku", None) is not None and image_ref.get("version", None) is not None):
+    if image_ref.get("offer", None) is not None and image_ref.get("publisher", None) is not None \
+            and image_ref.get("sku", None) is not None and image_ref.get("version", None) is not None:
         from ._client_factory import cf_vm_image
         version = image_ref["version"]
         if version.lower() == 'latest':
@@ -1382,7 +1381,7 @@ def get_vm_to_update(cmd, resource_group_name, vm_name):
 
 
 def get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name):
-    from .operations.vm import convert_show_result_to_sneak_case, VMShow
+    from .operations.vm import VMShow
 
     vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
@@ -1729,7 +1728,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
-    from ._vm_utils import update_write_accelerator_settings, update_disk_caching
+    from ._vm_utils import update_write_accelerator_settings, update_disk_caching_by_aaz
     from .operations.vm import convert_show_result_to_sneak_case as vm_convert_show_result_to_sneak_case
     vm = kwargs['parameters']
     vm = vm_convert_show_result_to_sneak_case(vm)
@@ -1800,7 +1799,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
         from azure.cli.core.azclierror import InvalidArgumentValueError
         if vm.get("security_profile", {}).get("security_type", None) == "ConfidentialVM":
             raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. Security Configuration "
-                                            "cannot be updated from ConfidentialVM to TrustedLaunch.".format(vm["name"]))
+                                            "cannot be updated from ConfidentialVM to TrustedLaunch.".format(vm["name"]))  # pylint: disable=line-too-long
 
         if disk_name is None and vm.get("storage_profile", {}).get("os_disk", {}).get("managed_disk", None) is not None:
             os_disk_id_parsed = parse_resource_id(vm["storage_profile"]["os_disk"]["managed_disk"]["id"])
@@ -1829,7 +1828,6 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
     if disk_caching is not None:
         if vm.get("storage_profile", None) is None:
             vm["storage_profile"] = {}
-        from _vm_utils import update_disk_caching_by_aaz
         update_disk_caching_by_aaz(vm["storage_profile"], disk_caching)
 
     if license_type is not None:
@@ -1975,11 +1973,11 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                 },
                 "user_initiated_reboot": {
                     "automatically_approve":
-                        enable_user_reboot_scheduled_events if enable_user_reboot_scheduled_events is not None else False
+                        enable_user_reboot_scheduled_events if enable_user_reboot_scheduled_events is not None else False   # pylint: disable=line-too-long
                 },
                 "user_initiated_redeploy": {
                     "automatically_approve":
-                        enable_user_redeploy_scheduled_events if enable_user_redeploy_scheduled_events is not None else False
+                        enable_user_redeploy_scheduled_events if enable_user_redeploy_scheduled_events is not None else False   # pylint: disable=line-too-long
                 }
             }
         else:
@@ -4048,7 +4046,7 @@ def _check_vmss_hyper_v_generation(cli_ctx, vmss):
 
 def _check_vmss_hyper_v_generation_by_aaz(cli_ctx, vmss):
     hyper_v_generation = get_hyper_v_generation_from_vmss_by_aaz(
-        cli_ctx, vmss.get("virtualMachineProfile", {}).get("storageProfile", {}).get("imageReference", {}), vmss["location"])
+        cli_ctx, vmss.get("virtualMachineProfile", {}).get("storageProfile", {}).get("imageReference", {}), vmss["location"])  # pylint: disable=line-too-long
     security_profile = vmss.get("virtualMachineProfile", {}).get("securityProfile", {})
     security_type = security_profile.get("securityType", None)
 
@@ -4084,9 +4082,8 @@ def get_vmss_modified(cmd, resource_group_name, name, instance_id=None, security
 
 
 def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, security_type=None):
-    client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is not None:
-        from .operations.vmss_vms import convert_show_result_to_sneak_case as vmss_vms_convert_show_result_to_sneak_case, VMSSVMSShow
+        from .operations.vmss_vms import VMSSVMSShow
         vms = VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args={
             'resource_group': resource_group_name,
             "vm_scale_set_name": name,
@@ -4098,7 +4095,7 @@ def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, s
             vms["storageProfile"]["imageReference"] = None
         return vms
 
-    from .operations.vmss import convert_show_result_to_sneak_case as vmss_convert_show_result_to_sneak_case, VMSSShow
+    from .operations.vmss import VMSSShow
     vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
         'resource_group': resource_group_name,
         "vm_scale_set_name": name,
@@ -4429,9 +4426,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"] = {}
 
         if v_cpus_available is not None:
-            vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_available"] = v_cpus_available
+            vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_available"] = v_cpus_available  # pylint: disable=line-too-long
         if v_cpus_per_core is not None:
-            vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_per_core"] = v_cpus_per_core
+            vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_per_core"] = v_cpus_per_core  # pylint: disable=line-too-long
 
     if capacity_reservation_group is not None:
         if vmss.get("virtual_machine_profile", None) is None:
@@ -4460,15 +4457,16 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if additional_scheduled_events is not None:
             if vmss["scheduled_events_policy"].get("scheduled_events_additional_publishing_targets", None) is None:
                 vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"] = {}
-            if vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"].get("event_grid_and_resource_graph", None) is None:
-                vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"]["event_grid_and_resource_graph"] = {}
+            if vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"].get("event_grid_and_resource_graph", None) is None:  # pylint: disable=line-too-long
+                vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"]["event_grid_and_resource_graph"] = {}  # pylint: disable=line-too-long
             vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"][
                 "event_grid_and_resource_graph"]["enable"] = additional_scheduled_events
 
         if enable_user_redeploy_scheduled_events is not None:
             if vmss["scheduled_events_policy"].get("user_initiated_redeploy", None) is None:
                 vmss["scheduled_events_policy"]["user_initiated_redeploy"] = {}
-            vmss["scheduled_events_policy"]["user_initiated_redeploy"]["automatically_approve"] = enable_user_redeploy_scheduled_events
+            vmss["scheduled_events_policy"]["user_initiated_redeploy"]["automatically_approve"] \
+                = enable_user_redeploy_scheduled_events
 
         if enable_user_reboot_scheduled_events is not None:
             if vmss["scheduled_events_policy"].get("user_initiated_reboot", None) is None:
@@ -4485,7 +4483,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             "enable": enable_osimage_notification
         }
 
-    if enable_automatic_repairs is not None or automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
+    if enable_automatic_repairs is not None or automatic_repairs_grace_period is not None or automatic_repairs_action is not None:  # pylint: disable=line-too-long
         if vmss.get("automatic_repairs_policy", None) is None:
             vmss["automatic_repairs_policy"] = {}
         if enable_automatic_repairs is not None:
@@ -4577,7 +4575,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 "wire_server": {}, "imds": {}
             }
         else:
-            if vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"].get("wire_server", None) is None:
+            if vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"].get("wire_server", None) is None:  # pylint: disable=line-too-long
                 vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["wire_server"] = {}
             if vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"].get("imds", None) is None:
                 vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["imds"] = {}
@@ -4585,7 +4583,8 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if enable_proxy_agent is not None:
             vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["enabled"] = enable_proxy_agent
         if wire_server_mode is not None:
-            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["wire_server"]["mode"] = wire_server_mode
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["wire_server"]["mode"] \
+                = wire_server_mode
         if imds_mode is not None:
             vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["imds"]["mode"] = imds_mode
 
@@ -4607,6 +4606,7 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
     if proximity_placement_group is not None:
         vmss["proximity_placement_group"] = {'id': proximity_placement_group}
 
+    # pylint: disable=too-many-boolean-expressions
     if max_batch_instance_percent is not None or max_unhealthy_instance_percent is not None \
             or max_unhealthy_upgraded_instance_percent is not None or pause_time_between_batches is not None \
             or enable_cross_zone_upgrade is not None or prioritize_unhealthy_instances is not None \
@@ -4625,18 +4625,23 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             }
         else:
             if max_batch_instance_percent is not None:
-                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_batch_instance_percent"] = max_batch_instance_percent
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_batch_instance_percent"] \
+                    = max_batch_instance_percent
             if max_unhealthy_instance_percent is not None:
-                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_unhealthy_instance_percent"] = max_unhealthy_instance_percent
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_unhealthy_instance_percent"] \
+                    = max_unhealthy_instance_percent
             if max_unhealthy_upgraded_instance_percent is not None:
-                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_unhealthy_upgraded_instance_percent"] = \
-                max_unhealthy_upgraded_instance_percent
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_unhealthy_upgraded_instance_percent"] \
+                    = max_unhealthy_upgraded_instance_percent
             if pause_time_between_batches is not None:
-                vmss["upgrade_policy"]["rolling_upgrade_policy"]["pause_time_between_batches"] = pause_time_between_batches
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["pause_time_between_batches"] \
+                    = pause_time_between_batches
             if enable_cross_zone_upgrade is not None:
-                vmss["upgrade_policy"]["rolling_upgrade_policy"]["enable_cross_zone_upgrade"] = enable_cross_zone_upgrade
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["enable_cross_zone_upgrade"] \
+                    = enable_cross_zone_upgrade
             if prioritize_unhealthy_instances is not None:
-                vmss["upgrade_policy"]["rolling_upgrade_policy"]["prioritize_unhealthy_instances"] = prioritize_unhealthy_instances
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["prioritize_unhealthy_instances"] \
+                    = prioritize_unhealthy_instances
             if max_surge is not None:
                 vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_surge"] = max_surge
 
@@ -4649,9 +4654,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if vmss.get("upgrade_policy", None) is None:
             vmss["upgrade_policy"] = {}
         if vmss["upgrade_policy"].get("automatic_os_upgrade_policy", None) is None:
-            vmss["upgrade_policy"]["automatic_os_upgrade_policy"] = {'enable_automatic_os_upgrade': enable_auto_os_upgrade}
+            vmss["upgrade_policy"]["automatic_os_upgrade_policy"] \
+                = {'enable_automatic_os_upgrade': enable_auto_os_upgrade}
         else:
-            vmss["upgrade_policy"]["automatic_os_upgrade_policy"]["enable_automatic_os_upgrade"] = enable_auto_os_upgrade
+            vmss["upgrade_policy"]["automatic_os_upgrade_policy"]["enable_automatic_os_upgrade"] \
+                = enable_auto_os_upgrade
 
     if vm_sku is not None:
         if vmss.get("sku", {}).get("name", None) == vm_sku:
@@ -4691,9 +4698,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"] = {}
 
         if ephemeral_os_disk_placement is not None:
-            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"]["placement"] = ephemeral_os_disk_placement
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"]["placement"] \
+                = ephemeral_os_disk_placement
         if ephemeral_os_disk_option is not None:
-            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"]["option"] = ephemeral_os_disk_option
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"]["option"] \
+                = ephemeral_os_disk_option
         if ephemeral_os_disk is False:
             vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"] = {}
 
@@ -4728,9 +4737,11 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         if security_posture_reference_id is not None:
             vmss["virtual_machine_profile"]["security_posture_reference"]["id"] = security_posture_reference_id
         if security_posture_reference_exclude_extensions is not None:
-            vmss["virtual_machine_profile"]["security_posture_reference"]["exclude_extensions"] = security_posture_reference_exclude_extensions
+            vmss["virtual_machine_profile"]["security_posture_reference"]["exclude_extensions"] \
+                = security_posture_reference_exclude_extensions
         if security_posture_reference_is_overridable is not None:
-            vmss["virtual_machine_profile"]["security_posture_reference"]["is_overridable"] = security_posture_reference_is_overridable
+            vmss["virtual_machine_profile"]["security_posture_reference"]["is_overridable"] \
+                = security_posture_reference_is_overridable
 
     if enable_resilient_creation is not None or enable_resilient_deletion is not None:
         if vmss.get("resiliency_policy", None) is None:
@@ -4751,10 +4762,12 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
             vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"]["enabled"] = enable_automatic_zone_balancing
 
         if automatic_zone_balancing_strategy is not None:
-            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"]["rebalance_strategy"] = automatic_zone_balancing_strategy
+            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"]["rebalance_strategy"] \
+                = automatic_zone_balancing_strategy
 
         if automatic_zone_balancing_behavior is not None:
-            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"]["rebalance_behavior"] = automatic_zone_balancing_behavior
+            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"]["rebalance_behavior"] \
+                = automatic_zone_balancing_behavior
 
     if zones is not None:
         vmss["zones"] = zones
