@@ -2247,14 +2247,24 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  '--resource-group {rg} '
                  '--name {setting-name} '
                  '--gateway-name {gateway-name} '
-                 '--enable-l4-client-ip-preservation true',
+                 '--enable-l4-client-ip true',
                  checks=(self.check('enableL4ClientIpPreservation', True)))
 
-        setting_list = self.cmd('network application-gateway settings list '
+        self.cmd('network application-gateway settings list '
                  '--resource-group {rg} '
-                 '--gateway-name {gateway-name}').get_output_in_json()
+                 '--gateway-name {gateway-name}',
+                 checks = self.check('length(@)', 1))
 
-        self.assertTrue(len(setting_list) > 0)
+        self.cmd('network application-gateway settings delete '
+                 '--resource-group {rg} '
+                 '--name {setting-name} '
+                 '--gateway-name {gateway-name}')
+
+        self.cmd('network application-gateway settings list '
+                 '--resource-group {rg} '
+                 '--gateway-name {gateway-name}',
+                 checks=self.check('length(@)', 0))
+
 
     @ResourceGroupPreparer(name_prefix='cli_test_agp_new_prop')
     def test_network_ags_enable_probe_proxy_protocol_header(self, resource_group):
@@ -2310,14 +2320,24 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  '--resource-group {rg} '
                  '--name {probe-name} '
                  '--gateway-name {gateway-name} '
-                 '--enable-probe-proxy-protocol-header true',
+                 '--enable-proxy-header true',
                  checks=(self.check('enableProbeProxyProtocolHeader', True)))
 
-        probe_list = self.cmd('network application-gateway probe list '
+        self.cmd('network application-gateway probe list '
                  '--resource-group {rg} '
-                 '--gateway-name {gateway-name}').get_output_in_json()
+                 '--gateway-name {gateway-name}',
+                 checks=self.check('length(@)', 1))
 
-        self.assertTrue(len(probe_list) > 0)
+        self.cmd('network application-gateway probe delete '
+                 '--resource-group {rg} '
+                 '--name {probe-name} '
+                 '--gateway-name {gateway-name}')
+
+        self.cmd('network application-gateway probe list '
+                 '--resource-group {rg} '
+                 '--gateway-name {gateway-name}',
+                 checks=self.check('length(@)', 0))
+
 
 class NetworkAppGatewayRewriteRuleset(ScenarioTest):
 
