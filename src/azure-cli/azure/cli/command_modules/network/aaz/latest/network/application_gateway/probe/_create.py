@@ -121,8 +121,8 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.enable_probe_proxy_protocol_header = AAZBoolArg(
-            options=["--enable-probe-proxy-protocol-header"],
+        _args_schema.enable_proxy_header = AAZBoolArg(
+            options=["--enable-proxy-header"],
             arg_group="Properties",
             help="Whether to send Proxy Protocol header along with the Health Probe over TCP or TLS protocol. Default value is false.",
         )
@@ -391,7 +391,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("enableProbeProxyProtocolHeader", AAZBoolType, ".enable_probe_proxy_protocol_header")
+                properties.set_prop("enableProbeProxyProtocolHeader", AAZBoolType, ".enable_proxy_header")
                 properties.set_prop("host", AAZStrType, ".host")
                 properties.set_prop("interval", AAZIntType, ".interval")
                 properties.set_prop("match", AAZObjectType)

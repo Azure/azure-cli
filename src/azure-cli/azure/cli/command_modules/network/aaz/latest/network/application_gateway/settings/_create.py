@@ -88,8 +88,8 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
-        _args_schema.enable_l4_client_ip_preservation = AAZBoolArg(
-            options=["--enable-l4-client-ip-preservation"],
+        _args_schema.enable_l4_client_ip = AAZBoolArg(
+            options=["--enable-l4-client-ip"],
             arg_group="Properties",
             help="Whether to send Proxy Protocol header to backend servers over TCP or TLS protocols. Default value is false.",
         )
@@ -385,7 +385,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
-                properties.set_prop("enableL4ClientIpPreservation", AAZBoolType, ".enable_l4_client_ip_preservation")
+                properties.set_prop("enableL4ClientIpPreservation", AAZBoolType, ".enable_l4_client_ip")
                 properties.set_prop("hostName", AAZStrType, ".host_name")
                 properties.set_prop("pickHostNameFromBackendAddress", AAZBoolType, ".backend_pool_host_name")
                 properties.set_prop("port", AAZIntType, ".port")
