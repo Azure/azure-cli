@@ -252,7 +252,9 @@ def _create_database_account(client,
                              minimal_tls_version=None,
                              disable_ttl=None,
                              enable_priority_based_execution=None,
-                             default_priority_level=None):
+                             default_priority_level=None,
+                             source_backup_location=None):
+
 
     consistency_policy = None
     if default_consistency_level is not None:
@@ -392,7 +394,8 @@ def _create_database_account(client,
         enable_per_region_per_partition_autoscale=enable_prpp_autoscale,
         minimal_tls_version=minimal_tls_version,
         enable_priority_based_execution=enable_priority_based_execution,
-        default_priority_level=default_priority_level
+        default_priority_level=default_priority_level,
+        source_backup_location=source_backup_location
     )
 
     async_docdb_create = client.begin_create_or_update(resource_group_name, account_name, params)
