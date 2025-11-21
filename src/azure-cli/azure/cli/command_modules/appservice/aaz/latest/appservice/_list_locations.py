@@ -41,11 +41,11 @@ class ListLocations(AAZCommand):
         _args_schema = cls._args_schema
         _args_schema.custom_mode_workers_enabled = AAZBoolArg(
             options=["--custom-mode-workers-enabled"],
-            help="Specify <code>true</code> if you want to filter to only regions that support App Service Plans with <code>IsCustomMode</code> set to <code>true</code>.",
+            help="Specify true if you want to filter to only regions that support App Service Plans with IsCustomMode set to true.",
         )
         _args_schema.linux_dynamic_workers_enabled = AAZBoolArg(
             options=["--linux-dynamic-workers-enabled"],
-            help="Specify <code>true</code> if you want to filter to only regions that support Linux Consumption Workers.",
+            help="Specify true if you want to filter to only regions that support Linux Consumption Workers.",
         )
         _args_schema.linux_workers_enabled = AAZBoolArg(
             options=["--linux-workers-enabled"],
