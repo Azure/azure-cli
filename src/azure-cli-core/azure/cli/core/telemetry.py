@@ -208,7 +208,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'InvokeTimeElapsed', str(self.invoke_time_elapsed))
         set_custom_properties(result, 'OutputType', self.output_type)
         set_custom_properties(result, 'RawCommand', self.raw_command)
-        set_custom_properties(result, 'RawArgs', ','.join(self.raw_args or []))
+        set_custom_properties(result, 'RawArgs', ' '.join(self.raw_args or []))
         set_custom_properties(result, 'Params', ','.join(self.parameters or []))
         set_custom_properties(result, 'PythonVersion', platform.python_version())
         set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)

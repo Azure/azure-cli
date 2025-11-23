@@ -514,7 +514,6 @@ class AzCliCommandInvoker(CommandInvoker):
             EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, EVENT_INVOKER_PRE_LOAD_ARGUMENTS, EVENT_INVOKER_POST_LOAD_ARGUMENTS)
 
         # TODO: Can't simply be invoked as an event because args are transformed
-        # what are args before this call?
         args = _pre_command_table_create(self.cli_ctx, args)
         raw_args = args.copy()
 
@@ -582,8 +581,6 @@ class AzCliCommandInvoker(CommandInvoker):
             # TODO: No event in base with which to target
             telemetry.set_command_details('az', raw_args=raw_args)
             telemetry.set_success(summary='welcome')
-            # @TODO: can add custom telemetry calls here?
-            # @ie: set commandAsTyped. trigger table? (where does that come from)
             return CommandResultItem(None, exit_code=0)
 
         if args[0].lower() == 'help':
@@ -636,7 +633,6 @@ class AzCliCommandInvoker(CommandInvoker):
         except Exception:  # pylint: disable=broad-except
             pass
         
-        # Raw args added to telemetry payload for command rebuild analysis
         telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                       self.cli_ctx.data['safe_params'],
                                       extension_name=extension_name, extension_version=extension_version,
