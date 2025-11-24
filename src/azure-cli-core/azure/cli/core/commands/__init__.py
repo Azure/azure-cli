@@ -517,7 +517,6 @@ class AzCliCommandInvoker(CommandInvoker):
         # TODO: Can't simply be invoked as an event because args are transformed
         command_preserve_casing = roughly_parse_command_with_casing(args)
         args = _pre_command_table_create(self.cli_ctx, args)
-        # The index may be outdated. Make sure the command appears in the loaded command table
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
         self.commands_loader.load_command_table(args)
