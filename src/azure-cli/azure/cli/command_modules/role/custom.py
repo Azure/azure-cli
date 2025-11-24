@@ -604,6 +604,13 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                        # JSON properties
                        app_roles=None, optional_claims=None, required_resource_accesses=None):
     # pylint:disable=too-many-locals
+
+    logger.warning(f"The `az {cmd.name}` command can modify an existing application or service principal "
+                   "if another object shares the same display name. Display names aren't unique and can change, "
+                   "which could result in credential loss or incorrect RBAC assignments. "
+                   "Use a unique object ID or app ID instead. For more details, "
+                   "see https://go.microsoft.com/fwlink/?linkid=2342455.")
+
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     existing_apps = list_applications(cmd, client, display_name=display_name)
@@ -1017,10 +1024,6 @@ def app_federated_credential_delete(client, app_identifier, federated_identity_c
 
 
 def create_service_principal(cmd, identifier):
-    logger.warning("The `az ad sp create` command can modify an existing application or service principal "
-                   "if another object shares the same display name. Display names aren't unique and can change, "
-                   "which could result in credential loss or incorrect RBAC assignments. "
-                   "Use a unique object ID or app ID instead.")
     return _create_service_principal(cmd.cli_ctx, identifier)
 
 
@@ -1148,11 +1151,6 @@ def create_service_principal_for_rbac(
         years=None, create_cert=False, cert=None, scopes=None, role=None,
         show_auth_in_json=None, skip_assignment=False, keyvault=None):
     import time
-
-    logger.warning("The `az ad sp create-for-rbac` command can modify an existing application or service principal "
-                   "if another object shares the same display name. Display names aren't unique and can change, "
-                   "which could result in credential loss or incorrect RBAC assignments. "
-                   "Use a unique object ID or app ID instead.")
 
     if role and not scopes or not role and scopes:
         raise ArgumentUsageError("Usage error: To create role assignments, specify both --role and --scopes.")
