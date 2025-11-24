@@ -517,7 +517,7 @@ class AzCliCommandInvoker(CommandInvoker):
         # TODO: Can't simply be invoked as an event because args are transformed
         command_preserve_casing = roughly_parse_command_with_casing(args)
         args = _pre_command_table_create(self.cli_ctx, args)
-                # The index may be outdated. Make sure the command appears in the loaded command table
+        # The index may be outdated. Make sure the command appears in the loaded command table
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
         self.commands_loader.load_command_table(args)
@@ -634,7 +634,6 @@ class AzCliCommandInvoker(CommandInvoker):
                 extension_version = get_extension(command_source.extension_name).version
         except Exception:  # pylint: disable=broad-except
             pass
-        
         telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                       self.cli_ctx.data['safe_params'],
                                       extension_name=extension_name, extension_version=extension_version,
