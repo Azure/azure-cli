@@ -211,7 +211,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'RawCommand', self.raw_command)
         set_custom_properties(result, 'CommandPreserveCasing',
                               self.command_preserve_casing or '')
-        set_custom_properties(result, 'CmdIdxRebuildTriggered', self.cmd_idx_rebuild_triggered)
+        set_custom_properties(result, 'CmdIdxRebuildTriggered', str(self.cmd_idx_rebuild_triggered))
         set_custom_properties(result, 'Params', ','.join(self.parameters or []))
         set_custom_properties(result, 'PythonVersion', platform.python_version())
         set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
