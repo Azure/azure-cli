@@ -3,6 +3,78 @@
 Release History
 ===============
 
+2.80.0
+++++++
+
+**AKS**
+
+* [BREAKING CHANGE] `az aks create`: Make `--no-ssh-key` default behaviour (#32254)
+* `az aks namespace add/update/show/list/delete/get-credentials`: Add namespace command to support managed namespace feature (#32387)
+* `az aks create`: Add `KataVmIsolation` option for `--workload-runtime` parameter (#32020)
+* `az aks nodepool add`: Add `KataVmIsolation` option for `--workload-runtime` parameter (#32020)
+* `az aks mesh enable-egress-gateway/disable-egress-gateway`: Add commands to manage Azure Service Mesh egress gateway (#32386)
+* `az aks nodepool add/update`: Add parameter `--localdns-config` to config local dns profile for the nodepool (#32392)
+* `az aks upgrade`: Update user confirmation prompt of `--control-plane-only` parameter (#32404)
+
+**App Service**
+
+* `az appservice plan`: Add features for managed instance app service plans (#32344)
+* `az functionapp plan create`: Add elastic premium as supported SKU for zone redundency (#32319)
+
+**Batch**
+
+* [BREAKING CHANGE] `az batch pool create`: Remove deprecated argument `--target-communication` and `--resource-tags` (#32397)
+* [BREAKING CHANGE] `az batch pool reset/set`: Remove deprecated argument `--target-communication` (#32397)
+
+**Cognitive Services**
+
+* `az cognitiveservices account connection`: Add AI Foundry account connection management (#32336)
+* `az cognitiveservices account project`: Add AI Foundry account project management (#32336)
+* `az cognitiveservices account project connection`: Add AI Foundry account project connection management (#32336)
+* `az cognitiveservice agent`: Add command group (#32372)
+
+**Compute**
+
+* `az vm/vmss create/update`: Support `--add-proxy-agent-extension` parameter to specify whether to implicitly install the ProxyAgent Extension (#32298)
+
+**Container app**
+
+* `az containerapp env`: Remove `--min-replicas/max-replicas` from premium ingress (#32360)
+
+**DMS**
+
+* `az dms project create`: Change location parameter to be optional (#31465)
+
+**NetAppFiles**
+
+* [BREAKING CHANGE] `az netappfiles volume create/update`: Remove deprecated argument `--endpoint-type`, this property is readOnly (#32395)
+
+**Network**
+
+* `az network application-gateway http-settings`: Support dedicated backend connection and certificate validation (#32332)
+* `az network application-gateway waf-policy managed-rule`: Support `Microsoft_HTTPDDoSRuleSet` rule set (#32374)
+* `az network application-gateway waf-policy`: Remove option `None` for WAF rule sensitivity (#32374)
+* `az network private-endpoint-connection`: Add provider `Microsoft.Security/privateLinks` (#32396)
+
+**Packaging**
+
+* Drop Python 3.9 support (#32381)
+
+**RDBMS**
+
+* [BREAKING CHANGE] `az postgres server/db/server-logs`: Remove single server commands (#32388)
+* [BREAKING CHANGE] `az postgres flexible-server create`: Remove default value to `--version` and remove arguments `--create-default-database` and `--database-name` (#32398)
+
+**Service Fabric**
+
+* [BREAKING CHANGE] `az sf managed-application update`: Remove argument options `--service-type-policy`, `--upgrade-replica-set-check-timeout`, `--max-porcent-unhealthy-partitions`, `--max-porcent-unhealthy-replicas`, `--max-porcent-unhealthy-services`, `--max-porcent-unhealthy-apps` to fix `--help` formatting (#31814)
+* [BREAKING CHANGE] `az sf application update`: Remove argument options `--service-type-policy`, `--upgrade-replica-set-check-timeout`, `--instance-close-duration`, `--consider-warning-as-error`, `--max-percent-unhealthy-partitions`. `--max-percent-unhealthy-replicas`, `--max-percent-unhealthy-replicas`, `--max-percent-unhealthy-deployed-applications` to fix `--help` formatting (#31814)
+
+**Storage**
+
+* `az storage account failover`: Add `Unplanned` to `--failover-type` for Planned failover GA (#32384)
+* Fix #32399: `az storage file list`: Fix not showing additional info when listing files without set protocol (#32405)
+
 2.79.0
 ++++++
 

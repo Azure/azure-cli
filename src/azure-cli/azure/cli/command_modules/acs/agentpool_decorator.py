@@ -32,7 +32,7 @@ from azure.cli.command_modules.acs._consts import (
     DecoratorEarlyExitException,
     DecoratorMode,
 )
-from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, safe_list_get
+from azure.cli.command_modules.acs._helpers import get_snapshot_by_snapshot_id, safe_list_get, process_dns_overrides
 from azure.cli.command_modules.acs._validators import extract_comma_separated_string
 from azure.cli.command_modules.acs.base_decorator import BaseAKSContext, BaseAKSModels, BaseAKSParamDict
 from azure.cli.core import AzCommandsLoader
@@ -1685,6 +1685,117 @@ class AKSAgentPoolContext(BaseAKSContext):
         """
         return self.raw_param.get('gateway_prefix_size')
 
+    def get_localdns_config(self):
+        return self.raw_param.get("localdns_config")
+
+    def get_localdns_profile(self):
+        """
+        Returns the local DNS profile dict if set, or None.
+        Only supports loading from --localdns-config (JSON file).
+        Assumes the input is always a string filename.
+        """
+        config = self.get_localdns_config()
+        if config:
+            if not isinstance(config, str) or not os.path.isfile(config):
+                raise InvalidArgumentValueError(
+                    f"{config} is not a valid file, or not accessible."
+                )
+            profile = get_file_json(config)
+            if not isinstance(profile, dict):
+                raise InvalidArgumentValueError(
+                    f"Error reading local DNS config from {config}. "
+                    "Please provide a valid JSON file."
+                )
+            return profile
+        return None
+
+    def build_localdns_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Build local DNS profile for the AgentPool object if provided via --localdns-config."""
+        localdns_profile = self.get_localdns_profile()
+        kube_dns_overrides, vnet_dns_overrides = None, None
+
+        if localdns_profile is not None:
+            def find_keys_case_insensitive(dictionary, target_keys):
+                """Find multiple keys case-insensitively and return a dict mapping target_key -> actual_key"""
+                result = {}
+                lowered_keys = {key.lower(): key for key in dictionary.keys()}
+                for target_key in target_keys:
+                    lowered_target = target_key.lower()
+                    if lowered_target in lowered_keys:
+                        result[target_key] = lowered_keys[lowered_target]
+                    else:
+                        result[target_key] = None
+                return result
+
+            def build_override(override_dict):
+                if not isinstance(override_dict, dict):
+                    raise InvalidArgumentValueError(
+                        f"Expected a dictionary for DNS override settings,"
+                        f" but got {type(override_dict).__name__}: {override_dict}"
+                    )
+                camel_to_snake_case = {
+                    "queryLogging": "query_logging",
+                    "protocol": "protocol",
+                    "forwardDestination": "forward_destination",
+                    "forwardPolicy": "forward_policy",
+                    "maxConcurrent": "max_concurrent",
+                    "cacheDurationInSeconds": "cache_duration_in_seconds",
+                    "serveStaleDurationInSeconds": "serve_stale_duration_in_seconds",
+                    "serveStale": "serve_stale",
+                }
+                valid_keys = set(camel_to_snake_case.values())
+                filtered = {}
+                for k, v in override_dict.items():
+                    if k in camel_to_snake_case:
+                        filtered[camel_to_snake_case[k]] = v
+                    elif k in valid_keys:
+                        filtered[k] = v
+                return self.models.LocalDNSOverride(**filtered)
+
+            # Build kubeDNSOverrides and vnetDNSOverrides from the localdns_profile
+            key_mappings = find_keys_case_insensitive(localdns_profile, ["kubeDNSOverrides", "vnetDNSOverrides"])
+            actual_kube_key = key_mappings["kubeDNSOverrides"]
+            if actual_kube_key:
+                logger.debug("Found kubeDNSOverrides key as: %s", actual_kube_key)
+                kube_dns_overrides = {}
+                process_dns_overrides(
+                    localdns_profile.get(actual_kube_key),
+                    kube_dns_overrides,
+                    build_override
+                )
+
+            actual_vnet_key = key_mappings["vnetDNSOverrides"]
+            if actual_vnet_key:
+                logger.debug("Found vnetDNSOverrides key as: %s", actual_vnet_key)
+                vnet_dns_overrides = {}
+                process_dns_overrides(
+                    localdns_profile.get(actual_vnet_key),
+                    vnet_dns_overrides,
+                    build_override
+                )
+
+            agentpool.local_dns_profile = self.models.LocalDNSProfile(
+                mode=localdns_profile.get("mode"),
+                kube_dns_overrides=kube_dns_overrides,
+                vnet_dns_overrides=vnet_dns_overrides,
+            )
+        return agentpool
+
+    def get_workload_runtime(self) -> Union[str, None]:
+        """Obtain the value of workload_runtime, default value is None.
+
+        :return: string or None
+        """
+        # read the original value passed by the command
+        workload_runtime = self.raw_param.get("workload_runtime", None)
+        # try to read the property value corresponding to the parameter from the `mc` object
+        if self.agentpool and self.agentpool.workload_runtime is not None:
+            workload_runtime = self.agentpool.workload_runtime
+
+        # this parameter does not need dynamic completion
+        # this parameter does not need validation
+        return workload_runtime
+
 
 class AKSAgentPoolAddDecorator:
     def __init__(
@@ -2134,6 +2245,19 @@ class AKSAgentPoolAddDecorator:
 
         return agentpool
 
+    def set_up_workload_runtime(self, agentpool: AgentPool) -> AgentPool:
+        """Set up workload runtime for the AgentPool object.
+
+        :return: the AgentPool object
+        """
+        self._ensure_agentpool(agentpool)
+
+        workload_runtime = self.context.get_workload_runtime()
+        if workload_runtime is not None:
+            agentpool.workload_runtime = workload_runtime
+
+        return agentpool
+
     def construct_agentpool_profile_default(self, bypass_restore_defaults: bool = False) -> AgentPool:
         """The overall controller used to construct the AgentPool profile by default.
 
@@ -2186,6 +2310,10 @@ class AKSAgentPoolAddDecorator:
         agentpool = self.set_up_agentpool_gateway_profile(agentpool)
         # set up virtual machines profile
         agentpool = self.set_up_virtual_machines_profile(agentpool)
+        # set up local DNS profile
+        agentpool = self.set_up_localdns_profile(agentpool)
+        # set up workload_runtime
+        agentpool = self.set_up_workload_runtime(agentpool)
         # restore defaults
         if not bypass_restore_defaults:
             agentpool = self._restore_defaults_in_agentpool(agentpool)
@@ -2226,6 +2354,11 @@ class AKSAgentPoolAddDecorator:
             if_none_match=self.context.get_if_none_match(),
             headers=self.context.get_aks_custom_headers(),
         )
+
+    def set_up_localdns_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Set up local DNS profile for the AgentPool object if provided via --localdns-config."""
+        self._ensure_agentpool(agentpool)
+        return self.context.build_localdns_profile(agentpool)
 
 
 class AKSAgentPoolUpdateDecorator:
@@ -2513,11 +2646,12 @@ class AKSAgentPoolUpdateDecorator:
         agentpool = self.update_os_sku(agentpool)
         # update fips image
         agentpool = self.update_fips_image(agentpool)
-
         # update vtpm
         agentpool = self.update_vtpm(agentpool)
         # update secure boot
         agentpool = self.update_secure_boot(agentpool)
+        # update local DNS profile
+        agentpool = self.update_localdns_profile(agentpool)
         return agentpool
 
     def update_agentpool(self, agentpool: AgentPool) -> AgentPool:
@@ -2553,3 +2687,8 @@ class AKSAgentPoolUpdateDecorator:
             if_none_match=self.context.get_if_none_match(),
             headers=self.context.get_aks_custom_headers(),
         )
+
+    def update_localdns_profile(self, agentpool: AgentPool) -> AgentPool:
+        """Update local DNS profile for the AgentPool object if provided via --localdns-config."""
+        self._ensure_agentpool(agentpool)
+        return self.context.build_localdns_profile(agentpool)

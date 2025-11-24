@@ -6,7 +6,7 @@
 from azure.cli.core.commands import CliCommandType
 from azure.cli.command_modules.cognitiveservices._client_factory import cf_accounts, cf_resource_skus, \
     cf_deleted_accounts, cf_deployments, cf_commitment_plans, cf_commitment_tiers, cf_models, cf_usages, \
-    cf_account_connections, cf_projects, cf_project_connections
+    cf_ai_projects, cf_account_connections, cf_projects, cf_project_connections
 
 
 def load_command_table(self, _):
@@ -119,6 +119,15 @@ def load_command_table(self, _):
     with self.command_group('cognitiveservices usage', usages_type) as g:
         g.command('list', 'list')
 
+    with self.command_group('cognitiveservices agent', client_factory=cf_ai_projects, is_preview=True) as g:
+        g.custom_command('update', 'agent_update')
+        g.custom_command('stop', 'agent_stop')
+        g.custom_command('start', 'agent_start')
+        g.custom_command('delete-deployment', 'agent_delete_deployment')
+        g.custom_command('delete', 'agent_delete')
+        g.custom_command('list', 'agent_list')
+        g.custom_command('list-versions', 'agent_versions_list')
+        g.custom_show_command('show', 'agent_show')
     with self.command_group(
             'cognitiveservices account project', projects_type,
             client_factory=cf_projects) as g:

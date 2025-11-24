@@ -62,6 +62,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_LOAD_BALANCER_BACKEND_POOL_TYPE_NODE_IP_CONFIGURATION,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_EXTERNAL,
     CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL,
+    CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
     CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_READONLY,
     CONST_NRG_LOCKDOWN_RESTRICTION_LEVEL_UNRESTRICTED,
     CONST_ARTIFACT_SOURCE_DIRECT,
@@ -73,7 +74,8 @@ from azure.cli.command_modules.acs._consts import (
     CONST_NODE_PROVISIONING_MODE_MANUAL,
     CONST_NODE_PROVISIONING_MODE_AUTO,
     CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE,
-    CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO)
+    CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO,
+    CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION)
 from azure.cli.command_modules.acs.azurecontainerstorage._consts import (
     CONST_ACSTOR_ALL,
     CONST_DISK_TYPE_EPHEMERAL_VOLUME_ONLY,
@@ -125,6 +127,7 @@ from azure.cli.command_modules.acs._validators import (
     validate_allowed_host_ports, validate_application_security_groups,
     validate_node_public_ip_tags,
     validate_disable_windows_outbound_nat,
+    validate_asm_egress_name,
     validate_crg_id, validate_apiserver_subnet_id,
     validate_azure_service_mesh_revision,
     validate_message_of_the_day,
@@ -356,6 +359,10 @@ app_routing_nginx_configs = [
     CONST_APP_ROUTING_NONE_NGINX
 ]
 
+workload_runtime_types = [
+    CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION,
+]
+
 
 def load_arguments(self, _):
     acr_arg_type = CLIArgumentType(metavar='ACR_NAME_OR_RESOURCE_ID')
@@ -536,6 +543,7 @@ def load_arguments(self, _):
         c.argument('gpu_instance_profile', arg_type=get_enum_type(gpu_instance_profiles))
         c.argument('nodepool_allowed_host_ports', nargs='+', validator=validate_allowed_host_ports, help="allowed host ports for agentpool")
         c.argument('nodepool_asg_ids', nargs='+', validator=validate_application_security_groups, help="application security groups for agentpool")
+        c.argument('workload_runtime', arg_type=get_enum_type(workload_runtime_types), help="The workload runtime to use on the node pool.")
         c.argument("message_of_the_day")
 
         # azure monitor profile
@@ -1046,6 +1054,8 @@ def load_arguments(self, _):
         c.argument("if_none_match")
         c.argument('gpu_driver', arg_type=get_enum_type(gpu_driver_install_modes))
         c.argument("gateway_prefix_size", type=int, validator=validate_gateway_prefix_size)
+        c.argument('localdns_config', help='Path to a JSON file to configure the local DNS profile for a new nodepool.')
+        c.argument('workload_runtime', arg_type=get_enum_type(workload_runtime_types), help="The workload runtime to use on the nodepool.")
 
     with self.argument_context('aks nodepool update', resource_type=ResourceType.MGMT_CONTAINERSERVICE, operation_group='agent_pools') as c:
         c.argument('enable_cluster_autoscaler', options_list=[
@@ -1077,6 +1087,7 @@ def load_arguments(self, _):
         c.argument('disable_secure_boot', action='store_true')
         c.argument("if_match")
         c.argument("if_none_match")
+        c.argument('localdns_config', help='Path to a JSON file to configure the local DNS profile for a new nodepool.')
 
     with self.argument_context('aks nodepool upgrade') as c:
         c.argument('max_surge', validator=validate_max_surge)
@@ -1160,6 +1171,39 @@ def load_arguments(self, _):
     with self.argument_context('aks mesh disable-ingress-gateway') as c:
         c.argument('ingress_gateway_type',
                    arg_type=get_enum_type(ingress_gateway_types))
+
+    with self.argument_context("aks mesh enable-egress-gateway") as c:
+        c.argument(
+            "istio_egressgateway_name",
+            validator=validate_asm_egress_name,
+            required=True,
+            options_list=["--istio-egressgateway-name", "--istio-eg-gtw-name"]
+        )
+        c.argument(
+            "istio_egressgateway_namespace",
+            required=False,
+            default=CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
+            options_list=["--istio-egressgateway-namespace", "--istio-eg-gtw-ns"]
+        )
+        c.argument(
+            "gateway_configuration_name",
+            required=True,
+            options_list=["--gateway-configuration-name", "--gtw-config-name"]
+        )
+
+    with self.argument_context("aks mesh disable-egress-gateway") as c:
+        c.argument(
+            "istio_egressgateway_name",
+            validator=validate_asm_egress_name,
+            required=True,
+            options_list=["--istio-egressgateway-name", "--istio-eg-gtw-name"]
+        )
+        c.argument(
+            "istio_egressgateway_namespace",
+            required=False,
+            default=CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
+            options_list=["--istio-egressgateway-namespace", "--istio-eg-gtw-ns"]
+        )
 
     with self.argument_context('aks mesh enable') as c:
         c.argument('revision', validator=validate_azure_service_mesh_revision)

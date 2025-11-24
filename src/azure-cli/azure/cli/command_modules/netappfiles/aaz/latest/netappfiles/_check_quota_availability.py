@@ -21,9 +21,9 @@ class CheckQuotaAvailability(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/checkquotaavailability", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.netapp/locations/{}/checkquotaavailability", "2025-09-01"],
         ]
     }
 
@@ -68,7 +68,7 @@ class CheckQuotaAvailability(AAZCommand):
             arg_group="Body",
             help="Resource type used for verification.",
             required=True,
-            enum={"Microsoft.NetApp/netAppAccounts": "Microsoft.NetApp/netAppAccounts", "Microsoft.NetApp/netAppAccounts/capacityPools": "Microsoft.NetApp/netAppAccounts/capacityPools", "Microsoft.NetApp/netAppAccounts/capacityPools/volumes": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes", "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots"},
+            enum={"Microsoft.NetApp/netAppAccounts": "Microsoft.NetApp/netAppAccounts", "Microsoft.NetApp/netAppAccounts/backupVaults/backups": "Microsoft.NetApp/netAppAccounts/backupVaults/backups", "Microsoft.NetApp/netAppAccounts/capacityPools": "Microsoft.NetApp/netAppAccounts/capacityPools", "Microsoft.NetApp/netAppAccounts/capacityPools/volumes": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes", "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/backups": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/backups", "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots": "Microsoft.NetApp/netAppAccounts/capacityPools/volumes/snapshots"},
         )
         return cls._args_schema
 
@@ -133,7 +133,7 @@ class CheckQuotaAvailability(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }

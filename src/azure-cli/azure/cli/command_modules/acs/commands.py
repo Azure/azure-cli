@@ -278,8 +278,17 @@ def load_command_table(self, _):
             'aks_mesh_enable_ingress_gateway',
             supports_no_wait=True)
         g.custom_command(
+            "enable-egress-gateway",
+            "aks_mesh_enable_egress_gateway",
+            supports_no_wait=True)
+        g.custom_command(
             'disable-ingress-gateway',
             'aks_mesh_disable_ingress_gateway',
+            supports_no_wait=True,
+            confirmation=True)
+        g.custom_command(
+            "disable-egress-gateway",
+            "aks_mesh_disable_egress_gateway",
             supports_no_wait=True,
             confirmation=True)
         g.custom_command(

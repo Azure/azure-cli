@@ -63,13 +63,12 @@ def flexible_server_create(cmd, client,
                            storage_gb=None, version=None, microsoft_entra_auth=None,
                            admin_name=None, admin_id=None, admin_type=None,
                            password_auth=None, administrator_login=None, administrator_login_password=None,
-                           tags=None, database_name=None,
-                           subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
+                           tags=None, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
                            high_availability=None, zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, create_default_db='Enabled', create_cluster=None, cluster_size=None, yes=False):
+                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None, yes=False):
 
     if not check_resource_group(resource_group_name):
         resource_group_name = None
@@ -87,21 +86,26 @@ def flexible_server_create(cmd, client,
 
     server_name = server_name.lower()
 
-    if sku_name is None:
-        # set sku_name from capability API
+    if (sku_name is None) or (version is None):
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-        tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
-        try:
-            sku_info = list_location_capability_info['sku_info']
-            skus = list(get_postgres_skus(sku_info, tier.lower()))
-            skus = sorted(skus, key=cmp_to_key(compare_sku_names))
-            sku_name = skus[0]
-        except:
-            raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
+
+        # set sku_name from capability API
+        if sku_name is None:
+            tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
+            try:
+                sku_info = list_location_capability_info['sku_info']
+                skus = list(get_postgres_skus(sku_info, tier.lower()))
+                skus = sorted(skus, key=cmp_to_key(compare_sku_names))
+                sku_name = skus[0]
+            except:
+                raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
+        # default to the latest version
+        if version is None:
+            supported_server_versions = sorted(list_location_capability_info['supported_server_versions'])
+            version = supported_server_versions[-1]
 
     pg_arguments_validator(db_context,
                            server_name=server_name,
-                           database_name=database_name,
                            location=location,
                            tier=tier, sku_name=sku_name,
                            storage_gb=storage_gb,
@@ -197,13 +201,6 @@ def flexible_server_create(cmd, client,
     if start_ip != -1 and end_ip != -1:
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
-    # Create database if it does not exist
-    if (database_name is not None or (create_default_db and create_default_db.lower() == 'enabled') and create_cluster != 'ElasticCluster'):
-        db_name = database_name if database_name else DEFAULT_DB_NAME
-        _create_database(db_context, cmd, resource_group_name, server_name, db_name)
-    else:
-        db_name = POSTGRES_DB_NAME
-
     user = server_result.administrator_login if is_password_auth_enabled else '<user>'
     password = administrator_login_password if is_password_auth_enabled else '<password>'
     admin = quote(admin_name) if admin_name else '<admin>'
@@ -220,12 +217,12 @@ def flexible_server_create(cmd, client,
                        server_name, resource_group_name)
     logger.warning('Try using \'az postgres flexible-server connect\' command to test out connection.')
 
-    _update_local_contexts(cmd, server_name, resource_group_name, db_name, location, user)
+    _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
     return _form_response(user, sku, loc, server_id, host, version, password,
-                          _create_postgresql_connection_string(host, user, password, db_name),
-                          db_name, firewall_id, subnet_id, is_password_auth_enabled, is_microsoft_entra_auth_enabled, admin_name,
-                          _create_microsoft_entra_connection_string(host, db_name, admin))
+                          _create_postgresql_connection_string(host, user, password),
+                          firewall_id, subnet_id, is_password_auth_enabled, is_microsoft_entra_auth_enabled, admin_name,
+                          _create_microsoft_entra_connection_string(host, POSTGRES_DB_NAME, admin))
 # endregion create without args
 
 
@@ -1808,7 +1805,7 @@ def _create_postgresql_connection_strings(host, user, password, database, port):
     return result
 
 
-def _create_postgresql_connection_string(host, user, password, database):
+def _create_postgresql_connection_string(host, user, password, database=POSTGRES_DB_NAME):
     connection_kwargs = {
         'user': user if user is not None else '{user}',
         'host': host,
@@ -1818,7 +1815,7 @@ def _create_postgresql_connection_string(host, user, password, database):
     return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
 
-def _create_microsoft_entra_connection_string(host, database, admin='<admin>'):
+def _create_microsoft_entra_connection_string(host, database=POSTGRES_DB_NAME, admin='<admin>'):
     connection_kwargs = {
         'user': admin,
         'host': host,
@@ -1827,7 +1824,7 @@ def _create_microsoft_entra_connection_string(host, database, admin='<admin>'):
     return 'postgresql://{user}:<access-token>@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
 
-def _form_response(username, sku, location, server_id, host, version, password, connection_string, database_name, firewall_id=None,
+def _form_response(username, sku, location, server_id, host, version, password, connection_string, firewall_id=None,
                    subnet_id=None, is_password_auth=True, is_microsoft_entra_auth_enabled=False, microsoft_admin=None, connection_string_microsoft_entra=None):
 
     output = {
@@ -1838,7 +1835,7 @@ def _form_response(username, sku, location, server_id, host, version, password, 
         'location': location,
         'id': server_id,
         'version': version,
-        'databaseName': database_name,
+        'databaseName': POSTGRES_DB_NAME,
         'connectionString': connection_string
     }
     if is_microsoft_entra_auth_enabled:
@@ -1851,7 +1848,7 @@ def _form_response(username, sku, location, server_id, host, version, password, 
     return output
 
 
-def _update_local_contexts(cmd, server_name, resource_group_name, database_name, location, user):
+def _update_local_contexts(cmd, server_name, resource_group_name, location, user):
     validate_resource_group(resource_group_name)
 
     if cmd.cli_ctx.local_context.is_on:
@@ -1860,7 +1857,7 @@ def _update_local_contexts(cmd, server_name, resource_group_name, database_name,
         cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'administrator_login',
                                       user)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'database_name',
-                                      database_name)  # Setting the server name in the local context
+                                      POSTGRES_DB_NAME)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set([ALL], 'location',
                                       location)  # Setting the location in the local context
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)

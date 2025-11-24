@@ -117,6 +117,10 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
                            self.check('metadata[0].name', 'a'),
                            self.check('metadata[1].value', 'd')])
 
+        # test that deprecated --target-communication for pool reset
+        with self.assertRaises(SystemExit):
+            self.batch_cmd('batch pool reset --pool-id {p_id} --target-communication classic')
+
         self.batch_cmd('batch pool delete --pool-id {p_id} --yes')
 
     @ResourceGroupPreparer()
@@ -540,11 +544,18 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         # test create pool using parameters
         self.batch_cmd('batch pool create --id {pool_i} --vm-size Standard_DS1_v2 '
                        '--image Canonical:UbuntuServer:18.04-LTS '
-                       '--node-agent-sku-id "batch.node.ubuntu 18.04" '
-                       '--target-communication classic')
-        self.batch_cmd('batch pool show --pool-id {pool_i}').assert_with_checks([
-            self.check('targetNodeCommunicationMode', 'classic')
-        ])
+                       '--node-agent-sku-id "batch.node.ubuntu 18.04"')
+        
+        # test that deprecated --target-communication argument causes argparse error
+        with self.assertRaises(SystemExit):
+            self.batch_cmd('batch pool create --id test-deprecated-arg --vm-size Standard_DS1_v2 '
+                           '--image Canonical:UbuntuServer:18.04-LTS '
+                           '--node-agent-sku-id "batch.node.ubuntu 18.04" '
+                           '--target-communication classic')
+        
+        # test that the deprecated targetNodeCommunicationMode property is not included in pool show output
+        pool_result = self.batch_cmd('batch pool show --pool-id {pool_i}').get_output_in_json()
+        self.assertNotIn('targetNodeCommunicationMode', pool_result, 'targetNodeCommunicationMode should not be present in pool output')
 
         # test create pool with missing parameters
         with self.assertRaises(SystemExit):
@@ -634,14 +645,12 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         updated = self.batch_cmd('batch pool show --pool-id {pool_j} --select "startTask"').get_output_in_json()
         self.assertNotEqual(current['startTask']['commandLine'], updated['startTask']['commandLine'])
 
-        # test patch pool with target-node-communication-mode
-        self.batch_cmd('batch pool set --pool-id {pool_j} --target-communication classic')
-        self.batch_cmd('batch pool show --pool-id {pool_j}').assert_with_checks([
-            self.check('targetNodeCommunicationMode', 'classic')
-        ])
-
         # test list node agent skus
         self.batch_cmd('batch pool supported-images list')
+
+        # test deprecated --target-communication for pool set
+        with self.assertRaises(SystemExit):
+            self.batch_cmd('batch pool set --pool-id {pool_i} --target-communication classic')
 
         # test app package reference
         self.batch_cmd('batch pool set --pool-id {pool_i} --application-package-references does-not-exist',
@@ -657,6 +666,9 @@ class BatchDataPlaneScenarioTests(BatchScenarioMixin, ScenarioTest):
         node_list = self.batch_cmd("batch node list --pool-id {pool_i}").get_output_in_json()
         self.assertEqual(len(node_list), 1)
         self.kwargs.update({'node1': node_list[0]['id']})
+
+        # test that deprecated currentNodeCommunicationMode property is not present in pool output
+        self.assertNotIn('currentNodeCommunicationMode', node_list, 'currentNodeCommunicationMode should not be present in pool output')
 
         # node show
         self.batch_cmd('batch node show --pool-id {pool_i} --node-id {node1}').assert_with_checks([

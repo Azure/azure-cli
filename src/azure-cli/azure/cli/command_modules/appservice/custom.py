@@ -6477,7 +6477,7 @@ class _FlexFunctionAppStackRuntimeHelper:
 
     def get_flex_raw_function_app_stacks(self, cmd, location, runtime):
         stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?' \
-                         'api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}'
+                         'api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}&sku=FC1'
         if runtime == "dotnet-isolated":
             runtime = "dotnet"
         request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime)

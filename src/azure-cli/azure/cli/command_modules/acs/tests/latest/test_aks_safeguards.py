@@ -56,31 +56,34 @@ class AksSafeguardsScenario(ScenarioTest):
             self.check('agentPoolProfiles[0].vmSize', '{vm_size}'),
         ]).get_output_in_json()
 
-        # Enable safeguards
-        self.cmd(f'aks safeguards create -c {aks_cluster["id"]} --level Warn', checks=[
+        # Enable safeguards with PSS level using -c/-g syntax
+        self.cmd('aks safeguards create -c {aks_name} -g {rg} --level Warn --pss-level Baseline', checks=[
             self.check('properties.level', 'Warn'),
+            self.check('properties.podSecurityStandardsLevel', 'Baseline'),
         ])
 
-        # Get Safeguards
-        self.cmd(f'aks safeguards show -c {aks_cluster["id"]}', checks=[
+        # Get Safeguards using -c/-g syntax
+        self.cmd('aks safeguards show -c {aks_name} -g {rg}', checks=[
             self.check('properties.level', 'Warn'),
+            self.check('properties.podSecurityStandardsLevel', 'Baseline'),
             self.check('properties.excludedNamespaces', None),
         ])
 
-        self.cmd(f'aks safeguards list -c {aks_cluster["id"]}', checks=[
+        self.cmd('aks safeguards list -c {aks_name} -g {rg}', checks=[
             self.check('length(@)', 1),
             self.check('[0].properties.level', 'Warn'),
+            self.check('[0].properties.podSecurityStandardsLevel', 'Baseline'),
             self.check('[0].properties.excludedNamespaces', None),
         ])
 
-        # Change excluded namespaces
-        self.cmd(f'aks safeguards update -c {aks_cluster["id"]} --excluded-namespaces ns1', checks=[
+        # Change excluded namespaces and PSS level
+        self.cmd('aks safeguards update -c {aks_name} -g {rg} --excluded-namespaces ns1 --pss-level Restricted', checks=[
             self.check('properties.excludedNamespaces[0]', 'ns1'),
+            self.check('properties.podSecurityStandardsLevel', 'Restricted'),
         ])
 
-        # Disable Safeguards
-
-        self.cmd(f'aks safeguards delete -c {aks_cluster["id"]} --yes')
+        # Disable Safeguards using -c/-g syntax
+        self.cmd('aks safeguards delete -c {aks_name} -g {rg} --yes')
 
         # delete the aks cluster
         self.cmd('aks delete -g {rg} -n {aks_name} --yes --no-wait')

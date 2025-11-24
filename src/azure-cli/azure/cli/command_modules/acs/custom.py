@@ -43,7 +43,7 @@ import colorama
 import requests
 import yaml
 from azure.cli.command_modules.acs._client_factory import (
-    cf_agent_pools
+    cf_agent_pools,
 )
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
@@ -126,6 +126,8 @@ logger = get_logger(__name__)
 
 
 def _validate_and_set_managed_cluster_argument(ctx):
+    from azure.mgmt.core.tools import is_valid_resource_id
+
     args = ctx.args
     has_managed_cluster = has_value(args.managed_cluster)
     has_rg_and_cluster = has_value(
@@ -138,7 +140,25 @@ def _validate_and_set_managed_cluster_argument(ctx):
 
     if not has_managed_cluster:
         # pylint: disable=line-too-long
-        args.managed_cluster = f"subscriptions/{ctx.subscription_id}/resourceGroups/{args.resource_group}/providers/Microsoft.ContainerService/managedClusters/{args.cluster_name}"
+        args.managed_cluster = f"/subscriptions/{ctx.subscription_id}/resourceGroups/{args.resource_group}/providers/Microsoft.ContainerService/managedClusters/{args.cluster_name}"
+    else:
+        # If managed_cluster is provided but is not a full resource ID, treat it as a cluster name
+        # and require resource_group to be provided
+        managed_cluster_value = args.managed_cluster.to_serialized_data()
+
+        # Normalize resource ID: add leading slash if missing for backward compatibility
+        if managed_cluster_value and not managed_cluster_value.startswith('/'):
+            managed_cluster_value = f"/{managed_cluster_value}"
+
+        if not is_valid_resource_id(managed_cluster_value):
+            # It's just a cluster name, need resource group
+            if not has_value(args.resource_group):
+                raise ArgumentUsageError(
+                    "When providing cluster name via -c/--cluster, you must also provide -g/--resource-group.")
+            # Build the full resource ID
+            managed_cluster_value = f"/subscriptions/{ctx.subscription_id}/resourceGroups/{args.resource_group}/providers/Microsoft.ContainerService/managedClusters/{managed_cluster_value.lstrip('/')}"
+
+        args.managed_cluster = managed_cluster_value
 
 
 def _add_resource_group_cluster_name_subscription_id_args(_args_schema):
@@ -154,12 +174,11 @@ def _add_resource_group_cluster_name_subscription_id_args(_args_schema):
         help="The name of the Managed Cluster.You may provide either 'managed_cluster' or both 'resource_group' and name', but not both.",
         required=False,
     )
-    _args_schema.managed_cluster.required = False
+    _args_schema.managed_cluster._required = False  # pylint: disable=protected-access
     return _args_schema
 
 
 class AKSSafeguardsShowCustom(Show):
-
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
 
@@ -172,7 +191,6 @@ class AKSSafeguardsShowCustom(Show):
 
 
 class AKSSafeguardsDeleteCustom(Delete):
-
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
 
@@ -183,7 +201,6 @@ class AKSSafeguardsDeleteCustom(Delete):
 
 
 class AKSSafeguardsUpdateCustom(Update):
-
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
 
@@ -194,18 +211,51 @@ class AKSSafeguardsUpdateCustom(Update):
 
 
 class AKSSafeguardsCreateCustom(Create):
-
-    def pre_operations(self):
-        _validate_and_set_managed_cluster_argument(self.ctx)
-
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         _args_schema = super()._build_arguments_schema(*args, **kwargs)
         return _add_resource_group_cluster_name_subscription_id_args(_args_schema)
 
+    def pre_operations(self):
+        from azure.cli.core.util import send_raw_request
+        from azure.cli.core.azclierror import HTTPError
+
+        # Validate and set managed cluster argument
+        _validate_and_set_managed_cluster_argument(self.ctx)
+
+        # Check if Deployment Safeguards already exists before attempting create
+        resource_uri = self.ctx.args.managed_cluster.to_serialized_data()
+
+        # Validate resource_uri format to prevent URL injection
+        if not resource_uri.startswith('/subscriptions/'):
+            raise CLIError(f"Invalid managed cluster resource ID format: {resource_uri}")
+
+        # Construct the GET URL to check if resource already exists
+        api_version = self._aaz_info['version']
+        safeguards_url = f"https://management.azure.com{resource_uri}/providers/Microsoft.ContainerService/deploymentSafeguards/default?api-version={api_version}"
+
+        # Check if resource already exists
+        resource_exists = False
+        try:
+            response = send_raw_request(self.ctx.cli_ctx, "GET", safeguards_url)
+            if response.status_code == 200:
+                resource_exists = True
+        except HTTPError as ex:
+            # 404 means resource doesn't exist, which is expected for create
+            if ex.response.status_code != 404:
+                # Re-raise if it's not a 404 - could be auth issue, network problem, etc.
+                raise
+
+        # If resource exists, block the create
+        if resource_exists:
+            raise CLIError(
+                "Deployment Safeguards instance already exists for this cluster. "
+                "Please use 'az aks safeguards update' to modify the configuration, "
+                "or 'az aks safeguards delete' to remove it before creating a new one."
+            )
+
 
 class AKSSafeguardsListCustom(List):
-
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
 
@@ -216,7 +266,6 @@ class AKSSafeguardsListCustom(List):
 
 
 class AKSSafeguardsWaitCustom(Wait):
-
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
 
@@ -945,6 +994,7 @@ def aks_create(
     crg_id=None,
     gpu_instance_profile=None,
     message_of_the_day=None,
+    workload_runtime=None,
     # azure service mesh
     enable_azure_service_mesh=None,
     revision=None,
@@ -1279,14 +1329,16 @@ def aks_upgrade(cmd,
         upgrade_all = True
     else:
         if not control_plane_only:
-            msg = ("Since control-plane-only argument is not specified, this will upgrade the control plane "
+            msg = ("Since --control-plane-only parameter is not specified, this will upgrade the control plane "
                    "AND all nodepools to version {}. Continue?").format(instance.kubernetes_version)
             if not yes and not prompt_y_n(msg, default="n"):
                 return None
             upgrade_all = True
         else:
-            msg = ("Since control-plane-only argument is specified, this will upgrade only the control plane to {}. "
-                   "Node pool will not change. Continue?").format(instance.kubernetes_version)
+            msg = ("Since --control-plane-only parameter is specified, this will upgrade only the kubernetes version of the control plane to {}. "
+                   "Kubernetes versions of the node pools will remain unchanged, "
+                   "but node image version may be upgraded if there has been cluster config change that requires VM reimage. "
+                   "Continue?").format(instance.kubernetes_version)
             if not yes and not prompt_y_n(msg, default="n"):
                 return None
 
@@ -1351,7 +1403,7 @@ def _update_upgrade_settings(cmd, instance,
                     f"{upgrade_override_until} is not a valid datatime format."
                 )
         elif force_upgrade:
-            default_extended_until = datetime.datetime.utcnow() + datetime.timedelta(days=3)
+            default_extended_until = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=3)
             if existing_until is None or existing_until.timestamp() < default_extended_until.timestamp():
                 instance.upgrade_settings.override_settings.until = default_extended_until
     return instance
@@ -2855,6 +2907,7 @@ def aks_agentpool_add(
     asg_ids=None,
     node_public_ip_tags=None,
     disable_windows_outbound_nat=False,
+    workload_runtime=None,
     # trusted launch
     enable_vtpm=False,
     enable_secure_boot=False,
@@ -2865,6 +2918,8 @@ def aks_agentpool_add(
     gpu_driver=None,
     # static egress gateway - gateway-mode pool
     gateway_prefix_size=None,
+    # local DNS
+    localdns_config=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -2925,6 +2980,8 @@ def aks_agentpool_update(
     # etag headers
     if_match=None,
     if_none_match=None,
+    # local DNS
+    localdns_config=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()
@@ -3596,6 +3653,44 @@ def aks_mesh_disable_ingress_gateway(
         ingress_gateway_type=ingress_gateway_type)
 
 
+def aks_mesh_enable_egress_gateway(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        istio_egressgateway_name,
+        istio_egressgateway_namespace,
+        gateway_configuration_name,
+):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        enable_egress_gateway=True,
+        istio_egressgateway_name=istio_egressgateway_name,
+        istio_egressgateway_namespace=istio_egressgateway_namespace,
+        gateway_configuration_name=gateway_configuration_name)
+
+
+def aks_mesh_disable_egress_gateway(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        istio_egressgateway_name,
+        istio_egressgateway_namespace,
+):
+    return _aks_mesh_update(
+        cmd,
+        client,
+        resource_group_name,
+        name,
+        istio_egressgateway_name=istio_egressgateway_name,
+        istio_egressgateway_namespace=istio_egressgateway_namespace,
+        disable_egress_gateway=True)
+
+
 def aks_mesh_get_revisions(
         cmd,
         client,
@@ -3718,6 +3813,11 @@ def _aks_mesh_update(
         enable_ingress_gateway=None,
         disable_ingress_gateway=None,
         ingress_gateway_type=None,
+        enable_egress_gateway=None,
+        disable_egress_gateway=None,
+        istio_egressgateway_name=None,
+        istio_egressgateway_namespace=None,
+        gateway_configuration_name=None,
         revision=None,
         yes=False,
         mesh_upgrade_command=None,

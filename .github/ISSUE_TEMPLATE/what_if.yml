@@ -1,0 +1,86 @@
+name: "What-If Feature Issue"
+description: Report issues or request enhancements for Azure CLI What-If feature
+labels: ["what-if"]
+body:
+  - type: markdown
+    id: intro
+    attributes:
+      value: |
+        Thank you for reporting an issue related to preview of changes (--what-if) or export to Bicep (--export-bicep) with az cli! Please provide as much detail as possible.
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue Type
+      description: What type of issue are you reporting?
+      options:
+        - Bug Report
+        - Feature Request
+        - Documentation Issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Provide a clear description of the issue or feature request
+      placeholder: Describe what happened or what you'd like to see
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command or Script
+      description: Provide the command or script that helps reproducing or demonstrate the issue
+      placeholder: |
+        - az vm create --what-if --export-bicep
+        - N/A if not applicable
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: |
+        - Describe the expected outcome
+        - N/A if not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: |
+        - Describe what actually occurred
+        - N/A if not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Provide environment details
+      placeholder: |
+        - OS: Windows 11 / Ubuntu 22.04 / macOS 14
+        - Tool Version: Azure CLI 2.80.0
+        - Python Version: 3.12.10
+        - N/A if not applicable
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots, or logs
+      placeholder: Any additional information that might be helpful
+    validations:
+      required: false
