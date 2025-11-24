@@ -1280,6 +1280,7 @@ def roughly_parse_command(args):
             break
     return ' '.join(nouns).lower()
 
+# @TODO: add unit test
 def roughly_parse_command_with_casing(args):
     # Roughly parse the command part: <az VM create> --name vm1
     # Similar to knack.invocation.CommandInvoker._rudimentary_get_command, but preserves original casing

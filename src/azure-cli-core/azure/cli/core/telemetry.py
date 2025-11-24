@@ -52,6 +52,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.extension_management_detail = None
         self.raw_command = None
         self.command_preserve_casing = None
+        self.cmd_idx_rebuild_triggered = False
         self.show_survey_message = False
         self.region_input = None
         self.region_identified = None
@@ -209,6 +210,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'OutputType', self.output_type)
         set_custom_properties(result, 'RawCommand', self.raw_command)
         set_custom_properties(result, 'CommandPreserveCasing', self.command_preserve_casing or '')
+        set_custom_properties(result, 'CmdIdxRebuildTriggered', self.cmd_idx_rebuild_triggered)
         set_custom_properties(result, 'Params', ','.join(self.parameters or []))
         set_custom_properties(result, 'PythonVersion', platform.python_version())
         set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
@@ -437,6 +439,9 @@ def set_extension_management_detail(ext_name, ext_version):
     content = '{}@{}'.format(ext_name, ext_version)
     _session.extension_management_detail = content[:512]
 
+@decorators.suppress_all_exceptions()
+def set_command_index_rebuild_triggered(cmd_idx_rebuild_triggered=False):
+    _session.cmd_idx_rebuild_triggered = cmd_idx_rebuild_triggered
 
 @decorators.suppress_all_exceptions()
 def set_command_details(command, output_type=None, parameters=None, extension_name=None, extension_version=None, command_preserve_casing=None):
