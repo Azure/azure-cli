@@ -2208,7 +2208,8 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network public-ip create '
                  '--resource-group {rg} '
                  '--name {public-ip-name} '
-                 '--sku Standard')
+                 '--sku Standard '
+                 '--ip-tags FirstPartyUsage=/NonProd')
 
         self.cmd('network vnet create '
                  '--resource-group {rg} '
@@ -2281,7 +2282,8 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
         self.cmd('network public-ip create '
                  '--resource-group {rg} '
                  '--name {public-ip-name} '
-                 '--sku Standard')
+                 '--sku Standard '
+                 '--ip-tags FirstPartyUsage=/NonProd')
 
         self.cmd('network vnet create '
                  '--resource-group {rg} '
