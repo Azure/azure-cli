@@ -13,7 +13,6 @@ from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
                                                           cf_log_analytics_data_plane,
                                                           cf_capacity_reservation_groups, cf_capacity_reservations,
-                                                          cf_restore_point,
                                                           cf_community_gallery)
 from azure.cli.command_modules.vm._format import (
     transform_ip_addresses, transform_vm, transform_vm_create_output, transform_vm_usage_list, transform_vm_list,
@@ -195,7 +194,6 @@ def load_command_table(self, _):
 
     restore_point = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#RestorePointsOperations.{}',
-        client_factory=cf_restore_point
     )
 
     restore_point_collection = CliCommandType(
@@ -309,7 +307,7 @@ def load_command_table(self, _):
         g.custom_command('restart', 'restart_vm', supports_no_wait=True)
         g.custom_show_command('show', 'show_vm', table_transformer=transform_vm)
         g.command('stop', 'begin_power_off', supports_no_wait=True, validator=process_vm_vmss_stop)
-        g.generic_update_command('update', getter_name='get_vm_to_update', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
+        g.generic_update_command('update', getter_name='get_vm_to_update_by_aaz', setter_name='update_vm', setter_type=compute_custom, command_type=compute_custom, supports_no_wait=True, validator=process_vm_update_namespace)
         g.wait_command('wait', getter_name='get_instance_view', getter_type=compute_custom)
         g.custom_command('auto-shutdown', 'auto_shutdown_vm')
         g.custom_command('list-sizes', 'list_vm_sizes', deprecate_info=g.deprecate(redirect='az vm list-skus'))
@@ -425,7 +423,7 @@ def load_command_table(self, _):
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
         g.custom_show_command('show', 'get_vmss', table_transformer=get_vmss_table_output_transformer(self, False))
         g.custom_command('stop', 'stop_vmss', supports_no_wait=True, validator=process_vm_vmss_stop)
-        g.generic_update_command('update', getter_name='get_vmss_modified', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
+        g.generic_update_command('update', getter_name='get_vmss_modified_by_aaz', setter_name='update_vmss', supports_no_wait=True, command_type=compute_custom, validator=validate_vmss_update_namespace)
         g.custom_command('update-instances', 'update_vmss_instances', supports_no_wait=True)
         g.wait_command('wait', getter_name='get_vmss', getter_type=compute_custom)
         g.custom_command('set-orchestration-service-state', 'set_orchestration_service_state', supports_no_wait=True)
@@ -556,7 +554,7 @@ def load_command_table(self, _):
         self.command_table['capacity reservation update'] = CapacityReservationUpdate(loader=self)
         self.command_table['capacity reservation show'] = CapacityReservationShow(loader=self)
 
-    with self.command_group('restore-point', restore_point, client_factory=cf_restore_point, min_api='2021-03-01') as g:
+    with self.command_group('restore-point', restore_point) as g:
         g.custom_show_command('show', 'restore_point_show')
         g.custom_command('create', 'restore_point_create', supports_no_wait=True)
         g.wait_command('wait')

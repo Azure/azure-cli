@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.79.0"
+VERSION = "2.80.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -42,7 +42,6 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
@@ -53,6 +52,7 @@ CLASSIFIERS = [
 DEPENDENCIES = [
     "antlr4-python3-runtime~=4.13.1",
     'azure-appconfiguration~=1.7.1',
+    'azure-ai-projects~=1.0.0',
     'azure-batch==15.0.0b1',
     'azure-cli-core=={}'.format(VERSION),
     'azure-cosmos~=3.0,>=3.0.2',
@@ -74,11 +74,11 @@ DEPENDENCIES = [
     'azure-mgmt-billing==6.0.0',
     'azure-mgmt-botservice~=2.0.0b3',
     'azure-mgmt-cdn==12.0.0',
-    'azure-mgmt-cognitiveservices~=13.7.0',
+    'azure-mgmt-cognitiveservices~=14.1.0',
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==14.1.0b1',
-    'azure-mgmt-containerservice~=40.0.0',
+    'azure-mgmt-containerservice~=40.1.0',
     'azure-mgmt-cosmosdb==9.8.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
@@ -180,7 +180,7 @@ setup(
     ],
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
-    python_requires='>=3.9.0',
+    python_requires='>=3.10.0',
     package_data={
         'azure.cli.command_modules.acr': ['*.json'],
         'azure.cli.command_modules.botservice': ['*.json', '*.config'],

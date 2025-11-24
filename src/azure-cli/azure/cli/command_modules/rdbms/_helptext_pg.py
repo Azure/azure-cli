@@ -9,6 +9,11 @@ from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 
+helps['postgres'] = """
+type: group
+short-summary: Manage Azure Database for PostgreSQL.
+"""
+
 helps['postgres flexible-server'] = """
 type: group
 short-summary: Manage Azure Database for PostgreSQL Flexible Servers.

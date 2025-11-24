@@ -1254,6 +1254,7 @@ def load_arguments(self, _):
             c.argument('wire_server_access_control_profile_reference_id', options_list=['--wire-server-access-control-profile-reference-id', '--wire-server-profile-id'], min_api='2024-11-01', help='Specify the access control profile version resource id of wire server.')
             c.argument('imds_mode', arg_type=get_enum_type(self.get_models('Mode')), min_api='2024-11-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
             c.argument('imds_access_control_profile_reference_id', options_list=['--imds-access-control-profile-reference-id', '--imds-profile-id'], min_api='2024-11-01', help='Specify the access control profile version resource id resource id of imds.')
+            c.argument('add_proxy_agent_extension', options_list=['--add-proxy-agent-extension', '--add-proxy-agent-ext'], arg_type=get_three_state_flag(), help="Specify whether to implicitly install the ProxyAgent Extension. This option is currently applicable only for Linux OS. Use with --enable-proxy-agent.")
 
     with self.argument_context('vm update') as c:
         c.argument('license_type', license_type)
