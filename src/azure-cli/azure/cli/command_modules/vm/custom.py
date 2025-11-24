@@ -1729,9 +1729,9 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               key_incarnation_id=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching_by_aaz
-    from .operations.vm import convert_show_result_to_sneak_case as vm_convert_show_result_to_sneak_case
+    from .operations.vm import convert_show_result_to_snake_case as vm_convert_show_result_to_snake_case
     vm = kwargs['parameters']
-    vm = vm_convert_show_result_to_sneak_case(vm)
+    vm = vm_convert_show_result_to_snake_case(vm)
 
     if wire_server_access_control_profile_reference_id is not None or \
             imds_access_control_profile_reference_id is not None:
@@ -1756,7 +1756,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             'security_profile': security_profile
         }))
         vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
-        vm = vm_convert_show_result_to_sneak_case(vm)
+        vm = vm_convert_show_result_to_snake_case(vm)
 
     if add_proxy_agent_extension is not None:
         if vm.get("security_profile", None) is None:
@@ -4322,13 +4322,13 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
-    from .operations.vmss_vms import convert_show_result_to_sneak_case as vmss_vms_convert_show_result_to_sneak_case
-    from .operations.vmss import convert_show_result_to_sneak_case as vmss_convert_show_result_to_sneak_case
+    from .operations.vmss_vms import convert_show_result_to_snake_case as vmss_vms_convert_show_result_to_snake_case
+    from .operations.vmss import convert_show_result_to_snake_case as vmss_convert_show_result_to_snake_case
     vmss = kwargs['parameters']
     if instance_id:
-        vmss = vmss_vms_convert_show_result_to_sneak_case(vmss)
+        vmss = vmss_vms_convert_show_result_to_snake_case(vmss)
     else:
-        vmss = vmss_convert_show_result_to_sneak_case(vmss)
+        vmss = vmss_convert_show_result_to_snake_case(vmss)
 
     if wire_server_access_control_profile_reference_id is not None or \
             imds_access_control_profile_reference_id is not None:
@@ -4356,9 +4356,9 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
         }))
         vmss = get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id, security_type)
         if instance_id:
-            vmss = vmss_vms_convert_show_result_to_sneak_case(vmss)
+            vmss = vmss_vms_convert_show_result_to_snake_case(vmss)
         else:
-            vmss = vmss_convert_show_result_to_sneak_case(vmss)
+            vmss = vmss_convert_show_result_to_snake_case(vmss)
 
     if add_proxy_agent_extension is not None:
         if instance_id:
@@ -5552,8 +5552,8 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          target_edge_zones=None, block_deletion_before_end_of_life=None, no_wait=False, **kwargs):
     args = kwargs['gallery_image_version']
 
-    from .operations.sig_image_version import convert_show_result_to_sneak_case
-    args = convert_show_result_to_sneak_case(args)
+    from .operations.sig_image_version import convert_show_result_to_snake_case
+    args = convert_show_result_to_snake_case(args)
 
     if target_regions:
         if "publishing_profile" not in args:

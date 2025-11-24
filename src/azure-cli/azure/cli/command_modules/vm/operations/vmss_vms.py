@@ -66,7 +66,7 @@ class VMSSVMSShow(_VMSSVMSShow):
         return result
 
 
-def convert_show_result_to_sneak_case(result):
+def convert_show_result_to_snake_case(result):
     new_result = {}
     if "instanceId" in result:
         new_result["instance_id"] = result["instanceId"]

@@ -155,7 +155,7 @@ class VMCreate(_VMCreate):
         return result
 
 
-def convert_show_result_to_sneak_case(result):
+def convert_show_result_to_snake_case(result):
     new_result = {}
     if "extendedLocation" in result:
         new_result["extended_location"] = result["extendedLocation"]
