@@ -604,13 +604,6 @@ def create_application(cmd, client, display_name, identifier_uris=None,
                        # JSON properties
                        app_roles=None, optional_claims=None, required_resource_accesses=None):
     # pylint:disable=too-many-locals
-
-    logger.warning("The `az %s` command can modify an existing application or service principal "
-                   "if another object shares the same display name. Display names aren't unique and can change, "
-                   "which could result in credential loss or incorrect RBAC assignments. "
-                   "Use a unique object ID or app ID instead. For more details, "
-                   "see https://go.microsoft.com/fwlink/?linkid=2342455.", cmd.name)
-
     graph_client = _graph_client_factory(cmd.cli_ctx)
 
     existing_apps = list_applications(cmd, client, display_name=display_name)
@@ -622,6 +615,12 @@ def create_application(cmd, client, display_name, identifier_uris=None,
             raise CLIError("More than one application have the same display name '{}': (id) {}, please remove "
                            'them first.'.format(display_name, ', '.join([x[ID] for x in existing_apps])))
         if len(existing_apps) == 1:
+            logger.warning("IMPORTANT: The \"az %s\" command can modify an existing application or service principal "
+                           "if another object shares the same display name. "
+                           "Display names aren't unique and can change, "
+                           "which could result in credential loss or incorrect RBAC assignments. "
+                           "Use a unique object ID or app ID instead. For more details, "
+                           "see https://go.microsoft.com/fwlink/?linkid=2342455.", cmd.name)
             logger.warning("Found an existing application instance: (id) %s. We will patch it.",
                            existing_apps[0][ID])
             body = update_application(
