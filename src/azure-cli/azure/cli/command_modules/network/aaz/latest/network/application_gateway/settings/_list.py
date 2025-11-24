@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List settings.
+
+    :example: List settings.
+        az network application-gateway settings list -g MyResourceGroup --gateway-name MyAppGateway
     """
 
     _aaz_info = {
