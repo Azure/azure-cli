@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class List(AAZCommand):
     """List probes.
+
+    :example: List probes.
+        az network application-gateway probe list -g MyResourceGroup --gateway-name MyAppGateway
     """
 
     _aaz_info = {

@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create a probe.
+
+    :example: Create an application gateway probe.
+        az network application-gateway probe create -g MyResourceGroup --gateway-name MyAppGateway -n MyProbe --protocol https --host 127.0.0.1 --path ProbePath
     """
 
     _aaz_info = {

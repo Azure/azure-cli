@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update settings.
+
+    :example: Update settings to use a new probe.
+        az network application-gateway settings update -g MyResourceGroup --gateway-name MyAppGateway -n MySettings --probe MyNewProbe
     """
 
     _aaz_info = {

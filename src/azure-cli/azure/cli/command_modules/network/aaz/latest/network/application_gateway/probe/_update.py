@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Update(AAZCommand):
     """Update a probe.
+
+    :example: Update an application gateway probe with a timeout of 60 seconds.
+        az network application-gateway probe update -g MyResourceGroup --gateway-name MyAppGateway -n MyProbe --timeout 60
     """
 
     _aaz_info = {

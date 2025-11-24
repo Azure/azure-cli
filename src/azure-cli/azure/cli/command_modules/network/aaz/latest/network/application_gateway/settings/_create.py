@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Create(AAZCommand):
     """Create settings.
+
+    :example: Create settings.
+        az network application-gateway settings create -g MyResourceGroup --gateway-name MyAppGateway -n MySettings --port 80 --protocol Http --timeout 30
     """
 
     _aaz_info = {

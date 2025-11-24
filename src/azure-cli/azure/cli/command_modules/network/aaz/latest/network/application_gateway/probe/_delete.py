@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Delete(AAZCommand):
     """Delete a probe.
+
+    :example: Delete a probe.
+        az network application-gateway probe delete -g MyResourceGroup --gateway-name MyAppGateway -n MyProbe
     """
 
     _aaz_info = {
