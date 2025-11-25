@@ -7,7 +7,7 @@ import os
 import unittest
 from unittest import mock
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer)
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, live_only)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from datetime import datetime, timedelta
 from dateutil import parser
@@ -454,6 +454,8 @@ class CosmosDBBackupRestoreScenarioTest(ScenarioTest):
         assert restored_account['restoreParameters']['restoreTimestampInUtc'] == restore_ts_string
         assert restored_account['writeLocations'][0]['locationName'] == 'North Central US'
 
+    # Base account deleted, will be recreated and test enabled in the next release.
+    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_cross_region_restore', location='westcentralus')
     def test_cosmosdb_xrr_single_region_account(self, resource_group):
