@@ -6152,12 +6152,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return list(self._client.provider.get_web_app_stacks(stack_os_type=None))
 
     def _parse_raw_stacks(self, stacks):
+        seen_runtimes = set()  # Track seen runtime display names to avoid duplicates
         for lang in stacks:
             for major_version in lang.major_versions:
                 if self._linux:
                     if lang.display_text.lower() == "java":
                         continue
-                    self._parse_major_version_linux(major_version, self._stacks)
+                    self._parse_major_version_linux(major_version, self._stacks, seen_runtimes)
                 if self._windows:
                     self._parse_major_version_windows(major_version, self._stacks, self.windows_config_mappings)
 
@@ -6302,10 +6303,91 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             return cls._is_valid_runtime_setting(cls._get_runtime_setting(minor_version, linux, java))
         return [m for m in major_version.minor_versions if _filter(m)]
 
+    @staticmethod
+    def _get_java_versions_from_minor_versions(minor_versions):
+        """Dynamically extract unique Java versions from minor version values.
+        Used for Linux Java SE containers where minor.value is like "25.0.0", "21.0.0".
+        Returns versions sorted in descending order (newest first)."""
+        java_versions = set()
+        for minor in minor_versions:
+            # minor.value is like "25.0.0", "21.0.0", "17.0.0", "11.0.0", "8.0.0" or "1.8.0"
+            value = minor.value
+            if value:
+                # Handle both "1.8" format and newer "25", "21" formats
+                if value.startswith("1.8"):
+                    java_versions.add("1.8")
+                else:
+                    # Extract major version number (e.g., "25" from "25.0.0")
+                    major_ver = value.split('.')[0]
+                    if major_ver.isdigit():
+                        java_versions.add(major_ver)
+        # Sort descending (newest versions first), treating "1.8" specially
+        return sorted(java_versions, key=lambda x: -1 if x == "1.8" else -int(x))
+
+    @staticmethod
+    def _get_java_versions_from_windows_container(container_settings):
+        """Dynamically extract Java versions from Windows container settings.
+        Looks at the 'runtimes' array in additional_properties.
+        Returns versions sorted in descending order (newest first)."""
+        java_versions = set()
+        additional_props = getattr(container_settings, 'additional_properties', {}) or {}
+        runtimes_array = additional_props.get('runtimes', [])
+
+        for runtime_info in runtimes_array:
+            version = runtime_info.get('runtimeVersion')
+            if version:
+                # Normalize version: convert "1.8" to "1.8", keep others as-is
+                java_versions.add(version)
+
+        # Sort descending (newest versions first), treating "1.8" specially
+        return sorted(java_versions, key=lambda x: -1 if x == "1.8" else -int(x))
+
+    @staticmethod
+    def _get_java_runtimes_from_container_settings(container_settings):
+        """Dynamically extract Java runtimes from container settings.
+        Prefers the 'runtimes' array from the API when available (most future-proof),
+        falls back to individual java*Runtime properties in additional_properties,
+        and finally SDK-defined properties (java8_runtime, java11_runtime).
+        Returns list of tuples: (runtime_name, version, is_auto_update)"""
+        runtimes = []
+        is_auto_update = getattr(container_settings, 'is_auto_update', False)
+        additional_props = getattr(container_settings, 'additional_properties', {}) or {}
+
+        # Prefer the 'runtimes' array if available (cleanest, most future-proof)
+        runtimes_array = additional_props.get('runtimes', [])
+        if runtimes_array:
+            for runtime_info in runtimes_array:
+                runtime_name = runtime_info.get('runtime')
+                version = runtime_info.get('runtimeVersion')
+                if runtime_name and version:
+                    runtimes.append((runtime_name, version, is_auto_update))
+        else:
+            # Fallback: Get runtimes from additional_properties (java*Runtime keys)
+            for key, value in additional_props.items():
+                # Match pattern like "java25Runtime", "java21Runtime", etc.
+                if key.startswith('java') and key.endswith('Runtime') and value:
+                    # Extract version number from key (e.g., "25" from "java25Runtime")
+                    version = key[4:-7]  # Remove "java" prefix and "Runtime" suffix
+                    if version.isdigit():
+                        runtimes.append((value, version, is_auto_update))
+
+            # Also get runtimes from SDK-defined properties (java8_runtime, java11_runtime)
+            if getattr(container_settings, 'java11_runtime', None):
+                # Avoid duplicates if already found in additional_properties
+                if not any(v == "11" for _, v, _ in runtimes):
+                    runtimes.append((container_settings.java11_runtime, "11", is_auto_update))
+            if getattr(container_settings, 'java8_runtime', None):
+                if not any(v == "8" for _, v, _ in runtimes):
+                    runtimes.append((container_settings.java8_runtime, "8", is_auto_update))
+
+        # Sort by version descending (newest first)
+        runtimes.sort(key=lambda x: -1 if x[1] == "8" else -int(x[1]))
+        return runtimes
+
     def _parse_major_version_windows(self, major_version, parsed_results, config_mappings):
         java_container_minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=True)
         if java_container_minor_versions:
-            javas = ["21", "17", "11", "1.8"]
+            # Limit to 3 containers for display
             if len(java_container_minor_versions) > 0:
                 leng = len(java_container_minor_versions) if len(java_container_minor_versions) < 3 else 3
                 java_container_minor_versions = java_container_minor_versions[:leng]
@@ -6313,6 +6395,8 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 container_settings = container.stack_settings.windows_container_settings
                 java_container = container_settings.java_container
                 container_version = container_settings.java_container_version
+                # Get Java versions from the container's runtimes array
+                javas = self._get_java_versions_from_windows_container(container_settings)
                 for java in javas:
                     runtime = self.get_windows_java_runtime(
                         java,
@@ -6380,11 +6464,13 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                             linux=False,
                             is_auto_update=is_auto_update)
 
-    def _parse_major_version_linux(self, major_version, parsed_results):
+    def _parse_major_version_linux(self, major_version, parsed_results, seen_runtimes):
         minor_java_container_versions = self._get_valid_minor_versions(major_version, linux=True, java=True)
         if "SE" in major_version.display_text:
-            se_containers = [minor_java_container_versions[0]]
-            for java in ["21", "17", "11", "1.8"]:
+            # Dynamically get Java versions from the available minor versions
+            java_versions = self._get_java_versions_from_minor_versions(minor_java_container_versions)
+            se_containers = [minor_java_container_versions[0]] if minor_java_container_versions else []
+            for java in java_versions:
                 se_java_containers = [c for c in minor_java_container_versions if c.value.startswith(java)]
                 se_containers = se_containers + se_java_containers[:len(se_java_containers) if len(se_java_containers) < 2 else 2]    # pylint: disable=line-too-long
             minor_java_container_versions = se_containers
@@ -6394,14 +6480,15 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 "SE" not in major_version.display_text else len(minor_java_container_versions)
             for minor in minor_java_container_versions[:leng]:
                 linux_container_settings = minor.stack_settings.linux_container_settings
-                runtimes = [
-                    (linux_container_settings.additional_properties.get("java21Runtime"), "21", linux_container_settings.is_auto_update),    # pylint: disable=line-too-long
-                    (linux_container_settings.additional_properties.get("java17Runtime"), "17", linux_container_settings.is_auto_update),    # pylint: disable=line-too-long
-                    (linux_container_settings.java11_runtime, "11", linux_container_settings.is_auto_update),
-                    (linux_container_settings.java8_runtime, "8", linux_container_settings.is_auto_update)]
+                # Dynamically get all Java runtimes from container settings
+                runtimes = self._get_java_runtimes_from_container_settings(linux_container_settings)
                 # Remove the JBoss'_byol' entries from the output
                 runtimes = [(r, v, au) for (r, v, au) in runtimes if r is not None and not r.endswith("_byol")]    # pylint: disable=line-too-long
                 for runtime_name, version, auto_update in [(r, v, au) for (r, v, au) in runtimes if r is not None]:
+                    # Skip duplicates
+                    if runtime_name in seen_runtimes:
+                        continue
+                    seen_runtimes.add(runtime_name)
                     runtime = self.Runtime(display_name=runtime_name,
                                            configs={"linux_fx_version": runtime_name},
                                            github_actions_properties={"github_actions_version": version},
