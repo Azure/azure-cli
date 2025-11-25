@@ -22,7 +22,7 @@ Release History
 **NetAppFiles**
 
 * `az netappfiles volume-group create`: Add `--network-features` parameter for volume groups (#32423)
-* `az netappfiles volume replication list `: Add `--exclude` parameter to exclude deleted replications (#32423)
+* `az netappfiles volume replication list`: Add `--exclude` parameter to exclude deleted replications (#32423)
 
 2.80.0
 ++++++
