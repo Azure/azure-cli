@@ -684,3 +684,34 @@ def load_arguments(self, _):
         c.argument('instance_count', options_list=['--count', '-c'], help="Instance Count.")
         c.argument('instance_size', options_list=['--size'], help="Instance Size. Possible values are: Cosmos.D4s, Cosmos.D8s, Cosmos.D16s etc")
         c.argument('dedicated_gateway_type', options_list=['--gateway-type'], arg_type=get_enum_type(['IntegratedCache', 'DistributedQuery']), help="Dedicated Gateway Type. Valid only for SqlDedicatedGateway service kind")
+
+    # Cosmos DB Fleet
+    with self.argument_context('cosmosdb fleet') as c:
+        c.argument('resource_group', options_list=['--resource-group', '-g'], help='Name of the resource group.', required=True)
+        c.argument('fleet_name', options_list=['--fleet-name', '-n'], help='Name of the Fleet resource.', required=True)
+
+    with self.argument_context('cosmosdb fleet create') as c:
+        c.argument('location', options_list=['--location', '-l'], help='Location of the Fleet.', required=True)
+        c.argument('tags', help="Tags in 'key=value key2=value2' format.")
+
+    # Cosmos DB Fleetspace
+    with self.argument_context('cosmosdb fleetspace') as c:
+        c.argument('resource_group', options_list=['--resource-group', '-g'], help='Name of the resource group.', required=True)
+        c.argument('fleet_name', options_list=['--fleet-name'], help='Name of the Cosmos DB Fleet.', required=True)
+        c.argument('fleetspace_name', options_list=['--fleetspace-name', '-n'], help='Name of the Fleetspace resource.', required=True)
+
+    with self.argument_context('cosmosdb fleetspace create') as c:
+        c.argument('fleetspace_body', options_list=['--body', '-b'], validator=validate_fleetspace_body, completer=FilesCompleter(), help="Fleetspace body with properties.serviceTier (required), properties.dataRegions (required), and properties.throughputPoolConfiguration (fields: minThroughput, maxThroughput). You can enter it as a string or as a file, e.g., --body @fleetspace.json or " + FLEETSPACE_PROPERTIES_EXAMPLE)
+
+    with self.argument_context('cosmosdb fleetspace update') as c:
+        c.argument('fleetspace_body', options_list=['--body', '-b'], validator=validate_fleetspace_body, completer=FilesCompleter(), help="Fleetspace body with properties.serviceTier (optional), properties.dataRegions (optional), and properties.throughputPoolConfiguration (fields: minThroughput, maxThroughput). You can enter it as a string or as a file, e.g., --body @fleetspace.json or " + FLEETSPACE_PROPERTIES_EXAMPLE)
+
+    # Cosmos DB Fleetspace account
+    with self.argument_context('cosmosdb fleetspace account') as c:
+        c.argument('resource_group', options_list=['--resource-group', '-g'], help='Name of the resource group.', required=True)
+        c.argument('fleet_name', options_list=['--fleet-name'], help='Name of the Cosmos DB Fleet.', required=True)
+        c.argument('fleetspace_name', options_list=['--fleetspace-name'], help='Name of the Fleetspace resource.', required=True)
+        c.argument('fleetspace_account_name', options_list=['--fleetspace-account-name', '-n'], help='Name of the Fleetspace Account resource.', required=True)
+
+    with self.argument_context('cosmosdb fleetspace account create') as c:
+        c.argument('fleetspace_account_body', options_list=['--body', '-b'], validator=validate_fleetspaceAccount_body, completer=FilesCompleter(), help="Fleetspace Account body with properties.globalDatabaseAccountProperties (fields: armLocation, resourceId). You can enter it as a string or as a file, e.g., --body @fleetspaceAccount.json or " + FLEETSPACE_ACCOUNT_PROPERTIES_EXAMPLE)

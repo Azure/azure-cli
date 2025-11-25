@@ -32,7 +32,11 @@ from azure.cli.command_modules.cosmosdb._client_factory import (
     cf_db_locations,
     cf_cassandra_cluster,
     cf_cassandra_data_center,
-    cf_service
+    cf_service,
+    cf_fleet,
+    cf_fleetspace,
+    cf_fleetspace_account,
+    cf_fleet_analytics
 )
 
 from azure.cli.command_modules.cosmosdb._format import (
@@ -499,3 +503,52 @@ def load_command_table(self, _):
         g.command('list', 'list')
         g.show_command('show', 'get')
         g.command('delete', 'begin_delete', confirmation=True, supports_no_wait=True)
+
+    setup_fleet_commands(self)
+
+
+def setup_fleet_commands(self):
+    # Fleet operations
+    cosmosdb_fleet_sdk = CliCommandType(
+        operations_tmpl='azext_cosmosdb_preview.vendored_sdks.azure_mgmt_cosmosdb.operations#FleetOperations.{}',
+        client_factory=cf_fleet)
+
+    # Fleetspace operations
+    cosmosdb_fleetspace_sdk = CliCommandType(
+        operations_tmpl='azext_cosmosdb_preview.vendored_sdks.azure_mgmt_cosmosdb.operations#FleetspaceOperations.{}',
+        client_factory=cf_fleetspace)
+
+    # Fleetspace account operations
+    cosmosdb_fleetspace_account_sdk = CliCommandType(
+        operations_tmpl='azext_cosmosdb_preview.vendored_sdks.azure_mgmt_cosmosdb.operations#FleetspaceAccountOperations.{}',
+        client_factory=cf_fleetspace_account)
+
+    # Fleet analytics operations
+    cosmosdb_fleet_analytics_sdk = CliCommandType(
+        operations_tmpl='azext_cosmosdb_preview.vendored_sdks.azure_mgmt_cosmosdb.operations#FleetAnalyticsOperations.{}',
+        client_factory=cf_fleet_analytics)
+
+    with self.command_group('cosmosdb fleet', cosmosdb_fleet_sdk, client_factory=cf_fleet, is_preview=True) as g:
+        g.custom_command('create', 'cli_cosmosdb_fleet_create')
+        g.custom_command('list', 'cli_list_cosmosdb_fleets')
+        g.show_command('show', 'get')
+        g.command('delete', 'begin_delete', confirmation=True)
+
+    with self.command_group('cosmosdb fleet analytics', cosmosdb_fleet_analytics_sdk, client_factory=cf_fleet_analytics, is_preview=True) as g:
+        g.custom_command('create', 'cli_cosmosdb_fleet_analytics_create')
+        g.command('list', 'list')
+        g.show_command('show', 'get')
+        g.command('delete', 'begin_delete', confirmation=True)
+
+    with self.command_group('cosmosdb fleetspace', cosmosdb_fleetspace_sdk, client_factory=cf_fleetspace, is_preview=True) as g:
+        g.custom_command('create', 'cli_cosmosdb_fleetspace_create')
+        g.command('list', 'list')
+        g.show_command('show', 'get')
+        g.custom_command('update', 'cli_cosmosdb_fleetspace_update')
+        g.command('delete', 'begin_delete', confirmation=True)
+
+    with self.command_group('cosmosdb fleetspace account', cosmosdb_fleetspace_account_sdk, client_factory=cf_fleetspace_account, is_preview=True) as g:
+        g.custom_command('create', 'cli_cosmosdb_fleetspace_account_create')
+        g.command('list', 'list')
+        g.show_command('show', 'get')
+        g.command('delete', 'begin_delete', confirmation=True)
