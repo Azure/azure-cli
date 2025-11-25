@@ -28,7 +28,9 @@ from azure.cli.command_modules.cosmosdb._validators import (
     validate_mongo_role_definition_body,
     validate_mongo_role_definition_id,
     validate_mongo_user_definition_body,
-    validate_mongo_user_definition_id)
+    validate_mongo_user_definition_id,
+    validate_fleetspace_body,
+    validate_fleetspaceAccount_body)
 
 from azure.cli.command_modules.cosmosdb.actions import (
     CreateLocation, CreateDatabaseRestoreResource, CreateGremlinDatabaseRestoreResource, CreateTableRestoreResource, UtcDatetimeAction, InvokeCommandArgumentsAddAction)
@@ -70,6 +72,28 @@ MONGO_ROLE_DEFINITION_EXAMPLE = """--body "{\\"Id\\": \\"be79875a-2cc4-40d5-8958
 """
 
 MONGO_USER_DEFINITION_EXAMPLE = """--body "{\\"Id\\": \\"be79875a-2cc4-40d5-8958-566017875b39\\",\\"UserName\\": \\"MyUserName\\",\\"Password\\": \\"MyPass\\",\\"CustomData\\": \\"MyCustomData\\",\\"Mechanisms\\": \\"SCRAM-SHA-256\\"\\"DatabaseName\\": \\"MyDb\\",\\"Roles\\": [ {\\"Role\\": \\"myReadRole\\",\\"Db\\": \\"MyDb\\"}]}"
+"""
+
+FLEETSPACE_PROPERTIES_EXAMPLE = """--body "{
+    \\"properties\\": {
+        \\"serviceTier\\": \\"GeneralPurpose\\",
+        \\"dataRegions\\": [\\"West US 2\\"],
+        \\"throughputPoolConfiguration\\": {
+            \\"minThroughput\\": 100000,
+            \\"maxThroughput\\": 300000
+        }
+    }
+}"
+"""
+
+FLEETSPACE_ACCOUNT_PROPERTIES_EXAMPLE = """--body "{
+    \\"properties\\": {
+        \\"globalDatabaseAccountProperties\\": {
+            \\"resourceId\\": \\"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/example-rg/providers/Microsoft.DocumentDB/databaseAccounts/example-account\\",
+            \\"armLocation\\": \\"East US\\"
+        }
+    }
+}"
 """
 
 

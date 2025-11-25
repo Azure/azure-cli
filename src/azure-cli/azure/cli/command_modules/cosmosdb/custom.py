@@ -73,7 +73,12 @@ from azure.mgmt.cosmosdb.models import (
     ServiceType,
     MongoRoleDefinitionCreateUpdateParameters,
     MongoUserDefinitionCreateUpdateParameters,
-    RegionForOnlineOffline
+    RegionForOnlineOffline,
+    FleetResource,
+    FleetspaceResource,
+    FleetspacePropertiesThroughputPoolConfiguration,
+    FleetspaceAccountResource,
+    FleetspaceAccountPropertiesGlobalDatabaseAccountProperties
 )
 
 logger = get_logger(__name__)
@@ -254,7 +259,6 @@ def _create_database_account(client,
                              enable_priority_based_execution=None,
                              default_priority_level=None,
                              source_backup_location=None):
-
 
     consistency_policy = None
     if default_consistency_level is not None:
@@ -3511,4 +3515,131 @@ def cli_offline_region(client,
         resource_group_name=resource_group_name,
         account_name=account_name,
         region_parameter_for_offline=region_parameter_for_offline
+    )
+
+def cli_cosmosdb_fleet_create(client,
+                              resource_group_name,
+                              fleet_name,
+                              location,
+                              tags=None):
+    """Creates an Azure Cosmos DB Fleet."""
+
+    if isinstance(tags, str):
+        try:
+            tags = dict(tag.split('=') for tag in tags.split())
+        except ValueError:
+            raise InvalidArgumentValueError('Tags must be in key=value format.')
+
+    fleet_parameters = FleetResource(location=location)
+
+    if tags:
+        fleet_parameters.tags = tags
+
+    return client.create(
+        resource_group_name=resource_group_name,
+        fleet_name=fleet_name,
+        body=fleet_parameters)
+
+
+def cli_list_cosmosdb_fleets(client, resource_group_name=None):
+    """Lists Azure Cosmos DB Fleets."""
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+    return client.list()
+
+
+def cli_cosmosdb_fleetspace_create(client,
+                                   resource_group_name,
+                                   fleet_name,
+                                   fleetspace_name,
+                                   fleetspace_body):
+
+    """Creates an Azure Cosmos DB Fleetspace."""
+
+    # Extract service_tier and data_regions from base level (mandatory for create)
+    service_tier = fleetspace_body['properties'].get('serviceTier')
+    data_regions = fleetspace_body['properties'].get('dataRegions')
+
+    if not service_tier:
+        raise CLIError('Missing required field "serviceTier" in properties.')
+
+    if not data_regions:
+        raise CLIError('Missing required field "dataRegions" in properties.')
+
+    throughput_pool_config = FleetspacePropertiesThroughputPoolConfiguration(
+        min_throughput=fleetspace_body['properties']['throughputPoolConfiguration']['minThroughput'],
+        max_throughput=fleetspace_body['properties']['throughputPoolConfiguration']['maxThroughput']
+    )
+
+    fleetspace_resource = FleetspaceResource(
+        fleetspace_api_kind="NoSQL",
+        throughput_pool_configuration=throughput_pool_config,
+        service_tier=service_tier,
+        data_regions=data_regions
+    )
+
+    return client.begin_create(
+        resource_group_name=resource_group_name,
+        fleet_name=fleet_name,
+        fleetspace_name=fleetspace_name,
+        body=fleetspace_resource
+    )
+
+
+def cli_cosmosdb_fleetspace_update(client,
+                                   resource_group_name,
+                                   fleet_name,
+                                   fleetspace_name,
+                                   fleetspace_body):
+
+    """Updates an existing Azure Cosmos DB Fleetspace."""
+
+    # Extract service_tier and data_regions from base level (optional for update)
+    service_tier = fleetspace_body['properties'].get('serviceTier')
+    data_regions = fleetspace_body['properties'].get('dataRegions')
+
+    throughput_pool_config = FleetspacePropertiesThroughputPoolConfiguration(
+        min_throughput=fleetspace_body['properties']['throughputPoolConfiguration']['minThroughput'],
+        max_throughput=fleetspace_body['properties']['throughputPoolConfiguration']['maxThroughput']
+    )
+
+    fleetspace_resource = FleetspaceResource(
+        fleetspace_api_kind="NoSQL",
+        throughput_pool_configuration=throughput_pool_config,
+        service_tier=service_tier,
+        data_regions=data_regions
+    )
+
+    return client.begin_update(
+        resource_group_name=resource_group_name,
+        fleet_name=fleet_name,
+        fleetspace_name=fleetspace_name,
+        body=fleetspace_resource
+    )
+
+
+def cli_cosmosdb_fleetspace_account_create(client,
+                                           resource_group_name,
+                                           fleet_name,
+                                           fleetspace_name,
+                                           fleetspace_account_name,
+                                           fleetspace_account_body):
+
+    """Creates an Azure Cosmos DB Fleetspace Account."""
+
+    fleetspaceAccountPropertiesGlobalDatabaseAccountProperties = FleetspaceAccountPropertiesGlobalDatabaseAccountProperties(
+        resource_id=fleetspace_account_body['properties']['globalDatabaseAccountProperties']['resourceId'],
+        arm_location=fleetspace_account_body['properties']['globalDatabaseAccountProperties']['armLocation'],
+    )
+
+    fleetspace_account_body = FleetspaceAccountResource(
+        global_database_account_properties=fleetspaceAccountPropertiesGlobalDatabaseAccountProperties
+    )
+
+    return client.begin_create(
+        resource_group_name=resource_group_name,
+        fleet_name=fleet_name,
+        fleetspace_name=fleetspace_name,
+        fleetspace_account_name=fleetspace_account_name,
+        body=fleetspace_account_body
     )
