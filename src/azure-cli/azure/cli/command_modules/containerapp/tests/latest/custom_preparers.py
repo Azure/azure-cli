@@ -37,21 +37,21 @@ class SubnetPreparer(NoTrafficRecordingPreparer, SingleValueReplacer):
         if format_location(location) == format_location(STAGE_LOCATION):
             location = self.location_replace_stage
 
-        # try:
-        self.live_only_execute(self.cli_ctx, f"az network vnet create --address-prefixes {self.vnet_address_prefixes} -g {resource_group} -n {self.vnet_name} --subnet-name {self.subnet_name} --location {location}")
-        subnet_command = f"az network vnet subnet update --address-prefixes {self.subnet_address_prefixes} " \
-                         f"-n {self.subnet_name} " \
-                         f"-g {resource_group} " \
-                         f"--vnet-name {self.vnet_name} "
-        if self.service_endpoints is not None:
-            subnet_command += f'--service-endpoints {self.service_endpoints} '
+        try:
+            self.live_only_execute(self.cli_ctx, f"az network vnet create --address-prefixes {self.vnet_address_prefixes} -g {resource_group} -n {self.vnet_name} --subnet-name {self.subnet_name} --location {location}")
+            subnet_command = f"az network vnet subnet update --address-prefixes {self.subnet_address_prefixes} " \
+                             f"-n {self.subnet_name} " \
+                             f"-g {resource_group} " \
+                             f"--vnet-name {self.vnet_name} "
+            if self.service_endpoints is not None:
+                subnet_command += f'--service-endpoints {self.service_endpoints} '
 
-        if self.delegations is not None:
-            subnet_command += f'--delegations {self.delegations} '
+            if self.delegations is not None:
+                subnet_command += f'--delegations {self.delegations} '
 
-        subnet_id = self.live_only_execute(self.cli_ctx, subnet_command).get_output_in_json()["id"]
-        # except AttributeError:  # live only execute returns None if playing from record
-        #     pass
+            subnet_id = self.live_only_execute(self.cli_ctx, subnet_command).get_output_in_json()["id"]
+        except AttributeError:  # live only execute returns None if playing from record
+            pass
         return {'subnet_id': subnet_id,
                 'vnet_name': self.vnet_name,
                 'subnet_name': self.subnet_name}
