@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backuppolicies/{}", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backuppolicies/{}", "2025-09-01"],
         ]
     }
 
@@ -192,7 +192,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -295,7 +295,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -452,9 +452,7 @@ class _UpdateHelper:
         )
 
         volume_backups = _schema_backup_policy_read.properties.volume_backups
-        volume_backups.Element = AAZObjectType(
-            flags={"read_only": True},
-        )
+        volume_backups.Element = AAZObjectType()
 
         _element = _schema_backup_policy_read.properties.volume_backups.Element
         _element.backups_count = AAZIntType(
