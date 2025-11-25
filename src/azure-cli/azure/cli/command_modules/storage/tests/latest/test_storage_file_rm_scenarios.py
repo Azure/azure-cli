@@ -15,7 +15,6 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli", location="eastus")
     @StorageAccountPreparer(name_prefix="sharerm", location="eastus")
     def test_storage_file_using_rm_main_scenario(self):
@@ -147,8 +146,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         result = self.cmd('storage share-rm exists --ids {share_id_2}').get_output_in_json()
         self.assertEqual(result['exists'], False)
 
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2024-01-01')
-    @ResourceGroupPreparer(name_prefix="cli", location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus2")
     def test_storage_file_using_rm_provisioned_v2_scenario(self, resource_group):
         self.kwargs = {
             'sku': 'StandardV2_LRS',
@@ -156,7 +154,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             'rg': resource_group
         }
         self.cmd('az storage account create -n {sa} -g {rg} --sku {sku} --kind FileStorage '
-                 '-l eastus2euap',
+                 '-l eastus2',
                  checks=[self.check('sku.name', self.kwargs.get('sku'))])
 
         self.kwargs.update({
@@ -218,8 +216,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage share-rm list --storage-account {sa} -g {rg}',
                  checks=[self.check('length(@)', 1)])
 
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2024-01-01')
-    @ResourceGroupPreparer(name_prefix="cli", location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="cli", location="eastus2")
     def test_storage_file_using_rm_provisioned_v1_scenario(self, resource_group):
         self.kwargs = {
             'sku': 'Premium_LRS',
@@ -227,7 +224,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             'rg': resource_group
         }
         self.cmd('az storage account create -n {sa} -g {rg} --sku {sku} --kind FileStorage '
-                 '-l eastus2euap',
+                 '-l eastus2',
                  checks=[self.check('sku.name', self.kwargs.get('sku'))])
 
         self.kwargs.update({
@@ -264,8 +261,7 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage share-rm list --storage-account {sa} -g {rg}',
                  checks=[self.check('length(@)', 1)])
 
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
-    @ResourceGroupPreparer(name_prefix="cli_nfs", location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="cli_nfs", location="eastus2")
     @StorageAccountPreparer(name_prefix="nfs", location="eastus2", kind='FileStorage', sku='Premium_LRS')
     def test_storage_share_rm_with_NFS(self):
 
@@ -300,7 +296,6 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(@)', 0)
         })
 
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2020-08-01-preview')
     @ResourceGroupPreparer(name_prefix="cli_snapshot", location="eastus")
     @StorageAccountPreparer(name_prefix="snapshot", location="eastus", kind='StorageV2')
     def test_storage_share_rm_with_snapshot(self):
@@ -352,7 +347,6 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(@)', 1)
         })
 
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_tier", location="eastus")
     @StorageAccountPreparer(name_prefix="tier", location="eastus", kind='StorageV2')
     def test_storage_share_rm_with_access_tier(self):
@@ -411,7 +405,6 @@ class StorageFileShareRmScenarios(StorageScenarioMixin, ScenarioTest):
         self.assertEqual(result, str(512 * 1024))
 
     # @unittest.skip('FileServiceProperties object has no attribute protocol_settings')
-    @api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
     @ResourceGroupPreparer(name_prefix="cli_sf", location="francecentral")
     @StorageAccountPreparer(name_prefix="clitest", location="francecentral")
     def test_storage_share_rm_soft_delete(self):

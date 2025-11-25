@@ -144,15 +144,13 @@ class ContainerappEnvScenarioTest(ScenarioTest):
 
     @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location="northeurope")
-    @live_only()  # encounters 'CannotOverwriteExistingCassetteException' only when run from recording (passes when run live)
-    @LogAnalyticsWorkspacePreparer(location="eastus", get_shared_key=True)
-    def test_containerapp_env_dapr_components(self, resource_group, laworkspace_customer_id, laworkspace_shared_key):
+    def test_containerapp_env_dapr_components(self, resource_group):
         self.cmd('configure --defaults location={}'.format(TEST_LOCATION))
 
         env_name = self.create_random_name(prefix='containerapp-e2e-env', length=24)
         dapr_comp_name = self.create_random_name(prefix='dapr-component', length=24)
 
-        self.cmd('containerapp env create -g {} -n {} --logs-workspace-id {} --logs-workspace-key {}'.format(resource_group, env_name, laworkspace_customer_id, laworkspace_shared_key))
+        self.cmd('containerapp env create -g {} -n {} --logs-destination none'.format(resource_group, env_name))
 
         import tempfile
 

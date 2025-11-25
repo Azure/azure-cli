@@ -94,8 +94,6 @@ def get_sku_tier(name):  # pylint: disable=too-many-return-statements
         return 'PremiumContainer'
     if name in ['EP1', 'EP2', 'EP3']:
         return 'ElasticPremium'
-    if name in ['I1', 'I2', 'I3']:
-        return 'Isolated'
     if name in ['I1V2', 'I2V2', 'I3V2', 'I4V2', 'I5V2', 'I6V2']:
         return 'IsolatedV2'
     if name in ['I1MV2', 'I2MV2', 'I3MV2', 'I4MV2', 'I5MV2']:

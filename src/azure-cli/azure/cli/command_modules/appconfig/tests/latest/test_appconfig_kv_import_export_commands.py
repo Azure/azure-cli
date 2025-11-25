@@ -14,7 +14,7 @@ from knack.util import CLIError
 from azure.cli.testsdk import (ResourceGroupPreparer, ScenarioTest, LiveScenarioTest)
 from azure.cli.command_modules.appconfig._constants import FeatureFlagConstants, KeyVaultConstants, ImportExportProfiles, AppServiceConstants
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+from azure.cli.core.azclierror import AzureInternalError, MutuallyExclusiveArgumentError
 from azure.cli.command_modules.appconfig.tests.latest._test_utils import create_config_store, CredentialResponseSanitizer, get_resource_name_prefix
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
@@ -278,6 +278,13 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
         assert imported_kvs == exported_kvs
         os.remove(exported_file_path)
 
+        # Dry run and yes options should not be used together
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "The '--dry-run' and '--yes' options cannot be specified together."):
+            self.cmd('appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} --label {label} --dry-run -y')
+
+        with self.assertRaisesRegex(MutuallyExclusiveArgumentError, "The '--dry-run' and '--yes' options cannot be specified together."):
+            self.cmd('appconfig kv export -n {config_store_name} -d {import_source} --path "{exported_file_path}" --format {imported_format} --label {label} --dry-run -y')
+
     @AllowLargeResponse()
     @ResourceGroupPreparer(parameter_name_for_location='location')
     def test_azconfig_import_export_new_fm_schema(self, resource_group, location):
@@ -305,7 +312,7 @@ class AppConfigImportExportScenarioTest(ScenarioTest):
             'imported_file_path': import_features_invalid_requirement_type_file_path
         })
 
-        with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an any/all requirement type"):
+        with self.assertRaisesRegex(CLIError, "Feature 'Timestamp' must have an Any/All requirement type"):
             self.cmd(
             'appconfig kv import -n {config_store_name} -s {import_source} --path "{imported_file_path}" --format {imported_format} -y')
 
@@ -1179,3 +1186,156 @@ class AppConfigToAppConfigImportExportScenarioTest(ScenarioTest):
         })
         with self.assertRaisesRegex(CLIError, "Export failed! Please provide only one of these arguments: '--dest-label' or '--preserve-labels'."):
             self.cmd('appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --label {src_label} --dest-label {label} --preserve-labels -y')
+
+        # Tag filtering test
+        key_tag_test = "TagTestKey"
+        tags = {
+            "tag1": "value1",
+            "tag2": "value2"
+        }
+        tags_str = ' '.join([f"{k}={v}" for k, v in tags.items()])
+        self.kwargs.update({
+            'key': key_tag_test,
+            'tags': tags_str
+        })
+
+        # add a new key-value entry with tags
+        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --value {value} --tags {tags} -y',
+                 checks=[self.check('key', key_tag_test),
+                         self.check('tags', tags)])
+        
+        # create entry without tags
+        label_without_tags = "LabelWithoutTags"
+        self.kwargs.update({
+            'label': label_without_tags
+        })
+
+        # add a new key-value entry without tags
+        self.cmd('appconfig kv set --connection-string {src_connection_string} --key {key} --label {label} --value {value} -y',
+                 checks=[self.check('label', label_without_tags),
+                         self.check('tags', {})])
+        
+        # export only key-value with tags and add new tags
+        dest_tags = {
+            "tag3": "value3"
+        }
+        dest_tags_str = ' '.join([f"{k}={v}" for k, v in dest_tags.items()])
+        self.kwargs.update({
+            'dest_tags': dest_tags_str
+        })
+
+        self.cmd('appconfig kv export --connection-string {src_connection_string} -d {import_source} --dest-connection-string {dest_connection_string} --key {key} --tags {tags} --dest-tags {dest_tags} -y')
+        deleted_kv_with_tags = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --tags {dest_tags} -y',
+                                        checks=[self.check('[0].key', key_tag_test),
+                                                self.check('[0].tags', dest_tags)]).get_output_in_json()
+        assert(len(deleted_kv_with_tags) == 1)
+
+        # import only key-value with tags and add new tags
+        self.cmd('appconfig kv import --connection-string {dest_connection_string} -s {import_source} --src-connection-string {src_connection_string} --src-key {key} --src-tags {tags} --tags {dest_tags} -y')
+        deleted_kv_with_tags = self.cmd('appconfig kv delete --connection-string {dest_connection_string} --key {key} --tags {dest_tags} -y',
+                                        checks=[self.check('[0].key', key_tag_test),
+                                                self.check('[0].tags', dest_tags)]).get_output_in_json()
+        assert(len(deleted_kv_with_tags) == 1)
+
+
+
+class AppConfigKubernetesConfigMapImportLiveScenarioTest(LiveScenarioTest):
+    """Test suite for importing key-values from Kubernetes ConfigMaps using AKS RunCommand."""
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(parameter_name_for_location='location')
+    def test_appconfig_import_from_kubernetes_configmap(self, resource_group, location):
+        """Test all scenarios for importing key-values from Kubernetes ConfigMaps using AKS RunCommand."""
+        configmap_import_store_prefix = get_resource_name_prefix('ConfigMapImportTest')
+        configmap_import_aks_prefix = get_resource_name_prefix('ImportAKSTest')
+        config_store_name = self.create_random_name(prefix=configmap_import_store_prefix, length=24)
+        
+        # Create AKS cluster for testing
+        aks_cluster_name = self.create_random_name(prefix=configmap_import_aks_prefix, length=24)
+        
+        location = 'westus2'
+        sku = 'standard'
+        namespace = 'default'
+        
+        self.kwargs.update({
+            'config_store_name': config_store_name,
+            'aks_cluster_name': aks_cluster_name,
+            'rg_loc': location,
+            'rg': resource_group,
+            'sku': sku,
+            'namespace': namespace
+        })
+        
+        # Create App Configuration store
+        create_config_store(self, self.kwargs)
+
+        aks_created = False
+        
+        try:
+            # Create AKS cluster and wait for completion
+            self.cmd('aks create -g {rg} -n {aks_cluster_name} -l {rg_loc} --node-count 1 --generate-ssh-keys --enable-managed-identity --enable-image-cleaner --node-os-upgrade-channel NodeImage')
+            
+            # Wait for AKS cluster to be ready
+            self.cmd('aks wait -g {rg} -n {aks_cluster_name} --created')
+            
+            aks_created = True
+
+            # try:
+            # Scenario 1: Import from a specific ConfigMap
+            configmap_name = 'test-config'
+            label1 = 'ConfigMapImport'
+            prefix = 'test/'
+            
+            kubectl_create_cmd = f'''kubectl create configmap {configmap_name} --from-literal=database.host=localhost --from-literal=database.port=5432 --from-literal=app.name=testapp -n {namespace}'''
+            
+            self.kwargs.update({
+                'configmap_name': configmap_name,
+                'label': label1,
+                'prefix': prefix,
+                'kubectl_create_cmd': kubectl_create_cmd
+            })
+            
+            # Create ConfigMap using AKS run command
+            self.cmd('aks command invoke -g {rg} -n {aks_cluster_name} --command "{kubectl_create_cmd}"')
+            
+            # Import from specific ConfigMap
+            self.cmd('appconfig kv import -n {config_store_name} -s aks --aks-cluster {aks_cluster_name} --configmap-name {configmap_name} --configmap-namespace {namespace} --label {label} --prefix {prefix} -y')
+
+            # Verify imported key-values
+            imported_kvs = self.cmd('appconfig kv list -n {config_store_name} --label {label}').get_output_in_json()
+            
+            # Check that all expected keys were imported
+            expected_keys = ['test/database.host', 'test/database.port', 'test/app.name']
+            imported_keys = [kv['key'] for kv in imported_kvs]
+            
+            for expected_key in expected_keys:
+                assert expected_key in imported_keys, f"Expected key '{expected_key}' not found in imported keys"
+            
+            # Verify specific values
+            database_host = next(kv for kv in imported_kvs if kv['key'] == 'test/database.host')
+            assert database_host['value'] == 'localhost'
+
+            database_port = next(kv for kv in imported_kvs if kv['key'] == 'test/database.port')
+            assert database_port['value'] == '5432'
+            
+            app_name = next(kv for kv in imported_kvs if kv['key'] == 'test/app.name')
+            assert app_name['value'] == 'testapp'
+
+            # Scenario 2: Error handling - non-existent ConfigMap
+            non_existent_configmap = 'non-existent-config'
+            error_label = 'ErrorTest'
+            
+            self.kwargs.update({
+                'non_existent_configmap': non_existent_configmap,
+                'error_label': error_label
+            })
+            
+            # This should fail gracefully
+            with self.assertRaises(AzureInternalError):
+                self.cmd('appconfig kv import -n {config_store_name} -s aks --aks-cluster {aks_cluster_name} --configmap-name {non_existent_configmap} --configmap-namespace {namespace} --label {error_label} -y')
+        finally:
+            if aks_created:
+                try:
+                    self.cmd('aks delete -g {rg} -n {aks_cluster_name} --yes --no-wait')
+                except Exception as cleanup_error:
+                    print(f"Warning: Failed to clean up AKS cluster {aks_cluster_name}: {str(cleanup_error)}")

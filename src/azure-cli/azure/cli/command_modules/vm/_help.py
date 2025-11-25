@@ -695,32 +695,6 @@ examples:
         --release-note-uri path_to_release_notes
 """
 
-helps['sig image-definition list-shared'] = """
-type: command
-short-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
-long-summary: List VM Image definitions in a gallery shared directly to your subscription or tenant
-examples:
-  - name: List an image definition in a gallery shared directly to your subscription in the given location.
-    text: |
-        az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
-        --location myLocation
-  - name: List an image definition in a gallery shared directly to your tenant in the given location.
-    text: |
-        az sig image-definition list-shared --gallery-unique-name galleryUniqueName \\
-        --location myLocation --shared-to tenant
-"""
-
-helps['sig image-definition list-community'] = """
-type: command
-short-summary: List VM Image definitions in a gallery community
-long-summary: List VM Image definitions in a gallery community
-examples:
-  - name: List an image definition in a gallery community.
-    text: |
-        az sig image-definition list-community --public-gallery-name publicGalleryName \\
-        --location myLocation
-"""
-
 helps['sig image-version create'] = """
 type: command
 short-summary: create a new image version
@@ -862,21 +836,6 @@ examples:
         --block-deletion-before-end-of-life true
 """
 
-helps['sig image-version list-shared'] = """
-type: command
-short-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant
-long-summary: List VM Image Versions in a gallery shared directly to your subscription or tenant
-examples:
-  - name: List image versions in a gallery shared directly to your subscription in the given location and image definition.
-    text: |
-        az sig image-version list-shared --gallery-unique-name galleryUniqueName \\
-        --gallery-image-definition MyImage --location myLocation
-  - name: List image versions in a gallery shared directly to your tenant in the given location and image definition.
-    text: |
-        az sig image-version list-shared --gallery-unique-name galleryUniqueName \\
-        --gallery-image-definition MyImage --location myLocation --shared-to tenant
-"""
-
 helps['sig image-version update'] = """
 type: command
 short-summary: update a share image version
@@ -939,17 +898,6 @@ examples:
         az sig image-version undelete --resource-group MyResourceGroup \\
         --gallery-name MyGallery --gallery-image-definition MyImage \\
         --gallery-image-version 1.1.1
-"""
-
-helps['sig image-version list-community'] = """
-type: command
-short-summary: List VM Image Versions in a gallery community
-long-summary: List VM Image Versions in a gallery community
-examples:
-  - name: List an image versions in a gallery community.
-    text: |
-        az sig image-version list-community --public-gallery-name publicGalleryName \\
-        --gallery-image-definition MyImage --location myLocation
 """
 
 helps['sig image-version wait'] = """
@@ -1110,33 +1058,6 @@ examples:
         az vm boot-diagnostics get-boot-log-uris -g MyResourceGroup -n MyVirtualMachine
 """
 
-helps['vm capture'] = """
-type: command
-short-summary: Capture information for a stopped VM.
-long-summary: 'For an end-to-end tutorial, see https://learn.microsoft.com/azure/virtual-machines/linux/capture-image'
-parameters:
-  - name: --vhd-name-prefix
-    type: string
-    short-summary: The VHD name prefix specify for the VM disks.
-  - name: --storage-container
-    short-summary: The storage account container name in which to save the disks.
-  - name: --overwrite
-    short-summary: Overwrite the existing disk file.
-examples:
-  - name: Deallocate, generalize, and capture a stopped virtual machine.
-    text: |
-        az vm deallocate -g MyResourceGroup -n MyVm
-        az vm generalize -g MyResourceGroup -n MyVm
-        az vm capture -g MyResourceGroup -n MyVm --vhd-name-prefix MyPrefix
-  - name: Deallocate, generalize, and capture multiple stopped virtual machines.
-    text: |
-        vms_ids=$(az vm list -g MyResourceGroup --query "[].id" -o tsv)
-        az vm deallocate --ids {vms_ids}
-        az vm generalize --ids {vms_ids}
-        az vm capture --ids {vms_ids} --vhd-name-prefix MyPrefix
-
-"""
-
 helps['vm create'] = """
 type: command
 short-summary: Create an Azure Virtual Machine.
@@ -1238,22 +1159,6 @@ examples:
   - name: Create a VM from community gallery image
     text: >
         az vm create -n MyVm -g MyResourceGroup --image /CommunityGalleries/{gallery_unique_name}/Images/{image}/Versions/{version}
-"""
-
-helps['vm delete'] = """
-type: command
-short-summary: Delete a VM.
-parameters:
-  - name: --force-deletion
-    short-summary: Optional parameter to force delete virtual machines. Default value is None.
-examples:
-  - name: Delete a VM without a prompt for confirmation.
-    text: >
-        az vm delete -g MyResourceGroup -n MyVm --yes
-  - name: Delete all VMs in a resource group.
-    text: >
-        az vm delete --ids $(az vm list -g MyResourceGroup --query "[].id" -o tsv)
-
 """
 
 helps['vm diagnostics'] = """
@@ -1503,24 +1408,6 @@ examples:
     text: az vm extension show -g MyResourceGroup --vm-name MyVm -n extension_name
 """
 
-helps['vm extension wait'] = """
-type: command
-short-summary: Place the CLI in a waiting state until a condition of a virtual machine extension is met.
-examples:
-  - name: Place the CLI in a waiting state until a condition of a virtual machine extension is met. (autogenerated)
-    text: |
-        az vm extension wait --created --name MyExtension --resource-group MyResourceGroup --vm-name MyVm
-    crafted: true
-  - name: Place the CLI in a waiting state until a condition of a virtual machine extension is met. (autogenerated)
-    text: |
-        az vm extension wait --exists --name MyExtension --resource-group MyResourceGroup --vm-name MyVm
-    crafted: true
-  - name: Place the CLI in a waiting state until a condition of a virtual machine extension is met. (autogenerated)
-    text: |
-        az vm extension wait --ids @- --name MyExtension --subscription MySubscription --updated --vm-name MyVm
-    crafted: true
-"""
-
 helps['vm get-instance-view'] = """
 type: command
 short-summary: Get instance information about a VM.
@@ -1663,6 +1550,9 @@ examples:
     text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
 /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1 \
 --app-config-overrides https://mystorageaccount.blob.core.windows.net/configurations/settings.config null
+  - name: Set applications for vm with auto upgrade
+    text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication2/versions/1.1 --enable-automatic-upgrade True False
 """
 
 helps['vm application list'] = """
@@ -2070,16 +1960,6 @@ examples:
 "https://mystorageaccount.blob.core.windows.net/mycontainer/RuncommandOutput.txt?sp=racw&st=2022-10-17T19:02:15Z&se=2022-10-18T03:02:15Z&spr=https&sv=2021-06-08&sr=b&sig=3BxtEasfdasdfasdfdYki9yvYsqc60V0%3D"
 """
 
-helps['vm run-command delete'] = """
-type: command
-short-summary: "The operation to delete the run command."
-examples:
-  - name: Delete a run command.
-    text: |-
-           az vm run-command delete --resource-group "myResourceGroup" --run-command-name \
-"myRunCommand" --vm-name "myVM"
-"""
-
 helps['vm run-command wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until a condition of the res virtual-machine-run-command is met.
@@ -2440,15 +2320,6 @@ examples:
     crafted: true
 """
 
-helps['vmss delete-instances'] = """
-type: command
-short-summary: Delete VMs within a VMSS.
-examples:
-  - name: Delete VMs within a VMSS. (autogenerated)
-    text: |
-        az vmss delete-instances --instance-ids 0 --name MyScaleSet --resource-group MyResourceGroup
-    crafted: true
-"""
 
 helps['vmss diagnostics'] = """
 type: group
@@ -2858,25 +2729,6 @@ helps['vmss run-command update'] = """
 --run-command-name "myRunCommand" --vmss-name "myVMSS"
 """
 
-helps['vmss run-command delete'] = """
-    type: command
-    short-summary: "The operation to delete the run command."
-    examples:
-      - name: The operation to delete the VMSS run command..
-        text: |-
-               az vmss run-command delete --resource-group "myResourceGroup" --instance-id "0" --run-command-name \
-"myRunCommand" --vmss-name "myVMSS"
-"""
-
-helps['vmss run-command list'] = """
-    type: command
-    short-summary: "The operation to get all run commands of an instance in Virtual Machine Scaleset."
-    examples:
-      - name: List run commands in Vmss instance.
-        text: |-
-               az vmss run-command list --resource-group "myResourceGroup" --vmss-name "myVMSS" --instance-id "0"
-"""
-
 helps['vmss run-command show'] = """
     type: command
     short-summary: "The operation to get the VMSS run command."
@@ -2910,16 +2762,6 @@ examples:
   - name: Get details on VMs within a VMSS. (autogenerated)
     text: |
         az vmss show --name MyScaleSet --resource-group MyResourceGroup
-    crafted: true
-"""
-
-helps['vmss start'] = """
-type: command
-short-summary: Start VMs within a VMSS.
-examples:
-  - name: Start VMs within a VMSS. (autogenerated)
-    text: |
-        az vmss start --instance-ids 1 --name MyScaleSet --resource-group MyResourceGroup
     crafted: true
 """
 
@@ -3073,11 +2915,6 @@ examples:
     crafted: true
 """
 
-helps['capacity reservation'] = """
-type: group
-short-summary: Manage capacity.
-"""
-
 helps['capacity reservation group create'] = """
 type: command
 short-summary: Create capacity reservation group.
@@ -3106,56 +2943,6 @@ examples:
     text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup
   - name: Get a capacity reservation group containing the instance views of the capacity reservations under the capacity reservation group
     text: az capacity reservation group show -n ReservationGroupName -g MyResourceGroup --instance-view
-"""
-
-
-helps['capacity reservation create'] = """
-type: command
-short-summary: Create capacity reservation.
-examples:
-  - name: Create a capacity reservation.
-    text: |
-        az capacity reservation create -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --sku Standard_A0
-  - name: Create a capacity reservation with specific capacity and zones.
-    text: |
-        az capacity reservation create -c ReservationGroupName -n ReservationName -l centraluseuap \\
-            -g MyResourceGroup  --sku Standard_A1_v2 --capacity 5 \\
-                --zone 1 --tags key=val
-"""
-
-helps['capacity reservation update'] = """
-type: command
-short-summary: Update capacity reservation.
-examples:
-  - name: Update a capacity reservation.
-    text: |
-        az capacity reservation update -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --capacity 5 --tags key=val
-"""
-
-helps['capacity reservation show'] = """
-type: command
-short-summary: Show capacity reservation.
-examples:
-  - name: Get a capacity reservation.
-    text: az capacity reservation show -c ReservationGroupName -n ReservationName -g MyResourceGroup
-  - name: Get a capacity reservation containing the instance views.
-    text: |
-        az capacity reservation show -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --instance-view
-"""
-
-helps['capacity reservation show'] = """
-type: command
-short-summary: Show capacity reservation.
-examples:
-  - name: Get a capacity reservation.
-    text: az capacity reservation show -c ReservationGroupName -n ReservationName -g MyResourceGroup
-  - name: Get a capacity reservation containing the instance views.
-    text: |
-        az capacity reservation show -c ReservationGroupName -n ReservationName \\
-            -g MyResourceGroup --instance-view
 """
 
 helps['restore-point'] = """
@@ -3229,34 +3016,4 @@ helps['restore-point collection show'] = """
       - name: Get a restore point collection, including the restore points contained in the restore point collection
         text: |-
                az restore-point collection show --resource-group "myResourceGroup" --collection-name "rpcName"
-"""
-
-helps['restore-point collection create'] = """
-    type: command
-    short-summary: "Create the restore point collection. Please refer to https://aka.ms/RestorePoints \
-for more details. When updating a restore point collection, only tags may be modified."
-    examples:
-      - name: Create or update a restore point collection.
-        text: |-
-               az restore-point collection create --location "norwayeast" --source-id "/subscriptions/{subscription-id}\
-/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM" --tags myTag1="tagValue1" \
---resource-group "myResourceGroup" --collection-name "myRpc"
-"""
-
-helps['restore-point collection update'] = """
-    type: command
-    short-summary: "Update the restore point collection."
-"""
-
-helps['restore-point collection wait'] = """
-    type: command
-    short-summary: Place the CLI in a waiting state until a condition of the restore-point-collection is met.
-    parameters:
-      - name: --expand
-        short-summary: The expand expression to apply on the operation. If expand=restorePoints, server will return all
-                       contained restore points in the restorePointCollection. "restorePoints" Default value is None.
-    examples:
-      - name: Pause executing next line of CLI script until the restore-point-collection is successfully deleted.
-        text: |-
-               az restore-point collection wait --resource-group "myResourceGroup" --collection-name "rpcName" --deleted
 """

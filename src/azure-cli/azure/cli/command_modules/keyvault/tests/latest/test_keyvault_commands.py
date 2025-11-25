@@ -133,6 +133,7 @@ class KeyVaultMHSMPrivateLinkResourceScenarioTest(ScenarioTest):
 
 
 class KeyVaultPrivateEndpointConnectionScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pec')
     @KeyVaultPreparer(name_prefix='cli-test-kv-pec-', location='eastus2', additional_params='--enable-rbac-authorization false')
     def test_keyvault_private_endpoint_connection(self, resource_group, key_vault):
@@ -544,7 +545,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.kwargs.update({
             'hsm_name': self.create_random_name('test-mhsm-sd1', 24),
             'next_hsm_name': self.create_random_name('test-mhsm-sd2', 24),
-            'loc': 'uksouth',
+            'loc': 'canadaeast',
             'init_admin': logged_in_user,
             'key_name': self.create_random_name('key', 10),
             'sdtest_dir': sdtest_dir
@@ -568,7 +569,7 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.cmd('az keyvault security-domain download --hsm-name {hsm_name} --security-domain-file "{sdfile}" '
                  '--sd-quorum 2 --sd-wrapping-keys "{cer1_path}" "{cer2_path}" "{cer3_path}"',
                  checks=[self.check('status', 'Success')])
-        time.sleep(180)
+        time.sleep(300)
         with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {hsm_name} '
                      '--role "Managed HSM Crypto User" --scope "/"')
@@ -591,17 +592,17 @@ class KeyVaultHSMSecurityDomainScenarioTest(ScenarioTest):
         self.cmd('az keyvault security-domain init-recovery --hsm-name {next_hsm_name} '
                  '--sd-exchange-key "{exchange_key}"')
 
-        time.sleep(180)
+        time.sleep(600)
         # upload the blob
         self.cmd('az keyvault security-domain upload --hsm-name {next_hsm_name} --sd-file "{sdfile}" '
                  '--sd-exchange-key "{exchange_key}" '
                  '--sd-wrapping-keys "{key1_path}" "{key2_path}"',
                  checks=[self.check('status', 'Success')])
-        time.sleep(180)
+        time.sleep(300)
         with mock.patch('azure.cli.command_modules.keyvault.custom._gen_guid', side_effect=self.create_guid):
             self.cmd('az keyvault role assignment create --assignee {init_admin} --hsm-name {next_hsm_name} '
                      '--role "Managed HSM Crypto User" --scope "/"')
-        time.sleep(180)
+        time.sleep(300)
         # restore the key
         self.cmd('az keyvault key restore --hsm-name {next_hsm_name} -f "{key_backup}"')
 
@@ -1371,6 +1372,27 @@ class KeyVaultHSMKeyUsingHSMNameScenarioTest(ScenarioTest):
         result = self.cmd('keyvault key random --count 1 --id {hsm_url}').get_output_in_json()
         self.assertIsNotNone(result['value'])
 
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_test_hsm_key_attestation')
+    @ManagedHSMPreparer(name_prefix='clitesthsmkeyats', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])
+    def test_keyvault_hsm_key_attestation(self, resource_group, managed_hsm):
+        self.kwargs.update({
+            'hsm_name': managed_hsm,
+            'hsm_url': 'https://{}.managedhsm.azure.net'.format(managed_hsm),
+            'key': self.create_random_name('key1-', 24)
+        })
+
+        # create a key
+        hsm_key = self.cmd('keyvault key create --hsm-name {hsm_name} -n {key}').get_output_in_json()
+        self.kwargs['hsm_kid'] = hsm_key['key']['kid']
+        self.assertNotIn('attestation', hsm_key['attributes'])
+
+        # get key's attestation
+        key_attestation = self.cmd('keyvault key get-attestation --hsm-name {hsm_name} --name {key}').get_output_in_json()
+        self.assertIn('publicKeyAttestation', key_attestation)
+        self.assertIn('privateKeyAttestation', key_attestation)
+
     @serial_test()
     @ResourceGroupPreparer(name_prefix='cli_test_hsm_key')
     @ManagedHSMPreparer(name_prefix='clitesthsmkey', certs_path=CERTS_DIR, roles=['Managed HSM Crypto Officer', 'Managed HSM Crypto User'])
@@ -1594,7 +1616,7 @@ class KeyVaultHSMKeyUsingHSMURLScenarioTest(ScenarioTest):
 
 class KeyVaultKeyDownloadScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_kv_key_download')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-key-d-', location='eastus2')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-key-d-', location='eastus2', additional_params='--enable-rbac-authorization false')
     def test_keyvault_key_download(self, resource_group, key_vault):
         import OpenSSL.crypto
 
@@ -1751,19 +1773,33 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
         with open(secret_path, 'r') as f:
             expected = f.read().replace('\r\n', '\n')
 
-        def _test_set_and_download(encoding):
+        def _test_set_and_download(encoding, dest_path):
             self.kwargs['enc'] = encoding
             self.cmd('keyvault secret set --vault-name {kv} -n download-{enc} --file "{src_path}" --encoding {enc}')
-            dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(encoding))
             self.kwargs['dest_path'] = dest_path
             self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}"')
             with open(dest_path, 'r') as f:
                 actual = f.read().replace('\r\n', '\n')
             self.assertEqual(actual, expected)
-            os.remove(dest_path)
+
+        def _test_download_with_overwrite(encoding, dest_path):
+            self.kwargs['dest_path'] = dest_path
+            with open(dest_path, 'w') as f:
+                f.write('This file will be overwritten.')
+            # test without and with overwrite
+            with self.assertRaises(CLIError):
+                self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}"')
+            self.cmd('keyvault secret download --vault-name {kv} -n download-{enc} --file "{dest_path}" --overwrite')
+            with open(dest_path, 'r') as f:
+                actual = f.read().replace('\r\n', '\n')
+            self.assertEqual(actual, expected)
 
         for encoding in secret_encoding_values:
-            _test_set_and_download(encoding)
+            dest_path = os.path.join(TEST_DIR, 'recover-{}'.format(encoding))
+            _test_set_and_download(encoding, dest_path)
+            _test_download_with_overwrite(encoding, dest_path)
+            if os.path.exists(dest_path):
+                os.remove(dest_path)
 
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_secret')
     @KeyVaultPreparer(name_prefix='cli-test-kv-se-', additional_params='--enable-rbac-authorization false')
@@ -1867,7 +1903,7 @@ class KeyVaultSecretScenarioTest(ScenarioTest):
 
 class KeyVaultCertificateRestoreScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_kv_cert_soft_delete_')
-    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-sd-')
+    @KeyVaultPreparer(name_prefix='cli-test-kv-ct-sd-', additional_params='--enable-rbac-authorization false')
     def test_keyvault_certificate_soft_delete(self, resource_group, key_vault):
         self.kwargs.update({
             'loc': 'eastus',
@@ -2612,6 +2648,96 @@ class KeyVaultNetworkRuleScenarioTest(ScenarioTest):
         # Remove multiple ip addresses
         self.cmd('keyvault network-rule remove --ip-address {ip} {ip2} {ip3} --name {kv} --resource-group {rg}',
                  checks=[self.check('length(properties.networkAcls.ipRules)', 1)])
+
+class KeyVaultMHSMNetworkRuleScenarioTest(ScenarioTest):
+
+    @serial_test()
+    @ResourceGroupPreparer(name_prefix='cli_test_mhsm_network_rule')
+    def test_keyvault_mhsm_network_rule(self, resource_group):
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "cfd63e61-7aec-4d54-ba2c-394c6d10df25"
+        self.kwargs.update({
+            'hsm': self.create_random_name('cli-test-hsm-nr-', 24),
+            'hsm2': self.create_random_name('cli-test-hsm-nr-', 24),
+            'loc': 'uksouth',
+            'init_admin': logged_in_user,
+            'ip': '1.2.3.4/32',
+            'ip2': '2.3.4.0/24',
+            'ip3': '3.4.5.0/24',
+            'ip4': '4.5.0.0/16',
+            'ip5': '1.2.3.4'
+        })
+
+        # test creating network rules while creating managed hsm
+        self.cmd('keyvault create --hsm-name {hsm} -l {loc} -g {rg} --default-action Deny --network-acls-ips {ip} {ip2} --administrators {init_admin} --retention-days 7', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 2),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}'),
+            self.check('properties.networkAcls.ipRules[1].value', '{ip2}')
+        ])
+
+        # basic tests
+        self.cmd('keyvault create --hsm-name {hsm2} -l {loc} -g {rg} --administrators {init_admin} --retention-days 7')
+        cert_dir = os.path.join(TEST_DIR, 'certs')
+        tmp_dir = self.create_temp_dir()
+
+        self.kwargs.update({
+            'cert0': os.path.join(cert_dir, 'cert_0.cer').replace('\\', '\\\\'),
+            'cert1': os.path.join(cert_dir, 'cert_1.cer').replace('\\', '\\\\'),
+            'cert2': os.path.join(cert_dir, 'cert_2.cer').replace('\\', '\\\\'),
+            'security_domain': os.path.join(tmp_dir, 'clitest-mhsm-SD.json').replace('\\', '\\\\')
+        })
+        self.cmd('keyvault security-domain download --hsm-name {hsm2} --sd-wrapping-keys {cert0} {cert1} {cert2} '
+                 '--sd-quorum 2 --security-domain-file {security_domain}')
+        self.cmd('keyvault update-hsm --hsm-name {hsm2} -g {rg} --default-action Deny')
+
+        # add network-rule for ip-address
+        self.cmd('keyvault network-rule add --ip-address {ip} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')])
+
+        # Add twice to make sure there is no duplication
+        self.cmd('keyvault network-rule add --ip-address {ip} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 1),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')
+        ])
+
+        # Add ip without CIDR format to make sure there is no duplication
+        self.cmd('keyvault network-rule add --ip-address {ip5} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 1),
+            self.check('properties.networkAcls.ipRules[0].value', '{ip}')
+        ])
+
+        # list network-rule for ip-address
+        self.cmd('keyvault network-rule list --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('ipRules[0].value', '{ip}')])
+
+        # remove network-rule for ip-address
+        self.cmd('keyvault network-rule remove --ip-address {ip} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 0)])
+
+        # remove network-rule for ip-address without CIDR
+        self.cmd('keyvault network-rule add --ip-address {ip} --hsm-name {hsm2} --resource-group {rg}')
+        self.cmd('keyvault network-rule remove --ip-address {ip5} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 0)])
+
+        # Add multiple ip addresses
+        self.cmd('keyvault network-rule add --ip-address {ip} {ip2} {ip3} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 3)
+        ])
+
+        # Add multiple ip addresses with overlaps between them
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('keyvault network-rule add --ip-address {ip} {ip5} --hsm-name {hsm2} --resource-group {rg}')
+
+        # Add multiple ip addresses with some overlaps with the server
+        self.cmd('keyvault network-rule add --ip-address {ip4} {ip5} --hsm-name {hsm2} --resource-group {rg}', checks=[
+            self.check('length(properties.networkAcls.ipRules)', 4)
+        ])
+
+        # Remove multiple ip addresses
+        self.cmd('keyvault network-rule remove --ip-address {ip} {ip2} {ip3} --hsm-name {hsm2} --resource-group {rg}',
+                 checks=[self.check('length(properties.networkAcls.ipRules)', 1)])
+
 
 class KeyVaultPublicNetworkAccessScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_keyvault_pna')

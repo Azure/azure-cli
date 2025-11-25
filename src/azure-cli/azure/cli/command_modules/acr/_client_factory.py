@@ -12,6 +12,8 @@ VERSION_2021_08_01_PREVIEW = "2021-08-01-preview"
 VERSION_2022_02_01_PREVIEW = "2022-02-01-preview"
 VERSION_2023_01_01_PREVIEW = "2023-01-01-preview"
 VERSION_2024_11_01_PREVIEW = "2024-11-01-preview"
+VERSION_2025_03_01_PREVIEW = "2025-03-01-preview"
+VERSION_2025_04_01 = "2025-04-01"
 
 
 def get_acr_service_client(cli_ctx, api_version=None):
@@ -38,7 +40,7 @@ def cf_acr_network_rules(cli_ctx, *_):
 
 
 def cf_acr_registries_tasks(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, api_version=VERSION_2019_06_01_PREVIEW).registries
+    return get_acr_service_client(cli_ctx, api_version=VERSION_2025_03_01_PREVIEW).registries
 
 
 def cf_acr_replications(cli_ctx, *_):
@@ -54,15 +56,15 @@ def cf_acr_private_endpoint_connections(cli_ctx, *_):
 
 
 def cf_acr_tasks(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).tasks
+    return get_acr_service_client(cli_ctx, VERSION_2025_03_01_PREVIEW).tasks
 
 
 def cf_acr_taskruns(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).task_runs
+    return get_acr_service_client(cli_ctx, VERSION_2025_03_01_PREVIEW).task_runs
 
 
 def cf_acr_runs(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).runs
+    return get_acr_service_client(cli_ctx, VERSION_2025_03_01_PREVIEW).runs
 
 
 def cf_acr_scope_maps(cli_ctx, *_):
@@ -78,8 +80,8 @@ def cf_acr_token_credentials(cli_ctx, *_):
 
 
 def cf_acr_agentpool(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2019_06_01_PREVIEW).agent_pools
+    return get_acr_service_client(cli_ctx, VERSION_2025_03_01_PREVIEW).agent_pools
 
 
 def cf_acr_connected_registries(cli_ctx, *_):
-    return get_acr_service_client(cli_ctx, VERSION_2021_08_01_PREVIEW).connected_registries
+    return get_acr_service_client(cli_ctx, VERSION_2025_04_01).connected_registries

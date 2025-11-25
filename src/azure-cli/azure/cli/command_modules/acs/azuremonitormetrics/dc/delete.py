@@ -47,33 +47,24 @@ def get_dc_objects_list(cmd, cluster_subscription, cluster_resource_group_name, 
 
 # pylint: disable=line-too-long
 def delete_dc_objects_if_prometheus_enabled(cmd, dc_objects_list, cluster_subscription, cluster_resource_group_name, cluster_name):
-    from azure.cli.core.util import send_raw_request
+    from azure.cli.command_modules.acs._client_factory import get_resources_client
+    resources = get_resources_client(cmd.cli_ctx, cluster_subscription)
     cluster_resource_id = "/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.ContainerService/managedClusters/{2}".format(
         cluster_subscription,
         cluster_resource_group_name,
         cluster_name
     )
     for item in dc_objects_list:
-        armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
-        association_url = f"{armendpoint}{item['dataCollectionRuleId']}?api-version={DC_API}"
         try:
-            headers = ['User-Agent=azuremonitormetrics.get_dcr_if_prometheus_enabled']
-            r = send_raw_request(cmd.cli_ctx, "GET", association_url, headers=headers)
-            data = json.loads(r.text)
-            if 'microsoft-prometheusmetrics' in [stream.lower() for stream in data['properties']['dataFlows'][0]['streams']]:
+            dcr = resources.get_by_id(item['dataCollectionRuleId'], DC_API)
+            dataFlows = getattr(dcr, 'properties', {}).get('dataFlows', []) if hasattr(dcr, 'properties') else dcr.get('properties', {}).get('dataFlows', [])
+            if dataFlows and 'microsoft-prometheusmetrics' in [stream.lower() for stream in dataFlows[0].get('streams', [])]:
                 # delete DCRA
-                armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
-                url = f"{armendpoint}{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{item['name']}?api-version={DC_API}"
-                headers = ['User-Agent=azuremonitormetrics.delete_dcra']
-                send_raw_request(cmd.cli_ctx, "DELETE", url, headers=headers)
+                dcra_id = f"{cluster_resource_id}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{item['name']}"
+                resources.begin_delete_by_id(dcra_id, DC_API)
                 # delete DCR
-                url = f"{armendpoint}{item['dataCollectionRuleId']}?api-version={DC_API}"
-                headers = ['User-Agent=azuremonitormetrics.delete_dcr']
-                send_raw_request(cmd.cli_ctx, "DELETE", url, headers=headers)
+                resources.begin_delete_by_id(item['dataCollectionRuleId'], DC_API)
                 # delete DCE
-                url = f"{armendpoint}{item['dceId']}?api-version={DC_API}"
-                headers = ['User-Agent=azuremonitormetrics.delete_dce']
-                send_raw_request(cmd.cli_ctx, "DELETE", url, headers=headers)
-        except CLIError as e:
-            error = e
-            raise CLIError(error)
+                resources.begin_delete_by_id(item['dceId'], DC_API)
+        except Exception as e:
+            raise CLIError(e)

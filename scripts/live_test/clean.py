@@ -16,12 +16,13 @@ from tqdm import tqdm
 
 def main():
     print('Azure cli resource clean up: version 1.0')
+    clean_resource_group()
     clean_lock()
-    clean_sig()
-    clean_storage()
-    clean_servicebus()
-    clean_backup()
-    clean_deleted_keyvault()
+    # clean_sig()
+    # clean_storage()
+    # clean_servicebus()
+    # clean_backup()
+    # clean_deleted_keyvault()
 
 
 def clean_lock():
@@ -277,6 +278,7 @@ def clean_backup():
 
 
 def clean_deleted_keyvault():
+    print('Clean keyvault')
     cmd = ['az', 'keyvault', 'list-deleted', '--query', '[][name, properties.scheduledPurgeDate, type]']
     print(cmd)
     out = subprocess.run(cmd, capture_output=True)
@@ -298,6 +300,7 @@ def clean_deleted_keyvault():
 
 
 def clean_resource_group():
+    print('Clean resource group')
     skip_grous = []
     cmd = ['az', 'group', 'list', '--query', '[].name']
     print(cmd)

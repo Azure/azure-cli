@@ -99,6 +99,25 @@ class BackupTests(ScenarioTest, unittest.TestCase):
                 self.check("resourceGroup", '{rg}')
             ]).get_output_in_json()
 
+    def test_backup_wl_hana_snapshot(self):
+        self.kwargs.update({
+            'sub': sub_hana,
+            'rg': rg_hana,
+            'vault': 'saphana-clitest-vault',
+            'existing_policy_name': 'hanasnaptest',
+            'bmt': 'AzureWorkload',
+            'wt': 'SAPHanaDBInstance',
+            'policy_name': 'hanasnap2'
+        })
+
+        policy_json = self.cmd('backup policy show -g "{rg}" -v "{vault}" -n "{existing_policy_name}"').get_output_in_json()
+        policy_json['properties']['subProtectionPolicy'][0]['snapshotBackupAdditionalDetails']['instantRPDetails'] = policy_json['properties']['subProtectionPolicy'][0]['snapshotBackupAdditionalDetails']['instantRpDetails']
+        del policy_json['properties']['subProtectionPolicy'][0]['snapshotBackupAdditionalDetails']['instantRpDetails'] 
+        self.kwargs['existing_policy'] = json.dumps(policy_json, separators=(',', ':')).replace('\'', '\\\'').replace('"', '\\"')
+
+        self.cmd('backup policy create --backup-management-type "{bmt}" --workload-type "{wt}" -g "{rg}" -v "{vault}" -n "{policy_name}" --policy "{existing_policy}"')
+        self.cmd('backup policy delete -g "{rg}" -v "{vault}" -n "{policy_name}"')
+
     # @record_only()
     @unittest.skip("Unit test is currently blocked due to test resource setup issues. SQL tests cover scenarios for now.")
     def test_backup_wl_hana_container(self):

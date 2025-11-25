@@ -16,6 +16,13 @@ from azure.cli.command_modules.acs._consts import (
     CONST_OS_SKU_AZURELINUX,
     CONST_OS_SKU_CBLMARINER,
     CONST_OS_SKU_MARINER,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
+    CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+    CONST_NODEPOOL_MODE_GATEWAY,
+    CONST_AZURE_SERVICE_MESH_MAX_EGRESS_NAME_LENGTH,
+    CONST_VIRTUAL_MACHINE_SCALE_SETS,
+    CONST_AVAILABILITY_SET,
+    CONST_VIRTUAL_MACHINES,
 )
 from azure.cli.core import keys
 from azure.cli.core.azclierror import (
@@ -59,8 +66,16 @@ def validate_ssh_key(namespace):
                            "file share, back up your keys to a safe location",
                            private_key_filepath, public_key_filepath)
         else:
-            raise CLIError('An RSA key file or key value must be supplied to SSH Key Value. '
-                           'You can use --generate-ssh-keys to let CLI generate one for you')
+            if (not content or str(content).strip() == "" or
+                    (content == os.path.join(os.path.expanduser('~'), '.ssh', 'id_rsa.pub'))):
+                namespace.no_ssh_key = True
+                return
+            raise CLIError(
+                "The SSH key provided is not a valid RSA public key. "
+                "Provide the contents of a valid SSH public key (for example, '~/.ssh/id_rsa.pub'), "
+                "specify a path to a public key file, "
+                "or add --generate-ssh-keys as a parameter to create a new key pair."
+            )
     namespace.ssh_key_value = content
 
 
@@ -99,6 +114,44 @@ def validate_ip_ranges(namespace):
             raise CLIError("--api-server-authorized-ip-ranges should be a list of IPv4 addresses or CIDRs")
 
 
+def validate_namespace_name(namespace):
+    _validate_namespace_name(namespace.name)
+
+
+def _validate_namespace_name(name):
+    """
+    Validates a Kubernetes namespace name.
+    Raises ValueError if the name is invalid.
+    """
+    if name != "":
+        if len(name) < 1 or len(name) > 63:
+            raise ValueError("Namespace name must be between 1 and 63 characters.")
+        pattern = r'^[a-z0-9]([-a-z0-9]*[a-z0-9])?$'
+        if not re.match(pattern, name):
+            raise ValueError(
+                f"Invalid namespace '{name}'. Must consist of lower case alphanumeric characters or '-', "
+                "and must start and end with an alphanumeric character."
+            )
+
+
+def validate_resource_quota(namespace):
+    if namespace.cpu_request is not None:
+        if not namespace.cpu_request.endswith("m"):
+            raise ValueError("--cpu-request must be specified in millicores, like 200m")
+    if namespace.cpu_limit is not None:
+        if not namespace.cpu_limit.endswith("m"):
+            raise ValueError("--cpu-limit must be specified in millicores, like 200m")
+    pattern = r"^\d+(Ki|Mi|Gi|Ti|Pi|Ei)$"
+    if namespace.memory_request is not None:
+        if not re.match(pattern, namespace.memory_request):
+            raise ValueError("--memory-request must be specified in the power-of-two equivalents form:"
+                             "Ei, Pi, Ti, Gi, Mi, Ki.")
+    if namespace.memory_limit is not None:
+        if not re.match(pattern, namespace.memory_limit):
+            raise ValueError("--memory-limit must be specified in the power-of-two equivalents form:"
+                             "Ei, Pi, Ti, Gi, Mi, Ki.")
+
+
 def validate_k8s_version(namespace):
     """Validates a string as a possible Kubernetes version. An empty string is also valid, which tells the server
     to use its default version."""
@@ -129,6 +182,20 @@ def validate_nodepool_name(namespace):
 def validate_agent_pool_name(namespace):
     """Validates a nodepool name to be at most 12 characters, alphanumeric only."""
     _validate_nodepool_name(namespace.agent_pool_name)
+
+
+def validate_asm_egress_name(namespace):
+    if namespace.istio_egressgateway_name is None:
+        return
+    name = namespace.istio_egressgateway_name
+    asm_egress_name_regex = re.compile(r'^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$')
+    match = asm_egress_name_regex.match(name)
+    if not match or len(name) > CONST_AZURE_SERVICE_MESH_MAX_EGRESS_NAME_LENGTH:
+        raise InvalidArgumentValueError(
+            f"Istio egress name {name} is invalid. Name must be between 1 and "
+            f"{CONST_AZURE_SERVICE_MESH_MAX_EGRESS_NAME_LENGTH} characters, must consist of lower case alphanumeric "
+            "characters, '-' or '.', and must start and end with an alphanumeric character."
+        )
 
 
 def validate_kubectl_version(namespace):
@@ -182,9 +249,12 @@ def validate_vm_set_type(namespace):
     if namespace.vm_set_type is not None:
         if namespace.vm_set_type == '':
             return
-        if namespace.vm_set_type.lower() != "availabilityset" and \
-                namespace.vm_set_type.lower() != "virtualmachinescalesets":
-            raise CLIError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet")
+        if (
+            namespace.vm_set_type.lower() != CONST_VIRTUAL_MACHINE_SCALE_SETS.lower() and
+            namespace.vm_set_type.lower() != CONST_AVAILABILITY_SET.lower() and
+            namespace.vm_set_type.lower() != CONST_VIRTUAL_MACHINES.lower()
+        ):
+            raise CLIError("--vm-set-type can only be VirtualMachineScaleSets or AvailabilitySet or VirtualMachines")
 
 
 def validate_load_balancer_sku(namespace):
@@ -341,6 +411,17 @@ def validate_spot_max_price(namespace):
 def validate_acr(namespace):
     if namespace.attach_acr and namespace.detach_acr:
         raise CLIError('Cannot specify "--attach-acr" and "--detach-acr" at the same time.')
+    if namespace.assignee_principal_type and not namespace.attach_acr:
+        raise CLIError('The "--assignee-principal-type" argument can only be used with "--attach-acr".')
+    if namespace.attach_acr:
+        # Validate assignee_principal_type if specified
+        if namespace.assignee_principal_type:
+            valid_types = ['User', 'ServicePrincipal', 'Group']
+            if namespace.assignee_principal_type not in valid_types:
+                raise CLIError(
+                    f"Invalid value for --assignee_principal_type. "
+                    f"Allowed values are: {', '.join(valid_types)}"
+                )
 
 
 def validate_nodepool_tags(ns):
@@ -358,6 +439,20 @@ def validate_vnet_subnet_id(namespace):
 
 def validate_pod_subnet_id(namespace):
     _validate_subnet_id(namespace.pod_subnet_id, "--pod-subnet-id")
+
+
+def validate_pod_ip_allocation_mode(namespace):
+    """Validates the pod ip allocation mode string."""
+    if namespace.pod_ip_allocation_mode is not None:
+        if namespace.pod_ip_allocation_mode not in (
+            CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL,
+            CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK,
+        ):
+            raise InvalidArgumentValueError("--pod-ip-allocation-mode can only be DynamicIndividual or StaticBlock")
+
+
+def validate_apiserver_subnet_id(namespace):
+    _validate_subnet_id(namespace.apiserver_subnet_id, "--apiserver-subnet-id")
 
 
 def _validate_subnet_id(subnet_id, name):
@@ -470,6 +565,21 @@ def validate_max_surge(namespace):
             raise CLIError("--max-surge must be positive")
     except ValueError:
         raise CLIError("--max-surge should be an int or percentage")
+
+
+def validate_max_unavailable(namespace):
+    """validates parameters max unavailable are positive integers or percents."""
+    if namespace.max_unavailable is None:
+        return
+    int_or_percent = namespace.max_unavailable
+    if int_or_percent.endswith('%'):
+        int_or_percent = int_or_percent.rstrip('%')
+
+    try:
+        if int(int_or_percent) < 0:
+            raise InvalidArgumentValueError("--max-unavailable must be positive")
+    except ValueError:
+        raise InvalidArgumentValueError("--max-unavailable should be an int or percentage")
 
 
 def validate_assign_identity(namespace):
@@ -841,7 +951,7 @@ def validate_bootstrap_container_registry_resource_id(namespace):
     container_registry_resource_id = namespace.bootstrap_container_registry_resource_id
     if container_registry_resource_id is None or container_registry_resource_id == '':
         return
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
     if not is_valid_resource_id(container_registry_resource_id):
         raise InvalidArgumentValueError("--bootstrap-container-registry-resource-id is not a valid Azure resource ID.")
 
@@ -852,3 +962,12 @@ def validate_custom_ca_trust_certificates(namespace):
         if hasattr(namespace, 'os_type') and namespace.os_type != "Linux":
             raise ArgumentUsageError(
                 '--custom-ca-trust-certificates can only be set for linux nodepools')
+
+
+def validate_gateway_prefix_size(namespace):
+    """Validates the gateway prefix size."""
+    if namespace.gateway_prefix_size is not None:
+        if not hasattr(namespace, 'mode') or namespace.mode != CONST_NODEPOOL_MODE_GATEWAY:
+            raise ArgumentUsageError("--gateway-prefix-size can only be set for Gateway-mode nodepools")
+        if namespace.gateway_prefix_size < 28 or namespace.gateway_prefix_size > 31:
+            raise InvalidArgumentValueError("--gateway-prefix-size must be in the range [28, 31]")

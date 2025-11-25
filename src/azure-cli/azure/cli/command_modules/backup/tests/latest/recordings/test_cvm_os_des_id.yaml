@@ -1,0 +1,49 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - backup recoverypoint list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --backup-management-type --workload-type -g -v -c -i --query
+      User-Agent:
+      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.11.9 (Windows-10-10.0.26200-SP0)
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/sgholap-rg/providers/Microsoft.RecoveryServices/vaults/PSTestingVault/backupProtectedItems?api-version=2025-02-01&%24filter=backupManagementType+eq+%27AzureIaasVM%27+and+itemType+eq+%27VM%27
+  response:
+    body:
+      string: '{"error":{"code":"ResourceGroupNotFound","message":"Resource group
+        ''sgholap-rg'' could not be found."}}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '102'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Mon, 27 Oct 2025 12:38:53 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-failure-cause:
+      - gateway
+      x-msedge-ref:
+      - 'Ref A: 0185FD67EDA640939F4518379E06AF80 Ref B: JKT201051407029 Ref C: 2025-10-27T12:38:53Z'
+    status:
+      code: 404
+      message: Not Found
+version: 1

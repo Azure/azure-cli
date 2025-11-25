@@ -12,8 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network virtual-appliance site create",
-    is_preview=True,
+    "network virtual-appliance site create"
 )
 class Create(AAZCommand):
     """Create an Azure network virtual appliance site.

@@ -12,8 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network virtual-appliance update",
-    is_preview=True,
+    "network virtual-appliance update"
 )
 class Update(AAZCommand):
     """Update an Azure network virtual appliance.

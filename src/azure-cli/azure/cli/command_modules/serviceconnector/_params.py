@@ -154,7 +154,7 @@ def add_target_resource_block(context, target):
             context.argument(arg, options_list=content.get('options'), type=str,
                              help='{}. Required if \'--target-id\' is not specified.'.format(content.get('help')))
             required_args.append(content.get('options')[0])
-        if target == RESOURCE.NeonPostgres:
+        if target == RESOURCE.NeonPostgres or target == RESOURCE.MongoDbAtlas:
             context.ignore('target_id')
         else:
             context.argument('target_id', type=str,
@@ -189,6 +189,12 @@ def add_connstr_props_argument(context):
                      action=AddAdditionalConnectionStringProperties, nargs='*',
                      help='The additional connection string properties used to build connection string.',
                      validator=validate_connstr_props)
+
+
+def add_no_recreate_arguments(context):
+    context.argument('no_recreate', options_list=['--no-recreate'],
+                     arg_type=get_three_state_flag(), default=False,
+                     help='Skip executing creation operation when no updates to an existing connection.')
 
 
 def add_target_type_argument(context, source):
@@ -321,6 +327,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-statements
                 add_customized_keys_argument(c)
                 add_opt_out_argument(c)
                 add_connstr_props_argument(c)
+                add_no_recreate_arguments(c)
 
             with self.argument_context('{} connection update {}'.format(source.value, target.value)) as c:
                 add_client_type_argument(c, source, target)

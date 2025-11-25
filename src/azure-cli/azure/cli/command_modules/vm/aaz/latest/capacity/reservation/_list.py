@@ -22,11 +22,13 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-08-01",
+        "version": "2024-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations", "2022-08-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/capacityreservationgroups/{}/capacityreservations", "2024-11-01"],
         ]
     }
+
+    AZ_SUPPORT_PAGINATION = True
 
     def _handler(self, command_args):
         super()._handler(command_args)
@@ -43,8 +45,8 @@ class List(AAZCommand):
         # define Arg Group ""
 
         _args_schema = cls._args_schema
-        _args_schema.capacity_reservation_group_name = AAZStrArg(
-            options=["-c", "--capacity-reservation-group", "--capacity-reservation-group-name"],
+        _args_schema.capacity_reservation_group = AAZStrArg(
+            options=["-c", "--capacity-reservation-group"],
             help="The name of the capacity reservation group.",
             required=True,
         )
@@ -101,7 +103,7 @@ class List(AAZCommand):
         def url_parameters(self):
             parameters = {
                 **self.serialize_url_param(
-                    "capacityReservationGroupName", self.ctx.args.capacity_reservation_group_name,
+                    "capacityReservationGroupName", self.ctx.args.capacity_reservation_group,
                     required=True,
                 ),
                 **self.serialize_url_param(
@@ -119,7 +121,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-08-01",
+                    "api-version", "2024-11-01",
                     required=True,
                 ),
             }
@@ -187,6 +189,7 @@ class List(AAZCommand):
             properties = cls._schema_on_200.value.Element.properties
             properties.instance_view = AAZObjectType(
                 serialized_name="instanceView",
+                flags={"read_only": True},
             )
             properties.platform_fault_domain_count = AAZIntType(
                 serialized_name="platformFaultDomainCount",

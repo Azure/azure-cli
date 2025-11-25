@@ -8,7 +8,7 @@
 from codecs import open
 from setuptools import setup, find_packages
 
-VERSION = "2.72.0"
+VERSION = "2.81.0"
 
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
@@ -35,16 +35,17 @@ CLASSIFIERS = [
     'Intended Audience :: System Administrators',
     'Programming Language :: Python',
     'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
     'Programming Language :: Python :: 3.11',
     'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13',
     'License :: OSI Approved :: MIT License',
 ]
 
 DEPENDENCIES = [
     'argcomplete~=3.5.2',
     'azure-cli-telemetry==1.1.0.*',
+    'azure-core~=1.35.0',
     'azure-mgmt-core>=1.2.0,<2',
     'cryptography',
     # On Linux, the distribution (Ubuntu, Debian, etc) and version are logged in telemetry
@@ -54,8 +55,8 @@ DEPENDENCIES = [
     'knack~=0.11.0',
     'microsoft-security-utilities-secret-masker~=1.0.0b4',
     'msal-extensions==1.2.0',
-    'msal[broker]==1.32.0',
-    'msrestazure~=0.6.4',
+    'msal[broker]==1.34.0b1; sys_platform == "win32"',
+    'msal==1.34.0b1; sys_platform != "win32"',
     'packaging>=20.9',
     'pkginfo>=1.5.0.1',
     # psutil can't install on cygwin: https://github.com/Azure/azure-cli/issues/9399
@@ -82,6 +83,6 @@ setup(
     classifiers=CLASSIFIERS,
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests", "azure", "azure.cli"]),
     install_requires=DEPENDENCIES,
-    python_requires='>=3.9.0',
+    python_requires='>=3.10.0',
     package_data={'azure.cli.core': ['auth/landing_pages/*.html']}
 )

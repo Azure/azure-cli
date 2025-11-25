@@ -16,7 +16,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_ltr_backups,
     cf_postgres_flexible_operations,
     cf_postgres_flexible_replica,
-    cf_postgres_flexible_adadmin,
+    cf_postgres_flexible_admin,
     cf_postgres_flexible_migrations,
     cf_postgres_flexible_private_endpoint_connection,
     cf_postgres_flexible_private_endpoint_connections,
@@ -85,9 +85,9 @@ def load_flexibleserver_command_table(self, _):
         client_factory=cf_postgres_flexible_replica
     )
 
-    postgres_flexible_adadmin_sdk = CliCommandType(
+    postgres_flexible_admin_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#AdministratorsOperations.{}',
-        client_factory=cf_postgres_flexible_adadmin
+        client_factory=cf_postgres_flexible_admin
     )
 
     postgres_flexible_migrations_sdk = CliCommandType(
@@ -238,7 +238,6 @@ def load_flexibleserver_command_table(self, _):
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_servers) as g:
         g.custom_command('create', 'flexible_replica_create', supports_no_wait=True)
-        g.custom_command('stop-replication', 'flexible_replica_stop', confirmation=True)
         g.custom_command('promote', 'flexible_replica_promote', confirmation=True)
 
     with self.command_group('postgres flexible-server identity', postgres_flexible_servers_sdk,
@@ -250,23 +249,14 @@ def load_flexibleserver_command_table(self, _):
         g.custom_show_command('show', 'flexible_server_identity_show')
         g.custom_command('list', 'flexible_server_identity_list')
 
-    with self.command_group('postgres flexible-server ad-admin', postgres_flexible_adadmin_sdk,
+    with self.command_group('postgres flexible-server microsoft-entra-admin', postgres_flexible_admin_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_adadmin) as g:
-        g.custom_command('create', 'flexible_server_ad_admin_set', supports_no_wait=True)
-        g.custom_command('delete', 'flexible_server_ad_admin_delete', supports_no_wait=True, confirmation=True)
-        g.custom_command('list', 'flexible_server_ad_admin_list')
-        g.custom_show_command('show', 'flexible_server_ad_admin_show')
-        g.custom_wait_command('wait', 'flexible_server_ad_admin_show')
-
-    with self.command_group('postgres flexible-server microsoft-entra-admin', postgres_flexible_adadmin_sdk,
-                            custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=cf_postgres_flexible_adadmin) as g:
-        g.custom_command('create', 'flexible_server_ad_admin_set', supports_no_wait=True)
-        g.custom_command('delete', 'flexible_server_ad_admin_delete', supports_no_wait=True, confirmation=True)
-        g.custom_command('list', 'flexible_server_ad_admin_list')
-        g.custom_show_command('show', 'flexible_server_ad_admin_show')
-        g.custom_wait_command('wait', 'flexible_server_ad_admin_show')
+                            client_factory=cf_postgres_flexible_admin) as g:
+        g.custom_command('create', 'flexible_server_microsoft_entra_admin_set', supports_no_wait=True)
+        g.custom_command('delete', 'flexible_server_microsoft_entra_admin_delete', supports_no_wait=True, confirmation=True)
+        g.custom_command('list', 'flexible_server_microsoft_entra_admin_list')
+        g.custom_show_command('show', 'flexible_server_microsoft_entra_admin_show')
+        g.custom_wait_command('wait', 'flexible_server_microsoft_entra_admin_show')
 
     with self.command_group('postgres flexible-server advanced-threat-protection-setting', postgres_flexible_server_threat_protection_settings_sdk,
                             custom_command_type=flexible_servers_custom_postgres,

@@ -139,7 +139,6 @@ from .operations.dns import (RecordSetADelete as DNSRecordSetADelete, RecordSetA
                              RecordSetCAADelete as DNSRecordSetCAADelete, RecordSetCNAMEDelete as DNSRecordSetCNAMEDelete)
 
 logger = get_logger(__name__)
-RULESET_VERSION = {"0.1": "0.1", "1.0": "1.0", "1.1": "1.1", "2.1": "2.1", "2.2.9": "2.2.9", "3.0": "3.0", "3.1": "3.1", "3.2": "3.2"}
 
 remove_basic_option_msg = "It's recommended to create with `%s`. " \
                           "Please be aware that Basic option will be removed in the future."
@@ -228,7 +227,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
                                custom_error_pages=None, firewall_policy=None, max_capacity=None,
-                               user_assigned_identity=None,
+                               user_assigned_identity=None, enable_fips=None,
                                enable_private_link=False,
                                private_link_ip_address=None,
                                private_link_subnet='PrivateLinkDefaultSubnet',
@@ -302,7 +301,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
-        firewall_policy, max_capacity, user_assigned_identity,
+        firewall_policy, max_capacity, user_assigned_identity, enable_fips,
         enable_private_link, private_link_name,
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
         private_link_subnet_id, trusted_client_cert, ssl_profile, ssl_profile_id, ssl_cert_name)
@@ -1942,14 +1941,18 @@ class WAFCreate(_WAFCreate):
             options=["--type"],
             help="Type of the web application firewall rule set.",
             default="Microsoft_DefaultRuleSet",
-            enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet", "OWASP": "OWASP"},
+            enum={
+                "Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet",
+                "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet",
+                "OWASP": "OWASP",
+                "Microsoft_HTTPDDoSRuleSet": "Microsoft_HTTPDDoSRuleSet"
+            },
         )
         args_schema.rule_set_version = AAZStrArg(
             options=["--version"],
             help="Version of the web application firewall rule set type. "
                  "0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet",
-            default="2.1",
-            enum=RULESET_VERSION
+            default="2.1"
         )
         return args_schema
 
@@ -2032,6 +2035,11 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
         managed_rule_overrides = []
     else:
         managed_rule_overrides = rules
+
+    if rule_set_type.lower() == "microsoft_httpddosruleset":
+        for r in managed_rule_overrides:
+            if not r.get('sensitivity', None):
+                r['sensitivity'] = 'Medium'
 
     rule_group_override = None
     if rule_group_name is not None:
@@ -2189,6 +2197,21 @@ def list_waf_managed_rules(cmd, resource_group_name, policy_name):
         "resource_group": resource_group_name,
         "name": policy_name
     })["managedRules"]
+# endregion
+
+
+# region ApplicationGatewayWAFPolicy ManagedRule Exception
+def remove_waf_managed_rule_exception(cmd, resource_group_name, policy_name):
+    from .aaz.latest.network.application_gateway.waf_policy import Update
+
+    class WAFExceptionRemove(Update):
+        def pre_instance_update(self, instance):
+            instance.properties.managed_rules.exceptions = []
+
+    return WAFExceptionRemove(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": policy_name,
+        "resource_group": resource_group_name,
+    })
 # endregion
 
 
@@ -3845,7 +3868,6 @@ class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
             )
         )
         args_schema.private_dns_zone_id._registered = False
-        args_schema.name._required = False
 
         return args_schema
 
@@ -3892,7 +3914,6 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
             options=['--subnet'],
             arg_group="IP Configuration",
             help="Name or ID of subnet to use. If name provided, also supply `--vnet-name`.",
-            required=True,
             fmt=AAZResourceIdArgFormat(
                 template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}/subnets/{}"
             )
@@ -3910,20 +3931,21 @@ class PrivateLinkServiceCreate(_PrivateLinkServiceCreate):
             )
         )
 
-        args_schema.ip_configurations._registered = False
         args_schema.load_balancer_frontend_ip_configurations._registered = False
         args_schema.edge_zone_type._registered = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.ip_configurations = [{
-            'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
-            'private_ip_address': args.private_ip_address,
-            'private_ip_allocation_method': args.private_ip_allocation_method,
-            'private_ip_address_version': args.private_ip_address_version,
-            'subnet': {'id': args.subnet}
-        }]
+
+        if not has_value(args.ip_configurations):
+            args.ip_configurations = [{
+                'name': '{}_ipconfig_0'.format(args.name.to_serialized_data()),
+                'private_ip_address': args.private_ip_address,
+                'private_ip_allocation_method': args.private_ip_allocation_method,
+                'private_ip_address_version': args.private_ip_address_version,
+                'subnet': {'id': args.subnet}
+            }]
 
         args.load_balancer_frontend_ip_configurations = assign_aaz_list_arg(
             args.load_balancer_frontend_ip_configurations,
@@ -5314,14 +5336,12 @@ class PublicIpPrefixCreate(_PublicIpPrefixCreate):
         )
         args_schema.ip_tags.Element = AAZStrArg()
         args_schema.type._registered = False
-        args_schema.sku._registered = False
         args_schema.ip_tags_list._registered = False
 
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.sku = 'Standard'
         if has_value(args.edge_zone):
             args.type = 'EdgeZone'
         if has_value(args.ip_tags):
@@ -5575,7 +5595,7 @@ class VNetUpdate(_VNetUpdate):
 
     def pre_operations(self):
         args = self.ctx.args
-        if has_value(args.ipam_pool_prefix_allocations):
+        if args.ipam_pool_prefix_allocations.to_serialized_data():
             args.address_prefixes = []
 
     def post_instance_update(self, instance):
@@ -5686,6 +5706,9 @@ class VNetSubnetCreate(_VNetSubnetCreate):
         if has_value(args.disable_private_link_service_network_policies):
             logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+
+        if has_value(args.ipam_pool_prefix_allocations):
+            args.address_prefixes = []
 
 
 class VNetSubnetUpdate(_VNetSubnetUpdate):
@@ -5802,6 +5825,9 @@ class VNetSubnetUpdate(_VNetSubnetUpdate):
         if has_value(args.disable_private_link_service_network_policies):
             logger.warning(subnet_disable_pls_msg)
             args.private_link_service_network_policies = args.disable_private_link_service_network_policies
+
+        if args.ipam_pool_prefix_allocations.to_serialized_data():
+            args.address_prefixes = []
 
     def post_instance_update(self, instance):
         if not has_value(instance.properties.network_security_group.id):
@@ -5970,6 +5996,7 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
+        args_schema.virtual_network_gateway_migration_status._registered = False
         args_schema.ip_configurations._registered = False
         args_schema.edge_zone_type._registered = False
         args_schema.active._registered = False
@@ -6001,6 +6028,12 @@ class VnetGatewayCreate(_VnetGatewayCreate):
                                            'private_ip_allocation_method': 'Dynamic',
                                            'name': 'vnetGatewayConfig{}'.format(i)}
                     args.ip_configurations.append(ip_configuration[i])
+            else:
+                ip_configuration = {'subnet': subnet,
+                                    'private_ip_allocation_method': 'Dynamic',
+                                    'name': 'vnetGatewayConfig'}
+                args.ip_configurations.append(ip_configuration)
+
         else:
             args.vpn_type = None
             args.sku = None
@@ -6081,6 +6114,8 @@ class VnetGatewayUpdate(_VnetGatewayUpdate):
         args_schema.gateway_default_site._fmt = AAZResourceIdArgFormat(
             template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Network/localNetworkGateways/{}"
         )
+        args_schema.enable_high_bandwidth_vpn_gateway._registered = False
+        args_schema.virtual_network_gateway_migration_status._registered = False
         args_schema.ip_configurations._registered = False
         args_schema.active._registered = False
         args_schema.vpn_client_root_certificates._registered = False

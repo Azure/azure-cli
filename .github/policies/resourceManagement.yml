@@ -231,7 +231,7 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - dyu1208
+            - mbifeld
             - FumingZhang
             - andyliuliming
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
@@ -589,17 +589,28 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: AzureDataTransfer
+        then:
+        - mentionUsers:
+            mentionees:
+            - lasuredd-msft
+            - fzkhan
+            - pkuma-msft
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: Batch
         then:
         - mentionUsers:
             mentionees:
-            - mksuni
-            - bgklein
-            - mscurrell
             - dpwatrous
-            - gingi
-            - paterasMSFT
+            - wiboris
             - cRui861
+            - skapur12
+            - wanghoppe
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -621,8 +632,19 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - cabbpt
-            - theelderwand
+            - muazmian
+            - us6193
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Blob Storage SFTP
+        then:
+        - mentionUsers:
+            mentionees:
+            - greeshma-microsoft
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1422,7 +1444,7 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - rgreenMSFT
+            - amarjeetkr
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1435,6 +1457,19 @@ configuration:
             mentionees:
             - dlacy7
             - NateB2
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Data Transfer
+        then:
+        - mentionUsers:
+            mentionees:
+            - fzkhan
+            - lasuredd-msft
+            - pkuma-msft
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1484,8 +1519,7 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - alec-baird
-            - costinhagiu
+            - MichaelWu
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1527,6 +1561,21 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Device Registry
+        then:
+        - mentionUsers:
+            mentionees:
+            - c-ryan-k
+            - digimaun
+            - rohankhandelwal
+            - mryanlo
+            - atastrophic
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: DevOps
         then:
         - mentionUsers:
@@ -1544,7 +1593,6 @@ configuration:
         - mentionUsers:
             mentionees:
             - anishtrakru
-            - derekbekoe
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1555,8 +1603,7 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - sourabhguha
-            - inesk-vt
+            - YingXue
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1610,6 +1657,17 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Fabric
+        then:
+        - mentionUsers:
+            mentionees:
+            - xinzhizou
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: fleet
         then:
         - mentionUsers:
@@ -1625,9 +1683,9 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - AnatoliB
-            - Francisco-Gamino
-            - shreyabatra4
+            - kamperiadis
+            - amamounelsayed
+            - khkh-ms
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1722,20 +1780,8 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - iluican
-            - jlian
-            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
-            assignMentionees: False
-      - if:
-        - hasLabel:
-            label: Service Attention
-        - hasLabel:
-            label: IotDPS
-        then:
-        - mentionUsers:
-            mentionees:
-            - iluican
-            - jlian
+            - digimaun
+            - Azure/azure-iot-cli-triage
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1761,6 +1807,7 @@ configuration:
             - schaabs
             - chen-karen
             - chandanrr
+            - cheathamb36
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -1931,7 +1978,10 @@ configuration:
         - mentionUsers:
             mentionees:
             - ambhatna
-            - savjani
+            - deepthiprasad
+            - akning-ms
+            - junsu-msft
+            - coffeemug
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2198,6 +2248,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - AzMonEssential
+            - LarryZhang19
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2252,12 +2303,28 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: Monitor - ScheduledQueryRule
+        then:
+        - mentionUsers:
+            mentionees:
+            - azmonapplicationinsights
+            - asafst
+            - efratbp
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: MySQL
         then:
         - mentionUsers:
             mentionees:
             - ambhatna
-            - savjani
+            - deepthiprasad
+            - akning-ms
+            - junsu-msft
+            - coffeemug
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2270,6 +2337,21 @@ configuration:
             mentionees:
             - daeunyim
             - rajsell
+            - deepthiprasad
+            - akning-ms
+            - junsu-msft
+            - coffeemug
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Neon Postgre
+        then:
+        - mentionUsers:
+            mentionees:
+            - alluri02
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2372,8 +2454,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - gopimsft
-            - gimotwanMSFT
-            - avripintoms
+            - Azure/azure-firewall
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2656,8 +2737,11 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - shariq-mcs
-            - MSFTeegarden
+            - abhijitch_microsoft
+            - yuvalm_microsoft
+            - nikitagarg_microsoft
+            - sanar_microsoft
+            - cawa_microsoft
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2669,6 +2753,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - jfggdl
+            - damodaravadhani
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2720,6 +2805,17 @@ configuration:
         - hasLabel:
             label: Service Attention
         - hasLabel:
+            label: ResourceMover
+        then:
+        - mentionUsers:
+            mentionees:
+            - yashjain4
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
             label: Scheduler
         then:
         - mentionUsers:
@@ -2758,10 +2854,10 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - bleroy
-            - tjacobhi
-            - markheff
-            - miwelsh
+            - kuanlu95
+            - efrainretana
+            - mattgotteiner
+            - Draconicida
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2784,6 +2880,7 @@ configuration:
         - mentionUsers:
             mentionees:
             - nazang
+            - mooshc
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2839,10 +2936,10 @@ configuration:
         then:
         - mentionUsers:
             mentionees:
-            - mwesigwaguma
-            - a-Santamaria
+            - iliu816
+            - a-santamaria
             - LukeSlev
-            - jkochhar
+            - Jkochhar
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:
@@ -2978,6 +3075,34 @@ configuration:
         - mentionUsers:
             mentionees:
             - xgithubtriage
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: Storage Action
+        then:
+        - mentionUsers:
+            mentionees:
+            - blueww
+            - sshankMSFT
+            - golddove
+            - S-J-M
+            replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
+            assignMentionees: False
+      - if:
+        - hasLabel:
+            label: Service Attention
+        - hasLabel:
+            label: StorageDiscovery
+        then:
+        - mentionUsers:
+            mentionees:
+            - shanefujs
+            - apurv2304
+            - skallurk
+            - vdziunms
             replyTemplate: Thanks for the feedback! We are routing this to the appropriate team for follow-up. cc ${mentionees}.
             assignMentionees: False
       - if:

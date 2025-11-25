@@ -1536,7 +1536,7 @@ parameters:
     short-summary: The rule that will be disabled. If none specified, all rules in the group will be disabled. If provided, --group-name must be provided too.
     long-summary: |
         Usage: --rule rule-id=MyID state=MyState action=MyAction sensitivity=MySensitivity
-        Allowed values for sensitivity: High, Medium, Low, None
+        Allowed values for sensitivity: High, Medium, Low
         Multiple rules can be specified by using more than one `--rule` argument.
 examples:
   - name: Disable an attack protection rule
@@ -1588,6 +1588,21 @@ examples:
     text: |
         az network application-gateway waf-policy managed-rule rule-set list --policy-name MyPolicy --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['network application-gateway waf-policy managed-rule exception'] = """
+type: group
+short-summary: Manage exceptions to allow a request to skip the managed rules when the condition is satisfied.
+"""
+
+helps['network application-gateway waf-policy managed-rule exception remove'] = """
+type: command
+short-summary: Remove all managed rule exceptions that are applied on a WAF policy managed rules.
+"""
+
+helps['network application-gateway waf-policy managed-rule exception list'] = """
+type: command
+short-summary: List all managed rule exceptions that are applied on a WAF policy managed rules.
 """
 
 helps['network application-gateway waf-policy managed-rule exclusion'] = """

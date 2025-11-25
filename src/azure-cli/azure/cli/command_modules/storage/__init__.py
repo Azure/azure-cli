@@ -16,7 +16,7 @@ class StorageCommandsLoader(AzCommandsLoader):
         from azure.cli.core.commands import CliCommandType
         storage_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.storage.custom#{}')
         super().__init__(cli_ctx=cli_ctx,
-                         resource_type=ResourceType.DATA_STORAGE,
+                         resource_type=ResourceType.MGMT_STORAGE,
                          custom_command_type=storage_custom,
                          command_group_cls=StorageCommandGroup,
                          argument_context_cls=StorageArgumentContext)
@@ -39,29 +39,6 @@ class StorageCommandsLoader(AzCommandsLoader):
 
     def load_arguments(self, command):
         from azure.cli.command_modules.storage._params import load_arguments
-        load_arguments(self, command)
-
-
-class AzureStackStorageCommandsLoader(AzCommandsLoader):
-    def __init__(self, cli_ctx=None):
-        from azure.cli.core.commands import CliCommandType
-
-        storage_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.storage.custom#{}')
-        super().__init__(cli_ctx=cli_ctx,
-                         resource_type=ResourceType.DATA_STORAGE,
-                         custom_command_type=storage_custom,
-                         command_group_cls=AzureStackStorageCommandGroup,
-                         argument_context_cls=StorageArgumentContext)
-
-    def load_command_table(self, args):
-        super().load_command_table(args)
-        from azure.cli.command_modules.storage.commands_azure_stack import load_command_table
-        load_command_table(self, args)
-        return self.command_table
-
-    def load_arguments(self, command):
-        super().load_arguments(command)
-        from azure.cli.command_modules.storage._params_azure_stack import load_arguments
         load_arguments(self, command)
 
 
@@ -156,7 +133,6 @@ class StorageArgumentContext(AzArgumentContext):
                       arg_type=get_three_state_flag())
         self.argument('sku', help='The storage account SKU.', arg_type=get_enum_type(t_sku_name))
         self.argument('assign_identity', action='store_true', resource_type=ResourceType.MGMT_STORAGE,
-                      min_api='2017-06-01',
                       help='Generate and assign a new Storage Account Identity for this storage account for use '
                            'with key management services like Azure KeyVault.')
         self.argument('access_tier', arg_type=get_enum_type(t_access_tier),
@@ -169,7 +145,7 @@ class StorageArgumentContext(AzArgumentContext):
             encryption_choices = list(
                 t_encryption_services._attribute_map.keys())  # pylint: disable=protected-access
             self.argument('encryption_services', arg_type=get_enum_type(encryption_choices),
-                          resource_type=ResourceType.MGMT_STORAGE, min_api='2016-12-01', nargs='+',
+                          resource_type=ResourceType.MGMT_STORAGE, nargs='+',
                           validator=validate_encryption_services, help='Specifies which service(s) to encrypt.')
 
     def register_precondition_options(self, prefix=''):
@@ -306,7 +282,7 @@ Authentication failure. This may be caused by either invalid account key, connec
     def _register_data_plane_account_arguments(self, command_name):
         """ Add parameters required to create a storage client """
         from azure.cli.core.commands.parameters import get_resource_name_completion_list
-        from azure.cli.command_modules.storage._validators import is_storagev2, validate_client_parameters
+        from azure.cli.command_modules.storage._validators import validate_client_parameters
         command = self.command_loader.command_table.get(command_name, None)
         if not command:
             return
@@ -325,37 +301,27 @@ Authentication failure. This may be caused by either invalid account key, connec
                              help='Storage account connection string. Environment variable: '
                                   'AZURE_STORAGE_CONNECTION_STRING')
         resource_type = command.command_kwargs['resource_type']
-        if is_storagev2(resource_type.value[0]):
-            endpoint_argument_dict = {
-                ResourceType.DATA_STORAGE_BLOB: '--blob-endpoint',
-                ResourceType.DATA_STORAGE_FILESHARE: '--file-endpoint',
-                ResourceType.DATA_STORAGE_TABLE: '--table-endpoint',
-                ResourceType.DATA_STORAGE_QUEUE: '--queue-endpoint',
-                ResourceType.DATA_STORAGE_FILEDATALAKE: '--blob-endpoint'
-            }
-            command.add_argument('account_url', endpoint_argument_dict.get(resource_type, '--service-endpoint'),
-                                 required=False, default=None, arg_group=group_name,
-                                 help='Storage data service endpoint. Must be used in conjunction with either '
-                                      'storage account key or a SAS token. You can find each service primary endpoint '
-                                      'with `az storage account show`. '
-                                      'Environment variable: AZURE_STORAGE_SERVICE_ENDPOINT')
-            command.add_argument('account_key', '--account-key', required=False, default=None,
-                                 arg_group=group_name,
-                                 help='Storage account key. Must be used in conjunction with storage account '
-                                      'name or service endpoint. Environment variable: AZURE_STORAGE_KEY')
-            command.add_argument('sas_token', '--sas-token', required=False, default=None,
-                                 arg_group=group_name,
-                                 help='A Shared Access Signature (SAS). Must be used in conjunction with storage '
-                                      'account name or service endpoint. Environment variable: AZURE_STORAGE_SAS_TOKEN')
-        else:
-            command.add_argument('account_key', '--account-key', required=False, default=None,
-                                 arg_group=group_name,
-                                 help='Storage account key. Must be used in conjunction with storage account name. '
-                                      'Environment variable: AZURE_STORAGE_KEY')
-            command.add_argument('sas_token', '--sas-token', required=False, default=None,
-                                 arg_group=group_name,
-                                 help='A Shared Access Signature (SAS). Must be used in conjunction with storage '
-                                      'account name. Environment variable: AZURE_STORAGE_SAS_TOKEN')
+        endpoint_argument_dict = {
+            ResourceType.DATA_STORAGE_BLOB: '--blob-endpoint',
+            ResourceType.DATA_STORAGE_FILESHARE: '--file-endpoint',
+            ResourceType.DATA_STORAGE_TABLE: '--table-endpoint',
+            ResourceType.DATA_STORAGE_QUEUE: '--queue-endpoint',
+            ResourceType.DATA_STORAGE_FILEDATALAKE: '--blob-endpoint'
+        }
+        command.add_argument('account_url', endpoint_argument_dict.get(resource_type, '--service-endpoint'),
+                             required=False, default=None, arg_group=group_name,
+                             help='Storage data service endpoint. Must be used in conjunction with either '
+                                  'storage account key or a SAS token. You can find each service primary endpoint '
+                                  'with `az storage account show`. '
+                                  'Environment variable: AZURE_STORAGE_SERVICE_ENDPOINT')
+        command.add_argument('account_key', '--account-key', required=False, default=None,
+                             arg_group=group_name,
+                             help='Storage account key. Must be used in conjunction with storage account '
+                                  'name or service endpoint. Environment variable: AZURE_STORAGE_KEY')
+        command.add_argument('sas_token', '--sas-token', required=False, default=None,
+                             arg_group=group_name,
+                             help='A Shared Access Signature (SAS). Must be used in conjunction with storage '
+                                  'account name or service endpoint. Environment variable: AZURE_STORAGE_SAS_TOKEN')
 
     def _register_data_plane_oauth_arguments(self, command_name):
         from azure.cli.core.commands.parameters import get_enum_type
@@ -367,7 +333,7 @@ Authentication failure. This may be caused by either invalid account key, connec
             return
         self.command_loader.cli_ctx.invocation.data['command_string'] = command_name
 
-        with self.command_loader.argument_context(command_name, min_api='2017-11-09') as c:
+        with self.command_loader.argument_context(command_name) as c:
             c.extra('auth_mode', arg_type=get_enum_type(['login', 'key']),
                     help='The mode in which to run the command. "login" mode will directly use your login credentials '
                          'for the authentication. The legacy "key" mode will attempt to query for '
@@ -382,44 +348,6 @@ Authentication failure. This may be caused by either invalid account key, connec
                              'allowed data actions, even if there are ACLs in place for those files/directories.')
 
 
-class AzureStackStorageCommandGroup(StorageCommandGroup):
-
-    @classmethod
-    def get_handler_suppress_some_400(cls):
-        def handler(ex):
-            if hasattr(ex, 'status_code') and ex.status_code == 403:
-                # TODO: Revisit the logic here once the service team updates their response
-                if 'AuthorizationPermissionMismatch' in ex.args[0]:
-                    message = """
-You do not have the required permissions needed to perform this operation.
-Depending on your operation, you may need to be assigned one of the following roles:
-    "Storage Blob Data Contributor"
-    "Storage Blob Data Reader"
-    "Storage Queue Data Contributor"
-    "Storage Queue Data Reader"
-    "Storage Table Data Contributor"
-    "Storage Table Data Reader"
-
-If you want to use the old authentication method and allow querying for the right account key, please use the "--auth-mode" parameter and "key" value.
-                    """
-                    ex.args = (message,)
-                elif 'AuthorizationFailure' in ex.args[0]:
-                    message = """
-The request may be blocked by network rules of storage account. Please check network rule set using 'az storage account show -n accountname --query networkRuleSet'.
-If you want to change the default action to apply when no rule matches, please use 'az storage account update'.
-                    """
-                    ex.args = (message,)
-                elif 'AuthenticationFailed' in ex.args[0]:
-                    message = """
-Authentication failure. This may be caused by either invalid account key, connection string or sas token value provided for your storage account.
-                    """
-                    ex.args = (message,)
-            if hasattr(ex, 'status_code') and ex.status_code == 409 and 'NoPendingCopyOperation' in ex.args[0]:
-                pass
-
-        return handler
-
-
 def _merge_new_exception_handler(kwargs, handler):
     first = kwargs.get('exception_handler')
 
@@ -431,8 +359,4 @@ def _merge_new_exception_handler(kwargs, handler):
     kwargs['exception_handler'] = new_handler
 
 
-def get_command_loader(cli_ctx):
-    if cli_ctx.cloud.profile.lower() != 'latest':
-        return AzureStackStorageCommandsLoader
-
-    return StorageCommandsLoader
+COMMAND_LOADER_CLS = StorageCommandsLoader

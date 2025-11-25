@@ -145,10 +145,6 @@ long-summary: >
 examples:
   - name: Create a storage account 'mystorageaccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
     text: az storage account create -n mystorageaccount -g MyResourceGroup -l westus --sku Standard_LRS
-    unsupported-profiles: 2017-03-09-profile
-  - name: Create a storage account 'mystorageaccount' in resource group 'MyResourceGroup' in the West US region with locally redundant storage.
-    text: az storage account create -n mystorageaccount -g MyResourceGroup -l westus --account-type Standard_LRS
-    supported-profiles: 2017-03-09-profile
   - name: Create a storage account 'mystorageaccount' in resource group 'MyResourceGroup' in the eastus2euap region with account-scoped encryption key enabled for Table Service.
     text: az storage account create -n mystorageaccount -g MyResourceGroup --kind StorageV2 -l eastus2euap -t Account
 """
@@ -231,9 +227,12 @@ long-summary: |
     cluster will become primary after failover. For more information, please refer to
     https://learn.microsoft.com/azure/storage/common/storage-disaster-recovery-guidance.
 examples:
-  - name: Failover a storage account.
+  - name: Unplanned Failover a storage account.
     text: |
         az storage account failover -n mystorageaccount -g MyResourceGroup
+  - name: Planned Failover a storage account.
+    text: |
+        az storage account failover -n mystorageaccount -g MyResourceGroup --failover-type Planned
   - name: Failover a storage account without waiting for complete.
     text: |
         az storage account failover -n mystorageaccount -g MyResourceGroup --no-wait
@@ -1044,6 +1043,11 @@ examples:
     text: |
         az storage blob incremental-copy start --connection-string myconnectionstring --destination-blob mydestinationblob --destination-container MyDestinationContainer --source-uri https://storage.blob.core.windows.net/photos
     crafted: true
+"""
+
+helps['storage blob incremental-copy cancel'] = """
+type: command
+short-summary: Aborts a pending copy_blob operation, and leaves a destination blob with zero length and full metadata.
 """
 
 helps['storage blob lease'] = """
@@ -3188,4 +3192,27 @@ helps['storage file hard-link create'] = """
       - name: Create a hard link to an NFS file specified by path.
         text: |
             az storage file hard-link create --account-name MyAccount --share-name share --path link_path --target original_path
+"""
+
+helps['storage file symbolic-link'] = """
+    type: group
+    short-summary: Manage storage file symbolic-link.
+"""
+
+helps['storage file symbolic-link create'] = """
+    type: command
+    short-summary: NFS only. Creates a symbolic link to the specified file.
+    examples:
+      - name: Create a symbolic link to an NFS file specified by path.
+        text: |
+            az storage file symbolic-link create --account-name MyAccount --share-name share --path link_path --target target_path --metadata meta1=value1 meta2=value2 --file-creation-time now --file-last-write-time now --owner 6 --group 7
+"""
+
+helps['storage file symbolic-link show'] = """
+    type: command
+    short-summary: NFS only. Gets the symbolic link for the file client.
+    examples:
+      - name: Show the symbolic link to an NFS file specified by path.
+        text: |
+            az storage file symbolic-link show --account-name MyAccount --share-name share --path link_path
 """

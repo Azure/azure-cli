@@ -14,7 +14,6 @@ from azure.cli.command_modules.appconfig._credential import AppConfigurationCliC
 from azure.cli.command_modules.appconfig._utils import get_appconfig_data_client
 from azure.cli.core._profile import Profile
 from azure.cli.core.auth.credential_adaptor import CredentialAdaptor
-from azure.cli.core.auth.adal_authentication import MSIAuthenticationWrapper
 from azure.cli.core.cloud import get_active_cloud
 from azure.cli.core.mock import DummyCli
 from knack.util import CLIError

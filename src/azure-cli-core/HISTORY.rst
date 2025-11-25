@@ -3,6 +3,48 @@
 Release History
 ===============
 
+2.81.0
+++++++
+* Minor fixes
+
+2.80.0
+++++++
+* Minor fixes
+
+2.79.0
+++++++
+* Resolve CVE-2025-9230 (#32315)
+* Resolve CVE-2025-9232 (#32315)
+
+2.78.0
+++++++
+* Minor fixes
+
+2.77.0
+++++++
+* Resolve CVE-2025-4517 (#31928)
+* Add global policy arguments `--acquire-policy-token` and `--change-reference` to support Change Safety feature (#31741)
+
+2.76.0
+++++++
+* Resolve CVE-2024-47081 (#31708)
+* Provide actionable error recommendation when a command fails because of Multi-Factor Authentication (MFA) policy violation (#31699)
+
+2.75.0
+++++++
+* Resolve CVE-2025-50181 (#31669)
+* Resolve CVE-2025-50182 (#31669)
+
+2.74.0
+++++++
+* Resolve CVE-2024-13176 (#31503)
+* Resolve CVE-2024-9143 (#31503)
+
+2.73.0
+++++++
+* [BREAKING CHANGE] Remove azure stack profiles `2020-09-01-hybrid`, `2019-03-01-hybrid`, `2018-03-01-hybrid` and `2017-03-09-profile` (#31307)
+* Use MSAL for managed identity authentication (#25959)
+
 2.72.0
 ++++++
 * Minor fixes

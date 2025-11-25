@@ -9,7 +9,7 @@ import time
 import re
 from xml.etree import ElementTree
 
-from urllib.parse import urlparse
+from urllib.parse import quote, urlparse
 from urllib.request import urlopen
 
 from binascii import hexlify
@@ -41,8 +41,9 @@ from azure.mgmt.web import WebSiteManagementClient
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands import LongRunningOperation
-from azure.cli.core.util import in_cloud_console, shell_safe_json_parse, open_page_in_browser, get_json_object, \
-    ConfiguredDefaultSetter, sdk_no_wait
+from azure.cli.core.commands.progress import IndeterminateProgressBar
+from azure.cli.core.util import shell_safe_json_parse, open_page_in_browser, get_json_object, \
+    ConfiguredDefaultSetter
 from azure.cli.core.util import get_az_user_agent, send_raw_request, get_file_json
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.core.azclierror import (InvalidArgumentValueError, MutuallyExclusiveArgumentError, ResourceNotFoundError,
@@ -75,7 +76,8 @@ from .utils import (_normalize_sku,
                     _remove_list_duplicates, get_raw_functionapp,
                     register_app_provider)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
-                           check_resource_group_exists, set_location, get_site_availability, get_profile_username,
+                           check_resource_group_exists, set_location, get_site_availability,
+                           get_regional_site_availability, get_profile_username,
                            get_plan_to_use, get_lang_from_content, get_rg_to_use, get_sku_to_use,
                            detect_os_from_src, get_current_stack_from_runtime, generate_default_app_name,
                            get_or_create_default_workspace, get_or_create_default_resource_group,
@@ -98,6 +100,12 @@ from .aaz.latest.relay.hyco import Show as HyCoShow
 from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
 from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
 from .aaz.latest.relay.namespace import List as NamespaceList
+from .aaz.latest.appservice.plan import (Show as AppServicePlanShow, Create as AppServicePlanCreate,
+                                         Update as AppServicePlanUpdate)
+from .aaz.latest.appservice.plan.managed_instance import (ShowRdpPassword
+                                                          as AppServicePlanManagedInstanceShowRdpPassword)
+from .aaz.latest.appservice.plan.managed_instance.instance import (List as AppServicePlanManagedInstanceList,
+                                                                   Recycle as AppServicePlanManagedInstanceRecycle)
 
 logger = get_logger(__name__)
 
@@ -115,7 +123,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   multicontainer_config_type=None, multicontainer_config_file=None, tags=None,
                   using_webapp_up=False, language=None, assign_identities=None,
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
-                  public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth=""):
+                  public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
+                  auto_generated_domain_name_label_scope=None):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -166,7 +175,15 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     helper = _StackRuntimeHelper(cmd, linux=is_linux, windows=not is_linux)
     location = plan_info.location
     # This is to keep the existing appsettings for a newly created webapp on existing webapp name.
-    name_validation = get_site_availability(cmd, name)
+    if auto_generated_domain_name_label_scope:
+        name_validation = get_regional_site_availability(cmd,
+                                                         location,
+                                                         name,
+                                                         resource_group_name,
+                                                         auto_generated_domain_name_label_scope)
+    else:
+        name_validation = get_site_availability(cmd, name)
+
     if not name_validation.name_available:
         if name_validation.reason == 'Invalid':
             raise ValidationError(name_validation.message)
@@ -221,7 +238,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
 
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
-                      public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled)
+                      public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled,
+                      auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
@@ -371,7 +389,7 @@ def _validate_vnet_integration_location(cmd, subnet_resource_group, vnet_name, w
                                  "vnet location: {}. Plan location: {}.".format(vnet_location, asp_location))
 
 
-def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
+def _get_subnet_info(cmd, resource_group_name, vnet, subnet, attached_resource="webapp"):
     from azure.cli.core.commands.client_factory import get_subscription_id
     subnet_info = {"vnet_name": None,
                    "subnet_name": None,
@@ -406,8 +424,8 @@ def _get_subnet_info(cmd, resource_group_name, vnet, subnet):
         subscription_id = parsed_vnet["subscription"]
         subnet_info["vnet_resource_id"] = vnet
     else:
-        logger.warning("Assuming subnet resource group is the same as webapp. "
-                       "Use a resource ID for --subnet or --vnet to use a different resource group.")
+        logger.warning("Assuming subnet resource group is the same as %s. "
+                       "Use a resource ID for --subnet or --vnet to use a different resource group.", attached_resource)
         subnet_rg = resource_group_name
         vnet_name = vnet
         subscription_id = get_subscription_id(cmd.cli_ctx)
@@ -512,6 +530,17 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
     # pylint: disable=too-many-nested-blocks
     for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
         for s in src:
+            # Check if this looks like a simple key=value pair without JSON/dict syntax
+            # If so, parse it directly to avoid unnecessary warnings from ast.literal_eval
+            if ('=' in s and not s.lstrip().startswith(('{"', "[", "{")) and
+                    not s.startswith('@')):  # @ indicates file input
+                try:
+                    setting_name, value = s.split('=', 1)
+                    dest[setting_name] = value
+                    continue
+                except ValueError:
+                    pass  # Fall back to JSON parsing if split fails
+
             try:
                 temp = shell_safe_json_parse(s)
                 if isinstance(temp, list):  # a bit messy, but we'd like accept the output of the "list" command
@@ -952,6 +981,678 @@ def remove_remote_build_app_settings(cmd, resource_group_name, name, slot):
             logger.warning("App settings may not be propagated to the SCM site")
 
 
+def _is_linux_consumption_function_app(cmd, site):
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient)
+
+    if site.kind != 'functionapp,linux':
+        return False
+
+    if not is_valid_resource_id(site.server_farm_id):
+        return False
+
+    try:
+        parsed_plan_id = parse_resource_id(site.server_farm_id)
+        plan_info = web_client.app_service_plans.get(parsed_plan_id['resource_group'], parsed_plan_id['name'])
+        if plan_info is None:
+            return False
+        return plan_info.sku.tier.lower() == 'dynamic'
+    except Exception:  # pylint: disable=broad-except
+        return False
+
+
+def list_flex_migration_candidates(cmd):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient)
+
+    print(f"Searching for function apps under the subscription '{subscription_id}' that are eligible for Flex "
+          "Consumption migration...\n")
+
+    all_sites = list(web_client.web_apps.list())
+    eligible_sites = []
+    ineligible_sites = []
+
+    flex_regions = [region['name'] for region in list_flexconsumption_locations(cmd)]
+
+    for site in all_sites:
+        if not _is_linux_consumption_function_app(cmd, site):
+            continue
+
+        try:
+            if validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions):
+                site_entry = {
+                    'name': site.name,
+                    'resource_group': site.resource_group,
+                }
+
+                has_slots = len(list_slots(cmd, site.resource_group, site.name)) > 0
+
+                if has_slots:
+                    slots_warning = (f"The site '{site.name}' has slots configured. This will not block migration, "
+                                     f"but please note that slots are not supported in Flex Consumption.")
+                    site_entry['note'] = slots_warning
+
+                eligible_sites.append(site_entry)
+
+        except Exception as e:  # pylint: disable=broad-except
+            ineligible_sites.append({
+                'name': site.name,
+                'resource_group': site.resource_group,
+                'reason': str(e)
+            })
+
+    return {
+        'eligible_apps': eligible_sites,
+        'ineligible_apps': ineligible_sites
+    }
+
+
+def validate_flex_migration_eligibility_for_linux_consumption_app(cmd, site, flex_regions):
+    # Validating that the site is in a Flex Consumption-supported region
+    normalized_site_location = _normalize_location(cmd, site.location)
+    if normalized_site_location not in flex_regions:
+        raise ValidationError("The site '{}' is not in a region supported in Flex Consumption. "
+                              "Please see the list regions supported in Flex Consumption by running az functionapp "
+                              "list-flexconsumption-locations".format(site.name))
+
+    # Validating that the site is using a Flex Consumption-supported runtime
+    site_config = get_site_configs(cmd, site.resource_group, site.name)
+    linux_fx_version = getattr(site_config, 'linux_fx_version', None)
+    runtime_info = _get_functionapp_runtime_info_helper(cmd, linux_fx_version, None, None, True)
+    runtime = runtime_info['app_runtime']
+    runtime_version = runtime_info['app_runtime_version']
+
+    runtime_helper = _FlexFunctionAppStackRuntimeHelper(cmd, normalized_site_location, runtime)
+    runtime_helper.resolve(runtime, runtime_version)
+
+    # Validating that the site does not have SSL bindings configured
+    for ssl_state in site.host_name_ssl_states or []:
+        if ssl_state.ssl_state != 'Disabled':
+            raise ValidationError("The site '{}' is using TSL/SSL certificates. "
+                                  "TSL/SSL certificates are not supported in Flex Consumption.".format(site.name))
+
+    # Validating that the site does not have WEBSITE_LOAD_CERTIFICATES app setting configured
+    app_settings = get_app_settings(cmd, site.resource_group, site.name)
+    for setting in app_settings:
+        if setting['name'] == 'WEBSITE_LOAD_CERTIFICATES':
+            raise ValidationError("The site '{}' has the WEBSITE_LOAD_CERTIFICATES app setting configured. "
+                                  "Certificate loading is not supported in Flex Consumption.".format(site.name))
+
+    # Validating that the site has triggers supported in Flex Consumption
+    functions = list_functions(cmd, site.resource_group, site.name)
+    unsupported_blob_triggers = []
+
+    for function in functions:
+        bindings = function.config.get('bindings', [])
+        for binding in bindings:
+            if binding.get('type', None) == 'blobTrigger' and binding.get('source', None) != 'EventGrid':
+                unsupported_blob_triggers.append(function.name)
+
+    if unsupported_blob_triggers:
+        function_list = '\n'.join(unsupported_blob_triggers)
+        raise ValidationError("The site '{}' has blob storage trigger(s) that don't use Event Grid "
+                              "as the source:\n{}\nFlex Consumption only supports Event Grid-based blob triggers. "
+                              "Please convert these triggers to use Event Grid or replace them with Event Grid "
+                              "triggers before migration.".format(site.name, function_list))
+
+    return True
+
+
+def get_storage_account_from_functionapp(cmd, resource_group_name, name):
+    from azure.cli.command_modules.storage.operations.account import list_storage_accounts
+
+    storage_account_name = None
+    app_settings = get_app_settings(cmd, resource_group_name, name)
+    for setting in app_settings:
+        if setting['name'] == 'AzureWebJobsStorage':
+            for part in setting['value'].split(';'):
+                if part.startswith('AccountName='):
+                    storage_account_name = part.split('=')[1]
+                    break
+
+        if setting['name'] == 'AzureWebJobsStorage__accountName':
+            storage_account_name = setting['value']
+            break
+
+        if setting['name'] == 'AzureWebJobsStorage__blobServiceUri':
+            match = re.match(r'https?://([^.]+)\.blob\.core\.windows\.net', setting['value'])
+            if match:
+                storage_account_name = match.group(1)
+                break
+
+    if not storage_account_name:
+        raise ResourceNotFoundError("Unable to obtain storage account name from app settings for function app '{}'. "
+                                    .format(name))
+
+    storage_accounts_rg = list_storage_accounts(cmd, resource_group_name)
+    for storage_account in storage_accounts_rg:
+        if storage_account.name == storage_account_name:
+            return storage_account.id
+
+    storage_accounts_sub = list_storage_accounts(cmd)
+    for storage_account in storage_accounts_sub:
+        if storage_account.name == storage_account_name:
+            return storage_account.id
+
+    raise ResourceNotFoundError("Storage account '{}' referenced by function app '{}' was not found in subscription."
+                                .format(storage_account_name, name))
+
+
+def migrate_consumption_to_flex(cmd, source_resource_group, source_name, resource_group, name, storage_account=None,
+                                maximum_instance_count=None, skip_managed_identities=False,
+                                skip_access_restrictions=False, skip_storage_mount=False, skip_hostnames=False,
+                                skip_cors=False):
+
+    web_client = get_mgmt_service_client(cmd.cli_ctx, WebSiteManagementClient)
+
+    # Validate that the app is eligible for Flex Consumption migration
+    print(f"Validating that the app '{source_name}' is eligible for Flex Consumption migration...")
+    flex_regions = [region['name'] for region in list_flexconsumption_locations(cmd)]
+    source = web_client.web_apps.get(source_resource_group, source_name)
+
+    if not _is_linux_consumption_function_app(cmd, source):
+        raise ValidationError("The site '{}' is not on a Linux Dynamic (Consumption) plan. Flex Consumption "
+                              "migration is only supported for Function Apps on Linux Consumption plans."
+                              .format(source.name))
+
+    if validate_flex_migration_eligibility_for_linux_consumption_app(cmd, source, flex_regions):
+        slots = list_slots(cmd, source_resource_group, source_name)
+        if len(slots) > 0:
+            print(f"The site '{source_name}' has slots configured. This will not block migration, "
+                  f"but please note that slots are not supported in Flex Consumption.")
+        print(f"Source app '{source_name}' is eligible for Flex Consumption migration.")
+
+    source_site_configs = get_site_configs(cmd, source_resource_group, source_name)
+    source_linux_fx_version = getattr(source_site_configs, 'linux_fx_version', None)
+    source_runtime_info = _get_functionapp_runtime_info_helper(cmd, source_linux_fx_version, None, None, True)
+    source_runtime = source_runtime_info['app_runtime']
+    source_runtime_version = source_runtime_info['app_runtime_version']
+
+    print(f"\nCreating Flex Consumption function app '{name}' in resource group '{resource_group}'...")
+
+    if not storage_account:
+        storage_account = get_storage_account_from_functionapp(cmd, source_resource_group, source_name)
+        storage_account_name = parse_resource_id(storage_account)['name']
+        print(f"Using source app's storage account '{storage_account_name}' for function app '{name}'")
+
+    try:
+        create_functionapp(cmd, resource_group, name, storage_account, flexconsumption_location=source.location,
+                           runtime=source_runtime, runtime_version=source_runtime_version,
+                           maximum_instance_count=maximum_instance_count)
+    except Exception:
+        logger.error("There was an error creating the Flex Consumption function app. Please address the issue "
+                     "and try again.")
+        raise
+
+    print(f"Flex Consumption function app '{name}' created successfully")
+
+    # Migrate app settings, site configs and site properties
+    _migrate_app_settings(cmd, source_resource_group, source_name, resource_group, name, storage_account)
+    _migrate_site_configs(cmd, source_site_configs, source_name, resource_group, name)
+    _migrate_site_properties(cmd, source, resource_group, name)
+    _migrate_basic_publishing_credentials_policies(cmd, source_resource_group, source_name, resource_group, name)
+
+    # CORS migration
+    if not skip_cors:
+        _migrate_cors_settings(cmd, source_site_configs, source_name, resource_group, name)
+    else:
+        print("\nSkipping CORS settings migration")
+
+    # Custom hostname migration
+    if not skip_hostnames:
+        _migrate_custom_hostnames(cmd, source_resource_group, source_name, resource_group, name)
+    else:
+        print("\nSkipping custom hostname migration")
+
+    # Storage mount migration
+    if not skip_storage_mount:
+        _migrate_storage_mounts(cmd, source_resource_group, source_name, resource_group, name)
+    else:
+        print("\nSkipping storage mount migration")
+
+    # Access restrictions migration
+    if not skip_access_restrictions:
+        _migrate_access_restrictions(cmd, source_resource_group, source_name, resource_group, name)
+    else:
+        print("\nSkipping access restrictions migration")
+
+    # Managed identities migration
+    if not skip_managed_identities:
+        _migrate_managed_identities_and_roles(cmd, source, resource_group, name)
+    else:
+        print("\nSkipping managed identities migration")
+
+    print(f"\nInitial migration steps complete. Function app '{source_name}' migrated to Flex Consumption app "
+          f"'{name}'. Next: deploy code, test functions, then delete the source app."
+          f"\nFor more details on the migration, please visit: "
+          f"https://learn.microsoft.com/en-us/azure/azure-functions/migration/migrate-plan-consumption-to-flex")
+
+    return get_functionapp(cmd, resource_group, name)
+
+
+def _migrate_app_settings(cmd, source_resource_group, source_name, resource_group, name, storage_account):
+    print(f"\nMigrating app settings from source function app '{source_name}' to target function app '{name}'...")
+
+    try:
+        source_app_settings = get_app_settings(cmd, source_resource_group, source_name)
+
+        excluded_settings = {
+            'WEBSITE_USE_PLACEHOLDER_DOTNETISOLATED',
+            'WEBSITE_MOUNT_ENABLED',
+            'ENABLE_ORYX_BUILD',
+            'FUNCTIONS_EXTENSION_VERSION',
+            'FUNCTIONS_WORKER_RUNTIME',
+            'FUNCTIONS_WORKER_RUNTIME_VERSION',
+            'FUNCTIONS_MAX_HTTP_CONCURRENCY',
+            'FUNCTIONS_WORKER_PROCESS_COUNT',
+            'FUNCTIONS_WORKER_DYNAMIC_CONCURRENCY_ENABLED',
+            'SCM_DO_BUILD_DURING_DEPLOYMENT',
+            'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING',
+            'WEBSITE_CONTENTOVERVNET',
+            'WEBSITE_CONTENTSHARE',
+            'WEBSITE_DNS_SERVER',
+            'WEBSITE_MAX_DYNAMIC_APPLICATION_SCALE_OUT',
+            'WEBSITE_NODE_DEFAULT_VERSION',
+            'WEBSITE_RUN_FROM_PACKAGE',
+            'WEBSITE_SKIP_CONTENTSHARE_VALIDATION',
+            'WEBSITE_VNET_ROUTE_ALL',
+            'APPLICATIONINSIGHTS_CONNECTION_STRING',
+            'AZUREWEBJOBSDASHBOARD'
+        }
+
+        if is_valid_resource_id(storage_account):
+            storage_account = parse_resource_id(storage_account)['name']
+
+        migrated_app_settings = []
+        for setting in source_app_settings:
+            setting_name = setting['name'].upper()
+
+            # for the storage account, we format the app setting just like the source app
+            if setting_name == 'AZUREWEBJOBSSTORAGE':
+                continue
+
+            if setting_name == 'AZUREWEBJOBSSTORAGE__ACCOUNTNAME':
+                migrated_app_settings.append(f"AzureWebJobsStorage__accountName={storage_account}")
+                delete_app_settings(cmd, resource_group, name, ['AzureWebJobsStorage'])
+
+            elif setting_name == 'AZUREWEBJOBSSTORAGE__BLOBSERVICEURI':
+                migrated_app_settings.append(f"AzureWebJobsStorage__blobServiceUri="
+                                             f"https://{storage_account}.blob.core.windows.net")
+                delete_app_settings(cmd, resource_group, name, ['AzureWebJobsStorage'])
+
+            elif setting_name not in excluded_settings:
+                migrated_app_settings.append(f"{setting['name']}={setting['value']}")
+
+        if migrated_app_settings:
+            setting_names = [setting.split('=')[0] for setting in migrated_app_settings]
+            update_app_settings(cmd, resource_group, name, migrated_app_settings)
+            print(f"Successfully migrated {len(migrated_app_settings)} app settings: {', '.join(setting_names)}")
+        else:
+            print("No app settings to migrate")
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to migrate app settings: %s. This step will be skipped. "
+                     "Run 'az functionapp config appsettings set' to add them manually", str(e))
+
+
+def _migrate_site_configs(cmd, source_site_configs, source_name, resource_group, name):
+    print(f"\nMigrating site configs from source function app '{source_name}' to target function app '{name}'...")
+
+    try:
+        site_configs = {
+            'http20_enabled': str(source_site_configs.http20_enabled).lower(),
+            'min_tls_version': source_site_configs.min_tls_version,
+            'min_tls_cipher_suite': source_site_configs.min_tls_cipher_suite
+        }
+
+        update_site_configs(cmd, resource_group, name, **site_configs)
+        print(f"Successfully migrated the following site configs: {', '.join(site_configs.keys())}")
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to migrate site configs: %s. This step will be skipped. "
+                     "Run 'az functionapp config set' to add them manually", str(e))
+
+
+def _migrate_site_properties(cmd, source, resource_group, name):
+    print(f"\nMigrating site properties from source function app '{source.name}' to target function app '{name}'...")
+
+    try:
+        functionapp = get_functionapp(cmd, resource_group, name)
+        functionapp.https_only = source.https_only
+        functionapp.client_cert_enabled = source.client_cert_enabled
+        functionapp.client_cert_mode = source.client_cert_mode
+        functionapp.client_cert_exclusion_paths = source.client_cert_exclusion_paths
+
+        poller = set_functionapp(cmd, resource_group, name, parameters=functionapp)
+        LongRunningOperation(cmd.cli_ctx)(poller)
+
+        print("Successfully migrated the following properties: "
+              "https_only, client_cert_enabled, client_cert_mode, client_cert_exclusion_paths")
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to migrate site properties: %s. This step will be skipped. "
+                     "Run 'az functionapp update' to configure the site properties manually",
+                     str(e))
+
+
+def _migrate_basic_publishing_credentials_policies(cmd, source_resource_group, source_name, resource_group, name):
+    print(f"\nMigrating SCM basic authentication setting from source function app '{source_name}' to target "
+          f"function app '{name}'...")
+
+    try:
+        source_scm_basic_auth_enabled = basic_auth_supported(cmd.cli_ctx, source_name, source_resource_group)
+
+        if source_scm_basic_auth_enabled:
+
+            CsmPublishingCredentialsPoliciesEntity = cmd.get_models("CsmPublishingCredentialsPoliciesEntity")
+            csmPublishingCredentialsPoliciesEntity = CsmPublishingCredentialsPoliciesEntity(allow=True)
+            _generic_site_operation(cmd.cli_ctx, resource_group, name,
+                                    'update_scm_allowed', None, csmPublishingCredentialsPoliciesEntity)
+
+            print("Successfully enabled SCM basic authentication setting")
+
+        else:
+            print("SCM basic authentication is disabled in the source function app. "
+                  "No action needed.")
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to migrate SCM basic authentication setting: %s. This step will be skipped. "
+                     "Run 'az resource update' to configure it manually", str(e))
+
+
+def _migrate_cors_settings(cmd, source_site_configs, source_name, resource_group, name):
+    print(f"\nMigrating CORS settings from source function app '{source_name}' to target function app '{name}'...")
+
+    try:
+        source_cors_settings = source_site_configs.cors
+
+        if source_cors_settings:
+            if source_cors_settings.allowed_origins:
+                add_cors(cmd, resource_group, name, source_cors_settings.allowed_origins)
+                cors_allowed_origins = ', '.join(source_cors_settings.allowed_origins)
+                print(f"Successfully migrated CORS allowed origins: {cors_allowed_origins}")
+
+            if source_cors_settings.support_credentials:
+                enable_credentials(cmd, resource_group, name, enable=True)
+                print("Successfully enabled Access-Control-Allow-Credentials setting")
+        else:
+            print("No CORS settings found to migrate")
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to migrate CORS settings: %s. This step will be skipped. "
+                     "Run 'az functionapp cors add' to configure them manually", str(e))
+
+
+def _migrate_custom_hostnames(cmd, source_resource_group, source_name, resource_group, name):
+    print(f"\nMigrating custom hostnames from source function app '{source_name}' to target function app '{name}'...")
+
+    try:
+        source_hostnames = list_hostnames(cmd, source_resource_group, source_name)
+
+        custom_hostnames = []
+        for hostname_binding in source_hostnames:
+            hostname = hostname_binding.name
+            if not hostname.endswith('.azurewebsites.net'):
+                custom_hostnames.append(hostname)
+
+        if custom_hostnames:
+            print(f"Found {len(custom_hostnames)} custom domain(s) to migrate:")
+            for hostname in custom_hostnames:
+                print(hostname)
+
+            for hostname in custom_hostnames:
+                add_hostname(cmd, resource_group, name, hostname)
+                print(f"Successfully migrated hostname: {hostname}")
+        else:
+            print("No custom domains found to migrate")
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to migrate hostnames: %s. This step will be skipped. "
+                     "Run 'az functionapp config hostname add' to add them manually",
+                     str(e))
+
+
+def _migrate_storage_mounts(cmd, source_resource_group, source_name, resource_group, name):
+    print(f"\nMigrating storage mounts from source function app '{source_name}' to target function app '{name}'...")
+
+    try:
+        source_storage_accounts = get_azure_storage_accounts(cmd, source_resource_group, source_name)
+
+        if not source_storage_accounts:
+            print("No storage mounts found to migrate")
+            return
+
+        for storage_config in source_storage_accounts:
+            try:
+                custom_id = storage_config['name']
+                storage_info = storage_config['value']
+
+                add_azure_storage_account(
+                    cmd=cmd,
+                    resource_group_name=resource_group,
+                    name=name,
+                    custom_id=custom_id,
+                    storage_type=storage_info.type,
+                    account_name=storage_info.account_name,
+                    share_name=storage_info.share_name,
+                    access_key=storage_info.access_key,
+                    mount_path=storage_info.mount_path,
+                    slot=None,
+                    slot_setting=False
+                )
+                print(f"Successfully migrated storage mount '{custom_id}' (Account: {storage_info.account_name}, "
+                      f"Share: {storage_info.share_name})")
+
+            except Exception as e:  # pylint: disable=broad-except
+                logger.error("Failed to migrate storage mount '%s': %s. This step will be skipped. "
+                             "Run 'az webapp config storage-account add' to add it manually", custom_id, str(e))
+                continue
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to migrate storage mounts: %s. This step will be skipped. "
+                     "Run 'az webapp config storage-account add' to add them manually", str(e))
+
+
+def _migrate_access_restrictions(cmd, source_resource_group, source_name, resource_group, name):
+    print(f"\nMigrating access restrictions from source function app '{source_name}' to target function app "
+          f"'{name}'...")
+
+    try:
+        from . import access_restrictions
+
+        source_restrictions = access_restrictions.show_webapp_access_restrictions(
+            cmd, source_resource_group, source_name
+        )
+
+        if not source_restrictions:
+            print("No access restrictions found to migrate")
+            return
+
+        ip_restrictions = source_restrictions.get('ipSecurityRestrictions', [])
+        scm_restrictions = source_restrictions.get('scmIpSecurityRestrictions', [])
+        scm_use_main = source_restrictions.get('scmIpSecurityRestrictionsUseMain', False)
+        default_action = source_restrictions.get('ipSecurityRestrictionsDefaultAction')
+        scm_default_action = source_restrictions.get('scmIpSecurityRestrictionsDefaultAction')
+
+        if scm_use_main or default_action or scm_default_action:
+            try:
+                access_restrictions.set_webapp_access_restriction(
+                    cmd, resource_group, name,
+                    use_same_restrictions_for_scm_site=scm_use_main,
+                    default_action=default_action,
+                    scm_default_action=scm_default_action
+                )
+
+                print(f"Successfully set access restriction configurations: scmUseMain={scm_use_main}, "
+                      f"defaultAction={default_action}, scmDefaultAction={scm_default_action}")
+
+            except Exception as e:  # pylint: disable=broad-except
+                logger.error("Failed to set access restriction configurations: %s. This step will be skipped. "
+                             "Run 'az webapp config access-restriction set' to configure them manually", str(e))
+
+        for restriction in ip_restrictions:
+            _add_single_access_restriction(
+                cmd, resource_group, name, restriction, scm_site=False
+            )
+
+        if not scm_use_main and scm_restrictions:
+            for restriction in scm_restrictions:
+                _add_single_access_restriction(
+                    cmd, resource_group, name, restriction, scm_site=True
+                )
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to migrate access restrictions: %s. This step will be skipped. "
+                     "Run 'az webapp config access-restriction add' to add them manually",
+                     str(e))
+
+
+def _add_single_access_restriction(cmd, resource_group, name, restriction, scm_site=False):
+    from . import access_restrictions
+
+    rule_name = restriction.get('name')
+    priority = restriction.get('priority')
+    action = restriction.get('action', 'Allow')
+    description = restriction.get('description')
+    tag = restriction.get('tag', 'Default')
+    ip_address = restriction.get('ip_address')
+    subnet_id = restriction.get('vnet_subnet_resource_id')
+    headers = restriction.get('headers')
+
+    if not ip_address and not subnet_id:
+        print(f"Skipping restriction with no valid IP address or subnet: {rule_name or 'unnamed'}")
+        return
+
+    try:
+        if subnet_id:
+            access_restrictions.add_webapp_access_restriction(
+                cmd=cmd,
+                resource_group_name=resource_group,
+                name=name,
+                priority=priority,
+                rule_name=rule_name,
+                action=action,
+                subnet=subnet_id,
+                description=description,
+                scm_site=scm_site,
+                ignore_missing_vnet_service_endpoint=True,
+                http_headers=_format_headers(headers) if headers else None
+            )
+            print(f"Successfully migrated {'SCM' if scm_site else 'main'} subnet restriction: "
+                  f"{rule_name or subnet_id} (Priority: {priority})")
+
+        elif ip_address:
+            if tag == 'ServiceTag':
+                access_restrictions.add_webapp_access_restriction(
+                    cmd=cmd,
+                    resource_group_name=resource_group,
+                    name=name,
+                    priority=priority,
+                    rule_name=rule_name,
+                    action=action,
+                    service_tag=ip_address,
+                    description=description,
+                    scm_site=scm_site,
+                    http_headers=_format_headers(headers) if headers else None
+                )
+                print(f"Successfully migrated {'SCM' if scm_site else 'main'} service tag restriction: "
+                      f"{rule_name or ip_address} (Priority: {priority})")
+
+            else:
+                access_restrictions.add_webapp_access_restriction(
+                    cmd=cmd,
+                    resource_group_name=resource_group,
+                    name=name,
+                    priority=priority,
+                    rule_name=rule_name,
+                    action=action,
+                    ip_address=ip_address,
+                    description=description,
+                    scm_site=scm_site,
+                    http_headers=_format_headers(headers) if headers else None
+                )
+                print(f"Successfully migrated {'SCM' if scm_site else 'main'} IP restriction: "
+                      f"{rule_name or ip_address} (Priority: {priority})")
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to add %s restriction '%s': %s. This step will be skipped. "
+                     "Run 'az webapp config access-restriction add' to add it manually",
+                     "SCM" if scm_site else "main",
+                     rule_name or ip_address or subnet_id or 'unnamed',
+                     str(e))
+
+
+def _format_headers(headers_dict):
+    if not headers_dict:
+        return None
+
+    headers_list = []
+    for header_name, header_values in headers_dict.items():
+        for value in header_values:
+            headers_list.append(f"{header_name}={value}")
+
+    return headers_list if headers_list else None
+
+
+def _migrate_managed_identities_and_roles(cmd, source, resource_group, name):
+    print(f"\nMigrating managed identities and role assignments from source function app '{source.name}' "
+          f"to target function app '{name}'...")
+
+    try:
+        from azure.cli.command_modules.role.custom import list_role_assignments
+
+        source_identity = source.identity
+
+        if source_identity:
+            if 'SystemAssigned' in source_identity.type:
+                system_role_assignments = list_role_assignments(cmd,
+                                                                assignee_object_id=source_identity.principal_id,
+                                                                show_all=True)
+
+                assign_identity(cmd, resource_group, name, assign_identities=['[system]'])
+                target_identity = show_identity(cmd, resource_group, name)
+                print(f"Successfully assigned system-assigned identity with principal ID "
+                      f"'{target_identity.principal_id}'")
+                _migrate_role_assignments(cmd, system_role_assignments, target_identity.principal_id)
+
+            if source_identity.user_assigned_identities:
+                user_identity_ids = list(source_identity.user_assigned_identities.keys())
+                assign_identity(cmd, resource_group, name, assign_identities=user_identity_ids)
+                print(f"Successfully assigned user-assigned identities: {', '.join(user_identity_ids)}")
+        else:
+            print("No managed identities found in the source function app. No action needed.")
+
+    except Exception as e:  # pylint: disable=broad-except
+        logger.error("Failed to migrate managed identities and role assignments: %s. This step will be skipped. "
+                     "Run 'az functionapp identity assign' and 'az role assignment create' to configure "
+                     "them manually", str(e))
+
+
+def _migrate_role_assignments(cmd, source_role_assignments, target_principal_id):
+    from azure.cli.command_modules.role.custom import create_role_assignment
+
+    for assignment in source_role_assignments:
+        try:
+            role_definition_id = assignment['roleDefinitionId']
+            role_name = role_definition_id.split('/')[-1]
+            scope = assignment['scope']
+
+            create_role_assignment(
+                cmd=cmd,
+                role=role_name,
+                scope=scope,
+                assignee_object_id=target_principal_id,
+                assignee_principal_type='ServicePrincipal'
+            )
+
+            print(f"Created role assignment for scope '{scope}' with role "
+                  f"'{assignment.get('roleDefinitionName', role_name)}' for principal ID '{target_principal_id}'")
+
+        except Exception as e:  # pylint: disable=broad-except
+            logger.error("Failed to create role assignment for scope '%s': %s. This step will be skipped. "
+                         "Run 'az role assignment create' to add it manually",
+                         scope, str(e))
+            continue
+
+
 def validate_zip_deploy_app_setting_exists(cmd, resource_group_name, name, slot=None):
     settings = get_app_settings(cmd, resource_group_name, name, slot)
 
@@ -976,10 +1677,12 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
 
     container_name = "function-releases"
     blob_name = "{}-{}.zip".format(datetime.datetime.today().strftime('%Y%m%d%H%M%S'), str(uuid.uuid4()))
-    BlockBlobService = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlockBlobService')
-    block_blob_service = BlockBlobService(connection_string=storage_connection)
-    if not block_blob_service.exists(container_name):
-        block_blob_service.create_container(container_name)
+    BlobServiceClient = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                '_blob_service_client#BlobServiceClient')
+    blob_service_client = BlobServiceClient.from_connection_string(conn_str=storage_connection)
+    container_client = blob_service_client.get_container_client(container_name)
+    if not container_client.exists():
+        container_client.create_container()
 
     # https://gist.github.com/vladignatyev/06860ec2040cb497f0f3
     def progress_callback(current, total):
@@ -990,20 +1693,28 @@ def upload_zip_to_storage(cmd, resource_group_name, name, src, slot=None):
         progress_message = 'Uploading {} {}%'.format(progress_bar, percents)
         cmd.cli_ctx.get_progress_controller().add(message=progress_message)
 
-    block_blob_service.create_blob_from_path(container_name, blob_name, src, validate_content=True,
-                                             progress_callback=progress_callback)
+    blob_client = None
+    import os
+    with open(os.path.realpath(os.path.expanduser(src)), 'rb') as fs:
+        zip_content = fs.read()
+        blob_client = container_client.upload_blob(blob_name, zip_content, validate_content=True,
+                                                   progress_hook=progress_callback)
 
     now = datetime.datetime.utcnow()
     blob_start = now - datetime.timedelta(minutes=10)
     blob_end = now + datetime.timedelta(weeks=520)
-    BlobPermissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE, 'blob#BlobPermissions')
-    blob_token = block_blob_service.generate_blob_shared_access_signature(container_name,
-                                                                          blob_name,
-                                                                          permission=BlobPermissions(read=True),
-                                                                          expiry=blob_end,
-                                                                          start=blob_start)
+    BlobSharedAccessSignature = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
+                                        '_shared_access_signature#BlobSharedAccessSignature')
 
-    blob_uri = block_blob_service.make_blob_url(container_name, blob_name, sas_token=blob_token)
+    BlobSasPermissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_models#BlobSasPermissions')
+    sas_client = BlobSharedAccessSignature(blob_service_client.account_name,
+                                           account_key=blob_service_client.credential.account_key)
+    blob_token = sas_client.generate_blob(container_name, blob_name, permission=BlobSasPermissions(read=True),
+                                          expiry=blob_end, start=blob_start)
+
+    blob_uri = blob_client.url
+    if '?' not in blob_uri:
+        blob_uri += '?' + blob_token
     website_run_from_setting = "WEBSITE_RUN_FROM_PACKAGE={}".format(blob_uri)
     update_app_settings(cmd, resource_group_name, name, settings=[website_run_from_setting], slot=slot)
     client = web_client_factory(cmd.cli_ctx)
@@ -1186,8 +1897,10 @@ def _validate_sitecontainer_internal(new_sitecontainer_spec, existing_sitecontai
                                   .format(new_sitecontainer_spec.target_port, new_sitecontainer_spec.name))
     # ensure that targetPort is unique
     existing_same_port_sitecontainer = next((spec for spec in existing_sitecontainers_spec
-                                             if spec.target_port == new_sitecontainer_spec.target_port and
-                                             spec.name != new_sitecontainer_spec.name), None)
+                                             if (spec.target_port is not None and
+                                                 new_sitecontainer_spec.target_port is not None and
+                                                 spec.target_port == new_sitecontainer_spec.target_port and
+                                                 spec.name != new_sitecontainer_spec.name)), None)
     if existing_same_port_sitecontainer:
         raise ValidationError(("SiteContainer '{}' with targetPort '{}' already exists. "
                               "targetPort must be unique for SiteContainer '{}'.")
@@ -1351,6 +2064,27 @@ def get_webapp_sitecontainer_log(cmd, name, resource_group, container_name, slot
             time.sleep(100)  # so that ctrl+c can stop the command
     except Exception as ex:
         raise AzureInternalError("Failed to fetch sitecontainer logs. Error: {}".format(str(ex)))
+
+
+def convert_webapp_sitecontainers(cmd, name, resource_group, mode, slot=None):
+    """
+    Convert a webapp between classic (docker) and sitecontainers mode.
+
+    :param cmd: CLI command context
+    :param name: Name of the webapp
+    :param resource_group: Resource group of the webapp
+    :param mode: Target mode, either 'docker' or 'sitecontainers'
+    :param slot: Optional deployment slot
+    """
+    if mode == 'sitecontainers':
+        _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot)
+    elif mode == 'docker':
+        _convert_webapp_to_docker(cmd, name, resource_group, slot)
+    else:
+        raise InvalidArgumentValueError(
+            "Invalid mode '{}'. Allowed values: docker, sitecontainers.".format(mode)
+        )
+    return {"result": "success", "mode": mode}
 
 
 # for generic updater
@@ -1607,6 +2341,199 @@ def _build_identities_info(identities):
     if external_identities:
         info['userAssignedIdentities'] = {e: {} for e in external_identities}
     return (info, identity_types, external_identities, 'SystemAssigned' in identity_types)
+
+
+def _build_plan_default_identity(default_identity):
+    """Transform default_identity parameter into the proper structure for plan creation."""
+    if not default_identity:
+        return None
+
+    if default_identity.lower() == '[system]':
+        return {
+            'identity_type': "SystemAssigned"
+        }
+
+    return {
+        'identity_type': "UserAssigned",
+        'user_assigned_identity_resource_id': default_identity
+    }
+
+
+def _build_plan_default_identity_sdk(default_identity):
+    """Transform default_identity parameter into the proper structure for SDK-style operations."""
+    if not default_identity:
+        return None
+
+    if default_identity.lower() == '[system]':
+        return {
+            'identityType': "SystemAssigned"
+        }
+
+    return {
+        'identityType': "UserAssigned",
+        'userAssignedIdentityResourceId': default_identity
+    }
+
+
+def _convert_webapp_to_sitecontainers(cmd, name, resource_group, slot):
+    site_config = get_site_configs(cmd, resource_group, name, slot)
+    linux_fx_version = getattr(site_config, "linux_fx_version", None)
+
+    if linux_fx_version and not linux_fx_version.startswith('DOCKER|'):
+        raise ValidationError("Cannot convert to sitecontainers mode as site is not a "
+                              "classic custom container (docker) app.")
+
+    acr_use_managed_identity_creds = getattr(site_config, "acr_use_managed_identity_creds", None)
+    acr_user_managed_identity_id = getattr(site_config, "acr_user_managed_identity_id", None)
+    acr_user_name = None
+    acr_user_password = None
+
+    # Get app settings to check for ACR credentials
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    subscription_id = get_subscription_id(cmd.cli_ctx)
+    slot_segment = f"/slots/{slot}" if slot else ""
+    url = (
+        f"/subscriptions/{subscription_id}/resourceGroups/{resource_group}/"
+        f"providers/Microsoft.Web/sites/{name}{slot_segment}/config/appsettings/list?api-version=2023-12-01"
+    )
+    request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + url
+    response = send_raw_request(cmd.cli_ctx, "POST", request_url)
+    app_settings_raw = response.json()
+    app_settings = app_settings_raw.get("properties", {})
+
+    acr_user_password = app_settings.get("DOCKER_REGISTRY_SERVER_PASSWORD", None)
+    acr_user_name = app_settings.get("DOCKER_REGISTRY_SERVER_USERNAME", None)
+    websites_port = app_settings.get("WEBSITES_PORT", None) or app_settings.get("PORT", None)
+
+    # Get docker image from linux_fx_version
+    docker_image = linux_fx_version.replace("DOCKER|", "", 1)
+    sidecar_main_container_name = "main"
+    startup_cmd = getattr(site_config, "app_command_line", None)
+
+    # Prepare parameters for sitecontainers create
+    sitecontainer_kwargs = {
+        "name": name,
+        "resource_group": resource_group,
+        "slot": slot,
+        "container_name": sidecar_main_container_name,
+        "image": docker_image,
+        "target_port": websites_port,
+        "startup_cmd": startup_cmd,
+        "is_main": True,
+    }
+
+    if acr_use_managed_identity_creds:
+        if acr_user_managed_identity_id:
+            # ACR with User-Assigned Managed Identity
+            logger.warning("Site is using User-Assigned Managed Identity for ACR authentication.")
+            sitecontainer_kwargs["user_assigned_identity"] = acr_user_managed_identity_id
+        else:
+            # ACR with System-Assigned Managed Identity
+            logger.warning("Site is using System-Assigned Managed Identity for ACR authentication.")
+            sitecontainer_kwargs["system_assigned_identity"] = True
+    else:
+        if acr_user_name and acr_user_password:
+            # ACR with User Credentials
+            logger.warning("Site is using User Credentials for ACR authentication.")
+            sitecontainer_kwargs["registry_username"] = acr_user_name
+            sitecontainer_kwargs["registry_password"] = acr_user_password
+        else:
+            # No ACR authentication, using anonymous access
+            logger.warning("Site is using anonymous access for ACR authentication.")
+    response = create_webapp_sitecontainers(cmd, **sitecontainer_kwargs)
+    if response is None:
+        logger.warning("Failed to create sitecontainer, deleting all sitecontainers")
+        sitecontainers = list_webapp_sitecontainers(cmd, name, resource_group, slot)
+        # Remove all sitecontainers
+        for c in sitecontainers:
+            delete_webapp_sitecontainer(cmd, name, resource_group, c.name, slot)
+        raise AzureInternalError("Failed to create sitecontainer for conversion to sitecontainers mode.")
+
+    # Set linuxFxVersion to SITECONTAINERS
+    logger.warning("Setting linuxFxVersion to SITECONTAINERS")
+    update_site_configs(cmd, resource_group, name, slot=slot, linux_fx_version="SITECONTAINERS")
+    logger.warning("Webapp '%s' converted to sitecontainers mode.", name)
+
+
+def _convert_webapp_to_docker(cmd, name, resource_group, slot):
+    site_config = get_site_configs(cmd, resource_group, name, slot)
+    linux_fx_version = getattr(site_config, "linux_fx_version", None)
+    if linux_fx_version and not linux_fx_version.lower().startswith('sitecontainers'):
+        raise ValidationError("Cannot convert to classic (docker) mode as site is not a SITECONTAINERS app.")
+
+    # Get the main sitecontainer
+    sitecontainers = list_webapp_sitecontainers(cmd, name, resource_group, slot)
+    main_container = next((c for c in sitecontainers if getattr(c, "is_main", False)), None)
+    if not main_container:
+        raise ResourceNotFoundError("No main sitecontainer found. Cannot convert to classic mode (docker).")
+    if len(sitecontainers) > 1:
+        option = prompt_y_n('More than one sitecontainer exists. Do you want to continue with the conversion?')
+        if not option:
+            raise ValidationError("Skipped converting to classic (docker) mode as more than one sitecontainer exists."
+                                  " Please remove all but the main sitecontainer before converting.")
+
+    main_container = update_webapp_sitecontainer(
+        cmd, name, resource_group, main_container.name, slot=slot,
+        image=main_container.image, target_port=main_container.target_port,
+        is_main=main_container.is_main
+    )
+
+    # Prepare new linux_fx_version
+    docker_image = getattr(main_container, "image", None)
+    if not docker_image:
+        raise ValidationError("Main sitecontainer does not have an image specified.")
+
+    linux_fx_version = _format_fx_version(docker_image)
+
+    # Prepare app settings for registry credentials if needed
+    settings = []
+    settings.append(f"DOCKER_REGISTRY_SERVER_URL=https://{main_container.image.split('/')[0]}")
+    if main_container.auth_type == AuthType.USER_CREDENTIALS:
+        if main_container.user_name:
+            settings.append(f"DOCKER_REGISTRY_SERVER_USERNAME={main_container.user_name}")
+        if main_container.password_secret:
+            settings.append(f"DOCKER_REGISTRY_SERVER_PASSWORD={main_container.password_secret}")
+        if main_container.target_port:
+            settings.append(f"WEBSITES_PORT={main_container.target_port}")
+    elif main_container.auth_type == AuthType.SYSTEM_IDENTITY:
+        configs = get_site_configs(cmd, resource_group, name, slot)
+        setattr(configs, 'acr_use_managed_identity_creds', True)
+        setattr(configs, 'acr_user_managed_identity_id', "")
+        _generic_site_operation(cmd.cli_ctx, resource_group, name, 'update_configuration', slot, configs)
+    elif main_container.auth_type == AuthType.USER_ASSIGNED:
+        client = web_client_factory(cmd.cli_ctx)
+        if slot:
+            app = client.web_apps.get_slot(resource_group, name, slot)
+        else:
+            app = client.web_apps.get(resource_group, name)
+        if app.identity and app.identity.user_assigned_identities:
+            # Find the managed identity key whose client_id matches main_container.user_managed_identity_client_id
+            matched_key = None
+            for key, identity in app.identity.user_assigned_identities.items():
+                if identity.client_id == main_container.user_managed_identity_client_id:
+                    matched_key = key
+                    break
+            if not matched_key:
+                raise ResourceNotFoundError(
+                    f"Could not find a user-assigned identity with client_id "
+                    f"'{main_container.user_managed_identity_client_id}' assigned to the app."
+                )
+        update_site_configs(cmd, resource_group, name, slot=slot, acr_identity=matched_key)
+    elif main_container.auth_type == AuthType.ANONYMOUS:
+        configs = get_site_configs(cmd, resource_group, name, slot)
+        setattr(configs, 'acr_use_managed_identity_creds', False)
+        _generic_site_operation(cmd.cli_ctx, resource_group, name, 'update_configuration', slot, configs)
+
+    logger.warning("Deleting all sitecontainers before converting to classic mode (docker).")
+    # Remove all sitecontainers
+    for c in sitecontainers:
+        delete_webapp_sitecontainer(cmd, name, resource_group, c.name, slot)
+
+    # Set linuxFxVersion to docker
+    update_site_configs(cmd, resource_group, name, slot=slot, linux_fx_version=linux_fx_version)
+    if settings:
+        update_app_settings(cmd, resource_group, name, settings, slot)
+    logger.warning("Webapp '%s' converted to classic custom container (docker) mode.", name)
 
 
 def assign_identity(cmd, resource_group_name, name, assign_identities=None, role='Contributor', slot=None, scope=None):
@@ -2180,10 +3107,9 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
                 get_current_stack_from_runtime(runtime_version) != "tomcat" else "java"
             _update_webapp_current_stack_property_if_needed(cmd, resource_group_name, name, current_stack)
 
-    if number_of_workers is not None:
-        number_of_workers = validate_range_of_int_flag('--number-of-workers', number_of_workers, min_val=0, max_val=20)
     if linux_fx_version:
-        if linux_fx_version.strip().lower().startswith('docker|'):
+        if (linux_fx_version.strip().lower().startswith('docker|') or
+                linux_fx_version.strip().lower().startswith('sitecontainers')):
             if ('WEBSITES_ENABLE_APP_SERVICE_STORAGE' not in app_settings.properties or
                     app_settings.properties['WEBSITES_ENABLE_APP_SERVICE_STORAGE'] != 'true'):
                 update_app_settings(cmd, resource_group_name, name, ["WEBSITES_ENABLE_APP_SERVICE_STORAGE=false"])
@@ -2480,12 +3406,6 @@ def _redact_storage_accounts(properties):
 
 
 def _ssl_context():
-    if sys.version_info < (3, 4) or (in_cloud_console() and sys.platform.system() == 'Windows'):
-        try:
-            return ssl.SSLContext(ssl.PROTOCOL_TLS)  # added in python 2.7.13 and 3.6
-        except AttributeError:
-            return ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
     return ssl.create_default_context()
 
 
@@ -3107,9 +4027,103 @@ def _enable_zone_redundant(plan_def, sku_def, number_of_workers):
         sku_def.capacity = max(3, number_of_workers)
 
 
+# Progress bar for serverfarm async scaling operations
+class PlanProgressBar(IndeterminateProgressBar):
+    STATUS_CHECK_INTERVAL_SEC = 60
+
+    def __init__(self, cli_ctx, resource_group_name, plan_name):
+        self.client = web_client_factory(cli_ctx).app_service_plans
+        self.rg = resource_group_name
+        self.plan_name = plan_name
+        self._last_msg = None
+        self._last_status_check = None
+        super().__init__(cli_ctx)
+
+    def _emit(self, msg):
+        if msg != self._last_msg:
+            logger.warning(msg)
+            self._last_msg = msg
+
+    def begin(self):
+        self._emit(f"Starting to scale App Service plan {self.plan_name}...")
+        super().begin()
+
+    def update_progress_with_msg(self, message):
+        self._safe_update_progress_message(message)
+        super().update_progress_with_msg(message)
+
+    def end(self):
+        plan = self.client.get(self.rg, self.plan_name)
+        capacity = None
+        sku_name = None
+
+        if getattr(plan, 'sku', None):
+            capacity = getattr(plan.sku, 'capacity', None)
+            sku_name = getattr(plan.sku, 'name', None)
+
+        if capacity is not None and sku_name is not None:
+            self._emit(f"Successfully scaled to {capacity} workers in pricing tier {sku_name}.")
+
+        super().end()
+
+    def stop(self):
+        logger.error("Operation wait cancelled. The async scaling operation is still in progress. "
+                     "Please update the plan to stop scaling.")
+        super().stop()
+
+    def _safe_update_progress_message(self, message):
+        # Only check real status periodically to avoid hammering API
+        now = time.monotonic()
+        if (self._last_status_check is not None and
+                now - self._last_status_check < PlanProgressBar.STATUS_CHECK_INTERVAL_SEC):
+            return
+
+        try:
+            plan = self.client.get(self.rg, self.plan_name)
+            capacity = None
+            skuName = None
+            if getattr(plan, 'sku', None):
+                capacity = getattr(plan.sku, 'capacity', None)
+                skuName = getattr(plan.sku, 'name', None)
+
+            status = message or "InProgress"
+            details = f"Status: {status} — Scaled to {capacity} workers of pricing tier {skuName}."
+            self._last_status_check = now
+            self._emit(details)
+        except Exception:  # pylint: disable=broad-except
+            self._emit("Scaling in progress...")
+
+
+def is_async_response(poller, timeout_seconds=30):
+    for _ in range(timeout_seconds):
+        if poller.done():
+            break
+
+        if hasattr(poller._polling_method, '_initial_response'):  # pylint: disable=protected-access
+            break
+
+        time.sleep(1)
+
+    # pylint: disable=protected-access
+    if (
+        not hasattr(poller._polling_method, '_initial_response') or
+        not hasattr(poller._polling_method._initial_response, 'http_response') or
+        not hasattr(poller._polling_method._initial_response.http_response, 'status_code')
+    ):
+        return False
+
+    # Check if this is an asynchronous operation (202)
+    status_code = poller._polling_method._initial_response.http_response.status_code
+    # pylint: enable=protected-access
+    return status_code == 202
+
+
 def create_app_service_plan(cmd, resource_group_name, name, is_linux, hyper_v, per_site_scaling=False,
                             app_service_environment=None, sku='B1', number_of_workers=None, location=None,
-                            tags=None, no_wait=False, zone_redundant=False):
+                            tags=None, no_wait=False, zone_redundant=False, async_scaling_enabled=None,
+                            is_managed_instance=None, mi_system_assigned=None, mi_user_assigned=None,
+                            default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
+                            registry_adapters=None, install_scripts=None, storage_mounts=None):
     HostingEnvironmentProfile, SkuDescription, AppServicePlan = cmd.get_models(
         'HostingEnvironmentProfile', 'SkuDescription', 'AppServicePlan')
 
@@ -3148,7 +4162,8 @@ has been deployed ".format(app_service_environment)
     sku_def = SkuDescription(tier=get_sku_tier(sku), name=_normalize_sku(sku), capacity=number_of_workers)
     plan_def = AppServicePlan(location=location, tags=tags, sku=sku_def,
                               reserved=(is_linux or None), hyper_v=(hyper_v or None),
-                              per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def)
+                              per_site_scaling=per_site_scaling, hosting_environment_profile=ase_def,
+                              async_scaling_enabled=async_scaling_enabled)
 
     if sku.upper() in ['WS1', 'WS2', 'WS3']:
         existing_plan = get_resource_if_exists(client.app_service_plans,
@@ -3161,16 +4176,116 @@ has been deployed ".format(app_service_environment)
     if zone_redundant:
         _enable_zone_redundant(plan_def, sku_def, number_of_workers)
 
-    return sdk_no_wait(no_wait, client.app_service_plans.begin_create_or_update, name=name,
-                       resource_group_name=resource_group_name, app_service_plan=plan_def)
+    if subnet or vnet:
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=resource_group_name,
+                                       subnet=subnet,
+                                       vnet=vnet,
+                                       attached_resource="app service plan")
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+    else:
+        subnet_resource_id = None
+
+    # Transform default_identity parameter into the proper structure
+    plan_default_identity = _build_plan_default_identity(default_identity)
+
+    hosting_environment_profile = None
+    if plan_def.hosting_environment_profile:
+        hosting_environment_profile = plan_def.hosting_environment_profile.__dict__
+
+    class AppServicePlanCreateWithNoWait(AppServicePlanCreate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
+
+    poller = AppServicePlanCreateWithNoWait(cli_ctx=cmd.cli_ctx)(command_args={
+        "name": name,
+        "resource_group": resource_group_name,
+        "location": location,
+        "tags": tags,
+        "sku": sku_def.__dict__,
+        "reserved": plan_def.reserved,
+        "hyper_v": plan_def.hyper_v,
+        "per_site_scaling": plan_def.per_site_scaling,
+        "hosting_environment_profile": hosting_environment_profile,
+        "async_scaling_enabled": plan_def.async_scaling_enabled,
+        "zone_redundant": zone_redundant if zone_redundant else None,
+        "is_custom_mode": is_managed_instance,
+        "network": {
+            "virtual_network_subnet_id": subnet_resource_id,
+        } if subnet_resource_id else None,
+        "rdp_enabled": rdp_enabled,
+        "mi_system_assigned": str(mi_system_assigned) if mi_system_assigned else None,
+        "mi_user_assigned": mi_user_assigned,
+        "plan_default_identity": plan_default_identity,
+        "registry_adapters": registry_adapters,
+        "install_scripts": install_scripts,
+        "storage_mounts": storage_mounts,
+    })
+
+    if no_wait:
+        return poller.result()
+
+    # Check if this is an asynchronous operation
+    is_async = is_async_response(poller)
+
+    if not is_async:
+        # for synchronous operations, or if we are unable to get the initial response, directly return poller result
+        return poller.result()
+
+    # Asynchronous operation (202 response), use custom progress bar
+    progress_bar = PlanProgressBar(cmd.cli_ctx, resource_group_name, name)
+    return LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(poller)
+
+
+def update_app_service_plan_with_progress(cmd, resource_group_name, name, app_service_plan):
+    client = web_client_factory(cmd.cli_ctx)
+
+    # For regular execution, apply conditional progress logic
+    poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, app_service_plan)
+
+    if poller.done():
+        # Synchronous operation (200 response), return result directly
+        return poller.result()
+
+    # Asynchronous operation (202 response), use custom progress bar
+    progress_bar = PlanProgressBar(cmd.cli_ctx, resource_group_name, name)
+    return LongRunningOperation(cmd.cli_ctx, progress_bar=progress_bar)(poller)
 
 
 def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, elastic_scale=None,
-                            max_elastic_worker_count=None):
-    if number_of_workers is None and sku is None and elastic_scale is None and max_elastic_worker_count is None:
+                            max_elastic_worker_count=None, async_scaling_enabled=None,
+                            default_identity=None, rdp_enabled=None, vnet=None, subnet=None,
+                            registry_adapters=None, install_scripts=None, storage_mounts=None):
+    has_updates = any(param is not None for param in [
+        number_of_workers, sku, elastic_scale, max_elastic_worker_count,
+        async_scaling_enabled, default_identity, rdp_enabled, vnet, subnet,
+        registry_adapters, install_scripts, storage_mounts
+    ])
+
+    if not has_updates:
         safe_params = cmd.cli_ctx.data['safe_params']
         if '--set' not in safe_params:
-            args = ["--number-of-workers", "--sku", "--elastic-scale", "--max-elastic-worker-count"]
+            args = ["--number-of-workers",
+                    "--sku",
+                    "--elastic-scale",
+                    "--max-elastic-worker-count",
+                    "--async-scaling-enabled",
+                    "--default-identity",
+                    "--rdp-enabled",
+                    "--vnet",
+                    "--subnet",
+                    "--registry-adapter",
+                    "--install-script",
+                    "--storage-mount"]
             logger.warning('Nothing to update. Set one of the following parameters to make an update: %s', str(args))
     sku_def = instance.sku
     if sku is not None:
@@ -3206,8 +4321,91 @@ def update_app_service_plan(cmd, instance, sku=None, number_of_workers=None, ela
         use_additional_properties(instance)
         instance.additional_properties["properties"]["maximumElasticWorkerCount"] = max_elastic_worker_count
 
+    if async_scaling_enabled is not None:
+        instance.async_scaling_enabled = async_scaling_enabled
+
+    # Handle VNet integration
+    subnet_resource_id = None
+    if subnet or vnet:
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=instance.resource_group,
+                                       subnet=subnet,
+                                       vnet=vnet,
+                                       attached_resource="app service plan")
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=instance.location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+
+    # Transform default_identity parameter into the proper structure
+    plan_default_identity = _build_plan_default_identity_sdk(default_identity)
+
+    # Configure managed instance properties
+    _enable_managed_instance_properties(instance,
+                                        default_identity=plan_default_identity,
+                                        subnet_resource_id=subnet_resource_id,
+                                        rdp_enabled=rdp_enabled,
+                                        registry_adapters=registry_adapters,
+                                        install_scripts=install_scripts,
+                                        storage_mounts=storage_mounts)
+
     instance.sku = sku_def
     return instance
+
+
+def _enable_managed_instance_properties(plan_def, default_identity=None, subnet_resource_id=None, rdp_enabled=None,
+                                        registry_adapters=None, install_scripts=None, storage_mounts=None):
+    """Configure additional properties for managed instance App Service Plan features."""
+    # Only enable additional properties if we have managed instance features to configure
+    has_managed_instance_features = any([
+        default_identity,
+        subnet_resource_id,
+        rdp_enabled is not None,
+        registry_adapters,
+        install_scripts,
+        storage_mounts
+    ])
+
+    if not has_managed_instance_features:
+        return
+
+    plan_def.enable_additional_properties_sending()
+
+    # Only set properties if they haven't been set already (e.g., by elastic scale)
+    if "properties" not in plan_def.additional_properties:
+        existing_properties = plan_def.serialize()["properties"]
+        plan_def.additional_properties["properties"] = existing_properties
+
+    # Configure network (VNet integration)
+    if subnet_resource_id:
+        plan_def.additional_properties["properties"]["network"] = {
+            "virtualNetworkSubnetId": subnet_resource_id
+        }
+
+    # Configure RDP access
+    if rdp_enabled is not None:
+        plan_def.additional_properties["properties"]["rdpEnabled"] = rdp_enabled
+
+    # Configure default identity
+    if default_identity:
+        plan_def.additional_properties["properties"]["planDefaultIdentity"] = default_identity
+
+    # Configure registry adapters
+    if registry_adapters:
+        plan_def.additional_properties["properties"]["registryAdapters"] = registry_adapters
+
+    # Configure install scripts
+    if install_scripts:
+        plan_def.additional_properties["properties"]["installScripts"] = install_scripts
+
+    # Configure storage mounts
+    if storage_mounts:
+        plan_def.additional_properties["properties"]["storageMounts"] = storage_mounts
 
 
 def show_plan(cmd, resource_group_name, name):
@@ -3231,7 +4429,652 @@ def update_functionapp_app_service_plan(cmd, instance, sku=None, number_of_worke
     if number_of_workers is not None:
         number_of_workers = validate_range_of_int_flag('--number-of-workers / --min-instances',
                                                        number_of_workers, min_val=0, max_val=20)
+    if is_plan_flex(cmd, instance):
+        return update_flex_app_service_plan(instance)
+
     return update_app_service_plan(cmd, instance, sku, number_of_workers)
+
+
+def list_plan_managed_instance_registry_adapters(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    return plan_result.get('registryAdapters', [])
+
+
+def _update_plan_registry_adapters(cmd, resource_group_name, name, adapters, current_plan):
+    plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
+    poller = plan_create_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': current_plan.get('location'),
+        'sku': current_plan.get('sku', {}),
+        'registry_adapters': adapters
+    })
+
+    # Wait for the operation to complete and get the result
+    plan_result = poller.result()
+
+    # Return the updated registry adapters directly from the result
+    return plan_result.get('registryAdapters', [])
+
+
+def add_plan_managed_instance_registry_adapter(cmd, resource_group_name, name,
+                                               registry_key, adapter_type, secret_uri):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current adapters directly from the plan result
+    existing_adapters = plan_result.get('registryAdapters', [])
+    updated_adapters = []
+    adapter_found = False
+
+    # New adapter
+    adapter_obj = {
+        'registryKey': registry_key,
+        'type': adapter_type,
+        'keyVaultSecretReference': {
+            'secretUri': secret_uri
+        }
+    }
+
+    for adapter in existing_adapters:
+        if adapter.get('registryKey', '').lower() == registry_key.lower():
+            # Replace the existing adapter in the same position
+            updated_adapters.append(adapter_obj)
+            adapter_found = True
+        else:
+            # Keep existing adapter
+            updated_adapters.append(adapter)
+
+    if not adapter_found:
+        updated_adapters.append(adapter_obj)
+
+    return _update_plan_registry_adapters(cmd, resource_group_name, name, updated_adapters, plan_result)
+
+
+def remove_plan_managed_instance_registry_adapter(cmd, resource_group_name, name, registry_key):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current adapters directly from the plan result
+    adapters = plan_result.get('registryAdapters', [])
+
+    # Remove adapter by case-insensitive registry key
+    updated_adapters = [a for a in adapters if a.get('registryKey', '').lower() != registry_key.lower()]
+    if len(adapters) == len(updated_adapters):
+        raise ResourceNotFoundError("Registry key {} not found".format(registry_key))
+
+    return _update_plan_registry_adapters(cmd, resource_group_name, name, updated_adapters, plan_result)
+
+
+def list_plan_managed_instance_install_scripts(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    return plan_result.get('installScripts', [])
+
+
+def _update_plan_install_scripts(cmd, resource_group_name, name, scripts, current_plan):
+    plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
+    poller = plan_create_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': current_plan.get('location'),
+        'sku': current_plan.get('sku', {}),
+        'install_scripts': scripts
+    })
+
+    plan_result = poller.result()
+
+    return plan_result.get('installScripts', [])
+
+
+def add_plan_managed_instance_install_script(cmd, resource_group_name, name,
+                                             install_script_name, source_uri, install_script_type):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current scripts directly from the plan result
+    existing_scripts = plan_result.get('installScripts', [])
+    updated_scripts = []
+    script_found = False
+
+    # New script object
+    script_obj = {
+        'name': install_script_name,
+        'source': {
+            'sourceUri': source_uri,
+            'type': install_script_type
+        }
+    }
+
+    # Replace existing script in the same position or add to end
+    for script in existing_scripts:
+        if script.get('name', '').lower() == install_script_name.lower():
+            # Replace the existing script in the same position
+            updated_scripts.append(script_obj)
+            script_found = True
+        else:
+            # Keep existing script
+            updated_scripts.append(script)
+
+    # If script wasn't found, add it to the end
+    if not script_found:
+        updated_scripts.append(script_obj)
+
+    return _update_plan_install_scripts(cmd, resource_group_name, name, updated_scripts, plan_result)
+
+
+def remove_plan_managed_instance_install_script(cmd, resource_group_name, name, install_script_name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current scripts directly from the plan result
+    scripts = plan_result.get('installScripts', [])
+
+    # Remove script by case-insensitive name
+    updated_scripts = [s for s in scripts if s.get('name', '').lower() != install_script_name.lower()]
+
+    if len(scripts) == len(updated_scripts):
+        raise ResourceNotFoundError("Install script with name {} not found".format(install_script_name))
+
+    return _update_plan_install_scripts(cmd, resource_group_name, name, updated_scripts, plan_result)
+
+
+def list_plan_managed_instance_storage_mounts(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    return plan_result.get('storageMounts', [])
+
+
+def _update_plan_storage_mounts(cmd, resource_group_name, name, mounts, current_plan):
+    plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
+    poller = plan_create_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': current_plan.get('location'),
+        'sku': current_plan.get('sku', {}),
+        'storage_mounts': mounts
+    })
+
+    plan_result = poller.result()
+
+    return plan_result.get('storageMounts', [])
+
+
+def add_plan_managed_instance_storage_mount(cmd, resource_group_name, name,
+                                            mount_name, mount_type,
+                                            destination_path, source=None, credentials_secret_uri=None):
+    if not source and mount_type.lower() != "localstorage":
+        raise InvalidArgumentValueError("--source argument is required for mount type {}".format(mount_type))
+
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current mounts directly from the plan result
+    existing_mounts = plan_result.get('storageMounts', [])
+    updated_mounts = []
+    mount_found = False
+
+    # New mount object
+    mount_obj = {
+        'name': mount_name,
+        'source': source,
+        'type': mount_type,
+        'destinationPath': destination_path
+    }
+
+    # Add credentials key vault reference if provided
+    if credentials_secret_uri:
+        mount_obj['credentialsKeyVaultReference'] = {
+            'secretUri': credentials_secret_uri
+        }
+
+    # Replace existing mount in the same position or add to end
+    for mount in existing_mounts:
+        if mount.get('name', '').lower() == mount_name.lower():
+            # Replace the existing mount in the same position
+            updated_mounts.append(mount_obj)
+            mount_found = True
+        else:
+            # Keep existing mount
+            updated_mounts.append(mount)
+
+    # If mount wasn't found, add it to the end
+    if not mount_found:
+        updated_mounts.append(mount_obj)
+
+    return _update_plan_storage_mounts(cmd, resource_group_name, name, updated_mounts, plan_result)
+
+
+def remove_plan_managed_instance_storage_mount(cmd, resource_group_name, name, mount_name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Extract current mounts directly from the plan result
+    mounts = plan_result.get('storageMounts', [])
+
+    # Remove mount by case-insensitive name
+    updated_mounts = [m for m in mounts if m.get('name', '').lower() != mount_name.lower()]
+    if len(mounts) == len(updated_mounts):
+        raise ResourceNotFoundError("Storage mount with name {} not found".format(mount_name))
+
+    return _update_plan_storage_mounts(cmd, resource_group_name, name, updated_mounts, plan_result)
+
+
+def show_plan_managed_instance_network(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Return the whole network information from the plan result
+    return plan_result.get('network', {})
+
+
+def _update_plan_network(cmd, resource_group_name, name, subnet_resource_id, current_plan):
+    plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
+
+    # Handle None, empty string, and actual resource IDs properly
+    if subnet_resource_id is None:
+        network_config = None
+    else:
+        network_config = {
+            'virtual_network_subnet_id': subnet_resource_id
+        }
+
+    poller = plan_create_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': current_plan.get('location'),
+        'sku': current_plan.get('sku', {}),
+        'network': network_config
+    })
+
+    plan_result = poller.result()
+
+    # Return the whole network information from the updated plan result
+    return plan_result.get('network', {})
+
+
+def add_plan_managed_instance_network(cmd, resource_group_name, name, vnet=None, subnet=None):
+    # Validate that both vnet and subnet are provided
+    if not subnet and not vnet:
+        raise RequiredArgumentMissingError('Either --subnet or both --vnet and --subnet arguments are required.')
+
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    location = plan_result.get('location')
+
+    if subnet or vnet:
+        subnet_info = _get_subnet_info(cmd=cmd,
+                                       resource_group_name=resource_group_name,
+                                       subnet=subnet,
+                                       vnet=vnet,
+                                       attached_resource="app service plan")
+        _validate_vnet_integration_location(cmd=cmd, webapp_location=location,
+                                            subnet_resource_group=subnet_info["resource_group_name"],
+                                            vnet_name=subnet_info["vnet_name"],
+                                            vnet_sub_id=subnet_info["subnet_subscription_id"])
+        _vnet_delegation_check(cmd, subnet_subscription_id=subnet_info["subnet_subscription_id"],
+                               vnet_resource_group=subnet_info["resource_group_name"],
+                               vnet_name=subnet_info["vnet_name"],
+                               subnet_name=subnet_info["subnet_name"])
+        subnet_resource_id = subnet_info["subnet_resource_id"]
+    else:
+        subnet_resource_id = None
+
+    return _update_plan_network(cmd, resource_group_name, name, subnet_resource_id, plan_result)
+
+
+def remove_plan_managed_instance_network(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    # Explicitly set to empty string to remove network configuration
+    return _update_plan_network(cmd, resource_group_name, name, "", plan_result)
+
+
+def show_plan_identity(cmd, resource_group_name, name):
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    return plan_result.get('identity', {})
+
+
+def _determine_identity_type(system_assigned, user_assigned_identities):
+    has_system = system_assigned is not None and system_assigned
+    has_user = user_assigned_identities and len(user_assigned_identities) > 0
+
+    if has_system and has_user:
+        return "SystemAssigned,UserAssigned"
+    if has_system:
+        return "SystemAssigned"
+    if has_user:
+        return "UserAssigned"
+
+    return "None"
+
+
+def _update_plan_identity(cmd, resource_group_name, name, identity_type, user_assigned_identities, current_plan):
+    class IdentityUpdate(AppServicePlanUpdate):
+        def pre_instance_update(self, instance):
+            instance.properties.storageMounts = None  # need this due to backend bug
+            # Construct the appropriate identity object based on the desired identity_type
+            if identity_type == "None":
+                # Explicitly clear the identity
+                instance.identity = {"type": "None"}
+            elif identity_type == "SystemAssigned":
+                instance.identity = {"type": "SystemAssigned"}
+            elif identity_type == "UserAssigned":
+                # For user-assigned identity, we need to include the user assigned identities
+                user_assigned_dict = {}
+                if user_assigned_identities:
+                    for identity_id in user_assigned_identities:
+                        user_assigned_dict[identity_id] = {}  # Empty object as required by the API
+                instance.identity = {
+                    "type": "UserAssigned",
+                    "userAssignedIdentities": user_assigned_dict
+                }
+            elif identity_type == "SystemAssigned,UserAssigned":
+                # For combined identity, include both system and user assigned
+                user_assigned_dict = {}
+                if user_assigned_identities:
+                    for identity_id in user_assigned_identities:
+                        user_assigned_dict[identity_id] = {}  # Empty object as required by the API
+                instance.identity = {
+                    "type": "SystemAssigned,UserAssigned",
+                    "userAssignedIdentities": user_assigned_dict
+                }
+
+    identity_update_cmd = IdentityUpdate(cli_ctx=cmd.cli_ctx)
+    update_args = {
+        'resource_group': resource_group_name,
+        'location': current_plan.get('location'),
+        'sku': current_plan.get('sku', {}),
+        'name': name,
+    }
+
+    poller = identity_update_cmd(command_args=update_args)
+
+    # Wait for the operation to complete and get the result
+    plan_result = poller.result()
+
+    # Return the updated identity directly from the result
+    return plan_result.get('identity', {})
+
+
+def assign_plan_identity(cmd, resource_group_name, name, system_assigned=None, user_assigned=None):
+    # Parse the identities parameter similar to webapp pattern
+    if not system_assigned and not user_assigned:
+        raise InvalidArgumentValueError("No identities specified. "
+                                        "Either --system-assigned or --user-assigned must be specified.")
+
+    # Determine what identities to assign
+    system_assigned = bool(system_assigned)
+    user_assigned = user_assigned if user_assigned else []
+
+    # Get the current plan to understand existing identity
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    current_identity = plan_result.get('identity', {})
+    current_type = current_identity.get('type', 'None')
+    current_user_assigned = current_identity.get('userAssignedIdentities', {})
+
+    # Determine what the new identity should be
+    has_existing_system = current_type and 'SystemAssigned' in current_type
+    has_existing_user = current_type and 'UserAssigned' in current_type
+
+    # Merge existing user-assigned identities with new ones
+    final_user_assigned = []
+    if has_existing_user and current_user_assigned:
+        final_user_assigned.extend(list(current_user_assigned.keys()))
+
+    # Add new user-assigned identities (avoid duplicates with case-insensitive comparison)
+    for identity in user_assigned:
+        if not any(existing.lower() == identity.lower() for existing in final_user_assigned):
+            final_user_assigned.append(identity)
+
+    # Determine final system assignment
+    final_system_assigned = has_existing_system or system_assigned
+
+    # Determine the correct identity type
+    identity_type = _determine_identity_type(final_system_assigned, final_user_assigned)
+
+    return _update_plan_identity(cmd, resource_group_name, name, identity_type, final_user_assigned, plan_result)
+
+
+def remove_plan_identity(cmd, resource_group_name, name, system_assigned=None, user_assigned=None):
+    # Parse the identities parameter similar to webapp pattern
+    if not system_assigned and user_assigned is None:
+        raise InvalidArgumentValueError("No identities specified. "
+                                        "Either --system-assigned or --user-assigned must be specified.")
+
+    # Determine what identities to remove
+    remove_system = bool(system_assigned)
+    remove_user_assigned = user_assigned if user_assigned else []
+    remove_all_user_assigned = user_assigned == []
+
+    if remove_all_user_assigned:
+        logger.warning('--user-assigned specified without any resource IDs. '
+                       'Removing all user-assigned identities from app service plan.')
+
+    # Get the current plan to understand existing identity
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    current_identity = plan_result.get('identity', {})
+    current_type = current_identity.get('type', 'None')
+    current_user_assigned = current_identity.get('userAssignedIdentities', {})
+
+    # Validate current state
+    has_system = current_type and 'SystemAssigned' in current_type
+    has_user = current_type and 'UserAssigned' in current_type
+
+    if remove_system and not has_system:
+        logger.warning("System-assigned identity is not associated with plan '%s'", name)
+
+    if not has_user and (remove_user_assigned or remove_all_user_assigned):
+        logger.warning("No user-assigned identities are associated with plan '%s'", name)
+
+    # Check if user-assigned identities exist
+    if remove_user_assigned:
+        existing_user_ids = set(id.lower() for id in current_user_assigned.keys()) if current_user_assigned else set()
+        remove_user_ids = set(id.lower() for id in remove_user_assigned)
+        non_existing = remove_user_ids - existing_user_ids
+        if non_existing:
+            # Find the original casing for error message
+            original_non_existing = []
+            for remove_id in remove_user_assigned:
+                if remove_id.lower() in non_existing:
+                    original_non_existing.append(remove_id)
+            logger.warning("User-assigned identities '%s' are not associated with plan '%s'",
+                           ', '.join(original_non_existing), name)
+
+    # Calculate what should remain
+    final_system_assigned = has_system and not remove_system
+
+    final_user_assigned = []
+    if has_user and current_user_assigned and not remove_all_user_assigned:
+        # Keep existing user-assigned identities except those being removed (case insensitive comparison)
+        remove_user_ids_lower = set(id.lower() for id in remove_user_assigned)
+        final_user_assigned = [uid for uid in current_user_assigned.keys() if uid.lower() not in remove_user_ids_lower]
+
+    # Determine the correct identity type
+    identity_type = _determine_identity_type(final_system_assigned, final_user_assigned)
+
+    return _update_plan_identity(cmd, resource_group_name, name, identity_type, final_user_assigned, plan_result)
+
+
+def set_plan_default_identity(cmd, resource_group_name, name, identity=None):
+    # Validate that identity is provided
+    if not identity:
+        raise InvalidArgumentValueError("Identity is required. Use '[system]' for system-assigned identity "
+                                        "or provide user-assigned identity resource ID.")
+
+    # Get the current plan
+    plan_show_cmd = AppServicePlanShow(cli_ctx=cmd.cli_ctx)
+    plan_result = plan_show_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    location = plan_result.get('location')
+
+    # Determine identity type and resource ID
+    if identity.lower() == '[system]':
+        identity_type = "SystemAssigned"
+        user_assigned_identity_resource_id = None
+    else:
+        identity_type = "UserAssigned"
+        user_assigned_identity_resource_id = identity
+
+    # Update the plan with the default identity
+    plan_create_cmd = AppServicePlanCreate(cli_ctx=cmd.cli_ctx)
+    update_args = {
+        'resource_group': resource_group_name,
+        'name': name,
+        'location': location,
+        'sku': plan_result.get('sku', {}),
+        'plan_default_identity': {
+            'identity_type': identity_type
+        }
+    }
+
+    # Add user assigned identity resource ID if it's a user-assigned identity
+    if user_assigned_identity_resource_id:
+        update_args['plan_default_identity']['user_assigned_identity_resource_id'] = user_assigned_identity_resource_id
+
+    poller = plan_create_cmd(command_args=update_args)
+
+    # Wait for the operation to complete and get the result
+    plan_result = poller.result()
+
+    # Return the updated plan default identity
+    return plan_result.get('planDefaultIdentity', {})
+
+
+def recycle_plan_managed_instance(cmd, resource_group_name, name, instance_name):
+    recycle_cmd = AppServicePlanManagedInstanceRecycle(cli_ctx=cmd.cli_ctx)
+    _ = recycle_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name,
+        'worker_name': instance_name
+    })
+
+    logger.warning("Initiated recycle for instance %s", instance_name)
+
+
+def connect_to_plan_instance(cmd, resource_group_name, name, instance_name,
+                             bastion_name, bastion_resource_group_name=None):
+    from azure.cli.core.util import run_az_cmd
+
+    # 1. Default bastion RG to plan RG if not supplied
+    if not bastion_resource_group_name:
+        bastion_resource_group_name = resource_group_name
+
+    # 2. List instances to locate the target instance and its IP address
+    instances_cmd = AppServicePlanManagedInstanceList(cli_ctx=cmd.cli_ctx)
+    instances_payload = instances_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    instances = instances_payload.get('instances', []) if isinstance(instances_payload, dict) else []
+
+    # Search for the specified instance using the documented shape {"instanceName": ..., "ipAddress": ...}
+    target_instance = None
+    for inst in instances:
+        inst_instance_name = inst.get('instanceName')
+        if inst_instance_name and inst_instance_name.lower() == instance_name.lower():
+            target_instance = inst
+            break
+
+    if not target_instance:
+        raise ResourceNotFoundError(f"Instance '{instance_name}' not found in plan '{name}'.")
+
+    # Resolve IP address field (try a few possible keys)
+    target_ip = target_instance.get('ipAddress')
+    if not target_ip:
+        raise InvalidArgumentValueError("Could not determine target IP address from instance metadata.")
+
+    # 3. Retrieve RDP password after validating instance exists
+    password_cmd = AppServicePlanManagedInstanceShowRdpPassword(cli_ctx=cmd.cli_ctx)
+    password_response = password_cmd(command_args={
+        'resource_group': resource_group_name,
+        'name': name
+    })
+
+    password_value = password_response.get('rdpPassword')
+    if not password_value:
+        raise UnclassifiedUserFault("Double check that the app service plan is set with rdp-enabled and try again.")
+
+    logger.warning("Use the following credentials to login:")
+    logger.warning("RDP username: Administrator")
+    logger.warning("RDP password: [copied to clipboard]")
+    _copy_string_to_clipboard(password_value)
+
+    # 4. Invoke the Bastion RDP command
+    bastion_cmd = [
+        'az', 'network', 'bastion', 'rdp',
+        '--name', bastion_name,
+        '--resource-group', bastion_resource_group_name,
+        '--target-ip-address', target_ip
+    ]
+
+    run_az_cmd(bastion_cmd)
+
+
+def _copy_string_to_clipboard(string_value):
+    from azure.cli.core.util import run_cmd
+    run_cmd(["cmd.exe", "/c", "echo", "|", "set", "/p={}|".format(string_value), "clip"], check=False)
 
 
 def show_backup_configuration(cmd, resource_group_name, webapp_name, slot=None):
@@ -3823,7 +5666,7 @@ def get_bearer_token(cli_ctx):
     from azure.cli.core.auth.util import resource_to_scopes
     profile = Profile(cli_ctx=cli_ctx)
     credential, _, _ = profile.get_login_credentials()
-    scopes = resource_to_scopes(cli_ctx.cloud.endpoints.active_directory_resource_id)
+    scopes = resource_to_scopes(cli_ctx.cloud.endpoints.app_service_resource_id)
     bearer_token = credential.get_token(*scopes).token
     return bearer_token
 
@@ -4280,6 +6123,17 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         linux_auto_updates = [
             s.display_name for s in self.stacks if
             s.linux and ('java' not in s.display_name.casefold() or s.is_auto_update)]
+
+        def is_valid_runtime_name(name):
+            # Accepts names like "node|18-lts", "python|3.11", but not "NODE:lts" or "node"
+            parts = name.split(self.DEFAULT_DELIMETER)
+            return len(parts) == 2 and parts[1] and not parts[1].lower() in ("lts", "default", "stable")
+
+        windows_stacks = [n for n in windows_stacks if is_valid_runtime_name(n)]
+        linux_stacks = [n for n in linux_stacks if is_valid_runtime_name(n)]
+        windows_auto_updates = [n for n in windows_auto_updates if is_valid_runtime_name(n)]
+        linux_auto_updates = [n for n in linux_auto_updates if is_valid_runtime_name(n)]
+
         if delimiter is not None:
             windows_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in windows_stacks]
             linux_stacks = [n.replace(self.DEFAULT_DELIMETER, delimiter) for n in linux_stacks]
@@ -4402,7 +6256,35 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
 
     @classmethod
     def _is_valid_runtime_setting(cls, runtime_setting):
-        return runtime_setting is not None and not runtime_setting.is_hidden and not runtime_setting.is_deprecated
+        # Using datetime module imported at the top level
+        if runtime_setting is None or getattr(runtime_setting, 'is_hidden', False):
+            return False
+        if getattr(runtime_setting, 'is_deprecated', False):
+            return False
+        end_of_life = getattr(runtime_setting, 'end_of_life_date', None)
+        if end_of_life:
+            try:
+                if isinstance(end_of_life, str):
+                    try:
+                        end_of_life_dt = datetime.datetime.strptime(
+                            end_of_life, "%Y-%m-%dT%H:%M:%S.%fZ"
+                        ).replace(tzinfo=datetime.timezone.utc)
+                    except ValueError:
+                        end_of_life_dt = datetime.datetime.strptime(
+                            end_of_life, "%Y-%m-%dT%H:%M:%SZ"
+                        ).replace(tzinfo=datetime.timezone.utc)
+                else:
+                    # If already a datetime, ensure it's timezone-aware
+                    if end_of_life.tzinfo is None:
+                        end_of_life_dt = end_of_life.replace(tzinfo=datetime.timezone.utc)
+                    else:
+                        end_of_life_dt = end_of_life
+                now_utc = datetime.datetime.utcnow().replace(tzinfo=datetime.timezone.utc)
+                if now_utc >= end_of_life_dt:
+                    return False
+            except (ValueError, AttributeError):
+                pass
+        return True
 
     @classmethod
     def _get_runtime_setting(cls, minor_version, linux, java):
@@ -4595,7 +6477,7 @@ class _FlexFunctionAppStackRuntimeHelper:
 
     def get_flex_raw_function_app_stacks(self, cmd, location, runtime):
         stacks_api_url = '/providers/Microsoft.Web/locations/{}/functionAppStacks?' \
-                         'api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}'
+                         'api-version=2020-10-01&removeHiddenStacks=true&removeDeprecatedStacks=true&stack={}&sku=FC1'
         if runtime == "dotnet-isolated":
             runtime = "dotnet"
         request_url = cmd.cli_ctx.cloud.endpoints.resource_manager + stacks_api_url.format(location, runtime)
@@ -4679,6 +6561,27 @@ class _FlexFunctionAppStackRuntimeHelper:
         stacks = self.get_flex_raw_function_app_stacks(self._cmd, self._location, self._runtime)
         self._parse_raw_stacks(stacks)
 
+    def _get_version_variants(self, version):
+        variants = {version}
+
+        if '.' in version:
+            if version.endswith('.0'):
+                variants.add(version[:-2])
+        else:
+            variants.add(f"{version}.0")
+
+        return variants
+
+    def _find_matching_runtime_version(self, runtimes, version):
+        version_variants = self._get_version_variants(version)
+
+        for variant in version_variants:
+            matched_runtime = next((r for r in runtimes if r.version == variant), None)
+            if matched_runtime:
+                return matched_runtime
+
+        return None
+
     def resolve(self, runtime, version=None):
         runtimes = [r for r in self.stacks if runtime == r.name]
         if not runtimes:
@@ -4686,19 +6589,12 @@ class _FlexFunctionAppStackRuntimeHelper:
                                   .format(runtime))
         if version is None:
             return self.get_default_version()
+
         matched_runtime_version = next((r for r in runtimes if r.version == version), None)
+
         if not matched_runtime_version:
-            old_to_new_version = {
-                "11": "11.0",
-                "8": "8.0",
-                "8.0": "8",
-                "7": "7.0",
-                "6.0": "6",
-                "1.8": "8.0",
-                "17": "17.0"
-            }
-            new_version = old_to_new_version.get(version)
-            matched_runtime_version = next((r for r in runtimes if r.version == new_version), None)
+            matched_runtime_version = self._find_matching_runtime_version(runtimes, version)
+
         if not matched_runtime_version:
             versions = [r.version for r in runtimes]
             raise ValidationError("Invalid version {0} for runtime {1} for function apps on the Flex Consumption"
@@ -4972,8 +6868,7 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_
         location=location,
         sku=sku_def,
         reserved=True,
-        kind="functionapp",
-        name=name
+        kind="functionapp"
     )
 
     if zone_redundant:
@@ -4981,6 +6876,20 @@ def create_flex_app_service_plan(cmd, resource_group_name, name, location, zone_
 
     poller = client.app_service_plans.begin_create_or_update(resource_group_name, name, plan_def)
     return LongRunningOperation(cmd.cli_ctx)(poller)
+
+
+def update_flex_app_service_plan(instance):
+    instance.target_worker_count = None
+    instance.target_worker_size = None
+    instance.is_xenon = None
+    instance.hyper_v = None
+    instance.per_site_scaling = None
+    instance.maximum_elastic_worker_count = None
+    instance.elastic_scale_enabled = None
+    instance.is_spot = None
+    instance.target_worker_size_id = None
+    instance.sku.capacity = None
+    return instance
 
 
 def create_functionapp_app_service_plan(cmd, resource_group_name, name, is_linux, sku, number_of_workers=None,
@@ -5010,6 +6919,14 @@ def is_plan_consumption(cmd, plan_info):
     if isinstance(plan_info, AppServicePlan):
         if isinstance(plan_info.sku, SkuDescription):
             return plan_info.sku.tier.lower() == 'dynamic'
+    return False
+
+
+def is_plan_flex(cmd, plan_info):
+    SkuDescription, AppServicePlan = cmd.get_models('SkuDescription', 'AppServicePlan')
+    if isinstance(plan_info, AppServicePlan):
+        if isinstance(plan_info.sku, SkuDescription):
+            return plan_info.sku.tier.lower() == 'flexconsumption'
     return False
 
 
@@ -5159,7 +7076,8 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                        always_ready_instances=None, maximum_instance_count=None, instance_memory=None,
                        flexconsumption_location=None, deployment_storage_name=None,
                        deployment_storage_container_name=None, deployment_storage_auth_type=None,
-                       deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None):
+                       deployment_storage_auth_value=None, zone_redundant=False, configure_networking_later=None,
+                       auto_generated_domain_name_label_scope=None):
     # pylint: disable=too-many-statements, too-many-branches
 
     if functions_version is None and flexconsumption_location is None:
@@ -5282,15 +7200,17 @@ def create_functionapp(cmd, resource_group_name, name, storage_account, plan=Non
                                subnet_name=subnet_info["subnet_name"],
                                subnet_service_delegation=FLEX_SUBNET_DELEGATION if flexconsumption_location else None)
         subnet_resource_id = subnet_info["subnet_resource_id"]
-        vnet_route_all_enabled = True
         site_config.vnet_route_all_enabled = True
     else:
         subnet_resource_id = None
-        vnet_route_all_enabled = None
+
+    # if this is a managed function app (Azure Functions on Azure Containers), http20_proxy_flag must be None
+    if environment is not None:
+        site_config.http20_proxy_flag = None
 
     functionapp_def = Site(location=None, site_config=site_config, tags=tags,
                            virtual_network_subnet_id=subnet_resource_id, https_only=https_only,
-                           vnet_route_all_enabled=vnet_route_all_enabled)
+                           auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
 
     plan_info = None
     if runtime is not None:
@@ -5945,7 +7865,14 @@ def _normalize_functionapp_name(functionapp_name):
 
 def delete_storage_container(cmd, resource_group_name, storage_name, container_name):
     storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
-    storage_client.blob_containers.delete(resource_group_name, storage_name, container_name)
+
+    sa_resource_group = resource_group_name
+
+    if is_valid_resource_id(storage_name):
+        sa_resource_group = parse_resource_id(storage_name)['resource_group']
+        storage_name = parse_resource_id(storage_name)['name']
+
+    storage_client.blob_containers.delete(sa_resource_group, storage_name, container_name)
 
 
 def delete_user_assigned_identity(cmd, resource_group_name, identity_name):
@@ -5956,9 +7883,15 @@ def delete_user_assigned_identity(cmd, resource_group_name, identity_name):
 
 def _get_or_create_deployment_storage_container(cmd, resource_group_name, functionapp_name,
                                                 deployment_storage_name, deployment_storage_container_name):
+    sa_resource_group = resource_group_name
+
+    if is_valid_resource_id(deployment_storage_name):
+        sa_resource_group = parse_resource_id(deployment_storage_name)['resource_group']
+        deployment_storage_name = parse_resource_id(deployment_storage_name)['name']
+
     storage_client = get_mgmt_service_client(cmd.cli_ctx, StorageManagementClient)
     if deployment_storage_container_name:
-        storage_container = storage_client.blob_containers.get(resource_group_name, deployment_storage_name,
+        storage_container = storage_client.blob_containers.get(sa_resource_group, deployment_storage_name,
                                                                deployment_storage_container_name)
     else:
         from random import randint
@@ -5968,7 +7901,7 @@ def _get_or_create_deployment_storage_container(cmd, resource_group_name, functi
 
         from azure.mgmt.storage.models import BlobContainer
 
-        storage_container = storage_client.blob_containers.create(resource_group_name,
+        storage_container = storage_client.blob_containers.create(sa_resource_group,
                                                                   deployment_storage_name,
                                                                   deployment_storage_container_name,
                                                                   BlobContainer())
@@ -6830,7 +8763,6 @@ def _add_vnet_integration(cmd, name, resource_group_name, vnet, subnet, slot=Non
                                subnet_service_delegation=FLEX_SUBNET_DELEGATION if is_flex else None)
 
     app.virtual_network_subnet_id = subnet_info["subnet_resource_id"]
-    app.vnet_route_all_enabled = True
     app.site_config.vnet_route_all_enabled = True
 
     _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
@@ -7433,6 +9365,31 @@ def _build_onedeploy_url(params, instance_id=None):
     return _build_onedeploy_scm_url(params)
 
 
+def _build_kudu_warmup_scm_url(params):
+    scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+    return scm_url + '/api/deployments?warmup=true'
+
+
+def _build_kudu_warmup_arm_url(params, instance_id=None):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    client = web_client_factory(params.cmd.cli_ctx)
+    sub_id = get_subscription_id(params.cmd.cli_ctx)
+    instances_segment = f"/instances/{instance_id}" if instance_id is not None else ""
+    if not params.slot:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}{instances_segment}/deployments?api-version={client.DEFAULT_API_VERSION}"
+            f"&warmup=true"
+        )
+    else:
+        base_url = (
+            f"subscriptions/{sub_id}/resourceGroups/{params.resource_group_name}/providers/Microsoft.Web/sites/"
+            f"{params.webapp_name}/slots/{params.slot}{instances_segment}/deployments"
+            f"?api-version={client.DEFAULT_API_VERSION}&warmup=true"
+        )
+    return params.cmd.cli_ctx.cloud.endpoints.resource_manager + base_url
+
+
 def _build_onedeploy_scm_url(params):
     scm_url = _get_scm_url(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
     deploy_url = scm_url + '/api/publish?type=' + params.artifact_type
@@ -7450,7 +9407,7 @@ def _build_onedeploy_scm_url(params):
         deploy_url = deploy_url + '&ignorestack=' + str(params.should_ignore_stack)
 
     if params.target_path is not None:
-        deploy_url = deploy_url + '&path=' + params.target_path
+        deploy_url = deploy_url + '&path=' + quote(params.target_path)
 
     return deploy_url
 
@@ -7598,10 +9555,10 @@ def _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot):
         return None
 
 
-def _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, webapp_name, slot):
+def _warmup_kudu_and_get_cookie_internal(params):
     import requests
-    scm_url = _get_scm_url(cmd, resource_group_name, webapp_name, slot)
-    instance_id = _get_instance_id_internal(cmd, resource_group_name, webapp_name, slot)
+    instance_id = _get_instance_id_internal(params.cmd, params.resource_group_name, params.webapp_name, params.slot)
+
     if instance_id is None:
         logger.info("Failed to get a Kudu instance id...")
         return None
@@ -7611,16 +9568,21 @@ def _warmup_kudu_and_get_cookie_internal(cmd, resource_group_name, webapp_name, 
 
     for _ in range(max_retries):
         try:
-            headers = get_scm_site_headers(cmd.cli_ctx, webapp_name, resource_group_name)
-            response = requests.get(scm_url + '/api/deployments?warmup=true',
-                                    headers=headers, cookies=cookies, timeout=time_out)
+            if not params.src_url:  # use SCM endpoint for Kudu warmup
+                kudu_warmup_url = _build_kudu_warmup_scm_url(params)
+                headers = get_scm_site_headers(params.cmd.cli_ctx, params.webapp_name, params.resource_group_name)
+                response = requests.get(kudu_warmup_url, headers=headers, cookies=cookies, timeout=time_out)
+            else:  # use ARM endpoint for Kudu warmup
+                kudu_warmup_url = _build_kudu_warmup_arm_url(params, instance_id)
+                response = send_raw_request(params.cmd.cli_ctx, "GET", kudu_warmup_url)
+
             if response.status_code in (200, 201, 202):
                 logger.warning("Warmed up Kudu instance successfully.")
                 return cookies
             time_out = 300
         except Exception as ex:  # pylint: disable=broad-except
             logger.info("Error while warming-up Kudu with instanceid: %s, ex: %s", instance_id, ex)
-            return False
+            time_out = 300
     logger.warning("Failed to warm-up Kudu with instanceid: %s, "
                    "the deployment will proceed without pre-warmup.", instance_id)
     return None
@@ -7647,8 +9609,7 @@ def _make_onedeploy_request(params):
         if params.is_linux_webapp and not params.is_functionapp and params.enable_kudu_warmup:
             try:
                 logger.warning("Warming up Kudu before deployment.")
-                cookies = _warmup_kudu_and_get_cookie_internal(params.cmd, params.resource_group_name,
-                                                               params.webapp_name, params.slot)
+                cookies = _warmup_kudu_and_get_cookie_internal(params)
                 if cookies is None:
                     logger.info("Failed to fetch affinity cookie for Kudu. "
                                 "Deployment will proceed without pre-warming a Kudu instance.")
@@ -7670,8 +9631,7 @@ def _make_onedeploy_request(params):
         if params.is_linux_webapp and not params.is_functionapp and params.enable_kudu_warmup:
             try:
                 logger.warning("Warming up Kudu before deployment.")
-                cookies = _warmup_kudu_and_get_cookie_internal(params.cmd, params.resource_group_name,
-                                                               params.webapp_name, params.slot)
+                cookies = _warmup_kudu_and_get_cookie_internal(params)
                 if cookies is None:
                     logger.info("Failed to fetch affinity cookie for Kudu. "
                                 "Deployment will proceed without pre-warming a Kudu instance.")

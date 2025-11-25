@@ -21,11 +21,11 @@ from azure.cli.command_modules.backup._validators import \
 # ARGUMENT DEFINITIONS
 
 allowed_container_types = ['AzureIaasVM']
-allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'MSSQL', 'SAPHanaDatabase', 'SQLDataBase']
-allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPHanaDatabase', 'SQLDataBase']
+allowed_workload_types = ['VM', 'AzureFileShare', 'SAPHANA', 'SAPASE', 'MSSQL', 'SAPHanaDatabase', 'SQLDataBase', 'SAPAseDatabase', 'SAPHanaDBInstance']
+allowed_azure_workload_types = ['MSSQL', 'SAPHANA', 'SAPASE', 'SAPAseDatabase', 'SAPHanaDatabase', 'SQLDataBase', 'SAPHanaDBInstance']
 allowed_backup_management_types = ['AzureIaasVM', 'AzureStorage', 'AzureWorkload']
 allowed_extended_backup_management_types = allowed_backup_management_types + ['MAB']
-allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPHanaDatabase', 'SAPHanaSystem']
+allowed_protectable_item_type = ['SQLAG', 'SQLInstance', 'SQLDatabase', 'HANAInstance', 'SAPAseDatabase', 'SAPHanaDatabase', 'SAPHanaSystem', 'SAPHanaDBInstance']
 allowed_target_tier_type_chk_archivable = ['VaultArchive']
 allowed_tier_type = ['VaultStandard', 'Snapshot', 'VaultArchive', 'VaultStandardRehydrated', 'SnapshotAndVaultStandard', 'SnapshotAndVaultArchive']
 allowed_rehyd_priority_type = ['Standard', 'High']
@@ -108,7 +108,7 @@ def load_arguments(self, _):
         c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(enable_disable_options), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
         c.argument('immutability_state', arg_type=get_enum_type(allowed_immutability_options), help='Use this parameter to configure immutability settings for the vault. By default, immutability is "Disabled" for the vault. "Unlocked" means that immutability is enabled for the vault and can be reversed. "Locked" means that immutability is enabled for the vault and cannot be reversed.')
         c.argument('cross_subscription_restore_state', arg_type=get_enum_type(enable_disable_permadisable_options), help='Use this parameter to configure cross subscription restore settings for the vault. By default, the property is "Enabled" for the vault.')
-        # TODO Re-add once the new SDK is in place
+        # TODO May add the soft_delete_retention_period_in_days parameter later. The other will not be exposed.
         # c.argument('soft_delete_state', options_list=['--soft-delete-state', '--soft-delete-feature-state'], arg_type=get_enum_type(allowed_softdelete_options), help='Set soft-delete feature state for a Recovery Services Vault.')
         # c.argument('soft_delete_retention_period_in_days', type=int, options_list=['--soft-delete-duration'], help='Set soft-delete retention duration time in days for a Recovery Services Vault.')
 
@@ -119,7 +119,7 @@ def load_arguments(self, _):
         c.argument('azure_monitor_alerts_for_job_failures', options_list=['--job-failure-alerts'], arg_type=get_enum_type(enable_disable_options), help='Use this property to specify whether built-in Azure Monitor alerts should be received for every job failure.')
         c.argument('immutability_state', arg_type=get_enum_type(allowed_immutability_options), help='Use this parameter to configure immutability settings for the vault. By default, immutability is "Disabled" for the vault. "Unlocked" means that immutability is enabled for the vault and can be reversed. "Locked" means that immutability is enabled for the vault and cannot be reversed.')
         c.argument('cross_subscription_restore_state', arg_type=get_enum_type(enable_disable_permadisable_options), help='Use this parameter to configure cross subscription restore settings for the vault. By default, the property is "Enabled" for the vault.')
-        # TODO Re-add once the new SDK is in place
+        # TODO Discussion with Rishav once Enhanced Soft Delete is in place. We can only expose the latter, and might have to disable it from vaultconfig API
         # c.argument('soft_delete_state', options_list=['--soft-delete-state', '--soft-delete-feature-state'], arg_type=get_enum_type(allowed_softdelete_options), help='Set soft-delete feature state for a Recovery Services Vault.')
         # c.argument('soft_delete_retention_period_in_days', type=int, options_list=['--soft-delete-duration'], help='Set soft-delete retention duration time in days for a Recovery Services Vault.')
         c.argument('backup_storage_redundancy', arg_type=get_enum_type(['GeoRedundant', 'LocallyRedundant', 'ZoneRedundant']), help='Set backup storage properties for a Recovery Services vault.')
@@ -163,6 +163,15 @@ def load_arguments(self, _):
 
     with self.argument_context('backup vault encryption show') as c:
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'], id_part='name')
+
+    # Deleted Vault
+    with self.argument_context('backup deleted-vault') as c:
+        c.argument('location', help='Location of the deleted vault.')
+
+    for command in ['get', 'undelete', 'list-containers']:
+        with self.argument_context('backup deleted-vault ' + command) as c:
+            c.argument('deleted_vault_name', vault_name_type, options_list=['--name', '-n'], help='Name of the deleted vault.')
+            c.argument('deleted_vault_id', options_list=['--ids', '--deleted-vault-id'], help='ID of the deleted vault.')
 
     # Container
     with self.argument_context('backup container') as c:
@@ -326,6 +335,17 @@ def load_arguments(self, _):
         c.argument('workload_type', workload_type)
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
 
+    with self.argument_context('backup protection reconfigure') as c:
+        c.argument('container_name', container_name_type, id_part='child_name_2')
+        c.argument('item_name', item_name_type, id_part='child_name_3')
+        c.argument('backup_management_type', backup_management_type)
+        c.argument('workload_type', workload_type)
+        c.argument('new_vault_name', help='Name of the destination Recovery Services vault.')
+        c.argument('new_vault_resource_group', options_list=['--new-vault-resource-group', '--new-rg'], help='Resource group name of the destination Recovery Services vault.')
+        c.argument('new_policy_name', options_list=['--new-policy-name'], help='Name of the backup policy in the destination vault.')
+        c.argument('retain_as_per_policy', arg_type=get_three_state_flag(), help='Retain existing recovery points as per current backup policy when stopping protection in the source vault (the source vault is always the one specified by --vault-name/--resource-group).')
+        c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the source vault exists in a different tenant.')
+
     with self.argument_context('backup protection check-vm') as c:
         c.argument('vm_id', help='ID of the virtual machine to be checked for protection.', deprecate_info=c.deprecate(redirect='--vm', hide=True))
 
@@ -403,6 +423,7 @@ def load_arguments(self, _):
         c.argument('tenant_id', help='ID of the tenant if the Resource Guard protecting the vault exists in a different tenant.')
         c.argument('disk_access_option', arg_type=get_enum_type(allowed_disk_access_options), help='Specify the disk access option for target disks.')
         c.argument('target_disk_access_id', help='Specify the target disk access ID when --disk-access-option is set to EnablePrivateAccessForAllDisks')
+        c.argument('cvm_os_des_id', help='Disk encryption set ID for the OS disk of confidential VMs. This is used to encrypt the OS disk during restore.')
 
     with self.argument_context('backup restore restore-azurefileshare') as c:
         c.argument('resolve_conflict', resolve_conflict_type)
@@ -453,6 +474,9 @@ def load_arguments(self, _):
         c.argument('target_resource_group', options_list=['--target-resource-group'], help="""Specify the resource group of target item for Cross Region Restore. Default value will be same as --resource-group if not specified.""")
         c.argument('target_vault_name', options_list=['--target-vault-name'], help="""Specify the vault name of target item for Cross Region Restore. Default value will be same as --vault-name if not specified.""")
         c.argument('target_subscription_id', help="""Specify the subscription of the target item for Cross Subscription Restore. Defaulted to source subscription if not specified.""")
+        c.argument('attach_and_mount', arg_type=get_three_state_flag(), help='Specify attach and mount value for HANA Snapshot restores.')
+        c.argument('identity_arm_id', help='Set Identity ARM ID for HANA Snapshot restores.')
+        c.argument('snapshot_instance_resource_group', options_list=['--snapshot-rg'], help="""Specify the resource group for HANA Snapshot Instance restores. If not provided, the default value will be fetched from the target container details.""")
 
     # Job
     with self.argument_context('backup job') as c:

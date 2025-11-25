@@ -17,13 +17,12 @@ from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2016-12-01')
 class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='source_account')
     @StorageAccountPreparer(parameter_name='target_account')
     def test_storage_blob_incremental_copy(self, resource_group, source_account, target_account):
-        source_file = self.create_temp_file(16)
+        source_file = self.create_temp_file(16*1000) # 16MB for a longer copying period
         source_account_info = self.get_account_info(resource_group, source_account)
         source_container = self.create_container(source_account_info)
         self.storage_cmd('storage blob upload -c {} -n src -f "{}" -t page', source_account_info,
@@ -34,12 +33,17 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
         target_account_info = self.get_account_info(resource_group, target_account)
         target_container = self.create_container(target_account_info)
-        self.storage_cmd('storage blob incremental-copy start --source-container {} --source-blob '
-                         'src --source-account-name {} --source-account-key {} --source-snapshot '
-                         '{} --destination-container {} --destination-blob backup '
-                         '--destination-if-modified-since "2020-06-29T06:32Z" ',
-                         target_account_info, source_container, source_account,
-                         source_account_info[1], snapshot, target_container)
+        copy_id = self.storage_cmd('storage blob incremental-copy start --source-container {} --source-blob '
+                                   'src --source-account-name {} --source-account-key {} --source-snapshot '
+                                   '{} --destination-container {} --destination-blob backup '
+                                   '--destination-if-modified-since "2020-06-29T06:32Z" ',
+                                   target_account_info, source_container, source_account,
+                                   source_account_info[1], snapshot, target_container).get_output_in_json()['id']
+        from azure.core.exceptions import ResourceExistsError
+        with self.assertRaisesRegex(ResourceExistsError, "There is currently no pending copy operation"):
+            self.storage_cmd('storage blob incremental-copy cancel --container-name {} --name {} --copy-id {} '
+                             '--lease-id abcdabcd-abcd-abcd-abcd-abcdabcdabcd',
+                             target_account_info, target_container, "backup", copy_id)
 
     def test_storage_blob_no_credentials_scenario(self):
         source_file = self.create_temp_file(1)
@@ -122,8 +126,9 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         # self.storage_cmd('storage blob show -n {} -c {}', account_info, blob_name, container) \
         #     .assert_with_checks(JMESPathCheck('properties.contentSettings.contentType', None))
 
+        # service behavior change
         self.storage_cmd('storage blob service-properties show', account_info) \
-            .assert_with_checks(JMESPathCheck('hourMetrics.enabled', True))
+            .assert_with_checks(JMESPathCheck('hourMetrics.enabled', False))
 
         if not skip_download:
             downloaded = os.path.join(local_dir, 'test.file')
@@ -441,9 +446,10 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account create -n {} -g {} --kind StorageV2'.format(storage_account, resource_group))
         account_info = self.get_account_info(resource_group, storage_account)
 
+        # service behavior change
         self.storage_cmd('storage blob service-properties show', account_info) \
             .assert_with_checks(JMESPathCheck('staticWebsite.enabled', False),
-                                JMESPathCheck('hourMetrics.enabled', True),
+                                JMESPathCheck('hourMetrics.enabled', False),
                                 JMESPathCheck('minuteMetrics.enabled', False),
                                 JMESPathCheck('minuteMetrics.includeApis', None),
                                 JMESPathCheck('logging.delete', False))
@@ -568,7 +574,7 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
             self.cmd('storage blob show --account-name {} --account-key="YQ==" -c foo -n bar.txt '.format(storage_account))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(kind='StorageV2', location='centraluseuap')
+    @StorageAccountPreparer(kind='StorageV2', location='centralus')
     def test_storage_blob_upload_tiers_scenarios(self, resource_group, storage_account_info):
         account_info = storage_account_info
         container = self.create_container(account_info, prefix="con")
@@ -816,7 +822,7 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
 @api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2020-10-02')
 class StorageBlobImmutabilityTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
-    @StorageAccountPreparer(name_prefix='version', kind='StorageV2', location='centraluseuap')
+    @StorageAccountPreparer(name_prefix='version', kind='StorageV2', location='centralus')
     def test_storage_blob_vlm(self, resource_group, storage_account_info):
         container = self.create_random_name(prefix='container', length=18)
         blob = self.create_random_name(prefix='blob', length=18)
@@ -932,11 +938,10 @@ class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('length(@)', 2))
 
 
-@api_version_constraint(ResourceType.MGMT_STORAGE, min_api='2019-06-01')
 class StorageBlobPITRTests(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix="storage_blob_restore", location="centraluseuap")
-    @StorageAccountPreparer(name_prefix="restore", kind="StorageV2", sku='Standard_LRS', location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="storage_blob_restore", location="centralus")
+    @StorageAccountPreparer(name_prefix="restore", kind="StorageV2", sku='Standard_LRS', location="centralus")
     def test_storage_blob_restore(self, resource_group, storage_account):
         import time
         # Enable Policy
@@ -1041,7 +1046,7 @@ class StorageBlobCopyTestScenario(StorageScenarioMixin, ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='clitest')
-    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='centraluseuap')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='centralus')
     def test_storage_container_vlm_scenarios(self, resource_group, storage_account):
         self.kwargs.update({
             'container1': self.create_random_name(prefix='con1', length=10),
@@ -1084,7 +1089,7 @@ class StorageBlobCopyTestScenario(StorageScenarioMixin, ScenarioTest):
 
 class StorageContainerScenarioTest(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
-    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2euap')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2')
     def test_storage_container_list_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         container1 = self.create_container(account_info, prefix="con1")
@@ -1131,7 +1136,7 @@ class StorageContainerScenarioTest(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 2))
 
     @ResourceGroupPreparer(name_prefix='clitest')
-    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2euap')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2')
     def test_storage_container_soft_delete_scenarios(self, resource_group, storage_account):
         import time
         account_info = self.get_account_info(resource_group, storage_account)

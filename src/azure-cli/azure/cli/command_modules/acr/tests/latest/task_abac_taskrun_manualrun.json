@@ -1,0 +1,74 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "registryName": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 50,
+      "metadata": {
+        "description": "Name of your Azure Container Registry"
+      }
+    },
+    "taskRunName": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 50,
+      "metadata": {
+        "description": "Name of your Task Run"
+      }
+    },
+    "taskName": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 50,
+      "metadata": {
+        "description": "Name of the Task to bind task run"
+      }
+    },
+    "taskRunId": {
+      "type": "string",
+      "metadata": {
+        "description": "Resource ID of task to bind task run"
+      },
+      "defaultValue": ""
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.ContainerRegistry/registries/taskRuns/",
+      "name": "[concat(parameters('registryName'), '/', parameters('taskRunName'))]",
+      "location": "[parameters('location')]",
+      "apiVersion": "2025-03-01-preview",
+      "properties": {
+        "runRequest": {
+          "type": "TaskRunRequest",
+          "taskName": "[parameters('taskName')]",
+          "taskId": "[parameters('taskRunId')]",
+          "values": [],
+          "timeout": 3600,
+          "platform": {
+            "os": "linux",
+            "architecture": "amd64"
+          },
+          "agentConfiguration": {
+            "cpu": 2
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "registry": {
+      "type": "string",
+      "value": "[parameters('registryName')]"
+    }
+  }
+}

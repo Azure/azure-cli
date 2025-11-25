@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2024-07-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/natgateways/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/natgateways/{}", "2024-07-01"],
         ]
     }
 
@@ -66,11 +66,27 @@ class Update(AAZCommand):
             help="Space-separated list of public IP addresses (Names or IDs).",
             nullable=True,
         )
+        _args_schema.pip_addresses_v6 = AAZListArg(
+            options=["--pip-addresses-v6"],
+            help="An array of public ip addresses V6 associated with the nat gateway resource.",
+            nullable=True,
+        )
         _args_schema.pip_prefixes = AAZListArg(
             options=["--pip-prefixes"],
             help="Space-separated list of public IP prefixes (Names or IDs).",
             nullable=True,
         )
+        _args_schema.pip_prefixes_v6 = AAZListArg(
+            options=["--pip-prefixes-v6"],
+            help="An array of public ip prefixes V6 associated with the nat gateway resource.",
+            nullable=True,
+        )
+        _args_schema.source_vnet = AAZObjectArg(
+            options=["--source-vnet"],
+            help="A reference to the source virtual network using this nat gateway resource.",
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(_args_schema.source_vnet)
         _args_schema.tags = AAZDictArg(
             options=["--tags"],
             help="Space-separated tags: key[=value] [key[=value] ...].",
@@ -89,6 +105,12 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        pip_addresses_v6 = cls._args_schema.pip_addresses_v6
+        pip_addresses_v6.Element = AAZObjectArg(
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(pip_addresses_v6.Element)
+
         pip_prefixes = cls._args_schema.pip_prefixes
         pip_prefixes.Element = AAZObjectArg(
             nullable=True,
@@ -101,6 +123,12 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        pip_prefixes_v6 = cls._args_schema.pip_prefixes_v6
+        pip_prefixes_v6.Element = AAZObjectArg(
+            nullable=True,
+        )
+        cls._build_args_sub_resource_update(pip_prefixes_v6.Element)
+
         tags = cls._args_schema.tags
         tags.Element = AAZStrArg(
             nullable=True,
@@ -108,6 +136,27 @@ class Update(AAZCommand):
 
         # define Arg Group "Parameters"
         return cls._args_schema
+
+    _args_sub_resource_update = None
+
+    @classmethod
+    def _build_args_sub_resource_update(cls, _schema):
+        if cls._args_sub_resource_update is not None:
+            _schema.id = cls._args_sub_resource_update.id
+            return
+
+        cls._args_sub_resource_update = AAZObjectArg(
+            nullable=True,
+        )
+
+        sub_resource_update = cls._args_sub_resource_update
+        sub_resource_update.id = AAZStrArg(
+            options=["id"],
+            help="Resource ID.",
+            nullable=True,
+        )
+
+        _schema.id = cls._args_sub_resource_update.id
 
     def _execute_operations(self):
         self.pre_operations()
@@ -187,7 +236,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -286,7 +335,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2024-07-01",
                     required=True,
                 ),
             }
@@ -351,7 +400,10 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("idleTimeoutInMinutes", AAZIntType, ".idle_timeout")
                 properties.set_prop("publicIpAddresses", AAZListType, ".pip_addresses")
+                properties.set_prop("publicIpAddressesV6", AAZListType, ".pip_addresses_v6")
                 properties.set_prop("publicIpPrefixes", AAZListType, ".pip_prefixes")
+                properties.set_prop("publicIpPrefixesV6", AAZListType, ".pip_prefixes_v6")
+                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("sourceVirtualNetwork", AAZObjectType, ".source_vnet"))
 
             public_ip_addresses = _builder.get(".properties.publicIpAddresses")
             if public_ip_addresses is not None:
@@ -361,6 +413,10 @@ class Update(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("id", AAZStrType, ".id")
 
+            public_ip_addresses_v6 = _builder.get(".properties.publicIpAddressesV6")
+            if public_ip_addresses_v6 is not None:
+                _UpdateHelper._build_schema_sub_resource_update(public_ip_addresses_v6.set_elements(AAZObjectType, "."))
+
             public_ip_prefixes = _builder.get(".properties.publicIpPrefixes")
             if public_ip_prefixes is not None:
                 public_ip_prefixes.set_elements(AAZObjectType, ".")
@@ -368,6 +424,10 @@ class Update(AAZCommand):
             _elements = _builder.get(".properties.publicIpPrefixes[]")
             if _elements is not None:
                 _elements.set_prop("id", AAZStrType, ".id")
+
+            public_ip_prefixes_v6 = _builder.get(".properties.publicIpPrefixesV6")
+            if public_ip_prefixes_v6 is not None:
+                _UpdateHelper._build_schema_sub_resource_update(public_ip_prefixes_v6.set_elements(AAZObjectType, "."))
 
             tags = _builder.get(".tags")
             if tags is not None:
@@ -386,6 +446,12 @@ class Update(AAZCommand):
 
 class _UpdateHelper:
     """Helper class for Update"""
+
+    @classmethod
+    def _build_schema_sub_resource_update(cls, _builder):
+        if _builder is None:
+            return
+        _builder.set_prop("id", AAZStrType, ".id")
 
     _schema_nat_gateway_read = None
 
@@ -435,13 +501,23 @@ class _UpdateHelper:
         properties.public_ip_addresses = AAZListType(
             serialized_name="publicIpAddresses",
         )
+        properties.public_ip_addresses_v6 = AAZListType(
+            serialized_name="publicIpAddressesV6",
+        )
         properties.public_ip_prefixes = AAZListType(
             serialized_name="publicIpPrefixes",
+        )
+        properties.public_ip_prefixes_v6 = AAZListType(
+            serialized_name="publicIpPrefixesV6",
         )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
             flags={"read_only": True},
         )
+        properties.source_virtual_network = AAZObjectType(
+            serialized_name="sourceVirtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.source_virtual_network)
         properties.subnets = AAZListType(
             flags={"read_only": True},
         )
@@ -450,9 +526,17 @@ class _UpdateHelper:
         public_ip_addresses.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_addresses.Element)
 
+        public_ip_addresses_v6 = _schema_nat_gateway_read.properties.public_ip_addresses_v6
+        public_ip_addresses_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
+
         public_ip_prefixes = _schema_nat_gateway_read.properties.public_ip_prefixes
         public_ip_prefixes.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_prefixes.Element)
+
+        public_ip_prefixes_v6 = _schema_nat_gateway_read.properties.public_ip_prefixes_v6
+        public_ip_prefixes_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
 
         subnets = _schema_nat_gateway_read.properties.subnets
         subnets.Element = AAZObjectType()

@@ -152,7 +152,7 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         # Update Application
         updated_app = self.cmd('az sf managed-application update -g {rg} -c {cluster_name} --application-name {app_name} --application-type-version {v2} '
                                '--health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 '
-                               '--upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --upgrade-replica-set-check-timeout 300 --force-restart',
+                               '--upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --replica-check-timeout 300 --force-restart',
                                checks=[self.check('provisioningState', 'Succeeded'),
                                        self.check('upgradePolicy.forceRestart', True),
                                        self.check('upgradePolicy.upgradeReplicaSetCheckTimeout', '300'),

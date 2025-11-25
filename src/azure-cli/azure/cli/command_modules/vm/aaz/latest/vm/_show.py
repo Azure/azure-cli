@@ -16,9 +16,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}", "2025-04-01"],
         ]
     }
 
@@ -50,7 +50,7 @@ class Show(AAZCommand):
         _args_schema.expand = AAZStrArg(
             options=["--expand"],
             help="The expand expression to apply on the operation. 'InstanceView' retrieves a snapshot of the runtime properties of the virtual machine that is managed by the platform and can change outside of control plane operations. 'UserData' retrieves the UserData property as part of the VM model view that was provided by the user during the VM Create/Update operation.",
-            enum={"instanceView": "instanceView", "userData": "userData"},
+            enum={"instanceView": "instanceView", "resiliencyView": "resiliencyView", "userData": "userData"},
         )
         return cls._args_schema
 
@@ -122,7 +122,7 @@ class Show(AAZCommand):
                     "$expand", self.ctx.args.expand,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-04-01",
                     required=True,
                 ),
             }
@@ -175,6 +175,7 @@ class Show(AAZCommand):
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
             )
+            _schema_on_200.placement = AAZObjectType()
             _schema_on_200.plan = AAZObjectType()
             _schema_on_200.properties = AAZObjectType(
                 flags={"client_flatten": True},
@@ -182,6 +183,11 @@ class Show(AAZCommand):
             _schema_on_200.resources = AAZListType(
                 flags={"read_only": True},
             )
+            _schema_on_200.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _ShowHelper._build_schema_system_data_read(_schema_on_200.system_data)
             _schema_on_200.tags = AAZDictType()
             _schema_on_200.type = AAZStrType(
                 flags={"read_only": True},
@@ -218,6 +224,23 @@ class Show(AAZCommand):
                 serialized_name="principalId",
                 flags={"read_only": True},
             )
+
+            placement = cls._schema_on_200.placement
+            placement.exclude_zones = AAZListType(
+                serialized_name="excludeZones",
+            )
+            placement.include_zones = AAZListType(
+                serialized_name="includeZones",
+            )
+            placement.zone_placement_policy = AAZStrType(
+                serialized_name="zonePlacementPolicy",
+            )
+
+            exclude_zones = cls._schema_on_200.placement.exclude_zones
+            exclude_zones.Element = AAZStrType()
+
+            include_zones = cls._schema_on_200.placement.include_zones
+            include_zones.Element = AAZStrType()
 
             plan = cls._schema_on_200.plan
             plan.name = AAZStrType()
@@ -316,6 +339,9 @@ class Show(AAZCommand):
             )
 
             additional_capabilities = cls._schema_on_200.properties.additional_capabilities
+            additional_capabilities.enable_fips1403_encryption = AAZBoolType(
+                serialized_name="enableFips1403Encryption",
+            )
             additional_capabilities.hibernation_enabled = AAZBoolType(
                 serialized_name="hibernationEnabled",
             )
@@ -644,6 +670,7 @@ class Show(AAZCommand):
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.tags = AAZDictType()
 
             properties = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties
             properties.auxiliary_mode = AAZStrType(
@@ -743,6 +770,7 @@ class Show(AAZCommand):
                 flags={"client_flatten": True},
             )
             public_ip_address_configuration.sku = AAZObjectType()
+            public_ip_address_configuration.tags = AAZDictType()
 
             properties = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties
             properties.delete_option = AAZStrType(
@@ -789,6 +817,12 @@ class Show(AAZCommand):
             sku = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.sku
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
+
+            tags = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.tags
+            tags.Element = AAZStrType()
+
+            tags = cls._schema_on_200.properties.network_profile.network_interface_configurations.Element.tags
+            tags.Element = AAZStrType()
 
             network_interfaces = cls._schema_on_200.properties.network_profile.network_interfaces
             network_interfaces.Element = AAZObjectType()
@@ -978,6 +1012,9 @@ class Show(AAZCommand):
             _element.protocol = AAZStrType()
 
             scheduled_events_policy = cls._schema_on_200.properties.scheduled_events_policy
+            scheduled_events_policy.all_instances_down = AAZObjectType(
+                serialized_name="allInstancesDown",
+            )
             scheduled_events_policy.scheduled_events_additional_publishing_targets = AAZObjectType(
                 serialized_name="scheduledEventsAdditionalPublishingTargets",
             )
@@ -988,6 +1025,11 @@ class Show(AAZCommand):
                 serialized_name="userInitiatedRedeploy",
             )
 
+            all_instances_down = cls._schema_on_200.properties.scheduled_events_policy.all_instances_down
+            all_instances_down.automatically_approve = AAZBoolType(
+                serialized_name="automaticallyApprove",
+            )
+
             scheduled_events_additional_publishing_targets = cls._schema_on_200.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets
             scheduled_events_additional_publishing_targets.event_grid_and_resource_graph = AAZObjectType(
                 serialized_name="eventGridAndResourceGraph",
@@ -995,6 +1037,9 @@ class Show(AAZCommand):
 
             event_grid_and_resource_graph = cls._schema_on_200.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
             event_grid_and_resource_graph.enable = AAZBoolType()
+            event_grid_and_resource_graph.scheduled_events_api_version = AAZStrType(
+                serialized_name="scheduledEventsApiVersion",
+            )
 
             user_initiated_reboot = cls._schema_on_200.properties.scheduled_events_policy.user_initiated_reboot
             user_initiated_reboot.automatically_approve = AAZBoolType(
@@ -1049,11 +1094,20 @@ class Show(AAZCommand):
             )
 
             proxy_agent_settings = cls._schema_on_200.properties.security_profile.proxy_agent_settings
+            proxy_agent_settings.add_proxy_agent_extension = AAZBoolType(
+                serialized_name="addProxyAgentExtension",
+            )
             proxy_agent_settings.enabled = AAZBoolType()
+            proxy_agent_settings.imds = AAZObjectType()
+            _ShowHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
             proxy_agent_settings.key_incarnation_id = AAZIntType(
                 serialized_name="keyIncarnationId",
             )
             proxy_agent_settings.mode = AAZStrType()
+            proxy_agent_settings.wire_server = AAZObjectType(
+                serialized_name="wireServer",
+            )
+            _ShowHelper._build_schema_host_endpoint_settings_read(proxy_agent_settings.wire_server)
 
             uefi_settings = cls._schema_on_200.properties.security_profile.uefi_settings
             uefi_settings.secure_boot_enabled = AAZBoolType(
@@ -1064,6 +1118,9 @@ class Show(AAZCommand):
             )
 
             storage_profile = cls._schema_on_200.properties.storage_profile
+            storage_profile.align_regional_disks_to_vm_zone = AAZBoolType(
+                serialized_name="alignRegionalDisksToVMZone",
+            )
             storage_profile.data_disks = AAZListType(
                 serialized_name="dataDisks",
             )
@@ -1094,11 +1151,9 @@ class Show(AAZCommand):
             )
             _element.disk_iops_read_write = AAZIntType(
                 serialized_name="diskIOPSReadWrite",
-                flags={"read_only": True},
             )
             _element.disk_m_bps_read_write = AAZIntType(
                 serialized_name="diskMBpsReadWrite",
-                flags={"read_only": True},
             )
             _element.disk_size_gb = AAZIntType(
                 serialized_name="diskSizeGB",
@@ -1191,13 +1246,20 @@ class Show(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.location = AAZStrType()
+            _element.location = AAZStrType(
+                flags={"required": True},
+            )
             _element.name = AAZStrType(
                 flags={"read_only": True},
             )
             _element.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _element.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
+            _ShowHelper._build_schema_system_data_read(_element.system_data)
             _element.tags = AAZDictType()
             _element.type = AAZStrType(
                 flags={"read_only": True},
@@ -1217,7 +1279,7 @@ class Show(AAZCommand):
                 serialized_name="instanceView",
             )
             _ShowHelper._build_schema_virtual_machine_extension_instance_view_read(properties.instance_view)
-            properties.protected_settings = AAZFreeFormDictType(
+            properties.protected_settings = AAZAnyType(
                 serialized_name="protectedSettings",
             )
             properties.protected_settings_from_key_vault = AAZObjectType(
@@ -1232,7 +1294,7 @@ class Show(AAZCommand):
                 flags={"read_only": True},
             )
             properties.publisher = AAZStrType()
-            properties.settings = AAZFreeFormDictType()
+            properties.settings = AAZAnyType()
             properties.suppress_failures = AAZBoolType(
                 serialized_name="suppressFailures",
             )
@@ -1352,6 +1414,26 @@ class _ShowHelper:
         _schema.enabled = cls._schema_disk_encryption_settings_read.enabled
         _schema.key_encryption_key = cls._schema_disk_encryption_settings_read.key_encryption_key
 
+    _schema_host_endpoint_settings_read = None
+
+    @classmethod
+    def _build_schema_host_endpoint_settings_read(cls, _schema):
+        if cls._schema_host_endpoint_settings_read is not None:
+            _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+            _schema.mode = cls._schema_host_endpoint_settings_read.mode
+            return
+
+        cls._schema_host_endpoint_settings_read = _schema_host_endpoint_settings_read = AAZObjectType()
+
+        host_endpoint_settings_read = _schema_host_endpoint_settings_read
+        host_endpoint_settings_read.in_vm_access_control_profile_reference_id = AAZStrType(
+            serialized_name="inVMAccessControlProfileReferenceId",
+        )
+        host_endpoint_settings_read.mode = AAZStrType()
+
+        _schema.in_vm_access_control_profile_reference_id = cls._schema_host_endpoint_settings_read.in_vm_access_control_profile_reference_id
+        _schema.mode = cls._schema_host_endpoint_settings_read.mode
+
     _schema_instance_view_status_read = None
 
     @classmethod
@@ -1460,6 +1542,50 @@ class _ShowHelper:
         sub_resource_read.id = AAZStrType()
 
         _schema.id = cls._schema_sub_resource_read.id
+
+    _schema_system_data_read = None
+
+    @classmethod
+    def _build_schema_system_data_read(cls, _schema):
+        if cls._schema_system_data_read is not None:
+            _schema.created_at = cls._schema_system_data_read.created_at
+            _schema.created_by = cls._schema_system_data_read.created_by
+            _schema.created_by_type = cls._schema_system_data_read.created_by_type
+            _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+            _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+            _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
+            return
+
+        cls._schema_system_data_read = _schema_system_data_read = AAZObjectType(
+            flags={"read_only": True}
+        )
+
+        system_data_read = _schema_system_data_read
+        system_data_read.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data_read.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data_read.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data_read.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data_read.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data_read.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
+        _schema.created_at = cls._schema_system_data_read.created_at
+        _schema.created_by = cls._schema_system_data_read.created_by
+        _schema.created_by_type = cls._schema_system_data_read.created_by_type
+        _schema.last_modified_at = cls._schema_system_data_read.last_modified_at
+        _schema.last_modified_by = cls._schema_system_data_read.last_modified_by
+        _schema.last_modified_by_type = cls._schema_system_data_read.last_modified_by_type
 
     _schema_virtual_hard_disk_read = None
 

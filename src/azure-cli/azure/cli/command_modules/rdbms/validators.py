@@ -305,15 +305,16 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
         logger.warning("The server has enabled the auto scale iops. So the iops will be ignored.")
 
 
-def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, zone=None,
-                           standby_availability_zone=None, high_availability=None, subnet=None, public_access=None,
-                           version=None, instance=None, geo_redundant_backup=None,
+def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
+                           zone=None, standby_availability_zone=None, high_availability=None, subnet=None,
+                           public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None,
-                           password_auth=None, active_directory_auth=None, microsoft_entra_auth=None,
+                           password_auth=None, microsoft_entra_auth=None,
                            admin_name=None, admin_id=None, admin_type=None):
     validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
+    validate_database_name(database_name)
     is_create = not instance
     if is_create:
         list_location_capability_info = get_postgres_location_capability_info(
@@ -328,8 +329,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
-    _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
-                       byok_identity, byok_key, backup_byok_identity, backup_byok_key, instance)
+    _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, instance)
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -339,7 +339,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     else:
         supported_storageV2_size = None
     _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier,
-                               supported_storageV2_size, iops, throughput, instance)
+                               tier, supported_storageV2_size, iops, throughput, instance)
     _pg_storage_performance_tier_validator(performance_tier,
                                            sku_info,
                                            tier,
@@ -350,43 +350,28 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
-    _pg_version_validator(version, list_location_capability_info['server_versions'], is_create)
+    _pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
-    is_microsoft_entra_auth = bool(active_directory_auth is not None and active_directory_auth.lower() == 'enabled') \
-        or bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
+    is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
     _pg_authentication_validator(password_auth, is_microsoft_entra_auth,
                                  admin_name, admin_id, admin_type, instance)
 
 
-def _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
-                       byok_identity, byok_key, backup_byok_identity, backup_byok_key, instance):
+def _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, instance):
     if create_cluster == 'ElasticCluster' or (instance and instance.cluster and instance.cluster.cluster_size > 0):
-        if instance is None and version == '17':
-            raise ValidationError("PostgreSQL version 17 is currently not supported for elastic cluster.")
+        if instance is None and version != '17':
+            raise ValidationError("Elastic cluster is only supported for PostgreSQL version 17.")
 
         if cluster_size and instance and instance.cluster.cluster_size > cluster_size:
             raise ValidationError('Updating node count cannot be less than the current size of {} nodes.'
                                   .format(instance.cluster.cluster_size))
         if auto_grow and auto_grow.lower() != 'disabled':
             raise ValidationError("Storage Auto-grow is currently not supported for elastic cluster.")
-        if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
-            raise ValidationError("Geo-redundancy is currently not supported for elastic cluster.")
-        if byok_identity or byok_key or backup_byok_identity or backup_byok_key:
-            raise ValidationError("Data encryption is currently not supported for elastic cluster.")
         if tier == 'Burstable':
             raise ValidationError("Burstable tier is currently not supported for elastic cluster.")
 
     if cluster_size and instance and not instance.cluster:
         raise ValidationError("Node count can only be specified for an elastic cluster.")
-
-
-def cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key,
-                           geo_redundant_backup, instance):
-    if instance and instance.cluster and instance.cluster.cluster_size > 0:
-        if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
-            raise ValidationError("Geo-redundancy is currently not supported for elastic cluster.")
-        if byok_identity or byok_key or backup_byok_identity or backup_byok_key:
-            raise ValidationError("Data encryption is currently not supported for elastic cluster.")
 
 
 def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance):
@@ -470,9 +455,9 @@ def compare_sku_names(sku_1, sku_2):
         return -1
 
     # the case where version number is the same, we want to sort by the core number
-    if int(sku_2_match.group('core_number')) > int(sku_1_match.group('core_number')):
-        return 1
     if int(sku_2_match.group('core_number')) < int(sku_1_match.group('core_number')):
+        return 1
+    if int(sku_2_match.group('core_number')) > int(sku_1_match.group('core_number')):
         return -1
 
     return 0
@@ -510,20 +495,18 @@ def _pg_storage_performance_tier_validator(performance_tier, sku_info, tier=None
                                ' Allowed values : {}'.format(storage_size, performance_tiers))
 
 
-def _pg_version_validator(version, versions, is_create):
+def _pg_version_validator(version, versions):
     if version:
         if version not in versions:
             raise CLIError('Incorrect value for --version. Allowed values : {}'.format(sorted(versions)))
-        if version == '12':
-            logger.warning("Support for PostgreSQL 12 has officially ended. As a result, "
-                           "the option to select version 12 will be removed in the near future. "
-                           "We recommend selecting PostgreSQL 13 or a later version for "
-                           "all future operations.")
-
-    if is_create:
-        # Warning for upcoming breaking change to default value of pg version
-        logger.warning("The default value for the PostgreSQL server major version "
-                       "will be updating to 17 in the near future.")
+        if version in ('11', '12'):
+            logger.warning("Support for PostgreSQL %s has officially ended. "
+                           "We recommend selecting PostgreSQL 14 or a later version for "
+                           "all future operations.", str(version))
+        if version == '13':
+            logger.warning("PostgreSQL version 13 will reach end-of-life (EOL) soon. "
+                           "Upgrade to PostgreSQL 14 or later as soon as possible to "
+                           "maintain security, performance, and supportability.")
 
 
 def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
@@ -907,7 +890,7 @@ def validate_identities(cmd, namespace):
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
 
 
-def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier,
+def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier, tier,
                                supported_storageV2_size, iops, throughput, instance):
     is_create_ssdv2 = storage_type == "PremiumV2_LRS"
     is_update_ssdv2 = instance is not None and instance.storage.type == "PremiumV2_LRS"
@@ -930,11 +913,20 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
             raise ValidationError("Geo-redundancy is not supported for servers with Premium SSD V2.")
         if performance_tier:
             raise ValidationError("Performance tier is not supported for servers with Premium SSD V2.")
+        if tier and tier.lower() == 'burstable':
+            raise ValidationError("Burstable tier is not supported for servers with Premium SSD V2.")
     else:
         if throughput is not None:
             raise CLIError('Updating throughput is only capable for server created with Premium SSD v2.')
         if iops is not None:
             raise CLIError('Updating storage iops is only capable for server created with Premium SSD v2.')
+
+
+def pg_restore_validator(compute_tier, **args):
+    is_ssdv2_enabled = args.get('storage_type', None) == "PremiumV2_LRS"
+
+    if is_ssdv2_enabled and compute_tier.lower() == 'burstable':
+        raise ValidationError("Burstable tier is not supported for servers with Premium SSD V2.")
 
 
 def _pg_authentication_validator(password_auth, is_microsoft_entra_auth_enabled,
@@ -989,3 +981,10 @@ def validate_backup_name(backup_name):
     # check if backup_name exceeds 128 characters
     if len(backup_name) > 128:
         raise CLIError('Backup name cannot exceed 128 characters.')
+
+
+def validate_database_name(database_name):
+    if database_name is not None and not re.match(r'^[a-zA-Z_][\w\-]{0,62}$', database_name):
+        raise ValidationError("Database name must begin with a letter (a-z) or underscore (_). "
+                              "Subsequent characters in a name can be letters, digits (0-9), hyphens (-), "
+                              "or underscores. Database name length must be less than 64 characters.")

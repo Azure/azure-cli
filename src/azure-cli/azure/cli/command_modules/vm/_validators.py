@@ -518,7 +518,8 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                 image_version_infos = _SigImageVersionList(cli_ctx=cmd.cli_ctx)(command_args={
                     "resource_group": res['resource_group'],
                     "gallery_name": res['name'],
-                    "gallery_image_definition": res['child_name_1']
+                    "gallery_image_definition": res['child_name_1'],
+                    "subscription": res['subscription']
                 })
                 image_version_infos = [x for x in image_version_infos
                                        if not x.get("publishingProfile", {}).get("excludeFromLatest", None)]
@@ -535,6 +536,7 @@ def _validate_vm_create_storage_profile(cmd, namespace, for_scale_set=False):
                     "gallery_name": res['name'],
                     "gallery_image_definition": res['child_name_1'],
                     "gallery_image_version_name": res['child_name_2'],
+                    "subscription": res['subscription']
                 })
                 image_data_disks = image_version_info.get("storageProfile", {}).get("dataDiskImages", []) or []
                 image_data_disks = [{'lun': disk["lun"]} for disk in image_data_disks]
@@ -820,7 +822,8 @@ def _validate_vm_vmss_create_vnet(cmd, namespace, for_scale_set=False):
             raise CLIError("incorrect usage: --subnet ID | --subnet NAME --vnet-name NAME")
 
         subnet_exists = \
-            check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets', vnet, 'virtualNetworks')
+            check_existence(cmd.cli_ctx, subnet, rg, 'Microsoft.Network', 'subnets', vnet, 'virtualNetworks',
+                            static_version="2024-07-01")
 
         if subnet_is_id and not subnet_exists:
             raise CLIError("Subnet '{}' does not exist.".format(subnet))
@@ -1483,6 +1486,10 @@ def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unuse
             if boolean_value_in_string.lower() != 'true' and boolean_value_in_string.lower() != 'false':
                 raise ArgumentUsageError('usage error: --treat-deployment-as-failure only accepts a list of "true" or'
                                          ' "false" values')
+    if namespace.enable_automatic_upgrade:
+        if len(namespace.application_version_ids) != len(namespace.enable_automatic_upgrade):
+            raise ArgumentUsageError('usage error: --enable-automatic-upgrade should have the same number of items'
+                                     ' as --application-version-ids')
 
 
 def _resolve_role_id(cli_ctx, role, scope):
@@ -1884,8 +1891,25 @@ def validate_vmss_update_namespace(cmd, namespace):  # pylint: disable=unused-ar
 
 # region disk, snapshot, image validators
 def process_vm_disk_attach_namespace(cmd, namespace):
-    if not namespace.disks and not namespace.disk and not namespace.disk_ids:
-        raise RequiredArgumentMissingError("Please use at least one of --name, --disks and --disk-ids")
+    if not namespace.disks and not namespace.disk and not namespace.disk_ids and \
+            not namespace.source_snapshots_or_disks and not namespace.source_disk_restore_point:
+        raise RequiredArgumentMissingError("Please use at least one of --name, --disks, --disk-ids,"
+                                           " --source-snapshots-or-disks and --source-disk-restore-point")
+
+    if namespace.new_names_of_source_snapshots_or_disks and not namespace.source_snapshots_or_disks:
+        raise RequiredArgumentMissingError("Please use --source-snapshots-or-disks when using"
+                                           " --new-names-of-source-snapshots-or-disks")
+    if namespace.new_names_of_source_disk_restore_point and not namespace.source_disk_restore_point:
+        raise RequiredArgumentMissingError("Please use --source-disk-restore-point when using"
+                                           " --new-names-of-source-disk-restore-point")
+    if namespace.new_names_of_source_snapshots_or_disks and \
+            (len(namespace.new_names_of_source_snapshots_or_disks) != len(namespace.source_snapshots_or_disks)):
+        raise ArgumentUsageError("The number of --new-names-of-source-snapshots-or-disks must be the same as the number"
+                                 " of --source-snapshots-or-disks")
+    if namespace.new_names_of_source_disk_restore_point and \
+            (len(namespace.new_names_of_source_disk_restore_point) != len(namespace.source_disk_restore_point)):
+        raise ArgumentUsageError("The number of --new-names-of-source-disk-restore-point must be the same as the number"
+                                 " of --source-disk-restore-point")
 
     if namespace.disk and namespace.disks:
         raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disks")
@@ -2528,6 +2552,9 @@ def _validate_vmss_create_automatic_repairs(cmd, namespace):  # pylint: disable=
         if namespace.load_balancer is None or namespace.health_probe is None:
             raise ArgumentUsageError("usage error: --load-balancer and --health-probe are required "
                                      "when creating vmss with automatic repairs")
+        if namespace.enable_automatic_repairs is not None and namespace.enable_automatic_repairs is False:
+            raise ArgumentUsageError("usage error: --enable-automatic-repairs cannot be false when "
+                                     "--automatic-repairs-action or --automatic-repairs-grace-period are used")
     _validate_vmss_automatic_repairs(cmd, namespace)
 
 

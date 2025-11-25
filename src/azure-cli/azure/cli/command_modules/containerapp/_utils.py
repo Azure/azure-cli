@@ -949,7 +949,9 @@ def _remove_readonly_attributes(containerapp_def):
         "latestRevisionFqdn",
         "customDomainVerificationId",
         "outboundIpAddresses",
-        "fqdn"
+        "fqdn",
+        "runningStatus",
+        "runningState"
     ]
 
     for unneeded_property in unneeded_properties:
@@ -1000,6 +1002,7 @@ def _remove_dapr_readonly_attributes(daprcomponent_def):
         "latestRevisionFqdn",
         "customDomainVerificationId",
         "outboundIpAddresses",
+        "deploymentErrors",
         "fqdn"
     ]
 
@@ -1342,10 +1345,10 @@ def queue_acr_build(cmd, registry_rg, registry_name, img_name, src_dir, dockerfi
         timeout=None,
         arguments=[])
 
-    queued_build = LongRunningOperation(cmd.cli_ctx)(client_registries.begin_schedule_run(
+    queued_build = client_registries.schedule_run(
         resource_group_name=registry_rg,
         registry_name=registry_name,
-        run_request=docker_build_request))
+        run_request=docker_build_request)
 
     run_id = queued_build.run_id
     logger.info("Queued a build with ID: %s", run_id)

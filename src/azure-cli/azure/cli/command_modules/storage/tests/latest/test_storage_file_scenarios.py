@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from urllib.parse import quote
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, NoneCheck, StringCheck, StringContainCheck, JMESPathCheckExists)
 from ..storage_test_util import StorageScenarioMixin
@@ -356,6 +357,8 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         self.assertIn(filename,
                       self.storage_cmd('storage file list -s {} --query "[].name"',
                                        account_info, share).get_output_in_json())
+        file_list = self.storage_cmd('storage file list -s {}', account_info, share).get_output_in_json()
+        self.assertIsNotNone(file_list[0]['lastAccessTime'])
 
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
@@ -596,7 +599,7 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('exists', True))
 
     @ResourceGroupPreparer()
-    @StorageAccountPreparer(location='eastus2euap', kind='FileStorage', sku='Premium_LRS')
+    @StorageAccountPreparer(location='eastus2', kind='FileStorage', sku='Premium_LRS')
     def test_storage_file_share_nfs_scenario(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         share_name = self.create_random_name('share', 24)
@@ -627,6 +630,8 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('fileMode', '0664'),
                                 JMESPathCheck('owner', '3'),
                                 JMESPathCheck('group', '4'))
+        self.storage_cmd('storage file list --share-name {}', account_info, share_name)\
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
 
         # test copy mode
         dst_file_path = dir_name + '/' + 'dst_file.txt'
@@ -648,6 +653,8 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('fileMode', '0666'),
                                 JMESPathCheck('owner', '4'),
                                 JMESPathCheck('group', '5'))
+        self.storage_cmd('storage file list --share-name {} --path {}', account_info, share_name, dir_name) \
+            .assert_with_checks(JMESPathCheck('length(@)', 3))
 
         # hard link
         link_path = dir_name + '/' + 'linked_file.txt'
@@ -656,3 +663,21 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             assert_with_checks(JMESPathCheck('mode', '0664'),
                                JMESPathCheck('owner', '3'),
                                JMESPathCheck('group', '4'))
+
+        # symbolic link
+        link_path = dir_name + '/' + 'link1'
+        target_path = 'target1/file1'
+        metadata = 'meta1=value1 meta2=value2'
+        owner = '6'
+        group = '7'
+
+        self.storage_cmd('storage file symbolic-link create --share-name {} --path {} --target {} '
+                         '--metadata {} --file-creation-time now --file-last-write-time now --owner {} --group {}',
+                         account_info, share_name, link_path, target_path, metadata, owner, group). \
+            assert_with_checks(JMESPathCheck('owner', '6'),
+                               JMESPathCheck('group', '7'))
+
+        link_text = quote(target_path, safe=[])
+        self.storage_cmd('storage file symbolic-link show --share-name {} --path {}',
+                         account_info, share_name, link_path). \
+            assert_with_checks(JMESPathCheck('link_text', link_text))

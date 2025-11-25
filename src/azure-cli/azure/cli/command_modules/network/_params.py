@@ -35,7 +35,6 @@ from azure.cli.command_modules.network._completers import (
 from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
-from azure.cli.command_modules.network.custom import RULESET_VERSION
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
@@ -109,6 +108,7 @@ def load_arguments(self, _):
         c.argument('enable_http2', arg_type=get_three_state_flag(positive_label='Enabled', negative_label='Disabled'), options_list=['--http2'], help='Use HTTP2 for the application gateway.')
         c.ignore('public_ip_address_type', 'frontend_type', 'subnet_type')
         c.argument('ssl_profile_id', help='SSL profile resource of the application gateway.', is_preview=True)
+        c.argument('enable_fips', arg_type=get_three_state_flag(), help='Whether FIPS is enabled on the application gateway resource.')
 
     with self.argument_context('network application-gateway', arg_group='Private Link Configuration') as c:
         c.argument('enable_private_link',
@@ -226,11 +226,10 @@ def load_arguments(self, _):
     with self.argument_context('network application-gateway waf-policy') as c:
         c.argument('policy_name', name_arg_type, id_part='name', help='The name of the application gateway WAF policy.')
         c.argument('rule_set_type', options_list='--type',
-                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'Microsoft_DefaultRuleSet', 'OWASP']),
+                   arg_type=get_enum_type(['Microsoft_BotManagerRuleSet', 'Microsoft_DefaultRuleSet', 'OWASP', 'Microsoft_HTTPDDoSRuleSet']),
                    help='The type of the web application firewall rule set.')
         c.argument('rule_set_version',
                    options_list='--version',
-                   arg_type=get_enum_type(RULESET_VERSION.values()),
                    help='The version of the web application firewall rule set type. '
                         '0.1, 1.0, and 1.1 are used for Microsoft_BotManagerRuleSet.')
 
@@ -615,7 +614,7 @@ def load_arguments(self, _):
 
     with self.argument_context('network public-ip create') as c:
         c.argument('name', completer=None)
-        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard"]), default="Standard")
+        c.argument('sku', help='Name of a public IP address SKU', arg_type=get_enum_type(["Basic", "Standard", "StandardV2"]), default="Standard")
         c.argument('tier', help='Tier of a public IP address SKU and Global tier is only supported for standard SKU public IP addresses', arg_type=get_enum_type(["Regional", "Global"]))
         c.ignore('dns_name_type')
         c.argument('edge_zone', edge_zone)

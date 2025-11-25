@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-10-02",
+        "version": "2025-01-02",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/snapshots/{}", "2023-10-02"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/snapshots/{}", "2025-01-02"],
         ]
     }
 
@@ -244,7 +244,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "MgmtErrorFormat"
+            return "ODataV4Format"
 
         @property
         def url_parameters(self):
@@ -268,7 +268,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-10-02",
+                    "api-version", "2025-01-02",
                     required=True,
                 ),
             }
@@ -315,7 +315,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200]:
@@ -324,7 +324,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -343,7 +343,7 @@ class Update(AAZCommand):
 
         @property
         def error_format(self):
-            return "MgmtErrorFormat"
+            return "ODataV4Format"
 
         @property
         def url_parameters(self):
@@ -367,7 +367,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-10-02",
+                    "api-version", "2025-01-02",
                     required=True,
                 ),
             }
@@ -519,6 +519,7 @@ class _UpdateHelper:
             _schema.name = cls._schema_snapshot_read.name
             _schema.properties = cls._schema_snapshot_read.properties
             _schema.sku = cls._schema_snapshot_read.sku
+            _schema.system_data = cls._schema_snapshot_read.system_data
             _schema.tags = cls._schema_snapshot_read.tags
             _schema.type = cls._schema_snapshot_read.type
             return
@@ -546,6 +547,10 @@ class _UpdateHelper:
             flags={"client_flatten": True},
         )
         snapshot_read.sku = AAZObjectType()
+        snapshot_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
         snapshot_read.tags = AAZDictType()
         snapshot_read.type = AAZStrType(
             flags={"read_only": True},
@@ -614,6 +619,10 @@ class _UpdateHelper:
         properties.security_profile = AAZObjectType(
             serialized_name="securityProfile",
         )
+        properties.snapshot_access_state = AAZStrType(
+            serialized_name="snapshotAccessState",
+            flags={"read_only": True},
+        )
         properties.supported_capabilities = AAZObjectType(
             serialized_name="supportedCapabilities",
         )
@@ -655,6 +664,9 @@ class _UpdateHelper:
             serialized_name="imageReference",
         )
         cls._build_schema_image_disk_reference_read(creation_data.image_reference)
+        creation_data.instant_access_duration_minutes = AAZIntType(
+            serialized_name="instantAccessDurationMinutes",
+        )
         creation_data.logical_sector_size = AAZIntType(
             serialized_name="logicalSectorSize",
         )
@@ -666,6 +678,9 @@ class _UpdateHelper:
         )
         creation_data.security_data_uri = AAZStrType(
             serialized_name="securityDataUri",
+        )
+        creation_data.security_metadata_uri = AAZStrType(
+            serialized_name="securityMetadataUri",
         )
         creation_data.source_resource_id = AAZStrType(
             serialized_name="sourceResourceId",
@@ -764,11 +779,34 @@ class _UpdateHelper:
         supported_capabilities.disk_controller_types = AAZStrType(
             serialized_name="diskControllerTypes",
         )
+        supported_capabilities.supported_security_option = AAZStrType(
+            serialized_name="supportedSecurityOption",
+        )
 
         sku = _schema_snapshot_read.sku
         sku.name = AAZStrType()
         sku.tier = AAZStrType(
             flags={"read_only": True},
+        )
+
+        system_data = _schema_snapshot_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
         )
 
         tags = _schema_snapshot_read.tags
@@ -781,6 +819,7 @@ class _UpdateHelper:
         _schema.name = cls._schema_snapshot_read.name
         _schema.properties = cls._schema_snapshot_read.properties
         _schema.sku = cls._schema_snapshot_read.sku
+        _schema.system_data = cls._schema_snapshot_read.system_data
         _schema.tags = cls._schema_snapshot_read.tags
         _schema.type = cls._schema_snapshot_read.type
 

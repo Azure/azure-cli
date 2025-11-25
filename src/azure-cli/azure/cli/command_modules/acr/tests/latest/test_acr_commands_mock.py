@@ -9,8 +9,6 @@ import unittest
 from unittest import mock
 import sys
 
-from azure.mgmt.containerregistry.v2019_05_01.models import Registry, Sku
-
 from azure.cli.command_modules.acr.repository import (
     acr_repository_list,
     acr_repository_show_tags,
@@ -1192,6 +1190,8 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    tenant_suffix=test_tenant_suffix)
 
     def _core_token_scenarios(self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name, registry_exists, registry_name, login_server, tenant_suffix):
+        from azure.mgmt.containerregistry.v2024_11_01_preview.models import Registry, Sku
+
         cmd = self._setup_cmd()
 
         if registry_exists:

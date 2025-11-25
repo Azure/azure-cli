@@ -49,8 +49,8 @@ class FeatureFlagConstants:
     GROUPS = "groups"
 
     # Requirement type options
-    REQUIREMENT_TYPE_ALL = "all"
-    REQUIREMENT_TYPE_ANY = "any"
+    REQUIREMENT_TYPE_ALL = "All"
+    REQUIREMENT_TYPE_ANY = "Any"
 
     # Telemetry properties
     METADATA = "metadata"
@@ -61,6 +61,10 @@ class FeatureFlagConstants:
 
 class KeyVaultConstants:
     KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
+
+
+class AIConfigConstants:
+    AI_CHAT_COMPLETION_CONTENT_TYPE = "application/vnd.microsoft.appconfig.aichatcompletion+json;charset=utf-8"
 
 
 class AppServiceConstants:
@@ -144,6 +148,7 @@ class CompareFields:
 CompareFieldsMap = {
     "appconfig": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
     "appservice": (CompareFields.VALUE, CompareFields.TAGS),
+    "aks": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
     "file": (CompareFields.CONTENT_TYPE, CompareFields.VALUE),
     "kvset": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
     "restore": (CompareFields.VALUE, CompareFields.CONTENT_TYPE, CompareFields.LOCKED, CompareFields.TAGS)

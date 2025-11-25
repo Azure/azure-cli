@@ -30,11 +30,11 @@ from ._kv_import_helpers import (
     __delete_configuration_setting_from_config_store,
     __read_features_from_file,
     __read_kv_from_app_service,
+    __read_kv_from_kubernetes_configmap,
     __read_kv_from_file,
 )
 from knack.log import get_logger
 from knack.util import CLIError
-from ._constants import HttpHeaders
 
 from azure.appconfiguration import (ConfigurationSetting,
                                     ResourceReadOnlyError)
@@ -49,10 +49,12 @@ import azure.cli.core.azclierror as CLIErrors
 from ._constants import (FeatureFlagConstants, KeyVaultConstants,
                          SearchFilterOptions, StatusCodes,
                          ImportExportProfiles, CompareFieldsMap,
-                         JsonDiff, ImportMode)
+                         JsonDiff, ImportMode,
+                         AIConfigConstants, HttpHeaders)
 from ._featuremodels import map_keyvalue_to_featureflag
+from ._json import parse_json_with_comments
 from ._models import (convert_configurationsetting_to_keyvalue, convert_keyvalue_to_configurationsetting)
-from ._utils import get_appconfig_data_client, prep_label_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
+from ._utils import get_appconfig_data_client, prep_filter_for_url_encoding, resolve_store_metadata, get_store_endpoint_from_connection_string, is_json_content_type
 
 from ._diff_utils import print_preview, KVComparer
 from .feature import __list_features
@@ -65,6 +67,7 @@ def import_config(cmd,
                   name=None,
                   connection_string=None,
                   label=None,
+                  tags=None,  # tags to add
                   prefix="",  # prefix to add
                   yes=False,
                   skip_features=False,
@@ -72,6 +75,7 @@ def import_config(cmd,
                   auth_mode="key",
                   endpoint=None,
                   import_mode=ImportMode.IGNORE_MATCH,
+                  dry_run=False,
                   # from-file parameters
                   path=None,
                   format_=None,
@@ -88,8 +92,13 @@ def import_config(cmd,
                   preserve_labels=False,
                   src_auth_mode="key",
                   src_endpoint=None,
+                  src_tags=None,  # tags to filter
                   # from-appservice parameters
-                  appservice_account=None):
+                  appservice_account=None,
+                  # from-aks parameters
+                  aks_cluster=None,
+                  configmap_namespace="default",
+                  configmap_name=None):
 
     src_features = []
     dest_features = []
@@ -106,7 +115,7 @@ def import_config(cmd,
     # fetch key values from source
     if source == 'file':
         if profile == ImportExportProfiles.KVSET:
-            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes, import_mode=import_mode, correlation_request_id=correlation_request_id)
+            __import_kvset_from_file(client=azconfig_client, path=path, strict=strict, yes=yes, dry_run=dry_run, import_mode=import_mode, correlation_request_id=correlation_request_id)
             return
         if format_ and content_type:
             # JSON content type is only supported with JSON format.
@@ -147,6 +156,7 @@ def import_config(cmd,
                                               key=src_key,
                                               snapshot=src_snapshot,
                                               label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL,
+                                              tags=src_tags,
                                               prefix_to_add=prefix,
                                               correlation_request_id=correlation_request_id)
 
@@ -154,10 +164,11 @@ def import_config(cmd,
             if src_snapshot:
                 all_features = [kv for kv in src_kvs if kv.key.startswith(FeatureFlagConstants.FEATURE_FLAG_PREFIX)]
             else:
-                # Get all Feature flags with matching label
+                # Get all Feature flags with matching label and tags
                 all_features = __read_kv_from_config_store(src_azconfig_client,
                                                            key=FeatureFlagConstants.FEATURE_FLAG_PREFIX + '*',
                                                            label=src_label if src_label else SearchFilterOptions.EMPTY_LABEL,
+                                                           tags=src_tags,
                                                            correlation_request_id=correlation_request_id)
 
             for feature in all_features:
@@ -170,6 +181,25 @@ def import_config(cmd,
     elif source == 'appservice':
         src_kvs = __read_kv_from_app_service(
             cmd, appservice_account=appservice_account, prefix_to_add=prefix, content_type=content_type)
+
+    elif source == 'aks':
+        if separator:
+            # If separator is provided, use max depth by default unless depth is specified.
+            depth = sys.maxsize if depth is None else int(depth)
+        else:
+            if depth and int(depth) != 1:
+                logger.warning("Cannot flatten hierarchical data without a separator. --depth argument will be ignored.")
+            depth = 1
+
+        src_kvs = __read_kv_from_kubernetes_configmap(cmd,
+                                                      aks_cluster=aks_cluster,
+                                                      configmap_name=configmap_name,
+                                                      namespace=configmap_namespace,
+                                                      prefix_to_add=prefix,
+                                                      content_type=content_type,
+                                                      format_=format_,
+                                                      separator=separator,
+                                                      depth=depth)
 
     if strict or not yes or import_mode == ImportMode.IGNORE_MATCH:
         # fetch key values from user's configstore
@@ -215,7 +245,7 @@ def import_config(cmd,
         ff_diff = ff_comparer.compare(dest_kvs=dest_features, strict=strict, ignore_matching_kvs=import_mode == ImportMode.IGNORE_MATCH)
         need_feature_change = print_preview(ff_diff, source, yes=yes, strict=strict, title="Feature Flags")
 
-    if not need_kv_change and not need_feature_change:
+    if (not need_kv_change and not need_feature_change) or dry_run:
         return
 
     if not yes:
@@ -249,6 +279,7 @@ def import_config(cmd,
     __write_kv_and_features_to_config_store(azconfig_client,
                                             key_values=kvs_to_write,
                                             label=label,
+                                            tags=tags,
                                             preserve_labels=preserve_labels,
                                             content_type=content_type,
                                             correlation_request_id=correlation_request_id)
@@ -260,6 +291,7 @@ def export_config(cmd,
                   connection_string=None,
                   label=None,
                   key=None,
+                  tags=None,  # tags to filter
                   prefix="",  # prefix to remove
                   yes=False,
                   skip_features=False,
@@ -267,6 +299,7 @@ def export_config(cmd,
                   auth_mode="key",
                   endpoint=None,
                   snapshot=None,
+                  dry_run=False,
                   # to-file parameters
                   path=None,
                   format_=None,
@@ -281,6 +314,7 @@ def export_config(cmd,
                   preserve_labels=False,
                   dest_auth_mode="key",
                   dest_endpoint=None,
+                  dest_tags=None,  # tags to add
                   # to-app-service parameters
                   appservice_account=None,
                   export_as_reference=False):
@@ -313,6 +347,7 @@ def export_config(cmd,
     src_kvs = __read_kv_from_config_store(azconfig_client,
                                           key=key,
                                           label=label if label else SearchFilterOptions.EMPTY_LABEL,
+                                          tags=tags,
                                           prefix_to_remove=prefix if not export_as_reference else "",
                                           snapshot=snapshot,
                                           cli_ctx=cmd.cli_ctx if resolve_keyvault else None,
@@ -337,6 +372,7 @@ def export_config(cmd,
                     cmd,
                     feature="*",
                     label=label if label else SearchFilterOptions.EMPTY_LABEL,
+                    tags=tags,
                     name=name,
                     connection_string=connection_string,
                     all_=True,
@@ -351,7 +387,7 @@ def export_config(cmd,
         __discard_features_from_retrieved_kv(src_kvs)
 
     if profile == ImportExportProfiles.KVSET:
-        __export_kvset_to_file(file_path=path, keyvalues=src_kvs, yes=yes)
+        __export_kvset_to_file(file_path=path, keyvalues=src_kvs, yes=yes, dry_run=dry_run)
         return
 
     if destination == 'appservice' and export_as_reference:
@@ -410,8 +446,9 @@ def export_config(cmd,
         ff_diff = ff_comparer.compare(dest_kvs=__convert_featureflag_list_to_keyvalue_list(dest_features))
         need_feature_change = print_preview(ff_diff, destination, yes=yes, title="Feature Flags")
 
-    if not need_feature_change and not need_kv_change:
+    if (not need_feature_change and not need_kv_change) or dry_run:
         return
+
     # if customer needs preview & confirmation
     if not yes:
         user_confirmation("Do you want to continue? \n")
@@ -423,7 +460,7 @@ def export_config(cmd,
                                         naming_convention=naming_convention)
     elif destination == 'appconfig':
         __write_kv_and_features_to_config_store(dest_azconfig_client, key_values=src_kvs, features=src_features,
-                                                label=dest_label, preserve_labels=preserve_labels,
+                                                label=dest_label, tags=dest_tags, preserve_labels=preserve_labels,
                                                 correlation_request_id=correlation_request_id)
     elif destination == 'appservice':
         __write_kv_to_app_service(cmd, key_values=src_kvs, appservice_account=appservice_account)
@@ -471,9 +508,10 @@ def set_key(cmd,
         if retrieved_kv is None:
             if is_json_content_type(content_type):
                 try:
-                    # Ensure that provided value is valid JSON. Error out if value is invalid JSON.
+                    # Ensure that provided value is valid JSON and strip comments if needed.
                     value = 'null' if value is None else value
-                    json.loads(value)
+
+                    __validate_json_value(value, content_type)
                 except ValueError:
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}".'.format(value, content_type))
 
@@ -487,8 +525,8 @@ def set_key(cmd,
             content_type = retrieved_kv.content_type if content_type is None else content_type
             if is_json_content_type(content_type):
                 try:
-                    # Ensure that provided/existing value is valid JSON. Error out if value is invalid JSON.
-                    json.loads(value)
+                    # Ensure that provided value is valid JSON and strip comments if needed.
+                    __validate_json_value(value, content_type)
                 except (TypeError, ValueError):
                     raise CLIErrors.ValidationError('Value "{}" is not a valid JSON object, which conflicts with the content type "{}". Set the value again in valid JSON format.'.format(value, content_type))
             set_kv = ConfigurationSetting(key=key,
@@ -614,6 +652,7 @@ def delete_key(cmd,
                key,
                name=None,
                label=None,
+               tags=None,
                yes=False,
                connection_string=None,
                auth_mode="key",
@@ -631,8 +670,9 @@ def delete_key(cmd,
     entries = __read_kv_from_config_store(azconfig_client,
                                           key=key,
                                           label=label if label else SearchFilterOptions.EMPTY_LABEL,
+                                          tags=tags,
                                           correlation_request_id=correlation_request_id)
-    confirmation_message = "Found '{}' key-values matching the specified key and label. Are you sure you want to delete these key-values?".format(len(entries))
+    confirmation_message = "Found '{}' key-values matching the specified key, label and tags. Are you sure you want to delete these key-values?".format(len(entries))
     user_confirmation(confirmation_message, yes)
 
     deleted_entries = []
@@ -774,6 +814,7 @@ def list_key(cmd,
              fields=None,
              name=None,
              label=None,
+             tags=None,
              datetime=None,
              snapshot=None,
              connection_string=None,
@@ -793,6 +834,7 @@ def list_key(cmd,
     keyvalues = __read_kv_from_config_store(azconfig_client,
                                             key=key if key else SearchFilterOptions.ANY_KEY,
                                             label=label if label else SearchFilterOptions.ANY_LABEL,
+                                            tags=tags,
                                             datetime=datetime,
                                             snapshot=snapshot,
                                             fields=fields,
@@ -807,9 +849,11 @@ def restore_key(cmd,
                 key=None,
                 name=None,
                 label=None,
+                tags=None,
                 connection_string=None,
                 yes=False,
                 auth_mode="key",
+                dry_run=False,
                 endpoint=None):
     azconfig_client = get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
@@ -820,11 +864,13 @@ def restore_key(cmd,
     restore_keyvalues = __read_kv_from_config_store(azconfig_client,
                                                     key=key if key else SearchFilterOptions.ANY_KEY,
                                                     label=label if label else SearchFilterOptions.ANY_LABEL,
+                                                    tags=tags,
                                                     datetime=datetime,
                                                     correlation_request_id=correlation_request_id)
     current_keyvalues = __read_kv_from_config_store(azconfig_client,
                                                     key=key if key else SearchFilterOptions.ANY_KEY,
                                                     label=label if label else SearchFilterOptions.ANY_LABEL,
+                                                    tags=tags,
                                                     correlation_request_id=correlation_request_id)
 
     try:
@@ -833,11 +879,10 @@ def restore_key(cmd,
 
         need_change = __print_restore_preview(restore_diff, yes=yes)
 
-        if not yes:
-            if need_change is False:
-                logger.debug('Canceling the restore operation based on user selection.')
-                return
+        if dry_run or not need_change:
+            return
 
+        if not yes:
             user_confirmation("Do you want to continue? \n")
 
         kvs_to_restore = restore_diff.get(JsonDiff.ADD, [])
@@ -892,6 +937,7 @@ def list_revision(cmd,
                   fields=None,
                   name=None,
                   label=None,
+                  tags=None,
                   datetime=None,
                   connection_string=None,
                   top=None,
@@ -902,7 +948,8 @@ def list_revision(cmd,
 
     key = key if key else SearchFilterOptions.ANY_KEY
     label = label if label else SearchFilterOptions.ANY_LABEL
-    label = prep_label_filter_for_url_encoding(label)
+    label = prep_filter_for_url_encoding(label)
+    prepped_tags = [prep_filter_for_url_encoding(tag) for tag in tags] if tags else []
 
     try:
         query_fields = None
@@ -913,6 +960,7 @@ def list_revision(cmd,
 
         revisions_iterable = azconfig_client.list_revisions(key_filter=key,
                                                             label_filter=label,
+                                                            tags_filter=prepped_tags,
                                                             accept_datetime=datetime,
                                                             fields=query_fields)
         retrieved_revisions = []
@@ -938,3 +986,12 @@ def list_revision(cmd,
         return retrieved_revisions
     except HttpResponseError as ex:
         raise CLIErrors.AzureResponseError('List revision operation failed.\n' + str(ex))
+
+
+def __validate_json_value(json_string, content_type):
+    # We do not allow comments in keyvault references, feature flags, and AI chat completion configs
+    if content_type in (FeatureFlagConstants.FEATURE_FLAG_CONTENT_TYPE, KeyVaultConstants.KEYVAULT_CONTENT_TYPE, AIConfigConstants.AI_CHAT_COMPLETION_CONTENT_TYPE):
+        json.loads(json_string)
+
+    else:
+        parse_json_with_comments(json_string)
