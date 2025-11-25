@@ -3517,18 +3517,13 @@ def cli_offline_region(client,
         region_parameter_for_offline=region_parameter_for_offline
     )
 
+
 def cli_cosmosdb_fleet_create(client,
                               resource_group_name,
                               fleet_name,
                               location,
                               tags=None):
     """Creates an Azure Cosmos DB Fleet."""
-
-    if isinstance(tags, str):
-        try:
-            tags = dict(tag.split('=') for tag in tags.split())
-        except ValueError:
-            raise InvalidArgumentValueError('Tags must be in key=value format.')
 
     fleet_parameters = FleetResource(location=location)
 
