@@ -21,7 +21,7 @@ class CosmosdbPriorityBasedExecutionScenarioTest(ScenarioTest):
         })
 
         # create priority based execution enabled account
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-priority-based-execution')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-pbe')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enablePriorityBasedExecution', True),
         ])
@@ -35,14 +35,14 @@ class CosmosdbPriorityBasedExecutionScenarioTest(ScenarioTest):
         print('Set Default Priority Level to Low')
 
         # disable Priority Based Execution
-        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-priority-based-execution false')
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-pbe false')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enablePriorityBasedExecution', False),
         ])
         print('Disabled Priority Based Execution')
 
         # enable Priority Based Execution
-        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-priority-based-execution')
+        self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-pbe')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enablePriorityBasedExecution', True),
         ])
