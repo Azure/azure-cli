@@ -149,7 +149,7 @@ def cli_cosmosdb_create(cmd,
                         enable_burst_capacity=None,
                         enable_prpp_autoscale=None,
                         minimal_tls_version=None,
-                        enable_priority_based_execution=None,
+                        enable_pbe=None,
                         default_priority_level=None):
     """Create a new Azure Cosmos DB database account."""
 
@@ -207,7 +207,7 @@ def cli_cosmosdb_create(cmd,
                                     enable_burst_capacity=enable_burst_capacity,
                                     enable_prpp_autoscale=enable_prpp_autoscale,
                                     minimal_tls_version=minimal_tls_version,
-                                    enable_priority_based_execution=enable_priority_based_execution,
+                                    enable_pbe=enable_pbe,
                                     default_priority_level=default_priority_level)
 
 
@@ -256,7 +256,7 @@ def _create_database_account(client,
                              enable_prpp_autoscale=None,
                              minimal_tls_version=None,
                              disable_ttl=None,
-                             enable_priority_based_execution=None,
+                             enable_pbe=None,
                              default_priority_level=None,
                              source_backup_location=None):
 
@@ -397,7 +397,7 @@ def _create_database_account(client,
         enable_burst_capacity=enable_burst_capacity,
         enable_per_region_per_partition_autoscale=enable_prpp_autoscale,
         minimal_tls_version=minimal_tls_version,
-        enable_priority_based_execution=enable_priority_based_execution,
+        enable_pbe=enable_pbe,
         default_priority_level=default_priority_level,
         source_backup_location=source_backup_location
     )
@@ -441,7 +441,7 @@ def cli_cosmosdb_update(client,
                         enable_burst_capacity=None,
                         enable_prpp_autoscale=None,
                         minimal_tls_version=None,
-                        enable_priority_based_execution=None,
+                        enable_pbe=None,
                         default_priority_level=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
@@ -541,7 +541,7 @@ def cli_cosmosdb_update(client,
         enable_burst_capacity=enable_burst_capacity,
         enable_per_region_per_partition_autoscale=enable_prpp_autoscale,
         minimal_tls_version=minimal_tls_version,
-        enable_priority_based_execution=enable_priority_based_execution,
+        enable_pbe=enable_pbe,
         default_priority_level=default_priority_level)
 
     async_docdb_update = client.begin_update(resource_group_name, account_name, params)
