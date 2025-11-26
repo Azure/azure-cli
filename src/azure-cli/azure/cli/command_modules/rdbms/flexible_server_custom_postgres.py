@@ -471,7 +471,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
             high_availability_param.standby_availability_zone = standby_availability_zone
 
         # PG 11 and 12 will never receive fabric mirroring support. Ignite 2025 Fabric mirroring supported on 17. Skip this check for servers of these versions
-        if high_availability.lower() != "disabled" and str(instance.version) not in ["11", "12", "17"]:
+        if high_availability.lower() != "disabled" and str(instance.version) not in ["11", "12", "17", "18"]:
             config_client = cf_postgres_flexible_config(cmd.cli_ctx, '_')
             fabric_mirror_status = config_client.get(resource_group_name, server_name, 'azure.fabric_mirror_enabled')
             if (fabric_mirror_status and fabric_mirror_status.value.lower() == 'on'):
@@ -1585,7 +1585,7 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
     flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
     server = flexible_servers_client.get(resource_group_name, server_name)
 
-    if server.high_availability.mode != "Disabled" and server.version not in ["17"]:
+    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
         # disable fabric mirroring on HA server
         raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
@@ -1615,7 +1615,7 @@ def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, serv
     flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
     server = flexible_servers_client.get(resource_group_name, server_name)
 
-    if server.high_availability.mode != "Disabled" and server.version not in ["17"]:
+    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
         # disable fabric mirroring on HA server
         raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
@@ -1637,7 +1637,7 @@ def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_grou
     flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
     server = flexible_servers_client.get(resource_group_name, server_name)
 
-    if server.high_availability.mode != "Disabled" and server.version not in ["17"]:
+    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
         # disable fabric mirroring on HA server
         raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
