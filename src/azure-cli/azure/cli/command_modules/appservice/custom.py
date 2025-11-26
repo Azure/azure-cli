@@ -6152,7 +6152,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return list(self._client.provider.get_web_app_stacks(stack_os_type=None))
 
     def _parse_raw_stacks(self, stacks):
-        seen_runtimes = set()  # Track seen runtime display names to avoid duplicates
+        # Track seen runtime display names to avoid duplicates in Linux parsing.
+        # Linux Java containers (e.g., JBOSSEAP) can produce duplicate entries across major versions.
+        # Windows parsing doesn't have this issue due to its different structure.
+        seen_runtimes = set()
         for lang in stacks:
             for major_version in lang.major_versions:
                 if self._linux:
@@ -6415,6 +6418,9 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 container_version = container_settings.java_container_version
                 # Get Java versions from the container's runtimes array
                 javas = self._get_java_versions_from_windows_container(container_settings)
+                if not javas:
+                    logger.debug("No Java versions found in Windows container settings for "
+                                 "container '%s' (version: '%s')", java_container, container_version)
                 for java in javas:
                     runtime = self.get_windows_java_runtime(
                         java,
