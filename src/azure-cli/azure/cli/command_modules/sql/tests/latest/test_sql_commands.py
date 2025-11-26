@@ -8828,26 +8828,6 @@ class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
             'family': 'Gen8IM'
         })
 
-        # # Create GPv1
-        # self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
-        #                             '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
-        #                             '--storage {storage_size_in_gb} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} ',
-        #                             checks=[
-        #                                 self.check('name', '{managed_instance_name}'),
-        #                                 self.check('resourceGroup', '{rg}'),
-        #                                 self.check('administratorLogin', '{username}'),
-        #                                 self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
-        #                                 self.check('vCores', '{v_cores}'),
-        #                                 self.check('storageSizeInGb', '{storage_size_in_gb}'),
-        #                                 self.check('licenseType', '{license_type}'),
-        #                                 self.check('sku.tier', '{edition}'),
-        #                                 self.check('sku.family', '{family}'),
-        #                                 self.check('sku.capacity', '{v_cores}')])
-
-        # # Get the managed instance and check GPv2 flag
-        # managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
-        # self.assertEqual(managed_instance['zoneRedundant'], False)
-
         self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --memory {memory_size_in_gb}',
                  checks=[self.check('memorySizeInGb', '{memory_size_in_gb}')])
 
