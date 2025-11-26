@@ -8813,19 +8813,18 @@ class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
 
         self.kwargs.update({
             'rg': group,
-            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
-                                                             managed_instance_name_max_length),
+            'managed_instance_name': 'uroskrstic-flexi-test-azpowershell',
             'loc': 'westeurope',
             'username': 'admin123',
             'admin_password': 'SecretPassword123SecretPassword',
             'subnet': subnet,
             'license_type': 'LicenseIncluded',
             'v_cores': 4,
-            'memory_size_in_gb': '80',
+            'memory_size_in_gb': '64',
             'storage_size_in_gb': '128',
             'storage_iops': '1000',
             'edition': 'GeneralPurpose',
-            'is_general_purpose_v2': 'False',
+            'is_general_purpose_v2': 'True',
             'family': 'Gen8IM'
         })
 
@@ -8849,12 +8848,12 @@ class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
         # managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
         # self.assertEqual(managed_instance['zoneRedundant'], False)
 
-        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --capacity {v_cores} --memory {memory_size_in_gb}',
-                 checks=[self.check('memorySizeInGB', '{memory_size_in_gb}')])
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --memory {memory_size_in_gb}',
+                 checks=[self.check('memorySizeInGb', '{memory_size_in_gb}')])
 
-        # Get the managed instance and check GPv2 flag
+        # Get the managed instance and check memory size in gb
         managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
-        self.assertEqual(managed_instance['memorySizeInGB'], 80)
+        self.assertEqual(managed_instance['memorySizeInGb'], int(self.kwargs['memory_size_in_gb']))
 
         # Delete the managed instance
         self.cmd('sql mi delete --ids {} --yes'

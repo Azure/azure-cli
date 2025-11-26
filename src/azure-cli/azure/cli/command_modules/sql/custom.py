@@ -5459,6 +5459,10 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         instance.requested_backup_storage_redundancy = requested_backup_storage_redundancy
         instance.zone_redundant = None
 
+    # Have to set requested logical avail zone to none explicitly otherwise requests will fail
+    # as the default value is string 'NoPreference' which is invalid for update requests currently
+    instance.requested_logical_availability_zone = None
+
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
 
