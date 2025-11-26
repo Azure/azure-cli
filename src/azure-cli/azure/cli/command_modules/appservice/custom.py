@@ -6304,6 +6304,24 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         return [m for m in major_version.minor_versions if _filter(m)]
 
     @staticmethod
+    def _java_version_sort_key(version):
+        """Sort key for Java versions. Handles formats like "25", "1.8", "11.0", etc.
+        Returns negative values so sorted() gives descending order (newest first)."""
+        if version == "1.8":
+            return -8  # Treat 1.8 as Java 8
+        if version.startswith("1."):
+            # Handle legacy "1.x" format (e.g., "1.7", "1.9")
+            try:
+                return -int(version.split('.')[1])
+            except (IndexError, ValueError):
+                return 0
+        # Handle "X.Y" format (e.g., "11.0", "17.0") or plain integers ("25", "21")
+        try:
+            return -int(version.split('.')[0])
+        except ValueError:
+            return 0
+
+    @staticmethod
     def _get_java_versions_from_minor_versions(minor_versions):
         """Dynamically extract unique Java versions from minor version values.
         Used for Linux Java SE containers where minor.value is like "25.0.0", "21.0.0".
@@ -6321,8 +6339,8 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     major_ver = value.split('.')[0]
                     if major_ver.isdigit():
                         java_versions.add(major_ver)
-        # Sort descending (newest versions first), treating "1.8" specially
-        return sorted(java_versions, key=lambda x: -1 if x == "1.8" else -int(x))
+        # Sort descending (newest versions first)
+        return sorted(java_versions, key=_StackRuntimeHelper._java_version_sort_key)
 
     @staticmethod
     def _get_java_versions_from_windows_container(container_settings):
@@ -6339,8 +6357,8 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 # Normalize version: convert "1.8" to "1.8", keep others as-is
                 java_versions.add(version)
 
-        # Sort descending (newest versions first), treating "1.8" specially
-        return sorted(java_versions, key=lambda x: -1 if x == "1.8" else -int(x))
+        # Sort descending (newest versions first)
+        return sorted(java_versions, key=_StackRuntimeHelper._java_version_sort_key)
 
     @staticmethod
     def _get_java_runtimes_from_container_settings(container_settings):
@@ -6381,7 +6399,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     runtimes.append((container_settings.java8_runtime, "8", is_auto_update))
 
         # Sort by version descending (newest first)
-        runtimes.sort(key=lambda x: -1 if x[1] == "8" else -int(x[1]))
+        runtimes.sort(key=lambda x: _StackRuntimeHelper._java_version_sort_key(x[1]))
         return runtimes
 
     def _parse_major_version_windows(self, major_version, parsed_results, config_mappings):
