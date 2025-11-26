@@ -6354,7 +6354,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
         for runtime_info in runtimes_array:
             version = runtime_info.get('runtimeVersion')
             if version:
-                # Normalize version: convert "1.8" to "1.8", keep others as-is
+                # Add version as-is (e.g., "25", "21", "17", "11", "1.8")
                 java_versions.add(version)
 
         # Sort descending (newest versions first)
