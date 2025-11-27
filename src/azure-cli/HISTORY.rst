@@ -3,6 +3,27 @@
 Release History
 ===============
 
+2.81.0
+++++++
+
+**AKS**
+
+* `az aks safeguards`: Add `--pss-level` parameter to support Pod Security Standards (#32432)
+* `az aks safeguards create`: Add validation to prevent duplicate resource creation (#32432)
+
+**ARM**
+
+* Fix #32098: `az bicep install`: Fix a bug where the installation was skipped when `--version` was specified unless `bicep.use_binary_from_path` was explicitly set to `false` (#32337)
+
+**Compute**
+
+* `az vm/vmss application set`: Add new parameter `--enable-automatic-upgrade` to support enabling application automatic upgrade (#32394)
+
+**NetAppFiles**
+
+* `az netappfiles volume-group create`: Add `--network-features` parameter for volume groups (#32423)
+* `az netappfiles volume replication list`: Add `--exclude` parameter to exclude deleted replications (#32423)
+
 2.80.0
 ++++++
 
