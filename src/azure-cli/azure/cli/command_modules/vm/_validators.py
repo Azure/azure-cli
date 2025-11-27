@@ -1486,6 +1486,10 @@ def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unuse
             if boolean_value_in_string.lower() != 'true' and boolean_value_in_string.lower() != 'false':
                 raise ArgumentUsageError('usage error: --treat-deployment-as-failure only accepts a list of "true" or'
                                          ' "false" values')
+    if namespace.enable_automatic_upgrade:
+        if len(namespace.application_version_ids) != len(namespace.enable_automatic_upgrade):
+            raise ArgumentUsageError('usage error: --enable-automatic-upgrade should have the same number of items'
+                                     ' as --application-version-ids')
 
 
 def _resolve_role_id(cli_ctx, role, scope):

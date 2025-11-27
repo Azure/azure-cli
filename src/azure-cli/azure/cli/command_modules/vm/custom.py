@@ -5930,7 +5930,7 @@ def show_capacity_reservation_group(client, resource_group_name, capacity_reserv
                       expand=expand)
 
 
-def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
+def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, enable_automatic_upgrade=None, no_wait=False):
     from .aaz.latest.vm import Update as _VMUpdate
 
     class SetVMApplications(_VMUpdate):
@@ -5959,6 +5959,13 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
                 for treat_as_failure in treat_deployment_as_failure:
                     instance.properties.application_profile.gallery_applications[index]["treat_failure_as_deployment_failure"] = \
                         treat_as_failure.lower() == 'true'
+                    index += 1
+
+            if enable_automatic_upgrade:
+                index = 0
+                for enable_auto_upgrade in enable_automatic_upgrade:
+                    instance.properties.application_profile.gallery_applications[index]["enable_automatic_upgrade"] = \
+                        enable_auto_upgrade.lower() == 'true'
                     index += 1
 
         def _output(self, *args, **kwargs):
@@ -5992,35 +5999,62 @@ def list_vm_applications(cmd, vm_name, resource_group_name):
     return vm.get("applicationProfile", {})
 
 
-def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
-    try:
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    except ResourceNotFoundError:
-        raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
+def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, enable_automatic_upgrade=None, no_wait=False):
+    from .aaz.latest.vmss import Update as _VMSSUpdate
 
-    vmss.virtual_machine_profile.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
+    class SetVMSSApplications(_VMSSUpdate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
 
-    if order_applications:
-        index = 1
-        for app in vmss.virtual_machine_profile.application_profile.gallery_applications:
-            app.order = index
-            index += 1
+        def pre_instance_update(self, instance):
+            instance.properties.virtualMachineProfile.application_profile.gallery_applications = [{"package_reference_id": avid} for avid in application_version_ids]
 
-    if application_configuration_overrides:
-        index = 0
-        for over_ride in application_configuration_overrides:
-            if over_ride or over_ride.lower() != 'null':
-                vmss.virtual_machine_profile.application_profile.gallery_applications[index].configuration_reference = over_ride
-            index += 1
+            if order_applications:
+                index = 1
+                for app in instance.properties.virtualMachineProfile.application_profile.gallery_applications:
+                    app["order"] = index
+                    index += 1
 
-    if treat_deployment_as_failure:
-        index = 0
-        for treat_as_failure in treat_deployment_as_failure:
-            vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = treat_as_failure.lower() == 'true'
-            index += 1
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update, resource_group_name, vmss_name, vmss)
+            if application_configuration_overrides:
+                index = 0
+                for over_ride in application_configuration_overrides:
+                    if over_ride or over_ride.lower() != 'null':
+                        instance.properties.virtual_machine_profile.application_profile.gallery_applications[index]["configuration_reference"] = over_ride
+                    index += 1
+
+            if treat_deployment_as_failure:
+                index = 0
+                for treat_as_failure in treat_deployment_as_failure:
+                    instance.properties.virtual_machine_profile.application_profile.gallery_applications[index]["treat_failure_as_deployment_failure"] = \
+                        treat_as_failure.lower() == 'true'
+                    index += 1
+
+            if enable_automatic_upgrade:
+                index = 0
+                for enable_auto_upgrade in enable_automatic_upgrade:
+                    instance.properties.virtual_machine_profile.application_profile.gallery_applications[index]["enable_automatic_upgrade"] = \
+                        enable_auto_upgrade.lower() == 'true'
+                    index += 1
+
+        def _output(self, *args, **kwargs):
+            from azure.cli.core.aaz import AAZUndefined, has_value
+
+            # Resolve flatten conflict
+            # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+            print(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions)
+            if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):
+                for extension in self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions:
+                    if has_value(extension.type):
+                        extension.type = AAZUndefined
+
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result
+
+    return SetVMSSApplications(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "vm_scale_set_name": vmss_name,
+    })
 
 
 def list_vmss_applications(cmd, vmss_name, resource_group_name):
