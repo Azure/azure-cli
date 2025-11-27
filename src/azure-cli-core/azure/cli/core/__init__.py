@@ -120,6 +120,9 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string, show_updates
+        from azure.cli.core import telemetry
+
+        telemetry.set_command_details(command="", parameters=["--version"])
 
         ver_string, updates_available_components = get_az_version_string()
         print(ver_string)
