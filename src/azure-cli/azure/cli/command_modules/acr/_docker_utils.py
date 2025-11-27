@@ -28,7 +28,6 @@ from ._client_factory import cf_acr_registries
 from ._constants import get_managed_sku
 from ._constants import ACR_AUDIENCE_RESOURCE_NAME
 from ._utils import get_registry_by_name, ResourceNotFound
-from .policy import acr_config_authentication_as_arm_show
 from ._format import add_timestamp
 from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR
 
