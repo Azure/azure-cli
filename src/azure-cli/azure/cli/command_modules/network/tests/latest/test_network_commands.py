@@ -2,7 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-
+import json
 # pylint: disable=line-too-long
 # pylint: disable=too-many-lines
 import os
@@ -7570,6 +7570,141 @@ class NetworkVirtualApplianceReimageScenarioTest(ScenarioTest):
                  checks=[
                      self.check('provisioningState', 'Succeeded')
                  ])
+
+class NetworkVirtualApplianceVnetScenarioTest(ScenarioTest):
+
+    def setUp(self):
+        super(NetworkVirtualApplianceVnetScenarioTest, self).setUp()
+
+    def tearDown(self):
+        rg = self.kwargs.get('rg')
+        name = self.kwargs.get('name')
+        try:
+            if rg and name:
+                self.cmd(f'network virtual-appliance delete -n {name} -g {rg}')
+        except Exception as ex:
+            print(f'[teardown] cleanup skipped: {ex}')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location='eastus2euap', name_prefix='test_nva_vnet')
+    def test_network_virtual_appliance_vnet_interface_config(self, resource_group):
+        from time import sleep
+
+        def _get_request_id(ex: Exception) -> str:
+            try:
+                headers = getattr(getattr(ex, 'response', None), 'headers', {}) or {}
+                return headers.get('x-ms-request-id', 'N/A')
+            except Exception:
+                return 'N/A'
+
+        def _is_transient_update_error(ex: Exception) -> bool:
+            msg = str(ex)
+            return ('NvaOperationNotAllowed' in msg) or ('nvaoperationnotallowed' in msg.lower())
+
+        # -------- (0) args --------
+        self.kwargs.update({
+            'rg': resource_group,
+            'vnet': 'cli-nva-vnet',
+            'subnetPriv': 'ApplianceSubnet',
+            'subnetPub': 'ApplianceSubnetPublic',
+            'addrSpace': '10.10.0.0/16',
+            'privPrefix': '10.10.1.0/24',
+            'pubPrefix': '10.10.2.0/24',
+            'name': 'cli-virtual-appliance-vnet',
+            'vendor': 'barracudasdwanrelease',
+            'version': 'latest',
+            'asn': '10000',
+            'scale': '2',
+        })
+
+        # -------- (1) vnet/subnet --------
+        self.cmd(
+            'network vnet create '
+            '-g {rg} -n {vnet} -l eastus2euap '
+            '--address-prefixes {addrSpace} '
+            '--subnet-name {subnetPriv} --subnet-prefix {privPrefix}'
+        )
+        self.cmd(
+            'network vnet subnet create '
+            '-g {rg} --vnet-name {vnet} -n {subnetPub} '
+            '--address-prefixes {pubPrefix}'
+        )
+        vnet = self.cmd('network vnet show -g {rg} -n {vnet}').get_output_in_json()
+        sub_priv_id = [s['id'] for s in vnet['subnets'] if s['name'] == self.kwargs['subnetPriv']][0]
+        sub_pub_id = [s['id'] for s in vnet['subnets'] if s['name'] == self.kwargs['subnetPub']][0]
+
+        # -------- (2) create interface JSON --------
+        iface_cfg_path = os.path.join(self.create_temp_dir(), 'nva-interface-config-example.json')
+        iface_cfg = [
+            {"name": "nic0", "subnet": {"id": sub_priv_id}, "type": ["PrivateNic"]},
+            {"name": "nic1", "subnet": {"id": sub_pub_id}, "type": ["PublicNic"]},
+        ]
+
+        with open(iface_cfg_path, 'w', encoding='utf-8') as f:
+            json.dump(iface_cfg, f, indent=2)
+        self.kwargs.update({'iface': iface_cfg_path})
+
+        # -------- (3) create nva --------
+        self.cmd(
+            'network virtual-appliance create '
+            '-n {name} -g {rg} '
+            '--vendor {vendor} --scale-unit {scale} -v {version} --asn {asn} '
+            '--interface-config "@{iface}"',
+            checks=[
+                self.check('name', '{name}'),
+                self.check('length(nvaInterfaceConfigurations)', 2),
+                self.check('virtualApplianceAsn', '{asn}')
+            ]
+        )
+
+        # -------- (4) loop until Succeeded --------
+        retry_count = 0
+        while True:
+            state = self.cmd('network virtual-appliance show -g {rg} -n {name}').get_output_in_json().get('provisioningState')
+            if state == 'Succeeded':
+                break
+            retry_count += 1
+            if retry_count >= 20:  # 20 * 60s ≈ 20 min
+                raise Exception(f'Operation not complete: provisioningState={state}, retry_count={retry_count}')
+            sleep(60)
+
+        # -------- (5) wait 15 min --------
+        print('Provisioning Succeeded → sleep 5 minutes before update')
+        sleep(900)
+
+        # -------- (6) attempt update; if it fails, retry 5 times, sleeping for 10 minutes before each attempt --------
+        max_retries = 5
+        attempt = 0
+        last_err = None
+        while True:
+            try:
+                self.cmd(
+                    'network virtual-appliance update -n {name} -g {rg} --asn 20000',
+                    checks=[self.check('virtualApplianceAsn', 20000)]
+                )
+                last_err = None
+                break  # done
+            except Exception as ex:
+                last_err = ex
+                attempt += 1
+                if attempt > max_retries or not _is_transient_update_error(ex):
+                    req_id = _get_request_id(ex)
+                    raise Exception(
+                        f'UPDATE failed after {attempt} attempt(s). '
+                        f'x-ms-request-id={req_id}. Error={ex}'
+                    )
+                req_id = _get_request_id(ex)
+                print(
+                    f'UPDATE transient failure (attempt {attempt}/{max_retries}). '
+                    f'x-ms-request-id={req_id}. Sleep 5 minutes then retry...'
+                )
+                sleep(600)
+
+        # -------- (7) verify --------
+        result = self.cmd('network virtual-appliance show -n {name} -g {rg}').get_output_in_json()
+        self.assertEqual(result['name'], self.kwargs['name'])
+        expected_nics = int(result['nvaSku']['bundledScaleUnit']) * len(result['nvaInterfaceConfigurations'])
+        self.assertEqual(len(result['virtualApplianceNics']), expected_nics)
 
 class NetworkExtendedLocation(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_network_lb_edge_zone', location='eastus2euap')

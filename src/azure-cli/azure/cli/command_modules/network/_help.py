@@ -6239,3 +6239,19 @@ examples:
             --resource-type vpnConnection --storage-account MyStorageAccount \\
             --storage-path https://{storageAccountName}.blob.core.windows.net/{containerName}
 """
+
+helps['network virtual-appliance create'] = """
+type: command
+short-summary: Create a Network Virtual Appliance (NVA) in a Virtual Network.
+long-summary: >
+    Supports providing either a Virtual Hub or an interface configuration file for VNet deployment.
+parameters:
+  - name: --interface-config
+    short-summary: Path to a JSON file specifying NIC configurations for the NVA.
+examples:
+  - name: Create an NVA in a VNet with two NICs using an interface configuration file.
+    text: |
+        az network virtual-appliance create -n MyNva -g MyRG --vendor barracudasdwanrelease \\
+            --scale-unit 2 --version latest --asn 10000 \\
+            --interface-config @nva-interface-config-example.json
+"""
