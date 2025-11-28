@@ -6506,7 +6506,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                 linux_container_settings = minor.stack_settings.linux_container_settings
                 # Dynamically get all Java runtimes from container settings
                 runtimes = self._get_java_runtimes_from_container_settings(linux_container_settings)
-                # Remove the JBoss'_byol' entries from the output
+                # Remove the 'JBoss _byol' entries from the output
                 runtimes = [(r, v, au) for (r, v, au) in runtimes if r is not None and not r.endswith("_byol")]    # pylint: disable=line-too-long
                 for runtime_name, version, auto_update in [(r, v, au) for (r, v, au) in runtimes if r is not None]:
                     # Skip duplicates
