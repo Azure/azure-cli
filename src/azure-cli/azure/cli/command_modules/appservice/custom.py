@@ -6309,7 +6309,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     @staticmethod
     def _java_version_sort_key(version):
         """Sort key for Java versions. Handles formats like "25", "1.8", "11.0", etc.
-        Returns negative values so sorted() gives descending order (newest first)."""
+        Returns a negative integer representing the version, so sorted() produces descending order (newest first)."""
         if version == "1.8":
             return -8  # Treat 1.8 as Java 8
         if version.startswith("1."):
