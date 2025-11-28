@@ -103,7 +103,7 @@ DEPENDENCIES = [
     'azure-mgmt-postgresqlflexibleservers==1.1.0b2',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
-    'azure-mgmt-mysqlflexibleservers==1.0.0b3',
+    'azure-mgmt-mysqlflexibleservers==1.1.0b1',
     'azure-mgmt-recoveryservicesbackup~=9.2.0',
     'azure-mgmt-recoveryservices~=4.0.0',
     'azure-mgmt-redhatopenshift~=1.5.0',
