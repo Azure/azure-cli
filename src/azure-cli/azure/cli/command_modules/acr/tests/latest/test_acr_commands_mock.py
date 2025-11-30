@@ -1239,7 +1239,7 @@ class AcrMockCommandsTests(unittest.TestCase):
         mock_requests_post.return_value = token_response
 
     def _validate_raw_token_request(self, mock_get_raw_token):
-        mock_get_raw_token.assert_called_with(mock.ANY, resource="https://containerregistry.azure.net")
+        mock_get_raw_token.assert_called_with(mock.ANY, resource="https://containerregistry.azure.net", subscription=mock.ANY)
 
     def _validate_refresh_token_request(self, mock_requests_get, mock_requests_post, login_server):
         mock_requests_get.assert_called_with('https://{}/v2/'.format(login_server), verify=mock.ANY)
