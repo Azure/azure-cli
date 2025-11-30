@@ -175,7 +175,9 @@ class List(AAZCommand):
             _element.caller = AAZStrType(
                 flags={"read_only": True},
             )
-            _element.category = AAZObjectType()
+            _element.category = AAZObjectType(
+                flags={"read_only": True},
+            )
             _ListHelper._build_schema_localizable_string_read(_element.category)
             _element.claims = AAZDictType(
                 flags={"read_only": True},
@@ -214,6 +216,7 @@ class List(AAZCommand):
             )
             _element.operation_name = AAZObjectType(
                 serialized_name="operationName",
+                flags={"read_only": True},
             )
             _ListHelper._build_schema_localizable_string_read(_element.operation_name)
             _element.properties = AAZDictType(
@@ -233,10 +236,13 @@ class List(AAZCommand):
             _element.resource_type = AAZObjectType(
                 serialized_name="resourceType",
             )
-            _element.status = AAZObjectType()
+            _element.status = AAZObjectType(
+                flags={"read_only": True},
+            )
             _ListHelper._build_schema_localizable_string_read(_element.status)
             _element.sub_status = AAZObjectType(
                 serialized_name="subStatus",
+                flags={"read_only": True},
             )
             _ListHelper._build_schema_localizable_string_read(_element.sub_status)
             _element.submission_timestamp = AAZStrType(

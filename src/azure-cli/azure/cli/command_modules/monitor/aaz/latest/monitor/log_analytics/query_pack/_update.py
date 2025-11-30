@@ -78,19 +78,19 @@ class Update(AAZCommand):
         self.QueryPacksCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def pre_instance_update(self, instance):
         pass
 
-    # @register_callback
+    @register_callback
     def post_instance_update(self, instance):
         pass
 
@@ -177,7 +177,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_log_analytics_query_pack_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_log_analytics_query_pack_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -272,7 +272,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_log_analytics_query_pack_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_log_analytics_query_pack_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -304,67 +304,69 @@ class Update(AAZCommand):
             )
 
 
-_schema_log_analytics_query_pack_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_log_analytics_query_pack_read = None
 
-def _build_schema_log_analytics_query_pack_read(_schema):
-    global _schema_log_analytics_query_pack_read
-    if _schema_log_analytics_query_pack_read is not None:
-        _schema.id = _schema_log_analytics_query_pack_read.id
-        _schema.location = _schema_log_analytics_query_pack_read.location
-        _schema.name = _schema_log_analytics_query_pack_read.name
-        _schema.properties = _schema_log_analytics_query_pack_read.properties
-        _schema.tags = _schema_log_analytics_query_pack_read.tags
-        _schema.type = _schema_log_analytics_query_pack_read.type
-        return
+    @classmethod
+    def _build_schema_log_analytics_query_pack_read(cls, _schema):
+        if cls._schema_log_analytics_query_pack_read is not None:
+            _schema.id = cls._schema_log_analytics_query_pack_read.id
+            _schema.location = cls._schema_log_analytics_query_pack_read.location
+            _schema.name = cls._schema_log_analytics_query_pack_read.name
+            _schema.properties = cls._schema_log_analytics_query_pack_read.properties
+            _schema.tags = cls._schema_log_analytics_query_pack_read.tags
+            _schema.type = cls._schema_log_analytics_query_pack_read.type
+            return
 
-    _schema_log_analytics_query_pack_read = AAZObjectType()
+        cls._schema_log_analytics_query_pack_read = _schema_log_analytics_query_pack_read = AAZObjectType()
 
-    log_analytics_query_pack_read = _schema_log_analytics_query_pack_read
-    log_analytics_query_pack_read.id = AAZStrType(
-        flags={"read_only": True},
-    )
-    log_analytics_query_pack_read.location = AAZStrType(
-        flags={"required": True},
-    )
-    log_analytics_query_pack_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    log_analytics_query_pack_read.properties = AAZObjectType(
-        flags={"required": True, "client_flatten": True},
-    )
-    log_analytics_query_pack_read.tags = AAZDictType()
-    log_analytics_query_pack_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        log_analytics_query_pack_read = _schema_log_analytics_query_pack_read
+        log_analytics_query_pack_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        log_analytics_query_pack_read.location = AAZStrType(
+            flags={"required": True},
+        )
+        log_analytics_query_pack_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        log_analytics_query_pack_read.properties = AAZObjectType(
+            flags={"required": True, "client_flatten": True},
+        )
+        log_analytics_query_pack_read.tags = AAZDictType()
+        log_analytics_query_pack_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    properties = _schema_log_analytics_query_pack_read.properties
-    properties.provisioning_state = AAZStrType(
-        serialized_name="provisioningState",
-        flags={"read_only": True},
-    )
-    properties.query_pack_id = AAZStrType(
-        serialized_name="queryPackId",
-        flags={"read_only": True},
-    )
-    properties.time_created = AAZStrType(
-        serialized_name="timeCreated",
-        flags={"read_only": True},
-    )
-    properties.time_modified = AAZStrType(
-        serialized_name="timeModified",
-        flags={"read_only": True},
-    )
+        properties = _schema_log_analytics_query_pack_read.properties
+        properties.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
+        )
+        properties.query_pack_id = AAZStrType(
+            serialized_name="queryPackId",
+            flags={"read_only": True},
+        )
+        properties.time_created = AAZStrType(
+            serialized_name="timeCreated",
+            flags={"read_only": True},
+        )
+        properties.time_modified = AAZStrType(
+            serialized_name="timeModified",
+            flags={"read_only": True},
+        )
 
-    tags = _schema_log_analytics_query_pack_read.tags
-    tags.Element = AAZStrType()
+        tags = _schema_log_analytics_query_pack_read.tags
+        tags.Element = AAZStrType()
 
-    _schema.id = _schema_log_analytics_query_pack_read.id
-    _schema.location = _schema_log_analytics_query_pack_read.location
-    _schema.name = _schema_log_analytics_query_pack_read.name
-    _schema.properties = _schema_log_analytics_query_pack_read.properties
-    _schema.tags = _schema_log_analytics_query_pack_read.tags
-    _schema.type = _schema_log_analytics_query_pack_read.type
+        _schema.id = cls._schema_log_analytics_query_pack_read.id
+        _schema.location = cls._schema_log_analytics_query_pack_read.location
+        _schema.name = cls._schema_log_analytics_query_pack_read.name
+        _schema.properties = cls._schema_log_analytics_query_pack_read.properties
+        _schema.tags = cls._schema_log_analytics_query_pack_read.tags
+        _schema.type = cls._schema_log_analytics_query_pack_read.type
 
 
 __all__ = ["Update"]

@@ -48,13 +48,11 @@ class Create(AAZCommand):
             options=["-n", "--name", "--saved-search-name"],
             help="Name of the saved search and it's unique in a given workspace.",
             required=True,
-            id_part="child_name_1",
         )
         _args_schema.workspace_name = AAZStrArg(
             options=["--workspace-name"],
             help="The name of the workspace.",
             required=True,
-            id_part="name",
             fmt=AAZStrArgFormat(
                 pattern="^[A-Za-z0-9][A-Za-z0-9-]+[A-Za-z0-9]$",
                 max_length=63,
@@ -127,11 +125,11 @@ class Create(AAZCommand):
         self.SavedSearchesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -303,6 +301,10 @@ class Create(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _CreateHelper:
+    """Helper class for Create"""
 
 
 __all__ = ["Create"]

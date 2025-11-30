@@ -32,6 +32,8 @@ class Search(AAZCommand):
         ]
     }
 
+    AZ_SUPPORT_PAGINATION = True
+
     def _handler(self, command_args):
         super()._handler(command_args)
         return self.build_paging(self._execute_operations, self._output)
@@ -51,7 +53,6 @@ class Search(AAZCommand):
             options=["--query-pack-name"],
             help="The name of the log analytics query pack.",
             required=True,
-            id_part="name",
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -106,11 +107,11 @@ class Search(AAZCommand):
         self.QueriesSearch(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
@@ -347,6 +348,10 @@ class Search(AAZCommand):
             )
 
             return cls._schema_on_200
+
+
+class _SearchHelper:
+    """Helper class for Search"""
 
 
 __all__ = ["Search"]

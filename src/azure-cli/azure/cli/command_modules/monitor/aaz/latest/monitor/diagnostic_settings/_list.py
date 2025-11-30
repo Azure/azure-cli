@@ -201,7 +201,7 @@ class List(AAZCommand):
             _element.retention_policy = AAZObjectType(
                 serialized_name="retentionPolicy",
             )
-            _build_schema_retention_policy_read(_element.retention_policy)
+            _ListHelper._build_schema_retention_policy_read(_element.retention_policy)
 
             metrics = cls._schema_on_200.value.Element.properties.metrics
             metrics.Element = AAZObjectType()
@@ -214,7 +214,7 @@ class List(AAZCommand):
             _element.retention_policy = AAZObjectType(
                 serialized_name="retentionPolicy",
             )
-            _build_schema_retention_policy_read(_element.retention_policy)
+            _ListHelper._build_schema_retention_policy_read(_element.retention_policy)
             _element.time_grain = AAZStrType(
                 serialized_name="timeGrain",
             )
@@ -242,28 +242,30 @@ class List(AAZCommand):
             return cls._schema_on_200
 
 
-_schema_retention_policy_read = None
+class _ListHelper:
+    """Helper class for List"""
 
+    _schema_retention_policy_read = None
 
-def _build_schema_retention_policy_read(_schema):
-    global _schema_retention_policy_read
-    if _schema_retention_policy_read is not None:
-        _schema.days = _schema_retention_policy_read.days
-        _schema.enabled = _schema_retention_policy_read.enabled
-        return
+    @classmethod
+    def _build_schema_retention_policy_read(cls, _schema):
+        if cls._schema_retention_policy_read is not None:
+            _schema.days = cls._schema_retention_policy_read.days
+            _schema.enabled = cls._schema_retention_policy_read.enabled
+            return
 
-    _schema_retention_policy_read = AAZObjectType()
+        cls._schema_retention_policy_read = _schema_retention_policy_read = AAZObjectType()
 
-    retention_policy_read = _schema_retention_policy_read
-    retention_policy_read.days = AAZIntType(
-        flags={"required": True},
-    )
-    retention_policy_read.enabled = AAZBoolType(
-        flags={"required": True},
-    )
+        retention_policy_read = _schema_retention_policy_read
+        retention_policy_read.days = AAZIntType(
+            flags={"required": True},
+        )
+        retention_policy_read.enabled = AAZBoolType(
+            flags={"required": True},
+        )
 
-    _schema.days = _schema_retention_policy_read.days
-    _schema.enabled = _schema_retention_policy_read.enabled
+        _schema.days = cls._schema_retention_policy_read.days
+        _schema.enabled = cls._schema_retention_policy_read.enabled
 
 
 __all__ = ["List"]

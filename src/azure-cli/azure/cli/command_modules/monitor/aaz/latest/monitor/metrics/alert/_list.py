@@ -22,10 +22,10 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2018-03-01",
+        "version": "2024-03-01-preview",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.insights/metricalerts", "2018-03-01"],
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/metricalerts", "2018-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/providers/microsoft.insights/metricalerts", "2024-03-01-preview"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.insights/metricalerts", "2024-03-01-preview"],
         ]
     }
 
@@ -50,12 +50,12 @@ class List(AAZCommand):
 
     def _execute_operations(self):
         self.pre_operations()
-        condition_0 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
-        condition_1 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_0 = has_value(self.ctx.subscription_id) and has_value(self.ctx.args.resource_group) is not True
+        condition_1 = has_value(self.ctx.args.resource_group) and has_value(self.ctx.subscription_id)
         if condition_0:
-            self.MetricAlertsListByResourceGroup(ctx=self.ctx)()
-        if condition_1:
             self.MetricAlertsListBySubscription(ctx=self.ctx)()
+        if condition_1:
+            self.MetricAlertsListByResourceGroup(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,300 +69,6 @@ class List(AAZCommand):
     def _output(self, *args, **kwargs):
         result = self.deserialize_output(self.ctx.vars.instance.value, client_flatten=True)
         return result
-
-    class MetricAlertsListByResourceGroup(AAZHttpOperation):
-        CLIENT_TYPE = "MgmtClient"
-
-        def __call__(self, *args, **kwargs):
-            request = self.make_request()
-            session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [200]:
-                return self.on_200(session)
-
-            return self.on_error(session.http_response)
-
-        @property
-        def url(self):
-            return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts",
-                **self.url_parameters
-            )
-
-        @property
-        def method(self):
-            return "GET"
-
-        @property
-        def error_format(self):
-            return "ODataV4Format"
-
-        @property
-        def url_parameters(self):
-            parameters = {
-                **self.serialize_url_param(
-                    "resourceGroupName", self.ctx.args.resource_group,
-                    required=True,
-                ),
-                **self.serialize_url_param(
-                    "subscriptionId", self.ctx.subscription_id,
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def query_parameters(self):
-            parameters = {
-                **self.serialize_query_param(
-                    "api-version", "2018-03-01",
-                    required=True,
-                ),
-            }
-            return parameters
-
-        @property
-        def header_parameters(self):
-            parameters = {
-                **self.serialize_header_param(
-                    "Accept", "application/json",
-                ),
-            }
-            return parameters
-
-        def on_200(self, session):
-            data = self.deserialize_http_content(session)
-            self.ctx.set_var(
-                "instance",
-                data,
-                schema_builder=self._build_schema_on_200
-            )
-
-        _schema_on_200 = None
-
-        @classmethod
-        def _build_schema_on_200(cls):
-            if cls._schema_on_200 is not None:
-                return cls._schema_on_200
-
-            cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.value = AAZListType()
-
-            value = cls._schema_on_200.value
-            value.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element
-            _element.id = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.location = AAZStrType(
-                flags={"required": True},
-            )
-            _element.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _element.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
-            )
-            _element.tags = AAZDictType()
-            _element.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.value.Element.properties
-            properties.actions = AAZListType()
-            properties.auto_mitigate = AAZBoolType(
-                serialized_name="autoMitigate",
-            )
-            properties.criteria = AAZObjectType(
-                flags={"required": True},
-            )
-            properties.description = AAZStrType()
-            properties.enabled = AAZBoolType(
-                flags={"required": True},
-            )
-            properties.evaluation_frequency = AAZStrType(
-                serialized_name="evaluationFrequency",
-                flags={"required": True},
-            )
-            properties.is_migrated = AAZBoolType(
-                serialized_name="isMigrated",
-                flags={"read_only": True},
-            )
-            properties.last_updated_time = AAZStrType(
-                serialized_name="lastUpdatedTime",
-                flags={"read_only": True},
-            )
-            properties.scopes = AAZListType(
-                flags={"required": True},
-            )
-            properties.severity = AAZIntType(
-                flags={"required": True},
-            )
-            properties.target_resource_region = AAZStrType(
-                serialized_name="targetResourceRegion",
-            )
-            properties.target_resource_type = AAZStrType(
-                serialized_name="targetResourceType",
-            )
-            properties.window_size = AAZStrType(
-                serialized_name="windowSize",
-                flags={"required": True},
-            )
-
-            actions = cls._schema_on_200.value.Element.properties.actions
-            actions.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.actions.Element
-            _element.action_group_id = AAZStrType(
-                serialized_name="actionGroupId",
-            )
-            _element.web_hook_properties = AAZDictType(
-                serialized_name="webHookProperties",
-            )
-
-            web_hook_properties = cls._schema_on_200.value.Element.properties.actions.Element.web_hook_properties
-            web_hook_properties.Element = AAZStrType()
-
-            criteria = cls._schema_on_200.value.Element.properties.criteria
-            criteria["odata.type"] = AAZStrType(
-                flags={"required": True},
-            )
-
-            disc_microsoft__azure__monitor__multiple_resource_multiple_metric_criteria = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria")
-            disc_microsoft__azure__monitor__multiple_resource_multiple_metric_criteria.all_of = AAZListType(
-                serialized_name="allOf",
-            )
-
-            all_of = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of
-            all_of.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of.Element
-            _element.criterion_type = AAZStrType(
-                serialized_name="criterionType",
-                flags={"required": True},
-            )
-            _element.dimensions = AAZListType()
-            _element.metric_name = AAZStrType(
-                serialized_name="metricName",
-                flags={"required": True},
-            )
-            _element.metric_namespace = AAZStrType(
-                serialized_name="metricNamespace",
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.skip_metric_validation = AAZBoolType(
-                serialized_name="skipMetricValidation",
-            )
-            _element.time_aggregation = AAZStrType(
-                serialized_name="timeAggregation",
-                flags={"required": True},
-            )
-
-            dimensions = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of.Element.dimensions
-            dimensions.Element = AAZObjectType()
-            _ListHelper._build_schema_metric_dimension_read(dimensions.Element)
-
-            disc_dynamic_threshold_criterion = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of.Element.discriminate_by("criterion_type", "DynamicThresholdCriterion")
-            disc_dynamic_threshold_criterion.alert_sensitivity = AAZStrType(
-                serialized_name="alertSensitivity",
-                flags={"required": True},
-            )
-            disc_dynamic_threshold_criterion.failing_periods = AAZObjectType(
-                serialized_name="failingPeriods",
-                flags={"required": True},
-            )
-            disc_dynamic_threshold_criterion.ignore_data_before = AAZStrType(
-                serialized_name="ignoreDataBefore",
-            )
-            disc_dynamic_threshold_criterion.operator = AAZStrType(
-                flags={"required": True},
-            )
-
-            failing_periods = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of.Element.discriminate_by("criterion_type", "DynamicThresholdCriterion").failing_periods
-            failing_periods.min_failing_periods_to_alert = AAZFloatType(
-                serialized_name="minFailingPeriodsToAlert",
-                flags={"required": True},
-            )
-            failing_periods.number_of_evaluation_periods = AAZFloatType(
-                serialized_name="numberOfEvaluationPeriods",
-                flags={"required": True},
-            )
-
-            disc_static_threshold_criterion = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of.Element.discriminate_by("criterion_type", "StaticThresholdCriterion")
-            disc_static_threshold_criterion.operator = AAZStrType(
-                flags={"required": True},
-            )
-            disc_static_threshold_criterion.threshold = AAZFloatType(
-                flags={"required": True},
-            )
-
-            disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria")
-            disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria.all_of = AAZListType(
-                serialized_name="allOf",
-            )
-
-            all_of = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria").all_of
-            all_of.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria").all_of.Element
-            _element.criterion_type = AAZStrType(
-                serialized_name="criterionType",
-                flags={"required": True},
-            )
-            _element.dimensions = AAZListType()
-            _element.metric_name = AAZStrType(
-                serialized_name="metricName",
-                flags={"required": True},
-            )
-            _element.metric_namespace = AAZStrType(
-                serialized_name="metricNamespace",
-            )
-            _element.name = AAZStrType(
-                flags={"required": True},
-            )
-            _element.operator = AAZStrType(
-                flags={"required": True},
-            )
-            _element.skip_metric_validation = AAZBoolType(
-                serialized_name="skipMetricValidation",
-            )
-            _element.threshold = AAZFloatType(
-                flags={"required": True},
-            )
-            _element.time_aggregation = AAZStrType(
-                serialized_name="timeAggregation",
-                flags={"required": True},
-            )
-
-            dimensions = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria").all_of.Element.dimensions
-            dimensions.Element = AAZObjectType()
-            _ListHelper._build_schema_metric_dimension_read(dimensions.Element)
-
-            disc_microsoft__azure__monitor__webtest_location_availability_criteria = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria")
-            disc_microsoft__azure__monitor__webtest_location_availability_criteria.component_id = AAZStrType(
-                serialized_name="componentId",
-                flags={"required": True},
-            )
-            disc_microsoft__azure__monitor__webtest_location_availability_criteria.failed_location_count = AAZFloatType(
-                serialized_name="failedLocationCount",
-                flags={"required": True},
-            )
-            disc_microsoft__azure__monitor__webtest_location_availability_criteria.web_test_id = AAZStrType(
-                serialized_name="webTestId",
-                flags={"required": True},
-            )
-
-            scopes = cls._schema_on_200.value.Element.properties.scopes
-            scopes.Element = AAZStrType()
-
-            tags = cls._schema_on_200.value.Element.tags
-            tags.Element = AAZStrType()
-
-            return cls._schema_on_200
 
     class MetricAlertsListBySubscription(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -388,7 +94,7 @@ class List(AAZCommand):
 
         @property
         def error_format(self):
-            return "ODataV4Format"
+            return "MgmtErrorFormat"
 
         @property
         def url_parameters(self):
@@ -404,7 +110,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2018-03-01",
+                    "api-version", "2024-03-01-preview",
                     required=True,
                 ),
             }
@@ -446,6 +152,7 @@ class List(AAZCommand):
             _element.id = AAZStrType(
                 flags={"read_only": True},
             )
+            _element.identity = AAZIdentityObjectType()
             _element.location = AAZStrType(
                 flags={"required": True},
             )
@@ -460,13 +167,48 @@ class List(AAZCommand):
                 flags={"read_only": True},
             )
 
+            identity = cls._schema_on_200.value.Element.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
             properties = cls._schema_on_200.value.Element.properties
+            properties.action_properties = AAZDictType(
+                serialized_name="actionProperties",
+            )
             properties.actions = AAZListType()
             properties.auto_mitigate = AAZBoolType(
                 serialized_name="autoMitigate",
             )
             properties.criteria = AAZObjectType(
                 flags={"required": True},
+            )
+            properties.custom_properties = AAZDictType(
+                serialized_name="customProperties",
             )
             properties.description = AAZStrType()
             properties.enabled = AAZBoolType(
@@ -484,6 +226,9 @@ class List(AAZCommand):
                 serialized_name="lastUpdatedTime",
                 flags={"read_only": True},
             )
+            properties.resolve_configuration = AAZObjectType(
+                serialized_name="resolveConfiguration",
+            )
             properties.scopes = AAZListType(
                 flags={"required": True},
             )
@@ -498,8 +243,10 @@ class List(AAZCommand):
             )
             properties.window_size = AAZStrType(
                 serialized_name="windowSize",
-                flags={"required": True},
             )
+
+            action_properties = cls._schema_on_200.value.Element.properties.action_properties
+            action_properties.Element = AAZStrType()
 
             actions = cls._schema_on_200.value.Element.properties.actions
             actions.Element = AAZObjectType()
@@ -590,6 +337,46 @@ class List(AAZCommand):
                 flags={"required": True},
             )
 
+            disc_microsoft__azure__monitor__prom_ql_criteria = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria")
+            disc_microsoft__azure__monitor__prom_ql_criteria.all_of = AAZListType(
+                serialized_name="allOf",
+            )
+            disc_microsoft__azure__monitor__prom_ql_criteria.failing_periods = AAZObjectType(
+                serialized_name="failingPeriods",
+            )
+
+            all_of = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of
+            all_of.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of.Element
+            _element.criterion_type = AAZStrType(
+                serialized_name="criterionType",
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.query = AAZStrType(
+                flags={"required": True},
+            )
+
+            disc_dynamic_threshold_criterion = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of.Element.discriminate_by("criterion_type", "DynamicThresholdCriterion")
+            disc_dynamic_threshold_criterion.alert_sensitivity = AAZStrType(
+                serialized_name="alertSensitivity",
+                flags={"required": True},
+            )
+            disc_dynamic_threshold_criterion.ignore_data_before = AAZStrType(
+                serialized_name="ignoreDataBefore",
+            )
+            disc_dynamic_threshold_criterion.operator = AAZStrType(
+                flags={"required": True},
+            )
+
+            failing_periods = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").failing_periods
+            failing_periods["for"] = AAZStrType(
+                flags={"required": True},
+            )
+
             disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria")
             disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria.all_of = AAZListType(
                 serialized_name="allOf",
@@ -644,6 +431,405 @@ class List(AAZCommand):
             disc_microsoft__azure__monitor__webtest_location_availability_criteria.web_test_id = AAZStrType(
                 serialized_name="webTestId",
                 flags={"required": True},
+            )
+
+            custom_properties = cls._schema_on_200.value.Element.properties.custom_properties
+            custom_properties.Element = AAZStrType()
+
+            resolve_configuration = cls._schema_on_200.value.Element.properties.resolve_configuration
+            resolve_configuration.auto_resolved = AAZBoolType(
+                serialized_name="autoResolved",
+                flags={"required": True},
+            )
+            resolve_configuration.time_to_resolve = AAZStrType(
+                serialized_name="timeToResolve",
+            )
+
+            scopes = cls._schema_on_200.value.Element.properties.scopes
+            scopes.Element = AAZStrType()
+
+            tags = cls._schema_on_200.value.Element.tags
+            tags.Element = AAZStrType()
+
+            return cls._schema_on_200
+
+    class MetricAlertsListByResourceGroup(AAZHttpOperation):
+        CLIENT_TYPE = "MgmtClient"
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200]:
+                return self.on_200(session)
+
+            return self.on_error(session.http_response)
+
+        @property
+        def url(self):
+            return self.client.format_url(
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Insights/metricAlerts",
+                **self.url_parameters
+            )
+
+        @property
+        def method(self):
+            return "GET"
+
+        @property
+        def error_format(self):
+            return "MgmtErrorFormat"
+
+        @property
+        def url_parameters(self):
+            parameters = {
+                **self.serialize_url_param(
+                    "resourceGroupName", self.ctx.args.resource_group,
+                    required=True,
+                ),
+                **self.serialize_url_param(
+                    "subscriptionId", self.ctx.subscription_id,
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def query_parameters(self):
+            parameters = {
+                **self.serialize_query_param(
+                    "api-version", "2024-03-01-preview",
+                    required=True,
+                ),
+            }
+            return parameters
+
+        @property
+        def header_parameters(self):
+            parameters = {
+                **self.serialize_header_param(
+                    "Accept", "application/json",
+                ),
+            }
+            return parameters
+
+        def on_200(self, session):
+            data = self.deserialize_http_content(session)
+            self.ctx.set_var(
+                "instance",
+                data,
+                schema_builder=self._build_schema_on_200
+            )
+
+        _schema_on_200 = None
+
+        @classmethod
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
+
+            cls._schema_on_200 = AAZObjectType()
+
+            _schema_on_200 = cls._schema_on_200
+            _schema_on_200.value = AAZListType()
+
+            value = cls._schema_on_200.value
+            value.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element
+            _element.id = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.identity = AAZIdentityObjectType()
+            _element.location = AAZStrType(
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"read_only": True},
+            )
+            _element.properties = AAZObjectType(
+                flags={"required": True, "client_flatten": True},
+            )
+            _element.tags = AAZDictType()
+            _element.type = AAZStrType(
+                flags={"read_only": True},
+            )
+
+            identity = cls._schema_on_200.value.Element.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType(
+                flags={"required": True},
+            )
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.value.Element.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+
+            properties = cls._schema_on_200.value.Element.properties
+            properties.action_properties = AAZDictType(
+                serialized_name="actionProperties",
+            )
+            properties.actions = AAZListType()
+            properties.auto_mitigate = AAZBoolType(
+                serialized_name="autoMitigate",
+            )
+            properties.criteria = AAZObjectType(
+                flags={"required": True},
+            )
+            properties.custom_properties = AAZDictType(
+                serialized_name="customProperties",
+            )
+            properties.description = AAZStrType()
+            properties.enabled = AAZBoolType(
+                flags={"required": True},
+            )
+            properties.evaluation_frequency = AAZStrType(
+                serialized_name="evaluationFrequency",
+                flags={"required": True},
+            )
+            properties.is_migrated = AAZBoolType(
+                serialized_name="isMigrated",
+                flags={"read_only": True},
+            )
+            properties.last_updated_time = AAZStrType(
+                serialized_name="lastUpdatedTime",
+                flags={"read_only": True},
+            )
+            properties.resolve_configuration = AAZObjectType(
+                serialized_name="resolveConfiguration",
+            )
+            properties.scopes = AAZListType(
+                flags={"required": True},
+            )
+            properties.severity = AAZIntType(
+                flags={"required": True},
+            )
+            properties.target_resource_region = AAZStrType(
+                serialized_name="targetResourceRegion",
+            )
+            properties.target_resource_type = AAZStrType(
+                serialized_name="targetResourceType",
+            )
+            properties.window_size = AAZStrType(
+                serialized_name="windowSize",
+            )
+
+            action_properties = cls._schema_on_200.value.Element.properties.action_properties
+            action_properties.Element = AAZStrType()
+
+            actions = cls._schema_on_200.value.Element.properties.actions
+            actions.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.actions.Element
+            _element.action_group_id = AAZStrType(
+                serialized_name="actionGroupId",
+            )
+            _element.web_hook_properties = AAZDictType(
+                serialized_name="webHookProperties",
+            )
+
+            web_hook_properties = cls._schema_on_200.value.Element.properties.actions.Element.web_hook_properties
+            web_hook_properties.Element = AAZStrType()
+
+            criteria = cls._schema_on_200.value.Element.properties.criteria
+            criteria["odata.type"] = AAZStrType(
+                flags={"required": True},
+            )
+
+            disc_microsoft__azure__monitor__multiple_resource_multiple_metric_criteria = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria")
+            disc_microsoft__azure__monitor__multiple_resource_multiple_metric_criteria.all_of = AAZListType(
+                serialized_name="allOf",
+            )
+
+            all_of = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of
+            all_of.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of.Element
+            _element.criterion_type = AAZStrType(
+                serialized_name="criterionType",
+                flags={"required": True},
+            )
+            _element.dimensions = AAZListType()
+            _element.metric_name = AAZStrType(
+                serialized_name="metricName",
+                flags={"required": True},
+            )
+            _element.metric_namespace = AAZStrType(
+                serialized_name="metricNamespace",
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.skip_metric_validation = AAZBoolType(
+                serialized_name="skipMetricValidation",
+            )
+            _element.time_aggregation = AAZStrType(
+                serialized_name="timeAggregation",
+                flags={"required": True},
+            )
+
+            dimensions = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of.Element.dimensions
+            dimensions.Element = AAZObjectType()
+            _ListHelper._build_schema_metric_dimension_read(dimensions.Element)
+
+            disc_dynamic_threshold_criterion = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of.Element.discriminate_by("criterion_type", "DynamicThresholdCriterion")
+            disc_dynamic_threshold_criterion.alert_sensitivity = AAZStrType(
+                serialized_name="alertSensitivity",
+                flags={"required": True},
+            )
+            disc_dynamic_threshold_criterion.failing_periods = AAZObjectType(
+                serialized_name="failingPeriods",
+                flags={"required": True},
+            )
+            disc_dynamic_threshold_criterion.ignore_data_before = AAZStrType(
+                serialized_name="ignoreDataBefore",
+            )
+            disc_dynamic_threshold_criterion.operator = AAZStrType(
+                flags={"required": True},
+            )
+
+            failing_periods = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of.Element.discriminate_by("criterion_type", "DynamicThresholdCriterion").failing_periods
+            failing_periods.min_failing_periods_to_alert = AAZFloatType(
+                serialized_name="minFailingPeriodsToAlert",
+                flags={"required": True},
+            )
+            failing_periods.number_of_evaluation_periods = AAZFloatType(
+                serialized_name="numberOfEvaluationPeriods",
+                flags={"required": True},
+            )
+
+            disc_static_threshold_criterion = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.MultipleResourceMultipleMetricCriteria").all_of.Element.discriminate_by("criterion_type", "StaticThresholdCriterion")
+            disc_static_threshold_criterion.operator = AAZStrType(
+                flags={"required": True},
+            )
+            disc_static_threshold_criterion.threshold = AAZFloatType(
+                flags={"required": True},
+            )
+
+            disc_microsoft__azure__monitor__prom_ql_criteria = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria")
+            disc_microsoft__azure__monitor__prom_ql_criteria.all_of = AAZListType(
+                serialized_name="allOf",
+            )
+            disc_microsoft__azure__monitor__prom_ql_criteria.failing_periods = AAZObjectType(
+                serialized_name="failingPeriods",
+            )
+
+            all_of = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of
+            all_of.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of.Element
+            _element.criterion_type = AAZStrType(
+                serialized_name="criterionType",
+                flags={"required": True},
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.query = AAZStrType(
+                flags={"required": True},
+            )
+
+            disc_dynamic_threshold_criterion = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").all_of.Element.discriminate_by("criterion_type", "DynamicThresholdCriterion")
+            disc_dynamic_threshold_criterion.alert_sensitivity = AAZStrType(
+                serialized_name="alertSensitivity",
+                flags={"required": True},
+            )
+            disc_dynamic_threshold_criterion.ignore_data_before = AAZStrType(
+                serialized_name="ignoreDataBefore",
+            )
+            disc_dynamic_threshold_criterion.operator = AAZStrType(
+                flags={"required": True},
+            )
+
+            failing_periods = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.PromQLCriteria").failing_periods
+            failing_periods["for"] = AAZStrType(
+                flags={"required": True},
+            )
+
+            disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria")
+            disc_microsoft__azure__monitor__single_resource_multiple_metric_criteria.all_of = AAZListType(
+                serialized_name="allOf",
+            )
+
+            all_of = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria").all_of
+            all_of.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria").all_of.Element
+            _element.criterion_type = AAZStrType(
+                serialized_name="criterionType",
+                flags={"required": True},
+            )
+            _element.dimensions = AAZListType()
+            _element.metric_name = AAZStrType(
+                serialized_name="metricName",
+                flags={"required": True},
+            )
+            _element.metric_namespace = AAZStrType(
+                serialized_name="metricNamespace",
+            )
+            _element.name = AAZStrType(
+                flags={"required": True},
+            )
+            _element.operator = AAZStrType(
+                flags={"required": True},
+            )
+            _element.skip_metric_validation = AAZBoolType(
+                serialized_name="skipMetricValidation",
+            )
+            _element.threshold = AAZFloatType(
+                flags={"required": True},
+            )
+            _element.time_aggregation = AAZStrType(
+                serialized_name="timeAggregation",
+                flags={"required": True},
+            )
+
+            dimensions = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria").all_of.Element.dimensions
+            dimensions.Element = AAZObjectType()
+            _ListHelper._build_schema_metric_dimension_read(dimensions.Element)
+
+            disc_microsoft__azure__monitor__webtest_location_availability_criteria = cls._schema_on_200.value.Element.properties.criteria.discriminate_by("odata.type", "Microsoft.Azure.Monitor.WebtestLocationAvailabilityCriteria")
+            disc_microsoft__azure__monitor__webtest_location_availability_criteria.component_id = AAZStrType(
+                serialized_name="componentId",
+                flags={"required": True},
+            )
+            disc_microsoft__azure__monitor__webtest_location_availability_criteria.failed_location_count = AAZFloatType(
+                serialized_name="failedLocationCount",
+                flags={"required": True},
+            )
+            disc_microsoft__azure__monitor__webtest_location_availability_criteria.web_test_id = AAZStrType(
+                serialized_name="webTestId",
+                flags={"required": True},
+            )
+
+            custom_properties = cls._schema_on_200.value.Element.properties.custom_properties
+            custom_properties.Element = AAZStrType()
+
+            resolve_configuration = cls._schema_on_200.value.Element.properties.resolve_configuration
+            resolve_configuration.auto_resolved = AAZBoolType(
+                serialized_name="autoResolved",
+                flags={"required": True},
+            )
+            resolve_configuration.time_to_resolve = AAZStrType(
+                serialized_name="timeToResolve",
             )
 
             scopes = cls._schema_on_200.value.Element.properties.scopes

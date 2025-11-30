@@ -87,19 +87,19 @@ class Update(AAZCommand):
         self.LinkedStorageAccountsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def pre_instance_update(self, instance):
         pass
 
-    # @register_callback
+    @register_callback
     def post_instance_update(self, instance):
         pass
 
@@ -190,7 +190,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_linked_storage_accounts_resource_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_linked_storage_accounts_resource_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -289,7 +289,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_linked_storage_accounts_resource_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_linked_storage_accounts_resource_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -325,51 +325,53 @@ class Update(AAZCommand):
             )
 
 
-_schema_linked_storage_accounts_resource_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_linked_storage_accounts_resource_read = None
 
-def _build_schema_linked_storage_accounts_resource_read(_schema):
-    global _schema_linked_storage_accounts_resource_read
-    if _schema_linked_storage_accounts_resource_read is not None:
-        _schema.id = _schema_linked_storage_accounts_resource_read.id
-        _schema.name = _schema_linked_storage_accounts_resource_read.name
-        _schema.properties = _schema_linked_storage_accounts_resource_read.properties
-        _schema.type = _schema_linked_storage_accounts_resource_read.type
-        return
+    @classmethod
+    def _build_schema_linked_storage_accounts_resource_read(cls, _schema):
+        if cls._schema_linked_storage_accounts_resource_read is not None:
+            _schema.id = cls._schema_linked_storage_accounts_resource_read.id
+            _schema.name = cls._schema_linked_storage_accounts_resource_read.name
+            _schema.properties = cls._schema_linked_storage_accounts_resource_read.properties
+            _schema.type = cls._schema_linked_storage_accounts_resource_read.type
+            return
 
-    _schema_linked_storage_accounts_resource_read = AAZObjectType()
+        cls._schema_linked_storage_accounts_resource_read = _schema_linked_storage_accounts_resource_read = AAZObjectType()
 
-    linked_storage_accounts_resource_read = _schema_linked_storage_accounts_resource_read
-    linked_storage_accounts_resource_read.id = AAZStrType(
-        flags={"read_only": True},
-    )
-    linked_storage_accounts_resource_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    linked_storage_accounts_resource_read.properties = AAZObjectType(
-        flags={"required": True, "client_flatten": True},
-    )
-    linked_storage_accounts_resource_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        linked_storage_accounts_resource_read = _schema_linked_storage_accounts_resource_read
+        linked_storage_accounts_resource_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        linked_storage_accounts_resource_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        linked_storage_accounts_resource_read.properties = AAZObjectType(
+            flags={"required": True, "client_flatten": True},
+        )
+        linked_storage_accounts_resource_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    properties = _schema_linked_storage_accounts_resource_read.properties
-    properties.data_source_type = AAZStrType(
-        serialized_name="dataSourceType",
-        flags={"read_only": True},
-    )
-    properties.storage_account_ids = AAZListType(
-        serialized_name="storageAccountIds",
-        flags={"required": True},
-    )
+        properties = _schema_linked_storage_accounts_resource_read.properties
+        properties.data_source_type = AAZStrType(
+            serialized_name="dataSourceType",
+            flags={"read_only": True},
+        )
+        properties.storage_account_ids = AAZListType(
+            serialized_name="storageAccountIds",
+            flags={"required": True},
+        )
 
-    storage_account_ids = _schema_linked_storage_accounts_resource_read.properties.storage_account_ids
-    storage_account_ids.Element = AAZStrType()
+        storage_account_ids = _schema_linked_storage_accounts_resource_read.properties.storage_account_ids
+        storage_account_ids.Element = AAZStrType()
 
-    _schema.id = _schema_linked_storage_accounts_resource_read.id
-    _schema.name = _schema_linked_storage_accounts_resource_read.name
-    _schema.properties = _schema_linked_storage_accounts_resource_read.properties
-    _schema.type = _schema_linked_storage_accounts_resource_read.type
+        _schema.id = cls._schema_linked_storage_accounts_resource_read.id
+        _schema.name = cls._schema_linked_storage_accounts_resource_read.name
+        _schema.properties = cls._schema_linked_storage_accounts_resource_read.properties
+        _schema.type = cls._schema_linked_storage_accounts_resource_read.type
 
 
 __all__ = ["Update"]

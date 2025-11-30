@@ -116,19 +116,19 @@ class Update(AAZCommand):
         self.DataExportsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
-    # @register_callback
+    @register_callback
     def pre_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def post_operations(self):
         pass
 
-    # @register_callback
+    @register_callback
     def pre_instance_update(self, instance):
         pass
 
-    # @register_callback
+    @register_callback
     def post_instance_update(self, instance):
         pass
 
@@ -219,7 +219,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _build_schema_data_export_read(cls._schema_on_200)
+            _UpdateHelper._build_schema_data_export_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -318,7 +318,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _build_schema_data_export_read(cls._schema_on_200_201)
+            _UpdateHelper._build_schema_data_export_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
@@ -365,78 +365,80 @@ class Update(AAZCommand):
             )
 
 
-_schema_data_export_read = None
+class _UpdateHelper:
+    """Helper class for Update"""
 
+    _schema_data_export_read = None
 
-def _build_schema_data_export_read(_schema):
-    global _schema_data_export_read
-    if _schema_data_export_read is not None:
-        _schema.id = _schema_data_export_read.id
-        _schema.name = _schema_data_export_read.name
-        _schema.properties = _schema_data_export_read.properties
-        _schema.type = _schema_data_export_read.type
-        return
+    @classmethod
+    def _build_schema_data_export_read(cls, _schema):
+        if cls._schema_data_export_read is not None:
+            _schema.id = cls._schema_data_export_read.id
+            _schema.name = cls._schema_data_export_read.name
+            _schema.properties = cls._schema_data_export_read.properties
+            _schema.type = cls._schema_data_export_read.type
+            return
 
-    _schema_data_export_read = AAZObjectType()
+        cls._schema_data_export_read = _schema_data_export_read = AAZObjectType()
 
-    data_export_read = _schema_data_export_read
-    data_export_read.id = AAZStrType(
-        flags={"read_only": True},
-    )
-    data_export_read.name = AAZStrType(
-        flags={"read_only": True},
-    )
-    data_export_read.properties = AAZObjectType(
-        flags={"required": True, "client_flatten": True},
-    )
-    data_export_read.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        data_export_read = _schema_data_export_read
+        data_export_read.id = AAZStrType(
+            flags={"read_only": True},
+        )
+        data_export_read.name = AAZStrType(
+            flags={"read_only": True},
+        )
+        data_export_read.properties = AAZObjectType(
+            flags={"required": True, "client_flatten": True},
+        )
+        data_export_read.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    properties = _schema_data_export_read.properties
-    properties.created_date = AAZStrType(
-        serialized_name="createdDate",
-    )
-    properties.data_export_id = AAZStrType(
-        serialized_name="dataExportId",
-    )
-    properties.destination = AAZObjectType(
-        flags={"required": True},
-    )
-    properties.enable = AAZBoolType()
-    properties.last_modified_date = AAZStrType(
-        serialized_name="lastModifiedDate",
-    )
-    properties.table_names = AAZListType(
-        serialized_name="tableNames",
-        flags={"required": True},
-    )
+        properties = _schema_data_export_read.properties
+        properties.created_date = AAZStrType(
+            serialized_name="createdDate",
+        )
+        properties.data_export_id = AAZStrType(
+            serialized_name="dataExportId",
+        )
+        properties.destination = AAZObjectType(
+            flags={"required": True},
+        )
+        properties.enable = AAZBoolType()
+        properties.last_modified_date = AAZStrType(
+            serialized_name="lastModifiedDate",
+        )
+        properties.table_names = AAZListType(
+            serialized_name="tableNames",
+            flags={"required": True},
+        )
 
-    destination = _schema_data_export_read.properties.destination
-    destination.meta_data = AAZObjectType(
-        serialized_name="metaData",
-        flags={"client_flatten": True},
-    )
-    destination.resource_id = AAZStrType(
-        serialized_name="resourceId",
-        flags={"required": True},
-    )
-    destination.type = AAZStrType(
-        flags={"read_only": True},
-    )
+        destination = _schema_data_export_read.properties.destination
+        destination.meta_data = AAZObjectType(
+            serialized_name="metaData",
+            flags={"client_flatten": True},
+        )
+        destination.resource_id = AAZStrType(
+            serialized_name="resourceId",
+            flags={"required": True},
+        )
+        destination.type = AAZStrType(
+            flags={"read_only": True},
+        )
 
-    meta_data = _schema_data_export_read.properties.destination.meta_data
-    meta_data.event_hub_name = AAZStrType(
-        serialized_name="eventHubName",
-    )
+        meta_data = _schema_data_export_read.properties.destination.meta_data
+        meta_data.event_hub_name = AAZStrType(
+            serialized_name="eventHubName",
+        )
 
-    table_names = _schema_data_export_read.properties.table_names
-    table_names.Element = AAZStrType()
+        table_names = _schema_data_export_read.properties.table_names
+        table_names.Element = AAZStrType()
 
-    _schema.id = _schema_data_export_read.id
-    _schema.name = _schema_data_export_read.name
-    _schema.properties = _schema_data_export_read.properties
-    _schema.type = _schema_data_export_read.type
+        _schema.id = cls._schema_data_export_read.id
+        _schema.name = cls._schema_data_export_read.name
+        _schema.properties = cls._schema_data_export_read.properties
+        _schema.type = cls._schema_data_export_read.type
 
 
 __all__ = ["Update"]
