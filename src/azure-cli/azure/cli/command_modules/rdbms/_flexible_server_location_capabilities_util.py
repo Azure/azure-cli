@@ -16,10 +16,10 @@ def get_postgres_location_capability_info(cmd, location):
     return _postgres_parse_list_capability(list_location_capability_result)
 
 
-def get_postgres_server_capability_info(cmd, resource_group, server_name):
+def get_postgres_server_capability_info(cmd, resource_group, server_name, is_mvu=False):
     list_server_capability_client = cf_postgres_flexible_server_capabilities(cmd.cli_ctx, '_')
     list_server_capability_result = list_server_capability_client.list(resource_group_name=resource_group, server_name=server_name)
-    return _postgres_parse_list_capability(list_server_capability_result)
+    return _postgres_parse_list_capability(list_server_capability_result, is_mvu)
 
 
 def get_performance_tiers_for_storage(storage_edition, storage_size):
@@ -41,7 +41,7 @@ def get_performance_tiers(storage_edition):
     return performance_tiers
 
 
-def _postgres_parse_list_capability(result):
+def _postgres_parse_list_capability(result, is_mvu=False):
     result = _get_list_from_paged_response(result)
 
     if not result:
@@ -54,10 +54,10 @@ def _postgres_parse_list_capability(result):
     geo_backup = [feature for feature in supported_features if feature.name == "GeoBackup"]
     index_tuning = [feature for feature in supported_features if feature.name == "IndexTuning"]
 
-    if restricted == "Enabled":
+    if restricted == "Enabled" and not is_mvu:
         raise InvalidArgumentValueError("The location is restricted for provisioning of flexible servers. Please try using another region.")
 
-    if restricted != "Disabled":
+    if restricted != "Disabled" and not is_mvu:
         raise InvalidArgumentValueError("No available SKUs in this location.")
 
     single_az = zone_redundant[0].status != "Enabled" if zone_redundant else True
