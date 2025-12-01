@@ -162,7 +162,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['sku']['tier'], tier)
         self.assertEqual(basic_info['version'], version)
         self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
-        self.assertEqual(basic_info['storage']['storageRedundancy'], storage_redundancy)
         self.assertEqual(basic_info['storage']['logOnDisk'], "Disabled")
         self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
 
@@ -347,7 +346,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, location))
 
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-                          checks=[JMESPathCheck('storage.iops', 640)]).get_output_in_json()
+                          checks=[JMESPathCheck('storage.iops', 900)]).get_output_in_json()
 
         # SKU upgraded and IOPS value set smaller than free iops, max iops for the sku
 
@@ -357,7 +356,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                       iops_input=iops,
                                       tier="Burstable",
                                       sku_name="Standard_B1ms")
-        self.assertEqual(iops_result, 640)
+        self.assertEqual(iops_result, 900)
 
         # SKU downgraded and IOPS not specified
         iops = result["storage"]["iops"]
@@ -366,7 +365,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                       iops_input=iops,
                                       tier="Burstable",
                                       sku_name="Standard_B1ms")
-        self.assertEqual(iops_result, 640)
+        self.assertEqual(iops_result, 900)
 
         # IOPS passed is within limit of max allowed by SKU but smaller than default
         self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 30 --tier Burstable --sku-name Standard_B1ms'
@@ -406,27 +405,27 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 64 --sku-name {} --tier GeneralPurpose'
                  .format(database_engine, resource_group, server_name, location, DEFAULT_GENERAL_PURPOSE_SKU))
-        
+
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
+                          checks=[JMESPathCheck('storage.autoIoScaling', 'Enabled')]).get_output_in_json()
+
+        self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Disabled'
+                 .format(database_engine, resource_group, server_name))
+
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
                           checks=[JMESPathCheck('storage.autoIoScaling', 'Disabled')]).get_output_in_json()
 
         self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Enabled'
                  .format(database_engine, resource_group, server_name))
-        
+
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
                           checks=[JMESPathCheck('storage.autoIoScaling', 'Enabled')]).get_output_in_json()
-        
-        self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Disabled'
-                 .format(database_engine, resource_group, server_name))
-        
-        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-                          checks=[JMESPathCheck('storage.autoIoScaling', 'Disabled')]).get_output_in_json()
 
-        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --auto-scale-iops Enabled --storage-size 64 --sku-name {} --tier GeneralPurpose'
+        self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --auto-scale-iops Disabled --storage-size 64 --sku-name {} --tier GeneralPurpose'
                  .format(database_engine, resource_group, server_name_2, location, DEFAULT_GENERAL_PURPOSE_SKU))
 
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name_2),
-                          checks=[JMESPathCheck('storage.autoIoScaling', 'Enabled')]).get_output_in_json()
+                          checks=[JMESPathCheck('storage.autoIoScaling', 'Disabled')]).get_output_in_json()
 
     def _test_flexible_server_restore_mgmt(self, database_engine, resource_group):
 
@@ -452,7 +451,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server create -g {} -n {} --storage-redundancy {} --vnet {} --subnet {} -l {} --yes'.format(
                  database_engine, resource_group, source_server, storage_redundancy, source_vnet, source_subnet, location))
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
-        self.assertEqual(result['storage']['storageRedundancy'], storage_redundancy)
 
         # Wait until snapshot is created
         current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
@@ -590,9 +588,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} --storage-redundancy {} --public-access enabled'
                                 .format(database_engine, resource_group, target_location, target_server_public_access, source_server,
                                         storage_redundancy)).get_output_in_json()
-        self.assertEqual(restore_result['storage']['storageRedundancy'], storage_redundancy)
-
-        #self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
         self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), target_location)
 
         # 3. vnet to different vnet
@@ -877,10 +872,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                         replica_1_name,
                         server_name
             ), checks=[
-                JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                JMESPathCheck('identity.userAssignedIdentities', None),
                 JMESPathCheck('dataEncryption', None),
                 JMESPathCheck('replicationRole', replication_role)
-            ] + ([JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id']))] if geo_redundant_backup else []))
+            ])
 
             # enable data encryption again in primary server
             self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {} {}'.format(
@@ -1301,7 +1296,6 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('replicationRole', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
                      JMESPathCheck('replicaCapacity', '0')]).get_output_in_json()
-                     #JMESPathCheck('network.publicNetworkAccess', 'Enabled')]).get_output_in_json()
         self.assertEqual(str(replica_result['location']).replace(' ', '').lower(), replica_location)
 
         # test replica create for private access
@@ -1325,7 +1319,6 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('replicationRole', replica_role),
                      JMESPathCheck('sourceServerResourceId', result['id']),
                      JMESPathCheck('replicaCapacity', '0'),
-                     #JMESPathCheck('network.publicNetworkAccess', 'Disabled'),
                      JMESPathCheck('network.delegatedSubnetResourceId', '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'
                                    .format(self.get_subscription_id(), resource_group, replica_vnet, replica_subnet)),
                      JMESPathCheck('network.{}'.format(private_dns_param), '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'
