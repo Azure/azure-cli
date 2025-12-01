@@ -6386,11 +6386,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             # Fallback: Get runtimes from additional_properties (java*Runtime keys)
             for key, value in additional_props.items():
                 # Match pattern like "java25Runtime", "java21Runtime", etc.
-                if key.startswith('java') and key.endswith('Runtime') and value:
-                    # Extract version number from key (e.g., "25" from "java25Runtime")
-                    version = key[4:-7]  # Remove "java" prefix and "Runtime" suffix
-                    if version.isdigit():
-                        runtimes.append((value, version, is_auto_update))
+                match = re.match(r'^java(\d+)Runtime$', key)
+                if match and value:
+                    version = match.group(1)
+                    runtimes.append((value, version, is_auto_update))
 
             # Also get runtimes from SDK-defined properties (java8_runtime, java11_runtime)
             if getattr(container_settings, 'java11_runtime', None):
@@ -6496,7 +6495,7 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             se_containers = [minor_java_container_versions[0]] if minor_java_container_versions else []
             for java in java_versions:
                 se_java_containers = [c for c in minor_java_container_versions if c.value.startswith(java)]
-                se_containers = se_containers + se_java_containers[:len(se_java_containers) if len(se_java_containers) < 2 else 2]    # pylint: disable=line-too-long
+                se_containers = se_containers + se_java_containers[:min(len(se_java_containers), 2)]
             minor_java_container_versions = se_containers
         if minor_java_container_versions:
             leng = len(minor_java_container_versions) if \
