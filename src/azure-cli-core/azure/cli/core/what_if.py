@@ -44,6 +44,7 @@ def _get_auth_headers(cli_ctx, subscription_id):
 
 def _make_what_if_request(payload, headers_dict, cli_ctx=None):
     request_completed = threading.Event()
+    progress_lock = threading.Lock()
 
     def _rotating_progress():
         """Simulate a rotating progress indicator."""
@@ -73,8 +74,22 @@ def _make_what_if_request(payload, headers_dict, cli_ctx=None):
 
         idx = 0
         start_time = time.time()
+        
+        is_tty = hasattr(sys.stderr, 'isatty') and sys.stderr.isatty()
+        
+        if not is_tty:
+            sys.stderr.write("Processing")
+            sys.stderr.flush()
+            while not request_completed.is_set():
+                if request_completed.wait(timeout=1.0):
+                    break
+                sys.stderr.write(".")
+                sys.stderr.flush()
+            sys.stderr.write(" Done\n")
+            sys.stderr.flush()
+            return
 
-        # Simulate different stages, can be improved with real stages if available
+        last_line_length = 0
         while not request_completed.is_set():
             elapsed = time.time() - start_time
             if elapsed < 10:
@@ -97,13 +112,22 @@ def _make_what_if_request(payload, headers_dict, cli_ctx=None):
             if visible_length > max_width:
                 truncated_status = status[:max_width - 30] + "..."
                 progress_line = f"{spinner} {truncated_status} {elapsed_str}"
-            sys.stderr.write(f"\r{' ' * 120}\r{progress_line}")
-            sys.stderr.flush()
+            
+            with progress_lock:
+                clear_spaces = ' ' * max(last_line_length, 120)
+                sys.stderr.write(f"\r{clear_spaces}\r{progress_line}")
+                sys.stderr.flush()
+                last_line_length = len(progress_line)
+            
             idx += 1
-            time.sleep(0.12)
-        clear_line = f"\r{' ' * 120}\r"
-        sys.stderr.write(clear_line)
-        sys.stderr.flush()
+            if request_completed.wait(timeout=0.12):
+                break
+        
+        with progress_lock:
+            if is_tty:
+                clear_spaces = ' ' * max(last_line_length, 120)
+                sys.stderr.write(f"\r{clear_spaces}\r")
+                sys.stderr.flush()
 
     try:
         function_app_url = "https://azcli-script-insight.azurewebsites.net"
@@ -119,15 +143,33 @@ def _make_what_if_request(payload, headers_dict, cli_ctx=None):
         prepared = session.prepare_request(req)
         response = session.send(prepared)
         logger.debug("response: %s", response)
+        
         request_completed.set()
-        progress_thread.join(timeout=0.5)
+        progress_thread.join(timeout=1.0)
+        
+        try:
+            with progress_lock:
+                if hasattr(sys.stderr, 'isatty') and sys.stderr.isatty():
+                    sys.stderr.write("\r" + " " * 120 + "\r")
+                    sys.stderr.flush()
+        except:
+            pass
 
         return response
 
     except Exception as ex:
         request_completed.set()
         if 'progress_thread' in locals():
-            progress_thread.join(timeout=0.5)
+            progress_thread.join(timeout=1.0)
+        
+        try:
+            with progress_lock:
+                if hasattr(sys.stderr, 'isatty') and sys.stderr.isatty():
+                    sys.stderr.write("\r" + " " * 120 + "\r")
+                    sys.stderr.flush()
+        except:
+            pass
+            
         raise CLIError(f"Failed to connect to the what-if service: {ex}")
 
 
