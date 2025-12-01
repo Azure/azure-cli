@@ -79,3 +79,42 @@ class TestCoreTelemetry(unittest.TestCase):
         self.assertEqual(session.command, "")
         self.assertEqual(session.parameters, ["--version"])
         self.assertIsNone(session.raw_command)
+
+    @mock.patch('azure.cli.core.util.get_az_version_string')
+    def test_command_preserve_casing_telemetry(self, mock_get_version):
+        """Test telemetry captures command preserve casing during actual command invocation."""
+        from azure.cli.core import telemetry
+        from azure.cli.core.mock import DummyCli
+        from knack.completion import ARGCOMPLETE_ENV_NAME
+
+        mock_get_version.return_value = ("azure-cli 2.80.0", ["core", "extension1"])
+
+        test_cases = [
+            (["version"], "version"),
+            (["VERSION"], "VERSION"),
+            (["vm", "list"], "vm list"),
+            (["Vm", "List"], "Vm List"),
+        ]
+
+        for command_args, expected_casing in test_cases:
+            with self.subTest(command_args=command_args):
+                cli = DummyCli()
+                telemetry.set_application(cli, ARGCOMPLETE_ENV_NAME)
+                telemetry.start()
+
+                try:
+                    cli.invoke(command_args)
+                except SystemExit:
+                    pass
+                except Exception:
+                    pass
+
+                # Verify the telemetry session preserves casing
+                session = telemetry._session
+                self.assertEqual(session.command_preserve_casing, expected_casing)
+
+                azure_cli_props = session._get_azure_cli_properties()
+
+                self.assertIn('Context.Default.AzureCLI.CommandPreserveCasing', azure_cli_props)
+                self.assertEqual(azure_cli_props['Context.Default.AzureCLI.CommandPreserveCasing'], 
+                                 expected_casing)
