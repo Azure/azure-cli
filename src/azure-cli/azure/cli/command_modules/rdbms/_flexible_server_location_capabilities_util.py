@@ -15,6 +15,7 @@ def get_postgres_location_capability_info(cmd, location, is_offer_restriction_ch
     list_location_capability_result = list_location_capability_client.execute(location)
     return _postgres_parse_list_capability(list_location_capability_result, is_offer_restriction_check_required)
 
+
 def get_postgres_server_capability_info(cmd, resource_group, server_name, is_offer_restriction_check_required=False):
     list_server_capability_client = cf_postgres_flexible_server_capabilities(cmd.cli_ctx, '_')
     list_server_capability_result = list_server_capability_client.list(resource_group_name=resource_group, server_name=server_name)
