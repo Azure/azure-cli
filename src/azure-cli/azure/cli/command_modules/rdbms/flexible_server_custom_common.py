@@ -300,7 +300,7 @@ def flexible_server_version_upgrade(cmd, client, resource_group_name, server_nam
     if current_version >= int(version):
         raise CLIError("The version to upgrade to must be greater than the current version.")
 
-    list_server_capability_info = get_postgres_server_capability_info(cmd, resource_group_name, server_name, is_offer_restriction_check_required=True)
+    list_server_capability_info = get_postgres_server_capability_info(cmd, resource_group_name, server_name)
     eligible_versions = list_server_capability_info['supported_server_versions'][str(current_version)]
 
     if version == '13':
