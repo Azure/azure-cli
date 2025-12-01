@@ -706,16 +706,29 @@ class AzCliCommandInvoker(CommandInvoker):
             if not self._is_command_supported_for_what_if(args):
                 error_msg = ("\"--what-if\" argument is not supported for this command.")
                 logger.error(error_msg)
+                telemetry.set_user_fault(summary='what-if-unsupported-command')
+                telemetry.set_failure(summary='what-if-unsupported-command')
                 return CommandResultItem(None, exit_code=1, error=CLIError(error_msg))
             
             from azure.cli.core.what_if import show_what_if
+            
+            # Remove both --what-if and --export-bicep from args for processing
+            clean_args = [arg for arg in args if arg not in ['--what-if', '--export-bicep']]
+            command_parts = [arg for arg in clean_args if not arg.startswith('-') and arg != 'az']
+            command_name = ' '.join(command_parts) if command_parts else 'unknown'
+            
+            # Check if --export-bicep is present
+            export_bicep = '--export-bicep' in args
+            safe_params = AzCliCommandInvoker._extract_parameter_names(args)
+            
+            telemetry.set_command_details(
+                command_name + ' --what-if',
+                self.data.get('output', 'json'),
+                safe_params
+            )
+            telemetry.set_custom_properties('what-if', 'export_bicep', str(export_bicep))
+            
             try:
-                # Check if --export-bicep is present
-                export_bicep = '--export-bicep' in args
-                
-                # Remove both --what-if and --export-bicep from args for processing
-                clean_args = [arg for arg in args if arg not in ['--what-if', '--export-bicep']]
-                
                 if export_bicep:
                     logger.debug("Export bicep mode enabled")
                 
@@ -747,14 +760,15 @@ class AzCliCommandInvoker(CommandInvoker):
                     for file_path in bicep_files:
                         print_styled_text((Style.WARNING, f"  {file_path}"))
                     print("")
+                    telemetry.set_custom_properties('what-if', 'bicep_files_count', str(len(bicep_files)))
                 
                 # Ensure output format is set for proper formatting
                 # Default to 'json' if not already set
                 if 'output' not in self.cli_ctx.invocation.data or self.cli_ctx.invocation.data['output'] is None:
                     self.cli_ctx.invocation.data['output'] = 'json'
 
-                # Return the formatted what-if output as the result
-                # Similar to the normal flow in execute() method
+                telemetry.set_success(summary='what-if-completed')
+                
                 return CommandResultItem(
                     what_if_result,
                     table_transformer=None,
@@ -762,8 +776,9 @@ class AzCliCommandInvoker(CommandInvoker):
                     exit_code=0
                 )
             except (CLIError, ValueError, KeyError) as ex:
-                # If what-if service fails, still show an informative message
                 logger.error("What-if preview failed: %s", str(ex))
+                telemetry.set_exception(ex, fault_type='what-if-error', summary=str(ex)[:100])
+                telemetry.set_failure(summary='what-if-failed')
                 return CommandResultItem(None, exit_code=1,
                                          error=CLIError(f'What-if preview failed: {str(ex)}'))
 

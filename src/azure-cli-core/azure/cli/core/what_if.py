@@ -43,96 +43,54 @@ def _get_auth_headers(cli_ctx, subscription_id):
 
 
 def _make_what_if_request(payload, headers_dict, cli_ctx=None):
+    from azure.cli.core.commands.progress import IndeterminateProgressBar
+    import os
+    
     request_completed = threading.Event()
-    progress_lock = threading.Lock()
+    progress_bar = None
+    
+    disable_progress = os.environ.get('AZURE_CLI_DISABLE_PROGRESS_BAR') or \
+                       (cli_ctx and cli_ctx.config.getboolean('core', 'disable_progress_bar', False))
 
-    def _rotating_progress():
-        """Simulate a rotating progress indicator."""
-        spinner_chars = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
-        fallback_chars = ["|", "\\", "/", "-"]
-
-        try:
-            "⠋".encode(sys.stderr.encoding or 'utf-8')
-            chars = spinner_chars
-        except (UnicodeEncodeError, UnicodeDecodeError, LookupError):
-            chars = fallback_chars
-
-        use_color = cli_ctx and getattr(cli_ctx, 'enable_color', False)
-        if use_color:
-            try:
-                CYAN = '\033[36m'
-                GREEN = '\033[32m'
-                YELLOW = '\033[33m'
-                BLUE = '\033[34m'
-                RESET = '\033[0m'
-                BOLD = '\033[1m'
-            except (UnicodeError, AttributeError):
-                use_color = False
-
-        if not use_color:
-            CYAN = GREEN = YELLOW = BLUE = RESET = BOLD = ''
-
-        idx = 0
-        start_time = time.time()
-        
-        is_tty = hasattr(sys.stderr, 'isatty') and sys.stderr.isatty()
-        
-        if not is_tty:
-            sys.stderr.write("Processing")
-            sys.stderr.flush()
-            while not request_completed.is_set():
-                if request_completed.wait(timeout=1.0):
-                    break
-                sys.stderr.write(".")
-                sys.stderr.flush()
-            sys.stderr.write(" Done\n")
-            sys.stderr.flush()
+    def _update_progress():
+        """Update progress with different status messages."""
+        if disable_progress or not progress_bar:
             return
-
-        last_line_length = 0
+            
+        start_time = time.time()
+        messages = [
+            (0, "Connecting to what-if service"),
+            (10, "Analyzing Azure CLI script"),
+            (30, "Processing what-if analysis"),
+            (60, "Finalizing results")
+        ]
+        
+        current_message_idx = 0
         while not request_completed.is_set():
             elapsed = time.time() - start_time
-            if elapsed < 10:
-                status = f"{CYAN}Connecting to what-if service{RESET}"
-                spinner_color = CYAN
-            elif elapsed < 30:
-                status = f"{BLUE}Analyzing Azure CLI script{RESET}"
-                spinner_color = BLUE
-            elif elapsed < 60:
-                status = f"{YELLOW}Processing what-if analysis{RESET}"
-                spinner_color = YELLOW
-            else:
-                status = f"{GREEN}Finalizing results{RESET}"
-                spinner_color = GREEN
-            elapsed_str = f"{BOLD}({elapsed:.0f}s){RESET}"
-            spinner = f"{spinner_color}{chars[idx % len(chars)]}{RESET}"
-            progress_line = f"{spinner} {status}... {elapsed_str}"
-            visible_length = len(progress_line) - (progress_line.count('\033[') * 5)
-            max_width = 100
-            if visible_length > max_width:
-                truncated_status = status[:max_width - 30] + "..."
-                progress_line = f"{spinner} {truncated_status} {elapsed_str}"
             
-            with progress_lock:
-                clear_spaces = ' ' * max(last_line_length, 120)
-                sys.stderr.write(f"\r{clear_spaces}\r{progress_line}")
-                sys.stderr.flush()
-                last_line_length = len(progress_line)
+            for idx, (threshold, message) in enumerate(messages):
+                if elapsed >= threshold and idx > current_message_idx:
+                    current_message_idx = idx
+                    try:
+                        progress_bar.update_progress_with_msg(message)
+                    except:
+                        pass
             
-            idx += 1
-            if request_completed.wait(timeout=0.12):
+            if request_completed.wait(timeout=1.0):
                 break
-        
-        with progress_lock:
-            if is_tty:
-                clear_spaces = ' ' * max(last_line_length, 120)
-                sys.stderr.write(f"\r{clear_spaces}\r")
-                sys.stderr.flush()
 
     try:
         function_app_url = "https://azcli-script-insight.azurewebsites.net"
 
-        progress_thread = threading.Thread(target=_rotating_progress)
+        if not disable_progress and cli_ctx:
+            try:
+                progress_bar = IndeterminateProgressBar(cli_ctx, message="Connecting to what-if service")
+                progress_bar.begin()
+            except:
+                progress_bar = None
+        
+        progress_thread = threading.Thread(target=_update_progress)
         progress_thread.daemon = True
         progress_thread.start()
 
@@ -147,13 +105,11 @@ def _make_what_if_request(payload, headers_dict, cli_ctx=None):
         request_completed.set()
         progress_thread.join(timeout=1.0)
         
-        try:
-            with progress_lock:
-                if hasattr(sys.stderr, 'isatty') and sys.stderr.isatty():
-                    sys.stderr.write("\r" + " " * 120 + "\r")
-                    sys.stderr.flush()
-        except:
-            pass
+        if progress_bar:
+            try:
+                progress_bar.end()
+            except:
+                pass
 
         return response
 
@@ -162,13 +118,11 @@ def _make_what_if_request(payload, headers_dict, cli_ctx=None):
         if 'progress_thread' in locals():
             progress_thread.join(timeout=1.0)
         
-        try:
-            with progress_lock:
-                if hasattr(sys.stderr, 'isatty') and sys.stderr.isatty():
-                    sys.stderr.write("\r" + " " * 120 + "\r")
-                    sys.stderr.flush()
-        except:
-            pass
+        if progress_bar:
+            try:
+                progress_bar.stop()
+            except:
+                pass
             
         raise CLIError(f"Failed to connect to the what-if service: {ex}")
 
