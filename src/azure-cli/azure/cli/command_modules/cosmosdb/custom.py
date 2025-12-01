@@ -73,7 +73,12 @@ from azure.mgmt.cosmosdb.models import (
     ServiceType,
     MongoRoleDefinitionCreateUpdateParameters,
     MongoUserDefinitionCreateUpdateParameters,
-    RegionForOnlineOffline
+    RegionForOnlineOffline,
+    FleetResource,
+    FleetspaceResource,
+    FleetspacePropertiesThroughputPoolConfiguration,
+    FleetspaceAccountResource,
+    FleetspaceAccountPropertiesGlobalDatabaseAccountProperties
 )
 
 logger = get_logger(__name__)
@@ -143,7 +148,9 @@ def cli_cosmosdb_create(cmd,
                         enable_partition_merge=None,
                         enable_burst_capacity=None,
                         enable_prpp_autoscale=None,
-                        minimal_tls_version=None):
+                        minimal_tls_version=None,
+                        enable_pbe=None,
+                        default_priority_level=None):
     """Create a new Azure Cosmos DB database account."""
 
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
@@ -199,7 +206,9 @@ def cli_cosmosdb_create(cmd,
                                     enable_partition_merge=enable_partition_merge,
                                     enable_burst_capacity=enable_burst_capacity,
                                     enable_prpp_autoscale=enable_prpp_autoscale,
-                                    minimal_tls_version=minimal_tls_version)
+                                    minimal_tls_version=minimal_tls_version,
+                                    enable_pbe=enable_pbe,
+                                    default_priority_level=default_priority_level)
 
 
 # pylint: disable=too-many-statements
@@ -246,7 +255,10 @@ def _create_database_account(client,
                              enable_burst_capacity=None,
                              enable_prpp_autoscale=None,
                              minimal_tls_version=None,
-                             disable_ttl=None):
+                             disable_ttl=None,
+                             enable_pbe=None,
+                             default_priority_level=None,
+                             source_backup_location=None):
 
     consistency_policy = None
     if default_consistency_level is not None:
@@ -384,7 +396,10 @@ def _create_database_account(client,
         enable_partition_merge=enable_partition_merge,
         enable_burst_capacity=enable_burst_capacity,
         enable_per_region_per_partition_autoscale=enable_prpp_autoscale,
-        minimal_tls_version=minimal_tls_version
+        minimal_tls_version=minimal_tls_version,
+        enable_pbe=enable_pbe,
+        default_priority_level=default_priority_level,
+        source_backup_location=source_backup_location
     )
 
     async_docdb_create = client.begin_create_or_update(resource_group_name, account_name, params)
@@ -425,7 +440,9 @@ def cli_cosmosdb_update(client,
                         enable_partition_merge=None,
                         enable_burst_capacity=None,
                         enable_prpp_autoscale=None,
-                        minimal_tls_version=None):
+                        minimal_tls_version=None,
+                        enable_pbe=None,
+                        default_priority_level=None):
     """Update an existing Azure Cosmos DB database account. """
     existing = client.get(resource_group_name, account_name)
 
@@ -523,7 +540,9 @@ def cli_cosmosdb_update(client,
         enable_partition_merge=enable_partition_merge,
         enable_burst_capacity=enable_burst_capacity,
         enable_per_region_per_partition_autoscale=enable_prpp_autoscale,
-        minimal_tls_version=minimal_tls_version)
+        minimal_tls_version=minimal_tls_version,
+        enable_pbe=enable_pbe,
+        default_priority_level=default_priority_level)
 
     async_docdb_update = client.begin_update(resource_group_name, account_name, params)
     docdb_account = async_docdb_update.result()
@@ -1830,7 +1849,8 @@ def cli_cosmosdb_restore(cmd,
                          gremlin_databases_to_restore=None,
                          tables_to_restore=None,
                          public_network_access=None,
-                         disable_ttl=None):
+                         disable_ttl=None,
+                         source_backup_location=None):
     from azure.cli.command_modules.cosmosdb._client_factory import cf_restorable_database_accounts
     restorable_database_accounts_client = cf_restorable_database_accounts(cmd.cli_ctx, [])
     restorable_database_accounts = restorable_database_accounts_client.list()
@@ -1880,7 +1900,8 @@ def cli_cosmosdb_restore(cmd,
                                     tables_to_restore=tables_to_restore,
                                     arm_location=target_restorable_account.location,
                                     public_network_access=public_network_access,
-                                    disable_ttl=disable_ttl)
+                                    disable_ttl=disable_ttl,
+                                    source_backup_location=source_backup_location)
 
 
 def _convert_to_utc_timestamp(timestamp_string):
@@ -3494,4 +3515,126 @@ def cli_offline_region(client,
         resource_group_name=resource_group_name,
         account_name=account_name,
         region_parameter_for_offline=region_parameter_for_offline
+    )
+
+
+def cli_cosmosdb_fleet_create(client,
+                              resource_group_name,
+                              fleet_name,
+                              location,
+                              tags=None):
+    """Creates an Azure Cosmos DB Fleet."""
+
+    fleet_parameters = FleetResource(location=location)
+
+    if tags:
+        fleet_parameters.tags = tags
+
+    return client.create(
+        resource_group_name=resource_group_name,
+        fleet_name=fleet_name,
+        body=fleet_parameters)
+
+
+def cli_list_cosmosdb_fleets(client, resource_group_name=None):
+    """Lists Azure Cosmos DB Fleets."""
+    if resource_group_name:
+        return client.list_by_resource_group(resource_group_name=resource_group_name)
+    return client.list()
+
+
+def cli_cosmosdb_fleetspace_create(client,
+                                   resource_group_name,
+                                   fleet_name,
+                                   fleetspace_name,
+                                   fleetspace_body):
+
+    """Creates an Azure Cosmos DB Fleetspace."""
+
+    # Extract service_tier and data_regions from base level (mandatory for create)
+    service_tier = fleetspace_body['properties'].get('serviceTier')
+    data_regions = fleetspace_body['properties'].get('dataRegions')
+
+    if not service_tier:
+        raise CLIError('Missing required field "serviceTier" in properties.')
+
+    if not data_regions:
+        raise CLIError('Missing required field "dataRegions" in properties.')
+
+    throughput_pool_config = FleetspacePropertiesThroughputPoolConfiguration(
+        min_throughput=fleetspace_body['properties']['throughputPoolConfiguration']['minThroughput'],
+        max_throughput=fleetspace_body['properties']['throughputPoolConfiguration']['maxThroughput']
+    )
+
+    fleetspace_resource = FleetspaceResource(
+        fleetspace_api_kind="NoSQL",
+        throughput_pool_configuration=throughput_pool_config,
+        service_tier=service_tier,
+        data_regions=data_regions
+    )
+
+    return client.begin_create(
+        resource_group_name=resource_group_name,
+        fleet_name=fleet_name,
+        fleetspace_name=fleetspace_name,
+        body=fleetspace_resource
+    )
+
+
+def cli_cosmosdb_fleetspace_update(client,
+                                   resource_group_name,
+                                   fleet_name,
+                                   fleetspace_name,
+                                   fleetspace_body):
+
+    """Updates an existing Azure Cosmos DB Fleetspace."""
+
+    # Extract service_tier and data_regions from base level (optional for update)
+    service_tier = fleetspace_body['properties'].get('serviceTier')
+    data_regions = fleetspace_body['properties'].get('dataRegions')
+
+    throughput_pool_config = FleetspacePropertiesThroughputPoolConfiguration(
+        min_throughput=fleetspace_body['properties']['throughputPoolConfiguration']['minThroughput'],
+        max_throughput=fleetspace_body['properties']['throughputPoolConfiguration']['maxThroughput']
+    )
+
+    fleetspace_resource = FleetspaceResource(
+        fleetspace_api_kind="NoSQL",
+        throughput_pool_configuration=throughput_pool_config,
+        service_tier=service_tier,
+        data_regions=data_regions
+    )
+
+    return client.begin_update(
+        resource_group_name=resource_group_name,
+        fleet_name=fleet_name,
+        fleetspace_name=fleetspace_name,
+        body=fleetspace_resource
+    )
+
+
+def cli_cosmosdb_fleetspace_account_create(client,
+                                           resource_group_name,
+                                           fleet_name,
+                                           fleetspace_name,
+                                           fleetspace_account_name,
+                                           fleetspace_account_body):
+
+    """Creates an Azure Cosmos DB Fleetspace Account."""
+
+    fleetspaceAccountPropertiesGlobalDatabaseAccountProperties = FleetspaceAccountPropertiesGlobalDatabaseAccountProperties(
+        resource_id=fleetspace_account_body['properties']['globalDatabaseAccountProperties']['resourceId'],
+        arm_location=fleetspace_account_body['properties']['globalDatabaseAccountProperties']['armLocation'],
+    )
+
+    fleetspace_account_body = FleetspaceAccountResource(
+        global_database_account_properties=fleetspaceAccountPropertiesGlobalDatabaseAccountProperties
+    )
+
+    return client.begin_create(
+        resource_group_name=resource_group_name,
+        fleet_name=fleet_name,
+        fleetspace_name=fleetspace_name,
+        fleetspace_account_name=fleetspace_account_name,
+        body=fleetspace_account_body
     )
