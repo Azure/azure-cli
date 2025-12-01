@@ -45,6 +45,12 @@ def _make_what_if_request(payload, headers_dict, cli_ctx=None):
 
     def _rotating_progress():
         """Simulate a rotating progress indicator."""
+        # Check if stderr supports interactive output
+        if not sys.stderr.isatty():
+            sys.stderr.write("Processing what-if analysis...\n")
+            sys.stderr.flush()
+            return
+        
         spinner_chars = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
         fallback_chars = ["|", "\\", "/", "-"]
 
