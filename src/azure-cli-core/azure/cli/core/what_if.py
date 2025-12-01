@@ -48,7 +48,7 @@ def _make_what_if_request(payload, headers_dict, cli_ctx=None):
     def _rotating_progress():
         """Simulate a rotating progress indicator."""
         spinner_chars = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
-        fallback_chars = ["|", "\\", "/", "-"]
+        fallback_chars = ["|", "/", "-", "\\"]
 
         try:
             "⠋".encode(sys.stderr.encoding or 'utf-8')
@@ -92,17 +92,11 @@ def _make_what_if_request(payload, headers_dict, cli_ctx=None):
             elapsed_str = f"{BOLD}({elapsed:.0f}s){RESET}"
             spinner = f"{spinner_color}{chars[idx % len(chars)]}{RESET}"
             progress_line = f"{spinner} {status}... {elapsed_str}"
-            visible_length = len(progress_line) - (progress_line.count('\033[') * 5)
-            max_width = 100
-            if visible_length > max_width:
-                truncated_status = status[:max_width - 30] + "..."
-                progress_line = f"{spinner} {truncated_status} {elapsed_str}"
-            sys.stderr.write(f"\r{' ' * 120}\r{progress_line}")
+            sys.stderr.write(f"\033[2K\r{progress_line}")
             sys.stderr.flush()
             idx += 1
             time.sleep(0.12)
-        clear_line = f"\r{' ' * 120}\r"
-        sys.stderr.write(clear_line)
+        sys.stderr.write("\033[2K\r")
         sys.stderr.flush()
 
     try:
