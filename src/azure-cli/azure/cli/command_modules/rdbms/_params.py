@@ -453,6 +453,18 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             help='Enable (ZoneRedundant or SameZone) or disable high availability feature.'
         )
 
+        zonal_resiliency_arg_type = CLIArgumentType(
+            arg_type=get_enum_type(['Enabled', 'Disabled']),
+            options_list=['--zonal-resiliency'],
+            help='Enable or disable high availability feature.'
+        )
+
+        allow_same_zone_arg_type = CLIArgumentType(
+            options_list=['--allow-same-zone'],
+            action='store_true',
+            help='Allow primary and standby in the same zone when multi-zone capacity is unavailable.'
+        )
+
         mysql_version_upgrade_arg_type = CLIArgumentType(
             arg_type=get_enum_type(['8']),
             options_list=['--version', '-v'],
@@ -607,6 +619,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('performance_tier', default=None, arg_type=performance_tier_arg_type)
                 c.argument('create_cluster', default='Server', arg_type=cluster_option_arg_type)
                 c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
+                c.argument('zonal_resiliency', arg_type=zonal_resiliency_arg_type, default="Disabled")
+                c.argument('allow_same_zone', arg_type=allow_same_zone_arg_type, default=False)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
@@ -749,6 +763,8 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('password_auth', arg_type=password_auth_arg_type)
                 c.argument('private_dns_zone_arguments', private_dns_zone_arguments_arg_type)
                 c.argument('cluster_size', default=None, arg_type=update_node_count_arg_type)
+                c.argument('zonal_resiliency', arg_type=zonal_resiliency_arg_type)
+                c.argument('allow_same_zone', arg_type=allow_same_zone_arg_type)
                 c.argument('yes', arg_type=yes_arg_type)
 
         with self.argument_context('{} flexible-server upgrade'.format(command_group)) as c:

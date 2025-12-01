@@ -65,7 +65,8 @@ def flexible_server_create(cmd, client,
                            password_auth=None, administrator_login=None, administrator_login_password=None,
                            tags=None, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
-                           high_availability=None, zone=None, standby_availability_zone=None,
+                           high_availability=None, zonal_resiliency=None, allow_same_zone=False,
+                           zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
                            storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None, yes=False):
@@ -85,8 +86,10 @@ def flexible_server_create(cmd, client,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     server_name = server_name.lower()
+    high_availability_mode = high_availability
 
-    if (sku_name is None) or (version is None):
+    if (sku_name is None) or (version is None) or \
+        (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled'):
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
 
         # set sku_name from capability API
@@ -103,6 +106,10 @@ def flexible_server_create(cmd, client,
         if version is None:
             supported_server_versions = sorted(list_location_capability_info['supported_server_versions'])
             version = supported_server_versions[-1]
+        # set high availability from capability API
+        if (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled'):
+            single_az = list_location_capability_info['single_az']
+            high_availability_mode = 'SameZone' if single_az and allow_same_zone else 'ZoneRedundant'
 
     pg_arguments_validator(db_context,
                            server_name=server_name,
@@ -113,6 +120,8 @@ def flexible_server_create(cmd, client,
                            storage_type=storage_type,
                            iops=iops, throughput=throughput,
                            high_availability=high_availability,
+                           zonal_resiliency=zonal_resiliency,
+                           allow_same_zone=allow_same_zone,
                            standby_availability_zone=standby_availability_zone,
                            zone=zone,
                            subnet=subnet,
@@ -155,7 +164,7 @@ def flexible_server_create(cmd, client,
 
     sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
-    high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
+    high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability_mode,
                                                                            standby_availability_zone=standby_availability_zone)
 
     is_password_auth_enabled = bool(password_auth is not None and password_auth.lower() == 'enabled')
@@ -319,6 +328,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        backup_retention=None,
                                        administrator_login_password=None,
                                        high_availability=None,
+                                       zonal_resiliency=None,
+                                       allow_same_zone=False,
                                        standby_availability_zone=None,
                                        maintenance_window=None,
                                        byok_identity=None, byok_key=None,
@@ -349,6 +360,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            iops=iops,
                            throughput=throughput,
                            high_availability=high_availability,
+                           zonal_resiliency=zonal_resiliency,
+                           allow_same_zone=allow_same_zone,
                            zone=instance.availability_zone,
                            standby_availability_zone=standby_availability_zone,
                            byok_identity=byok_identity,
@@ -464,6 +477,13 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     # High availability can't be updated with existing properties
     high_availability_param = postgresql_flexibleservers.models.HighAvailability()
+    if zonal_resiliency is not None:
+        if zonal_resiliency.lower() == 'disabled':
+            high_availability = 'Disabled'
+        else:
+            list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+            single_az = list_location_capability_info['single_az']
+            high_availability = 'SameZone' if single_az and allow_same_zone else 'ZoneRedundant'
     if high_availability:
         high_availability_param.mode = high_availability
 

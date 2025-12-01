@@ -43,6 +43,10 @@ examples:
           --tags "key=value" --version 17 --high-availability ZoneRedundant --zone 1 \\
           --standby-zone 3
   - name: >
+      Create server with high availability feature enabled that allows primary and standby in the same zone when multi-zone capacity is unavailable.
+    text: >
+      az postgres flexible-server create -g testGroup -n testCluster --location testLocation --zonal-resiliency Enabled --allow-same-zone
+  - name: >
       Create a PostgreSQL flexible server using Premium SSD v2 Disks.
     text: >
       # set storage type to "PremiumV2_LRS" and provide values for Storage size (in GiB), IOPS (operations/sec), and Throughput (MB/sec).
