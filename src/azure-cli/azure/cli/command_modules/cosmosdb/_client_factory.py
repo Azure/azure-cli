@@ -174,3 +174,16 @@ def cf_restorable_tables(cli_ctx, _):
 
 def cf_restorable_table_resources(cli_ctx, _):
     return cf_cosmosdb(cli_ctx).restorable_table_resources
+
+
+# fleet
+def cf_fleet(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).fleet
+
+
+def cf_fleetspace(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).fleetspace
+
+
+def cf_fleetspace_account(cli_ctx, _):
+    return cf_cosmosdb(cli_ctx).fleetspace_account
