@@ -668,7 +668,12 @@ jobs:
       brew uninstall azure-cli
       
       echo == Install azure-cli.rb formula ==
-      brew install --build-from-source $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb
+      # Need to create a dummy homebrew tap to install the formula
+      git config --global user.email "you@example.com"
+      git config --global user.name "Your Name"
+      brew tap-new dev/azure-cli
+      cp $SYSTEM_ARTIFACTSDIRECTORY/homebrew/azure-cli.rb $(brew --repository)/Library/Taps/dev/homebrew-azure-cli/Formula/
+      brew install --build-from-source dev/homebrew-azure-cli/azure-cli
       
       echo == Az Version ==
       az --version

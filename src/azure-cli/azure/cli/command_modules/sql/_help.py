@@ -243,6 +243,8 @@ short-summary: Update long term retention settings for a database.
 examples:
   - name: Set long term retention for a database.
     text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P1W" --monthly-retention "P6M" --yearly-retention "P1Y" --week-of-year 26 --make-backups-immutable Enabled
+  - name: Set long term retention for a database with time based immutability enabled and immutability mode locked.
+    text: az sql db ltr-policy set -g mygroup -s myserver -n mydb --weekly-retention "P0W" --monthly-retention "P0M" --yearly-retention "P0Y" --tb-immutability Enabled --tb-immutability-mode Locked
 """
 
 helps['sql db ltr-policy show'] = """

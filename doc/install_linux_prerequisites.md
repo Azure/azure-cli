@@ -6,7 +6,7 @@ Some native Linux packages are required when installing the CLI with:
 - Interactive installation script
 - `pip`
 
-Current supported Python versions are Python 3.9 ~ 3.13.
+Current supported Python versions are Python 3.10 ~ 3.13.
 
 The commands to run to install the dependencies for some common distributions are listed below.
 
@@ -16,7 +16,7 @@ sudo apt-get update && sudo apt-get install -y libssl-dev libffi-dev python-dev 
 ```
 
 ### RHEL 8, CentOS Stream 8, RHEL 9, CentOS Stream 9
-Install the latest Python 3.9 available in the software repo.
+Install the latest Python 3.12 available in the software repo.
 ```
-sudo dnf install -y gcc libffi-devel python39-devel openssl-devel
+sudo dnf install -y gcc libffi-devel python312-devel openssl-devel
 ```

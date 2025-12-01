@@ -261,6 +261,54 @@ def get_hyper_v_generation_from_vmss(cli_ctx, image_ref, location):  # pylint: d
     return None
 
 
+def get_hyper_v_generation_from_vmss_by_aaz(cli_ctx, image_ref, location):  # pylint: disable=too-many-return-statements
+    from ._vm_utils import (is_valid_image_version_id, parse_gallery_image_id, is_valid_vm_image_id, parse_vm_image_id,
+                            parse_shared_gallery_image_id, parse_community_gallery_image_id)
+    if image_ref is None:
+        return None
+    if image_ref.get("id", None) is not None:
+        from ._client_factory import _compute_client_factory
+        if is_valid_image_version_id(image_ref["id"]):
+            image_info = parse_gallery_image_id(image_ref["id"])
+            client = _compute_client_factory(cli_ctx, subscription_id=image_info[0]).gallery_images
+            gallery_image_info = client.get(
+                resource_group_name=image_info[1], gallery_name=image_info[2], gallery_image_name=image_info[3])
+            return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+        if is_valid_vm_image_id(image_ref["id"]):
+            sub, rg, image_name = parse_vm_image_id(image_ref["id"])
+            client = _compute_client_factory(cli_ctx, subscription_id=sub).images
+            image_info = client.get(rg, image_name)
+            return image_info.hyper_v_generation if hasattr(image_info, 'hyper_v_generation') else None
+
+    if image_ref.get("sharedGalleryImageId", None) is not None:
+        from ._client_factory import cf_shared_gallery_image
+        image_info = parse_shared_gallery_image_id(image_ref["sharedGalleryImageId"])
+        gallery_image_info = cf_shared_gallery_image(cli_ctx).get(
+            location=location, gallery_unique_name=image_info[0], gallery_image_name=image_info[1])
+        return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+
+    if image_ref.get("communityGalleryImageId", None) is not None:
+        from ._client_factory import cf_community_gallery_image
+        image_info = parse_community_gallery_image_id(image_ref["communityGalleryImageId"])
+        gallery_image_info = cf_community_gallery_image(cli_ctx).get(
+            location=location, public_gallery_name=image_info[0], gallery_image_name=image_info[1])
+        return gallery_image_info.hyper_v_generation if hasattr(gallery_image_info, 'hyper_v_generation') else None
+
+    if image_ref.get("offer", None) is not None and image_ref.get("publisher", None) is not None \
+            and image_ref.get("sku", None) is not None and image_ref.get("version", None) is not None:
+        from ._client_factory import cf_vm_image
+        version = image_ref["version"]
+        if version.lower() == 'latest':
+            from ._actions import _get_latest_image_version
+            version = _get_latest_image_version(cli_ctx, location, image_ref["publisher"], image_ref["offer"],
+                                                image_ref["sku"])
+        vm_image_info = cf_vm_image(cli_ctx, '').get(
+            location, image_ref["publisher"], image_ref["offer"], image_ref["sku"], version)
+        return vm_image_info.hyper_v_generation if hasattr(vm_image_info, 'hyper_v_generation') else None
+
+    return None
+
+
 def _is_linux_os(vm):
     os_type = None
     if vm and vm.storage_profile and vm.storage_profile.os_disk and vm.storage_profile.os_disk.os_type:
@@ -270,6 +318,18 @@ def _is_linux_os(vm):
     # the os_type could be None for VM scaleset, let us check out os configurations
     if vm.os_profile.linux_configuration:
         return bool(vm.os_profile.linux_configuration)
+    return False
+
+
+def _is_linux_os_by_aaz(vm):
+    os_type = None
+    if vm.get("storage_profile", {}).get("os_disk", {}).get("os_type", None) is not None:
+        os_type = vm["storage_profile"]["os_disk"]["os_type"]
+    if os_type:
+        return os_type.lower() == 'linux'
+    # the os_type could be None for VM scaleset, let us check out os configurations
+    if vm.get("os_profile", {}).get("linux_configuration", None) is not None:
+        return bool(vm["os_profile"]["linux_configuration"])
     return False
 
 
@@ -382,7 +442,8 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                         public_network_access=None, accelerated_network=None, architecture=None,
                         data_access_auth_mode=None, gallery_image_reference_type=None, security_data_uri=None,
                         upload_type=None, secure_vm_disk_encryption_set=None, performance_plus=None,
-                        optimized_for_frequent_attach=None, security_metadata_uri=None):
+                        optimized_for_frequent_attach=None, security_metadata_uri=None, action_on_disk_delay=None,
+                        supported_security_option=None):
 
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
@@ -557,20 +618,24 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
         args["supports_hibernation"] = support_hibernation
     if public_network_access is not None:
         args["public_network_access"] = public_network_access
-    if accelerated_network is not None or architecture is not None:
+    if accelerated_network is not None or architecture is not None or supported_security_option is not None:
         if args.get("supported_capabilities", None) is None:
             supported_capabilities = {
                 "accelerated_network": accelerated_network,
-                "architecture": architecture
+                "architecture": architecture,
+                "supported_security_option": supported_security_option
             }
             args["supported_capabilities"] = supported_capabilities
         else:
             args["supported_capabilities"]["accelerated_network"] = accelerated_network
             args["supported_capabilities"]["architecture"] = architecture
+            args["supported_capabilities"]["supported_security_option"] = supported_security_option
     if data_access_auth_mode is not None:
         args["data_access_auth_mode"] = data_access_auth_mode
     if optimized_for_frequent_attach is not None:
         args["optimized_for_frequent_attach"] = optimized_for_frequent_attach
+    if action_on_disk_delay is not None:
+        args["availability_policy"] = {'action_on_disk_delay': action_on_disk_delay}
 
     args["no_wait"] = no_wait
     args["disk_name"] = disk_name
@@ -868,7 +933,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_user_redeploy_scheduled_events=None, zone_placement_policy=None, include_zones=None,
               exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None, what_if=False):
+              key_incarnation_id=None, add_proxy_agent_extension=None, what_if=False):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1098,7 +1163,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
         imds_mode=imds_mode,
         wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
         imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
-        key_incarnation_id=key_incarnation_id)
+        key_incarnation_id=key_incarnation_id, add_proxy_agent_extension=add_proxy_agent_extension)
 
     vm_resource['dependsOn'] = vm_dependencies
 
@@ -1312,6 +1377,21 @@ def get_vm_to_update(cmd, resource_group_name, vm_name):
     vm = client.virtual_machines.get(resource_group_name, vm_name)
     # To avoid unnecessary permission check of image
     vm.storage_profile.image_reference = None
+    return vm
+
+
+def get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name):
+    from .operations.vm import VMShow
+
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        "vm_name": vm_name
+    })
+
+    # To avoid unnecessary permission check of image
+    storage_profile = vm.get('storageProfile', {})
+    storage_profile["imageReference"] = None
+
     return vm
 
 
@@ -1644,12 +1724,14 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               security_type=None, enable_proxy_agent=None, proxy_agent_mode=None, additional_scheduled_events=None,
               enable_user_reboot_scheduled_events=None, enable_user_redeploy_scheduled_events=None,
               align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
+              add_proxy_agent_extension=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
               key_incarnation_id=None, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
-    from ._vm_utils import update_write_accelerator_settings, update_disk_caching
-    SecurityProfile, UefiSettings = cmd.get_models('SecurityProfile', 'UefiSettings')
+    from ._vm_utils import update_write_accelerator_settings, update_disk_caching_by_aaz
+    from .operations.vm import convert_show_result_to_snake_case as vm_convert_show_result_to_snake_case
     vm = kwargs['parameters']
+    vm = vm_convert_show_result_to_snake_case(vm)
 
     if wire_server_access_control_profile_reference_id is not None or \
             imds_access_control_profile_reference_id is not None:
@@ -1673,7 +1755,16 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             'resource_group': resource_group_name,
             'security_profile': security_profile
         }))
-        vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+        vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+        vm = vm_convert_show_result_to_snake_case(vm)
+
+    if add_proxy_agent_extension is not None:
+        if vm.get("security_profile", None) is None:
+            vm["security_profile"] = {}
+        if vm["security_profile"].get("proxy_agent_settings", None) is None:
+            vm["security_profile"]["proxy_agent_settings"] = {}
+
+        vm["security_profile"]["proxy_agent_settings"]["add_proxy_agent_extension"] = add_proxy_agent_extension
 
     disk_name = None
     if os_disk is not None:
@@ -1682,141 +1773,148 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
             os_disk_id_parsed = parse_resource_id(os_disk)
             disk_name = os_disk_id_parsed['name']
         else:
-            vm_id_parsed = parse_resource_id(vm.id)
+            vm_id_parsed = parse_resource_id(vm["id"])
             disk_id = resource_id(subscription=vm_id_parsed['subscription'],
                                   resource_group=vm_id_parsed['resource_group'],
                                   namespace='Microsoft.Compute', type='disks', name=os_disk)
             disk_name = os_disk
-        vm.storage_profile.os_disk.managed_disk.id = disk_id
-        vm.storage_profile.os_disk.name = disk_name
+
+        if vm.get("storage_profile", None) is None:
+            vm["storage_profile"] = {}
+        if vm["storage_profile"].get("os_disk", None) is None:
+            vm["storage_profile"]["os_disk"] = {}
+        if vm["storage_profile"]["os_disk"].get("managed_disk", None) is None:
+            vm["storage_profile"]["os_disk"]["managed_disk"] = {}
+
+        vm["storage_profile"]["os_disk"]["managed_disk"]["id"] = disk_id
+        vm["storage_profile"]["os_disk"]["name"] = disk_name
 
     if align_regional_disks_to_vm_zone is not None:
-        vm.storage_profile.align_regional_disks_to_vm_zone = align_regional_disks_to_vm_zone
+        if vm.get("storage_profile", None) is None:
+            vm["storage_profile"] = {}
+        vm["storage_profile"]["align_regional_disks_to_vm_zone"] = align_regional_disks_to_vm_zone
 
     from ._constants import COMPATIBLE_SECURITY_TYPE_VALUE
     if security_type == "TrustedLaunch":
         from azure.cli.core.azclierror import InvalidArgumentValueError
-        if vm.security_profile is not None and vm.security_profile.security_type == "ConfidentialVM":
+        if vm.get("security_profile", {}).get("security_type", None) == "ConfidentialVM":
             raise InvalidArgumentValueError("{} is already configured with ConfidentialVM. Security Configuration "
-                                            "cannot be updated from ConfidentialVM to TrustedLaunch.".format(vm.name))
+                                            "cannot be updated from ConfidentialVM to TrustedLaunch.".format(vm["name"]))  # pylint: disable=line-too-long
 
-        if disk_name is None and vm.storage_profile.os_disk.managed_disk is not None:
-            os_disk_id_parsed = parse_resource_id(vm.storage_profile.os_disk.managed_disk.id)
-            disk_name = os_disk_id_parsed['name']
+        if disk_name is None and vm.get("storage_profile", {}).get("os_disk", {}).get("managed_disk", None) is not None:
+            os_disk_id_parsed = parse_resource_id(vm["storage_profile"]["os_disk"]["managed_disk"]["id"])
+            disk_name = os_disk_id_parsed["name"]
 
         if disk_name is not None:
             # Set --enable-secure-boot True and --enable-vtpm True if not specified by end user.
             enable_secure_boot = enable_secure_boot if enable_secure_boot is not None else True
             enable_vtpm = enable_vtpm if enable_vtpm is not None else True
 
-            if vm.security_profile is None:
-                vm.security_profile = SecurityProfile()
-            vm.security_profile.security_type = security_type
+            if vm.get("security_profile", None) is None:
+                vm["security_profile"] = {}
+            vm["security_profile"]["security_type"] = security_type
+
     elif security_type == COMPATIBLE_SECURITY_TYPE_VALUE:
-        if vm.security_profile is None:
-            vm.security_profile = SecurityProfile()
-        vm.security_profile.security_type = security_type
-        vm.security_profile.uefi_settings = None
+        if vm.get("security_profile", None) is None:
+            vm["security_profile"] = {}
+        vm["security_profile"]["security_type"] = security_type
+        vm["security_profile"]["uefi_settings"] = None
 
     if write_accelerator is not None:
-        update_write_accelerator_settings(vm.storage_profile, write_accelerator)
+        if vm.get("storage_profile", None) is None:
+            vm["storage_profile"] = {}
+        update_write_accelerator_settings(vm["storage_profile"], write_accelerator)
 
     if disk_caching is not None:
-        update_disk_caching(vm.storage_profile, disk_caching)
+        if vm.get("storage_profile", None) is None:
+            vm["storage_profile"] = {}
+        update_disk_caching_by_aaz(vm["storage_profile"], disk_caching)
 
     if license_type is not None:
-        vm.license_type = license_type
+        vm["license_type"] = license_type
 
     if user_data is not None:
         from azure.cli.core.util import b64encode
-        vm.user_data = b64encode(user_data)
+        vm["user_data"] = b64encode(user_data)
 
     if capacity_reservation_group is not None:
-        CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
-        SubResource = cmd.get_models('SubResource')
         if capacity_reservation_group == 'None':
             capacity_reservation_group = None
-        sub_resource = SubResource(id=capacity_reservation_group)
-        capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
-        vm.capacity_reservation = capacity_reservation
+
+        sub_resource = {"id": capacity_reservation_group}
+        capacity_reservation = {"capacity_reservation_group": sub_resource}
+        vm["capacity_reservation"] = capacity_reservation
 
     if dedicated_host is not None:
-        if vm.host is None:
-            DedicatedHost = cmd.get_models('SubResource')
-            vm.host = DedicatedHost(additional_properties={}, id=dedicated_host)
+        if vm.get("host", None) is None:
+            vm["host"] = {"id": dedicated_host}
         else:
-            vm.host.id = dedicated_host
-        if vm.host_group is not None:
-            vm.host_group = None
+            vm["host"]["id"] = dedicated_host
+        if vm.get("host_group", None) is not None:
+            vm["host_group"] = None
 
     if dedicated_host_group is not None:
-        if vm.host_group is None:
-            DedicatedHostGroup = cmd.get_models('SubResource')
-            vm.host_group = DedicatedHostGroup(additional_properties={}, id=dedicated_host_group)
+        if vm.get("host_group", None) is None:
+            vm["host_group"] = {"id": dedicated_host_group}
         else:
-            vm.host_group.id = dedicated_host_group
-        if vm.host is not None:
-            vm.host = None
+            vm["host_group"]["id"] = dedicated_host_group
+        if vm.get("host", None) is not None:
+            vm["host"] = None
 
     if ultra_ssd_enabled is not None:
-        if vm.additional_capabilities is None:
-            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
-            vm.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
+        if vm.get("additional_capabilities", None) is None:
+            vm["additional_capabilities"] = {"ultra_ssd_enabled": ultra_ssd_enabled}
         else:
-            vm.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+            vm["additional_capabilities"]["ultra_ssd_enabled"] = ultra_ssd_enabled
 
     if enable_hibernation is not None:
-        if vm.additional_capabilities is None:
-            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
-            vm.additional_capabilities = AdditionalCapabilities(hibernation_enabled=enable_hibernation)
+        if vm.get("additional_capabilities", None) is None:
+            vm["additional_capabilities"] = {"hibernation_enabled": enable_hibernation}
         else:
-            vm.additional_capabilities.hibernation_enabled = enable_hibernation
+            vm["additional_capabilities"]["hibernation_enabled"] = enable_hibernation
 
     if priority is not None:
-        vm.priority = priority
+        vm["priority"] = priority
 
     if max_price is not None:
-        if vm.billing_profile is None:
-            BillingProfile = cmd.get_models('BillingProfile')
-            vm.billing_profile = BillingProfile(max_price=max_price)
+        if vm.get("billing_profile", None) is None:
+            vm["billing_profile"] = {"max_price": max_price}
         else:
-            vm.billing_profile.max_price = max_price
+            vm["billing_profile"]["max_price"] = max_price
 
     if proximity_placement_group is not None:
-        vm.proximity_placement_group = {'id': proximity_placement_group}
+        vm["proximity_placement_group"] = {"id": proximity_placement_group}
 
     if security_type != COMPATIBLE_SECURITY_TYPE_VALUE and (enable_secure_boot is not None or enable_vtpm is not None):
-        if vm.security_profile is None:
-            vm.security_profile = SecurityProfile()
+        if vm.get("security_profile", None) is None:
+            vm["security_profile"] = {}
 
-        vm.security_profile.uefi_settings = UefiSettings(secure_boot_enabled=enable_secure_boot,
-                                                         v_tpm_enabled=enable_vtpm)
+        vm["security_profile"]["uefi_settings"] = {"secure_boot_enabled": enable_secure_boot,
+                                                   "v_tpm_enabled": enable_vtpm}
 
     proxy_agent_parameters = [enable_proxy_agent, wire_server_mode, imds_mode, key_incarnation_id]
     if any(parameter is not None for parameter in proxy_agent_parameters):
-        ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
-        HostEndpointSettings = cmd.get_models('HostEndpointSettings')
-        wire_server = HostEndpointSettings()
-        imds = HostEndpointSettings()
-        if vm.security_profile is None:
-            vm.security_profile = SecurityProfile()
-            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(wire_server=wire_server, imds=imds)
-        elif vm.security_profile.proxy_agent_settings is None:
-            vm.security_profile.proxy_agent_settings = ProxyAgentSettings(wire_server=wire_server, imds=imds)
+        wire_server = {}
+        imds = {}
+        if vm.get("security_profile", None) is None:
+            vm["security_profile"] = {}
+            vm["security_profile"]["proxy_agent_settings"] = {"wire_server": wire_server, "imds": imds}
+        elif vm["security_profile"].get("proxy_agent_settings", None) is None:
+            vm["security_profile"]["proxy_agent_settings"] = {"wire_server": wire_server, "imds": imds}
         else:
-            if vm.security_profile.proxy_agent_settings.wire_server is None:
-                vm.security_profile.proxy_agent_settings.wire_server = wire_server
-            if vm.security_profile.proxy_agent_settings.imds is None:
-                vm.security_profile.proxy_agent_settings.imds = imds
+            if vm["security_profile"]["proxy_agent_settings"].get("wire_server", None) is None:
+                vm["security_profile"]["proxy_agent_settings"]["wire_server"] = wire_server
+            if vm["security_profile"]["proxy_agent_settings"].get("imds", None) is None:
+                vm["security_profile"]["proxy_agent_settings"]["imds"] = imds
 
         if enable_proxy_agent is not None:
-            vm.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
+            vm["security_profile"]["proxy_agent_settings"]["enabled"] = enable_proxy_agent
         if key_incarnation_id is not None:
-            vm.security_profile.proxy_agent_settings.key_incarnation_id = key_incarnation_id
+            vm["security_profile"]["proxy_agent_settings"]["key_incarnation_id"] = key_incarnation_id
         if wire_server_mode is not None:
-            vm.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
+            vm["security_profile"]["proxy_agent_settings"]["wire_server"]["mode"] = wire_server_mode
         if imds_mode is not None:
-            vm.security_profile.proxy_agent_settings.imds.mode = imds_mode
+            vm["security_profile"]["proxy_agent_settings"]["imds"]["mode"] = imds_mode
 
     if workspace is not None:
         workspace_id = _prepare_workspace(cmd, resource_group_name, workspace)
@@ -1826,75 +1924,88 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
                                                vm=vm,
                                                vm_name=vm_name,
                                                workspace_name=workspace_name)
-        os_type = vm.storage_profile.os_disk.os_type if vm.storage_profile.os_disk.os_type else None
+        os_type = vm["storage_profile"]["os_disk"]["os_type"] \
+            if vm.get("storage_profile", {}).get("os_disk", {}).get("os_type", None) is not None else None
         _set_data_source_for_workspace(cmd, os_type, resource_group_name, workspace_name)
 
-    aux_subscriptions = None
-    if vm and vm.storage_profile and vm.storage_profile.image_reference and 'id' in vm.storage_profile.image_reference:
-        aux_subscriptions = _parse_aux_subscriptions(vm.storage_profile.image_reference['id'])
-
     if size is not None:
-        if vm.hardware_profile.vm_size == size:
+        if vm.get("hardware_profile", {}).get("vm_size", None) == size:
             logger.warning("VM size is already %s", size)
         else:
-            vm.hardware_profile.vm_size = size
+            if vm.get("hardware_profile", None) is None:
+                vm["hardware_profile"] = {}
+            vm["hardware_profile"]["vm_size"] = size
 
     if v_cpus_available is not None:
-        vm.hardware_profile.vm_size_properties.v_cpus_available = v_cpus_available
+        if vm.get("hardware_profile", None) is None:
+            vm["hardware_profile"] = {}
+        if vm["hardware_profile"].get("vm_size_properties", None) is None:
+            vm["hardware_profile"]["vm_size_properties"] = {}
+        vm["hardware_profile"]["vm_size_properties"]["v_cp_us_available"] = v_cpus_available
 
     if v_cpus_per_core is not None:
-        vm.hardware_profile.vm_size_properties.v_cpus_per_core = v_cpus_per_core
+        if vm.get("hardware_profile", None) is None:
+            vm["hardware_profile"] = {}
+        if vm["hardware_profile"].get("vm_size_properties", None) is None:
+            vm["hardware_profile"]["vm_size_properties"] = {}
+        vm["hardware_profile"]["vm_size_properties"]["v_cp_us_per_core"] = v_cpus_per_core
 
     if ephemeral_os_disk_placement is not None:
-        if vm.storage_profile.os_disk.diff_disk_settings is not None:
-            vm.storage_profile.os_disk.diff_disk_settings.placement = ephemeral_os_disk_placement
+        if vm.get("storage_profile", {}).get("os_disk", {}).get("diff_disk_settings", None) is not None:
+            vm["storage_profile"]["os_disk"]["diff_disk_settings"]["placement"] = ephemeral_os_disk_placement
         else:
             raise ValidationError("Please update the argument '--ephemeral-os-disk-placement' when "
                                   "creating VM with the option '--ephemeral-os-disk true'")
+
     if disk_controller_type is not None:
-        vm.storage_profile.disk_controller_type = disk_controller_type
+        if vm.get("storage_profile", None) is None:
+            vm["storage_profile"] = {}
+        vm["storage_profile"]["disk_controller_type"] = disk_controller_type
 
     if additional_scheduled_events is not None or \
             enable_user_reboot_scheduled_events is not None or enable_user_redeploy_scheduled_events is not None:
-        if vm.scheduled_events_policy is None:
-            ScheduledEventsPolicy = cmd.get_models('ScheduledEventsPolicy')
-            UserInitiatedRedeploy = cmd.get_models('UserInitiatedRedeploy')
-            UserInitiatedReboot = cmd.get_models('UserInitiatedReboot')
-            EventGridAndResourceGraph = cmd.get_models('EventGridAndResourceGraph')
-            ScheduledEventsAdditionalPublishingTargets = cmd.get_models('ScheduledEventsAdditionalPublishingTargets')
-            vm.scheduled_events_policy = ScheduledEventsPolicy()
-            vm.scheduled_events_policy.scheduled_events_additional_publishing_targets = \
-                ScheduledEventsAdditionalPublishingTargets()
-            vm.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
-                event_grid_and_resource_graph = EventGridAndResourceGraph()
-            vm.scheduled_events_policy.user_initiated_reboot = UserInitiatedReboot()
-            vm.scheduled_events_policy.user_initiated_redeploy = UserInitiatedRedeploy()
-            vm.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph.\
-                enable = additional_scheduled_events if additional_scheduled_events is not None else False
-            vm.scheduled_events_policy.user_initiated_redeploy.automatically_approve = \
-                enable_user_redeploy_scheduled_events if enable_user_redeploy_scheduled_events is not None else False
-            vm.scheduled_events_policy.user_initiated_reboot.automatically_approve = \
-                enable_user_reboot_scheduled_events if enable_user_reboot_scheduled_events is not None else False
+        if vm.get("scheduled_events_policy", None) is None:
+            vm["scheduled_events_policy"] = {
+                "scheduled_events_additional_publishing_targets": {
+                    "event_grid_and_resource_graph": {
+                        "enable": additional_scheduled_events if additional_scheduled_events is not None else False
+                    },
+                },
+                "user_initiated_reboot": {
+                    "automatically_approve":
+                        enable_user_reboot_scheduled_events if enable_user_reboot_scheduled_events is not None else False   # pylint: disable=line-too-long
+                },
+                "user_initiated_redeploy": {
+                    "automatically_approve":
+                        enable_user_redeploy_scheduled_events if enable_user_redeploy_scheduled_events is not None else False   # pylint: disable=line-too-long
+                }
+            }
         else:
             if additional_scheduled_events is not None:
-                vm.scheduled_events_policy.scheduled_events_additional_publishing_targets = {
-                    "eventGridAndResourceGraph": {
+                vm["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"] = {
+                    "event_grid_and_resource_graph": {
                         "enable": additional_scheduled_events
                     }
                 }
             if enable_user_redeploy_scheduled_events is not None:
-                vm.scheduled_events_policy.user_initiated_redeploy = {
-                    "automaticallyApprove": enable_user_redeploy_scheduled_events
+                vm["scheduled_events_policy"]["user_initiated_redeploy"] = {
+                    "automatically_approve": enable_user_redeploy_scheduled_events
                 }
             if enable_user_reboot_scheduled_events is not None:
-                vm.scheduled_events_policy.user_initiated_reboot = {
-                    "automaticallyApprove": enable_user_reboot_scheduled_events
+                vm["scheduled_events_policy"]["user_initiated_reboot"] = {
+                    "automatically_approve": enable_user_reboot_scheduled_events
                 }
-    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
     if wire_server_access_control_profile_reference_id is not None or \
-            imds_access_control_profile_reference_id is not None:
+            imds_access_control_profile_reference_id is not None or \
+            add_proxy_agent_extension is not None:
         kwargs['parameters'] = vm
-    return sdk_no_wait(no_wait, client.virtual_machines.begin_create_or_update, resource_group_name, vm_name, **kwargs)
+
+    vm["resource_group"] = resource_group_name
+    vm["vm_name"] = vm_name
+    vm["no_wait"] = no_wait
+
+    from .operations.vm import VMCreate
+    return VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
 # endregion
 
 
@@ -2124,7 +2235,8 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 # region VirtualMachines Disks (Managed)
 def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=None, disks=None, new=False, sku=None,
                              size_gb=None, lun=None, caching=None, enable_write_accelerator=False, disk_ids=None,
-                             source_snapshots_or_disks=None, source_disk_restore_point=None):
+                             source_snapshots_or_disks=None, source_disk_restore_point=None,
+                             new_names_of_source_snapshots_or_disks=None, new_names_of_source_disk_restore_point=None):
     # attach multiple managed disks using disk attach API
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
     if not new and not sku and not size_gb and disk_ids is not None:
@@ -2182,14 +2294,17 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
             vm.storage_profile.data_disks.append(data_disk)
         disk_lun = _get_disk_lun(vm.storage_profile.data_disks)
         if source_snapshots_or_disks is not None:
-            for disk_item in source_snapshots_or_disks:
+            if new_names_of_source_snapshots_or_disks is None:
+                new_names_of_source_snapshots_or_disks = [None] * len(source_snapshots_or_disks)
+            for disk_id, disk_name in zip(source_snapshots_or_disks, new_names_of_source_snapshots_or_disks):
                 disk = {
+                    'name': disk_name,
                     'create_option': 'Copy',
                     'caching': caching,
                     'lun': disk_lun,
                     'writeAcceleratorEnabled': enable_write_accelerator,
                     "sourceResource": {
-                        "id": disk_item
+                        "id": disk_id
                     }
                 }
                 if size_gb is not None:
@@ -2205,14 +2320,17 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=N
                 disk_lun += 1
                 vm.storage_profile.data_disks.append(disk)
         if source_disk_restore_point is not None:
-            for disk_item in source_disk_restore_point:
+            if new_names_of_source_disk_restore_point is None:
+                new_names_of_source_disk_restore_point = [None] * len(source_disk_restore_point)
+            for disk_id, disk_name in zip(source_disk_restore_point, new_names_of_source_disk_restore_point):
                 disk = {
+                    'name': disk_name,
                     'create_option': 'Restore',
                     'caching': caching,
                     'lun': disk_lun,
                     'writeAcceleratorEnabled': enable_write_accelerator,
                     "sourceResource": {
-                        "id": disk_item
+                        "id": disk_id
                     }
                 }
                 if size_gb is not None:
@@ -2761,13 +2879,9 @@ def _update_vm_nics(cmd, vm, nics, primary_nic):
 
 
 # region VirtualMachines RunCommand
-
-# todo: cleanup this method after both vmss and vm parts are migrated to AAZ
 def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scripts=None, parameters=None, instance_id=None):  # pylint: disable=line-too-long
-    RunCommandInput, RunCommandInputParameter = cmd.get_models('RunCommandInput', 'RunCommandInputParameter')
-
-    parameters = parameters or []
-    run_command_input_parameters = []
+    parameters = parameters or []  # CLI user input arg "parameters"
+    params = []  # AAZCommand arg for "parameters"
     auto_arg_name_num = 0
     for p in parameters:
         if '=' in p:
@@ -2779,43 +2893,33 @@ def run_command_invoke(cmd, resource_group_name, vm_vmss_name, command_id, scrip
             auto_arg_name_num += 1
             n = 'arg{}'.format(auto_arg_name_num)
             v = p
-        run_command_input_parameters.append(RunCommandInputParameter(name=n, value=v))
-
-    client = _compute_client_factory(cmd.cli_ctx)
+        params.append({'name': n, 'value': v})
 
     # if instance_id, this is a vmss instance
     if instance_id:
-        return client.virtual_machine_scale_set_vms.begin_run_command(
-            resource_group_name, vm_vmss_name, instance_id,
-            RunCommandInput(command_id=command_id, script=scripts, parameters=run_command_input_parameters))  # pylint: disable=line-too-long
+        from .aaz.latest.vmss.run_command import Invoke
+        return Invoke(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            'vmss_name': vm_vmss_name,
+            'instance_id': instance_id,
+            'command_id': command_id,
+            'script': scripts,
+            'parameters': params
+        })
+
     # otherwise this is a regular vm instance
-    return client.virtual_machines.begin_run_command(
-        resource_group_name, vm_vmss_name,
-        RunCommandInput(command_id=command_id, script=scripts, parameters=run_command_input_parameters))
+    from .aaz.latest.vm.run_command import Invoke
+    return Invoke(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_vmss_name,
+        'command_id': command_id,
+        'script': scripts,
+        'parameters': params
+    })
 
 
 def vm_run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts=None, parameters=None):
-    from .aaz.latest.vm.run_command import Invoke
-
-    parameters = parameters or []  # CLI user input arg
-    params = []  # AAZCommand arg
-    auto_arg_name_num = 0
-    for p in parameters:
-        if '=' in p:
-            n, v = p.split('=', 1)
-        else:
-            auto_arg_name_num += 1
-            n = 'arg{}'.format(auto_arg_name_num)
-            v = p
-        params.append({'name': n, 'value': v})
-
-    return Invoke(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'vm_name': vm_name,
-        'command_id': command_id,
-        'scripts': scripts,
-        'parameters': params
-    })
+    return run_command_invoke(cmd, resource_group_name, vm_name, command_id, scripts, parameters)
 
 
 def vm_run_command_create(cmd,
@@ -3409,7 +3513,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
                 enable_user_redeploy_scheduled_events=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None, wire_server_mode=None,
-                imds_mode=None, wire_server_access_control_profile_reference_id=None,
+                imds_mode=None, add_proxy_agent_extension=None, wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None,
                 enable_automatic_repairs=None):
@@ -3730,6 +3834,7 @@ def create_vmss(cmd, vmss_name, resource_group_name, image=None,
             skuprofile_rank=skuprofile_rank,
             security_posture_reference_is_overridable=security_posture_reference_is_overridable,
             zone_balance=zone_balance, wire_server_mode=wire_server_mode, imds_mode=imds_mode,
+            add_proxy_agent_extension=add_proxy_agent_extension,
             wire_server_access_control_profile_reference_id=wire_server_access_control_profile_reference_id,
             imds_access_control_profile_reference_id=imds_access_control_profile_reference_id,
             enable_automatic_zone_balancing=enable_automatic_zone_balancing,
@@ -3939,6 +4044,23 @@ def _check_vmss_hyper_v_generation(cli_ctx, vmss):
                                         "TrustedLaunch.".format(vmss.name, security_type))
 
 
+def _check_vmss_hyper_v_generation_by_aaz(cli_ctx, vmss):
+    hyper_v_generation = get_hyper_v_generation_from_vmss_by_aaz(
+        cli_ctx, vmss.get("virtualMachineProfile", {}).get("storageProfile", {}).get("imageReference", {}), vmss["location"])  # pylint: disable=line-too-long
+    security_profile = vmss.get("virtualMachineProfile", {}).get("securityProfile", {})
+    security_type = security_profile.get("securityType", None)
+
+    if hyper_v_generation == "V1" or (hyper_v_generation == "V2" and security_type is None):
+        logger.warning("Trusted Launch security type is supported on Hyper-V Generation 2 OS Images. "
+                       "To know more please visit "
+                       "https://learn.microsoft.com/en-us/azure/virtual-machines/trusted-launch")
+    elif hyper_v_generation == "V2" and security_type == "ConfidentialVM":
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        raise InvalidArgumentValueError("{} is already configured with {}. "
+                                        "Security Configuration cannot be updated from ConfidentialVM to "
+                                        "TrustedLaunch.".format(vmss["name"], security_type))
+
+
 def get_vmss_modified(cmd, resource_group_name, name, instance_id=None, security_type=None):
     client = _compute_client_factory(cmd.cli_ctx)
     if instance_id is not None:
@@ -3956,6 +4078,34 @@ def get_vmss_modified(cmd, resource_group_name, name, instance_id=None, security
     if hasattr(vmss, "virtual_machine_profile") and vmss.virtual_machine_profile \
             and vmss.virtual_machine_profile.storage_profile:
         vmss.virtual_machine_profile.storage_profile.image_reference = None
+    return vmss
+
+
+def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, security_type=None):
+    if instance_id is not None:
+        from .operations.vmss_vms import VMSSVMSShow
+        vms = VMSSVMSShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            "vm_scale_set_name": name,
+            "instance_id": instance_id
+        })
+
+        # To avoid unnecessary permission check of image
+        if vms.get("storageProfile", None) is not None:
+            vms["storageProfile"]["imageReference"] = None
+        return vms
+
+    from .operations.vmss import VMSSShow
+    vmss = VMSSShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        "vm_scale_set_name": name,
+    })
+
+    if security_type == 'TrustedLaunch':
+        _check_vmss_hyper_v_generation_by_aaz(cmd.cli_ctx, vmss)
+    # To avoid unnecessary permission check of image
+    if vmss.get("virtualMachineProfile", {}).get("storageProfile", None) is not None:
+        vmss["virtualMachineProfile"]["storageProfile"]["imageReference"] = None
     return vmss
 
 
@@ -4168,10 +4318,17 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 upgrade_policy_mode=None, enable_auto_os_upgrade=None, skuprofile_vmsizes=None,
                 skuprofile_allostrat=None, skuprofile_rank=None,
                 security_posture_reference_is_overridable=None, zone_balance=None,
-                wire_server_mode=None, imds_mode=None, wire_server_access_control_profile_reference_id=None,
+                wire_server_mode=None, imds_mode=None, add_proxy_agent_extension=None,
+                wire_server_access_control_profile_reference_id=None,
                 imds_access_control_profile_reference_id=None, enable_automatic_zone_balancing=None,
                 automatic_zone_balancing_strategy=None, automatic_zone_balancing_behavior=None, **kwargs):
+    from .operations.vmss_vms import convert_show_result_to_snake_case as vmss_vms_convert_show_result_to_snake_case
+    from .operations.vmss import convert_show_result_to_snake_case as vmss_convert_show_result_to_snake_case
     vmss = kwargs['parameters']
+    if instance_id:
+        vmss = vmss_vms_convert_show_result_to_snake_case(vmss)
+    else:
+        vmss = vmss_convert_show_result_to_snake_case(vmss)
 
     if wire_server_access_control_profile_reference_id is not None or \
             imds_access_control_profile_reference_id is not None:
@@ -4197,253 +4354,319 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                 'security_profile': security_profile
             }
         }))
-        vmss = get_vmss_modified(cmd, resource_group_name, name, instance_id, security_type)
+        vmss = get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id, security_type)
+        if instance_id:
+            vmss = vmss_vms_convert_show_result_to_snake_case(vmss)
+        else:
+            vmss = vmss_convert_show_result_to_snake_case(vmss)
 
-    aux_subscriptions = None
-    # pylint: disable=too-many-boolean-expressions
-    if vmss and hasattr(vmss, 'virtual_machine_profile') and vmss.virtual_machine_profile and \
-            vmss.virtual_machine_profile.storage_profile and \
-            vmss.virtual_machine_profile.storage_profile.image_reference and \
-            'id' in vmss.virtual_machine_profile.storage_profile.image_reference:
-        aux_subscriptions = _parse_aux_subscriptions(vmss.virtual_machine_profile.storage_profile.image_reference['id'])
-    client = _compute_client_factory(cmd.cli_ctx, aux_subscriptions=aux_subscriptions)
+    if add_proxy_agent_extension is not None:
+        if instance_id:
+            if vmss.get("security_profile", None) is None:
+                vmss["security_profile"] = {}
+            if vmss["security_profile"].get("proxy_agent_settings", None) is None:
+                vmss["security_profile"]["proxy_agent_settings"] = {}
 
-    VMProtectionPolicy = cmd.get_models('VirtualMachineScaleSetVMProtectionPolicy')
+            vmss["security_profile"]["proxy_agent_settings"]["add_proxy_agent_extension"] = add_proxy_agent_extension
+        else:
+            if vmss.get("virtual_machine_profile", None) is None:
+                vmss["virtual_machine_profile"] = {}
+            if vmss["virtual_machine_profile"].get("security_profile", None) is None:
+                vmss["virtual_machine_profile"]["security_profile"] = {}
+            if vmss["virtual_machine_profile"]["security_profile"].get("proxy_agent_settings", None) is None:
+                vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"] = {}
+
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["add_proxy_agent_extension"] = \
+                add_proxy_agent_extension
 
     # handle vmss instance update
     from azure.cli.core.util import b64encode
 
     if instance_id is not None:
         if license_type is not None:
-            vmss.license_type = license_type
+            vmss["license_type"] = license_type
 
         if user_data is not None:
-            vmss.user_data = b64encode(user_data)
+            vmss["user_data"] = b64encode(user_data)
 
-        if not vmss.protection_policy:
-            vmss.protection_policy = VMProtectionPolicy()
+        if vmss.get("protection_policy", None) is None:
+            vmss["protection_policy"] = {}
 
         if protect_from_scale_in is not None:
-            vmss.protection_policy.protect_from_scale_in = protect_from_scale_in
+            vmss["protection_policy"]["protect_from_scale_in"] = protect_from_scale_in
 
         if protect_from_scale_set_actions is not None:
-            vmss.protection_policy.protect_from_scale_set_actions = protect_from_scale_set_actions
+            vmss["protection_policy"]["protect_from_scale_set_actions"] = protect_from_scale_set_actions
 
-        return sdk_no_wait(no_wait, client.virtual_machine_scale_set_vms.begin_update,
-                           resource_group_name, name, instance_id, **kwargs)
+        vmss["resource_group"] = resource_group_name
+        vmss["vm_scale_set_name"] = name
+        vmss["instance_id"] = instance_id
+        vmss["no_wait"] = no_wait
+
+        from .operations.vmss_vms import VMSSVMSCreate
+        return VMSSVMSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
     # else handle vmss update
     if license_type is not None:
-        vmss.virtual_machine_profile.license_type = license_type
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        vmss["virtual_machine_profile"]["license_type"] = license_type
 
     if user_data is not None:
-        vmss.virtual_machine_profile.user_data = b64encode(user_data)
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        vmss["virtual_machine_profile"]["user_data"] = b64encode(user_data)
 
     if v_cpus_available is not None or v_cpus_per_core is not None:
-        HardwareProfile = cmd.get_models('HardwareProfile')
-        VMSizeProperties = cmd.get_models('VMSizeProperties')
-        hardware_profile = HardwareProfile(vm_size_properties=VMSizeProperties(v_cpus_available=v_cpus_available,
-                                                                               v_cpus_per_core=v_cpus_per_core))
-        vmss.virtual_machine_profile.hardware_profile = hardware_profile
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("hardware_profile", None) is None:
+            vmss["virtual_machine_profile"]["hardware_profile"] = {}
+        if vmss["virtual_machine_profile"]["hardware_profile"].get("vm_size_properties", None) is None:
+            vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"] = {}
+
+        if v_cpus_available is not None:
+            vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_available"] = v_cpus_available  # pylint: disable=line-too-long
+        if v_cpus_per_core is not None:
+            vmss["virtual_machine_profile"]["hardware_profile"]["vm_size_properties"]["v_cp_us_per_core"] = v_cpus_per_core  # pylint: disable=line-too-long
 
     if capacity_reservation_group is not None:
-        CapacityReservationProfile = cmd.get_models('CapacityReservationProfile')
-        SubResource = cmd.get_models('SubResource')
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
         if capacity_reservation_group == 'None':
             capacity_reservation_group = None
-        sub_resource = SubResource(id=capacity_reservation_group)
-        capacity_reservation = CapacityReservationProfile(capacity_reservation_group=sub_resource)
-        vmss.virtual_machine_profile.capacity_reservation = capacity_reservation
+
+        sub_resource = {"id": capacity_reservation_group}
+        capacity_reservation = {"capacity_reservation_group": sub_resource}
+        vmss["virtual_machine_profile"]["capacity_reservation"] = capacity_reservation
 
     if enable_terminate_notification is not None or terminate_notification_time is not None:
-        if vmss.virtual_machine_profile.scheduled_events_profile is None:
-            ScheduledEventsProfile = cmd.get_models('ScheduledEventsProfile')
-            vmss.virtual_machine_profile.scheduled_events_profile = ScheduledEventsProfile()
-        TerminateNotificationProfile = cmd.get_models('TerminateNotificationProfile')
-        vmss.virtual_machine_profile.scheduled_events_profile.terminate_notification_profile =\
-            TerminateNotificationProfile(not_before_timeout=terminate_notification_time,
-                                         enable=enable_terminate_notification)
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("scheduled_events_profile", None) is None:
+            vmss["virtual_machine_profile"]["scheduled_events_profile"] = {}
+        vmss["virtual_machine_profile"]["scheduled_events_profile"]["terminate_notification_profile"] = \
+            {"not_before_timeout": terminate_notification_time,
+             "enable": enable_terminate_notification}
 
     if additional_scheduled_events is not None or \
             enable_user_reboot_scheduled_events is not None or enable_user_redeploy_scheduled_events is not None:
-        if vmss.scheduled_events_policy is None:
-            ScheduledEventsPolicy = cmd.get_models('ScheduledEventsPolicy')
-            UserInitiatedRedeploy = cmd.get_models('UserInitiatedRedeploy')
-            UserInitiatedReboot = cmd.get_models('UserInitiatedReboot')
-            EventGridAndResourceGraph = cmd.get_models('EventGridAndResourceGraph')
-            ScheduledEventsAdditionalPublishingTargets = cmd.get_models('ScheduledEventsAdditionalPublishingTargets')
-            vmss.scheduled_events_policy = ScheduledEventsPolicy()
-            vmss.scheduled_events_policy.scheduled_events_additional_publishing_targets = \
-                ScheduledEventsAdditionalPublishingTargets()
-            vmss.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
-                event_grid_and_resource_graph = EventGridAndResourceGraph()
-            vmss.scheduled_events_policy.user_initiated_reboot = UserInitiatedReboot()
-            vmss.scheduled_events_policy.user_initiated_redeploy = UserInitiatedRedeploy()
-        vmss.scheduled_events_policy.scheduled_events_additional_publishing_targets.\
-            event_grid_and_resource_graph.enable = additional_scheduled_events
-        vmss.scheduled_events_policy.user_initiated_redeploy.automatically_approve = \
-            enable_user_redeploy_scheduled_events
-        vmss.scheduled_events_policy.user_initiated_reboot.automatically_approve = enable_user_reboot_scheduled_events
+        if vmss.get("scheduled_events_policy", None) is None:
+            vmss["scheduled_events_policy"] = {}
+
+        if additional_scheduled_events is not None:
+            if vmss["scheduled_events_policy"].get("scheduled_events_additional_publishing_targets", None) is None:
+                vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"] = {}
+            if vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"].get("event_grid_and_resource_graph", None) is None:  # pylint: disable=line-too-long
+                vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"]["event_grid_and_resource_graph"] = {}  # pylint: disable=line-too-long
+            vmss["scheduled_events_policy"]["scheduled_events_additional_publishing_targets"][
+                "event_grid_and_resource_graph"]["enable"] = additional_scheduled_events
+
+        if enable_user_redeploy_scheduled_events is not None:
+            if vmss["scheduled_events_policy"].get("user_initiated_redeploy", None) is None:
+                vmss["scheduled_events_policy"]["user_initiated_redeploy"] = {}
+            vmss["scheduled_events_policy"]["user_initiated_redeploy"]["automatically_approve"] \
+                = enable_user_redeploy_scheduled_events
+
+        if enable_user_reboot_scheduled_events is not None:
+            if vmss["scheduled_events_policy"].get("user_initiated_reboot", None) is None:
+                vmss["scheduled_events_policy"]["user_initiated_reboot"] = {}
+            vmss["scheduled_events_policy"]["user_initiated_reboot"][
+                "automatically_approve"] = enable_user_reboot_scheduled_events
 
     if enable_osimage_notification is not None:
-        if vmss.virtual_machine_profile.scheduled_events_profile is None:
-            vmss.virtual_machine_profile.scheduled_events_profile = cmd.get_models('ScheduledEventsProfile')()
-        OSImageNotificationProfile = cmd.get_models('OSImageNotificationProfile')
-        vmss.virtual_machine_profile.scheduled_events_profile.os_image_notification_profile = \
-            OSImageNotificationProfile(enable=enable_osimage_notification)
-    if enable_automatic_repairs is not None or \
-            automatic_repairs_grace_period is not None or automatic_repairs_action is not None:
-        AutomaticRepairsPolicy = cmd.get_models('AutomaticRepairsPolicy')
-        vmss.automatic_repairs_policy = \
-            AutomaticRepairsPolicy(enabled=enable_automatic_repairs,
-                                   grace_period=automatic_repairs_grace_period,
-                                   repair_action=automatic_repairs_action)
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("scheduled_events_profile", None) is None:
+            vmss["virtual_machine_profile"]["scheduled_events_profile"] = {}
+        vmss["virtual_machine_profile"]["scheduled_events_profile"]["os_image_notification_profile"] = {
+            "enable": enable_osimage_notification
+        }
+
+    if enable_automatic_repairs is not None or automatic_repairs_grace_period is not None or automatic_repairs_action is not None:  # pylint: disable=line-too-long
+        if vmss.get("automatic_repairs_policy", None) is None:
+            vmss["automatic_repairs_policy"] = {}
+        if enable_automatic_repairs is not None:
+            vmss["automatic_repairs_policy"]["enabled"] = enable_automatic_repairs
+        if automatic_repairs_grace_period is not None:
+            vmss["automatic_repairs_policy"]["grace_period"] = automatic_repairs_grace_period
+        if automatic_repairs_action is not None:
+            vmss["automatic_repairs_policy"]["repair_action"] = automatic_repairs_action
 
     if ultra_ssd_enabled is not None:
-        if cmd.supported_api_version(min_api='2019-03-01', operation_group='virtual_machine_scale_sets'):
-            if vmss.additional_capabilities is None:
-                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
-                vmss.additional_capabilities = AdditionalCapabilities(ultra_ssd_enabled=ultra_ssd_enabled)
-            else:
-                vmss.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+        if vmss.get("additional_capabilities", None) is None:
+            vmss["additional_capabilities"] = {"ultra_ssd_enabled": ultra_ssd_enabled}
         else:
-            if vmss.virtual_machine_profile.additional_capabilities is None:
-                AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
-                vmss.virtual_machine_profile.additional_capabilities = AdditionalCapabilities(
-                    ultra_ssd_enabled=ultra_ssd_enabled)
-            else:
-                vmss.virtual_machine_profile.additional_capabilities.ultra_ssd_enabled = ultra_ssd_enabled
+            vmss["additional_capabilities"]["ultra_ssd_enabled"] = ultra_ssd_enabled
 
     if scale_in_policy is not None or force_deletion is not None:
-        ScaleInPolicy = cmd.get_models('ScaleInPolicy')
-        vmss.scale_in_policy = ScaleInPolicy(rules=scale_in_policy, force_deletion=force_deletion)
+        if vmss.get("scale_in_policy", None) is None:
+            vmss["scale_in_policy"] = {}
+        if scale_in_policy is not None:
+            vmss["scale_in_policy"]["rules"] = scale_in_policy
+        if force_deletion is not None:
+            vmss["scale_in_policy"]["force_deletion"] = force_deletion
 
     if enable_spot_restore is not None:
-        vmss.spot_restore_policy.enabled = enable_spot_restore
+        if vmss.get("spot_restore_policy", None) is None:
+            vmss["spot_restore_policy"] = {}
+        vmss["spot_restore_policy"]["enabled"] = enable_spot_restore
 
     if spot_restore_timeout is not None:
-        vmss.spot_restore_policy.restore_timeout = spot_restore_timeout
+        if vmss.get("spot_restore_policy", None) is None:
+            vmss["spot_restore_policy"] = {}
+        vmss["spot_restore_policy"]["restore_timeout"] = spot_restore_timeout
 
     if priority is not None:
-        vmss.virtual_machine_profile.priority = priority
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        vmss["virtual_machine_profile"]["priority"] = priority
 
     if max_price is not None:
-        if vmss.virtual_machine_profile.billing_profile is None:
-            BillingProfile = cmd.get_models('BillingProfile')
-            vmss.virtual_machine_profile.billing_profile = BillingProfile(max_price=max_price)
-        else:
-            vmss.virtual_machine_profile.billing_profile.max_price = max_price
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("billing_profile", None) is None:
+            vmss["virtual_machine_profile"]["billing_profile"] = {}
+        vmss["virtual_machine_profile"]["billing_profile"]["max_price"] = max_price
 
     if security_type is not None or enable_secure_boot is not None or enable_vtpm is not None:
-        security_profile = vmss.virtual_machine_profile.security_profile
-        prev_security_type = security_profile.security_type if security_profile else None
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+
+        security_profile = vmss["virtual_machine_profile"].get("security_profile", {})
+        prev_security_type = security_profile.get("security_type", None)
         # At present, `SecurityType` has options `TrustedLaunch` and `Standard`
         if security_type == 'TrustedLaunch' and prev_security_type != security_type:
-            vmss.virtual_machine_profile.security_profile = {
-                'securityType': security_type,
-                'uefiSettings': {
-                    'secureBootEnabled': enable_secure_boot if enable_secure_boot is not None else False,
-                    'vTpmEnabled': enable_vtpm if enable_vtpm is not None else True
+            vmss["virtual_machine_profile"]["security_profile"] = {
+                'security_type': security_type,
+                'uefi_settings': {
+                    'secure_boot_enabled': enable_secure_boot if enable_secure_boot is not None else False,
+                    'v_tpm_enabled': enable_vtpm if enable_vtpm is not None else True
                 }
             }
         elif security_type == 'Standard':
             if prev_security_type == 'TrustedLaunch':
                 logger.warning('Turning off Trusted launch disables foundational security for your VMs. '
                                'For more information, visit https://aka.ms/TrustedLaunch')
-            vmss.virtual_machine_profile.security_profile = {
-                'securityType': security_type,
-                'uefiSettings': None
+            vmss["virtual_machine_profile"]["security_profile"] = {
+                'security_type': security_type,
+                'uefi_settings': None
             }
         else:
-            vmss.virtual_machine_profile.security_profile = {'uefiSettings': {
-                'secureBootEnabled': enable_secure_boot,
-                'vTpmEnabled': enable_vtpm
-            }}
+            vmss["virtual_machine_profile"]["security_profile"] = {
+                'uefi_settings': {
+                    'secure_boot_enabled': enable_secure_boot,
+                    'v_tpm_enabled': enable_vtpm
+                }}
 
     if enable_proxy_agent is not None or wire_server_mode is not None or imds_mode is not None:
-        SecurityProfile = cmd.get_models('SecurityProfile')
-        ProxyAgentSettings = cmd.get_models('ProxyAgentSettings')
-        HostEndpointSettings = cmd.get_models('HostEndpointSettings')
-        wire_server = HostEndpointSettings()
-        imds = HostEndpointSettings()
-        if vmss.virtual_machine_profile.security_profile is None:
-            vmss.virtual_machine_profile.security_profile = SecurityProfile()
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                wire_server=wire_server, imds=imds)
-        elif vmss.virtual_machine_profile.security_profile.proxy_agent_settings is None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings = ProxyAgentSettings(
-                wire_server=wire_server, imds=imds)
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+
+        if vmss["virtual_machine_profile"].get("security_profile", None) is None:
+            vmss["virtual_machine_profile"]["security_profile"] = {
+                "proxy_agent_settings": {
+                    "wire_server": {},
+                    "imds": {}
+                }
+            }
+        elif vmss["virtual_machine_profile"]["security_profile"].get("proxy_agent_settings", None) is None:
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"] = {
+                "wire_server": {}, "imds": {}
+            }
         else:
-            if vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server is None:
-                vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server = wire_server
-            if vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds is None:
-                vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds = imds
+            if vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"].get("wire_server", None) is None:  # pylint: disable=line-too-long
+                vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["wire_server"] = {}
+            if vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"].get("imds", None) is None:
+                vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["imds"] = {}
 
         if enable_proxy_agent is not None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.enabled = enable_proxy_agent
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["enabled"] = enable_proxy_agent
         if wire_server_mode is not None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.wire_server.mode = wire_server_mode
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["wire_server"]["mode"] \
+                = wire_server_mode
         if imds_mode is not None:
-            vmss.virtual_machine_profile.security_profile.proxy_agent_settings.imds.mode = imds_mode
+            vmss["virtual_machine_profile"]["security_profile"]["proxy_agent_settings"]["imds"]["mode"] = imds_mode
 
     if regular_priority_count is not None or regular_priority_percentage is not None:
-        if vmss.orchestration_mode != 'Flexible':
+        if vmss.get("orchestration_mode", None) != 'Flexible':
             raise ValidationError("--regular-priority-count/--regular-priority-percentage is only available for"
                                   " VMSS with flexible orchestration mode")
-        if vmss.priority_mix_policy is None:
-            vmss.priority_mix_policy = {
-                'baseRegularPriorityCount': regular_priority_count,
-                'regularPriorityPercentageAboveBase': regular_priority_percentage
+        if vmss.get("priority_mix_policy", None) is None:
+            vmss["priority_mix_policy"] = {
+                'base_regular_priority_count': regular_priority_count,
+                'regular_priority_percentage_above_base': regular_priority_percentage
             }
         else:
             if regular_priority_count is not None:
-                vmss.priority_mix_policy.base_regular_priority_count = regular_priority_count
+                vmss["priority_mix_policy"]["base_regular_priority_count"] = regular_priority_count
             if regular_priority_percentage is not None:
-                vmss.priority_mix_policy.regular_priority_percentage_above_base = regular_priority_percentage
+                vmss["priority_mix_policy"]["regular_priority_percentage_above_base"] = regular_priority_percentage
 
     if proximity_placement_group is not None:
-        vmss.proximity_placement_group = {'id': proximity_placement_group}
+        vmss["proximity_placement_group"] = {'id': proximity_placement_group}
 
+    # pylint: disable=too-many-boolean-expressions
     if max_batch_instance_percent is not None or max_unhealthy_instance_percent is not None \
             or max_unhealthy_upgraded_instance_percent is not None or pause_time_between_batches is not None \
             or enable_cross_zone_upgrade is not None or prioritize_unhealthy_instances is not None \
             or max_surge is not None:
-        if vmss.upgrade_policy is None:
-            vmss.upgrade_policy = {'rolling_upgrade_policy': None}
-        if vmss.upgrade_policy.rolling_upgrade_policy is None:
-            vmss.upgrade_policy.rolling_upgrade_policy = {
-                'maxBatchInstancePercent': max_batch_instance_percent,
-                'maxUnhealthyInstancePercent': max_unhealthy_instance_percent,
-                'maxUnhealthyUpgradedInstancePercent': max_unhealthy_upgraded_instance_percent,
-                'pauseTimeBetweenBatches': pause_time_between_batches,
-                'enableCrossZoneUpgrade': enable_cross_zone_upgrade,
-                'prioritizeUnhealthyInstances': prioritize_unhealthy_instances,
-                'maxSurge': max_surge
+        if vmss.get("upgrade_policy", None) is None:
+            vmss["upgrade_policy"] = {"rolling_upgrade_policy": None}
+        if vmss["upgrade_policy"].get("rolling_upgrade_policy", None) is None:
+            vmss["upgrade_policy"]["rolling_upgrade_policy"] = {
+                'max_batch_instance_percent': max_batch_instance_percent,
+                'max_unhealthy_instance_percent': max_unhealthy_instance_percent,
+                'max_unhealthy_upgraded_instance_percent': max_unhealthy_upgraded_instance_percent,
+                'pause_time_between_batches': pause_time_between_batches,
+                'enable_cross_zone_upgrade': enable_cross_zone_upgrade,
+                'prioritize_unhealthy_instances': prioritize_unhealthy_instances,
+                'max_surge': max_surge
             }
         else:
-            vmss.upgrade_policy.rolling_upgrade_policy.max_batch_instance_percent = max_batch_instance_percent
-            vmss.upgrade_policy.rolling_upgrade_policy.max_unhealthy_instance_percent = max_unhealthy_instance_percent
-            vmss.upgrade_policy.rolling_upgrade_policy.max_unhealthy_upgraded_instance_percent = \
-                max_unhealthy_upgraded_instance_percent
-            vmss.upgrade_policy.rolling_upgrade_policy.pause_time_between_batches = pause_time_between_batches
-            vmss.upgrade_policy.rolling_upgrade_policy.enable_cross_zone_upgrade = enable_cross_zone_upgrade
-            vmss.upgrade_policy.rolling_upgrade_policy.prioritize_unhealthy_instances = prioritize_unhealthy_instances
-            vmss.upgrade_policy.rolling_upgrade_policy.max_surge = max_surge
+            if max_batch_instance_percent is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_batch_instance_percent"] \
+                    = max_batch_instance_percent
+            if max_unhealthy_instance_percent is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_unhealthy_instance_percent"] \
+                    = max_unhealthy_instance_percent
+            if max_unhealthy_upgraded_instance_percent is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_unhealthy_upgraded_instance_percent"] \
+                    = max_unhealthy_upgraded_instance_percent
+            if pause_time_between_batches is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["pause_time_between_batches"] \
+                    = pause_time_between_batches
+            if enable_cross_zone_upgrade is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["enable_cross_zone_upgrade"] \
+                    = enable_cross_zone_upgrade
+            if prioritize_unhealthy_instances is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["prioritize_unhealthy_instances"] \
+                    = prioritize_unhealthy_instances
+            if max_surge is not None:
+                vmss["upgrade_policy"]["rolling_upgrade_policy"]["max_surge"] = max_surge
 
     if upgrade_policy_mode is not None:
-        vmss.upgrade_policy.mode = upgrade_policy_mode
+        if vmss.get("upgrade_policy", None) is None:
+            vmss["upgrade_policy"] = {}
+        vmss["upgrade_policy"]["mode"] = upgrade_policy_mode
 
     if enable_auto_os_upgrade is not None:
-        if vmss.upgrade_policy.automatic_os_upgrade_policy is None:
-            vmss.upgrade_policy.automatic_os_upgrade_policy = {'enableAutomaticOSUpgrade': enable_auto_os_upgrade}
+        if vmss.get("upgrade_policy", None) is None:
+            vmss["upgrade_policy"] = {}
+        if vmss["upgrade_policy"].get("automatic_os_upgrade_policy", None) is None:
+            vmss["upgrade_policy"]["automatic_os_upgrade_policy"] \
+                = {'enable_automatic_os_upgrade': enable_auto_os_upgrade}
         else:
-            vmss.upgrade_policy.automatic_os_upgrade_policy.enable_automatic_os_upgrade = enable_auto_os_upgrade
+            vmss["upgrade_policy"]["automatic_os_upgrade_policy"]["enable_automatic_os_upgrade"] \
+                = enable_auto_os_upgrade
 
     if vm_sku is not None:
-        if vmss.sku.name == vm_sku:
+        if vmss.get("sku", {}).get("name", None) == vm_sku:
             logger.warning("VMSS sku is already %s", vm_sku)
         else:
-            vmss.sku.name = vm_sku
+            if vmss.get("sku", None) is None:
+                vmss["sku"] = {}
+            vmss["sku"]["name"] = vm_sku
 
     sku_profile = {}
     if skuprofile_vmsizes is not None or skuprofile_allostrat is not None:
@@ -4454,101 +4677,110 @@ def update_vmss(cmd, resource_group_name, name, license_type=None, no_wait=False
                     'name': vm_size
                 }
                 sku_profile_vmsizes_list.append(vmsize_obj)
-            sku_profile['vmSizes'] = sku_profile_vmsizes_list
+            sku_profile['vm_sizes'] = sku_profile_vmsizes_list
 
             if skuprofile_rank:
                 for vm_size, rank in zip(sku_profile_vmsizes_list, skuprofile_rank):
                     vm_size['rank'] = rank
 
         if skuprofile_allostrat is not None:
-            sku_profile['allocationStrategy'] = skuprofile_allostrat
-        vmss.sku_profile = sku_profile
+            sku_profile['allocation_strategy'] = skuprofile_allostrat
+        vmss["sku_profile"] = sku_profile
 
-    if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None:
-        if vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings is not None:
-            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings.placement = \
-                ephemeral_os_disk_placement
-            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings.option = \
-                ephemeral_os_disk_option
-        else:
-            DiffDiskSettings = cmd.get_models('DiffDiskSettings')
-            vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings = DiffDiskSettings(
-                option=ephemeral_os_disk_option, placement=ephemeral_os_disk_placement)
+    if ephemeral_os_disk_placement is not None or ephemeral_os_disk_option is not None or ephemeral_os_disk is not None:
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("storage_profile", None) is None:
+            vmss["virtual_machine_profile"]["storage_profile"] = {}
+        if vmss["virtual_machine_profile"]["storage_profile"].get("os_disk", None) is None:
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"] = {}
+        if vmss["virtual_machine_profile"]["storage_profile"]["os_disk"].get("diff_disk_settings", None) is None:
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"] = {}
 
-    if ephemeral_os_disk is False:
-        vmss.virtual_machine_profile.storage_profile.os_disk.diff_disk_settings = {}
+        if ephemeral_os_disk_placement is not None:
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"]["placement"] \
+                = ephemeral_os_disk_placement
+        if ephemeral_os_disk_option is not None:
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"]["option"] \
+                = ephemeral_os_disk_option
+        if ephemeral_os_disk is False:
+            vmss["virtual_machine_profile"]["storage_profile"]["os_disk"]["diff_disk_settings"] = {}
 
     if disk_controller_type is not None:
-        vmss.virtual_machine_profile.storage_profile.disk_controller_type = disk_controller_type
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("storage_profile", None) is None:
+            vmss["virtual_machine_profile"]["storage_profile"] = {}
+        vmss["virtual_machine_profile"]["storage_profile"]["disk_controller_type"] = disk_controller_type
 
     if custom_data is not None:
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("os_profile", None) is None:
+            vmss["virtual_machine_profile"]["os_profile"] = {}
         custom_data = read_content_if_is_file(custom_data)
-        vmss.virtual_machine_profile.os_profile.custom_data = b64encode(custom_data)
+        vmss["virtual_machine_profile"]["os_profile"]["custom_data"] = b64encode(custom_data)
 
     if enable_hibernation is not None:
-        if vmss.additional_capabilities is None:
-            AdditionalCapabilities = cmd.get_models('AdditionalCapabilities')
-            vmss.additional_capabilities = AdditionalCapabilities(hibernation_enabled=enable_hibernation)
+        if vmss.get("additional_capabilities", None) is None:
+            vmss["additional_capabilities"] = {"hibernation_enabled": enable_hibernation}
         else:
-            vmss.additional_capabilities.hibernation_enabled = enable_hibernation
+            vmss["additional_capabilities"]["hibernation_enabled"] = enable_hibernation
 
     if security_posture_reference_id is not None or security_posture_reference_exclude_extensions is not None or \
             security_posture_reference_is_overridable is not None:
-        security_posture_reference = vmss.virtual_machine_profile.security_posture_reference
-        if security_posture_reference is None:
-            SecurityPostureReference = cmd.get_models('SecurityPostureReference')
-            security_posture_reference = SecurityPostureReference()
+        if vmss.get("virtual_machine_profile", None) is None:
+            vmss["virtual_machine_profile"] = {}
+        if vmss["virtual_machine_profile"].get("security_posture_reference", None) is None:
+            vmss["virtual_machine_profile"]["security_posture_reference"] = {}
 
         if security_posture_reference_id is not None:
-            security_posture_reference.id = security_posture_reference_id
+            vmss["virtual_machine_profile"]["security_posture_reference"]["id"] = security_posture_reference_id
         if security_posture_reference_exclude_extensions is not None:
-            security_posture_reference.exclude_extensions = security_posture_reference_exclude_extensions
+            vmss["virtual_machine_profile"]["security_posture_reference"]["exclude_extensions"] \
+                = security_posture_reference_exclude_extensions
         if security_posture_reference_is_overridable is not None:
-            security_posture_reference.is_overridable = security_posture_reference_is_overridable
-
-        vmss.virtual_machine_profile.security_posture_reference = security_posture_reference
+            vmss["virtual_machine_profile"]["security_posture_reference"]["is_overridable"] \
+                = security_posture_reference_is_overridable
 
     if enable_resilient_creation is not None or enable_resilient_deletion is not None:
-        resiliency_policy = vmss.resiliency_policy
+        if vmss.get("resiliency_policy", None) is None:
+            vmss["resiliency_policy"] = {}
         if enable_resilient_creation is not None:
-            resiliency_policy.resilient_vm_creation_policy = {'enabled': enable_resilient_creation}
+            vmss["resiliency_policy"]["resilient_vm_creation_policy"] = {'enabled': enable_resilient_creation}
         if enable_resilient_deletion is not None:
-            resiliency_policy.resilient_vm_deletion_policy = {'enabled': enable_resilient_deletion}
+            vmss["resiliency_policy"]["resilient_vm_deletion_policy"] = {'enabled': enable_resilient_deletion}
 
     if enable_automatic_zone_balancing is not None or automatic_zone_balancing_strategy is not None or \
             automatic_zone_balancing_behavior is not None:
-        resiliency_policy = vmss.resiliency_policy
-        if resiliency_policy is None:
-            ResiliencyPolicy = cmd.get_models('ResiliencyPolicy')
-            AutomaticZoneRebalancingPolicy = cmd.get_models('AutomaticZoneRebalancingPolicy')
-            resiliency_policy = ResiliencyPolicy()
-            resiliency_policy.automatic_zone_rebalancing_policy = AutomaticZoneRebalancingPolicy()
-        elif resiliency_policy.automatic_zone_rebalancing_policy is None:
-            AutomaticZoneRebalancingPolicy = cmd.get_models('AutomaticZoneRebalancingPolicy')
-            resiliency_policy.automatic_zone_rebalancing_policy = AutomaticZoneRebalancingPolicy()
+        if vmss.get("resiliency_policy", None) is None:
+            vmss["resiliency_policy"] = {}
+        if vmss["resiliency_policy"].get("automatic_zone_rebalancing_policy", None) is None:
+            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"] = {}
 
         if enable_automatic_zone_balancing is not None:
-            resiliency_policy.automatic_zone_rebalancing_policy.enabled = enable_automatic_zone_balancing
+            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"]["enabled"] = enable_automatic_zone_balancing
 
         if automatic_zone_balancing_strategy is not None:
-            resiliency_policy.automatic_zone_rebalancing_policy.rebalance_strategy = automatic_zone_balancing_strategy
+            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"]["rebalance_strategy"] \
+                = automatic_zone_balancing_strategy
 
         if automatic_zone_balancing_behavior is not None:
-            resiliency_policy.automatic_zone_rebalancing_policy.rebalance_behavior = automatic_zone_balancing_behavior
-        vmss.resiliency_policy = resiliency_policy
+            vmss["resiliency_policy"]["automatic_zone_rebalancing_policy"]["rebalance_behavior"] \
+                = automatic_zone_balancing_behavior
 
     if zones is not None:
-        vmss.zones = zones
+        vmss["zones"] = zones
 
     if zone_balance is not None:
-        vmss.zone_balance = zone_balance
+        vmss["zone_balance"] = zone_balance
 
-    if wire_server_access_control_profile_reference_id is not None or \
-            imds_access_control_profile_reference_id is not None:
-        kwargs['parameters'] = vmss
+    vmss["resource_group"] = resource_group_name
+    vmss["vm_scale_set_name"] = name
+    vmss["no_wait"] = no_wait
 
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update,
-                       resource_group_name, name, **kwargs)
+    from .operations.vmss import VMSSCreate
+    return VMSSCreate(cli_ctx=cmd.cli_ctx)(command_args=vmss)
 
 # endregion
 
@@ -4784,7 +5016,7 @@ def vmss_run_command_invoke(cmd, resource_group_name, vmss_name, command_id, ins
     return run_command_invoke(cmd, resource_group_name, vmss_name, command_id, scripts, parameters, instance_id)
 
 
-def vmss_run_command_create(client,
+def vmss_run_command_create(cmd,
                             resource_group_name,
                             vmss_name,
                             instance_id,
@@ -4803,21 +5035,25 @@ def vmss_run_command_create(client,
                             output_blob_uri=None,
                             error_blob_uri=None,
                             no_wait=False):
-    run_command = {}
-    run_command['location'] = location
+    from .aaz.latest.vmss.run_command import Create
+    args = {}
+    args['location'] = location
+    args['resource_group'] = resource_group_name
+    args['run_command_name'] = run_command_name
+    args['instance_id'] = instance_id
+    args['vmss_name'] = vmss_name
+    args['no_wait'] = no_wait
     if tags is not None:
-        run_command['tags'] = tags
-    source = {}
+        args['tags'] = tags
     if script is not None:
-        source['script'] = script
+        args['script'] = script
     if script_uri is not None:
-        source['script_uri'] = script_uri
+        args['script_uri'] = script_uri
     if command_id is not None:
-        source['command_id'] = command_id
-    run_command['source'] = source
+        args['command_id'] = command_id
     if parameters is not None:
         auto_arg_name_num = 0
-        run_command['parameters'] = []
+        args['parameters'] = []
         for p in parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
@@ -4825,10 +5061,10 @@ def vmss_run_command_create(client,
                 auto_arg_name_num += 1
                 n = 'arg{}'.format(auto_arg_name_num)
                 v = p
-            run_command['parameters'].append({'name': n, 'value': v})
+            args['parameters'].append({'name': n, 'value': v})
     if protected_parameters is not None:
         auto_arg_name_num = 0
-        run_command['protected_parameters'] = []
+        args['protected_parameters'] = []
         for p in protected_parameters:
             if '=' in p:
                 n, v = p.split('=', 1)
@@ -4836,31 +5072,25 @@ def vmss_run_command_create(client,
                 auto_arg_name_num += 1
                 n = 'arg{}'.format(auto_arg_name_num)
                 v = p
-            run_command['protected_parameters'].append({'name': n, 'value': v})
+            args['protected_parameters'].append({'name': n, 'value': v})
     if async_execution is not None:
-        run_command['async_execution'] = async_execution
+        args['async_execution'] = async_execution
     else:
-        run_command['async_execution'] = False
+        args['async_execution'] = False
     if run_as_user is not None:
-        run_command['run_as_user'] = run_as_user
+        args['run_as_user'] = run_as_user
     if run_as_password is not None:
-        run_command['run_as_password'] = run_as_password
+        args['run_as_password'] = run_as_password
     if timeout_in_seconds is not None:
-        run_command['timeout_in_seconds'] = timeout_in_seconds
+        args['timeout_in_seconds'] = timeout_in_seconds
     if output_blob_uri is not None:
-        run_command['output_blob_uri'] = output_blob_uri
+        args['output_blob_uri'] = output_blob_uri
     if error_blob_uri is not None:
-        run_command['error_blob_uri'] = error_blob_uri
-    return sdk_no_wait(no_wait,
-                       client.begin_create_or_update,
-                       resource_group_name=resource_group_name,
-                       vm_scale_set_name=vmss_name,
-                       instance_id=instance_id,
-                       run_command_name=run_command_name,
-                       run_command=run_command)
+        args['error_blob_uri'] = error_blob_uri
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
-def vmss_run_command_update(client,
+def vmss_run_command_update(cmd,
                             resource_group_name,
                             vmss_name,
                             instance_id,
@@ -4879,102 +5109,86 @@ def vmss_run_command_update(client,
                             output_blob_uri=None,
                             error_blob_uri=None,
                             no_wait=False):
-    run_command = {}
-    run_command['location'] = location
-    if tags is not None:
-        run_command['tags'] = tags
-    source = {}
-    if script is not None:
-        source['script'] = script
-    if script_uri is not None:
-        source['script_uri'] = script_uri
-    if command_id is not None:
-        source['command_id'] = command_id
-    run_command['source'] = source
-    if parameters is not None:
-        auto_arg_name_num = 0
-        run_command['parameters'] = []
-        for p in parameters:
-            if '=' in p:
-                n, v = p.split('=', 1)
+    from .aaz.latest.vmss.run_command import Update as _Update
+
+    class Update(_Update):
+        def pre_instance_update(self, instance):
+            if tags is not None:
+                instance.tags = tags
+            if location is not None:
+                instance.location = location
+            if script is not None:
+                instance.properties.source.script = script
+            if script_uri is not None:
+                instance.properties.source.script_uri = script_uri
+            if command_id is not None:
+                instance.properties.source.command_id = command_id
+            if parameters is not None:
+                auto_arg_name_num = 0
+                _params = []
+                for p in parameters:
+                    if '=' in p:
+                        n, v = p.split('=', 1)
+                    else:
+                        auto_arg_name_num += 1
+                        n = 'arg{}'.format(auto_arg_name_num)
+                        v = p
+                    _params.append({'name': n, 'value': v})
+                instance.properties.parameters = _params
+            if protected_parameters is not None:
+                auto_arg_name_num = 0
+                _params = []
+                for p in protected_parameters:
+                    if '=' in p:
+                        n, v = p.split('=', 1)
+                    else:
+                        auto_arg_name_num += 1
+                        n = 'arg{}'.format(auto_arg_name_num)
+                        v = p
+                    _params.append({'name': n, 'value': v})
+                instance.properties.protected_parameters = _params
+            if async_execution is not None:
+                instance.properties.async_execution = async_execution
             else:
-                auto_arg_name_num += 1
-                n = 'arg{}'.format(auto_arg_name_num)
-                v = p
-            run_command['parameters'].append({'name': n, 'value': v})
-    if protected_parameters is not None:
-        auto_arg_name_num = 0
-        run_command['protected_parameters'] = []
-        for p in protected_parameters:
-            if '=' in p:
-                n, v = p.split('=', 1)
-            else:
-                auto_arg_name_num += 1
-                n = 'arg{}'.format(auto_arg_name_num)
-                v = p
-            run_command['protected_parameters'].append({'name': n, 'value': v})
-    if async_execution is not None:
-        run_command['async_execution'] = async_execution
-    else:
-        run_command['async_execution'] = False
-    if run_as_user is not None:
-        run_command['run_as_user'] = run_as_user
-    if run_as_password is not None:
-        run_command['run_as_password'] = run_as_password
-    if timeout_in_seconds is not None:
-        run_command['timeout_in_seconds'] = timeout_in_seconds
-    if output_blob_uri is not None:
-        run_command['output_blob_uri'] = output_blob_uri
-    if error_blob_uri is not None:
-        run_command['error_blob_uri'] = error_blob_uri
-    return sdk_no_wait(no_wait,
-                       client.begin_update,
-                       resource_group_name=resource_group_name,
-                       vm_scale_set_name=vmss_name,
-                       instance_id=instance_id,
-                       run_command_name=run_command_name,
-                       run_command=run_command)
+                instance.properties.async_execution = False
+            if run_as_user is not None:
+                instance.properties.run_as_user = run_as_user
+            if run_as_password is not None:
+                instance.properties.run_as_password = run_as_password
+            if timeout_in_seconds is not None:
+                instance.properties.timeout_in_seconds = timeout_in_seconds
+            if output_blob_uri is not None:
+                instance.properties.output_blob_uri = output_blob_uri
+            if error_blob_uri is not None:
+                instance.properties.error_blob_uri = error_blob_uri
+
+    args = {}
+    args['resource_group'] = resource_group_name
+    args['run_command_name'] = run_command_name
+    args['instance_id'] = instance_id
+    args['vmss_name'] = vmss_name
+    args['no_wait'] = no_wait
+
+    return Update(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 
-def vmss_run_command_delete(client,
-                            resource_group_name,
-                            vmss_name,
-                            instance_id,
-                            run_command_name,
-                            no_wait=False):
-    return sdk_no_wait(no_wait,
-                       client.begin_delete,
-                       resource_group_name=resource_group_name,
-                       vm_scale_set_name=vmss_name,
-                       instance_id=instance_id,
-                       run_command_name=run_command_name)
-
-
-def vmss_run_command_list(client,
-                          resource_group_name,
-                          vmss_name,
-                          instance_id,
-                          expand=None):
-    return client.list(resource_group_name=resource_group_name,
-                       vm_scale_set_name=vmss_name,
-                       instance_id=instance_id,
-                       expand=expand)
-
-
-def vmss_run_command_show(client,
+def vmss_run_command_show(cmd,
                           resource_group_name,
                           vmss_name,
                           instance_id,
                           run_command_name,
                           expand=None,
                           instance_view=False):
+    from .aaz.latest.vmss.run_command import Show
     if instance_view:
         expand = 'instanceView'
-    return client.get(resource_group_name=resource_group_name,
-                      vm_scale_set_name=vmss_name,
-                      instance_id=instance_id,
-                      run_command_name=run_command_name,
-                      expand=expand)
+    return Show(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vmss_name': vmss_name,
+        'instance_id': instance_id,
+        'run_command_name': run_command_name,
+        'expand': expand
+    })
 # endregion
 
 
@@ -5338,8 +5552,8 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
                          target_edge_zones=None, block_deletion_before_end_of_life=None, no_wait=False, **kwargs):
     args = kwargs['gallery_image_version']
 
-    from .operations.sig_image_version import convert_show_result_to_sneak_case
-    args = convert_show_result_to_sneak_case(args)
+    from .operations.sig_image_version import convert_show_result_to_snake_case
+    args = convert_show_result_to_snake_case(args)
 
     if target_regions:
         if "publishing_profile" not in args:
@@ -5506,7 +5720,7 @@ def execute_query_for_vm(cmd, client, resource_group_name, vm_name, analytics_qu
 
 
 def _set_log_analytics_workspace_extension(cmd, resource_group_name, vm, vm_name, workspace_name):
-    is_linux_os = _is_linux_os(vm)
+    is_linux_os = _is_linux_os_by_aaz(vm)
     vm_extension_name = _LINUX_OMS_AGENT_EXT if is_linux_os else _WINDOWS_OMS_AGENT_EXT
     log_client = _get_log_analytics_client(cmd)
     customer_id = log_client.workspaces.get(resource_group_name, workspace_name).customer_id
@@ -5716,7 +5930,7 @@ def show_capacity_reservation_group(client, resource_group_name, capacity_reserv
                       expand=expand)
 
 
-def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
+def set_vm_applications(cmd, vm_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, enable_automatic_upgrade=None, no_wait=False):
     from .aaz.latest.vm import Update as _VMUpdate
 
     class SetVMApplications(_VMUpdate):
@@ -5745,6 +5959,13 @@ def set_vm_applications(cmd, vm_name, resource_group_name, application_version_i
                 for treat_as_failure in treat_deployment_as_failure:
                     instance.properties.application_profile.gallery_applications[index]["treat_failure_as_deployment_failure"] = \
                         treat_as_failure.lower() == 'true'
+                    index += 1
+
+            if enable_automatic_upgrade:
+                index = 0
+                for enable_auto_upgrade in enable_automatic_upgrade:
+                    instance.properties.application_profile.gallery_applications[index]["enable_automatic_upgrade"] = \
+                        enable_auto_upgrade.lower() == 'true'
                     index += 1
 
         def _output(self, *args, **kwargs):
@@ -5778,35 +5999,62 @@ def list_vm_applications(cmd, vm_name, resource_group_name):
     return vm.get("applicationProfile", {})
 
 
-def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, no_wait=False):
-    client = _compute_client_factory(cmd.cli_ctx)
-    ApplicationProfile, VMGalleryApplication = cmd.get_models('ApplicationProfile', 'VMGalleryApplication')
-    try:
-        vmss = client.virtual_machine_scale_sets.get(resource_group_name, vmss_name)
-    except ResourceNotFoundError:
-        raise ResourceNotFoundError('Could not find vmss {}.'.format(vmss_name))
+def set_vmss_applications(cmd, vmss_name, resource_group_name, application_version_ids, order_applications=False, application_configuration_overrides=None, treat_deployment_as_failure=None, enable_automatic_upgrade=None, no_wait=False):
+    from .aaz.latest.vmss import Update as _VMSSUpdate
 
-    vmss.virtual_machine_profile.application_profile = ApplicationProfile(gallery_applications=[VMGalleryApplication(package_reference_id=avid) for avid in application_version_ids])
+    class SetVMSSApplications(_VMSSUpdate):
+        def pre_operations(self):
+            args = self.ctx.args
+            args.no_wait = no_wait
 
-    if order_applications:
-        index = 1
-        for app in vmss.virtual_machine_profile.application_profile.gallery_applications:
-            app.order = index
-            index += 1
+        def pre_instance_update(self, instance):
+            instance.properties.virtualMachineProfile.application_profile.gallery_applications = [{"package_reference_id": avid} for avid in application_version_ids]
 
-    if application_configuration_overrides:
-        index = 0
-        for over_ride in application_configuration_overrides:
-            if over_ride or over_ride.lower() != 'null':
-                vmss.virtual_machine_profile.application_profile.gallery_applications[index].configuration_reference = over_ride
-            index += 1
+            if order_applications:
+                index = 1
+                for app in instance.properties.virtualMachineProfile.application_profile.gallery_applications:
+                    app["order"] = index
+                    index += 1
 
-    if treat_deployment_as_failure:
-        index = 0
-        for treat_as_failure in treat_deployment_as_failure:
-            vmss.virtual_machine_profile.application_profile.gallery_applications[index].treat_failure_as_deployment_failure = treat_as_failure.lower() == 'true'
-            index += 1
-    return sdk_no_wait(no_wait, client.virtual_machine_scale_sets.begin_create_or_update, resource_group_name, vmss_name, vmss)
+            if application_configuration_overrides:
+                index = 0
+                for over_ride in application_configuration_overrides:
+                    if over_ride or over_ride.lower() != 'null':
+                        instance.properties.virtual_machine_profile.application_profile.gallery_applications[index]["configuration_reference"] = over_ride
+                    index += 1
+
+            if treat_deployment_as_failure:
+                index = 0
+                for treat_as_failure in treat_deployment_as_failure:
+                    instance.properties.virtual_machine_profile.application_profile.gallery_applications[index]["treat_failure_as_deployment_failure"] = \
+                        treat_as_failure.lower() == 'true'
+                    index += 1
+
+            if enable_automatic_upgrade:
+                index = 0
+                for enable_auto_upgrade in enable_automatic_upgrade:
+                    instance.properties.virtual_machine_profile.application_profile.gallery_applications[index]["enable_automatic_upgrade"] = \
+                        enable_auto_upgrade.lower() == 'true'
+                    index += 1
+
+        def _output(self, *args, **kwargs):
+            from azure.cli.core.aaz import AAZUndefined, has_value
+
+            # Resolve flatten conflict
+            # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+            print(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions)
+            if has_value(self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions):
+                for extension in self.ctx.vars.instance.properties.virtual_machine_profile.extension_profile.extensions:
+                    if has_value(extension.type):
+                        extension.type = AAZUndefined
+
+            result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+            return result
+
+    return SetVMSSApplications(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "vm_scale_set_name": vmss_name,
+    })
 
 
 def list_vmss_applications(cmd, vmss_name, resource_group_name):
@@ -5819,7 +6067,7 @@ def list_vmss_applications(cmd, vmss_name, resource_group_name):
 
 
 # region Restore point collection
-def restore_point_create(client,
+def restore_point_create(cmd,
                          resource_group_name,
                          restore_point_collection_name,
                          restore_point_name,
@@ -5833,15 +6081,20 @@ def restore_point_create(client,
                          data_disk_restore_point_encryption_set=None,
                          data_disk_restore_point_encryption_type=None,
                          no_wait=False):
-    parameters = {}
+    parameters = {
+        'restore_point_collection_name': restore_point_collection_name,
+        'restore_point_name': restore_point_name,
+        'resource_group': resource_group_name,
+        'no_wait': no_wait
+    }
     if exclude_disks is not None:
-        parameters['excludeDisks'] = []
+        parameters['exclude_disks'] = []
         for disk in exclude_disks:
-            parameters['excludeDisks'].append({'id': disk})
+            parameters['exclude_disks'].append({'id': disk})
     if source_restore_point is not None:
-        parameters['sourceRestorePoint'] = {'id': source_restore_point}
+        parameters['source_restore_point'] = {'id': source_restore_point}
     if consistency_mode is not None:
-        parameters['consistencyMode'] = consistency_mode
+        parameters['consistency_mode'] = consistency_mode
 
     storage_profile = {}
     # Local restore point
@@ -5851,7 +6104,7 @@ def restore_point_create(client,
             managed_disk = {
                 'id': source_os_resource
             }
-            os_disk['managedDisk'] = managed_disk
+            os_disk['managed_disk'] = managed_disk
             if os_restore_point_encryption_set is None and os_restore_point_encryption_type is None:
                 raise ArgumentUsageError('usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource')
 
@@ -5859,7 +6112,7 @@ def restore_point_create(client,
         if os_restore_point_encryption_set is not None or os_restore_point_encryption_type is not None:
             encryption = {}
             if os_restore_point_encryption_set is not None:
-                encryption['diskEncryptionSet'] = {
+                encryption['disk_encryption_set'] = {
                     'id': os_restore_point_encryption_set
                 }
             if os_restore_point_encryption_type is not None:
@@ -5869,10 +6122,10 @@ def restore_point_create(client,
                 disk_restore_point['encryption'] = encryption
 
         if disk_restore_point:
-            os_disk['diskRestorePoint'] = disk_restore_point
+            os_disk['disk_restore_point'] = disk_restore_point
 
         if os_disk:
-            storage_profile['osDisk'] = os_disk
+            storage_profile['os_disk'] = os_disk
 
         data_disks = []
         if source_data_disk_resource is not None:
@@ -5885,10 +6138,10 @@ def restore_point_create(client,
 
             for i, v in enumerate(source_data_disk_resource):
                 data_disks.append({
-                    'managedDisk': {
+                    'managed_disk': {
                         'id': v
                     },
-                    'diskRestorePoint': {
+                    'disk_restore_point': {
                         'encryption': {
                             'disk_encryption_set': {
                                 'id': data_disk_restore_point_encryption_set[i] if data_disk_restore_point_encryption_set is not None else None
@@ -5899,7 +6152,7 @@ def restore_point_create(client,
                 })
 
         if data_disks:
-            storage_profile['dataDisks'] = data_disks
+            storage_profile['data_disks'] = data_disks
 
     # Remote restore point
     if source_restore_point is not None:
@@ -5909,14 +6162,14 @@ def restore_point_create(client,
             source_disk_restore_point = {
                 'id': source_os_resource
             }
-            disk_restore_point['sourceDiskRestorePoint'] = source_disk_restore_point
+            disk_restore_point['source_disk_restore_point'] = source_disk_restore_point
             if os_restore_point_encryption_set is None and os_restore_point_encryption_type is None:
                 raise ArgumentUsageError('usage error: --os-restore-point-encryption-set or --os-restore-point-encryption-type must be used together with --source-os-resource')
 
         if os_restore_point_encryption_set is not None or os_restore_point_encryption_type is not None:
             encryption = {}
             if os_restore_point_encryption_set is not None:
-                encryption['diskEncryptionSet'] = {
+                encryption['disk_encryption_set'] = {
                     'id': os_restore_point_encryption_set
                 }
             if os_restore_point_encryption_type is not None:
@@ -5925,9 +6178,9 @@ def restore_point_create(client,
             if encryption:
                 disk_restore_point['encryption'] = encryption
         if disk_restore_point:
-            os_disk['diskRestorePoint'] = disk_restore_point
+            os_disk['disk_restore_point'] = disk_restore_point
         if os_disk:
-            storage_profile['osDisk'] = os_disk
+            storage_profile['os_disk'] = os_disk
 
         data_disks = []
         if source_data_disk_resource is not None:
@@ -5940,8 +6193,8 @@ def restore_point_create(client,
 
             for i, v in enumerate(source_data_disk_resource):
                 data_disks.append({
-                    'diskRestorePoint': {
-                        'sourceDiskRestorePoint': {
+                    'disk_restore_point': {
+                        'source_disk_restore_point': {
                             'id': v
                         },
                         'encryption': {
@@ -5953,75 +6206,51 @@ def restore_point_create(client,
                     }
                 })
         if data_disks:
-            storage_profile['dataDisks'] = data_disks
+            storage_profile['data_disks'] = data_disks
 
     if storage_profile:
-        parameters['sourceMetadata'] = {'storageProfile': storage_profile}
-    return sdk_no_wait(no_wait,
-                       client.begin_create,
-                       resource_group_name=resource_group_name,
-                       restore_point_collection_name=restore_point_collection_name,
-                       restore_point_name=restore_point_name,
-                       parameters=parameters)
+        parameters['source_metadata'] = {'storage_profile': storage_profile}
+
+    from .aaz.latest.restore_point import Create
+    return Create(cli_ctx=cmd.cli_ctx)(command_args=parameters)
 
 
-def restore_point_show(client,
+def restore_point_show(cmd,
                        resource_group_name,
                        restore_point_name,
                        restore_point_collection_name,
                        expand=None,
                        instance_view=None):
+    args = {
+        'resource_group': resource_group_name,
+        'restore_point_collection_name': restore_point_collection_name,
+        'restore_point_name': restore_point_name,
+        'expand': expand
+    }
+
     if instance_view is not None:
-        expand = 'instanceView'
-    return client.get(resource_group_name=resource_group_name,
-                      restore_point_name=restore_point_name,
-                      restore_point_collection_name=restore_point_collection_name,
-                      expand=expand)
+        args['expand'] = 'instanceView'
+
+    from .aaz.latest.restore_point import Show
+    return Show(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 # endRegion
 
 
 # region Restore point collection
-def restore_point_collection_show(client,
+def restore_point_collection_show(cmd,
                                   resource_group_name,
                                   restore_point_collection_name,
                                   expand=None,
                                   restore_points=None):
+    from .aaz.latest.restore_point.collection import Show
+    args = {
+        "resource_group": resource_group_name,
+        "restore_point_collection_name": restore_point_collection_name,
+    }
     if restore_points is not None:
-        expand = 'restorePoints'
-    return client.get(resource_group_name=resource_group_name,
-                      restore_point_collection_name=restore_point_collection_name,
-                      expand=expand)
-
-
-def restore_point_collection_create(client,
-                                    resource_group_name,
-                                    restore_point_collection_name,
-                                    location,
-                                    source_id,
-                                    tags=None):
-    parameters = {}
-    properties = {}
-    parameters['location'] = location
-    if tags is not None:
-        parameters['tags'] = tags
-    properties['source'] = {'id': source_id}
-    parameters['properties'] = properties
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   restore_point_collection_name=restore_point_collection_name,
-                                   parameters=parameters)
-
-
-def restore_point_collection_update(client,
-                                    resource_group_name,
-                                    restore_point_collection_name,
-                                    tags=None):
-    parameters = {}
-    if tags is not None:
-        parameters['tags'] = tags
-    return client.update(resource_group_name=resource_group_name,
-                         restore_point_collection_name=restore_point_collection_name,
-                         parameters=parameters)
+        args['expand'] = 'restorePoints'
+    return Show(cli_ctx=cmd.cli_ctx)(command_args=args)
 
 # endRegion
 

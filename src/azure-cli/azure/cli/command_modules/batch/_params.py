@@ -17,7 +17,6 @@ from azure.mgmt.batch.models import (
 from azure.batch.models import (
     CachingType,
     BatchNodeDeallocationOption,
-    BatchNodeCommunicationMode,
     StorageAccountType)
 
 from azure.cli.core.commands.parameters import (
@@ -39,7 +38,6 @@ from azure.cli.command_modules.batch._validators import (
     keyvault_id,
     metadata_item_format,
     resource_file_format,
-    resource_tag_format,
     duration_format,
     storage_account_id,
     validate_client_parameters,
@@ -222,9 +220,6 @@ def load_arguments(self, _):
                                                                                             'configured on the Pool. If omitted, or if you specify an'
                                                                                             'empty collection, any existing metadata is removed from the'
                                                                                             'Pool.')
-        c.argument('target_node_communication_mode', options_list=['--target-communication'], arg_group='Pool',
-                   help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
-                   arg_type=get_enum_type(BatchNodeCommunicationMode))
         c.argument('start_task_command_line', arg_group='Pool: Start Task',
                    help='The command line of the start task. The command line does not run under a shell, and therefore cannot take advantage of shell features such as environment variable expansion. If you want to take advantage of such features, you should invoke the shell in the command line, for example using "cmd /c MyCommand" in Windows or "/bin/sh -c MyCommand" in Linux.')
         c.argument('start_task_wait_for_success', action='store_true', arg_group='Pool: Start Task',
@@ -382,10 +377,6 @@ def load_arguments(self, _):
 
     with self.argument_context('batch pool create') as c:
         c.argument('json_file', help='The file containing pool create properties parameter specification in JSON(formatted to match REST API request body). If this parameter is specified, all \'Pool Create Properties Parameter Arguments\' are ignored.  See https://learn.microsoft.com/rest/api/batchservice/pool/add?tabs=HTTP#request-body')
-        c.argument('resource_tags', arg_group='Pool', type=resource_tag_format, help="User is able to specify resource tags for the pool. Any resource created for the pool will then also be tagged by the same resource tags")
-        c.argument('target_node_communication_mode', options_list=['--target-communication'],
-                   help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
-                   arg_type=get_enum_type(BatchNodeCommunicationMode))
         c.argument('enable_accelerated_networking', arg_type=get_three_state_flag(), options_list=['--accelerated-networking'], arg_group="Pool: Network Configuration",
                    help='Whether this pool should enable accelerated networking. Accelerated networking enables single root I/O virtualization (SR-IOV) to a VM, which may lead to improved networking performance. For more details, see: https://learn.microsoft.com/azure/virtual-network/accelerated-networking-overview. Set true to enable.')
         c.argument('caching',
@@ -432,11 +423,6 @@ def load_arguments(self, _):
         c.argument('enable_cross_zone_upgrade', arg_type=get_three_state_flag())
         c.argument('prioritize_unhealthy_instances', arg_type=get_three_state_flag())
         c.argument('rollback_failed_instances_on_policy_breach', arg_type=get_three_state_flag())
-
-    with self.argument_context('batch pool set') as c:
-        c.argument('target_node_communication_mode', options_list=['--target-communication'],
-                   help="The desired node communication mode for the pool. If this element is present, it replaces the existing targetNodeCommunicationMode configured on the Pool. If omitted, any existing metadata is left unchanged.",
-                   arg_type=get_enum_type(BatchNodeCommunicationMode))
 
     with self.argument_context('batch task create') as c:
         c.argument('json_file', type=file_type, help='The file containing the task(s) to create in JSON(formatted to match REST API request body). When submitting multiple tasks, accepts either an array of tasks or a TaskAddCollectionParamater. If this parameter is specified, all other parameters are ignored.', validator=validate_json_file, completer=FilesCompleter())

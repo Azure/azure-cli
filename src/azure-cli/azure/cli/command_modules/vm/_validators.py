@@ -1486,6 +1486,10 @@ def _validate_vm_vmss_set_applications(cmd, namespace):  # pylint: disable=unuse
             if boolean_value_in_string.lower() != 'true' and boolean_value_in_string.lower() != 'false':
                 raise ArgumentUsageError('usage error: --treat-deployment-as-failure only accepts a list of "true" or'
                                          ' "false" values')
+    if namespace.enable_automatic_upgrade:
+        if len(namespace.application_version_ids) != len(namespace.enable_automatic_upgrade):
+            raise ArgumentUsageError('usage error: --enable-automatic-upgrade should have the same number of items'
+                                     ' as --application-version-ids')
 
 
 def _resolve_role_id(cli_ctx, role, scope):
@@ -1891,6 +1895,21 @@ def process_vm_disk_attach_namespace(cmd, namespace):
             not namespace.source_snapshots_or_disks and not namespace.source_disk_restore_point:
         raise RequiredArgumentMissingError("Please use at least one of --name, --disks, --disk-ids,"
                                            " --source-snapshots-or-disks and --source-disk-restore-point")
+
+    if namespace.new_names_of_source_snapshots_or_disks and not namespace.source_snapshots_or_disks:
+        raise RequiredArgumentMissingError("Please use --source-snapshots-or-disks when using"
+                                           " --new-names-of-source-snapshots-or-disks")
+    if namespace.new_names_of_source_disk_restore_point and not namespace.source_disk_restore_point:
+        raise RequiredArgumentMissingError("Please use --source-disk-restore-point when using"
+                                           " --new-names-of-source-disk-restore-point")
+    if namespace.new_names_of_source_snapshots_or_disks and \
+            (len(namespace.new_names_of_source_snapshots_or_disks) != len(namespace.source_snapshots_or_disks)):
+        raise ArgumentUsageError("The number of --new-names-of-source-snapshots-or-disks must be the same as the number"
+                                 " of --source-snapshots-or-disks")
+    if namespace.new_names_of_source_disk_restore_point and \
+            (len(namespace.new_names_of_source_disk_restore_point) != len(namespace.source_disk_restore_point)):
+        raise ArgumentUsageError("The number of --new-names-of-source-disk-restore-point must be the same as the number"
+                                 " of --source-disk-restore-point")
 
     if namespace.disk and namespace.disks:
         raise MutuallyExclusiveArgumentError("You can only specify one of --name and --disks")

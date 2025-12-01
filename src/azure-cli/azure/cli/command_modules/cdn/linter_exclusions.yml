@@ -359,6 +359,9 @@ cdn profile deployment-version:
 cdn profile-migration:
     rule_exclusions:
     - require_wait_command_if_no_wait
+cdn profile-migration abort:
+    rule_exclusions:
+    - require_wait_command_if_no_wait
 cdn profile-migration check-compatibility:
     parameters:
         migration_endpoint_mappings:
@@ -370,6 +373,23 @@ cdn profile-migration migrate:
             rule_exclusions:
             - option_length_too_long
         user_assigned_identities:
+            rule_exclusions:
+            - option_length_too_long
+
+cdn edge-action execution-filter create:
+    parameters:
+        execution_filter_identifier_header_name:
+            rule_exclusions:
+            - option_length_too_long
+        execution_filter_identifier_header_value:
+            rule_exclusions:
+            - option_length_too_long
+cdn edge-action execution-filter update:
+    parameters:
+        execution_filter_identifier_header_name:
+            rule_exclusions:
+            - option_length_too_long
+        execution_filter_identifier_header_value:
             rule_exclusions:
             - option_length_too_long
 ...

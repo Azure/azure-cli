@@ -146,8 +146,22 @@ def login_auth_for_azcopy(cmd):
 
 
 def client_auth_for_azcopy(cmd, client):
-    # prefer oauth mode
-    if client.credential:
+    # prefer oauth mode, if account-key is not provided
+    is_oauth = True
+    credential = client.credential
+    if credential:
+        if isinstance(credential, dict) and "account_key" in credential:
+            is_oauth = False
+        elif hasattr(credential, "account_key"):
+            is_oauth = False
+        elif isinstance(credential, str):
+            sas_indicators = ["sig=", "sv=", "sr=", "se=", "sp="]
+            for indicator in sas_indicators:
+                if indicator in credential:
+                    is_oauth = False
+                    break
+
+    if is_oauth:
         raw_token = Profile(cli_ctx=cmd.cli_ctx).get_raw_token(resource=STORAGE_RESOURCE_ENDPOINT)
         token_info = raw_token[0][2]
         try:

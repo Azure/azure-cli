@@ -227,7 +227,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
                                public_ip_address_type=None, subnet_type=None, validate=False,
                                connection_draining_timeout=0, enable_http2=None, min_capacity=None, zones=None,
                                custom_error_pages=None, firewall_policy=None, max_capacity=None,
-                               user_assigned_identity=None,
+                               user_assigned_identity=None, enable_fips=None,
                                enable_private_link=False,
                                private_link_ip_address=None,
                                private_link_subnet='PrivateLinkDefaultSubnet',
@@ -301,7 +301,7 @@ def create_application_gateway(cmd, application_gateway_name, resource_group_nam
         http_settings_cookie_based_affinity, http_settings_protocol, http_settings_port,
         http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
         connection_draining_timeout, enable_http2, min_capacity, zones, custom_error_pages,
-        firewall_policy, max_capacity, user_assigned_identity,
+        firewall_policy, max_capacity, user_assigned_identity, enable_fips,
         enable_private_link, private_link_name,
         private_link_ip_address, private_link_ip_allocation_method, private_link_primary,
         private_link_subnet_id, trusted_client_cert, ssl_profile, ssl_profile_id, ssl_cert_name)
@@ -1941,7 +1941,12 @@ class WAFCreate(_WAFCreate):
             options=["--type"],
             help="Type of the web application firewall rule set.",
             default="Microsoft_DefaultRuleSet",
-            enum={"Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet", "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet", "OWASP": "OWASP"},
+            enum={
+                "Microsoft_BotManagerRuleSet": "Microsoft_BotManagerRuleSet",
+                "Microsoft_DefaultRuleSet": "Microsoft_DefaultRuleSet",
+                "OWASP": "OWASP",
+                "Microsoft_HTTPDDoSRuleSet": "Microsoft_HTTPDDoSRuleSet"
+            },
         )
         args_schema.rule_set_version = AAZStrArg(
             options=["--version"],
@@ -2030,6 +2035,11 @@ def add_waf_managed_rule_set(cmd, resource_group_name, policy_name,
         managed_rule_overrides = []
     else:
         managed_rule_overrides = rules
+
+    if rule_set_type.lower() == "microsoft_httpddosruleset":
+        for r in managed_rule_overrides:
+            if not r.get('sensitivity', None):
+                r['sensitivity'] = 'Medium'
 
     rule_group_override = None
     if rule_group_name is not None:
@@ -3858,7 +3868,6 @@ class PrivateEndpointPrivateDnsZoneAdd(_PrivateEndpointPrivateDnsZoneAdd):
             )
         )
         args_schema.private_dns_zone_id._registered = False
-        args_schema.name._required = False
 
         return args_schema
 
@@ -6019,6 +6028,12 @@ class VnetGatewayCreate(_VnetGatewayCreate):
                                            'private_ip_allocation_method': 'Dynamic',
                                            'name': 'vnetGatewayConfig{}'.format(i)}
                     args.ip_configurations.append(ip_configuration[i])
+            else:
+                ip_configuration = {'subnet': subnet,
+                                    'private_ip_allocation_method': 'Dynamic',
+                                    'name': 'vnetGatewayConfig'}
+                args.ip_configurations.append(ip_configuration)
+
         else:
             args.vpn_type = None
             args.sku = None

@@ -41,6 +41,7 @@ from azure.cli.command_modules.acs._consts import (
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE,
     CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK,
+    CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE,
     CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_DNS_ZONE_CONTRIBUTOR_ROLE,
     CONST_ARTIFACT_SOURCE_CACHE,
@@ -920,8 +921,13 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: List[str] or None
         """
         custom_ca_certs_file_path = self.raw_param.get("custom_ca_trust_certificates")
-        if not custom_ca_certs_file_path:
+        if custom_ca_certs_file_path is None:
             return None
+        # Reject empty string - user must provide a valid file path
+        if custom_ca_certs_file_path == "":
+            raise InvalidArgumentValueError(
+                "custom_ca_trust_certificates cannot be an empty string. Please provide a valid file path."
+            )
         if not os.path.isfile(custom_ca_certs_file_path):
             raise InvalidArgumentValueError(
                 "{} is not valid file, or not accessible.".format(
@@ -2574,6 +2580,20 @@ class AKSManagedClusterContext(BaseAKSContext):
         :return: bool or None"""
         disable_acns_security = self.raw_param.get("disable_acns_security")
         return not bool(disable_acns_security) if disable_acns_security is not None else None
+
+    def get_acns_advanced_networkpolicies(self) -> Union[str, None]:
+        """Get the value of acns_advanced_networkpolicies
+        :return: str or None
+        """
+        disable_acns_security = self.raw_param.get("disable_acns_security")
+        disable_acns = self.raw_param.get("disable_acns")
+        acns_advanced_networkpolicies = self.raw_param.get("acns_advanced_networkpolicies")
+        if acns_advanced_networkpolicies is not None:
+            if disable_acns_security or disable_acns:
+                raise MutuallyExclusiveArgumentError(
+                    "--disable-acns-security and --disable-acns cannot be used with  --acns-advanced-networkpolicies."
+                )
+        return self.raw_param.get("acns_advanced_networkpolicies")
 
     def _get_pod_cidr_and_service_cidr_and_dns_service_ip_and_docker_bridge_address_and_network_policy(
         self, enable_validation: bool = False
@@ -4639,7 +4659,7 @@ class AKSManagedClusterContext(BaseAKSContext):
         disable_ingress_gateway = self.raw_param.get("disable_ingress_gateway", False)
         ingress_gateway_type = self.raw_param.get("ingress_gateway_type", None)
 
-        # disallow disable ingress gateway on a cluser with no asm enabled
+        # disallow disable ingress gateway on a cluster with no asm enabled
         if disable_ingress_gateway:
             if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
                 raise ArgumentUsageError(
@@ -4689,6 +4709,97 @@ class AKSManagedClusterContext(BaseAKSContext):
                         enabled=enable_ingress_gateway,
                     )
                 )
+                updated = True
+
+        return new_profile, updated
+
+    def _handle_egress_gateways_asm(self, new_profile: ServiceMeshProfile) -> Tuple[ServiceMeshProfile, bool]:
+        updated = False
+        enable_egress_gateway = self.raw_param.get("enable_egress_gateway", False)
+        disable_egress_gateway = self.raw_param.get("disable_egress_gateway", False)
+        istio_egressgateway_name = self.raw_param.get("istio_egressgateway_name", None)
+        istio_egressgateway_namespace = self.raw_param.get(
+            "istio_egressgateway_namespace",
+            CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE
+        )
+        gateway_configuration_name = self.raw_param.get("gateway_configuration_name", None)
+
+        # disallow disable egress gateway on a cluster with no asm enabled
+        if disable_egress_gateway:
+            if new_profile is None or new_profile.mode == CONST_AZURE_SERVICE_MESH_MODE_DISABLED:
+                raise ArgumentUsageError(
+                    "Istio has not been enabled for this cluster, please refer to https://aka.ms/asm-aks-addon-docs "
+                    "for more details on enabling Azure Service Mesh."
+                )
+        # deal with egress gateways
+        if enable_egress_gateway and disable_egress_gateway:
+            raise MutuallyExclusiveArgumentError(
+                "Cannot both enable and disable azure service mesh egress gateway at the same time.",
+            )
+        if enable_egress_gateway or disable_egress_gateway:
+            # if a gateway is enabled, enable the mesh
+            if enable_egress_gateway:
+
+                new_profile.mode = CONST_AZURE_SERVICE_MESH_MODE_ISTIO
+                if new_profile.istio is None:
+                    new_profile.istio = self.models.IstioServiceMesh()  # pylint: disable=no-member
+                updated = True
+
+                # Gateway configuration name is required for Istio egress gateway enablement
+                if not gateway_configuration_name:
+                    raise RequiredArgumentMissingError("--gateway-configuration-name is required.")
+
+            if not istio_egressgateway_name:
+                raise RequiredArgumentMissingError("--istio-egressgateway-name is required.")
+
+            # ensure necessary fields
+            if new_profile.istio.components is None:
+                new_profile.istio.components = self.models.IstioComponents()  # pylint: disable=no-member
+                updated = True
+            if new_profile.istio.components.egress_gateways is None:
+                new_profile.istio.components.egress_gateways = []
+                updated = True
+            # make update if the egress gateway already exists
+            egress_gateway_exists = False
+            for egress in new_profile.istio.components.egress_gateways:
+                if egress.name == istio_egressgateway_name and egress.namespace == istio_egressgateway_namespace:
+                    if not egress.enabled and disable_egress_gateway:
+                        raise ArgumentUsageError(
+                            f'Egress gateway {istio_egressgateway_name} '
+                            f'in namespace {istio_egressgateway_namespace} is already disabled.'
+                        )
+                    if egress.enabled and enable_egress_gateway:
+                        if egress.gateway_configuration_name == gateway_configuration_name:
+                            raise ArgumentUsageError(
+                                f'Egress gateway {istio_egressgateway_name} '
+                                f'in namespace {istio_egressgateway_namespace} is already enabled '
+                                f'with gateway configuration name {gateway_configuration_name}.'
+                            )
+                    egress.enabled = enable_egress_gateway
+                    # only update gateway configuration name for enabled egress gateways
+                    if enable_egress_gateway:
+                        egress.gateway_configuration_name = gateway_configuration_name
+                    egress_gateway_exists = True
+                    updated = True
+                    break
+
+            # egress gateway doesn't exist, append
+            if not egress_gateway_exists:
+                if enable_egress_gateway:
+                    new_profile.istio.components.egress_gateways.append(
+                        self.models.IstioEgressGateway(  # pylint: disable=no-member
+                            enabled=enable_egress_gateway,
+                            name=istio_egressgateway_name,
+                            namespace=istio_egressgateway_namespace,
+                            gateway_configuration_name=gateway_configuration_name,
+                        )
+                    )
+                elif disable_egress_gateway:
+                    raise ArgumentUsageError(
+                        f'Egress gateway {istio_egressgateway_name} '
+                        f'in namespace {istio_egressgateway_namespace} does not exist, cannot disable.'
+                    )
+
                 updated = True
 
         return new_profile, updated
@@ -4753,6 +4864,9 @@ class AKSManagedClusterContext(BaseAKSContext):
 
         new_profile, updated_ingress_gateways_asm = self._handle_ingress_gateways_asm(new_profile)
         updated |= updated_ingress_gateways_asm
+
+        new_profile, updated_egress_gateways_asm = self._handle_egress_gateways_asm(new_profile)
+        updated |= updated_egress_gateways_asm
 
         new_profile, updated_pluginca_asm = self._handle_pluginca_asm(new_profile)
         updated |= updated_pluginca_asm
@@ -6175,6 +6289,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         network_dataplane = self.context.get_network_dataplane()
 
         (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
+        acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
         if acns_enabled is not None:
             acns = self.models.AdvancedNetworking(
                 enabled=acns_enabled,
@@ -6187,6 +6302,13 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                 acns.security = self.models.AdvancedNetworkingSecurity(
                     enabled=acns_security,
                 )
+            if acns_advanced_networkpolicies is not None:
+                if acns.security is None:
+                    acns.security = self.models.AdvancedNetworkingSecurity(
+                        advanced_network_policies=acns_advanced_networkpolicies
+                    )
+                else:
+                    acns.security.advanced_network_policies = acns_advanced_networkpolicies
 
         if any(
             [
@@ -8086,6 +8208,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
         (acns_enabled, acns_observability, acns_security) = self.context.get_acns_enablement()
+        acns_advanced_networkpolicies = self.context.get_acns_advanced_networkpolicies()
         if acns_enabled is not None:
             acns = self.models.AdvancedNetworking(
                 enabled=acns_enabled,
@@ -8098,6 +8221,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 acns.security = self.models.AdvancedNetworkingSecurity(
                     enabled=acns_security,
                 )
+            if acns_advanced_networkpolicies is not None:
+                if acns.security is None:
+                    acns.security = self.models.AdvancedNetworkingSecurity(
+                        advanced_network_policies=acns_advanced_networkpolicies
+                    )
+                else:
+                    acns.security.advanced_network_policies = acns_advanced_networkpolicies
         if acns_enabled is not None:
             mc.network_profile.advanced_networking = acns
         return mc
@@ -8710,11 +8840,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        ca_certs = self.context.get_custom_ca_trust_certificates()
-        if ca_certs:
+        # Check if the parameter was explicitly provided
+        if self.context.raw_param.get("custom_ca_trust_certificates") is not None:
+            ca_certs = self.context.get_custom_ca_trust_certificates()
             if mc.security_profile is None:
                 mc.security_profile = self.models.ManagedClusterSecurityProfile()  # pylint: disable=no-member
 
+            # Set certificates (this allows setting to empty list to remove certificates)
             mc.security_profile.custom_ca_trust_certificates = ca_certs
 
         return mc
