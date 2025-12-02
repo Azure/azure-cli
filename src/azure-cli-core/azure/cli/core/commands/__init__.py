@@ -778,7 +778,7 @@ class AzCliCommandInvoker(CommandInvoker):
             except (CLIError, ValueError, KeyError) as ex:
                 # If what-if service fails, still show an informative message
                 logger.error("What-if preview failed: %s", str(ex))
-                telemetry.set_exception(ex, fault_type='what-if-error', summary=str(ex)[:100])
+                telemetry.set_exception(ex, fault_type='what-if-error')
                 telemetry.set_failure(summary='what-if-failed')
                 return CommandResultItem(None, exit_code=1,
                                          error=CLIError(f'What-if preview failed: {str(ex)}'))
