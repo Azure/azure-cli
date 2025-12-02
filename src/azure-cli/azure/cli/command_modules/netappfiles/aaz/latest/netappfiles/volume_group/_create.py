@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2025-09-01"],
         ]
     }
 
@@ -73,10 +73,12 @@ class Create(AAZCommand):
         # define Arg Group "Body"
 
         _args_schema = cls._args_schema
-        _args_schema.location = AAZStrArg(
-            options=["-l", "--location"],
+        _args_schema.location = AAZResourceLocationArg(
             arg_group="Body",
             help="Resource location",
+            fmt=AAZResourceLocationArgFormat(
+                resource_group_arg="resource_group",
+            ),
         )
 
         # define Arg Group "GroupMetaData"
@@ -526,12 +528,7 @@ class Create(AAZCommand):
         tags.Element = AAZStrArg()
 
         zones = cls._args_schema.volumes.Element.zones
-        zones.Element = AAZStrArg(
-            fmt=AAZStrArgFormat(
-                max_length=255,
-                min_length=1,
-            ),
-        )
+        zones.Element = AAZStrArg()
         return cls._args_schema
 
     _args_placement_key_value_pairs_create = None
@@ -589,7 +586,7 @@ class Create(AAZCommand):
                     session,
                     self.on_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [201]:
@@ -598,7 +595,7 @@ class Create(AAZCommand):
                     session,
                     self.on_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -645,7 +642,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -853,6 +850,10 @@ class Create(AAZCommand):
             _schema_on_201.properties = AAZObjectType(
                 flags={"client_flatten": True},
             )
+            _schema_on_201.system_data = AAZObjectType(
+                serialized_name="systemData",
+                flags={"read_only": True},
+            )
             _schema_on_201.type = AAZStrType(
                 flags={"read_only": True},
             )
@@ -967,6 +968,7 @@ class Create(AAZCommand):
             )
             properties.effective_network_features = AAZStrType(
                 serialized_name="effectiveNetworkFeatures",
+                flags={"read_only": True},
             )
             properties.enable_subvolumes = AAZStrType(
                 serialized_name="enableSubvolumes",
@@ -1279,6 +1281,26 @@ class Create(AAZCommand):
 
             zones = cls._schema_on_201.properties.volumes.Element.zones
             zones.Element = AAZStrType()
+
+            system_data = cls._schema_on_201.system_data
+            system_data.created_at = AAZStrType(
+                serialized_name="createdAt",
+            )
+            system_data.created_by = AAZStrType(
+                serialized_name="createdBy",
+            )
+            system_data.created_by_type = AAZStrType(
+                serialized_name="createdByType",
+            )
+            system_data.last_modified_at = AAZStrType(
+                serialized_name="lastModifiedAt",
+            )
+            system_data.last_modified_by = AAZStrType(
+                serialized_name="lastModifiedBy",
+            )
+            system_data.last_modified_by_type = AAZStrType(
+                serialized_name="lastModifiedByType",
+            )
 
             return cls._schema_on_201
 

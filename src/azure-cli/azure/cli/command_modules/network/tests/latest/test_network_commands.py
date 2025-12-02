@@ -2192,6 +2192,155 @@ class NetworkAppGatewaySubresourceScenarioTest(ScenarioTest):
                  checks=(self.check('length(@)', 0)))
 
 
+    @ResourceGroupPreparer(name_prefix='cli_test_ags_new_prop')
+    def test_network_ags_enable_l4_client_ip_preservation(self, resource_group):
+        self.kwargs.update({
+            'public-ip-name': self.create_random_name(prefix='public',length=15),
+            'vnet-name': self.create_random_name(prefix='vnet',length=15),
+            'vnet-address': '10.10.0.0/16',
+            'subnet-address': '10.10.0.0/24',
+            'subnet-name': self.create_random_name(prefix='subnet',length=15),
+            'gateway-name': self.create_random_name(prefix='gateway',length=15),
+            'setting-name': self.create_random_name(prefix='setting',length=15),
+            'port': 8080,
+        })
+
+        self.cmd('network public-ip create '
+                 '--resource-group {rg} '
+                 '--name {public-ip-name} '
+                 '--sku Standard '
+                 '--ip-tags FirstPartyUsage=/NonProd')
+
+        self.cmd('network vnet create '
+                 '--resource-group {rg} '
+                 '--name {vnet-name} '
+                 '--address-prefix {vnet-address}')
+
+        self.cmd('network vnet subnet create '
+                 '--resource-group {rg} '
+                 '--name {subnet-name} '
+                 '--vnet-name {vnet-name} '
+                 '--address-prefix {subnet-address} '
+                 '--default-outbound false')
+
+        self.cmd('network application-gateway create '
+                 '--resource-group {rg} '
+                 '--name {gateway-name} '
+                 '--sku Standard_v2 '
+                 '--public-ip-address {public-ip-name} '
+                 '--vnet-name {vnet-name} '
+                 '--subnet {subnet-name} '
+                 '--priority 1001')
+
+        self.cmd('network application-gateway settings create '
+                 '--resource-group {rg} '
+                 '--name {setting-name} '
+                 '--gateway-name {gateway-name} '
+                 '--port {port}')
+
+        self.cmd('network application-gateway settings show '
+                 '--resource-group {rg} '
+                 '--name {setting-name} '
+                 '--gateway-name {gateway-name}',
+                 checks=(self.check('enableL4ClientIpPreservation', False)))
+
+        self.cmd('network application-gateway settings update '
+                 '--resource-group {rg} '
+                 '--name {setting-name} '
+                 '--gateway-name {gateway-name} '
+                 '--enable-l4-client-ip true',
+                 checks=(self.check('enableL4ClientIpPreservation', True)))
+
+        self.cmd('network application-gateway settings list '
+                 '--resource-group {rg} '
+                 '--gateway-name {gateway-name}',
+                 checks = self.check('length(@)', 1))
+
+        self.cmd('network application-gateway settings delete '
+                 '--resource-group {rg} '
+                 '--name {setting-name} '
+                 '--gateway-name {gateway-name}')
+
+        self.cmd('network application-gateway settings list '
+                 '--resource-group {rg} '
+                 '--gateway-name {gateway-name}',
+                 checks=self.check('length(@)', 0))
+
+
+    @ResourceGroupPreparer(name_prefix='cli_test_agp_new_prop')
+    def test_network_ags_enable_probe_proxy_protocol_header(self, resource_group):
+        self.kwargs.update({
+            'public-ip-name': self.create_random_name(prefix='public',length=15),
+            'vnet-name': self.create_random_name(prefix='vnet',length=15),
+            'vnet-address': '10.10.0.0/16',
+            'subnet-address': '10.10.0.0/24',
+            'subnet-name': self.create_random_name(prefix='subnet',length=15),
+            'gateway-name': self.create_random_name(prefix='gateway',length=15),
+            'probe-name': self.create_random_name(prefix='probe',length=15),
+        })
+
+        self.cmd('network public-ip create '
+                 '--resource-group {rg} '
+                 '--name {public-ip-name} '
+                 '--sku Standard '
+                 '--ip-tags FirstPartyUsage=/NonProd')
+
+        self.cmd('network vnet create '
+                 '--resource-group {rg} '
+                 '--name {vnet-name} '
+                 '--address-prefix {vnet-address}')
+
+        self.cmd('network vnet subnet create '
+                 '--resource-group {rg} '
+                 '--name {subnet-name} '
+                 '--vnet-name {vnet-name} '
+                 '--address-prefix {subnet-address} '
+                 '--default-outbound false')
+
+        self.cmd('network application-gateway create '
+                 '--resource-group {rg} '
+                 '--name {gateway-name} '
+                 '--sku Standard_v2 '
+                 '--public-ip-address {public-ip-name} '
+                 '--vnet-name {vnet-name} '
+                 '--subnet {subnet-name} '
+                 '--priority 1001')
+
+        self.cmd('network application-gateway probe create '
+                 '--resource-group {rg} '
+                 '--name {probe-name} '
+                 '--gateway-name {gateway-name} '
+                 '--protocol TCP')
+
+        self.cmd('network application-gateway probe show '
+                 '--resource-group {rg} '
+                 '--name {probe-name} '
+                 '--gateway-name {gateway-name}',
+                 checks=(self.check('enableProbeProxyProtocolHeader', False)))
+
+        self.cmd('network application-gateway probe update '
+                 '--resource-group {rg} '
+                 '--name {probe-name} '
+                 '--gateway-name {gateway-name} '
+                 '--enable-proxy-header true',
+                 checks=(self.check('enableProbeProxyProtocolHeader', True)))
+
+        self.cmd('network application-gateway probe list '
+                 '--resource-group {rg} '
+                 '--gateway-name {gateway-name}',
+                 checks=self.check('length(@)', 1))
+
+        self.cmd('network application-gateway probe delete '
+                 '--resource-group {rg} '
+                 '--name {probe-name} '
+                 '--gateway-name {gateway-name}')
+
+        self.cmd('network application-gateway probe list '
+                 '--resource-group {rg} '
+                 '--gateway-name {gateway-name}',
+                 checks=self.check('length(@)', 0))
+
+
 class NetworkAppGatewayRewriteRuleset(ScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ag_rewrite_rulesets')

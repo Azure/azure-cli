@@ -410,7 +410,12 @@ class VolumeUpdate(_VolumeUpdate):
             help="Name or Resource ID of the vnet. If you want to use a vnet in other resource group or subscription, please provide the Resource ID instead of the name of the vnet.",
             required=False,
         )
-
+        args_schema.remote_volume_resource_id = AAZStrArg(
+            options=["--remote-volume-id", "--remote-volume-resource-id"],
+            arg_group="Replication",
+            help="The resource ID of the remote volume.",
+            nullable=True,
+        )
         args_schema.usage_threshold._fmt = AAZIntArgFormat(
             maximum=2457600,
             minimum=50
@@ -572,7 +577,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
     def _build_arguments_schema(cls, *args, **kwargs):
         from azure.cli.core.aaz import AAZStrArg, AAZIntArg, AAZDictArg, AAZBoolArg, AAZListArg, AAZStrArgFormat
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        logger.debug("ANF log: ExportPolicyRemove _build_arguments_schema")
+        logger.debug("ANF log: VolumeGroup _build_arguments_schema")
 
         args_schema.tags = AAZDictArg(
             options=["--tags"],
@@ -787,6 +792,13 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             help="Throughput in MiB/s for shared volumes. If not provided size will automatically be calculated.",
             required=False,
         )
+        args_schema.shared_network_features = AAZStrArg(
+            options=["--shared-network-features", "--network-features"],
+            arg_group="Shared Volume",
+            help="Network features available to the volumes in the volume group.",
+            default="Basic",
+            enum={"Basic": "Basic", "Standard": "Standard"},
+        )
         # cmk
         args_schema.key_vault_private_endpoint_resource_id = AAZStrArg(
             options=["--kv-private-endpoint-id", "--key-vault-private-endpoint-resource-id"],
@@ -912,6 +924,11 @@ class VolumeGroupCreate(_VolumeGroupCreate):
             shared_throughput = args.shared_throughput.to_serialized_data()
         else:
             shared_throughput = None
+        if has_value(args.shared_network_features):
+            shared_network_features = args.shared_network_features.to_serialized_data()
+        else:
+            shared_network_features = None
+
         shared_repl_skd = args.shared_repl_skd.to_serialized_data()
         shared_src_id = args.data_repl_skd.to_serialized_data()
         smb_access_based_enumeration = args.smb_access.to_serialized_data()
@@ -1027,7 +1044,7 @@ class VolumeGroupCreate(_VolumeGroupCreate):
                 data_volumes.append(create_data_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory,
                                                                   add_snapshot_capacity, str(i), data_size, data_throughput,
                                                                   prefix, data_repl_skd, data_src_id, kv_private_endpoint_id, encryption_key_source,
-                                                                  smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes))
+                                                                  smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes, shared_network_features))
 
             # Create log volume(s)
             log_volumes = []
@@ -1035,11 +1052,11 @@ class VolumeGroupCreate(_VolumeGroupCreate):
                 for i in range(start_host_id, start_host_id + number_of_hosts):
                     log_volumes.append(create_log_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, str(i), log_size,
                                                                     log_throughput, prefix, kv_private_endpoint_id, encryption_key_source,
-                                                                    smb_access_based_enumeration, smb_non_browsable, zones, database_throughput))
+                                                                    smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, shared_network_features))
             elif application_type == "ORACLE":
                 log_volumes.append(create_log_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, 1, log_size,
                                                                 log_throughput, prefix, kv_private_endpoint_id, encryption_key_source,
-                                                                smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes))
+                                                                smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes, shared_network_features))
             total_data_volume_size = sum(int(vol["usage_threshold"]) for vol in data_volumes)
             total_log_volume_size = sum(int(vol["usage_threshold"]) for vol in log_volumes)
 
@@ -1050,24 +1067,24 @@ class VolumeGroupCreate(_VolumeGroupCreate):
 
             args.volumes.append(create_shared_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, shared_size,
                                                                 shared_throughput, number_of_hosts, prefix, shared_repl_skd, shared_src_id, kv_private_endpoint_id, encryption_key_source,
-                                                                smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes))
+                                                                smb_access_based_enumeration, smb_non_browsable, zones, database_throughput, number_of_volumes, shared_network_features))
             args.volumes.append(create_data_backup_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, data_backup_size,
                                                                      data_backup_throughput, total_data_volume_size,
                                                                      total_log_volume_size, prefix, backup_nfsv3,
                                                                      data_backup_repl_skd, data_backup_src_id, kv_private_endpoint_id, encryption_key_source,
                                                                      smb_access_based_enumeration,
-                                                                     smb_non_browsable, zones, database_throughput, number_of_volumes))
+                                                                     smb_non_browsable, zones, database_throughput, number_of_volumes, shared_network_features))
             args.volumes.append(create_log_backup_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, log_backup_size,
                                                                     log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
                                                                     log_backup_src_id, kv_private_endpoint_id, encryption_key_source,
                                                                     smb_access_based_enumeration,
-                                                                    smb_non_browsable, zones, database_throughput, number_of_volumes))
+                                                                    smb_non_browsable, zones, database_throughput, number_of_volumes, shared_network_features))
 
 
 # pylint: disable=too-many-locals
 def create_data_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, add_snap_capacity, host_id,
                                   data_size, data_throughput, prefix, data_repl_skd=None, data_src_id=None, kv_private_endpoint_id=None,
-                                  encryption_key_source=None, smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
+                                  encryption_key_source=None, smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1, network_features=None):
 
     throughput = data_throughput
     if application_type == "SAP-HANA":
@@ -1114,7 +1131,8 @@ def create_data_volume_properties(subnet_id, application_identifier, application
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
-        "zones": zones
+        "zones": zones,
+        "network_features": network_features
     }
 
     return data_volume
@@ -1122,7 +1140,7 @@ def create_data_volume_properties(subnet_id, application_identifier, application
 
 def create_log_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, host_id, log_size,
                                  log_throughput, prefix, kv_private_endpoint_id=None, encryption_key_source=None,
-                                 smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
+                                 smb_access_based_enumeration=None, smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1, network_features=None):
     throughput = log_throughput
     if application_type == "SAP-HANA":
         name = prefix + application_identifier + "-" + VolumeType.LOG.value + "-mnt" + (host_id.rjust(5, '0'))
@@ -1163,7 +1181,8 @@ def create_log_volume_properties(subnet_id, application_identifier, application_
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
-        "zones": zones
+        "zones": zones,
+        "network_features": network_features
     }
 
     return log_volume
@@ -1173,7 +1192,7 @@ def create_log_volume_properties(subnet_id, application_identifier, application_
 def create_shared_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, shared_size,
                                     shared_throughput, number_of_hosts, prefix, shared_repl_skd=None,
                                     shared_src_id=None, kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
-                                    smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
+                                    smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1, network_features=None):
     throughput = shared_throughput
     if application_type == "SAP-HANA":
         name = prefix + application_identifier + "-" + VolumeType.SHARED.value
@@ -1222,7 +1241,8 @@ def create_shared_volume_properties(subnet_id, application_identifier, applicati
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
-        "zones": zones
+        "zones": zones,
+        "network_features": network_features
     }
 
     return shared_volume
@@ -1233,8 +1253,8 @@ def create_data_backup_volume_properties(subnet_id, application_identifier, appl
                                          data_backup_throughput, total_data_volume_size, total_log_volume_size,
                                          prefix, backup_nfsv3, data_backup_repl_skd, data_backup_src_id,
                                          kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
-                                         smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
-    logger.debug("ANF LOG: create_data_backup_volume_properties  => data_backup_size: %s * %s ", data_backup_size, gib_scale)
+                                         smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1, network_features=None):
+    logger.debug("ANF LOG: create_data_backup_volume_properties  => data_backup_size: %s * %s ", data_backup_size, gib_scale,)
     throughput = data_backup_throughput
     if application_type == "SAP-HANA":
         name = prefix + application_identifier + "-" + VolumeType.DATA_BACKUP.value
@@ -1283,7 +1303,8 @@ def create_data_backup_volume_properties(subnet_id, application_identifier, appl
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
-        "zones": zones
+        "zones": zones,
+        "network_features": network_features
     }
 
     return data_backup_volume
@@ -1292,7 +1313,7 @@ def create_data_backup_volume_properties(subnet_id, application_identifier, appl
 def create_log_backup_volume_properties(subnet_id, application_identifier, application_type, pool_id, ppg, memory, log_backup_size,
                                         log_backup_throughput, prefix, backup_nfsv3, log_backup_repl_skd,
                                         log_backup_src_id, kv_private_endpoint_id=None, encryption_key_source=None, smb_access_based_enumeration=None,
-                                        smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1):
+                                        smb_non_browsable=None, zones=None, database_throughput=None, number_of_volumes=1, network_features=None):
 
     throughput = log_backup_throughput
     if application_type == "SAP-HANA":
@@ -1341,7 +1362,8 @@ def create_log_backup_volume_properties(subnet_id, application_identifier, appli
         "encryption_key_source": encryption_key_source,
         "smb_access_based_enumeration": smb_access_based_enumeration,
         "smb_non_browsable": smb_non_browsable,
-        "zones": zones
+        "zones": zones,
+        "network_features": network_features
     }
 
     return log_backup
