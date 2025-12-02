@@ -5341,6 +5341,13 @@ def create_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
+    # Display warning about API version 2026-03-03 changes
+    logger.warning("Starting api-version 2026-03-03, gallery image versions will default to:\n"
+                   "  - endOfLifeDate = 6 months from publish date (unless explicitly set)\n"
+                   "  - blockDeletionBeforeEndOfLife = true (unless explicitly set)\n"
+                   "By default, image deletion is blocked for 6 months. "
+                   "To override, set a custom endOfLifeDate or set blockDeletionBeforeEndOfLife = false")
+
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     end_of_life_date = fix_gallery_image_date_info(end_of_life_date)
     if managed_image and not is_valid_resource_id(managed_image):
@@ -5554,6 +5561,13 @@ def update_image_version(cmd, resource_group_name, gallery_name, gallery_image_n
 
     from .operations.sig_image_version import convert_show_result_to_snake_case
     args = convert_show_result_to_snake_case(args)
+
+    # Display warning about API version 2026-03-03 changes
+    logger.warning("Starting api-version 2026-03-03, gallery image versions will default to:\n"
+                   "  - endOfLifeDate = 6 months from publish date (unless explicitly set)\n"
+                   "  - blockDeletionBeforeEndOfLife = true (unless explicitly set)\n"
+                   "By default, image deletion is blocked for 6 months. "
+                   "To override, set a custom endOfLifeDate or set blockDeletionBeforeEndOfLife = false")
 
     if target_regions:
         if "publishing_profile" not in args:
