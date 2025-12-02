@@ -212,7 +212,7 @@ class NWFlowLogScenarioTest(LiveScenarioTest):
         # This output is Azure Management Resource formatted.
         self.cmd('network watcher flow-log show --location {location} --name {flow_log}', checks=[
             self.check('name', self.kwargs['flow_log']),
-            self.check('recordTypes', '.*/{record_types}$'),
+            self.check('recordTypes', '{record_types}'),
             self.check('flowAnalyticsConfiguration.networkWatcherFlowAnalyticsConfiguration.workspaceResourceId',
                        self.kwargs['workspace_id']),
             self.check_pattern('targetResourceId', '.*/{vnet}$'),
