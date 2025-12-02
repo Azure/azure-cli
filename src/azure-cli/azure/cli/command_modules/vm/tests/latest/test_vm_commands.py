@@ -4384,11 +4384,11 @@ class VMSSCreateAndModify(ScenarioTest):
         })
 
         self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2022Datacenter '
-                 '--instance-count {count} --orchestration-mode Uniform --lb-sku Standard')
+                 '--instance-count {count} --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls')
 
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('virtualMachineProfile.priority', None),
-            self.check('sku.name', 'Standard_DS1_v2'),
+            self.check('sku.name', 'Standard_B1ls'),
         ])
 
         self.cmd('vmss list',
@@ -11094,7 +11094,7 @@ class VMSSSetOrchestrationServiceStateScenarioTest(ScenarioTest):
         self.cmd(
             'network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --load-balancer {lb} '
+            'vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --load-balancer {lb} --vm-sku Standard_B1ls '
             '--health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser --orchestration-mode Uniform --lb-sku Standard',
             checks=[
                 self.check('vmss.automaticRepairsPolicy.enabled', True),
