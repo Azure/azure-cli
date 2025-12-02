@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import unittest
+from unittest import mock
 
 
 class TestCoreTelemetry(unittest.TestCase):
@@ -57,3 +58,24 @@ class TestCoreTelemetry(unittest.TestCase):
             # mock to add current cloud name in CLOUDS_FORBIDDING_TELEMETRY
             with mock.patch('azure.cli.core.cloud.CLOUDS_FORBIDDING_TELEMETRY', [az_cli.cloud.name]):
                 self.assertFalse(telemetry.is_telemetry_enabled())
+
+    @mock.patch('azure.cli.core.util.get_az_version_string')
+    def test_show_version_sets_telemetry_params(self, mock_get_version):
+        """Test show_version telemetry state is same regardless of available updates."""
+        from azure.cli.core.mock import DummyCli
+        from azure.cli.core import telemetry
+        from knack.completion import ARGCOMPLETE_ENV_NAME
+
+        mock_get_version.return_value = ("azure-cli 2.80.0", ["core", "extension1"])
+
+        telemetry.start()
+
+        cli = DummyCli()
+        telemetry.set_application(cli, ARGCOMPLETE_ENV_NAME)
+
+        cli.show_version()
+
+        session = telemetry._session
+        self.assertEqual(session.command, "")
+        self.assertEqual(session.parameters, ["--version"])
+        self.assertIsNone(session.raw_command)

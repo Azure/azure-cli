@@ -371,26 +371,34 @@ def update_disk_caching(model, caching_settings):
             _update(model, lun, value)
 
 
+def update_disk_caching_by_aaz(model, caching_settings):
+    def _update(model, lun, value):
+        luns = model.keys() if lun is None else [lun]
+        for lun_item in luns:
+            if lun_item not in model:
+                raise CLIError("Data disk with lun of '{}' doesn't exist. Existing luns: {}."
+                               .format(lun_item, list(model.keys())))
+            model[lun_item]['caching'] = value
+
+    if len(caching_settings) == 1 and '=' not in caching_settings[0]:
+        _update(model, None, caching_settings[0])
+    else:
+        for x in caching_settings:
+            if '=' not in x:
+                raise CLIError("usage error: please use 'LUN=VALUE' to configure caching on individual disk")
+            lun, value = x.split('=', 1)
+            lun = lun.lower()
+            lun = int(lun) if lun != 'os' else lun
+            _update(model, lun, value)
+
+
 def update_write_accelerator_settings(model, write_accelerator_settings):
     def _update(model, lun, value):
-        if isinstance(model, dict):
-            luns = model.keys() if lun is None else [lun]
-            for lun_item in luns:
-                if lun_item not in model:
-                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun_item))
-                model[lun_item]['writeAcceleratorEnabled'] = value
-        else:
-            if lun is None:
-                disks = [model.os_disk] + (model.data_disks or [])
-            elif lun == 'os':
-                disks = [model.os_disk]
-            else:
-                disk = next((d for d in model.data_disks if d.lun == lun), None)
-                if not disk:
-                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
-                disks = [disk]
-            for disk in disks:
-                disk.write_accelerator_enabled = value
+        luns = model.keys() if lun is None else [lun]
+        for lun_item in luns:
+            if lun_item not in model:
+                raise CLIError("data disk with lun of '{}' doesn't exist".format(lun_item))
+            model[lun_item]['write_accelerator_enabled'] = value
 
     if len(write_accelerator_settings) == 1 and '=' not in write_accelerator_settings[0]:
         _update(model, None, write_accelerator_settings[0].lower() == 'true')
