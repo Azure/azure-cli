@@ -5,7 +5,7 @@ ARG image=registry.access.redhat.com/ubi8/ubi:8.4
 
 FROM ${image} AS build-env
 ARG cli_version=dev
-ARG python_package=python39
+ARG python_package=python3.12
 
 RUN yum update -y
 RUN yum install -y wget rpm-build gcc libffi-devel ${python_package}-devel openssl-devel make bash diffutils patch dos2unix perl
@@ -18,7 +18,7 @@ COPY . .
 # We have to explicitly specify 'python39' to install Python 3.9.
 RUN --mount=type=secret,id=PIP_INDEX_URL export PIP_INDEX_URL=$(cat /run/secrets/PIP_INDEX_URL) && \
     dos2unix ./scripts/release/rpm/azure-cli.spec && \
-    REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=$python_package PYTHON_CMD=python3.9 \
+    REPO_PATH=$(pwd) CLI_VERSION=$cli_version PYTHON_PACKAGE=$python_package PYTHON_CMD=$python_package \
     rpmbuild -v -bb --clean scripts/release/rpm/azure-cli.spec && \
     cp /root/rpmbuild/RPMS/*/azure-cli-${cli_version}-1.*.rpm /azure-cli-dev.rpm && \
     mkdir /out && cp /root/rpmbuild/RPMS/*/azure-cli-${cli_version}-1.*.rpm /out/
