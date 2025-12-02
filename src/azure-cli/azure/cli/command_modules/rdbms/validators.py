@@ -350,7 +350,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
-    _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone, standby_availability_zone, zone, tier, single_az, instance)
+    _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
+                                    standby_availability_zone,zone, tier, single_az, instance)
     _pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
     is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
@@ -510,7 +511,8 @@ def _pg_version_validator(version, versions):
                            "maintain security, performance, and supportability.")
 
 
-def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone, standby_availability_zone, zone, tier, single_az, instance):
+def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
+                                    standby_availability_zone, zone, tier, single_az, instance):
     high_availability_enabled = (high_availability is not None and high_availability.lower() != 'disabled')
     zonal_resiliency_enabled = (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled')
     high_availability_zone_redundant = (high_availability_enabled and high_availability.lower() == 'zoneredundant')
@@ -525,12 +527,12 @@ def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_s
 
     if high_availability_enabled:
         if tier == 'Burstable':
-            raise ArgumentUsageError("High availability is not supported for Burstable tier")  
+            raise ArgumentUsageError("High availability is not supported for Burstable tier")
         if single_az and high_availability_zone_redundant:
             raise ArgumentUsageError("This region is single availability zone. "
                                      "Zone redundant high availability is not supported "
                                      "in a single availability zone region.")
-        
+
     if zonal_resiliency_enabled:
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
@@ -547,7 +549,7 @@ def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_s
         if zone == standby_availability_zone:
             raise ArgumentUsageError("Your server is in availability zone {}. "
                                      "The zone of the server cannot be same as the standby zone.".format(zone))
-        
+
     if allow_same_zone and not zonal_resiliency_enabled:
         raise ArgumentUsageError("You can only set --allow-same-zone when --zonal-resiliency is Enabled.")
 
