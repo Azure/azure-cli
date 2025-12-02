@@ -719,6 +719,7 @@ class AzCliCommandInvoker(CommandInvoker):
             if not self._is_command_supported_for_what_if(args):
                 error_msg = ("\"--what-if\" argument is not supported for this command.")
                 logger.error(error_msg)
+                telemetry.set_what_if_summary('what-if-unsupported-command')
                 telemetry.set_user_fault(summary='what-if-unsupported-command')
                 return CommandResultItem(None, exit_code=1, error=CLIError(error_msg))
             
@@ -765,6 +766,7 @@ class AzCliCommandInvoker(CommandInvoker):
                 if 'output' not in self.cli_ctx.invocation.data or self.cli_ctx.invocation.data['output'] is None:
                     self.cli_ctx.invocation.data['output'] = 'json'
                 
+                telemetry.set_what_if_summary('what-if-completed')
                 telemetry.set_success(summary='what-if-completed')
 
                 # Return the formatted what-if output as the result
@@ -778,6 +780,8 @@ class AzCliCommandInvoker(CommandInvoker):
             except (CLIError, ValueError, KeyError) as ex:
                 # If what-if service fails, still show an informative message
                 logger.error("What-if preview failed: %s", str(ex))
+                telemetry.set_what_if_summary('what-if-failed')
+                telemetry.set_what_if_exception(ex)
                 telemetry.set_exception(ex, fault_type='what-if-error')
                 telemetry.set_failure(summary='what-if-failed')
                 return CommandResultItem(None, exit_code=1,

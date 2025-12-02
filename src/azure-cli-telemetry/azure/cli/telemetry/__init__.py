@@ -58,6 +58,7 @@ def save(config_dir, payload):
         events = json.loads(payload)
 
         logger.info('Begin splitting cli events and extra events, total events: %s', len(events))
+        logger.debug('events: %s', events)
         cli_events = {}
         client = CliTelemetryClient()
         for key, event in events.items():
