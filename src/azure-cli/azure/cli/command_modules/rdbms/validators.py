@@ -351,7 +351,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
     _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
-                                    standby_availability_zone,zone, tier, single_az, instance)
+                                    standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
     is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
@@ -519,7 +519,7 @@ def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_s
 
     if high_availability_enabled and zonal_resiliency_enabled:
         raise ArgumentUsageError("Setting both --high-availability and --zonal-resiliency is not allowed. "
-                                  "Please set only --zonal-resiliency to move forward.")
+                                 "Please set only --zonal-resiliency to move forward.")
 
     if instance:
         tier = instance.sku.tier if tier is None else tier

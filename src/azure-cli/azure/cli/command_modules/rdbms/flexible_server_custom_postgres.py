@@ -89,7 +89,7 @@ def flexible_server_create(cmd, client,
     high_availability_mode = high_availability
 
     if (sku_name is None) or (version is None) or \
-        (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled'):
+       (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled'):
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
 
         # set sku_name from capability API
