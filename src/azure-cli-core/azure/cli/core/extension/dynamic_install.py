@@ -210,7 +210,7 @@ def _check_value_in_extensions(cli_ctx, parser, args, no_prompt):  # pylint: dis
     telemetry.set_command_details(command_str,
                                   parameters=AzCliCommandInvoker._extract_parameter_names(args),  # pylint: disable=protected-access
                                   extension_name=ext_name,
-                                  command_preserve_casing = roughly_parse_command_with_casing(args))
+                                  command_preserve_casing=roughly_parse_command_with_casing(args))
     run_after_extension_installed = _get_extension_run_after_dynamic_install_config(cli_ctx)
     prompt_info = ""
     if no_prompt:
