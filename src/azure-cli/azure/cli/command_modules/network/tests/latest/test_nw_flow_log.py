@@ -165,7 +165,7 @@ class NWFlowLogScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='test_nw_flow_log_', location='centraluseuap')
     @StorageAccountPreparer(name_prefix='testflowlog', location='centraluseuap', kind='StorageV2')
-    def test_nw_flow_log_create_vnetfl_with_filtering(self, resource_group, resource_group_location, storage_account):
+    def test_nw_flow_log_create_vnetfl_with_record_types(self, resource_group, resource_group_location, storage_account):
         self.kwargs.update({
             'rg': resource_group,
             'location': resource_group_location,
