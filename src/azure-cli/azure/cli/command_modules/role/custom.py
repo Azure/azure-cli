@@ -615,14 +615,11 @@ def create_application(cmd, client, display_name, identifier_uris=None,
             raise CLIError("More than one application have the same display name '{}': (id) {}, please remove "
                            'them first.'.format(display_name, ', '.join([x[ID] for x in existing_apps])))
         if len(existing_apps) == 1:
-            logger.warning("IMPORTANT: The \"az %s\" command can modify an existing application or service principal "
-                           "if another object shares the same display name. "
-                           "Display names aren't unique and can change, "
+            logger.warning("Found an existing application instance: (id) %s.", existing_apps[0][ID])
+            logger.warning("Please notice that display names aren't unique, "
                            "which could result in credential loss or incorrect RBAC assignments. "
-                           "Use a unique object ID or app ID instead. For more details, "
-                           "see https://go.microsoft.com/fwlink/?linkid=2342455.", cmd.name)
-            logger.warning("Found an existing application instance: (id) %s. We will patch it.",
-                           existing_apps[0][ID])
+                           "To create a new application, use a unique display name instead. For more details, "
+                           "see https://go.microsoft.com/fwlink/?linkid=2342455.")
             body = update_application(
                 existing_apps[0], display_name=display_name, identifier_uris=identifier_uris,
                 is_fallback_public_client=is_fallback_public_client,
