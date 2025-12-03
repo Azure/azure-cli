@@ -13,7 +13,6 @@ from azure.cli.core.aaz import *
 
 @register_command(
     "netappfiles volume splitclonefromparent",
-    is_preview=True,
 )
 class Splitclonefromparent(AAZCommand):
     """Split operation to convert clone volume to an independent volume.
@@ -23,9 +22,9 @@ class Splitclonefromparent(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/splitclonefromparent", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/splitclonefromparent", "2025-09-01"],
         ]
     }
 
@@ -171,7 +170,7 @@ class Splitclonefromparent(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -290,6 +289,7 @@ class Splitclonefromparent(AAZCommand):
             )
             properties.effective_network_features = AAZStrType(
                 serialized_name="effectiveNetworkFeatures",
+                flags={"read_only": True},
             )
             properties.enable_subvolumes = AAZStrType(
                 serialized_name="enableSubvolumes",

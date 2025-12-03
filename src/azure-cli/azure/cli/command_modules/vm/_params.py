@@ -1053,6 +1053,7 @@ def load_arguments(self, _):
                        'It should have the same number of items as the application version ids. Null is available for a application '
                        'which does not have a configuration override.')
             c.argument('treat_deployment_as_failure', nargs='*', help="Space-separated list of true or false corresponding to the application version ids. If set to true, failure to install or update gallery application version operation will fail this operation")
+            c.argument('enable_automatic_upgrade', nargs='*', options_list=['--enable-automatic-upgrade', '--enable-auto-upgrade'], help='Space-separated list of true or false corresponding to the application version ids. If set to true, when a new Gallery Application version is available in PIR/SIG, it will be automatically updated for the VM/VMSS')
 
     for scope in ['vm application list', 'vmss application list']:
         with self.argument_context(scope) as c:
