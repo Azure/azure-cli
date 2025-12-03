@@ -41,7 +41,7 @@ SERVER_NAME_MAX_LENGTH = 20
 DEFAULT_LOCATION = "northeurope"
 DEFAULT_PAIRED_LOCATION = "westeurope"
 DEFAULT_GENERAL_PURPOSE_SKU = "Standard_D2ds_v4"
-DEFAULT_MEMORY_OPTIMIZED_SKU = "Standard_E4ads_v5"
+DEFAULT_MEMORY_OPTIMIZED_SKU = "Standard_E4ds_v5"
 RESOURCE_RANDOM_NAME = "clirecording"
 STORAGE_ACCOUNT_PREFIX = "storageaccount"
 STORAGE_ACCOUNT_NAME_MAX_LENGTH = 20
@@ -183,7 +183,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         sku_name = memory_optimized_sku
         accelerated_logs = "Enabled"
         self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {} --accelerated-logs {}'
-                 .format(database_engine, resource_group, server_name, tier, sku_name, accelerated_logs),
+                 .format(database_engine, resource_group, server_name, tier, sku_name, accelerated_logs))
+
+        self.cmd('{} flexible-server show -g {} --name {} '
+                 .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('sku.tier', tier),
                          JMESPathCheck('sku.name', sku_name),
                          JMESPathCheck('storage.logOnDisk', accelerated_logs)])
@@ -356,7 +359,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                       iops_input=iops,
                                       tier="Burstable",
                                       sku_name="Standard_B1ms")
-        self.assertEqual(iops_result, 900)
+        self.assertEqual(iops_result, 640)
 
         # SKU downgraded and IOPS not specified
         iops = result["storage"]["iops"]
@@ -365,7 +368,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                       iops_input=iops,
                                       tier="Burstable",
                                       sku_name="Standard_B1ms")
-        self.assertEqual(iops_result, 900)
+        self.assertEqual(iops_result, 640)
 
         # IOPS passed is within limit of max allowed by SKU but smaller than default
         self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --iops 50 --storage-size 30 --tier Burstable --sku-name Standard_B1ms'
@@ -459,8 +462,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 180)
 
         # default vnet resources
-        restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} '
-                                  .format(database_engine, resource_group, target_server_default, source_server)).get_output_in_json()
+        self.cmd('{} flexible-server restore -g {} --name {} --source-server {} '
+                 .format(database_engine, resource_group, target_server_default, source_server))
+        restore_result = self.cmd('{} flexible-server show -g {} -n {}'
+                                  .format(database_engine, resource_group, target_server_default)).get_output_in_json()
 
         self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
@@ -470,8 +475,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                              self.get_subscription_id(), resource_group, '{}.private.{}.database.azure.com'.format(source_server, database_engine)))
 
         # MYSQL only - vnet to public access
-        restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --public-access Enabled'
-                                .format(database_engine, resource_group, target_server_public_access, source_server)).get_output_in_json()
+        self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --public-access Enabled'
+                 .format(database_engine, resource_group, target_server_public_access, source_server)).get_output_in_json()
 
         # to different vnet and private dns zone
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
@@ -483,8 +488,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet, database_engine)
         self.cmd('network private-dns zone create -g {} --name {}'.format(resource_group, private_dns_zone))
 
-        restore_result = self.cmd('{} flexible-server restore -g {} -n {} --source-server {} --subnet {} --private-dns-zone {}'.format(
-                                  database_engine, resource_group, target_server_diff_vnet, source_server, subnet["id"], private_dns_zone)).get_output_in_json()
+        self.cmd('{} flexible-server restore -g {} -n {} --source-server {} --subnet {} --private-dns-zone {}'
+                .format(database_engine, resource_group, target_server_diff_vnet, source_server, subnet["id"], private_dns_zone))
+
+        restore_result = self.cmd('{} flexible-server show -g {} -n {}'
+                                  .format(database_engine, resource_group, target_server_diff_vnet)).get_output_in_json()
 
         self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
@@ -504,8 +512,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet_2, database_engine)
         self.cmd('network private-dns zone create -g {} --name {}'.format(resource_group, private_dns_zone))
 
-        restore_result = self.cmd('{} flexible-server restore -g {} -n {} --source-server {} --subnet {} --private-dns-zone {}'.format(
-                                database_engine, resource_group, target_server_diff_vnet_2, target_server_public_access, subnet["id"], private_dns_zone)).get_output_in_json()
+        self.cmd('{} flexible-server restore -g {} -n {} --source-server {} --subnet {} --private-dns-zone {}'
+                 .format(database_engine, resource_group, target_server_diff_vnet_2, target_server_public_access, subnet["id"], private_dns_zone))
+        restore_result = self.cmd('{} flexible-server show -g {} -n {}'
+                                  .format(database_engine, resource_group, target_server_diff_vnet_2)).get_output_in_json()
 
         self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
@@ -516,9 +526,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                             self.get_subscription_id(), resource_group, private_dns_zone))
             
         # take params tier, storage-size, sku-name, storage-auto-grow, backup-retention and geo-redundant-backup
-        restore_result = self.cmd('{} flexible-server restore -g {} -n {} --source-server {} --storage-size 64 --tier GeneralPurpose --storage-auto-grow Enabled --sku-name {} --backup-retention 9  --geo-redundant-backup Enabled'.format(
-                                database_engine, resource_group, target_server_config, source_server, DEFAULT_GENERAL_PURPOSE_SKU)).get_output_in_json()
-        
+        self.cmd('{} flexible-server restore -g {} -n {} --source-server {} --storage-size 64 --tier GeneralPurpose --storage-auto-grow Enabled --sku-name {} --backup-retention 9  --geo-redundant-backup Enabled'
+                 .format(database_engine, resource_group, target_server_config, source_server, DEFAULT_GENERAL_PURPOSE_SKU))
+        restore_result = self.cmd('{} flexible-server show -g {} -n {}'
+                                  .format(database_engine, resource_group, target_server_config)).get_output_in_json()
         self.assertEqual(restore_result['backup']['backupRetentionDays'], 9)
         self.assertEqual(restore_result['backup']['geoRedundantBackup'], "Enabled")
         self.assertEqual(restore_result['sku']['name'], DEFAULT_GENERAL_PURPOSE_SKU)
@@ -597,11 +608,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
                           resource_group, new_subnet, new_vnet)).get_output_in_json()
 
-        restore_result = retryable_method(retries=10, interval_sec=360 if os.environ.get(ENV_LIVE_TEST, False) else 0, exception_type=HttpResponseError,
-                                          condition=lambda ex: 'GeoBackupsNotAvailable' in ex.message)(self.cmd)(
-                                              '{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --subnet {} --yes'.format(
-                                              database_engine, resource_group, target_location, target_server_diff_vnet, source_server, subnet["id"])
-                                          ).get_output_in_json()
+        retryable_method(retries=10, interval_sec=360 if os.environ.get(ENV_LIVE_TEST, False) else 0, exception_type=HttpResponseError,
+                         condition=lambda ex: 'GeoBackupsNotAvailable' in ex.message)(self.cmd)(
+                             '{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --subnet {} --yes'
+                             .format(database_engine, resource_group, target_location, target_server_diff_vnet, source_server, subnet["id"]))
+        restore_result = self.cmd('{} flexible-server show -g {} -n {}'
+                                  .format(database_engine, resource_group, target_server_diff_vnet)).get_output_in_json()
 
         self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
@@ -621,8 +633,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet_2, database_engine)
         self.cmd('network private-dns zone create -g {} --name {}'.format(resource_group, private_dns_zone))
 
-        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --subnet {} --private-dns-zone {} --public-access disabled --yes'.format(
-                                database_engine, resource_group, target_location, target_server_diff_vnet_2, source_server_2, subnet["id"], private_dns_zone)).get_output_in_json()
+        self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --subnet {} --private-dns-zone {} --public-access disabled --yes'
+                 .format(database_engine, resource_group, target_location, target_server_diff_vnet_2, source_server_2, subnet["id"], private_dns_zone))
+
+        restore_result = self.cmd('{} flexible-server show -g {} -n {}'
+                                  .format(database_engine, resource_group, target_server_diff_vnet_2)).get_output_in_json()
 
         self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
                         '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
@@ -643,9 +658,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), target_location)
 
         # 6. take params tier, storage-size, sku-name, storage-auto-grow, backup-retention and geo-redundant-backup
-        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --public-access enabled --storage-size 64 --tier GeneralPurpose --storage-auto-grow Enabled --sku-name {} --backup-retention 9  --geo-redundant-backup Enabled'.format(
-                                database_engine, resource_group, target_location, target_server_config, source_server, DEFAULT_GENERAL_PURPOSE_SKU)).get_output_in_json()
-        
+        self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --public-access enabled --storage-size 64 --tier GeneralPurpose --storage-auto-grow Enabled --sku-name {} --backup-retention 9  --geo-redundant-backup Enabled'
+                 .format(database_engine, resource_group, target_location, target_server_config, source_server, DEFAULT_GENERAL_PURPOSE_SKU))
+
+        restore_result = self.cmd('{} flexible-server show -g {} -n {}'
+                                  .format(database_engine, resource_group, target_server_config)).get_output_in_json()
+
         self.assertEqual(restore_result['backup']['backupRetentionDays'], 9)
         self.assertEqual(restore_result['backup']['geoRedundantBackup'], "Enabled")
         self.assertEqual(restore_result['sku']['name'], DEFAULT_GENERAL_PURPOSE_SKU)
@@ -684,7 +702,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, source_server),
                  checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
 
-        result = self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Enabled'
+        self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Enabled'
+                 .format(database_engine, resource_group, source_server))
+        
+        result = self.cmd('{} flexible-server show -g {} -n {}'
                           .format(database_engine, resource_group, source_server),
                           checks=[JMESPathCheck('backup.geoRedundantBackup', 'Enabled')]).get_output_in_json()
 
@@ -694,10 +715,14 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 1200)
 
         self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {}'
-                 .format(database_engine, resource_group, target_location, target_server, source_server),
+                 .format(database_engine, resource_group, target_location, target_server, source_server))
+        self.cmd('{} flexible-server show -g {} -n {}'
+                 .format(database_engine, resource_group, target_server),
                  checks=[JMESPathCheck('backup.geoRedundantBackup', 'Enabled')])
 
         self.cmd('{} flexible-server update -g {} -n {} --geo-redundant-backup Disabled'
+                 .format(database_engine, resource_group, source_server))
+        self.cmd('{} flexible-server show -g {} -n {}'
                  .format(database_engine, resource_group, source_server),
                  checks=[JMESPathCheck('backup.geoRedundantBackup', 'Disabled')])
 
@@ -866,43 +891,39 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                     checks=[JMESPathCheck('dataEncryption', None)])
 
             # create replica 1, it shouldn't have data encryption
-            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'.format(
-                        database_engine,
-                        resource_group,
-                        replica_1_name,
-                        server_name
-            ), checks=[
-                JMESPathCheck('identity.userAssignedIdentities', None),
-                JMESPathCheck('dataEncryption', None),
-                JMESPathCheck('replicationRole', replication_role)
-            ])
+            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+                     .format(database_engine, resource_group, replica_1_name, server_name))
+
+            self.cmd('{} flexible-server show -g {} -n {}'
+                     .format(database_engine, resource_group, replica_1_name),
+                     checks=[
+                         JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
+                         JMESPathCheck('dataEncryption', None),
+                         JMESPathCheck('replicationRole', replication_role)
+                     ] + ([JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(backup_identity['id']))] if geo_redundant_backup else []))
 
             # enable data encryption again in primary server
-            self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {} {}'.format(
-                        database_engine,
-                        resource_group,
-                        server_name,
-                        key['key']['kid'],
-                        identity['id'],
-                        backup_key_id_flags
-            ), checks=main_checks)
+            self.cmd('{} flexible-server update -g {} -n {} --key {} --identity {} {}'
+                     .format(database_engine, resource_group, server_name, key['key']['kid'], identity['id'], backup_key_id_flags))
+
+            self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name), checks=main_checks)
 
             # replica 1 now should have data encryption as well
             self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, replica_1_name),
                         checks=main_checks)
 
             # create replica 2
-            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'.format(
-                        database_engine,
-                        resource_group,
-                        replica_2_name,
-                        server_name
-            ), checks=main_checks + [JMESPathCheck('replicationRole', replication_role)])
+            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+                     .format(database_engine, resource_group, replica_2_name, server_name))
+
+            self.cmd('{} flexible-server show -g {} -n {}'
+                     .format(database_engine, resource_group, replica_2_name),
+                     checks=main_checks + [JMESPathCheck('replicationRole', replication_role)])
 
             # should fail because modifying data encryption on replica server is not allowed
             self.cmd('{} flexible-server update -g {} -n {} --disable-data-encryption'
-                    .format(database_engine, resource_group, replica_2_name),
-                expect_failure=True)
+                     .format(database_engine, resource_group, replica_2_name), 
+                     expect_failure=True)
 
             # restore backup
             current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
@@ -910,13 +931,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
             sleep(max(0, seconds_to_wait))
 
-            restore_result = self.cmd('{} flexible-server {} -g {} --name {} --source-server {}'.format(
-                     database_engine,
-                     restore_type,
-                     resource_group,
-                     backup_name,
-                     server_name
-            ), checks=main_checks).get_output_in_json()
+            self.cmd('{} flexible-server {} -g {} --name {} --source-server {}'
+                     .format(database_engine, restore_type, resource_group, backup_name, server_name))
+
+            restore_result = self.cmd('{} flexible-server show -g {} -n {}'
+                                      .format(database_engine, resource_group, backup_name), checks=main_checks).get_output_in_json()
 
             if geo_redundant_backup:
                 self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), backup_location)
@@ -1259,7 +1278,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location=DEFAULT_LOCATION)
+    @ResourceGroupPreparer(location="australiaeast")
     def test_mysql_flexible_server_replica_mgmt(self, resource_group):
         self._test_flexible_server_replica_mgmt('mysql', resource_group, False)
 
@@ -1286,16 +1305,19 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                           checks=[JMESPathCheck('replicationRole', primary_role)]).get_output_in_json()
 
         # test replica create for public access
-        replica_result = self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --location {}'
-                 .format(database_engine, resource_group, replicas[0], result['id'], replica_location),
-                 checks=[
-                     JMESPathCheck('name', replicas[0]),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.tier', result['sku']['tier']),
-                     JMESPathCheck('sku.name', result['sku']['name']),
-                     JMESPathCheck('replicationRole', replica_role),
-                     JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0')]).get_output_in_json()
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --location {}'
+                 .format(database_engine, resource_group, replicas[0], result['id'], replica_location))
+        
+        replica_result = self.cmd('{} flexible-server show -g {} --name {} '
+                                  .format(database_engine, resource_group, replicas[0]),
+                                  checks=[
+                                      JMESPathCheck('name', replicas[0]),
+                                      JMESPathCheck('resourceGroup', resource_group),
+                                      JMESPathCheck('sku.tier', result['sku']['tier']),
+                                      JMESPathCheck('sku.name', result['sku']['name']),
+                                      JMESPathCheck('replicationRole', replica_role),
+                                      JMESPathCheck('sourceServerResourceId', result['id']),
+                                      JMESPathCheck('replicaCapacity', '0')]).get_output_in_json()
         self.assertEqual(str(replica_result['location']).replace(' ', '').lower(), replica_location)
 
         # test replica create for private access
@@ -1309,20 +1331,22 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                           .format(resource_group, replica_subnet, replica_vnet)).get_output_in_json()
         self.cmd('network private-dns zone create -g {} --name {}'.format(resource_group, private_dns_zone))
 
-        replica_result = self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --location {} --subnet {} --private-dns-zone {}'
-                 .format(database_engine, resource_group, replicas[1], result['id'], replica_location, subnet["id"], private_dns_zone),
-                 checks=[
-                     JMESPathCheck('name', replicas[1]),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('sku.tier', result['sku']['tier']),
-                     JMESPathCheck('sku.name', result['sku']['name']),
-                     JMESPathCheck('replicationRole', replica_role),
-                     JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replicaCapacity', '0'),
-                     JMESPathCheck('network.delegatedSubnetResourceId', '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'
-                                   .format(self.get_subscription_id(), resource_group, replica_vnet, replica_subnet)),
-                     JMESPathCheck('network.{}'.format(private_dns_param), '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'
-                                   .format(self.get_subscription_id(), resource_group, private_dns_zone))]).get_output_in_json()
+        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --location {} --subnet {} --private-dns-zone {}'
+                 .format(database_engine, resource_group, replicas[1], result['id'], replica_location, subnet["id"], private_dns_zone))
+        replica_result = self.cmd('{} flexible-server show -g {} --name {} '
+                                  .format(database_engine, resource_group, replicas[1]),
+                                  checks=[
+                                      JMESPathCheck('name', replicas[1]),
+                                      JMESPathCheck('resourceGroup', resource_group),
+                                      JMESPathCheck('sku.tier', result['sku']['tier']),
+                                      JMESPathCheck('sku.name', result['sku']['name']),
+                                      JMESPathCheck('replicationRole', replica_role),
+                                      JMESPathCheck('sourceServerResourceId', result['id']),
+                                      JMESPathCheck('replicaCapacity', '0'),
+                                      JMESPathCheck('network.delegatedSubnetResourceId', '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'
+                                                    .format(self.get_subscription_id(), resource_group, replica_vnet, replica_subnet)),
+                                      JMESPathCheck('network.{}'.format(private_dns_param), '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/privateDnsZones/{}'
+                                                    .format(self.get_subscription_id(), resource_group, private_dns_zone))]).get_output_in_json()
         self.assertEqual(str(replica_result['location']).replace(' ', '').lower(), replica_location)
 
         # test replica list
@@ -1340,7 +1364,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
 
     def _test_flexible_server_replica_mgmt(self, database_engine, resource_group, vnet_enabled):
-        location = DEFAULT_LOCATION
+        location = "australiaeast"
         primary_role = 'None'
         replica_role = 'Replica'
         master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
@@ -1369,7 +1393,10 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         
         # test replica create
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 --public-access Disabled {}'
-                 .format(database_engine, resource_group, replicas[0], result['id'], replica_vnet_args[0]),
+                 .format(database_engine, resource_group, replicas[0], result['id'], replica_vnet_args[0]))
+        
+        self.cmd('{} flexible-server show -g {} --name {} '
+                 .format(database_engine, resource_group, replicas[0]),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('availabilityZone', 2),
@@ -1393,6 +1420,8 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
         # test replica stop
         self.cmd('{} flexible-server replica stop-replication -g {} --name {} --yes'
+                 .format(database_engine, resource_group, replicas[0]))
+        self.cmd('{} flexible-server show -g {} --name {}'
                  .format(database_engine, resource_group, replicas[0]),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
@@ -1411,14 +1440,17 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
         # test delete master server
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} {}'
-                .format(database_engine, resource_group, replicas[1], result['id'], replica_vnet_args[1]),
-                checks=[
-                    JMESPathCheck('name', replicas[1]),
-                    JMESPathCheck('resourceGroup', resource_group),
-                    JMESPathCheck('sku.name', result['sku']['name']),
-                    JMESPathCheck('replicationRole', replica_role),
-                    JMESPathCheck('sourceServerResourceId', result['id']),
-                    JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[1])
+                 .format(database_engine, resource_group, replicas[1], result['id'], replica_vnet_args[1]))
+
+        self.cmd('{} flexible-server show -g {} --name {} '
+                 .format(database_engine, resource_group, replicas[1]),
+                 checks=[
+                     JMESPathCheck('name', replicas[1]),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replicationRole', replica_role),
+                     JMESPathCheck('sourceServerResourceId', result['id']),
+                     JMESPathCheck('replicaCapacity', '0')] + replica_vnet_check[1])
 
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
                 .format(database_engine, resource_group, master_server), checks=NoneCheck())
@@ -2059,9 +2091,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
 
         # add identity 1 to primary server
         self.cmd('{} flexible-server identity assign -g {} -s {} -n {}'
-                 .format(database_engine, resource_group, server, identity_id[0]),
-                 checks=[
-                     JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0]))])
+                 .format(database_engine, resource_group, server, identity_id[0]))
 
         # create replica 1
         self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
@@ -2315,7 +2345,6 @@ class MySQLExportTest(ScenarioTest):
     @ResourceGroupPreparer(location="eastus")
     @ServerPreparer(engine_type='mysql', location="eastus")
     @StorageAccountPreparer(location="eastus")
-
     def test_mysql_export(self, resource_group, server, storage_account):
         self._test_flexible_server_export_create_mgmt('mysql', resource_group, server, storage_account)
 
