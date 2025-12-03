@@ -177,7 +177,7 @@ class Create(AAZCommand):
         _args_schema.record_types = AAZStrArg(
             options=["--record-types"],
             arg_group="Properties",
-            help="Optional field to filter network traffic logs based on flow states. Value of this field could be any comma separated combination string of letters B,C,E or D. B represents Begin, when a flow is created. C represents Continue for an ongoing flow generated at every five-minute interval. E represents End, when a flow is terminated. D represents Deny, when a flow is denied. If not specified, all network traffic will be logged.",
+            help="Optional field to filter network traffic logs based on flow states. Value of this field could be any comma separated combination string of letters B, C, E, or D. B represents Begin, when a flow is created. C represents Continue for an ongoing flow generated at every five-minute interval. E represents End, when a flow is terminated. D represents Deny, when a flow is denied. If not specified, all network traffic will be logged.",
         )
         _args_schema.retention_policy = AAZObjectArg(
             options=["--retention-policy"],
