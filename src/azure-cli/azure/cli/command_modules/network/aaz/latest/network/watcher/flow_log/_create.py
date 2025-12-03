@@ -45,7 +45,7 @@ class Create(AAZCommand):
         az network watcher flow-log create --location westus --resource-group MtRGContainingVNet --name MyVNetName-flowlog --vnet MyVNetName --storage-account MyStorageAccountName  --filtering-criteria "dstip=20.252.145.59 || DstPort=443"
 
     :example: Create flow log with recordtypes filtering
-        az network watcher flow-log create --resource-group rg1 --network-watcher-name nw1 --name fl --location centraluseuap --target-resource-id /subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/networkSecurityGroups/desmondcentral-nsg --storage-account /subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/nwtest1mgvbfmqsigdxe --filtering-criteria srcIP=158.255.7.8 || dstPort=56891 --record-types B,E --enabled True --format JSON --log-version 1 --identity "{type:UserAssigned,user-assigned-identities:{/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1:{}}}"
+        az network watcher flow-log create --location westus --resource-group MyResourceGroup --name MyFlowLog --nsg MyNSG --storage-account MyStorageAccount --record-types B,E
     """
 
     _aaz_info = {
