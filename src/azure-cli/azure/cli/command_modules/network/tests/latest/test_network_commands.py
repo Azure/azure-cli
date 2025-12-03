@@ -3220,14 +3220,14 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_compute_disabled_rule')
     def test_network_app_gateway_waf_policy_compute_disabled_rule(self, resource_group):
         self.kwargs.update({
-            'policy_name':self.create_random_name('waf', 15),
+            'policy_name': self.create_random_name('waf', 15),
             'policy_type': 'OWASP',
             'policy_version': 3.2,
             'rule_group_name': 'REQUEST-921-PROTOCOL-ATTACK',
             'rule_id': '921120'
         })
 
-        self.cmd('az network application-gateway waf-policy create -g {rg} '
+        self.cmd('network application-gateway waf-policy create -g {rg} '
                  '-n {policy_name} '
                  '--type {policy_type} '
                  '--version {policy_version}')
@@ -3284,7 +3284,8 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                  '--version {policy_version} '
                  '--group-name {rule_group_name}',
                  checks=[self.not_exists('managedRules.managedRuleSets[0].computedDisabledRules')])
-        
+
+
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ddos_protection', location='eastus2')
