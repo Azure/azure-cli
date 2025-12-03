@@ -907,8 +907,6 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
     if is_create_ssdv2 or is_update_ssdv2:
         if auto_grow and auto_grow.lower() != 'disabled':
             raise ValidationError("Storage Auto-grow is not supported for servers with Premium SSD V2.")
-        if high_availability and high_availability.lower() != 'disabled':
-            raise ValidationError("High availability is not supported for servers with Premium SSD V2.")
         if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
             raise ValidationError("Geo-redundancy is not supported for servers with Premium SSD V2.")
         if performance_tier:
