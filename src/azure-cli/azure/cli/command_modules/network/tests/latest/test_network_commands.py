@@ -3217,7 +3217,74 @@ class NetworkAppGatewayWafPolicyScenarioTest(ScenarioTest):
                      self.not_exists('exceptions')
                  ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_app_gateway_waf_policy_compute_disabled_rule')
+    def test_network_app_gateway_waf_policy_compute_disabled_rule(self, resource_group):
+        self.kwargs.update({
+            'policy_name':self.create_random_name('waf', 15),
+            'policy_type': 'OWASP',
+            'policy_version': 3.2,
+            'rule_group_name': 'REQUEST-921-PROTOCOL-ATTACK',
+            'rule_id': '921120'
+        })
 
+        self.cmd('az network application-gateway waf-policy create -g {rg} '
+                 '-n {policy_name} '
+                 '--type {policy_type} '
+                 '--version {policy_version}')
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set add -g {rg} '
+                 '--policy-name {policy_name} '
+                 '--type {policy_type} '
+                 '--version {policy_version} '
+                 '--group-name {rule_group_name} '
+                 '--rule rule-id={rule_id}',
+                 checks=[
+                     self.exists('managedRules.managedRuleSets[0].computedDisabledRules'),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules | length(@)', 1),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules[0].ruleGroupName', self.kwargs['rule_group_name']),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules[0].rules | length(@)', 1),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules[0].rules[0]', self.kwargs['rule_id']),
+                 ])
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} '
+                 '--policy-name {policy_name} '
+                 '--type {policy_type} '
+                 '--version {policy_version} '
+                 '--group-name {rule_group_name} '
+                 '--rule rule-id={rule_id} state=Enabled',
+                 checks=[self.not_exists('managedRules.managedRuleSets[0].computedDisabledRules')])
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set update -g {rg} '
+                 '--policy-name {policy_name} '
+                 '--type {policy_type} '
+                 '--version {policy_version} '
+                 '--group-name {rule_group_name} '
+                 '--rule rule-id={rule_id} state=Disabled',
+                 checks=[
+                     self.exists('managedRules.managedRuleSets[0].computedDisabledRules'),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules | length(@)', 1),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules[0].ruleGroupName', self.kwargs['rule_group_name']),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules[0].rules | length(@)', 1),
+                     self.check('managedRules.managedRuleSets[0].computedDisabledRules[0].rules[0]', self.kwargs['rule_id']),
+                 ])
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set list -g {rg} '
+                 '--policy-name {policy_name}',
+                 checks=[
+                     self.exists('managedRuleSets[0].computedDisabledRules'),
+                     self.check('managedRuleSets[0].computedDisabledRules | length(@)', 1),
+                     self.check('managedRuleSets[0].computedDisabledRules[0].ruleGroupName', self.kwargs['rule_group_name']),
+                     self.check('managedRuleSets[0].computedDisabledRules[0].rules | length(@)', 1),
+                     self.check('managedRuleSets[0].computedDisabledRules[0].rules[0]', self.kwargs['rule_id']),
+                 ])
+
+        self.cmd('network application-gateway waf-policy managed-rule rule-set remove -g {rg} '
+                 '--policy-name {policy_name} '
+                 '--type {policy_type} '
+                 '--version {policy_version} '
+                 '--group-name {rule_group_name}',
+                 checks=[self.not_exists('managedRules.managedRuleSets[0].computedDisabledRules')])
+        
 class NetworkDdosProtectionScenarioTest(LiveScenarioTest):
 
     @ResourceGroupPreparer(name_prefix='cli_test_ddos_protection', location='eastus2')
