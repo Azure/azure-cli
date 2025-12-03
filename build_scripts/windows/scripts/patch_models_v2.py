@@ -74,6 +74,8 @@ def solve_mro(models):
             _LOGGER.info("Skipping since already patched")
             return
 
+        _LOGGER.info(f"Caught an SDK that is based on Python 2!")
+
         # Build the new files in a temp folder
         with tempfile.TemporaryDirectory() as temp_folder:
             final_models_path = Path(temp_folder, "models")
