@@ -197,7 +197,7 @@ class NWFlowLogScenarioTest(LiveScenarioTest):
             'workspace_id': workspace['id']
         })
 
-        #targetId as vnet
+        # targetId as vnet
         self.cmd('network watcher flow-log create '
                  '--location {location} '
                  '--resource-group {rg} '
