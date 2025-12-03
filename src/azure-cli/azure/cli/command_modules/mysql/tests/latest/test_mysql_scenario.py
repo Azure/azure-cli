@@ -2340,11 +2340,11 @@ class MySQLExportTest(ScenarioTest):
         self.storage_cmd('storage container create -n {}', account_info, container_name)
         return container_name
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location="eastus")
     @ServerPreparer(engine_type='mysql', location="eastus")
     @StorageAccountPreparer(location="eastus")
+    @unittest.skip("MySQL server backup export is not supported temporarily.")
     def test_mysql_export(self, resource_group, server, storage_account):
         self._test_flexible_server_export_create_mgmt('mysql', resource_group, server, storage_account)
 
