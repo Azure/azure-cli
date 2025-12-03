@@ -39,7 +39,7 @@ class Update(AAZCommand):
         az network watcher flow-log update --location westus --resource-group MyAnotherResourceGroup --name MyFlowLog --workspace MyAnotherLogAnalyticWorkspace
 
     :example: Update flowlog with recordtypes filtering
-        az network watcher flow-log update --resource-group rg1 --network-watcher-name nw1 --name fl --location centraluseuap --target-resource-id /subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/networkSecurityGroups/desmondcentral-nsg --storage-account /subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/nwtest1mgvbfmqsigdxe --filtering-criteria srcIP=158.255.7.8 || dstPort=56891 --record-types B,E --enabled True --format JSON --log-version 1 --identity "{type:UserAssigned,user-assigned-identities:{/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1:{}}}"
+        az network watcher flow-log update --location westus --resource-group MyResourceGroup --name MyFlowLog --record-types B,C
     """
 
     _aaz_info = {
