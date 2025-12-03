@@ -41,6 +41,7 @@ def get_performance_tiers(storage_edition):
     return performance_tiers
 
 
+# pylint: disable=too-many-locals
 def _postgres_parse_list_capability(result, is_offer_restriction_check_required=False):
     result = _get_list_from_paged_response(result)
 
