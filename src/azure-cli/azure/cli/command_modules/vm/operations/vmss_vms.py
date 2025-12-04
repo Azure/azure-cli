@@ -71,7 +71,10 @@ from azure.cli.core.aaz import register_command
     "vmss get-resiliency-view",
 )
 class VMSSGetResiliencyView(_VMSSVMSShow):
-    """View the resiliency status of an VMSS
+    """View the resiliency status of a VMSS instance
+
+    :example: View the resiliency status of a VMSS instance.
+        az vmss get-resiliency-view --name MyScaleSet --resource-group MyResourceGroup --instance MyInstanceId
     """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):

@@ -2599,6 +2599,12 @@ examples:
     crafted: true
 """
 
+helps['vmss list-instances'] = """
+parameters:
+  - name: --resiliency-view
+    short-summary: Show resiliency status of each instance.
+"""
+
 helps['vmss reimage'] = """
 type: command
 short-summary: Reimage VMs within a VMSS.
