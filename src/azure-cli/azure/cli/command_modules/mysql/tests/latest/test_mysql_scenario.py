@@ -2303,9 +2303,11 @@ class FlexibleServerMaintenanceMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, maintenance_name)).get_output_in_json()
         self.assertEqual(maintenance_id, maintenance_read_response['id'])
 
-        reschedule_start_time = "2024-10-23T03:41Z"
-        maintenance_reschedule_response = self.cmd('{} flexible-server maintenance reschedule --resource-group {} --server-name {} --maintenance-name {} --start-time {}'
-                 .format(database_engine, resource_group, server_name, maintenance_name, reschedule_start_time)).get_output_in_json()
+        reschedule_start_time = "2025-12-25T03:41Z"
+        self.cmd('{} flexible-server maintenance reschedule --resource-group {} --server-name {} --maintenance-name {} --start-time {}'
+                 .format(database_engine, resource_group, server_name, maintenance_name, reschedule_start_time))
+        maintenance_reschedule_response = self.cmd('{} flexible-server maintenance show --resource-group {} --server-name {} --maintenance-name {}'
+                 .format(database_engine, resource_group, server_name, maintenance_name)).get_output_in_json()
         maintenance_rescheduled_time = parser.parse(maintenance_reschedule_response['maintenanceStartTime']).strftime('%Y-%m-%dT%H:%MZ')
         self.assertEqual(reschedule_start_time, maintenance_rescheduled_time)
 
