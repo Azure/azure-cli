@@ -66,6 +66,24 @@ class VMSSVMSShow(_VMSSVMSShow):
         return result
 
 
+from azure.cli.core.aaz import register_command
+@register_command(
+    "vmss get-resiliency-view",
+)
+class VMSSGetResiliencyView(_VMSSVMSShow):
+    """View the resiliency status of an VMSS
+    """
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.instance_id._options = ["--instance"]
+        args_schema.vm_scale_set_name._options = ["-n", "--name"]
+        args_schema.expand._registered = False
+        return args_schema
+
+    def pre_operations(self):
+        self.ctx.args.expand='resiliencyView'
+
 def convert_show_result_to_snake_case(result):
     new_result = {}
     if "instanceId" in result:
