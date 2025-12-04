@@ -5,7 +5,7 @@
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument, too-many-statements, too-many-branches, too-many-locals
 from knack.log import get_logger
 
-from azure.cli.core.aaz import AAZUndefined, has_value
+from azure.cli.core.aaz import AAZUndefined, has_value, register_command
 from ..aaz.latest.vmss.vms import Create as _VMSSVMSCreate, Show as _VMSSVMSShow
 
 logger = get_logger(__name__)
@@ -66,7 +66,6 @@ class VMSSVMSShow(_VMSSVMSShow):
         return result
 
 
-from azure.cli.core.aaz import register_command
 @register_command(
     "vmss get-resiliency-view",
 )
@@ -86,6 +85,7 @@ class VMSSGetResiliencyView(_VMSSVMSShow):
 
     def pre_operations(self):
         self.ctx.args.expand = 'resiliencyView'
+
 
 def convert_show_result_to_snake_case(result):
     new_result = {}

@@ -4108,6 +4108,7 @@ def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, s
         vmss["virtualMachineProfile"]["storageProfile"]["imageReference"] = None
     return vmss
 
+
 def get_instances_list(cmd, resource_group_name, vm_scale_set_name, resiliency_view=False):
     from .operations.vmss import VMSSListInstances
     instances = VMSSListInstances(cli_ctx=cmd.cli_ctx)(command_args={
@@ -4126,6 +4127,7 @@ def get_instances_list(cmd, resource_group_name, vm_scale_set_name, resiliency_v
         'resource_group': resource_group_name,
         'vm_scale_set_name': vm_scale_set_name,
     }) for id in instances_id]
+
 
 def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)
