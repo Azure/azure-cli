@@ -2600,6 +2600,7 @@ examples:
 """
 
 helps['vmss list-instances'] = """
+short-summary: List all virtual machines in a VM scale sets.
 parameters:
   - name: --resiliency-view
     short-summary: Show resiliency status of each instance.
