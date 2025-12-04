@@ -40,7 +40,7 @@ examples:
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
           --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 17 --high-availability ZoneRedundant --zone 1 \\
+          --tags "key=value" --version 17 --zonal-resiliency Enabled --zone 1 \\
           --standby-zone 3
   - name: >
       Create server with high availability feature enabled that allows primary and standby in the same zone when multi-zone capacity is unavailable.

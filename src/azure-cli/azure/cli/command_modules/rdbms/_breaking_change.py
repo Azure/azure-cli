@@ -6,3 +6,4 @@
 from azure.cli.core.breaking_change import register_argument_deprecate
 
 register_argument_deprecate('postgres flexible-server create', '--high-availability', redirect='--zonal-resiliency')
+register_argument_deprecate('postgres flexible-server update', '--high-availability', redirect='--zonal-resiliency')
