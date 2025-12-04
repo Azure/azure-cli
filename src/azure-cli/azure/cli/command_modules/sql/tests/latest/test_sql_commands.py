@@ -8774,7 +8774,7 @@ class SqlManagedInstanceMemorySizeInGBCreateScenarioTest(ScenarioTest):
             'family': 'Gen8IM'
         })
 
-        # Create Hermes
+        # Create MI
         self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --iops {storage_iops} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} '
@@ -8793,7 +8793,7 @@ class SqlManagedInstanceMemorySizeInGBCreateScenarioTest(ScenarioTest):
                                         self.check('sku.family', '{family}'),
                                         self.check('sku.capacity', '{v_cores}')])
 
-        # Get the managed instance and check GPv2 flag
+        # Get the managed instance and check memory size in gb
         managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
         self.assertEqual(managed_instance['memorySizeInGb'], 64)
 
@@ -8801,7 +8801,7 @@ class SqlManagedInstanceMemorySizeInGBCreateScenarioTest(ScenarioTest):
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
 
-class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
+class SqlManagedInstanceMemorySizeInGBUpdateScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     def test_sql_mi_memorysizeingb_update(self):
 
@@ -8831,7 +8831,7 @@ class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
         self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --memory {memory_size_in_gb}',
                  checks=[self.check('memorySizeInGb', '{memory_size_in_gb}')])
 
-        # Get the managed instance and check memory size in gb
+        # Get the managed instance and check memory size in GB
         managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
         self.assertEqual(managed_instance['memorySizeInGb'], int(self.kwargs['memory_size_in_gb']))
 

@@ -2334,7 +2334,7 @@ def load_arguments(self, _):
                    options_list=['--memory'],
                    arg_type=memory_size_type,
                    help='The memory size of the managed instance.'
-                   'Memory size must be specified in GB')
+                   ' Memory size must be specified in GB')
 
         c.argument('collation',
                    help='The collation of the managed instance.')
