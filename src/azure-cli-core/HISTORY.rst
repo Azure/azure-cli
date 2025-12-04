@@ -3,6 +3,19 @@
 Release History
 ===============
 
+2.66.2
+++++++
+
+* Resolve CVE-2025-4517 (#32350)
+* Resolve CVE-2025-24049 (#32038)
+* Resolve CVE-2025-9230 (#32491)
+* Resolve CVE-2025-9232 (#32491)
+* Resolve CVE-2024-13176 (#32032)
+* Resolve CVE-2024-9143 (#32032)
+* Resolve CVE-2025-50181 (#32076)
+* Resolve CVE-2025-50182 (#32076)
+* Resolve CVE-2024-47081 (#32077)
+
 2.66.1
 ++++++
 
