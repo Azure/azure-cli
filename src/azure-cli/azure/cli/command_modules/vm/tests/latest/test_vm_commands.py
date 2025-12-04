@@ -5648,7 +5648,7 @@ class VMSSVMsScenarioTest(ScenarioTest):
 
         instances_id = [instance['instanceId'] for instance in instance_list]
         self.kwargs['instance_id'] = instances_id[0]
-    
+
         self.cmd('vmss get-resiliency-view -g {rg} -n {vmss_name_1} '
                  '--instance {instance_id}',
                  checks=[

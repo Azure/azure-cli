@@ -20,7 +20,6 @@ import requests
 # the urlopen is imported for automation purpose
 from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
-from azdev.operations.statistics import command_args_express
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import (

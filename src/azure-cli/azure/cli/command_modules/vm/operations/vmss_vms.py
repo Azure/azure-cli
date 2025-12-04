@@ -82,7 +82,7 @@ class VMSSGetResiliencyView(_VMSSVMSShow):
         return args_schema
 
     def pre_operations(self):
-        self.ctx.args.expand='resiliencyView'
+        self.ctx.args.expand = 'resiliencyView'
 
 def convert_show_result_to_snake_case(result):
     new_result = {}
