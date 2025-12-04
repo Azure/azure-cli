@@ -20,6 +20,7 @@ import requests
 # the urlopen is imported for automation purpose
 from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
+from azdev.operations.statistics import command_args_express
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import (
@@ -4108,6 +4109,24 @@ def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, s
         vmss["virtualMachineProfile"]["storageProfile"]["imageReference"] = None
     return vmss
 
+def get_instances_list(cmd, resource_group_name, vm_scale_set_name, resiliency_view=False):
+    from .operations.vmss import VMSSListInstances
+    instances = VMSSListInstances(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'virtual_machine_scale_set_name': vm_scale_set_name,
+    })
+
+    if not resiliency_view:
+        return instances
+
+    instances_id = [instance['instanceId'] for instance in instances]
+
+    from .operations.vmss_vms import VMSSGetResiliencyView
+    return [VMSSGetResiliencyView(cli_ctx=cmd.cli_ctx)(command_args={
+        'instance_id': id,
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+    }) for id in instances_id]
 
 def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
     client = _compute_client_factory(cmd.cli_ctx)

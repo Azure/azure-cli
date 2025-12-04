@@ -418,6 +418,7 @@ def load_command_table(self, _):
         g.custom_command('get-instance-view', 'get_vmss_instance_view', table_transformer='{ProvisioningState:statuses[0].displayStatus, PowerState:statuses[1].displayStatus}')
         g.custom_command('list-instance-connection-info', 'list_vmss_instance_connection_info')
         g.custom_command('list-instance-public-ips', 'list_vmss_instance_public_ips')
+        g.custom_command('list-instances', 'get_instances_list')
         g.custom_command('reimage', 'reimage_vmss', supports_no_wait=True, min_api='2017-03-30')
         g.custom_command('restart', 'restart_vmss', supports_no_wait=True)
         g.custom_command('scale', 'scale_vmss', supports_no_wait=True)
@@ -431,9 +432,6 @@ def load_command_table(self, _):
         from .aaz.latest.vmss import List as VMSSList
         self.command_table['vmss list'] = VMSSList(loader=self,
                                                    table_transformer=transform_vmss_list_with_zones_table_output)
-
-        from .operations.vmss import VMSSListInstances
-        self.command_table['vmss list-instances'] = VMSSListInstances(loader=self)
 
         from .operations.vmss_vms import VMSSGetResiliencyView
         self.command_table['vmss get-resiliency-view'] = VMSSGetResiliencyView(loader=self)
