@@ -101,8 +101,8 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The delegation for the Virtual Appliance",
         )
-        _args_schema.internet_ingress_public_ips = AAZListArg(
-            options=["--internet-ingress-public-ips"],
+        _args_schema.internet_ingress_ips = AAZListArg(
+            options=["--internet-ingress-ips"],
             arg_group="Properties",
             help="List of Resource Uri of Public IPs for Internet Ingress Scenario.",
         )
@@ -112,7 +112,7 @@ class Create(AAZCommand):
             help="Network Profile containing configurations for Public and Private NIC.",
         )
         _args_schema.nva_interface_configurations = AAZListArg(
-            options=["--interface-config", "--nva-interface-configurations"],
+            options=["--interface-configs", "--nva-interface-configurations"],
             arg_group="Properties",
             help="The NVA in VNet interface configurations",
             fmt=AAZListArgFormat(
@@ -154,10 +154,10 @@ class Create(AAZCommand):
             help="The service name to which the NVA is delegated.",
         )
 
-        internet_ingress_public_ips = cls._args_schema.internet_ingress_public_ips
-        internet_ingress_public_ips.Element = AAZObjectArg()
+        internet_ingress_ips = cls._args_schema.internet_ingress_ips
+        internet_ingress_ips.Element = AAZObjectArg()
 
-        _element = cls._args_schema.internet_ingress_public_ips.Element
+        _element = cls._args_schema.internet_ingress_ips.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Uri of Public Ip",
@@ -371,7 +371,7 @@ class Create(AAZCommand):
                 properties.set_prop("cloudInitConfiguration", AAZStrType, ".cloud_init_config")
                 properties.set_prop("cloudInitConfigurationBlobs", AAZListType, ".cloud_init_config_blobs")
                 properties.set_prop("delegation", AAZObjectType, ".delegation")
-                properties.set_prop("internetIngressPublicIps", AAZListType, ".internet_ingress_public_ips")
+                properties.set_prop("internetIngressPublicIps", AAZListType, ".internet_ingress_ips")
                 properties.set_prop("networkProfile", AAZObjectType, ".network_profile")
                 properties.set_prop("nvaInterfaceConfigurations", AAZListType, ".nva_interface_configurations")
                 properties.set_prop("nvaSku", AAZObjectType)
