@@ -5626,6 +5626,60 @@ class VMSSVMsScenarioTest(ScenarioTest):
             result = self.cmd('vmss get-instance-view --resource-group {{rg}} --name {{vmss}} --instance-id {}'.format(iid)).get_output_in_json()
             self.assertTrue(result['statuses'][1]['code'] in args)
 
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_resiliency_view')
+    def test_vmss_resiliency_view(self, resource_group):
+        self.kwargs.update({
+            'vmss_name_1': self.create_random_name('vmss', 20),
+            'vmss_name_2': self.create_random_name('vmss', 20),
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss_name_1} '
+                 '--image Debian11 '
+                 '--orchestration-mode Flexible '
+                 '--vm-sku Standard_B1ls')
+
+        instance_list = self.cmd('vmss list-instances -g {rg} -n {vmss_name_1} '
+                                 '--resiliency-view',
+                                 checks=[
+                                     self.exists('[0]'),
+                                     self.exists('[0].resilientVMDeletionStatus'),
+                                     self.check('[0].resilientVMDeletionStatus', 'Disabled')
+                                 ]).get_output_in_json()
+
+        instances_id = [instance['instanceId'] for instance in instance_list]
+        self.kwargs['instance_id'] = instances_id[0]
+    
+        self.cmd('vmss get-resiliency-view -g {rg} -n {vmss_name_1} '
+                 '--instance {instance_id}',
+                 checks=[
+                     self.exists('resilientVMDeletionStatus'),
+                     self.check('resilientVMDeletionStatus', 'Disabled')
+                 ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_name_2} '
+                 '--image Debian11 '
+                 '--orchestration-mode Uniform '
+                 '--instance-count 3 '
+                 '--vm-sku Standard_B1ls')
+
+        instance_list = self.cmd('vmss list-instances -g {rg} -n {vmss_name_2} '
+                                 '--resiliency-view',
+                                 checks=[
+                                     self.exists('[0]'),
+                                     self.exists('[0].resilientVMDeletionStatus'),
+                                     self.check('[0].resilientVMDeletionStatus', 'Disabled')
+                                 ]).get_output_in_json()
+
+        instances_id = [instance['instanceId'] for instance in instance_list]
+        self.kwargs['instance_id'] = instances_id[0]
+
+        self.cmd('vmss get-resiliency-view -g {rg} -n {vmss_name_2} '
+                 '--instance {instance_id}',
+                 checks=[
+                     self.exists('resilientVMDeletionStatus'),
+                     self.check('resilientVMDeletionStatus', 'Disabled')
+                 ])
+
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_vms')
     def test_vmss_vms(self, resource_group):
 
