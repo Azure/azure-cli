@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.66.1"
+VERSION = "2.66.2"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:

@@ -3,6 +3,15 @@
 Release History
 ===============
 
+2.66.2
+++++++
+
+**Packaging**
+
+* Bump Python to 3.12 on RHEL and CentOS Stream (#32464)
+* Bump embedded Python to 3.13.9 (#32491)
+* Drop Azure Linux (Mariner) 2.0 support (#32463)
+
 2.66.1
 ++++++
 
