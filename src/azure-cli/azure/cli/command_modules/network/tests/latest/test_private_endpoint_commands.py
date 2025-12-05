@@ -660,12 +660,6 @@ class NetworkPrivateLinkRDBMSScenarioTest(ScenarioTest):
         self._test_private_link_resource(resource_group, server, 'Microsoft.DBforMySQL/servers', 'mysqlServer')
         self._test_private_endpoint_connection(resource_group, server, database_engine, 'Microsoft.DBforMySQL/servers')
 
-    @ResourceGroupPreparer()
-    @ServerPreparer(engine_type='postgres')
-    def test_postgres_private_link_scenario(self, resource_group, server, database_engine):
-        self._test_private_link_resource(resource_group, server, 'Microsoft.DBforPostgreSQL/servers', 'postgresqlServer')
-        self._test_private_endpoint_connection(resource_group, server, database_engine, 'Microsoft.DBforPostgreSQL/servers')
-
     def _test_private_link_resource(self, resource_group, server, database_engine, group_id):
         result = self.cmd('network private-link-resource list -g {} --name {} --type {}'
                           .format(resource_group, server, database_engine)).get_output_in_json()
@@ -2491,6 +2485,97 @@ class VideoIndexerNetworkARMTemplateBasedScenarioTest(ScenarioTest):
         vi_name = self.create_random_name(prefix='clitestvideoindexer', length=24)
         self._test_private_endpoint_connection_scenario(resource_group, storage_account, vi_name)
 
+class SecurityPrivateLinkNetworkARMTemplateBasedScenarioTest(ScenarioTest):
+    def _test_private_endpoint_connection_scenario(self, resource_group, target_resource_name):
+        from azure.mgmt.core.tools import resource_id
+        resource_type = 'Microsoft.Security/privateLinks'
+        self.kwargs.update({
+            'target_resource_name': target_resource_name,
+            'target_resource_id': resource_id(subscription=self.get_subscription_id(),
+                                              resource_group=resource_group,
+                                              namespace=resource_type.split('/')[0],
+                                              type=resource_type.split('/')[1],
+                                              name=target_resource_name),
+            'rg': resource_group,
+            'resource_type': resource_type,
+            'vnet': self.create_random_name('cli-vnet-', 24),
+            'subnet': self.create_random_name('cli-subnet-', 24),
+            'pe': self.create_random_name('cli-pe-', 24),
+            'pe_connection': self.create_random_name('cli-pec-', 24)
+        })
+
+        split_resource_type = resource_type.split('/')
+        resource_type_name = split_resource_type[0].split('.')[1].lower()
+        resource_type_kind = split_resource_type[1].lower()
+        param_file_name = "{}_{}_parameters.json".format(resource_type_name, resource_type_kind)
+        template_file_name = "{}_{}_template.json".format(resource_type_name, resource_type_kind)
+        self.kwargs.update({
+            'param_path': os.path.join(TEST_DIR, 'private_endpoint_arm_templates', param_file_name),
+            'template_path': os.path.join(TEST_DIR, 'private_endpoint_arm_templates', template_file_name)
+        })
+        self.cmd('az deployment group create -g {rg} -p "@{param_path}" target_resource_name={target_resource_name} -f "{template_path}"')
+
+        self.cmd('az network vnet create -n {vnet} -g {rg} --subnet-name {subnet} -o json',
+                 checks=self.check('length(newVNet.subnets)', 1))
+        self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
+                 '--disable-private-endpoint-network-policies true -o json',
+                 checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
+
+        target_private_link_resource = self.cmd('az network private-link-resource list --name {target_resource_name} --resource-group {rg} --type {resource_type} -o json').get_output_in_json()
+        self.kwargs.update({
+            'group_id': target_private_link_resource[0]['properties']['groupId']
+        })
+        # Create a private endpoint connection
+        pe = self.cmd(
+            'az network private-endpoint create -g {rg} -n {pe} --vnet-name {vnet} --subnet {subnet} '
+            '--connection-name {pe_connection} --private-connection-resource-id {target_resource_id} '
+            '--group-id {group_id} -o json').get_output_in_json()
+        self.kwargs['pe_id'] = pe['id']
+        self.kwargs['pe_name'] = self.kwargs['pe_id'].split('/')[-1]
+
+        # Show the connection at the target resource side
+        list_private_endpoint_conn = self.cmd('az network private-endpoint-connection list --name {target_resource_name} --resource-group {rg} --type {resource_type} -o json').get_output_in_json()
+        self.kwargs.update({
+            "pec_id": list_private_endpoint_conn[0]['id']
+        })
+
+        self.kwargs.update({
+            "pec_name": self.kwargs['pec_id'].split('/')[-1]
+        })
+        self.cmd('az network private-endpoint-connection show --id {pec_id} -o json',
+                 checks=self.check('id', '{pec_id}'))
+        self.cmd('az network private-endpoint-connection show --resource-name {target_resource_name} --name {pec_name} --resource-group {rg} --type {resource_type} -o json')
+        self.cmd('az network private-endpoint-connection show --resource-name {target_resource_name} -n {pec_name} -g {rg} --type {resource_type} -o json')
+
+        # Test approval/rejection
+        self.kwargs.update({
+            'approval_desc': 'You are approved!',
+            'rejection_desc': 'You are rejected!'
+        })
+        self.cmd(
+            'az network private-endpoint-connection approve --resource-name {target_resource_name} --resource-group {rg} --name {pec_name} --type {resource_type} '
+            '--description "{approval_desc}" -o json', checks=[
+                self.check('properties.privateLinkServiceConnectionState.status', 'Approved')
+            ])
+        self.cmd('az network private-endpoint-connection reject --id {pec_id} '
+                 '--description "{rejection_desc}" -o json',
+                 checks=[
+                     self.check('properties.privateLinkServiceConnectionState.status', 'Rejected')
+                 ])
+        self.cmd(
+            'az network private-endpoint-connection list --name {target_resource_name} --resource-group {rg} --type {resource_type} -o json',
+            checks=[
+                self.check('length(@)', 1)
+            ])
+
+        # Test delete
+        self.cmd('az network private-endpoint-connection delete --id {pec_id} -y -o json')
+
+    @live_only()
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_security_privatelink", location="westus")
+    def test_private_endpoint_connection_security_privatelink(self, resource_group):
+        name = self.create_random_name(prefix='clitestsecuritypl', length=24)
+        self._test_private_endpoint_connection_scenario(resource_group, name)
 
 class NetworkPrivateLinkDigitalTwinsScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(
@@ -2883,7 +2968,7 @@ class NetworkPrivateLinkScenarioTest(ScenarioTest):
 
         _test_private_endpoint(self)
 
-    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server", location="westus")
+    @ResourceGroupPreparer(name_prefix="test_private_endpoint_connection_sql_server", location="westus2")
     def test_private_endpoint_connection_sql_server(self, resource_group):
         self.kwargs.update({
             'rg': resource_group,
