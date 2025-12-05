@@ -28,7 +28,6 @@ from ._client_factory import cf_acr_registries
 from ._constants import get_managed_sku
 from ._constants import ACR_AUDIENCE_RESOURCE_NAME
 from ._utils import get_registry_by_name, ResourceNotFound
-from .policy import acr_config_authentication_as_arm_show
 from ._format import add_timestamp
 from ._errors import CONNECTIVITY_TOOMANYREQUESTS_ERROR
 
@@ -135,7 +134,6 @@ def _get_aad_token_after_challenge(cli_ctx,
                                    artifact_repository,
                                    permission,
                                    is_diagnostics_context,
-                                   use_acr_audience,
                                    verify_user_permissions):
     authurl = urlparse(token_params['realm'])
     authhost = urlunparse((authurl[0], authurl[1], '/oauth2/exchange', '', '', ''))
@@ -143,10 +141,7 @@ def _get_aad_token_after_challenge(cli_ctx,
     from azure.cli.core._profile import Profile
     profile = Profile(cli_ctx=cli_ctx)
 
-    scope = None
-    if use_acr_audience:
-        logger.debug("Using ACR audience token for authentication")
-        scope = "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
+    scope = "https://{}.azure.net".format(ACR_AUDIENCE_RESOURCE_NAME)
 
     # this might be a cross tenant scenario, so pass subscription to get_raw_token
     creds, _, tenant = profile.get_raw_token(subscription=get_subscription_id(cli_ctx),
@@ -267,7 +262,6 @@ def _get_aad_token(cli_ctx,
                    artifact_repository=None,
                    permission=None,
                    is_diagnostics_context=False,
-                   use_acr_audience=False,
                    verify_user_permissions=False):
     """Obtains refresh and access tokens for an AAD-enabled registry. Will return the allowed actions if
     verify_user_permissions is set to True.
@@ -296,7 +290,6 @@ def _get_aad_token(cli_ctx,
                                           artifact_repository,
                                           permission,
                                           is_diagnostics_context,
-                                          use_acr_audience,
                                           verify_user_permissions)
 
 
@@ -453,19 +446,12 @@ def _get_credentials(cmd,  # pylint: disable=too-many-statements
     if not registry or registry.sku.name in get_managed_sku(cmd):
         logger.info("Attempting to retrieve AAD refresh token...")
         try:
-            use_acr_audience = False
-
-            if registry:
-                aad_auth_policy = acr_config_authentication_as_arm_show(cmd, registry_name, resource_group_name)
-                use_acr_audience = (aad_auth_policy and aad_auth_policy.status == 'disabled')
-
             return login_server, EMPTY_GUID, _get_aad_token(cli_ctx,
                                                             login_server,
                                                             only_refresh_token,
                                                             repository,
                                                             artifact_repository,
-                                                            permission,
-                                                            use_acr_audience=use_acr_audience)
+                                                            permission)
         except CLIError as e:
             raise_toomanyrequests_error(str(e))
             logger.warning("%s: %s", AAD_TOKEN_BASE_ERROR_MESSAGE, str(e))

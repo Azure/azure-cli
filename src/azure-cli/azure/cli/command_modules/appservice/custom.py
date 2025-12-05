@@ -74,7 +74,8 @@ from .utils import (_normalize_sku,
                     get_resource_if_exists, repo_url_to_name, get_token,
                     app_service_plan_exists, is_centauri_functionapp, is_flex_functionapp,
                     _remove_list_duplicates, get_raw_functionapp,
-                    register_app_provider)
+                    register_app_provider,
+                    is_sku_tier_enabled_for_managed_instance)
 from ._create_util import (zip_contents_from_dir, get_runtime_version_details, create_resource_group, get_app_details,
                            check_resource_group_exists, set_location, get_site_availability,
                            get_regional_site_availability, get_profile_username,
@@ -100,6 +101,7 @@ from .aaz.latest.relay.hyco import Show as HyCoShow
 from .aaz.latest.relay.hyco.authorization_rule import List as HycoAuthoList, Create as HycoAuthoCreate
 from .aaz.latest.relay.hyco.authorization_rule.keys import List as HycoAuthoKeysList
 from .aaz.latest.relay.namespace import List as NamespaceList
+from .aaz.latest.appservice import ListLocations as AppServiceListLocations
 from .aaz.latest.appservice.plan import (Show as AppServicePlanShow, Create as AppServicePlanCreate,
                                          Update as AppServicePlanUpdate)
 from .aaz.latest.appservice.plan.managed_instance import (ShowRdpPassword
@@ -8125,13 +8127,18 @@ def list_flexconsumption_zone_redundant_locations(cmd):
     return [{'name': x.name.lower().replace(' ', '')} for x in regions]
 
 
-def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None):
+def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=None, managed_instance_enabled=None):
     web_client = web_client_factory(cmd.cli_ctx)
     full_sku = get_sku_tier(sku)
-    # Temporary fix due to regression in this specific API with 2021-03-01, should be removed with the next SDK update
-    web_client_geo_regions = web_client.list_geo_regions(sku=full_sku,
-                                                         linux_workers_enabled=linux_workers_enabled,
-                                                         xenon_workers_enabled=hyperv_workers_enabled)
+
+    if managed_instance_enabled:
+        # managed_instance_enabled needs to be specially handled due to requiring version 2025-03-01
+        # and due to additional validation needed for SKU
+        web_client_geo_regions = _list_managed_instance_locations(cmd, full_sku)
+    else:
+        web_client_geo_regions = web_client.list_geo_regions(sku=full_sku,
+                                                             linux_workers_enabled=linux_workers_enabled,
+                                                             xenon_workers_enabled=hyperv_workers_enabled)
 
     providers_client = providers_client_factory(cmd.cli_ctx)
     providers_client_locations_list = getattr(providers_client.get('Microsoft.Web'), 'resource_types', [])
@@ -8141,6 +8148,22 @@ def list_locations(cmd, sku, linux_workers_enabled=None, hyperv_workers_enabled=
             break
 
     return [geo_region for geo_region in web_client_geo_regions if geo_region.name in providers_client_locations_list]
+
+
+def _list_managed_instance_locations(cmd, sku_tier):
+    from types import SimpleNamespace
+
+    if not is_sku_tier_enabled_for_managed_instance(sku_tier):
+        return []
+
+    # SKU is validated separately above and not passed into API call
+    # due to how the API handles SKU for managed instance
+    list_locations_cmd = AppServiceListLocations(cli_ctx=cmd.cli_ctx)
+    locations = list_locations_cmd(command_args={
+        'custom_mode_workers_enabled': True
+    })
+
+    return [SimpleNamespace(**location) for location in locations]
 
 
 def _check_zip_deployment_status(cmd, rg_name, name, deployment_status_url, slot, timeout=None):
