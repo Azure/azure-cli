@@ -915,14 +915,14 @@ def load_arguments(self, _):
         c.argument('virtual_machine_scale_set_name', id_part='virtual_machine_scale_set_name', required=True, options_list=["-n", "--name", "--virtual-machine-scale-set-name"],
                    help='The name of the VM scale set.')
         c.argument('expand', options_list=['--expand'], help="The expand expression to apply to the operation. Allowed values are 'instanceView'.")
-        c.argument('filter', options_list=['--filter'], 
+        c.argument('filter', options_list=['--filter'],
                    help="The filter to apply to the operation. Allowed values are 'startswith(instanceView/statuses/code, 'PowerState') eq true', 'properties/latestModelApplied eq true', 'properties/latestModelApplied eq false'.")
         c.argument('select', options_list=['--select'], help="The list parameters. Allowed values are 'instanceView', 'instanceView/statuses'.")
         c.argument('resiliency_view', options_list=["--resiliency-view"], help="Show resiliency status of each instance.")
-        c.argument('pagination_limit', options_list=['--max-items'], arg_group="Pagination", 
+        c.argument('pagination_limit', options_list=['--max-items'], arg_group="Pagination",
                    help="Total number of items to return in the command's output. If the total number of items available is "
-                 "more than the value specified, a token is provided in the command's output. To resume pagination, "
-                 "provide the token value in `--next-token` argument of a subsequent command.")
+                        "more than the value specified, a token is provided in the command's output. To resume pagination, "
+                        "provide the token value in `--next-token` argument of a subsequent command.")
         c.argument('pagination_token', options_list=['--next-token'], arg_group="Pagination",
                    help="Token to specify where to start paginating. This is the token value from a previously truncated response.")
     # endregion
