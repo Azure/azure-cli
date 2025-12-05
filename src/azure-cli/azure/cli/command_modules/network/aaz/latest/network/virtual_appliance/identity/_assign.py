@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class Assign(AAZCommand):
     """Assign the user or system managed identities.
+
+    :example: Create NetworkVirtualAppliance
+        az network virtual-appliance identity assign --resource-group rg1 --name nva
     """
 
     _aaz_info = {
