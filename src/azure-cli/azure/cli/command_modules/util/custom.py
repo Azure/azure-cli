@@ -35,8 +35,7 @@ def rest_call(cmd, url, method=None, headers=None, uri_parameters=None,
 
 def show_version(cmd):  # pylint: disable=unused-argument
     from azure.cli.core.util import get_az_version_json
-    versions = get_az_version_json()
-    return versions
+    return get_az_version_json()
 
 
 def upgrade_version(cmd, update_all=None, yes=None, allow_preview=None):  # pylint: disable=too-many-locals, too-many-statements, too-many-branches, no-member, unused-argument
