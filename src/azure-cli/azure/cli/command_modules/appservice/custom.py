@@ -6407,10 +6407,6 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
     def _parse_major_version_windows(self, major_version, parsed_results, config_mappings):
         java_container_minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=True)
         if java_container_minor_versions:
-            # Limit to 3 containers for display
-            if len(java_container_minor_versions) > 0:
-                leng = len(java_container_minor_versions) if len(java_container_minor_versions) < 3 else 3
-                java_container_minor_versions = java_container_minor_versions[:leng]
             for container in java_container_minor_versions:
                 container_settings = container.stack_settings.windows_container_settings
                 java_container = container_settings.java_container
@@ -6429,10 +6425,6 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
                     parsed_results.append(runtime)
         else:
             minor_versions = self._get_valid_minor_versions(major_version, linux=False, java=False)
-            if "Java" in major_version.display_text:
-                if len(minor_versions) > 0:
-                    leng = len(minor_versions) if len(minor_versions) < 3 else 3
-                    minor_versions = minor_versions[1:leng]
             for minor_version in minor_versions:
                 settings = minor_version.stack_settings.windows_runtime_settings
                 if "Java" not in minor_version.display_text:
@@ -6495,13 +6487,10 @@ class _StackRuntimeHelper(_AbstractStackRuntimeHelper):
             se_containers = [minor_java_container_versions[0]] if minor_java_container_versions else []
             for java in java_versions:
                 se_java_containers = [c for c in minor_java_container_versions if c.value.startswith(java)]
-                se_containers = se_containers + se_java_containers[:min(len(se_java_containers), 2)]
+                se_containers = se_containers + se_java_containers
             minor_java_container_versions = se_containers
         if minor_java_container_versions:
-            leng = len(minor_java_container_versions) if \
-                len(minor_java_container_versions) < 3 else 3 if \
-                "SE" not in major_version.display_text else len(minor_java_container_versions)
-            for minor in minor_java_container_versions[:leng]:
+            for minor in minor_java_container_versions:
                 linux_container_settings = minor.stack_settings.linux_container_settings
                 # Dynamically get all Java runtimes from container settings
                 runtimes = self._get_java_runtimes_from_container_settings(linux_container_settings)
