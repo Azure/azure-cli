@@ -2602,9 +2602,8 @@ examples:
 helps['vmss list-instances'] = """
 type: command
 short-summary: List all virtual machines in a VM scale sets.
-parameters:
-  - name: --resiliency-view
-    short-summary: Show resiliency status of each instance.
+long-summary: Return a list of virtual machines managed by VMSS. For VMSS in Flexible Orchestration mode,
+        please use "az vm list" to get full details.
 """
 
 helps['vmss reimage'] = """
