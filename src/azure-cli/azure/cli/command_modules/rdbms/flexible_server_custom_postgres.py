@@ -27,7 +27,6 @@ from azure.cli.core.azclierror import BadRequestError, FileOperationError, Mutua
 from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
 from ._client_factory import cf_postgres_flexible_firewall_rules, get_postgresql_flexible_management_client, \
     cf_postgres_flexible_db, cf_postgres_check_resource_availability, cf_postgres_flexible_servers, \
-    cf_postgres_check_resource_availability_with_location, \
     cf_postgres_flexible_private_dns_zone_suffix_operations, \
     cf_postgres_flexible_private_endpoint_connections, \
     cf_postgres_flexible_tuning_options, \
@@ -80,8 +79,7 @@ def flexible_server_create(cmd, client,
 
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
-        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
-        cf_availability_without_location=cf_postgres_check_resource_availability,
+        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability,
         cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
@@ -271,8 +269,7 @@ def flexible_server_restore(cmd, client,
 
         db_context = DbContext(
             cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
-            cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
-            cf_availability_without_location=cf_postgres_check_resource_availability,
+            cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability,
             cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
             logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
         validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
@@ -347,8 +344,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
     location = ''.join(instance.location.lower().split())
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
-        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
-        cf_availability_without_location=cf_postgres_check_resource_availability, cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
+        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability,
+        cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     pg_arguments_validator(db_context,
@@ -582,7 +579,7 @@ def flexible_parameter_update(client, server_name, configuration_name, resource_
 
 
 def flexible_list_skus(cmd, client, location):
-    result = client.execute(location)
+    result = client.list(location)
     logger.warning('For prices please refer to https://aka.ms/postgres-pricing')
     return result
 
@@ -645,8 +642,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
-        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
-        cf_availability_without_location=cf_postgres_check_resource_availability,
+        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability,
         cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
     validate_server_name(db_context, replica_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
@@ -723,8 +719,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
 
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
-        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
-        cf_availability_without_location=cf_postgres_check_resource_availability,
+        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability,
         cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
@@ -792,8 +787,7 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
 
     db_context = DbContext(
         cmd=cmd, azure_sdk=postgresql_flexibleservers, cf_firewall=cf_postgres_flexible_firewall_rules,
-        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability_with_location,
-        cf_availability_without_location=cf_postgres_check_resource_availability,
+        cf_db=cf_postgres_flexible_db, cf_availability=cf_postgres_check_resource_availability,
         cf_private_dns_zone_suffix=cf_postgres_flexible_private_dns_zone_suffix_operations,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
@@ -1996,13 +1990,12 @@ def _confirm_restart_server(instance, sku_name, storage_gb, yes):
 # pylint: disable=too-many-instance-attributes, too-few-public-methods
 class DbContext:
     def __init__(self, cmd=None, azure_sdk=None, logging_name=None, cf_firewall=None, cf_db=None,
-                 cf_availability=None, cf_availability_without_location=None, cf_private_dns_zone_suffix=None,
+                 cf_availability=None, cf_private_dns_zone_suffix=None,
                  command_group=None, server_client=None, location=None):
         self.cmd = cmd
         self.azure_sdk = azure_sdk
         self.cf_firewall = cf_firewall
         self.cf_availability = cf_availability
-        self.cf_availability_without_location = cf_availability_without_location
         self.cf_private_dns_zone_suffix = cf_private_dns_zone_suffix
         self.logging_name = logging_name
         self.cf_db = cf_db
