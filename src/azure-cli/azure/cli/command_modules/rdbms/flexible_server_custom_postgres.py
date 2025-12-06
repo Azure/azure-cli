@@ -315,7 +315,7 @@ def flexible_server_restore(cmd, client,
     except Exception as e:
         raise ResourceNotFoundError(e)
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, parameters)
 
 
 # pylint: disable=too-many-branches
@@ -370,7 +370,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     server_module_path = instance.__module__
     module = import_module(server_module_path)
-    ServerForUpdate = getattr(module, 'ServerForUpdate')
+    ServerForPatch = getattr(module, 'ServerForPatch')
 
     server_id_parts = parse_resource_id(instance.id)
     resource_group_name = server_id_parts['resource_group']
@@ -459,7 +459,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
     if cluster_size:
         instance.cluster.cluster_size = cluster_size
 
-    params = ServerForUpdate(sku=instance.sku,
+    params = ServerForPatch(sku=instance.sku,
                              storage=instance.storage,
                              backup=instance.backup,
                              administrator_login=administrator_login,
@@ -680,7 +680,7 @@ def flexible_replica_create(cmd, client, resource_group_name, source_server, rep
 
     parameters.storage = postgresql_flexibleservers.models.Storage(storage_size_gb=storage_gb, auto_grow=source_server_object.storage.auto_grow, tier=performance_tier)
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, replica_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, replica_name, parameters)
 
 
 def flexible_server_georestore(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
@@ -762,7 +762,7 @@ def flexible_server_georestore(cmd, client, resource_group_name, server_name, so
                                                                                          backup_byok_identity=backup_byok_identity,
                                                                                          backup_byok_key=backup_byok_key)
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, parameters)
 
 
 def flexible_server_revivedropped(cmd, client, resource_group_name, server_name, source_server, location, zone=None,
@@ -829,7 +829,7 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
                                                                                          backup_byok_identity=backup_byok_identity,
                                                                                          backup_byok_key=backup_byok_key)
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, parameters)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, parameters)
 
 
 def flexible_replica_promote(cmd, client, resource_group_name, server_name, promote_mode='standalone', promote_option='planned'):
@@ -850,7 +850,7 @@ def flexible_replica_promote(cmd, client, resource_group_name, server_name, prom
         raise CLIError('Server {} is not a replica server.'.format(server_name))
 
     if promote_mode == "standalone":
-        params = postgresql_flexibleservers.models.ServerForUpdate(
+        params = postgresql_flexibleservers.models.ServerForPatch(
             replica=postgresql_flexibleservers.models.Replica(
                 role='None',
                 promote_mode=promote_mode,
@@ -858,7 +858,7 @@ def flexible_replica_promote(cmd, client, resource_group_name, server_name, prom
             )
         )
     else:
-        params = postgresql_flexibleservers.models.ServerForUpdate(
+        params = postgresql_flexibleservers.models.ServerForPatch(
             replica=postgresql_flexibleservers.models.Replica(
                 role='Primary',
                 promote_mode=promote_mode,
@@ -900,7 +900,7 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
         create_mode="Create")
 
     return resolve_poller(
-        server_client.begin_create(resource_group_name, server_name, parameters), cmd.cli_ctx,
+        server_client.begin_create_or_update(resource_group_name, server_name, parameters), cmd.cli_ctx,
         '{} Server Create'.format(logging_name))
 
 
@@ -1158,7 +1158,7 @@ def _create_admin(client, resource_group_name, server_name, principal_name, sid,
         'principal_type': principal_type
     }
 
-    return sdk_no_wait(no_wait, client.begin_create, resource_group_name, server_name, sid, parameters)
+    return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, sid, parameters)
 
 
 def flexible_server_microsoft_entra_admin_delete(cmd, client, resource_group_name, server_name, sid, no_wait=False):
@@ -1519,7 +1519,7 @@ def backup_create_func(client, resource_group_name, server_name, backup_name):
 def ltr_precheck_func(client, resource_group_name, server_name, backup_name):
     validate_resource_group(resource_group_name)
 
-    return client.trigger_ltr_pre_backup(
+    return client.check_prerequisites(
         resource_group_name=resource_group_name,
         server_name=server_name,
         parameters={"backup_settings": {"backup_name": backup_name}}
@@ -1538,7 +1538,7 @@ def ltr_start_func(client, resource_group_name, server_name, backup_name, sas_ur
         }
     }
 
-    return client.begin_start_ltr_backup(
+    return client.begin_start(
         resource_group_name=resource_group_name,
         server_name=server_name,
         parameters=parameters
@@ -1933,7 +1933,7 @@ def _create_migration(cmd, logging_name, client, subscription_id, resource_group
         admin_credentials=admin_credentials,
         source_server_username=get_case_insensitive_key_value("SourceServerUsername", secret_parameter_keys, secret_parameter_dictionary),
         target_server_username=get_case_insensitive_key_value("TargetServerUsername", secret_parameter_keys, secret_parameter_dictionary))
-    migration_parameters = postgresql_flexibleservers.models.MigrationResource(
+    migration_parameters = postgresql_flexibleservers.models.MigrationResourceForPatch(
         tags=tags,
         location=location,
         migration_mode=migration_mode,

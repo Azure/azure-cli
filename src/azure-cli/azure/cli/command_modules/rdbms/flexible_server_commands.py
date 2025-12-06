@@ -217,9 +217,6 @@ def load_flexibleserver_command_table(self, _):
                             client_factory=cf_postgres_flexible_ltr_backups) as g:
         g.command('list', 'list_by_server', transform=transform_backups_list)
         g.show_command('show', 'get', transform=transform_backup)
-
-    with self.command_group('postgres flexible-server long-term-retention', postgres_flexible_operations_sdk,
-                            client_factory=cf_postgres_flexible_operations) as g:
         g.custom_command('pre-check', 'ltr_precheck_func', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('start', 'ltr_start_func', custom_command_type=flexible_servers_custom_postgres)
 

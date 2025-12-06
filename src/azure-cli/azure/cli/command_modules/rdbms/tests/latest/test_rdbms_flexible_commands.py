@@ -105,12 +105,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self._test_flexible_server_georestore_mgmt('postgres', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location=postgres_location)
     def test_flexible_server_ssdv2_restore_mgmt(self, resource_group):
         self._test_flexible_server_ssdv2_restore_mgmt('postgres', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='southcentralus')
+    @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_ltr(self, resource_group):
         self._test_flexible_server_ltr('postgres', resource_group)
 
@@ -233,9 +233,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        version = '16'
+        version = '17'
         storage_size = 128
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D2ds_v5'
         tier = 'GeneralPurpose'
         backup_retention = 7
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -290,9 +290,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         sas_url = storage_account['primaryEndpoints']['blob'] + container_account_name + "?" + container_sas_token[1:-2]
 
         # create server
-        version = '16'
+        version = '17'
         storage_size = 128
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D2ds_v5'
         tier = 'GeneralPurpose'
         backup_retention = 7
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -333,7 +333,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         version = '16'
         storage_size = 128
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D4ds_v4'
         tier = 'GeneralPurpose'
         backup_retention = 7
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -439,7 +439,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     def _test_flexible_server_restore_mgmt(self, database_engine, resource_group):
 
         private_dns_param = 'privateDnsZoneArmResourceId'
-        location = 'southcentralus'
+        location = 'canadacentral'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server_default = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -587,7 +587,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     def _test_flexible_server_ssdv2_restore_mgmt(self, database_engine, resource_group):
 
-        location = 'southcentralus'
+        location = 'canadacentral'
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         source_ssdv2_server = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-', 40)
         target_server_ssdv2_migration = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-migrate-', 40)
@@ -1123,7 +1123,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1169,8 +1169,8 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                  database_engine, resource_group, server_name, location, invalid_backup_retention),
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l centraluseuap --high-availability {} '.format(
-                 database_engine, resource_group, server_name, ha_value),
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --high-availability {} '.format(
+                 database_engine, resource_group, server_name, location, ha_value),
                  expect_failure=True)
 
         # high availability validator
@@ -1178,11 +1178,11 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                  database_engine, resource_group, server_name, location, ha_value),
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l centraluseuap --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability {}'.format(
-                 database_engine, resource_group, server_name, ha_value), # single availability zone location
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D4ds_v4 --high-availability {}'.format(
+                 database_engine, resource_group, server_name, location, ha_value), # single availability zone location
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability {} --zone 1 --standby-zone 1'.format(
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2ads_v5 --high-availability {} --zone 1 --standby-zone 1'.format(
                  database_engine, resource_group, server_name, location, ha_value), # single availability zone location
                  expect_failure=True)
 
@@ -1884,7 +1884,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
@@ -2076,7 +2076,7 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2160,12 +2160,12 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
     def _test_flexible_server_upgrade_mgmt(self, database_engine, resource_group, public_access):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        current_version = '13'
-        new_version = '16'
+        current_version = '15'
+        new_version = '17'
         location = self.postgres_location
 
         create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name {} --location {} --version {} --yes'.format(
-            database_engine, resource_group, server_name, "Standard_D2s_v3", location, current_version)
+            database_engine, resource_group, server_name, "Standard_D2ds_v5", location, current_version)
         if public_access:
             create_command += ' --public-access none'
         else:
@@ -2789,7 +2789,7 @@ class FlexibleServerFabricMirroringMgmtScenarioTest(ScenarioTest):
 
 class CitusOnFlexMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus2'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2804,7 +2804,7 @@ class CitusOnFlexMgmtScenarioTest(ScenarioTest):
         version = '17'
         storage_size = 128
         location = self.postgres_location
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D2ds_v5'
         tier = 'GeneralPurpose'
         backup_retention = 7
         cluster_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -2859,7 +2859,7 @@ class CitusOnFlexMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus2euap'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2871,9 +2871,9 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
         # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
         location = self.postgres_location
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        version = '16'
+        version = '17'
         storage_size = 128
-        sku_name = 'Standard_D4s_v3'
+        sku_name = 'Standard_D2ds_v4'
         tier = 'GeneralPurpose'
 
         self.cmd('{} flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'.format(
