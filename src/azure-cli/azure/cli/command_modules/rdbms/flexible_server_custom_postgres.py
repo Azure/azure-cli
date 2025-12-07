@@ -1376,35 +1376,30 @@ def migration_show_func(cmd, client, resource_group_name, server_name, migration
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    return client.get(subscription_id, resource_group_name, server_name, migration_name)
+    return client.get(resource_group_name, server_name, migration_name)
 
 
 def migration_list_func(cmd, client, resource_group_name, server_name, migration_filter="Active"):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    return client.list_by_target_server(subscription_id, resource_group_name, server_name, migration_filter)
+    return client.list_by_target_server(resource_group_name, server_name, migration_list_filter=migration_filter)
 
 
 def migration_delete_func(cmd, client, resource_group_name, server_name, migration_name):
     validate_resource_group(resource_group_name)
 
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-    return client.delete(subscription_id, resource_group_name, server_name, migration_name)
+    return client.cancel(resource_group_name, server_name, migration_name)
 
 
 def migration_update_func(cmd, client, resource_group_name, server_name, migration_name, setup_logical_replication=None, cutover=None, cancel=None):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
-    subscription_id = get_subscription_id(cmd.cli_ctx)
-
     operationSpecified = False
     if setup_logical_replication is True:
         operationSpecified = True
-        migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(setup_logical_replication_on_source_db_if_needed=True)
+        parameters = postgresql_flexibleservers.models.MigrationResourceForPatch(setup_logical_replication_on_source_db_if_needed=True)
 
     if cutover is not None:
         if operationSpecified is True:
@@ -1413,28 +1408,27 @@ def migration_update_func(cmd, client, resource_group_name, server_name, migrati
         migration_resource = migration_show_func(cmd, client, resource_group_name, server_name, migration_name)
         if migration_resource.migration_mode == "Offline":
             raise BadRequestError("Cutover is not possible for migration {} if the migration_mode set to offline. The migration will cutover automatically".format(migration_name))
-        migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(trigger_cutover="True", dbs_to_trigger_cutover_migration_on=migration_resource.dbs_to_migrate)
+        parameters = postgresql_flexibleservers.models.MigrationResourceForPatch(trigger_cutover="True", dbs_to_trigger_cutover_migration_on=migration_resource.dbs_to_migrate)
 
     if cancel is not None:
         if operationSpecified is True:
             raise MutuallyExclusiveArgumentError("Incorrect Usage: Can only specify one update operation.")
         operationSpecified = True
         migration_resource = migration_show_func(cmd, client, resource_group_name, server_name, migration_name)
-        migration_parameters_for_patch = postgresql_flexibleservers.models.MigrationResourceForPatch(cancel="True", dbs_to_cancel_migration_on=migration_resource.dbs_to_migrate)
+        parameters = postgresql_flexibleservers.models.MigrationResourceForPatch(cancel="True", dbs_to_cancel_migration_on=migration_resource.dbs_to_migrate)
 
     if operationSpecified is False:
         raise RequiredArgumentMissingError("Incorrect Usage: At least one update operation needs to be specified.")
 
-    return client.update(subscription_id, resource_group_name, server_name, migration_name, migration_parameters_for_patch)
+    return client.update(resource_group_name, server_name, migration_name, parameters)
 
 
 def migration_check_name_availability(cmd, client, resource_group_name, server_name, migration_name):
     validate_resource_group(resource_group_name)
     validate_citus_cluster(cmd, resource_group_name, server_name)
 
-    subscription_id = get_subscription_id(cmd.cli_ctx)
     migration_name_availability_parammeters = {"name": "%s" % migration_name, "type": "Microsoft.DBforPostgreSQL/flexibleServers/migrations"}
-    return get_postgresql_flexible_management_client(cmd.cli_ctx).check_migration_name_availability(subscription_id, resource_group_name, server_name, migration_name_availability_parammeters)
+    return client.check_name_availability(resource_group_name, server_name, migration_name_availability_parammeters)
 
 
 def virtual_endpoint_create_func(cmd, client, resource_group_name, server_name, virtual_endpoint_name, endpoint_type, members):
@@ -1933,7 +1927,7 @@ def _create_migration(cmd, logging_name, client, subscription_id, resource_group
         admin_credentials=admin_credentials,
         source_server_username=get_case_insensitive_key_value("SourceServerUsername", secret_parameter_keys, secret_parameter_dictionary),
         target_server_username=get_case_insensitive_key_value("TargetServerUsername", secret_parameter_keys, secret_parameter_dictionary))
-    migration_parameters = postgresql_flexibleservers.models.MigrationResourceForPatch(
+    migration_parameters = postgresql_flexibleservers.models.Migration(
         tags=tags,
         location=location,
         migration_mode=migration_mode,
@@ -1949,7 +1943,7 @@ def _create_migration(cmd, logging_name, client, subscription_id, resource_group
         ssl_mode=ssl_mode,
         migration_instance_resource_id=migrationInstanceResourceId)
 
-    return client.create(subscription_id, resource_group_name, target_db_server_name, migration_name, migration_parameters)
+    return client.create(resource_group_name, server_name=target_db_server_name, migration_name=migration_name, parameters=migration_parameters)
 
 
 def _update_login(server_name, resource_group_name, auth_config, password_auth, administrator_login, administrator_login_password):
