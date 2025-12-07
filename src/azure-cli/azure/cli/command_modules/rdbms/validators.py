@@ -744,7 +744,7 @@ def validate_server_name(db_context, server_name, type_):
 def validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name):
     client = cf_postgres_check_resource_availability(cmd.cli_ctx, '_')
     resource_type = 'Microsoft.DBforPostgreSQL/flexibleServers/virtualendpoints'
-    result = client.execute(name_availability_request={'name': virtual_endpoint_name, 'type': resource_type})
+    result = client.check_globally(parameters={'name': virtual_endpoint_name, 'type': resource_type})
     if result and result.name_available is False:
         raise ValidationError("Virtual endpoint's base name is not available.")
 
