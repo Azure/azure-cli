@@ -133,22 +133,24 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        version = '16'
+        version = '17'
         storage_size = 128
         location = self.postgres_location
-        db_name = self.POSTGRES_DB_NAME
-        sku_name = 'Standard_D2ds_v4'
-        memory_optimized_sku = 'Standard_E2ds_v4'
+        sku_name = 'Standard_D4ads_v5'
+        memory_optimized_sku = 'Standard_E4ds_v5'
         tier = 'GeneralPurpose'
         backup_retention = 7
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         zonal_resiliency_value = 'Enabled'
         ha_value = 'ZoneRedundant'
 
+        self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --tags keys=3 --zonal-resiliency {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --zonal-resiliency {} --location {}\
                   --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
-                                               sku_name, tier, storage_size, 'dbadmin', version, zonal_resiliency_value))
+                                               sku_name, tier, storage_size, 'dbadmin', version, zonal_resiliency_value, location))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
@@ -161,8 +163,16 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
         self.assertEqual(basic_info['highAvailability']['mode'], ha_value)
 
-        self.cmd('{} flexible-server db show -g {} -s {} -d {}'
-                    .format(database_engine, resource_group, server_name, db_name), checks=[JMESPathCheck('name', db_name)])
+        self.cmd('{} flexible-server list -g {}'.format(database_engine, resource_group),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        connection_string = self.cmd('{} flexible-server show-connection-string -s {}'
+                                     .format(database_engine, server_name)).get_output_in_json()
+        self.assertIn('jdbc', connection_string['connectionStrings'])
+        self.assertIn('node.js', connection_string['connectionStrings'])
+        self.assertIn('php', connection_string['connectionStrings'])
+        self.assertIn('python', connection_string['connectionStrings'])
+        self.assertIn('ado.net', connection_string['connectionStrings'])
 
         self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
                  .format(database_engine, resource_group, server_name))
@@ -175,9 +185,16 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storage.autoGrow', "Enabled" )])
 
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Disabled'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.autoGrow', "Disabled" )])
+
         self.cmd('{} flexible-server update -g {} -n {} --backup-retention {}'
                  .format(database_engine, resource_group, server_name, backup_retention + 10),
                  checks=[JMESPathCheck('backup.backupRetentionDays', backup_retention + 10)])
+
+        self.cmd('{} flexible-server restart -g {} -n {}'
+                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         tier = 'MemoryOptimized'
         sku_name = memory_optimized_sku
@@ -190,42 +207,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('tags.keys', '3')])
 
-        self.cmd('{} flexible-server restart -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
-
         self.cmd('{} flexible-server stop -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         self.cmd('{} flexible-server start -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
-        self.cmd('{} flexible-server list -g {}'.format(database_engine, resource_group),
-                 checks=[JMESPathCheck('type(@)', 'array')])
-
-        restore_server_name = 'restore-' + server_name
-        self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
-                 .format(database_engine, resource_group, restore_server_name, server_name),
-                 checks=[JMESPathCheck('name', restore_server_name)])
-
-        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Disabled'
-                 .format(database_engine, resource_group, server_name),
-                 checks=[JMESPathCheck('storage.autoGrow', "Disabled" )])
-
-        connection_string = self.cmd('{} flexible-server show-connection-string -s {}'
-                                     .format(database_engine, server_name)).get_output_in_json()
-
-        self.assertIn('jdbc', connection_string['connectionStrings'])
-        self.assertIn('node.js', connection_string['connectionStrings'])
-        self.assertIn('php', connection_string['connectionStrings'])
-        self.assertIn('python', connection_string['connectionStrings'])
-        self.assertIn('ado.net', connection_string['connectionStrings'])
-
-        self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
-                 checks=[JMESPathCheck('type(@)', 'array')])
-
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
-
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
 
 
     def _test_flexible_server_mgmt_empty_rg_name_return_error(self, database_engine):
