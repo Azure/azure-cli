@@ -3699,7 +3699,7 @@ spec:
     @AllowLargeResponse()
     @AKSCustomResourceGroupPreparer(random_name_length=17, name_prefix='clitest', location='eastus2euap')
     def test_aks_nodepool_add_with_ossku_ubuntu2404(self, resource_group, resource_group_location):
-        resource_group_location = 'eastus2euap'
+        resource_group_location = 'westus2'
         aks_name = self.create_random_name('cliakstest', 16)
         node_pool_name = self.create_random_name('c', 6)
         node_pool_name_second = self.create_random_name('c', 6)
@@ -3723,7 +3723,8 @@ spec:
                  '--resource-group={resource_group} '
                  '--cluster-name={name} '
                  '--name={node_pool_name_second} '
-                 '--os-sku Ubuntu2404',
+                 '--os-sku Ubuntu2404 '
+                 '--aks-custom-headers AKSHTTPCustomFeatures=Microsoft.ContainerService/Ubuntu2404Preview',
                  checks=[
                     self.check('provisioningState', 'Succeeded'),
                     self.check('osSku', 'Ubuntu2404'),
