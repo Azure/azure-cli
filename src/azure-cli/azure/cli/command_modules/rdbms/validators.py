@@ -727,9 +727,9 @@ def validate_server_name(db_context, server_name, type_):
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
     try:
         result = client.check_with_location(db_context.location,
-                                parameters={
-                                    'name': server_name,
-                                    'type': type_})
+                                            parameters={
+                                                'name': server_name,
+                                                'type': type_})
     except HttpResponseError as e:
         if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
             client_without_location = db_context.cf_availability(db_context.cmd.cli_ctx, '_')

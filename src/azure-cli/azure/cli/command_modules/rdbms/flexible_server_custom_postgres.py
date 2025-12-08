@@ -460,17 +460,17 @@ def flexible_server_update_custom_func(cmd, client, instance,
         instance.cluster.cluster_size = cluster_size
 
     params = ServerForPatch(sku=instance.sku,
-                             storage=instance.storage,
-                             backup=instance.backup,
-                             administrator_login=administrator_login,
-                             administrator_login_password=administrator_login_password,
-                             maintenance_window=instance.maintenance_window,
-                             network=instance.network,
-                             identity=identity,
-                             data_encryption=data_encryption,
-                             auth_config=auth_config,
-                             cluster=instance.cluster,
-                             tags=tags)
+                            storage=instance.storage,
+                            backup=instance.backup,
+                            administrator_login=administrator_login,
+                            administrator_login_password=administrator_login_password,
+                            maintenance_window=instance.maintenance_window,
+                            network=instance.network,
+                            identity=identity,
+                            data_encryption=data_encryption,
+                            auth_config=auth_config,
+                            cluster=instance.cluster,
+                            tags=tags)
 
     # High availability can't be updated with existing properties
     high_availability_param = postgresql_flexibleservers.models.HighAvailability()

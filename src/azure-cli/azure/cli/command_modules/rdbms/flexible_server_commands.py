@@ -14,7 +14,6 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_location_capabilities,
     cf_postgres_flexible_backups,
     cf_postgres_flexible_ltr_backups,
-    cf_postgres_flexible_operations,
     cf_postgres_flexible_replica,
     cf_postgres_flexible_admin,
     cf_postgres_flexible_migrations,
@@ -72,11 +71,6 @@ def load_flexibleserver_command_table(self, _):
     postgres_flexible_ltr_backup_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#BackupsLongTermRetentionOperations.{}',
         client_factory=cf_postgres_flexible_ltr_backups
-    )
-
-    postgres_flexible_operations_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#Operations.{}',
-        client_factory=cf_postgres_flexible_operations
     )
 
     postgres_flexible_replica_sdk = CliCommandType(
