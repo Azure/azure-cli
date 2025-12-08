@@ -303,6 +303,10 @@ def cf_postgres_flexible_migrations(cli_ctx, _):
 
 
 def cf_postgres_flexible_server_threat_protection_settings(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).server_threat_protection_settings
+
+
+def cf_postgres_flexible_advanced_threat_protection_settings(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).advanced_threat_protection_settings
 
 

@@ -21,6 +21,7 @@ from azure.cli.command_modules.rdbms._client_factory import (
     cf_postgres_flexible_private_link_resources,
     cf_postgres_flexible_virtual_endpoints,
     cf_postgres_flexible_server_threat_protection_settings,
+    cf_postgres_flexible_advanced_threat_protection_settings,
     cf_postgres_flexible_server_log_files)
 
 from ._transformers import (
@@ -96,6 +97,11 @@ def load_flexibleserver_command_table(self, _):
     postgres_flexible_server_threat_protection_settings_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#ServerThreatProtectionSettingsOperations.{}',
         client_factory=cf_postgres_flexible_server_threat_protection_settings
+    )
+
+    postgres_flexible_advanced_threat_protection_settings_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#AdvancedThreatProtectionSettingsOperations.{}',
+        client_factory=cf_postgres_flexible_advanced_threat_protection_settings
     )
 
     postgres_flexible_server_log_files_sdk = CliCommandType(
@@ -243,10 +249,14 @@ def load_flexibleserver_command_table(self, _):
         g.custom_show_command('show', 'flexible_server_microsoft_entra_admin_show')
         g.custom_wait_command('wait', 'flexible_server_microsoft_entra_admin_show')
 
+    with self.command_group('postgres flexible-server advanced-threat-protection-setting', postgres_flexible_advanced_threat_protection_settings_sdk,
+                            custom_command_type=flexible_servers_custom_postgres,
+                            client_factory=cf_postgres_flexible_advanced_threat_protection_settings) as g:
+        g.custom_show_command('show', 'flexible_server_threat_protection_get', custom_command_type=flexible_servers_custom_postgres)
+
     with self.command_group('postgres flexible-server advanced-threat-protection-setting', postgres_flexible_server_threat_protection_settings_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
                             client_factory=cf_postgres_flexible_server_threat_protection_settings) as g:
-        g.custom_show_command('show', 'flexible_server_threat_protection_get', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('update', 'flexible_server_threat_protection_update', custom_command_type=flexible_servers_custom_postgres)
 
     with self.command_group('postgres flexible-server server-logs', postgres_flexible_server_log_files_sdk,
