@@ -4311,12 +4311,11 @@ class NetworkPrivateLinkMysqlFlexibleServerScenarioTest(ScenarioTest):
         })
 
         #First of all, we need to create a flexible server
-        self.cmd('mysql flexible-server create -g {rg} --name {server_name}  --public-access none --tier GeneralPurpose --sku-name Standard_D2ds_v4')
-        result = self.cmd('mysql flexible-server show -g {rg} --name {server_name}').get_output_in_json()
-        self.kwargs['flexible_server_id'] = result['id']
+        result = self.cmd('mysql flexible-server create -g {rg} --name {server_name}  --public-access none').get_output_in_json()
+        self.kwargs['flexible_sever_id'] = result['id']
 
         #Secondly, we should check private-link-resource list
-        self.cmd('network private-link-resource list --id {flexible_server_id}', checks=[
+        self.cmd('network private-link-resource list --id {flexible_sever_id}', checks=[
             self.check('length(@)', 1),
         ])
 
