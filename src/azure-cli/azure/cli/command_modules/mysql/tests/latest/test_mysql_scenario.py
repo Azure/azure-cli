@@ -147,12 +147,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_retention = 7
         database_name = 'testdb'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        storage_redundancy = "LocalRedundancy"
 
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-                  --storage-size {} --storage-redundancy {} -u {} --version {} --tags keys=3 --database-name {} --public-access None'
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --public-access None'
                  .format(database_engine, resource_group, server_name, backup_retention, sku_name, tier, storage_size,
-                         storage_redundancy, 'dbadmin', version, database_name))
+                         'dbadmin', version, database_name))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
@@ -449,10 +448,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         new_vnet_2 = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         new_subnet_2 = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
 
-        storage_redundancy = "LocalRedundancy"
-
-        self.cmd('{} flexible-server create -g {} -n {} --storage-redundancy {} --vnet {} --subnet {} -l {} --yes'.format(
-                 database_engine, resource_group, source_server, storage_redundancy, source_vnet, source_subnet, location))
+        self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --yes'.format(
+                 database_engine, resource_group, source_server, source_vnet, source_subnet, location))
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
 
         # Wait until snapshot is created
@@ -578,8 +575,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         new_vnet_2 = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         new_subnet_2 = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
 
-        storage_redundancy = "LocalRedundancy"
-
         self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --geo-redundant-backup Enabled --yes'.format(
                  database_engine, resource_group, source_server, source_vnet, source_subnet, location))
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
@@ -596,9 +591,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, target_location, target_server_default, source_server), expect_failure=True)
 
         # 2. vnet to public access
-        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} --storage-redundancy {} --public-access enabled'
-                                .format(database_engine, resource_group, target_location, target_server_public_access, source_server,
-                                        storage_redundancy)).get_output_in_json()
+        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} --public-access enabled'
+                                  .format(database_engine, resource_group, target_location, target_server_public_access, source_server)
+                                  ).get_output_in_json()
         self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), target_location)
 
         # 3. vnet to different vnet
@@ -1294,12 +1289,11 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         primary_role = 'None'
         replica_role = 'Replica'
         private_dns_param = 'privateDnsZoneResourceId'
-        storage_redundancy = "LocalRedundancy"
 
         master_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --tier GeneralPurpose --sku-name {} --storage-redundancy {} --public-access none'
-                 .format(database_engine, resource_group, master_server, master_location, 256, DEFAULT_GENERAL_PURPOSE_SKU, storage_redundancy))
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --tier GeneralPurpose --sku-name {} --public-access none'
+                 .format(database_engine, resource_group, master_server, master_location, 256, DEFAULT_GENERAL_PURPOSE_SKU))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[JMESPathCheck('replicationRole', primary_role)]).get_output_in_json()
