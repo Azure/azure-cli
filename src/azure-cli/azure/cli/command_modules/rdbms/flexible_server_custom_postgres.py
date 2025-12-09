@@ -138,7 +138,7 @@ def flexible_server_create(cmd, client,
     cluster = None
     if create_cluster == 'ElasticCluster':
         cluster_size = cluster_size if cluster_size else 2
-        cluster = postgresql_flexibleservers.models.Cluster(cluster_size=cluster_size)
+        cluster = postgresql_flexibleservers.models.Cluster(cluster_size=cluster_size, default_database_name=POSTGRES_DB_NAME)
 
     server_result = firewall_id = None
 
@@ -902,25 +902,6 @@ def _create_server(db_context, cmd, resource_group_name, server_name, tags, loca
     return resolve_poller(
         server_client.begin_create_or_update(resource_group_name, server_name, parameters), cmd.cli_ctx,
         '{} Server Create'.format(logging_name))
-
-
-def _create_database(db_context, cmd, resource_group_name, server_name, database_name):
-    validate_resource_group(resource_group_name)
-    validate_citus_cluster(cmd, resource_group_name, server_name)
-
-    # check for existing database, create if not
-    cf_db, logging_name = db_context.cf_db, db_context.logging_name
-    database_client = cf_db(cmd.cli_ctx, None)
-
-    logger.warning('Creating %s database \'%s\'...', logging_name, database_name)
-    parameters = {
-        'name': database_name,
-        'charset': 'utf8',
-        'collation': 'en_US.utf8'
-    }
-    resolve_poller(
-        database_client.begin_create(resource_group_name, server_name, database_name, parameters), cmd.cli_ctx,
-        '{} Database Create/Update'.format(logging_name))
 
 
 def database_create_func(cmd, client, resource_group_name, server_name, database_name=None, charset=None, collation=None):

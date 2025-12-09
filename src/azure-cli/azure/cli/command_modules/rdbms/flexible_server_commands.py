@@ -267,7 +267,7 @@ def load_flexibleserver_command_table(self, _):
 
     with self.command_group('postgres flexible-server private-endpoint-connection', postgres_flexible_server_private_endpoint_connections_sdk,
                             custom_command_type=flexible_servers_custom_postgres,
-                            client_factory=postgres_flexible_server_private_endpoint_connections_sdk) as g:
+                            client_factory=cf_postgres_flexible_private_endpoint_connections) as g:
         g.command('list', 'list_by_server')
         g.show_command('show', 'get', validator=validate_private_endpoint_connection_id)
         g.command('delete', 'begin_delete', validator=validate_private_endpoint_connection_id)
