@@ -13,14 +13,14 @@ logger = get_logger(__name__)
 
 
 class NormalizedResponseJsonEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, NormalizedResponse):
+    def default(self, o):
+        if isinstance(o, NormalizedResponse):
             return {
-                "status_code": obj.status_code,
-                "text": obj.text,
-                "headers": obj.headers,
+                "status_code": o.status_code,
+                "text": o.text,
+                "headers": o.headers,
             }
-        return super().default(obj)
+        return super().default(o)
 
 
 class JsonCache(MutableMapping):
