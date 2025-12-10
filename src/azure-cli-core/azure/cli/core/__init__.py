@@ -10,6 +10,8 @@ import os
 import sys
 import timeit
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from typing import Dict, Any, Optional
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -196,6 +198,15 @@ class AzCli(CLI):
         format_styled_text.theme = theme
 
 
+@dataclass
+class ModuleLoadResult:
+    module_name: str
+    command_table: Dict[str, Any]
+    group_table: Dict[str, Any]
+    elapsed_time: float
+    error: Optional[Exception] = None
+
+
 class MainCommandsLoader(CLICommandsLoader):
 
     # Format string for pretty-print the command module table
@@ -222,11 +233,11 @@ class MainCommandsLoader(CLICommandsLoader):
         import pkgutil
         import traceback
         from azure.cli.core.commands import (
-            _load_module_command_loader, _load_extension_command_loader, BLOCKED_MODS, ExtensionCommandSource)
+             _load_extension_command_loader, ExtensionCommandSource)
         from azure.cli.core.extension import (
             get_extensions, get_extension_path, get_extension_modname)
         from azure.cli.core.breaking_change import (
-            import_core_breaking_changes, import_module_breaking_changes, import_extension_breaking_changes)
+            import_core_breaking_changes, import_extension_breaking_changes)
 
         def _update_command_table_from_modules(args, command_modules=None):
             """Loads command tables from modules and merge into the main command table.
@@ -254,55 +265,11 @@ class MainCommandsLoader(CLICommandsLoader):
                 except ImportError as e:
                     logger.warning(e)
 
-            count = 0
-            cumulative_elapsed_time = 0
-            cumulative_group_count = 0
-            cumulative_command_count = 0
-            logger.debug("Loading command modules:")
-            logger.debug(self.header_mod)
+            results = self._load_modules_threaded(args, command_modules)
 
-            print(f"*** Starting SUT***")
-            start_time_wrapper = timeit.default_timer()
-            
-            def load_module_threaded(mod):
-                try:
-                    start_time = timeit.default_timer()
-                    module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
-                    import_module_breaking_changes(mod)
-                    elapsed_time = timeit.default_timer() - start_time
-                    return (mod, module_command_table, module_group_table, elapsed_time, None)
-                except Exception as ex:  # pylint: disable=broad-except
-                    return (mod, {}, {}, 0, ex)
-            
-            # Use ThreadPoolExecutor to load modules in parallel
-            with ThreadPoolExecutor(max_workers=4) as executor:
-                futures = [executor.submit(load_module_threaded, mod) 
-                          for mod in command_modules if mod not in BLOCKED_MODS]
-                
-                for future in futures:
-                    mod, module_command_table, module_group_table, elapsed_time, error = future.result()
-                    if error:
-                        # Changing this error message requires updating CI script that checks for failed
-                        # module loading.
-                        from azure.cli.core import telemetry
-                        logger.error("Error loading command module '%s': %s", mod, error)
-                        telemetry.set_exception(exception=error, fault_type='module-load-error-' + mod,
-                                                summary='Error loading module: {}'.format(mod))
-                        logger.debug(traceback.format_exc())
-                    else:
-                        for cmd in module_command_table.values():
-                            cmd.command_source = mod
-                        self.command_table.update(module_command_table)
-                        self.command_group_table.update(module_group_table)
-
-                        logger.debug(self.item_format_string, mod, elapsed_time,
-                                     len(module_group_table), len(module_command_table))
-                        count += 1
-                        cumulative_elapsed_time += elapsed_time
-                        cumulative_group_count += len(module_group_table)
-                        cumulative_command_count += len(module_command_table)
-            elapsed_time = timeit.default_timer() - start_time_wrapper
-            print(f"*** SUT operation *** took: {elapsed_time:.6f} seconds for {len(command_modules)} modules")
+            # @TODO: export to own method:
+            count, cumulative_elapsed_time, cumulative_group_count, cumulative_command_count = \
+                self._process_results_with_timing(results, command_modules)
             # Summary line
             logger.debug(self.item_format_string,
                          "Total ({})".format(count), cumulative_elapsed_time,
@@ -578,6 +545,74 @@ class MainCommandsLoader(CLICommandsLoader):
                 self.argument_registry.arguments.update(loader.argument_registry.arguments)
                 self.extra_argument_registry.update(loader.extra_argument_registry)
                 loader._update_command_definitions()  # pylint: disable=protected-access
+
+    def _load_modules_threaded(self, args, command_modules):
+        """Load command modules using ThreadPoolExecutor for parallel processing."""
+        from azure.cli.core.commands import _load_module_command_loader, BLOCKED_MODS
+        from azure.cli.core.breaking_change import import_module_breaking_changes
+        
+        def load_single_module(mod):
+            try:
+                start_time = timeit.default_timer()
+                module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
+                import_module_breaking_changes(mod)
+                elapsed_time = timeit.default_timer() - start_time
+                return ModuleLoadResult(mod, module_command_table, module_group_table, elapsed_time)
+            except Exception as ex:  # pylint: disable=broad-except
+                return ModuleLoadResult(mod, {}, {}, 0, ex)
+        
+        with ThreadPoolExecutor(max_workers=4) as executor:
+            futures = [executor.submit(load_single_module, mod) 
+                      for mod in command_modules if mod not in BLOCKED_MODS]
+            return [future.result() for future in futures]
+
+    def _handle_module_load_error(self, result):
+        """Handle errors that occurred during module loading."""
+        import traceback
+        from azure.cli.core import telemetry
+        
+        # Changing this error message requires updating CI script that checks for failed module loading.
+        logger.error("Error loading command module '%s': %s", result.module_name, result.error)
+        telemetry.set_exception(exception=result.error, 
+                               fault_type='module-load-error-' + result.module_name,
+                               summary='Error loading module: {}'.format(result.module_name))
+        logger.debug(traceback.format_exc())
+
+    def _process_successful_load(self, result):
+        """Process successfully loaded module results."""
+        # Set command source for all commands in the module
+        for cmd in result.command_table.values():
+            cmd.command_source = result.module_name
+        
+        # Update main command and group tables
+        self.command_table.update(result.command_table)
+        self.command_group_table.update(result.group_table)
+        
+        # Log the results
+        logger.debug(self.item_format_string, result.module_name, result.elapsed_time,
+                    len(result.group_table), len(result.command_table))
+
+    def _process_results_with_timing(self, results, command_modules):
+        """Process pre-loaded module results with timing and progress reporting."""
+        logger.debug("Loading command modules:")
+        logger.debug(self.header_mod)
+
+        count = 0
+        cumulative_elapsed_time = 0
+        cumulative_group_count = 0
+        cumulative_command_count = 0
+
+        for result in results:
+            if result.error:
+                self._handle_module_load_error(result)
+            else:
+                self._process_successful_load(result)
+                count += 1
+                cumulative_elapsed_time += result.elapsed_time
+                cumulative_group_count += len(result.group_table)
+                cumulative_command_count += len(result.command_table)
+
+        return count, cumulative_elapsed_time, cumulative_group_count, cumulative_command_count
 
 
 class CommandIndex:
