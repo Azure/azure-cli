@@ -129,6 +129,7 @@ DEPENDENCIES = [
     'azure-monitor-query==1.2.0',
     'azure-multiapi-storage==1.7.0b1',
     'azure-storage-common~=1.4',
+    'azure-storage-queue==12.15.0b1',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.21.0',
     'azure-synapse-managedprivateendpoints~=0.4.0',
