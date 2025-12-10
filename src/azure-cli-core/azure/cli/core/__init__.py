@@ -9,6 +9,7 @@ __version__ = "2.82.0"
 import os
 import sys
 import timeit
+from concurrent.futures import ThreadPoolExecutor
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -260,31 +261,48 @@ class MainCommandsLoader(CLICommandsLoader):
             logger.debug("Loading command modules:")
             logger.debug(self.header_mod)
 
-            for mod in [m for m in command_modules if m not in BLOCKED_MODS]:
+            print(f"*** Starting SUT***")
+            start_time_wrapper = timeit.default_timer()
+            
+            def load_module_threaded(mod):
                 try:
                     start_time = timeit.default_timer()
                     module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
                     import_module_breaking_changes(mod)
-                    for cmd in module_command_table.values():
-                        cmd.command_source = mod
-                    self.command_table.update(module_command_table)
-                    self.command_group_table.update(module_group_table)
-
                     elapsed_time = timeit.default_timer() - start_time
-                    logger.debug(self.item_format_string, mod, elapsed_time,
-                                 len(module_group_table), len(module_command_table))
-                    count += 1
-                    cumulative_elapsed_time += elapsed_time
-                    cumulative_group_count += len(module_group_table)
-                    cumulative_command_count += len(module_command_table)
+                    return (mod, module_command_table, module_group_table, elapsed_time, None)
                 except Exception as ex:  # pylint: disable=broad-except
-                    # Changing this error message requires updating CI script that checks for failed
-                    # module loading.
-                    from azure.cli.core import telemetry
-                    logger.error("Error loading command module '%s': %s", mod, ex)
-                    telemetry.set_exception(exception=ex, fault_type='module-load-error-' + mod,
-                                            summary='Error loading module: {}'.format(mod))
-                    logger.debug(traceback.format_exc())
+                    return (mod, {}, {}, 0, ex)
+            
+            # Use ThreadPoolExecutor to load modules in parallel
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                futures = [executor.submit(load_module_threaded, mod) 
+                          for mod in command_modules if mod not in BLOCKED_MODS]
+                
+                for future in futures:
+                    mod, module_command_table, module_group_table, elapsed_time, error = future.result()
+                    if error:
+                        # Changing this error message requires updating CI script that checks for failed
+                        # module loading.
+                        from azure.cli.core import telemetry
+                        logger.error("Error loading command module '%s': %s", mod, error)
+                        telemetry.set_exception(exception=error, fault_type='module-load-error-' + mod,
+                                                summary='Error loading module: {}'.format(mod))
+                        logger.debug(traceback.format_exc())
+                    else:
+                        for cmd in module_command_table.values():
+                            cmd.command_source = mod
+                        self.command_table.update(module_command_table)
+                        self.command_group_table.update(module_group_table)
+
+                        logger.debug(self.item_format_string, mod, elapsed_time,
+                                     len(module_group_table), len(module_command_table))
+                        count += 1
+                        cumulative_elapsed_time += elapsed_time
+                        cumulative_group_count += len(module_group_table)
+                        cumulative_command_count += len(module_command_table)
+            elapsed_time = timeit.default_timer() - start_time_wrapper
+            print(f"*** SUT operation *** took: {elapsed_time:.6f} seconds for {len(command_modules)} modules")
             # Summary line
             logger.debug(self.item_format_string,
                          "Total ({})".format(count), cumulative_elapsed_time,

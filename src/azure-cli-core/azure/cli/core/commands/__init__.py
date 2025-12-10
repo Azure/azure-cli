@@ -519,6 +519,7 @@ class AzCliCommandInvoker(CommandInvoker):
         args = _pre_command_table_create(self.cli_ctx, args)
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
+        # @NOTE: below takes forever:
         self.commands_loader.load_command_table(args)
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE,
                                  load_cmd_tbl_func=self.commands_loader.load_command_table, args=args)
