@@ -268,7 +268,6 @@ class MainCommandsLoader(CLICommandsLoader):
 
             results = self._load_modules(args, command_modules)
 
-            # @TODO: export to own method:
             count, cumulative_elapsed_time, cumulative_group_count, cumulative_command_count = \
                 self._process_results_with_timing(results, command_modules)
             # Summary line
@@ -590,25 +589,21 @@ class MainCommandsLoader(CLICommandsLoader):
         """Handle errors that occurred during module loading."""
         import traceback
         from azure.cli.core import telemetry
-        
-        # Changing this error message requires updating CI script that checks for failed module loading.
+
         logger.error("Error loading command module '%s': %s", result.module_name, result.error)
-        telemetry.set_exception(exception=result.error, 
+        telemetry.set_exception(exception=result.error,
                                fault_type='module-load-error-' + result.module_name,
                                summary='Error loading module: {}'.format(result.module_name))
         logger.debug(traceback.format_exc())
 
     def _process_successful_load(self, result):
         """Process successfully loaded module results."""
-        # Set command source for all commands in the module
         for cmd in result.command_table.values():
             cmd.command_source = result.module_name
-        
-        # Update main command and group tables
+
         self.command_table.update(result.command_table)
         self.command_group_table.update(result.group_table)
-        
-        # Log the results
+
         logger.debug(self.item_format_string, result.module_name, result.elapsed_time,
                     len(result.group_table), len(result.command_table))
 
