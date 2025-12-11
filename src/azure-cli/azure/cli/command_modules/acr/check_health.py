@@ -72,6 +72,7 @@ def _subprocess_communicate(command_parts, shell=False):
         )
     return output, warning, stderr, succeeded
 
+
 # Checks for the environment
 # Checks docker command, docker daemon, docker version and docker pull
 def _get_docker_status_and_version(ignore_errors, yes):
@@ -112,7 +113,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
             except ValueError:
                 os = "unknown"
                 arch = "unknown"
-    logger.warning(f"{docker_command.title()} version: {version}, build {commit}, platform {os}/{arch}")
+    logger.warning("%s version: %s, build %s, platform %s/%s", docker_command.title(), version, commit, os, arch)
 
     # Docker pull check - only if docker daemon is available
     if docker_daemon_available:
