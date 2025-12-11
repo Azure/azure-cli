@@ -142,12 +142,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         tier = 'GeneralPurpose'
         backup_retention = 7
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        zonal_resiliency_value = 'Enabled'
         ha_value = 'ZoneRedundant'
 
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --tags keys=3 --high-availability {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --zonal-resiliency {} \
                   --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
-                                               sku_name, tier, storage_size, 'dbadmin', version, ha_value))
+                                               sku_name, tier, storage_size, 'dbadmin', version, zonal_resiliency_value))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
@@ -158,6 +159,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['version'], version)
         self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
         self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
+        self.assertEqual(basic_info['highAvailability']['mode'], ha_value)
 
         self.cmd('{} flexible-server db show -g {} -s {} -d {}'
                     .format(database_engine, resource_group, server_name, db_name), checks=[JMESPathCheck('name', db_name)])

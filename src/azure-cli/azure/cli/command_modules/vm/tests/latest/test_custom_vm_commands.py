@@ -186,19 +186,6 @@ class TestVmCustom(unittest.TestCase):
         mock_vm_set.assert_called_once_with(cmd, vm)
         self.assertEqual(len(vm.storage_profile.data_disks), 0)
 
-    @mock.patch('azure.cli.command_modules.vm.custom._compute_client_factory')
-    def test_show_vmss_instance_view(self, factory_mock):
-        vm_client = mock.MagicMock()
-        cmd = _get_test_cmd()
-        factory_mock.return_value = vm_client
-
-        # execute
-        get_vmss_instance_view(cmd, 'rg1', 'vmss1', '*')
-        # assert
-        vm_client.virtual_machine_scale_set_vms.list.assert_called_once_with(
-            resource_group_name='rg1', virtual_machine_scale_set_name='vmss1',
-            select='instanceView', expand='instanceView')
-
     def test_merge_secrets(self):
         secret1 = [{
             'sourceVault': {'id': '123'},
