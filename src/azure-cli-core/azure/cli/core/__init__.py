@@ -34,6 +34,8 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_next']
+MODULE_LOAD_TIMEOUT_SECONDS = 30
+MAX_WORKER_THREAD_COUNT = 4
 
 
 def _configure_knack():
@@ -551,18 +553,18 @@ class MainCommandsLoader(CLICommandsLoader):
         import concurrent.futures
 
         results = []
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        with ThreadPoolExecutor(max_workers=MAX_WORKER_THREAD_COUNT) as executor:
             future_to_module = {executor.submit(self._load_single_module, mod, args): mod
                                for mod in command_modules if mod not in BLOCKED_MODS}
 
-            for future in concurrent.futures.as_completed(future_to_module, timeout=60):
+            for future in future_to_module:
                 try:
-                    # @NOTE: Timeout to counteract deadlocks, but how to test?
-                    result = future.result(timeout=30)
+                    result = future.result(timeout=MODULE_LOAD_TIMEOUT_SECONDS)
                     results.append(result)
                 except concurrent.futures.TimeoutError:
                     mod = future_to_module[future]
-                    logger.warning("Module '%s' load timeout", mod)
+                    logger.warning("Module '%s' load timeout after %s seconds", mod, MODULE_LOAD_TIMEOUT_SECONDS)
+                    future.cancel()
                     results.append(ModuleLoadResult(mod, {}, {}, 0,
                                   Exception(f"Module '{mod}' load timeout")))
                 except Exception as ex:
