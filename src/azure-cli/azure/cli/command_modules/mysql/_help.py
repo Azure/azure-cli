@@ -323,7 +323,7 @@ examples:
 helps['mysql flexible-server update'] = """
 type: command
 short-summary: Update a flexible server.
-long-summary: >
+long-summary: |
     > [!WARNING]
     > Enabling High-availability may result in a short downtime for the server based on your server configuration.
 examples:

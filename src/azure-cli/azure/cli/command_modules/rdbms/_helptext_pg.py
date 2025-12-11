@@ -9,6 +9,11 @@ from knack.help_files import helps  # pylint: disable=unused-import
 # pylint: disable=line-too-long, too-many-lines
 
 
+helps['postgres'] = """
+type: group
+short-summary: Manage Azure Database for PostgreSQL.
+"""
+
 helps['postgres flexible-server'] = """
 type: group
 short-summary: Manage Azure Database for PostgreSQL Flexible Servers.
@@ -35,8 +40,12 @@ examples:
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
           --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 17 --high-availability ZoneRedundant --zone 1 \\
+          --tags "key=value" --version 17 --zonal-resiliency Enabled --zone 1 \\
           --standby-zone 3
+  - name: >
+      Create server with high availability feature enabled that allows primary and standby in the same zone when multi-zone capacity is unavailable.
+    text: >
+      az postgres flexible-server create -g testGroup -n testCluster --location testLocation --zonal-resiliency Enabled --allow-same-zone
   - name: >
       Create a PostgreSQL flexible server using Premium SSD v2 Disks.
     text: >

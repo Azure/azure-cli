@@ -206,6 +206,9 @@ def load_arguments(self, _):
         c.argument('upload_type', arg_type=get_enum_type(['Upload', 'UploadWithSecurityData']), min_api='2018-09-30',
                    help="Create the disk for upload scenario. 'Upload' is for Standard disk only upload. 'UploadWithSecurityData' is for OS Disk upload along with VM Guest State. Please note the 'UploadWithSecurityData' is not valid for data disk upload, it only to be used for OS Disk upload at present.")
         c.argument('performance_plus', arg_type=get_three_state_flag(), min_api='2022-07-02', help='Set this flag to true to get a boost on the performance target of the disk deployed. This flag can only be set on disk creation time and cannot be disabled after enabled')
+        c.argument('security_metadata_uri', help='Specify the blob URI to be imported into VM metadata for Confidential VM')
+        c.argument('action_on_disk_delay', arg_type=get_enum_type(['AutomaticReattach']), help='Determine on how to handle disks with slow I/O.')
+        c.argument('supported_security_option', options_list=['--supported-security-option', '--security-option'], arg_type=get_enum_type(['TrustedLaunchAndConfidentialVMSupported', 'TrustedLaunchSupported']), help='Refer to the security capability of the disk supported to create a Trusted launch or Confidential VM')
     # endregion
 
     # region Snapshots
@@ -227,6 +230,7 @@ def load_arguments(self, _):
         c.argument('bandwidth_copy_speed', min_api='2023-10-02',
                    help='If this field is set on a snapshot and createOption is CopyStart, the snapshot will be copied at a quicker speed.',
                    arg_type=get_enum_type(["None", "Enhanced"]))
+        c.argument('instant_access_duration_minutes', options_list=['--instant-access-duration-minutes', '--ia-duration'], type=int, help='For snapshots created from Premium SSD v2 or Ultra disk, this property determines the time in minutes the snapshot is retained for instant access to enable faster restore. The disk sku should be UltraSSD_LRS or PremiumV2_LRS')
     # endregion
 
     # region Images
@@ -546,6 +550,8 @@ def load_arguments(self, _):
         c.argument('disk_ids', nargs='+', min_api='2024-03-01', help='The disk IDs of the managed disk (space-delimited).')
         c.argument('source_snapshots_or_disks', options_list=['--source-snapshots-or-disks', '--source-resource'], nargs='+', min_api='2024-11-01', help='Create a data disk from a snapshot or another disk. Can use the ID of a disk or snapshot.')
         c.argument('source_disk_restore_point', options_list=['--source-disk-restore-point', '--source-disk-rp'], nargs='+', min_api='2024-11-01', help='create a data disk from a disk restore point. Can use the ID of a disk restore point.')
+        c.argument('new_names_of_source_snapshots_or_disks', options_list=['--new-names-of-source-snapshots-or-disks', '--new-names-of-sr'], nargs='+', min_api='2024-11-01', help='The name of create new data disk from a snapshot or another disk.')
+        c.argument('new_names_of_source_disk_restore_point', options_list=['--new-names-of-source-disk-restore-point', '--new-names-of-rp'], nargs='+', min_api='2024-11-01', help='The name of create new data disk from a disk restore point.')
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
@@ -705,7 +711,7 @@ def load_arguments(self, _):
         c.argument('host_group', min_api='2020-06-01',
                    help='Name or ID of dedicated host group that the virtual machine scale set resides in')
 
-    for scope in ['vmss deallocate', 'vmss delete-instances', 'vmss restart', 'vmss start', 'vmss stop', 'vmss show', 'vmss update-instances', 'vmss simulate-eviction']:
+    for scope in ['vmss deallocate', 'vmss restart', 'vmss stop', 'vmss show', 'vmss update-instances', 'vmss simulate-eviction']:
         with self.argument_context(scope) as c:
             for dest in scaleset_name_aliases:
                 c.argument(dest, vmss_name_type, id_part=None)  # due to instance-ids parameter
@@ -875,7 +881,7 @@ def load_arguments(self, _):
     with self.argument_context('vmss wait') as c:
         c.argument('instance_id', id_part='child_name_1', help="Wait on the VM instance with this ID. If missing, wait on the VMSS.")
 
-    for scope in ['vmss update-instances', 'vmss delete-instances']:
+    for scope in ['vmss update-instances']:
         with self.argument_context(scope) as c:
             c.argument('instance_ids', multi_ids_type, help='Space-separated list of IDs (ex: 1 2 3 ...) or * for all instances.')
 
@@ -950,10 +956,6 @@ def load_arguments(self, _):
             c.argument('timeout_in_seconds', type=int, help='The timeout in seconds to execute the run command.')
             c.argument('output_blob_uri', help='Specify the Azure storage blob (SAS URI) where script output stream will be uploaded.')
             c.argument('error_blob_uri', help='Specify the Azure storage blob where script error stream will be uploaded.')
-
-    with self.argument_context('vm run-command delete') as c:
-        c.argument('vm_name', run_cmd_vm_name)
-        c.argument('run_command_name', run_cmd_name_type)
 
     with self.argument_context('vm run-command list') as c:
         c.argument('vm_name', run_cmd_vm_name, id_part=None)
@@ -1051,6 +1053,7 @@ def load_arguments(self, _):
                        'It should have the same number of items as the application version ids. Null is available for a application '
                        'which does not have a configuration override.')
             c.argument('treat_deployment_as_failure', nargs='*', help="Space-separated list of true or false corresponding to the application version ids. If set to true, failure to install or update gallery application version operation will fail this operation")
+            c.argument('enable_automatic_upgrade', nargs='*', options_list=['--enable-automatic-upgrade', '--enable-auto-upgrade'], help='Space-separated list of true or false corresponding to the application version ids. If set to true, when a new Gallery Application version is available in PIR/SIG, it will be automatically updated for the VM/VMSS')
 
     for scope in ['vm application list', 'vmss application list']:
         with self.argument_context(scope) as c:
@@ -1252,6 +1255,7 @@ def load_arguments(self, _):
             c.argument('wire_server_access_control_profile_reference_id', options_list=['--wire-server-access-control-profile-reference-id', '--wire-server-profile-id'], min_api='2024-11-01', help='Specify the access control profile version resource id of wire server.')
             c.argument('imds_mode', arg_type=get_enum_type(self.get_models('Mode')), min_api='2024-11-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
             c.argument('imds_access_control_profile_reference_id', options_list=['--imds-access-control-profile-reference-id', '--imds-profile-id'], min_api='2024-11-01', help='Specify the access control profile version resource id resource id of imds.')
+            c.argument('add_proxy_agent_extension', options_list=['--add-proxy-agent-extension', '--add-proxy-agent-ext'], arg_type=get_three_state_flag(), help="Specify whether to implicitly install the ProxyAgent Extension. This option is currently applicable only for Linux OS. Use with --enable-proxy-agent.")
 
     with self.argument_context('vm update') as c:
         c.argument('license_type', license_type)
@@ -1514,16 +1518,6 @@ def load_arguments(self, _):
     # endRegion
 
     # region Restore point collection
-    with self.argument_context('restore-point collection create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-        c.argument('source_id', help='Resource Id of the source resource used to create this restore point collection',
-                   arg_group='Source')
-
-    with self.argument_context('restore-point collection update') as c:
-        c.argument('tags', tags_type)
-
     with self.argument_context('restore-point collection show') as c:
         c.argument('expand', help='The expand expression to apply on the operation.',
                    deprecate_info=c.deprecate(hide=True))

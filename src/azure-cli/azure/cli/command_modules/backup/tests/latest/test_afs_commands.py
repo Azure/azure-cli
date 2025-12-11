@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import unittest
 import time
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
-    StorageAccountPreparer, record_only
+    StorageAccountPreparer, record_only, live_only
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from .preparers import VaultPreparer, FileSharePreparer, AFSPolicyPreparer, AFSItemPreparer, \
     AFSRPPreparer, FilePreparer, RGPreparer
@@ -24,10 +24,10 @@ vault_name = "sarath-vault"
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
-    #@record_only()
+    @live_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()
@@ -55,13 +55,22 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # Disable Protection
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureStorage --delete-backup-data true --yes')
+
+        # Cleaning up Storage account locks
+        command_string = 'lock list -g {} --resource-name {} --resource-type {}'.format(
+            resource_group, storage_account, 'Microsoft.Storage/storageAccounts')
+        list_of_locks = self.cmd(command_string).get_output_in_json()
+        for lock in list_of_locks:
+            command_string = 'lock delete --ids {}'.format(lock["id"])
+            self.cmd(command_string)
         # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()
@@ -108,9 +117,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @FileSharePreparer(parameter_name="afs2")
@@ -177,9 +187,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()
@@ -219,10 +230,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
-    @RGPreparer(location="centraluseuap", random_name_length=30, parameter_name="resource_group2")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap", random_name_length=30, parameter_name="resource_group2")
+    @VaultPreparer()
     @StorageAccountPreparer(location="centraluseuap", parameter_name="storage_account", resource_group_parameter_name="resource_group")
     @StorageAccountPreparer(location="centraluseuap", parameter_name="storage_account_rg2", resource_group_parameter_name="resource_group2")
     @FilePreparer()
@@ -359,9 +371,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()
@@ -409,13 +422,22 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         protected_item_count2 = len(item_json)
 
         self.assertTrue(protected_item_count1 == protected_item_count2)
+
+        # Cleaning up Storage account locks
+        command_string = 'lock list -g {} --resource-name {} --resource-type {}'.format(
+            resource_group, storage_account, 'Microsoft.Storage/storageAccounts')
+        list_of_locks = self.cmd(command_string).get_output_in_json()
+        for lock in list_of_locks:
+            command_string = 'lock delete --ids {}'.format(lock["id"])
+            self.cmd(command_string)
         # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer(backup_tier="Snapshot")
@@ -471,9 +493,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # time.sleep(100)
 
     #@record_only()
+    @live_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer()
@@ -507,9 +530,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         #     self.check("length([?properties.friendlyName == '{container}'])", 0)])
         # time.sleep(100)
 
+    @live_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @AFSPolicyPreparer(backup_tier="Snapshot")
@@ -576,9 +600,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         # self.cmd('backup container unregister -g {rg} -v {vault} -c {container} --yes --backup-management-type AzureStorage')
         # time.sleep(100)
 
+    @live_only()
     @AllowLargeResponse()
-    @RGPreparer(location="eastus2euap", random_name_length=20)
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap", random_name_length=32)
+    @VaultPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     @FileSharePreparer()
     @FileSharePreparer(parameter_name="afs2")

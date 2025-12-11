@@ -63,6 +63,10 @@ class KeyVaultConstants:
     KEYVAULT_CONTENT_TYPE = "application/vnd.microsoft.appconfig.keyvaultref+json;charset=utf-8"
 
 
+class AIConfigConstants:
+    AI_CHAT_COMPLETION_CONTENT_TYPE = "application/vnd.microsoft.appconfig.aichatcompletion+json;charset=utf-8"
+
+
 class AppServiceConstants:
     APPSVC_CONFIG_REFERENCE_PREFIX = "@Microsoft.AppConfiguration"
     APPSVC_KEYVAULT_PREFIX = "@Microsoft.KeyVault"
@@ -144,6 +148,7 @@ class CompareFields:
 CompareFieldsMap = {
     "appconfig": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
     "appservice": (CompareFields.VALUE, CompareFields.TAGS),
+    "aks": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
     "file": (CompareFields.CONTENT_TYPE, CompareFields.VALUE),
     "kvset": (CompareFields.CONTENT_TYPE, CompareFields.VALUE, CompareFields.TAGS),
     "restore": (CompareFields.VALUE, CompareFields.CONTENT_TYPE, CompareFields.LOCKED, CompareFields.TAGS)

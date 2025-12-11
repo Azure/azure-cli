@@ -950,7 +950,8 @@ def _remove_readonly_attributes(containerapp_def):
         "customDomainVerificationId",
         "outboundIpAddresses",
         "fqdn",
-        "runningStatus"
+        "runningStatus",
+        "runningState"
     ]
 
     for unneeded_property in unneeded_properties:
@@ -1001,6 +1002,7 @@ def _remove_dapr_readonly_attributes(daprcomponent_def):
         "latestRevisionFqdn",
         "customDomainVerificationId",
         "outboundIpAddresses",
+        "deploymentErrors",
         "fqdn"
     ]
 

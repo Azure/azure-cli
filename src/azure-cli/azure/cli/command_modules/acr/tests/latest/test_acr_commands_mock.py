@@ -1206,6 +1206,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Test get refresh token
         get_login_credentials(cmd, registry_name, tenant_suffix=tenant_suffix)
+        self._validate_raw_token_request(mock_get_raw_token)
         self._validate_refresh_token_request(mock_requests_get, mock_requests_post, login_server)
 
         # Test get access token for container image repository
@@ -1236,6 +1237,9 @@ class AcrMockCommandsTests(unittest.TestCase):
             'refresh_token': TEST_ACR_REFRESH_TOKEN,
             'access_token': TEST_ACR_ACCESS_TOKEN}).encode()
         mock_requests_post.return_value = token_response
+
+    def _validate_raw_token_request(self, mock_get_raw_token):
+        mock_get_raw_token.assert_called_with(mock.ANY, resource="https://containerregistry.azure.net", subscription=mock.ANY)
 
     def _validate_refresh_token_request(self, mock_requests_get, mock_requests_post, login_server):
         mock_requests_get.assert_called_with('https://{}/v2/'.format(login_server), verify=mock.ANY)

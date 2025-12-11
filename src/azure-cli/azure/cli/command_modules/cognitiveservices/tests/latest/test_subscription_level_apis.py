@@ -5,11 +5,13 @@
 
 import unittest
 
+from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 from azure.cli.testsdk.decorators import serial_test
 
 
 class CognitiveServicesTests(ScenarioTest):
+    @AllowLargeResponse()
     def test_cognitiveservices_list_models(self):
         models = self.cmd('az cognitiveservices model list -l westeurope').get_output_in_json()
         self.assertTrue(len(models) > 0)
@@ -20,6 +22,7 @@ class CognitiveServicesTests(ScenarioTest):
         self.assertIsNotNone(models[0]['model']['skus'])
         self.assertIsNotNone(models[0]['model']['skus'][0]['name'])
 
+    @AllowLargeResponse()
     def test_cognitiveservices_list_usages(self):
         usages = self.cmd('az cognitiveservices usage list -l westeurope').get_output_in_json()
         self.assertTrue(len(usages) > 0)

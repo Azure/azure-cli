@@ -105,6 +105,11 @@ def validate_import(namespace):
     elif source == 'appservice':
         if namespace.appservice_account is None:
             raise RequiredArgumentMissingError("Please provide '--appservice-account' argument")
+    elif source == 'aks':
+        if namespace.aks_cluster is None:
+            raise RequiredArgumentMissingError("Please provide '--aks-cluster' argument")
+        if namespace.configmap_name is None:
+            raise RequiredArgumentMissingError("Please provide '--configmap-name' argument")
 
 
 def validate_export(namespace):
@@ -143,6 +148,29 @@ def validate_appservice_name_or_id(cmd, namespace):
             }
         else:
             namespace.appservice_account = parse_resource_id(namespace.appservice_account)
+
+
+def validate_aks_cluster_name_or_id(cmd, namespace):
+    from azure.cli.core.commands.client_factory import get_subscription_id
+    from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
+    if namespace.aks_cluster:
+        if not is_valid_resource_id(namespace.aks_cluster):
+            config_store_name = ""
+            if namespace.name:
+                config_store_name = namespace.name
+            elif namespace.connection_string:
+                config_store_name = get_store_name_from_connection_string(namespace.connection_string)
+            else:
+                raise ArgumentUsageError("Please provide App Configuration name or connection string for fetching the AKS cluster details. Alternatively, you can provide a valid ARM ID for the AKS cluster.")
+
+            resource_group, _ = resolve_store_metadata(cmd, config_store_name)
+            namespace.aks_cluster = {
+                "subscription": get_subscription_id(cmd.cli_ctx),
+                "resource_group": resource_group,
+                "name": namespace.aks_cluster
+            }
+        else:
+            namespace.aks_cluster = parse_resource_id(namespace.aks_cluster)
 
 
 def validate_query_fields(namespace):
