@@ -72,7 +72,6 @@ def _subprocess_communicate(command_parts, shell=False):
         )
     return output, warning, stderr, succeeded
 
-
 # Checks for the environment
 # Checks docker command, docker daemon, docker version and docker pull
 def _get_docker_status_and_version(ignore_errors, yes):
@@ -98,20 +97,22 @@ def _get_docker_status_and_version(ignore_errors, yes):
     else:
         if warning:
             logger.warning(warning)
-        json_output = json.loads(output).get("Client")
-        logger.warning(
-            "".join([
-                docker_command.title(),
-                " version: ",
-                json_output.get("Version"),
-                ", build ",
-                json_output.get("GitCommit")[:7],
-                ", platform ",
-                json_output.get("Os"),
-                "/",
-                json_output.get("Arch") if docker_command == "docker" else json_output.get("OsArch").split("/")[1]
-            ])
-        )
+        try:
+            json_output = json.loads(output).get("Client")
+        except json.decoder.JSONDecodeError:
+            json_output = {}
+        version = json_output.get("Version", "unknown")
+        commit = json_output.get("GitCommit", "unknown")[:7]
+        if docker_command == "docker":
+            os = json_output.get("Os", "unknown")
+            arch = json_output.get("Arch", "unknown")
+        else:
+            try:
+                os, arch = json_output.get("OsArch", "unknown").split("/")
+            except ValueError:
+                os = "unknown"
+                arch = "unknown"
+    logger.warning(f"{docker_command.title()} version: {version}, build {commit}, platform {os}/{arch}")
 
     # Docker pull check - only if docker daemon is available
     if docker_daemon_available:
