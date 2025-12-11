@@ -39,4 +39,3 @@ register_default_value_breaking_change(command_name='sig image-version update',
                                        current_default=None,
                                        new_default=True,
                                        target_version=None)
-
