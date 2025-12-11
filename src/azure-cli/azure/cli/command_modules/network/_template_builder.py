@@ -71,7 +71,7 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
                                        http_listener_protocol, routing_rule_type, public_ip_id, subnet_id,
                                        connection_draining_timeout, enable_http2, min_capacity, zones,
                                        custom_error_pages, firewall_policy, max_capacity,
-                                       user_assigned_identity,
+                                       user_assigned_identity, enable_fips,
                                        enable_private_link=False,
                                        private_link_name=None,
                                        private_link_ip_address=None,
@@ -270,6 +270,8 @@ def build_application_gateway_resource(cmd, name, location, tags, sku_name, sku_
         ag_properties.update({'sslCertificates': [ssl_cert]})
     if enable_http2:
         ag_properties.update({'enableHttp2': enable_http2})
+    if enable_fips is not None:
+        ag_properties.update({'enableFips': enable_fips})
     if min_capacity:
         if 'autoscaleConfiguration' not in ag_properties:
             ag_properties['autoscaleConfiguration'] = {}

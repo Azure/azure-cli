@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-06-01", "properties.exportPolicy.rules[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-09-01", "properties.exportPolicy.rules[]"],
         ]
     }
 
@@ -149,7 +149,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -293,6 +293,7 @@ class _WaitHelper:
         )
         properties.effective_network_features = AAZStrType(
             serialized_name="effectiveNetworkFeatures",
+            flags={"read_only": True},
         )
         properties.enable_subvolumes = AAZStrType(
             serialized_name="enableSubvolumes",

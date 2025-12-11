@@ -22,9 +22,9 @@ class Add(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-06-01", "properties.activeDirectories[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-09-01", "properties.activeDirectories[]"],
         ]
     }
 
@@ -142,12 +142,15 @@ class Add(AAZCommand):
             help="The Organizational Unit (OU) within the Windows Active Directory",
             default="CN=Computers",
         )
-        _args_schema.password = AAZStrArg(
+        _args_schema.password = AAZPasswordArg(
             options=["--password"],
             arg_group="Body.properties.activeDirectories[]",
             help="Plain text password of Active Directory domain administrator, value is masked in the response",
             fmt=AAZStrArgFormat(
                 max_length=64,
+            ),
+            blank=AAZPromptPasswordInput(
+                msg="Password:",
             ),
         )
         _args_schema.preferred_servers_for_ldap_client = AAZStrArg(
@@ -164,13 +167,16 @@ class Add(AAZCommand):
             arg_group="Body.properties.activeDirectories[]",
             help="Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier",
         )
-        _args_schema.server_root_ca_certificate = AAZStrArg(
+        _args_schema.server_root_ca_certificate = AAZPasswordArg(
             options=["--server-root-ca-cert", "--server-root-ca-certificate"],
             arg_group="Body.properties.activeDirectories[]",
             help="When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.",
             fmt=AAZStrArgFormat(
                 max_length=10240,
                 min_length=1,
+            ),
+            blank=AAZPromptPasswordInput(
+                msg="Password:",
             ),
         )
         _args_schema.site = AAZStrArg(
@@ -242,7 +248,7 @@ class Add(AAZCommand):
         self.AccountsGet(ctx=self.ctx)()
         self.pre_instance_create()
         self.InstanceCreateByJson(ctx=self.ctx)()
-        self.post_instance_create(self.ctx.selectors.subresource.required())
+        self.post_instance_create(self.ctx.selectors.subresource.get())
         yield self.AccountsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -263,7 +269,7 @@ class Add(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
 
     class SubresourceSelector(AAZJsonSelector):
@@ -339,7 +345,7 @@ class Add(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -438,7 +444,7 @@ class Add(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }

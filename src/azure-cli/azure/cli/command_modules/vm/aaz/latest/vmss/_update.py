@@ -16,9 +16,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-11-01",
+        "version": "2025-04-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}", "2024-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachinescalesets/{}", "2025-04-01"],
         ]
     }
 
@@ -72,6 +72,12 @@ class Update(AAZCommand):
             options=["--identity"],
             arg_group="Parameters",
             help="The identity of the virtual machine scale set, if configured.",
+            nullable=True,
+        )
+        _args_schema.placement = AAZObjectArg(
+            options=["--placement"],
+            arg_group="Parameters",
+            help="Placement section specifies the user-defined constraints for virtual machine scale set hardware placement. This property cannot be changed once VMSS is provisioned. Minimum api-version: 2025-04-01.",
             nullable=True,
         )
         _args_schema.plan = AAZObjectArg(
@@ -129,6 +135,34 @@ class Update(AAZCommand):
         user_assigned_identities.Element = AAZObjectArg(
             nullable=True,
             blank={},
+        )
+
+        placement = cls._args_schema.placement
+        placement.exclude_zones = AAZListArg(
+            options=["exclude-zones"],
+            help="This property supplements the 'zonePlacementPolicy' property. If 'zonePlacementPolicy' is set to 'Any'/'Auto', availability zone selected by the system must not be present in the list of availability zones passed with 'excludeZones'. If 'excludeZones' is not provided, all availability zones in region will be considered for selection.",
+            nullable=True,
+        )
+        placement.include_zones = AAZListArg(
+            options=["include-zones"],
+            help="This property supplements the 'zonePlacementPolicy' property. If 'zonePlacementPolicy' is set to 'Any'/'Auto', availability zone selected by the system must be present in the list of availability zones passed with 'includeZones'. If 'includeZones' is not provided, all availability zones in region will be considered for selection.",
+            nullable=True,
+        )
+        placement.zone_placement_policy = AAZStrArg(
+            options=["zone-placement-policy"],
+            help="Specifies the policy for resource's placement in availability zone. Possible values are: **Any** (used for Virtual Machines), **Auto** (used for Virtual Machine Scale Sets) - An availability zone will be automatically picked by system as part of resource creation.",
+            nullable=True,
+            enum={"Any": "Any", "Auto": "Auto"},
+        )
+
+        exclude_zones = cls._args_schema.placement.exclude_zones
+        exclude_zones.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        include_zones = cls._args_schema.placement.include_zones
+        include_zones.Element = AAZStrArg(
+            nullable=True,
         )
 
         plan = cls._args_schema.plan
@@ -206,6 +240,13 @@ class Update(AAZCommand):
             arg_group="Properties",
             help="When Overprovision is enabled, extensions are launched only on the requested number of VMs which are finally kept. This property will hence ensure that the extensions do not run on the extra overprovisioned VMs.",
             nullable=True,
+        )
+        _args_schema.high_speed_interconnect_placement = AAZStrArg(
+            options=["--high-speed-interconnect-placement"],
+            arg_group="Properties",
+            help="Specifies the high speed interconnect placement for the virtual machine scale set.",
+            nullable=True,
+            enum={"None": "None", "Trunk": "Trunk"},
         )
         _args_schema.host_group = AAZObjectArg(
             options=["--host-group"],
@@ -309,6 +350,11 @@ class Update(AAZCommand):
         )
 
         additional_capabilities = cls._args_schema.additional_capabilities
+        additional_capabilities.enable_fips1403_encryption = AAZBoolArg(
+            options=["enable-fips1403-encryption"],
+            help="The flag enables the usage of FIPS 140-3 compliant cryptography on the protectedSettings of an extension. Learn more at: https://aka.ms/linuxagentfipssupport.",
+            nullable=True,
+        )
         additional_capabilities.hibernation_enabled = AAZBoolArg(
             options=["hibernation-enabled"],
             help="The flag that enables or disables hibernation capability on the VM.",
@@ -343,9 +389,6 @@ class Update(AAZCommand):
             options=["base-regular-priority-count"],
             help="The base number of regular priority VMs that will be created in this scale set as it scales out.",
             nullable=True,
-            fmt=AAZIntArgFormat(
-                minimum=0,
-            ),
         )
         priority_mix_policy.regular_priority_percentage_above_base = AAZIntArg(
             options=["regular-priority-percentage-above-base"],
@@ -353,7 +396,6 @@ class Update(AAZCommand):
             nullable=True,
             fmt=AAZIntArgFormat(
                 maximum=100,
-                minimum=0,
             ),
         )
 
@@ -371,6 +413,11 @@ class Update(AAZCommand):
         resiliency_policy.resilient_vm_deletion_policy = AAZObjectArg(
             options=["resilient-vm-deletion-policy"],
             help="The configuration parameters used while performing resilient VM deletion.",
+            nullable=True,
+        )
+        resiliency_policy.zone_allocation_policy = AAZObjectArg(
+            options=["zone-allocation-policy"],
+            help="The configuration parameters used while performing zone allocation.",
             nullable=True,
         )
 
@@ -407,6 +454,33 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        zone_allocation_policy = cls._args_schema.resiliency_policy.zone_allocation_policy
+        zone_allocation_policy.max_instance_percent_per_zone_policy = AAZObjectArg(
+            options=["max-instance-percent-per-zone-policy"],
+            help="The configuration parameters used to limit the number of virtual machines per availability zone in the virtual machine scale set.",
+            nullable=True,
+        )
+        zone_allocation_policy.max_zone_count = AAZIntArg(
+            options=["max-zone-count"],
+            help="The maximum number of availability zones to use if the ZonePlacementPolicy is 'Auto'. If not specified, all availability zones will be used.",
+            nullable=True,
+        )
+
+        max_instance_percent_per_zone_policy = cls._args_schema.resiliency_policy.zone_allocation_policy.max_instance_percent_per_zone_policy
+        max_instance_percent_per_zone_policy.enabled = AAZBoolArg(
+            options=["enabled"],
+            help="Specifies whether maxInstancePercentPerZonePolicy should be enabled on the virtual machine scale set.",
+            nullable=True,
+        )
+        max_instance_percent_per_zone_policy.value = AAZIntArg(
+            options=["value"],
+            help="Limit on the number of instances in each zone as a percentage of the total capacity of the virtual machine scale set.",
+            nullable=True,
+            fmt=AAZIntArgFormat(
+                maximum=100,
+            ),
+        )
+
         scale_in_policy = cls._args_schema.scale_in_policy
         scale_in_policy.force_deletion = AAZBoolArg(
             options=["force-deletion"],
@@ -431,6 +505,11 @@ class Update(AAZCommand):
         )
 
         scheduled_events_policy = cls._args_schema.scheduled_events_policy
+        scheduled_events_policy.all_instances_down = AAZObjectArg(
+            options=["all-instances-down"],
+            help="The configuration parameters used while creating AllInstancesDown scheduled event setting creation.",
+            nullable=True,
+        )
         scheduled_events_policy.scheduled_events_additional_publishing_targets = AAZObjectArg(
             options=["scheduled-events-additional-publishing-targets"],
             help="The configuration parameters used while publishing scheduledEventsAdditionalPublishingTargets.",
@@ -447,6 +526,13 @@ class Update(AAZCommand):
             nullable=True,
         )
 
+        all_instances_down = cls._args_schema.scheduled_events_policy.all_instances_down
+        all_instances_down.automatically_approve = AAZBoolArg(
+            options=["automatically-approve"],
+            help="Specifies if Scheduled Events should be auto-approved when all instances are down. its default value is true",
+            nullable=True,
+        )
+
         scheduled_events_additional_publishing_targets = cls._args_schema.scheduled_events_policy.scheduled_events_additional_publishing_targets
         scheduled_events_additional_publishing_targets.event_grid_and_resource_graph = AAZObjectArg(
             options=["event-grid-and-resource-graph"],
@@ -458,6 +544,11 @@ class Update(AAZCommand):
         event_grid_and_resource_graph.enable = AAZBoolArg(
             options=["enable"],
             help="Specifies if event grid and resource graph is enabled for Scheduled event related configurations.",
+            nullable=True,
+        )
+        event_grid_and_resource_graph.scheduled_events_api_version = AAZStrArg(
+            options=["scheduled-events-api-version"],
+            help="Specifies the api-version to determine which Scheduled Events configuration schema version will be delivered.",
             nullable=True,
         )
 
@@ -503,9 +594,6 @@ class Update(AAZCommand):
             options=["rank"],
             help="Specifies the rank (a.k.a priority) associated with the VM Size.",
             nullable=True,
-            fmt=AAZIntArgFormat(
-                minimum=0,
-            ),
         )
 
         spot_restore_policy = cls._args_schema.spot_restore_policy
@@ -595,7 +683,6 @@ class Update(AAZCommand):
             nullable=True,
             fmt=AAZIntArgFormat(
                 maximum=100,
-                minimum=0,
             ),
         )
         rolling_upgrade_policy.pause_time_between_batches = AAZStrArg(
@@ -818,7 +905,7 @@ class Update(AAZCommand):
             help="If a value is provided and is different from the previous value, the extension handler will be forced to update even if the extension configuration has not changed.",
             nullable=True,
         )
-        _element.protected_settings = AAZFreeFormDictArg(
+        _element.protected_settings = AAZAnyTypeArg(
             options=["protected-settings"],
             help="The extension can contain either protectedSettings or protectedSettingsFromKeyVault or no protected settings at all.",
             nullable=True,
@@ -839,7 +926,7 @@ class Update(AAZCommand):
             help="The name of the extension handler publisher.",
             nullable=True,
         )
-        _element.settings = AAZFreeFormDictArg(
+        _element.settings = AAZAnyTypeArg(
             options=["settings"],
             help="Json formatted public settings for the extension.",
             nullable=True,
@@ -984,6 +1071,11 @@ class Update(AAZCommand):
             help="Specifies the primary network interface in case the virtual machine has more than 1 network interface.",
             nullable=True,
         )
+        _element.tags = AAZDictArg(
+            options=["tags"],
+            help="Resource tags applied to the networkInterface address created by this NetworkInterfaceConfiguration",
+            nullable=True,
+        )
 
         dns_settings = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.dns_settings
         dns_settings.dns_servers = AAZListArg(
@@ -1117,6 +1209,11 @@ class Update(AAZCommand):
             help="Describes the public IP Sku. It can only be set with OrchestrationMode as Flexible.",
             nullable=True,
         )
+        public_ip_address_configuration.tags = AAZDictArg(
+            options=["tags"],
+            help="Resource tags applied to the publicIP address created by this PublicIPAddressConfiguration",
+            nullable=True,
+        )
 
         dns_settings = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.dns_settings
         dns_settings.domain_name_label = AAZStrArg(
@@ -1161,11 +1258,24 @@ class Update(AAZCommand):
             enum={"Global": "Global", "Regional": "Regional"},
         )
 
+        tags = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.ip_configurations.Element.public_ip_address_configuration.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        tags = cls._args_schema.virtual_machine_profile.network_profile.network_interface_configurations.Element.tags
+        tags.Element = AAZStrArg(
+            nullable=True,
+        )
+
         os_profile = cls._args_schema.virtual_machine_profile.os_profile
-        os_profile.admin_password = AAZStrArg(
+        os_profile.admin_password = AAZPasswordArg(
             options=["admin-password"],
             help="Specifies the password of the administrator account. <br><br> **Minimum-length (Windows):** 8 characters <br><br> **Minimum-length (Linux):** 6 characters <br><br> **Max-length (Windows):** 123 characters <br><br> **Max-length (Linux):** 72 characters <br><br> **Complexity requirements:** 3 out of 4 conditions below need to be fulfilled <br> Has lower characters <br>Has upper characters <br> Has a digit <br> Has a special character (Regex match [\\W_]) <br><br> **Disallowed values:** \"abc@123\", \"P@$$w0rd\", \"P@ssw0rd\", \"P@ssword123\", \"Pa$$word\", \"pass@word1\", \"Password!\", \"Password1\", \"Password22\", \"iloveyou!\" <br><br> For resetting the password, see [How to reset the Remote Desktop service or its login password in a Windows VM](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/reset-rdp) <br><br> For resetting root password, see [Manage users, SSH, and check or repair disks on Azure Linux VMs using the VMAccess Extension](https://learn.microsoft.com/troubleshoot/azure/virtual-machines/troubleshoot-ssh-connection)",
             nullable=True,
+            blank=AAZPromptPasswordInput(
+                msg="Password:",
+            ),
         )
         os_profile.admin_username = AAZStrArg(
             options=["admin-username"],
@@ -1543,6 +1653,11 @@ class Update(AAZCommand):
         )
 
         proxy_agent_settings = cls._args_schema.virtual_machine_profile.security_profile.proxy_agent_settings
+        proxy_agent_settings.add_proxy_agent_extension = AAZBoolArg(
+            options=["add-proxy-agent-extension"],
+            help="Specify whether to implicitly install the ProxyAgent Extension. This option is currently applicable only for Linux Os.",
+            nullable=True,
+        )
         proxy_agent_settings.enabled = AAZBoolArg(
             options=["enabled"],
             help="Specifies whether ProxyAgent feature should be enabled on the virtual machine or virtual machine scale set.",
@@ -1599,7 +1714,9 @@ class Update(AAZCommand):
         )
         storage_profile.disk_controller_type = AAZStrArg(
             options=["disk-controller-type"],
+            help="Specifies the disk controller type configured for the virtual machines in the scale set. Minimum api-version: 2022-08-01",
             nullable=True,
+            enum={"NVMe": "NVMe", "SCSI": "SCSI"},
         )
         storage_profile.image_reference = AAZObjectArg(
             options=["image-reference"],
@@ -1677,7 +1794,7 @@ class Update(AAZCommand):
             help="Specified the community gallery image unique id for vm deployment. This can be fetched from community gallery image GET call.",
             nullable=True,
         )
-        image_reference.id = AAZStrArg(
+        image_reference.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
             nullable=True,
@@ -1830,7 +1947,7 @@ class Update(AAZCommand):
         )
 
         disk_encryption_set_parameters_update = cls._args_disk_encryption_set_parameters_update
-        disk_encryption_set_parameters_update.id = AAZStrArg(
+        disk_encryption_set_parameters_update.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
             nullable=True,
@@ -1880,7 +1997,7 @@ class Update(AAZCommand):
         )
 
         sub_resource_update = cls._args_sub_resource_update
-        sub_resource_update.id = AAZStrArg(
+        sub_resource_update.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Id",
             nullable=True,
@@ -2017,7 +2134,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2025-04-01",
                     required=True,
                 ),
             }
@@ -2064,7 +2181,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [200, 201]:
@@ -2073,7 +2190,7 @@ class Update(AAZCommand):
                     session,
                     self.on_200_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -2116,7 +2233,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-11-01",
+                    "api-version", "2025-04-01",
                     required=True,
                 ),
             }
@@ -2182,6 +2299,7 @@ class Update(AAZCommand):
             )
             _builder.set_prop("extendedLocation", AAZObjectType, ".extended_location")
             _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
+            _builder.set_prop("placement", AAZObjectType, ".placement")
             _builder.set_prop("plan", AAZObjectType, ".plan")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType, ".sku")
@@ -2202,6 +2320,20 @@ class Update(AAZCommand):
             if user_assigned_identities is not None:
                 user_assigned_identities.set_elements(AAZObjectType, ".")
 
+            placement = _builder.get(".placement")
+            if placement is not None:
+                placement.set_prop("excludeZones", AAZListType, ".exclude_zones")
+                placement.set_prop("includeZones", AAZListType, ".include_zones")
+                placement.set_prop("zonePlacementPolicy", AAZStrType, ".zone_placement_policy")
+
+            exclude_zones = _builder.get(".placement.excludeZones")
+            if exclude_zones is not None:
+                exclude_zones.set_elements(AAZStrType, ".")
+
+            include_zones = _builder.get(".placement.includeZones")
+            if include_zones is not None:
+                include_zones.set_elements(AAZStrType, ".")
+
             plan = _builder.get(".plan")
             if plan is not None:
                 plan.set_prop("name", AAZStrType, ".name")
@@ -2215,6 +2347,7 @@ class Update(AAZCommand):
                 properties.set_prop("automaticRepairsPolicy", AAZObjectType, ".automatic_repairs_policy")
                 properties.set_prop("constrainedMaximumCapacity", AAZBoolType, ".constrained_maximum_capacity")
                 properties.set_prop("doNotRunExtensionsOnOverprovisionedVMs", AAZBoolType, ".do_not_run_extensions_on_overprovisioned_v_ms")
+                properties.set_prop("highSpeedInterconnectPlacement", AAZStrType, ".high_speed_interconnect_placement")
                 _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("hostGroup", AAZObjectType, ".host_group"))
                 properties.set_prop("orchestrationMode", AAZStrType, ".orchestration_mode")
                 properties.set_prop("overprovision", AAZBoolType, ".overprovision")
@@ -2234,6 +2367,7 @@ class Update(AAZCommand):
 
             additional_capabilities = _builder.get(".properties.additionalCapabilities")
             if additional_capabilities is not None:
+                additional_capabilities.set_prop("enableFips1403Encryption", AAZBoolType, ".enable_fips1403_encryption")
                 additional_capabilities.set_prop("hibernationEnabled", AAZBoolType, ".hibernation_enabled")
                 additional_capabilities.set_prop("ultraSSDEnabled", AAZBoolType, ".ultra_ssd_enabled")
 
@@ -2253,6 +2387,7 @@ class Update(AAZCommand):
                 resiliency_policy.set_prop("automaticZoneRebalancingPolicy", AAZObjectType, ".automatic_zone_rebalancing_policy")
                 resiliency_policy.set_prop("resilientVMCreationPolicy", AAZObjectType, ".resilient_vm_creation_policy")
                 resiliency_policy.set_prop("resilientVMDeletionPolicy", AAZObjectType, ".resilient_vm_deletion_policy")
+                resiliency_policy.set_prop("zoneAllocationPolicy", AAZObjectType, ".zone_allocation_policy")
 
             automatic_zone_rebalancing_policy = _builder.get(".properties.resiliencyPolicy.automaticZoneRebalancingPolicy")
             if automatic_zone_rebalancing_policy is not None:
@@ -2268,6 +2403,16 @@ class Update(AAZCommand):
             if resilient_vm_deletion_policy is not None:
                 resilient_vm_deletion_policy.set_prop("enabled", AAZBoolType, ".enabled")
 
+            zone_allocation_policy = _builder.get(".properties.resiliencyPolicy.zoneAllocationPolicy")
+            if zone_allocation_policy is not None:
+                zone_allocation_policy.set_prop("maxInstancePercentPerZonePolicy", AAZObjectType, ".max_instance_percent_per_zone_policy")
+                zone_allocation_policy.set_prop("maxZoneCount", AAZIntType, ".max_zone_count")
+
+            max_instance_percent_per_zone_policy = _builder.get(".properties.resiliencyPolicy.zoneAllocationPolicy.maxInstancePercentPerZonePolicy")
+            if max_instance_percent_per_zone_policy is not None:
+                max_instance_percent_per_zone_policy.set_prop("enabled", AAZBoolType, ".enabled")
+                max_instance_percent_per_zone_policy.set_prop("value", AAZIntType, ".value")
+
             scale_in_policy = _builder.get(".properties.scaleInPolicy")
             if scale_in_policy is not None:
                 scale_in_policy.set_prop("forceDeletion", AAZBoolType, ".force_deletion")
@@ -2280,9 +2425,14 @@ class Update(AAZCommand):
 
             scheduled_events_policy = _builder.get(".properties.scheduledEventsPolicy")
             if scheduled_events_policy is not None:
+                scheduled_events_policy.set_prop("allInstancesDown", AAZObjectType, ".all_instances_down")
                 scheduled_events_policy.set_prop("scheduledEventsAdditionalPublishingTargets", AAZObjectType, ".scheduled_events_additional_publishing_targets")
                 scheduled_events_policy.set_prop("userInitiatedReboot", AAZObjectType, ".user_initiated_reboot")
                 scheduled_events_policy.set_prop("userInitiatedRedeploy", AAZObjectType, ".user_initiated_redeploy")
+
+            all_instances_down = _builder.get(".properties.scheduledEventsPolicy.allInstancesDown")
+            if all_instances_down is not None:
+                all_instances_down.set_prop("automaticallyApprove", AAZBoolType, ".automatically_approve")
 
             scheduled_events_additional_publishing_targets = _builder.get(".properties.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets")
             if scheduled_events_additional_publishing_targets is not None:
@@ -2291,6 +2441,7 @@ class Update(AAZCommand):
             event_grid_and_resource_graph = _builder.get(".properties.scheduledEventsPolicy.scheduledEventsAdditionalPublishingTargets.eventGridAndResourceGraph")
             if event_grid_and_resource_graph is not None:
                 event_grid_and_resource_graph.set_prop("enable", AAZBoolType, ".enable")
+                event_grid_and_resource_graph.set_prop("scheduledEventsApiVersion", AAZStrType, ".scheduled_events_api_version")
 
             user_initiated_reboot = _builder.get(".properties.scheduledEventsPolicy.userInitiatedReboot")
             if user_initiated_reboot is not None:
@@ -2416,18 +2567,14 @@ class Update(AAZCommand):
                 properties.set_prop("autoUpgradeMinorVersion", AAZBoolType, ".auto_upgrade_minor_version")
                 properties.set_prop("enableAutomaticUpgrade", AAZBoolType, ".enable_automatic_upgrade")
                 properties.set_prop("forceUpdateTag", AAZStrType, ".force_update_tag")
-                properties.set_prop("protectedSettings", AAZFreeFormDictType, ".protected_settings")
+                properties.set_prop("protectedSettings", AAZAnyType, ".protected_settings")
                 properties.set_prop("protectedSettingsFromKeyVault", AAZObjectType, ".protected_settings_from_key_vault")
                 properties.set_prop("provisionAfterExtensions", AAZListType, ".provision_after_extensions")
                 properties.set_prop("publisher", AAZStrType, ".publisher")
-                properties.set_prop("settings", AAZFreeFormDictType, ".settings")
+                properties.set_prop("settings", AAZAnyType, ".settings")
                 properties.set_prop("suppressFailures", AAZBoolType, ".suppress_failures")
                 properties.set_prop("type", AAZStrType, ".type")
                 properties.set_prop("typeHandlerVersion", AAZStrType, ".type_handler_version")
-
-            protected_settings = _builder.get(".properties.virtualMachineProfile.extensionProfile.extensions[].properties.protectedSettings")
-            if protected_settings is not None:
-                protected_settings.set_anytype_elements(".")
 
             protected_settings_from_key_vault = _builder.get(".properties.virtualMachineProfile.extensionProfile.extensions[].properties.protectedSettingsFromKeyVault")
             if protected_settings_from_key_vault is not None:
@@ -2437,10 +2584,6 @@ class Update(AAZCommand):
             provision_after_extensions = _builder.get(".properties.virtualMachineProfile.extensionProfile.extensions[].properties.provisionAfterExtensions")
             if provision_after_extensions is not None:
                 provision_after_extensions.set_elements(AAZStrType, ".")
-
-            settings = _builder.get(".properties.virtualMachineProfile.extensionProfile.extensions[].properties.settings")
-            if settings is not None:
-                settings.set_anytype_elements(".")
 
             hardware_profile = _builder.get(".properties.virtualMachineProfile.hardwareProfile")
             if hardware_profile is not None:
@@ -2465,6 +2608,7 @@ class Update(AAZCommand):
             if _elements is not None:
                 _elements.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+                _elements.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties")
             if properties is not None:
@@ -2529,6 +2673,7 @@ class Update(AAZCommand):
                 public_ip_address_configuration.set_prop("name", AAZStrType, ".name", typ_kwargs={"flags": {"required": True}})
                 public_ip_address_configuration.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
                 public_ip_address_configuration.set_prop("sku", AAZObjectType, ".sku")
+                public_ip_address_configuration.set_prop("tags", AAZDictType, ".tags")
 
             properties = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.properties")
             if properties is not None:
@@ -2557,6 +2702,14 @@ class Update(AAZCommand):
             if sku is not None:
                 sku.set_prop("name", AAZStrType, ".name")
                 sku.set_prop("tier", AAZStrType, ".tier")
+
+            tags = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].properties.ipConfigurations[].properties.publicIPAddressConfiguration.tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
+
+            tags = _builder.get(".properties.virtualMachineProfile.networkProfile.networkInterfaceConfigurations[].tags")
+            if tags is not None:
+                tags.set_elements(AAZStrType, ".")
 
             os_profile = _builder.get(".properties.virtualMachineProfile.osProfile")
             if os_profile is not None:
@@ -2704,6 +2857,7 @@ class Update(AAZCommand):
 
             proxy_agent_settings = _builder.get(".properties.virtualMachineProfile.securityProfile.proxyAgentSettings")
             if proxy_agent_settings is not None:
+                proxy_agent_settings.set_prop("addProxyAgentExtension", AAZBoolType, ".add_proxy_agent_extension")
                 proxy_agent_settings.set_prop("enabled", AAZBoolType, ".enabled")
                 _UpdateHelper._build_schema_host_endpoint_settings_update(proxy_agent_settings.set_prop("imds", AAZObjectType, ".imds"))
                 proxy_agent_settings.set_prop("keyIncarnationId", AAZIntType, ".key_incarnation_id")
@@ -2959,9 +3113,11 @@ class _UpdateHelper:
             _schema.identity = cls._schema_virtual_machine_scale_set_read.identity
             _schema.location = cls._schema_virtual_machine_scale_set_read.location
             _schema.name = cls._schema_virtual_machine_scale_set_read.name
+            _schema.placement = cls._schema_virtual_machine_scale_set_read.placement
             _schema.plan = cls._schema_virtual_machine_scale_set_read.plan
             _schema.properties = cls._schema_virtual_machine_scale_set_read.properties
             _schema.sku = cls._schema_virtual_machine_scale_set_read.sku
+            _schema.system_data = cls._schema_virtual_machine_scale_set_read.system_data
             _schema.tags = cls._schema_virtual_machine_scale_set_read.tags
             _schema.type = cls._schema_virtual_machine_scale_set_read.type
             _schema.zones = cls._schema_virtual_machine_scale_set_read.zones
@@ -2986,11 +3142,16 @@ class _UpdateHelper:
         virtual_machine_scale_set_read.name = AAZStrType(
             flags={"read_only": True},
         )
+        virtual_machine_scale_set_read.placement = AAZObjectType()
         virtual_machine_scale_set_read.plan = AAZObjectType()
         virtual_machine_scale_set_read.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
         virtual_machine_scale_set_read.sku = AAZObjectType()
+        virtual_machine_scale_set_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
+        )
         virtual_machine_scale_set_read.tags = AAZDictType()
         virtual_machine_scale_set_read.type = AAZStrType(
             flags={"read_only": True},
@@ -3028,6 +3189,23 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
+        placement = _schema_virtual_machine_scale_set_read.placement
+        placement.exclude_zones = AAZListType(
+            serialized_name="excludeZones",
+        )
+        placement.include_zones = AAZListType(
+            serialized_name="includeZones",
+        )
+        placement.zone_placement_policy = AAZStrType(
+            serialized_name="zonePlacementPolicy",
+        )
+
+        exclude_zones = _schema_virtual_machine_scale_set_read.placement.exclude_zones
+        exclude_zones.Element = AAZStrType()
+
+        include_zones = _schema_virtual_machine_scale_set_read.placement.include_zones
+        include_zones.Element = AAZStrType()
+
         plan = _schema_virtual_machine_scale_set_read.plan
         plan.name = AAZStrType()
         plan.product = AAZStrType()
@@ -3048,6 +3226,9 @@ class _UpdateHelper:
         )
         properties.do_not_run_extensions_on_overprovisioned_v_ms = AAZBoolType(
             serialized_name="doNotRunExtensionsOnOverprovisionedVMs",
+        )
+        properties.high_speed_interconnect_placement = AAZStrType(
+            serialized_name="highSpeedInterconnectPlacement",
         )
         properties.host_group = AAZObjectType(
             serialized_name="hostGroup",
@@ -3111,6 +3292,9 @@ class _UpdateHelper:
         )
 
         additional_capabilities = _schema_virtual_machine_scale_set_read.properties.additional_capabilities
+        additional_capabilities.enable_fips1403_encryption = AAZBoolType(
+            serialized_name="enableFips1403Encryption",
+        )
         additional_capabilities.hibernation_enabled = AAZBoolType(
             serialized_name="hibernationEnabled",
         )
@@ -3145,6 +3329,9 @@ class _UpdateHelper:
         resiliency_policy.resilient_vm_deletion_policy = AAZObjectType(
             serialized_name="resilientVMDeletionPolicy",
         )
+        resiliency_policy.zone_allocation_policy = AAZObjectType(
+            serialized_name="zoneAllocationPolicy",
+        )
 
         automatic_zone_rebalancing_policy = _schema_virtual_machine_scale_set_read.properties.resiliency_policy.automatic_zone_rebalancing_policy
         automatic_zone_rebalancing_policy.enabled = AAZBoolType()
@@ -3161,6 +3348,18 @@ class _UpdateHelper:
         resilient_vm_deletion_policy = _schema_virtual_machine_scale_set_read.properties.resiliency_policy.resilient_vm_deletion_policy
         resilient_vm_deletion_policy.enabled = AAZBoolType()
 
+        zone_allocation_policy = _schema_virtual_machine_scale_set_read.properties.resiliency_policy.zone_allocation_policy
+        zone_allocation_policy.max_instance_percent_per_zone_policy = AAZObjectType(
+            serialized_name="maxInstancePercentPerZonePolicy",
+        )
+        zone_allocation_policy.max_zone_count = AAZIntType(
+            serialized_name="maxZoneCount",
+        )
+
+        max_instance_percent_per_zone_policy = _schema_virtual_machine_scale_set_read.properties.resiliency_policy.zone_allocation_policy.max_instance_percent_per_zone_policy
+        max_instance_percent_per_zone_policy.enabled = AAZBoolType()
+        max_instance_percent_per_zone_policy.value = AAZIntType()
+
         scale_in_policy = _schema_virtual_machine_scale_set_read.properties.scale_in_policy
         scale_in_policy.force_deletion = AAZBoolType(
             serialized_name="forceDeletion",
@@ -3174,6 +3373,9 @@ class _UpdateHelper:
         rules.Element = AAZStrType()
 
         scheduled_events_policy = _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy
+        scheduled_events_policy.all_instances_down = AAZObjectType(
+            serialized_name="allInstancesDown",
+        )
         scheduled_events_policy.scheduled_events_additional_publishing_targets = AAZObjectType(
             serialized_name="scheduledEventsAdditionalPublishingTargets",
         )
@@ -3184,6 +3386,11 @@ class _UpdateHelper:
             serialized_name="userInitiatedRedeploy",
         )
 
+        all_instances_down = _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.all_instances_down
+        all_instances_down.automatically_approve = AAZBoolType(
+            serialized_name="automaticallyApprove",
+        )
+
         scheduled_events_additional_publishing_targets = _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets
         scheduled_events_additional_publishing_targets.event_grid_and_resource_graph = AAZObjectType(
             serialized_name="eventGridAndResourceGraph",
@@ -3191,6 +3398,9 @@ class _UpdateHelper:
 
         event_grid_and_resource_graph = _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.scheduled_events_additional_publishing_targets.event_grid_and_resource_graph
         event_grid_and_resource_graph.enable = AAZBoolType()
+        event_grid_and_resource_graph.scheduled_events_api_version = AAZStrType(
+            serialized_name="scheduledEventsApiVersion",
+        )
 
         user_initiated_reboot = _schema_virtual_machine_scale_set_read.properties.scheduled_events_policy.user_initiated_reboot
         user_initiated_reboot.automatically_approve = AAZBoolType(
@@ -3405,7 +3615,7 @@ class _UpdateHelper:
         properties.force_update_tag = AAZStrType(
             serialized_name="forceUpdateTag",
         )
-        properties.protected_settings = AAZFreeFormDictType(
+        properties.protected_settings = AAZAnyType(
             serialized_name="protectedSettings",
         )
         properties.protected_settings_from_key_vault = AAZObjectType(
@@ -3419,7 +3629,7 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         properties.publisher = AAZStrType()
-        properties.settings = AAZFreeFormDictType()
+        properties.settings = AAZAnyType()
         properties.suppress_failures = AAZBoolType(
             serialized_name="suppressFailures",
         )
@@ -3477,6 +3687,7 @@ class _UpdateHelper:
         _element.properties = AAZObjectType(
             flags={"client_flatten": True},
         )
+        _element.tags = AAZDictType()
 
         properties = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties
         properties.auxiliary_mode = AAZStrType(
@@ -3579,6 +3790,7 @@ class _UpdateHelper:
             flags={"client_flatten": True},
         )
         public_ip_address_configuration.sku = AAZObjectType()
+        public_ip_address_configuration.tags = AAZDictType()
 
         properties = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.properties
         properties.delete_option = AAZStrType(
@@ -3622,6 +3834,12 @@ class _UpdateHelper:
         sku = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.sku
         sku.name = AAZStrType()
         sku.tier = AAZStrType()
+
+        tags = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties.public_ip_address_configuration.tags
+        tags.Element = AAZStrType()
+
+        tags = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.network_profile.network_interface_configurations.Element.tags
+        tags.Element = AAZStrType()
 
         os_profile = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.os_profile
         os_profile.admin_password = AAZStrType(
@@ -3852,6 +4070,9 @@ class _UpdateHelper:
         )
 
         proxy_agent_settings = _schema_virtual_machine_scale_set_read.properties.virtual_machine_profile.security_profile.proxy_agent_settings
+        proxy_agent_settings.add_proxy_agent_extension = AAZBoolType(
+            serialized_name="addProxyAgentExtension",
+        )
         proxy_agent_settings.enabled = AAZBoolType()
         proxy_agent_settings.imds = AAZObjectType()
         cls._build_schema_host_endpoint_settings_read(proxy_agent_settings.imds)
@@ -3985,6 +4206,26 @@ class _UpdateHelper:
         sku.name = AAZStrType()
         sku.tier = AAZStrType()
 
+        system_data = _schema_virtual_machine_scale_set_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
         tags = _schema_virtual_machine_scale_set_read.tags
         tags.Element = AAZStrType()
 
@@ -3997,9 +4238,11 @@ class _UpdateHelper:
         _schema.identity = cls._schema_virtual_machine_scale_set_read.identity
         _schema.location = cls._schema_virtual_machine_scale_set_read.location
         _schema.name = cls._schema_virtual_machine_scale_set_read.name
+        _schema.placement = cls._schema_virtual_machine_scale_set_read.placement
         _schema.plan = cls._schema_virtual_machine_scale_set_read.plan
         _schema.properties = cls._schema_virtual_machine_scale_set_read.properties
         _schema.sku = cls._schema_virtual_machine_scale_set_read.sku
+        _schema.system_data = cls._schema_virtual_machine_scale_set_read.system_data
         _schema.tags = cls._schema_virtual_machine_scale_set_read.tags
         _schema.type = cls._schema_virtual_machine_scale_set_read.type
         _schema.zones = cls._schema_virtual_machine_scale_set_read.zones

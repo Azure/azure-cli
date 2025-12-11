@@ -1871,6 +1871,22 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('placement.zonePlacementPolicy', 'Any')
         ])
 
+    def test_storage_account_geo_sla(self):
+        self.kwargs.update({
+            'rg': 'yifantestzp',
+            'sa': self.create_random_name('sa', 24)
+        })
+
+        self.cmd('storage account create -n {sa} -g {rg} --sku Standard_GRS '
+                 '--enable-blob-geo-priority-replication true', checks=[
+            JMESPathCheck('geoPriorityReplicationStatus.isBlobEnabled', True)
+        ])
+        self.cmd('storage account update -n {sa} -g {rg} '
+                 '--enable-blob-geo-priority-replication false', checks=[
+            JMESPathCheck('geoPriorityReplicationStatus.isBlobEnabled', False)
+        ])
+
+
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
         account_info = self.cmd('account show').get_output_in_json()
@@ -2420,8 +2436,11 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
     def test_storage_account_failover(self, resource_group):
         self.kwargs = {
             'sa': self.create_random_name(prefix="storagegrzs", length=24),
+            'sa2': self.create_random_name(prefix="storagegrzs", length=24),
+            'sa3': self.create_random_name(prefix="storagegrzs", length=24),
             'rg': resource_group
         }
+        # planned failover
         self.cmd('storage account create -n {sa} -g {rg} -l eastus2 --kind StorageV2 --sku Standard_RAGRS --https-only',
                  checks=[self.check('name', '{sa}'),
                          self.check('sku.name', 'Standard_RAGRS')])
@@ -2438,11 +2457,59 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
             self.check('failoverInProgress', None)
         ])
 
-        # time.sleep(900)
         self.cmd('storage account failover -n {sa} -g {rg} --failover-type Planned --no-wait -y')
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
             self.check('name', '{sa}'),
+            self.check('failoverInProgress', True)
+        ])
+
+        # unplanned failover
+        self.cmd('storage account create -n {sa2} -g {rg} -l eastus2 --kind StorageV2 --sku Standard_RAGRS --https-only',
+                 checks=[self.check('name', '{sa2}'),
+                         self.check('sku.name', 'Standard_RAGRS')])
+
+        while True:
+            can_failover = self.cmd('storage account show -n {sa2} -g {rg} --expand geoReplicationStats --query '
+                                    'geoReplicationStats.canFailover -o tsv').output.strip('\n')
+            if can_failover == 'true':
+                break
+            time.sleep(10)
+
+        self.cmd('storage account show -n {sa2} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('geoReplicationStats.canFailover', True),
+            self.check('failoverInProgress', None)
+        ])
+
+        self.cmd('storage account failover -n {sa2} -g {rg} --failover-type Unplanned --no-wait -y')
+
+        self.cmd('storage account show -n {sa2} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa2}'),
+            self.check('failoverInProgress', True)
+        ])
+
+        # unplanned failover if not specified
+        self.cmd(
+            'storage account create -n {sa3} -g {rg} -l eastus2 --kind StorageV2 --sku Standard_RAGRS --https-only',
+            checks=[self.check('name', '{sa3}'),
+                    self.check('sku.name', 'Standard_RAGRS')])
+
+        while True:
+            can_failover = self.cmd('storage account show -n {sa3} -g {rg} --expand geoReplicationStats --query '
+                                    'geoReplicationStats.canFailover -o tsv').output.strip('\n')
+            if can_failover == 'true':
+                break
+            time.sleep(10)
+
+        self.cmd('storage account show -n {sa3} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('geoReplicationStats.canFailover', True),
+            self.check('failoverInProgress', None)
+        ])
+
+        self.cmd('storage account failover -n {sa3} -g {rg} --no-wait -y')
+
+        self.cmd('storage account show -n {sa3} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa3}'),
             self.check('failoverInProgress', True)
         ])
 
@@ -2465,10 +2532,10 @@ class StorageAccountLocalContextScenarioTest(LocalContextScenarioTest):
 
 class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2')
-    @StorageAccountPreparer(parameter_name='source_account', location='eastus2', kind='StorageV2')
-    @StorageAccountPreparer(parameter_name='destination_account', location='eastus2', kind='StorageV2')
-    @StorageAccountPreparer(parameter_name='new_account', location='eastus2', kind='StorageV2')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='centraluseuap')
+    @StorageAccountPreparer(parameter_name='source_account', location='centraluseuap', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='destination_account', location='centraluseuap', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='new_account', location='centraluseuap', kind='StorageV2')
     def test_storage_account_or_policy(self, resource_group, source_account, destination_account,
                                        new_account):
         src_account_info = self.get_account_info(resource_group, source_account)
@@ -2500,11 +2567,13 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
 
         # Create ORS policy on destination account
         result = self.cmd('storage account or-policy create -n {dest_sc} -s {src_sc} --dcont {dcont} '
-                          '--scont {scont} -t "2020-02-19T16:05:00Z" --enable-metrics True').get_output_in_json()
+                          '--scont {scont} -t "2020-02-19T16:05:00Z" --enable-metrics True '
+                          '--priority-replication true').get_output_in_json()
         self.assertIn('policyId', result)
         self.assertIn('ruleId', result['rules'][0])
         self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
         self.assertEqual(result["metrics"]["enabled"], True)
+        self.assertEqual(result["priorityReplication"]["enabled"], True)
 
         self.kwargs.update({
             'policy_id': result["policyId"],
@@ -2512,7 +2581,9 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         })
 
         self.cmd('storage account or-policy update -g {rg} -n {dest_sc} -s {src_sc} --policy-id {policy_id} '
-                 '--enable-metrics False', checks=[JMESPathCheck('metrics.enabled', False)])
+                 '--enable-metrics False --priority-replication false',
+                 checks=[JMESPathCheck('metrics.enabled', False),
+                         JMESPathCheck('priorityReplication.enabled', False)])
 
         # Get policy properties from destination account
         self.cmd('storage account or-policy show -g {rg} -n {dest_sc} --policy-id {policy_id}') \

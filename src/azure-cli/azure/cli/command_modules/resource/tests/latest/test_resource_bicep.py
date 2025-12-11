@@ -84,7 +84,7 @@ class TestBicep(unittest.TestCase):
         response.read.return_value = b"test"
         urlopen_stub.return_value = response
         
-        user_binary_from_path_stub.return_value = False
+        user_binary_from_path_stub.return_value = True
         get_use_binary_from_path_config_stub.return_value = "if_found_in_ci"
 
         # Act
@@ -206,13 +206,13 @@ class TestBicep(unittest.TestCase):
     @mock.patch("azure.cli.command_modules.resource._bicep.get_use_binary_from_path_config")
     @mock.patch("azure.cli.command_modules.resource._bicep._get_bicep_installation_path")
     @mock.patch("shutil.which")
-    def test_ensure_bicep_installation_skip_download_if_use_binary_from_path_is_true(
+    def test_ensure_bicep_installation_skip_download_if_use_binary_from_path_is_true_and_no_version_is_specified(
         self, which_stub, _get_bicep_installation_path_mock, get_use_binary_from_path_config_stub
     ):
         which_stub.return_value = True
         get_use_binary_from_path_config_stub.return_value = "true"
 
-        ensure_bicep_installation(self.cli_ctx, release_tag="v0.1.0")
+        ensure_bicep_installation(self.cli_ctx, release_tag=None)
 
         _get_bicep_installation_path_mock.assert_not_called()
 

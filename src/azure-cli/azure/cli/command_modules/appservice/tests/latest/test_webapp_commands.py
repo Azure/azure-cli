@@ -2343,6 +2343,15 @@ class WebappListLocationsTest(ScenarioTest):
             JMESPathCheck('length(@) > `0`', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_list-locations-managed-instance-enabled-test')
+    def test_webapp_list_locations_managed_instance_enabled(self, resource_group):
+        self.cmd('appservice list-locations --sku P1V4 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+        self.cmd('appservice list-locations --sku P1MV4 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+
 
 class ContainerWebappE2ETest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test', location='australiaeast')
@@ -3434,7 +3443,7 @@ class WebappSlotTest(ScenarioTest):
         ])
 
 class WebappStackTest(ScenarioTest):
-    @AllowLargeResponse()
+    @AllowLargeResponse(8192)
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
     def test_webapp_list_show_details(self, resource_group):
         webapp_name = self.create_random_name(prefix='webapp-list-show-details', length=40)

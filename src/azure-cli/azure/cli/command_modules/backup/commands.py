@@ -4,12 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.commands import CliCommandType
-from azure.cli.command_modules.backup._client_factory import vaults_cf, backup_protection_containers_cf, \
-    protection_policies_cf, backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, \
-    job_details_cf, job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_non_crr_cf, \
-    item_level_recovery_connections_cf, backup_protected_items_cf, backup_protectable_items_cf, \
-    protection_containers_cf, protection_intent_cf, backup_resource_encryption_config_cf, resource_guard_proxy_cf, \
-    deleted_protection_containers_cf  # pylint: disable=unused-variable
+from azure.cli.command_modules.backup._client_factory import (
+    vaults_cf, deleted_vaults_cf, backup_protection_containers_cf, protection_policies_cf,
+    backup_policies_cf, protected_items_cf, backups_cf, backup_jobs_cf, job_details_cf,
+    job_cancellations_cf, recovery_points_cf, restores_cf, backup_storage_configs_non_crr_cf,
+    item_level_recovery_connections_cf, backup_protected_items_cf, backup_protectable_items_cf,
+    protection_containers_cf, protection_intent_cf, backup_resource_encryption_config_cf,
+    resource_guard_proxy_cf, deleted_protection_containers_cf)  # pylint: disable=unused-variable
 from azure.cli.command_modules.backup._exception_handler import backup_exception_handler
 from azure.cli.command_modules.backup._format import (
     transform_container_list, transform_policy_list, transform_item_list, transform_job_list,
@@ -42,6 +43,12 @@ def load_command_table(self, _):
         g.custom_command('identity show', 'show_identity')
         g.custom_command('encryption update', 'update_encryption')
         g.custom_command('encryption show', 'show_encryption', client_factory=backup_resource_encryption_config_cf)
+
+    with self.command_group('backup deleted-vault', backup_custom, client_factory=deleted_vaults_cf, exception_handler=backup_exception_handler) as g:
+        g.custom_command('list', 'list_deleted_vaults')
+        g.custom_command('get', 'get_deleted_vault')
+        g.custom_command('undelete', 'undelete_vault')
+        g.custom_command('list-containers', 'list_deleted_vault_containers')
 
     with self.command_group('backup vault resource-guard-mapping', backup_custom, client_factory=resource_guard_proxy_cf, exception_handler=backup_exception_handler) as g:
         g.show_command('update', 'update_resource_guard_mapping')

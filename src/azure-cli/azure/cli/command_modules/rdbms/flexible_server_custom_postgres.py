@@ -42,7 +42,7 @@ from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
     validate_postgres_replica, validate_georestore_network, pg_byok_validator, validate_migration_runtime_server, \
-    validate_resource_group, check_resource_group, validate_citus_cluster, cluster_byok_validator, validate_backup_name, \
+    validate_resource_group, check_resource_group, validate_citus_cluster, validate_backup_name, \
     validate_virtual_endpoint_name_availability, validate_database_name, compare_sku_names, is_citus_cluster, pg_restore_validator
 
 logger = get_logger(__name__)
@@ -63,13 +63,13 @@ def flexible_server_create(cmd, client,
                            storage_gb=None, version=None, microsoft_entra_auth=None,
                            admin_name=None, admin_id=None, admin_type=None,
                            password_auth=None, administrator_login=None, administrator_login_password=None,
-                           tags=None, database_name=None,
-                           subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
+                           tags=None, subnet=None, subnet_address_prefix=None, vnet=None, vnet_address_prefix=None,
                            private_dns_zone_arguments=None, public_access=None,
-                           high_availability=None, zone=None, standby_availability_zone=None,
+                           high_availability=None, zonal_resiliency=None, allow_same_zone=False,
+                           zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, create_default_db='Enabled', create_cluster=None, cluster_size=None, yes=False):
+                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None, yes=False):
 
     if not check_resource_group(resource_group_name):
         resource_group_name = None
@@ -86,22 +86,33 @@ def flexible_server_create(cmd, client,
         logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
 
     server_name = server_name.lower()
+    high_availability_mode = high_availability
 
-    if sku_name is None:
-        # set sku_name from capability API
+    if (sku_name is None) or (version is None) or \
+       (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled'):
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-        tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
-        try:
-            sku_info = list_location_capability_info['sku_info']
-            skus = list(get_postgres_skus(sku_info, tier.lower()))
-            skus = sorted(skus, key=cmp_to_key(compare_sku_names))
-            sku_name = skus[0]
-        except:
-            raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
+
+        # set sku_name from capability API
+        if sku_name is None:
+            tiers = [item.lower() for item in get_postgres_tiers(list_location_capability_info['sku_info'])]
+            try:
+                sku_info = list_location_capability_info['sku_info']
+                skus = list(get_postgres_skus(sku_info, tier.lower()))
+                skus = sorted(skus, key=cmp_to_key(compare_sku_names))
+                sku_name = skus[0]
+            except:
+                raise CLIError('Incorrect value for --tier. Allowed values : {}'.format(tiers))
+        # default to the latest version
+        if version is None:
+            supported_server_versions = sorted(list_location_capability_info['supported_server_versions'])
+            version = supported_server_versions[-1]
+        # set high availability from capability API
+        if (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled'):
+            single_az = list_location_capability_info['single_az']
+            high_availability_mode = 'SameZone' if single_az and allow_same_zone else 'ZoneRedundant'
 
     pg_arguments_validator(db_context,
                            server_name=server_name,
-                           database_name=database_name,
                            location=location,
                            tier=tier, sku_name=sku_name,
                            storage_gb=storage_gb,
@@ -109,6 +120,8 @@ def flexible_server_create(cmd, client,
                            storage_type=storage_type,
                            iops=iops, throughput=throughput,
                            high_availability=high_availability,
+                           zonal_resiliency=zonal_resiliency,
+                           allow_same_zone=allow_same_zone,
                            standby_availability_zone=standby_availability_zone,
                            zone=zone,
                            subnet=subnet,
@@ -151,7 +164,7 @@ def flexible_server_create(cmd, client,
 
     sku = postgresql_flexibleservers.models.Sku(name=sku_name, tier=tier)
 
-    high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability,
+    high_availability = postgresql_flexibleservers.models.HighAvailability(mode=high_availability_mode,
                                                                            standby_availability_zone=standby_availability_zone)
 
     is_password_auth_enabled = bool(password_auth is not None and password_auth.lower() == 'enabled')
@@ -197,13 +210,6 @@ def flexible_server_create(cmd, client,
     if start_ip != -1 and end_ip != -1:
         firewall_id = create_firewall_rule(db_context, cmd, resource_group_name, server_name, start_ip, end_ip)
 
-    # Create database if it does not exist
-    if (database_name is not None or (create_default_db and create_default_db.lower() == 'enabled') and create_cluster != 'ElasticCluster'):
-        db_name = database_name if database_name else DEFAULT_DB_NAME
-        _create_database(db_context, cmd, resource_group_name, server_name, db_name)
-    else:
-        db_name = POSTGRES_DB_NAME
-
     user = server_result.administrator_login if is_password_auth_enabled else '<user>'
     password = administrator_login_password if is_password_auth_enabled else '<password>'
     admin = quote(admin_name) if admin_name else '<admin>'
@@ -220,12 +226,12 @@ def flexible_server_create(cmd, client,
                        server_name, resource_group_name)
     logger.warning('Try using \'az postgres flexible-server connect\' command to test out connection.')
 
-    _update_local_contexts(cmd, server_name, resource_group_name, db_name, location, user)
+    _update_local_contexts(cmd, server_name, resource_group_name, location, user)
 
     return _form_response(user, sku, loc, server_id, host, version, password,
-                          _create_postgresql_connection_string(host, user, password, db_name),
-                          db_name, firewall_id, subnet_id, is_password_auth_enabled, is_microsoft_entra_auth_enabled, admin_name,
-                          _create_microsoft_entra_connection_string(host, db_name, admin))
+                          _create_postgresql_connection_string(host, user, password),
+                          firewall_id, subnet_id, is_password_auth_enabled, is_microsoft_entra_auth_enabled, admin_name,
+                          _create_microsoft_entra_connection_string(host, POSTGRES_DB_NAME, admin))
 # endregion create without args
 
 
@@ -271,7 +277,6 @@ def flexible_server_restore(cmd, client,
             logging_name='PostgreSQL', command_group='postgres', server_client=client, location=location)
         validate_server_name(db_context, server_name, 'Microsoft.DBforPostgreSQL/flexibleServers')
 
-        cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, source_server_object)
         pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup)
 
         pg_restore_validator(source_server_object.sku.tier, storage_type=storage_type)
@@ -323,6 +328,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                                        backup_retention=None,
                                        administrator_login_password=None,
                                        high_availability=None,
+                                       zonal_resiliency=None,
+                                       allow_same_zone=False,
                                        standby_availability_zone=None,
                                        maintenance_window=None,
                                        byok_identity=None, byok_key=None,
@@ -353,6 +360,8 @@ def flexible_server_update_custom_func(cmd, client, instance,
                            iops=iops,
                            throughput=throughput,
                            high_availability=high_availability,
+                           zonal_resiliency=zonal_resiliency,
+                           allow_same_zone=allow_same_zone,
                            zone=instance.availability_zone,
                            standby_availability_zone=standby_availability_zone,
                            byok_identity=byok_identity,
@@ -468,14 +477,21 @@ def flexible_server_update_custom_func(cmd, client, instance,
 
     # High availability can't be updated with existing properties
     high_availability_param = postgresql_flexibleservers.models.HighAvailability()
+    if zonal_resiliency is not None:
+        if zonal_resiliency.lower() == 'disabled':
+            high_availability = 'Disabled'
+        else:
+            list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+            single_az = list_location_capability_info['single_az']
+            high_availability = 'SameZone' if single_az and allow_same_zone else 'ZoneRedundant'
     if high_availability:
         high_availability_param.mode = high_availability
 
         if high_availability.lower() != "disabled" and standby_availability_zone:
             high_availability_param.standby_availability_zone = standby_availability_zone
 
-        # PG 11 and 12 will never receive fabric mirroring support. Skip this check for servers of these versions
-        if high_availability.lower() != "disabled" and str(instance.version) not in ["11", "12"]:
+        # PG 11 and 12 will never receive fabric mirroring support. Ignite 2025 Fabric mirroring supported on 17. Skip this check for servers of these versions
+        if high_availability.lower() != "disabled" and str(instance.version) not in ["11", "12", "17", "18"]:
             config_client = cf_postgres_flexible_config(cmd.cli_ctx, '_')
             fabric_mirror_status = config_client.get(resource_group_name, server_name, 'azure.fabric_mirror_enabled')
             if (fabric_mirror_status and fabric_mirror_status.value.lower() == 'on'):
@@ -1589,7 +1605,7 @@ def flexible_server_fabric_mirroring_start(cmd, client, resource_group_name, ser
     flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
     server = flexible_servers_client.get(resource_group_name, server_name)
 
-    if server.high_availability.mode != "Disabled":
+    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
         # disable fabric mirroring on HA server
         raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
@@ -1619,7 +1635,7 @@ def flexible_server_fabric_mirroring_stop(cmd, client, resource_group_name, serv
     flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
     server = flexible_servers_client.get(resource_group_name, server_name)
 
-    if server.high_availability.mode != "Disabled":
+    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
         # disable fabric mirroring on HA server
         raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
@@ -1641,7 +1657,7 @@ def flexible_server_fabric_mirroring_update_databases(cmd, client, resource_grou
     flexible_servers_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
     server = flexible_servers_client.get(resource_group_name, server_name)
 
-    if server.high_availability.mode != "Disabled":
+    if server.high_availability.mode != "Disabled" and server.version not in ["17", "18"]:
         # disable fabric mirroring on HA server
         raise CLIError("Fabric mirroring is not supported on servers with high availability enabled.")
 
@@ -1677,7 +1693,7 @@ def index_tuning_update(cmd, client, resource_group_name, server_name, index_tun
         postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, subscription)
         source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
         location = ''.join(source_server_object.location.lower().split())
-        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+        list_location_capability_info = get_postgres_location_capability_info(cmd, location, is_offer_restriction_check_required=True)
         index_tuning_supported = list_location_capability_info['index_tuning_supported']
         if not index_tuning_supported:
             raise CLIError("Index tuning is not supported for the server.")
@@ -1809,7 +1825,7 @@ def _create_postgresql_connection_strings(host, user, password, database, port):
     return result
 
 
-def _create_postgresql_connection_string(host, user, password, database):
+def _create_postgresql_connection_string(host, user, password, database=POSTGRES_DB_NAME):
     connection_kwargs = {
         'user': user if user is not None else '{user}',
         'host': host,
@@ -1819,7 +1835,7 @@ def _create_postgresql_connection_string(host, user, password, database):
     return 'postgresql://{user}:{password}@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
 
-def _create_microsoft_entra_connection_string(host, database, admin='<admin>'):
+def _create_microsoft_entra_connection_string(host, database=POSTGRES_DB_NAME, admin='<admin>'):
     connection_kwargs = {
         'user': admin,
         'host': host,
@@ -1828,7 +1844,7 @@ def _create_microsoft_entra_connection_string(host, database, admin='<admin>'):
     return 'postgresql://{user}:<access-token>@{host}/{database}?sslmode=require'.format(**connection_kwargs)
 
 
-def _form_response(username, sku, location, server_id, host, version, password, connection_string, database_name, firewall_id=None,
+def _form_response(username, sku, location, server_id, host, version, password, connection_string, firewall_id=None,
                    subnet_id=None, is_password_auth=True, is_microsoft_entra_auth_enabled=False, microsoft_admin=None, connection_string_microsoft_entra=None):
 
     output = {
@@ -1839,7 +1855,7 @@ def _form_response(username, sku, location, server_id, host, version, password, 
         'location': location,
         'id': server_id,
         'version': version,
-        'databaseName': database_name,
+        'databaseName': POSTGRES_DB_NAME,
         'connectionString': connection_string
     }
     if is_microsoft_entra_auth_enabled:
@@ -1852,7 +1868,7 @@ def _form_response(username, sku, location, server_id, host, version, password, 
     return output
 
 
-def _update_local_contexts(cmd, server_name, resource_group_name, database_name, location, user):
+def _update_local_contexts(cmd, server_name, resource_group_name, location, user):
     validate_resource_group(resource_group_name)
 
     if cmd.cli_ctx.local_context.is_on:
@@ -1861,7 +1877,7 @@ def _update_local_contexts(cmd, server_name, resource_group_name, database_name,
         cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'administrator_login',
                                       user)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set(['postgres flexible-server'], 'database_name',
-                                      database_name)  # Setting the server name in the local context
+                                      POSTGRES_DB_NAME)  # Setting the server name in the local context
         cmd.cli_ctx.local_context.set([ALL], 'location',
                                       location)  # Setting the location in the local context
         cmd.cli_ctx.local_context.set([ALL], 'resource_group_name', resource_group_name)

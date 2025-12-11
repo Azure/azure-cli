@@ -1550,6 +1550,9 @@ examples:
     text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
 /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1 \
 --app-config-overrides https://mystorageaccount.blob.core.windows.net/configurations/settings.config null
+  - name: Set applications for vm with auto upgrade
+    text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication2/versions/1.1 --enable-automatic-upgrade True False
 """
 
 helps['vm application list'] = """
@@ -3013,34 +3016,4 @@ helps['restore-point collection show'] = """
       - name: Get a restore point collection, including the restore points contained in the restore point collection
         text: |-
                az restore-point collection show --resource-group "myResourceGroup" --collection-name "rpcName"
-"""
-
-helps['restore-point collection create'] = """
-    type: command
-    short-summary: "Create the restore point collection. Please refer to https://aka.ms/RestorePoints \
-for more details. When updating a restore point collection, only tags may be modified."
-    examples:
-      - name: Create or update a restore point collection.
-        text: |-
-               az restore-point collection create --location "norwayeast" --source-id "/subscriptions/{subscription-id}\
-/resourceGroups/myResourceGroup/providers/Microsoft.Compute/virtualMachines/myVM" --tags myTag1="tagValue1" \
---resource-group "myResourceGroup" --collection-name "myRpc"
-"""
-
-helps['restore-point collection update'] = """
-    type: command
-    short-summary: "Update the restore point collection."
-"""
-
-helps['restore-point collection wait'] = """
-    type: command
-    short-summary: Place the CLI in a waiting state until a condition of the restore-point-collection is met.
-    parameters:
-      - name: --expand
-        short-summary: The expand expression to apply on the operation. If expand=restorePoints, server will return all
-                       contained restore points in the restorePointCollection. "restorePoints" Default value is None.
-    examples:
-      - name: Pause executing next line of CLI script until the restore-point-collection is successfully deleted.
-        text: |-
-               az restore-point collection wait --resource-group "myResourceGroup" --collection-name "rpcName" --deleted
 """

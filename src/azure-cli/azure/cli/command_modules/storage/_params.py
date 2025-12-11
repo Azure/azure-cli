@@ -314,8 +314,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='The name of the storage account within the specified resource group')
 
     with self.argument_context('storage account failover') as c:
-        c.argument('failover_type', options_list=['--failover-type', '--type'], is_preview=True, default=None,
-                   help="The parameter is set to 'Planned' to indicate whether a Planned failover is requested")
+        c.argument('failover_type', options_list=['--failover-type', '--type'],
+                   arg_type=get_enum_type(['Unplanned', 'Planned']),
+                   help="Specify the failover type. Possible values are: Unplanned, Planned. "
+                        "If not specified, the default failover type is Unplanned.")
         c.argument('yes', options_list=['--yes', '-y'], help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('storage account delete') as c:
@@ -441,6 +443,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Describes the available zones for the product where storage account resource can be created.')
         c.argument('zone_placement_policy', arg_type=get_enum_type(t_zone_placement_policy),
                    help='The availability zone pinning policy for the storage account.')
+        c.argument('enable_blob_geo_priority_replication', arg_type=get_three_state_flag(),
+                   options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
+                   help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -539,6 +544,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help='Describes the available zones for the product where storage account resource can be created.')
         c.argument('zone_placement_policy', arg_type=get_enum_type(t_zone_placement_policy),
                    help='The availability zone pinning policy for the storage account.')
+        c.argument('enable_blob_geo_priority_replication', arg_type=get_three_state_flag(),
+                   options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
+                   help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key',
@@ -812,6 +820,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('min_creation_time', min_creation_time_type)
         c.argument('enable_metrics', arg_type=get_three_state_flag(),
                    help='Indicates whether object replication metrics feature is enabled for the policy.')
+        c.argument('priority_replication', arg_type=get_three_state_flag(),
+                   help='Indicates whether object replication priority replication feature is enabled for the policy.')
 
     for item in ['create', 'update']:
         with self.argument_context('storage account or-policy {}'.format(item),
