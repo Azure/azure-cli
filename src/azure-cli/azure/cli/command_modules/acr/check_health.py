@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import json
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom import get_docker_command
@@ -88,18 +89,29 @@ def _get_docker_status_and_version(ignore_errors, yes):
         docker_daemon_available = False
 
     if docker_daemon_available:
-        logger.warning("Docker daemon status: available")
+        logger.warning(f"{docker_command.title()} daemon status: available")
 
     # Docker version check
-    output, warning, stderr, succeeded = _subprocess_communicate(
-        [docker_command, "version", "--format", "'Docker version {{.Server.Version}}, "
-         "build {{.Server.GitCommit}}, platform {{.Server.Os}}/{{.Server.Arch}}'"])
+    output, warning, stderr, succeeded = _subprocess_communicate([docker_command, "version", "--format", "json"])
     if not succeeded:
         _handle_error(DOCKER_VERSION_ERROR.append_error_message(stderr), ignore_errors)
     else:
         if warning:
             logger.warning(warning)
-        logger.warning("Docker version: %s", output)
+        json_output = json.loads(output).get("Client")
+        logger.warning(
+            "".join([
+                docker_command.title(),
+                " version: ",
+                json_output.get("Version"),
+                ", build ",
+                json_output.get("GitCommit")[:7],
+                ", platform ",
+                json_output.get("Os"),
+                "/",
+                json_output.get("Arch") if docker_command == "docker" else json_output.get("OsArch").split("/")[1]
+            ])
+        )
 
     # Docker pull check - only if docker daemon is available
     if docker_daemon_available:
@@ -114,14 +126,14 @@ def _get_docker_status_and_version(ignore_errors, yes):
 
         if not succeeded:
             if stderr and DOCKER_PULL_WRONG_PLATFORM in stderr:
-                print_pass("Docker pull of '{}'".format(IMAGE))
+                print_pass(f"{docker_command.title()} pull of '{IMAGE}'")
                 logger.warning("Image '%s' can be pulled but cannot be used on this platform", IMAGE)
                 return
             _handle_error(DOCKER_PULL_ERROR.append_error_message(stderr), ignore_errors)
         else:
             if warning:
                 logger.warning(warning)
-            print_pass("Docker pull of '{}'".format(IMAGE))
+            print_pass(f"{docker_command.title()} pull of '{IMAGE}'")
 
 
 # Get current CLI version
