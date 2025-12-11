@@ -12,24 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network vpn-connection show",
+    "network vnet-gateway identity show",
 )
 class Show(AAZCommand):
-    """Get the details of a VPN connection.
-
-    :example: View the details of a VPN connection.
-        az network vpn-connection show -g MyResourceGroup -n MyConnection
+    """Show the details of managed identities.
     """
 
     _aaz_info = {
         "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/connections/{}", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2025-01-01", "identity"],
         ]
     }
 
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         self._execute_operations()
         return self._output()
 
@@ -49,15 +47,14 @@ class Show(AAZCommand):
         )
         _args_schema.name = AAZStrArg(
             options=["-n", "--name"],
-            help="Connection name.",
+            help="Name of the VNet gateway.",
             required=True,
-            id_part="name",
         )
         return cls._args_schema
 
     def _execute_operations(self):
         self.pre_operations()
-        self.VirtualNetworkGatewayConnectionsGet(ctx=self.ctx)()
+        self.VirtualNetworkGatewaysGet(ctx=self.ctx)()
         self.post_operations()
 
     @register_callback
@@ -69,10 +66,21 @@ class Show(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
         return result
 
-    class VirtualNetworkGatewayConnectionsGet(AAZHttpOperation):
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            return result.identity
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result.identity = value
+            return
+
+    class VirtualNetworkGatewaysGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
 
         def __call__(self, *args, **kwargs):
@@ -86,7 +94,7 @@ class Show(AAZCommand):
         @property
         def url(self):
             return self.client.format_url(
-                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/connections/{virtualNetworkGatewayConnectionName}",
+                "/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.Network/virtualNetworkGateways/{virtualNetworkGatewayName}",
                 **self.url_parameters
             )
 
@@ -110,7 +118,7 @@ class Show(AAZCommand):
                     required=True,
                 ),
                 **self.serialize_url_param(
-                    "virtualNetworkGatewayConnectionName", self.ctx.args.name,
+                    "virtualNetworkGatewayName", self.ctx.args.name,
                     required=True,
                 ),
             }
@@ -151,263 +159,7 @@ class Show(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-
-            _schema_on_200 = cls._schema_on_200
-            _schema_on_200.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.id = AAZStrType()
-            _schema_on_200.location = AAZStrType()
-            _schema_on_200.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            _schema_on_200.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
-            )
-            _schema_on_200.tags = AAZDictType()
-            _schema_on_200.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.properties
-            properties.authentication_type = AAZStrType(
-                serialized_name="authenticationType",
-            )
-            properties.authorization_key = AAZStrType(
-                serialized_name="authorizationKey",
-            )
-            properties.certificate_authentication = AAZObjectType(
-                serialized_name="certificateAuthentication",
-            )
-            properties.connection_mode = AAZStrType(
-                serialized_name="connectionMode",
-            )
-            properties.connection_protocol = AAZStrType(
-                serialized_name="connectionProtocol",
-            )
-            properties.connection_status = AAZStrType(
-                serialized_name="connectionStatus",
-                flags={"read_only": True},
-            )
-            properties.connection_type = AAZStrType(
-                serialized_name="connectionType",
-                flags={"required": True},
-            )
-            properties.dpd_timeout_seconds = AAZIntType(
-                serialized_name="dpdTimeoutSeconds",
-            )
-            properties.egress_bytes_transferred = AAZIntType(
-                serialized_name="egressBytesTransferred",
-                flags={"read_only": True},
-            )
-            properties.egress_nat_rules = AAZListType(
-                serialized_name="egressNatRules",
-            )
-            properties.enable_bgp = AAZBoolType(
-                serialized_name="enableBgp",
-            )
-            properties.enable_private_link_fast_path = AAZBoolType(
-                serialized_name="enablePrivateLinkFastPath",
-            )
-            properties.express_route_gateway_bypass = AAZBoolType(
-                serialized_name="expressRouteGatewayBypass",
-            )
-            properties.gateway_custom_bgp_ip_addresses = AAZListType(
-                serialized_name="gatewayCustomBgpIpAddresses",
-            )
-            properties.ingress_bytes_transferred = AAZIntType(
-                serialized_name="ingressBytesTransferred",
-                flags={"read_only": True},
-            )
-            properties.ingress_nat_rules = AAZListType(
-                serialized_name="ingressNatRules",
-            )
-            properties.ipsec_policies = AAZListType(
-                serialized_name="ipsecPolicies",
-            )
-            properties.local_network_gateway2 = AAZObjectType(
-                serialized_name="localNetworkGateway2",
-            )
-            properties.peer = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(properties.peer)
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.resource_guid = AAZStrType(
-                serialized_name="resourceGuid",
-                flags={"read_only": True},
-            )
-            properties.routing_weight = AAZIntType(
-                serialized_name="routingWeight",
-            )
-            properties.shared_key = AAZStrType(
-                serialized_name="sharedKey",
-                flags={"secret": True},
-            )
-            properties.traffic_selector_policies = AAZListType(
-                serialized_name="trafficSelectorPolicies",
-            )
-            properties.tunnel_connection_status = AAZListType(
-                serialized_name="tunnelConnectionStatus",
-                flags={"read_only": True},
-            )
-            properties.tunnel_properties = AAZListType(
-                serialized_name="tunnelProperties",
-            )
-            properties.use_local_azure_ip_address = AAZBoolType(
-                serialized_name="useLocalAzureIpAddress",
-            )
-            properties.use_policy_based_traffic_selectors = AAZBoolType(
-                serialized_name="usePolicyBasedTrafficSelectors",
-            )
-            properties.virtual_network_gateway1 = AAZObjectType(
-                serialized_name="virtualNetworkGateway1",
-                flags={"required": True},
-            )
-            _ShowHelper._build_schema_virtual_network_gateway_read(properties.virtual_network_gateway1)
-            properties.virtual_network_gateway2 = AAZObjectType(
-                serialized_name="virtualNetworkGateway2",
-            )
-            _ShowHelper._build_schema_virtual_network_gateway_read(properties.virtual_network_gateway2)
-
-            certificate_authentication = cls._schema_on_200.properties.certificate_authentication
-            certificate_authentication.inbound_auth_certificate_chain = AAZListType(
-                serialized_name="inboundAuthCertificateChain",
-            )
-            certificate_authentication.inbound_auth_certificate_subject_name = AAZStrType(
-                serialized_name="inboundAuthCertificateSubjectName",
-            )
-            certificate_authentication.outbound_auth_certificate = AAZStrType(
-                serialized_name="outboundAuthCertificate",
-            )
-
-            inbound_auth_certificate_chain = cls._schema_on_200.properties.certificate_authentication.inbound_auth_certificate_chain
-            inbound_auth_certificate_chain.Element = AAZStrType()
-
-            egress_nat_rules = cls._schema_on_200.properties.egress_nat_rules
-            egress_nat_rules.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(egress_nat_rules.Element)
-
-            gateway_custom_bgp_ip_addresses = cls._schema_on_200.properties.gateway_custom_bgp_ip_addresses
-            gateway_custom_bgp_ip_addresses.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.gateway_custom_bgp_ip_addresses.Element
-            _element.custom_bgp_ip_address = AAZStrType(
-                serialized_name="customBgpIpAddress",
-                flags={"required": True},
-            )
-            _element.ip_configuration_id = AAZStrType(
-                serialized_name="ipConfigurationId",
-                flags={"required": True},
-            )
-
-            ingress_nat_rules = cls._schema_on_200.properties.ingress_nat_rules
-            ingress_nat_rules.Element = AAZObjectType()
-            _ShowHelper._build_schema_sub_resource_read(ingress_nat_rules.Element)
-
-            ipsec_policies = cls._schema_on_200.properties.ipsec_policies
-            ipsec_policies.Element = AAZObjectType()
-            _ShowHelper._build_schema_ipsec_policy_read(ipsec_policies.Element)
-
-            local_network_gateway2 = cls._schema_on_200.properties.local_network_gateway2
-            local_network_gateway2.etag = AAZStrType(
-                flags={"read_only": True},
-            )
-            local_network_gateway2.id = AAZStrType()
-            local_network_gateway2.location = AAZStrType()
-            local_network_gateway2.name = AAZStrType(
-                flags={"read_only": True},
-            )
-            local_network_gateway2.properties = AAZObjectType(
-                flags={"required": True, "client_flatten": True},
-            )
-            local_network_gateway2.tags = AAZDictType()
-            local_network_gateway2.type = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            properties = cls._schema_on_200.properties.local_network_gateway2.properties
-            properties.bgp_settings = AAZObjectType(
-                serialized_name="bgpSettings",
-            )
-            _ShowHelper._build_schema_bgp_settings_read(properties.bgp_settings)
-            properties.fqdn = AAZStrType()
-            properties.gateway_ip_address = AAZStrType(
-                serialized_name="gatewayIpAddress",
-            )
-            properties.local_network_address_space = AAZObjectType(
-                serialized_name="localNetworkAddressSpace",
-            )
-            _ShowHelper._build_schema_address_space_read(properties.local_network_address_space)
-            properties.provisioning_state = AAZStrType(
-                serialized_name="provisioningState",
-                flags={"read_only": True},
-            )
-            properties.resource_guid = AAZStrType(
-                serialized_name="resourceGuid",
-                flags={"read_only": True},
-            )
-
-            tags = cls._schema_on_200.properties.local_network_gateway2.tags
-            tags.Element = AAZStrType()
-
-            traffic_selector_policies = cls._schema_on_200.properties.traffic_selector_policies
-            traffic_selector_policies.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.traffic_selector_policies.Element
-            _element.local_address_ranges = AAZListType(
-                serialized_name="localAddressRanges",
-                flags={"required": True},
-            )
-            _element.remote_address_ranges = AAZListType(
-                serialized_name="remoteAddressRanges",
-                flags={"required": True},
-            )
-
-            local_address_ranges = cls._schema_on_200.properties.traffic_selector_policies.Element.local_address_ranges
-            local_address_ranges.Element = AAZStrType()
-
-            remote_address_ranges = cls._schema_on_200.properties.traffic_selector_policies.Element.remote_address_ranges
-            remote_address_ranges.Element = AAZStrType()
-
-            tunnel_connection_status = cls._schema_on_200.properties.tunnel_connection_status
-            tunnel_connection_status.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.tunnel_connection_status.Element
-            _element.connection_status = AAZStrType(
-                serialized_name="connectionStatus",
-                flags={"read_only": True},
-            )
-            _element.egress_bytes_transferred = AAZIntType(
-                serialized_name="egressBytesTransferred",
-                flags={"read_only": True},
-            )
-            _element.ingress_bytes_transferred = AAZIntType(
-                serialized_name="ingressBytesTransferred",
-                flags={"read_only": True},
-            )
-            _element.last_connection_established_utc_time = AAZStrType(
-                serialized_name="lastConnectionEstablishedUtcTime",
-                flags={"read_only": True},
-            )
-            _element.tunnel = AAZStrType(
-                flags={"read_only": True},
-            )
-
-            tunnel_properties = cls._schema_on_200.properties.tunnel_properties
-            tunnel_properties.Element = AAZObjectType()
-
-            _element = cls._schema_on_200.properties.tunnel_properties.Element
-            _element.bgp_peering_address = AAZStrType(
-                serialized_name="bgpPeeringAddress",
-            )
-            _element.tunnel_ip_address = AAZStrType(
-                serialized_name="tunnelIpAddress",
-            )
-
-            tags = cls._schema_on_200.tags
-            tags.Element = AAZStrType()
+            _ShowHelper._build_schema_virtual_network_gateway_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -460,124 +212,6 @@ class _ShowHelper:
 
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
         _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
-
-    _schema_bgp_settings_read = None
-
-    @classmethod
-    def _build_schema_bgp_settings_read(cls, _schema):
-        if cls._schema_bgp_settings_read is not None:
-            _schema.asn = cls._schema_bgp_settings_read.asn
-            _schema.bgp_peering_address = cls._schema_bgp_settings_read.bgp_peering_address
-            _schema.bgp_peering_addresses = cls._schema_bgp_settings_read.bgp_peering_addresses
-            _schema.peer_weight = cls._schema_bgp_settings_read.peer_weight
-            return
-
-        cls._schema_bgp_settings_read = _schema_bgp_settings_read = AAZObjectType()
-
-        bgp_settings_read = _schema_bgp_settings_read
-        bgp_settings_read.asn = AAZIntType()
-        bgp_settings_read.bgp_peering_address = AAZStrType(
-            serialized_name="bgpPeeringAddress",
-        )
-        bgp_settings_read.bgp_peering_addresses = AAZListType(
-            serialized_name="bgpPeeringAddresses",
-        )
-        bgp_settings_read.peer_weight = AAZIntType(
-            serialized_name="peerWeight",
-        )
-
-        bgp_peering_addresses = _schema_bgp_settings_read.bgp_peering_addresses
-        bgp_peering_addresses.Element = AAZObjectType()
-
-        _element = _schema_bgp_settings_read.bgp_peering_addresses.Element
-        _element.custom_bgp_ip_addresses = AAZListType(
-            serialized_name="customBgpIpAddresses",
-        )
-        _element.default_bgp_ip_addresses = AAZListType(
-            serialized_name="defaultBgpIpAddresses",
-            flags={"read_only": True},
-        )
-        _element.ipconfiguration_id = AAZStrType(
-            serialized_name="ipconfigurationId",
-        )
-        _element.tunnel_ip_addresses = AAZListType(
-            serialized_name="tunnelIpAddresses",
-            flags={"read_only": True},
-        )
-
-        custom_bgp_ip_addresses = _schema_bgp_settings_read.bgp_peering_addresses.Element.custom_bgp_ip_addresses
-        custom_bgp_ip_addresses.Element = AAZStrType()
-
-        default_bgp_ip_addresses = _schema_bgp_settings_read.bgp_peering_addresses.Element.default_bgp_ip_addresses
-        default_bgp_ip_addresses.Element = AAZStrType()
-
-        tunnel_ip_addresses = _schema_bgp_settings_read.bgp_peering_addresses.Element.tunnel_ip_addresses
-        tunnel_ip_addresses.Element = AAZStrType()
-
-        _schema.asn = cls._schema_bgp_settings_read.asn
-        _schema.bgp_peering_address = cls._schema_bgp_settings_read.bgp_peering_address
-        _schema.bgp_peering_addresses = cls._schema_bgp_settings_read.bgp_peering_addresses
-        _schema.peer_weight = cls._schema_bgp_settings_read.peer_weight
-
-    _schema_ipsec_policy_read = None
-
-    @classmethod
-    def _build_schema_ipsec_policy_read(cls, _schema):
-        if cls._schema_ipsec_policy_read is not None:
-            _schema.dh_group = cls._schema_ipsec_policy_read.dh_group
-            _schema.ike_encryption = cls._schema_ipsec_policy_read.ike_encryption
-            _schema.ike_integrity = cls._schema_ipsec_policy_read.ike_integrity
-            _schema.ipsec_encryption = cls._schema_ipsec_policy_read.ipsec_encryption
-            _schema.ipsec_integrity = cls._schema_ipsec_policy_read.ipsec_integrity
-            _schema.pfs_group = cls._schema_ipsec_policy_read.pfs_group
-            _schema.sa_data_size_kilobytes = cls._schema_ipsec_policy_read.sa_data_size_kilobytes
-            _schema.sa_life_time_seconds = cls._schema_ipsec_policy_read.sa_life_time_seconds
-            return
-
-        cls._schema_ipsec_policy_read = _schema_ipsec_policy_read = AAZObjectType()
-
-        ipsec_policy_read = _schema_ipsec_policy_read
-        ipsec_policy_read.dh_group = AAZStrType(
-            serialized_name="dhGroup",
-            flags={"required": True},
-        )
-        ipsec_policy_read.ike_encryption = AAZStrType(
-            serialized_name="ikeEncryption",
-            flags={"required": True},
-        )
-        ipsec_policy_read.ike_integrity = AAZStrType(
-            serialized_name="ikeIntegrity",
-            flags={"required": True},
-        )
-        ipsec_policy_read.ipsec_encryption = AAZStrType(
-            serialized_name="ipsecEncryption",
-            flags={"required": True},
-        )
-        ipsec_policy_read.ipsec_integrity = AAZStrType(
-            serialized_name="ipsecIntegrity",
-            flags={"required": True},
-        )
-        ipsec_policy_read.pfs_group = AAZStrType(
-            serialized_name="pfsGroup",
-            flags={"required": True},
-        )
-        ipsec_policy_read.sa_data_size_kilobytes = AAZIntType(
-            serialized_name="saDataSizeKilobytes",
-            flags={"required": True},
-        )
-        ipsec_policy_read.sa_life_time_seconds = AAZIntType(
-            serialized_name="saLifeTimeSeconds",
-            flags={"required": True},
-        )
-
-        _schema.dh_group = cls._schema_ipsec_policy_read.dh_group
-        _schema.ike_encryption = cls._schema_ipsec_policy_read.ike_encryption
-        _schema.ike_integrity = cls._schema_ipsec_policy_read.ike_integrity
-        _schema.ipsec_encryption = cls._schema_ipsec_policy_read.ipsec_encryption
-        _schema.ipsec_integrity = cls._schema_ipsec_policy_read.ipsec_integrity
-        _schema.pfs_group = cls._schema_ipsec_policy_read.pfs_group
-        _schema.sa_data_size_kilobytes = cls._schema_ipsec_policy_read.sa_data_size_kilobytes
-        _schema.sa_life_time_seconds = cls._schema_ipsec_policy_read.sa_life_time_seconds
 
     _schema_sub_resource_read = None
 
@@ -683,7 +317,6 @@ class _ShowHelper:
         properties.bgp_settings = AAZObjectType(
             serialized_name="bgpSettings",
         )
-        cls._build_schema_bgp_settings_read(properties.bgp_settings)
         properties.custom_routes = AAZObjectType(
             serialized_name="customRoutes",
         )
@@ -760,6 +393,46 @@ class _ShowHelper:
         bounds = _schema_virtual_network_gateway_read.properties.auto_scale_configuration.bounds
         bounds.max = AAZIntType()
         bounds.min = AAZIntType()
+
+        bgp_settings = _schema_virtual_network_gateway_read.properties.bgp_settings
+        bgp_settings.asn = AAZIntType()
+        bgp_settings.bgp_peering_address = AAZStrType(
+            serialized_name="bgpPeeringAddress",
+        )
+        bgp_settings.bgp_peering_addresses = AAZListType(
+            serialized_name="bgpPeeringAddresses",
+        )
+        bgp_settings.peer_weight = AAZIntType(
+            serialized_name="peerWeight",
+        )
+
+        bgp_peering_addresses = _schema_virtual_network_gateway_read.properties.bgp_settings.bgp_peering_addresses
+        bgp_peering_addresses.Element = AAZObjectType()
+
+        _element = _schema_virtual_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element
+        _element.custom_bgp_ip_addresses = AAZListType(
+            serialized_name="customBgpIpAddresses",
+        )
+        _element.default_bgp_ip_addresses = AAZListType(
+            serialized_name="defaultBgpIpAddresses",
+            flags={"read_only": True},
+        )
+        _element.ipconfiguration_id = AAZStrType(
+            serialized_name="ipconfigurationId",
+        )
+        _element.tunnel_ip_addresses = AAZListType(
+            serialized_name="tunnelIpAddresses",
+            flags={"read_only": True},
+        )
+
+        custom_bgp_ip_addresses = _schema_virtual_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element.custom_bgp_ip_addresses
+        custom_bgp_ip_addresses.Element = AAZStrType()
+
+        default_bgp_ip_addresses = _schema_virtual_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element.default_bgp_ip_addresses
+        default_bgp_ip_addresses.Element = AAZStrType()
+
+        tunnel_ip_addresses = _schema_virtual_network_gateway_read.properties.bgp_settings.bgp_peering_addresses.Element.tunnel_ip_addresses
+        tunnel_ip_addresses.Element = AAZStrType()
 
         ip_configurations = _schema_virtual_network_gateway_read.properties.ip_configurations
         ip_configurations.Element = AAZObjectType()
@@ -994,7 +667,40 @@ class _ShowHelper:
 
         vpn_client_ipsec_policies = _schema_virtual_network_gateway_read.properties.vpn_client_configuration.vpn_client_ipsec_policies
         vpn_client_ipsec_policies.Element = AAZObjectType()
-        cls._build_schema_ipsec_policy_read(vpn_client_ipsec_policies.Element)
+
+        _element = _schema_virtual_network_gateway_read.properties.vpn_client_configuration.vpn_client_ipsec_policies.Element
+        _element.dh_group = AAZStrType(
+            serialized_name="dhGroup",
+            flags={"required": True},
+        )
+        _element.ike_encryption = AAZStrType(
+            serialized_name="ikeEncryption",
+            flags={"required": True},
+        )
+        _element.ike_integrity = AAZStrType(
+            serialized_name="ikeIntegrity",
+            flags={"required": True},
+        )
+        _element.ipsec_encryption = AAZStrType(
+            serialized_name="ipsecEncryption",
+            flags={"required": True},
+        )
+        _element.ipsec_integrity = AAZStrType(
+            serialized_name="ipsecIntegrity",
+            flags={"required": True},
+        )
+        _element.pfs_group = AAZStrType(
+            serialized_name="pfsGroup",
+            flags={"required": True},
+        )
+        _element.sa_data_size_kilobytes = AAZIntType(
+            serialized_name="saDataSizeKilobytes",
+            flags={"required": True},
+        )
+        _element.sa_life_time_seconds = AAZIntType(
+            serialized_name="saLifeTimeSeconds",
+            flags={"required": True},
+        )
 
         vpn_client_protocols = _schema_virtual_network_gateway_read.properties.vpn_client_configuration.vpn_client_protocols
         vpn_client_protocols.Element = AAZStrType()

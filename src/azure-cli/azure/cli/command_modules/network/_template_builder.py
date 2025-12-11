@@ -464,7 +464,8 @@ def build_vnet_resource(_, name, location, tags, vnet_prefix=None, subnet=None, 
 
 def build_vpn_connection_resource(cmd, name, location, tags, gateway1, gateway2, vpn_type, authorization_key,
                                   enable_bgp, routing_weight, shared_key, use_policy_based_traffic_selectors,
-                                  express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule):
+                                  express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule,
+                                  auth_type, cert_auth):
     vpn_properties = {
         'virtualNetworkGateway1': {'id': gateway1},
         'enableBgp': enable_bgp,
@@ -500,12 +501,18 @@ def build_vpn_connection_resource(cmd, name, location, tags, gateway1, gateway2,
     if egress_nat_rule:
         vpn_properties['egressNatRules'] = [{'id': rule} for rule in egress_nat_rule]
 
+    if auth_type:
+        vpn_properties['authenticationType'] = auth_type
+
+    if cert_auth:
+        vpn_properties['certificateAuthentication'] = cert_auth
+
     vpn_connection = {
         'type': 'Microsoft.Network/connections',
         'name': name,
         'location': location,
         'tags': tags,
-        'apiVersion': '2015-06-15',
+        'apiVersion': '2025-01-01',
         'dependsOn': [],
         'properties': vpn_properties if vpn_type != 'VpnClient' else {}
     }

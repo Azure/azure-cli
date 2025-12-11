@@ -12,31 +12,24 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network vnet-gateway update",
+    "network vnet-gateway identity remove",
 )
-class Update(AAZCommand):
-    """Update a virtual network gateway.
-
-    :example: Change the SKU of a virtual network gateway.
-        az network vnet-gateway update -g MyResourceGroup -n MyVnetGateway --sku VpnGw2
-
-    :example: Update a virtual network gateway.
-        az network vnet-gateway update --address-prefixes 40.1.0.0/24 --client-protocol IkeV2 --name MyVnetGateway --resource-group MyResourceGroup
+class Remove(AAZCommand):
+    """Remove the user or system managed identities.
     """
 
     _aaz_info = {
         "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2025-01-01", "identity"],
         ]
     }
 
     AZ_SUPPORT_NO_WAIT = True
 
-    AZ_SUPPORT_GENERIC_UPDATE = True
-
     def _handler(self, command_args):
         super()._handler(command_args)
+        self.SubresourceSelector(ctx=self.ctx, name="subresource")
         return self.build_lro_poller(self._execute_operations, self._output)
 
     _args_schema = None
@@ -57,458 +50,34 @@ class Update(AAZCommand):
             options=["-n", "--name"],
             help="Name of the VNet gateway.",
             required=True,
-            id_part="name",
-        )
-        _args_schema.allow_remote_vnet_traffic = AAZBoolArg(
-            options=["--allow-remote-vnet-traffic"],
-            help="Configure this gateway to accept traffic from other Azure Virtual Networks. This configuration does not support connectivity to Azure Virtual WAN.",
-            nullable=True,
-        )
-        _args_schema.allow_vwan_traffic = AAZBoolArg(
-            options=["--allow-vwan-traffic"],
-            help="Configures this gateway to accept traffic from remote Virtual WAN networks.",
-            nullable=True,
-        )
-        _args_schema.max_scale_unit = AAZIntArg(
-            options=["--max-scale-unit"],
-            help="Maximum scale units for auto-scale configuration.",
-            nullable=True,
-        )
-        _args_schema.min_scale_unit = AAZIntArg(
-            options=["--min-scale-unit"],
-            help="Minimum scale units for auto-scale configuration.",
-            nullable=True,
-        )
-        _args_schema.enable_high_bandwidth_vpn_gateway = AAZBoolArg(
-            options=["--enable-high-bandwidth", "--enable-high-bandwidth-vpn-gateway"],
-            help="To enable Advanced Connectivity feature for VPN gateway",
-            nullable=True,
-        )
-        _args_schema.enable_private_ip = AAZBoolArg(
-            options=["--enable-private-ip"],
-            help="Whether private IP needs to be enabled on this gateway for connections or not.",
-            nullable=True,
-        )
-        _args_schema.gateway_default_site = AAZStrArg(
-            options=["--gateway-default-site"],
-            help="Name or ID of a local network gateway representing a local network site with default routes.",
-            nullable=True,
-        )
-        _args_schema.gateway_type = AAZStrArg(
-            options=["--gateway-type"],
-            help="The gateway type.",
-            nullable=True,
-            enum={"ExpressRoute": "ExpressRoute", "LocalGateway": "LocalGateway", "Vpn": "Vpn"},
-        )
-        _args_schema.resiliency_model = AAZStrArg(
-            options=["--resiliency-model"],
-            help="Indicates if the Express Route Gateway has resiliency model of MultiHomed or SingleHomed",
-            nullable=True,
-            enum={"MultiHomed": "MultiHomed", "SingleHomed": "SingleHomed"},
-        )
-        _args_schema.sku = AAZStrArg(
-            options=["--sku"],
-            help="VNet gateway SKU.",
-            nullable=True,
-            enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "ErGwScale": "ErGwScale", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
-        )
-        _args_schema.vpn_auth_type = AAZListArg(
-            options=["--vpn-auth-type"],
-            help="VPN authentication types enabled for the virtual network gateway.",
-            nullable=True,
-        )
-        _args_schema.vpn_type = AAZStrArg(
-            options=["--vpn-type"],
-            help="VPN routing type.",
-            nullable=True,
-            enum={"PolicyBased": "PolicyBased", "RouteBased": "RouteBased"},
-        )
-        _args_schema.tags = AAZDictArg(
-            options=["--tags"],
-            help="Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.",
-            nullable=True,
         )
 
-        vpn_auth_type = cls._args_schema.vpn_auth_type
-        vpn_auth_type.Element = AAZStrArg(
-            nullable=True,
-            enum={"AAD": "AAD", "Certificate": "Certificate", "Radius": "Radius"},
-        )
-
-        tags = cls._args_schema.tags
-        tags.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        # define Arg Group "AAD Authentication"
+        # define Arg Group "Parameters.identity"
 
         _args_schema = cls._args_schema
-        _args_schema.aad_audience = AAZStrArg(
-            options=["--aad-audience"],
-            arg_group="AAD Authentication",
-            help="The AADAudience ID of the VirtualNetworkGateway.",
-            nullable=True,
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Parameters.identity",
+            help="Set the system managed identity.",
+            blank="True",
         )
-        _args_schema.aad_issuer = AAZStrArg(
-            options=["--aad-issuer"],
-            arg_group="AAD Authentication",
-            help="The AAD Issuer URI of the VirtualNetworkGateway.",
-            nullable=True,
-        )
-        _args_schema.aad_tenant = AAZStrArg(
-            options=["--aad-tenant"],
-            arg_group="AAD Authentication",
-            help="The AAD Tenant URI of the VirtualNetworkGateway.",
-            nullable=True,
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Parameters.identity",
+            help="Set the user managed identities.",
+            blank=[],
         )
 
-        # define Arg Group "BGP Peering"
-
-        _args_schema = cls._args_schema
-        _args_schema.asn = AAZIntArg(
-            options=["--asn"],
-            arg_group="BGP Peering",
-            help="Autonomous System Number to use for the BGP settings.",
-            nullable=True,
-            fmt=AAZIntArgFormat(
-                maximum=4294967295,
-                minimum=0,
-            ),
-        )
-        _args_schema.bgp_peering_address = AAZStrArg(
-            options=["--bgp-peering-address"],
-            arg_group="BGP Peering",
-            help="IP address to use for BGP peering.",
-            nullable=True,
-        )
-        _args_schema.peer_weight = AAZIntArg(
-            options=["--peer-weight"],
-            arg_group="BGP Peering",
-            help="Weight (0-100) added to routes learned through BGP peering.",
-            nullable=True,
-        )
-        _args_schema.enable_bgp = AAZBoolArg(
-            options=["--enable-bgp"],
-            arg_group="BGP Peering",
-            help="Enable BGP (Border Gateway Protocol).",
-            nullable=True,
-        )
-
-        # define Arg Group "BgpSettings"
-
-        # define Arg Group "CustomRoutes"
-
-        # define Arg Group "Identity"
-
-        # define Arg Group "Parameters"
-
-        # define Arg Group "Properties"
-
-        _args_schema = cls._args_schema
-        _args_schema.active = AAZBoolArg(
-            options=["--active"],
-            arg_group="Properties",
-            help="ActiveActive flag.",
-            nullable=True,
-        )
-        _args_schema.ip_configurations = AAZListArg(
-            options=["--ip-configurations"],
-            arg_group="Properties",
-            help="IP configurations for virtual network gateway.",
-            nullable=True,
-        )
-        _args_schema.sku_tier = AAZStrArg(
-            options=["--sku-tier"],
-            arg_group="Properties",
-            help="Gateway SKU tier.",
-            nullable=True,
-            enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "ErGwScale": "ErGwScale", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
-        )
-        _args_schema.virtual_network_gateway_migration_status = AAZObjectArg(
-            options=["--virtual-network-gateway-migration-status"],
-            arg_group="Properties",
-            help="The reference to the VirtualNetworkGatewayMigrationStatus which represents the status of migration.",
-            nullable=True,
-        )
-
-        ip_configurations = cls._args_schema.ip_configurations
-        ip_configurations.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.ip_configurations.Element
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
-            nullable=True,
-        )
-        _element.private_ip_allocation_method = AAZStrArg(
-            options=["private-ip-allocation-method"],
-            help="The private IP address allocation method.",
-            nullable=True,
-            enum={"Dynamic": "Dynamic", "Static": "Static"},
-        )
-        _element.public_ip_address = AAZObjectArg(
-            options=["public-ip-address"],
-            help="The reference to the public IP resource.",
-            nullable=True,
-        )
-        cls._build_args_sub_resource_update(_element.public_ip_address)
-        _element.subnet = AAZStrArg(
-            options=["subnet"],
-            help="test",
-            nullable=True,
-        )
-
-        virtual_network_gateway_migration_status = cls._args_schema.virtual_network_gateway_migration_status
-        virtual_network_gateway_migration_status.error_message = AAZStrArg(
-            options=["error-message"],
-            help="Error if any occurs during migration.",
-            nullable=True,
-        )
-        virtual_network_gateway_migration_status.phase = AAZStrArg(
-            options=["phase"],
-            help="Represent the current migration phase of gateway.",
-            nullable=True,
-            enum={"Abort": "Abort", "AbortSucceeded": "AbortSucceeded", "Commit": "Commit", "CommitSucceeded": "CommitSucceeded", "Execute": "Execute", "ExecuteSucceeded": "ExecuteSucceeded", "None": "None", "Prepare": "Prepare", "PrepareSucceeded": "PrepareSucceeded"},
-        )
-        virtual_network_gateway_migration_status.state = AAZStrArg(
-            options=["state"],
-            help="Represent the current state of gateway migration.",
-            nullable=True,
-            enum={"Failed": "Failed", "InProgress": "InProgress", "None": "None", "Succeeded": "Succeeded"},
-        )
-
-        # define Arg Group "Root Cert Authentication"
-
-        _args_schema = cls._args_schema
-        _args_schema.vpn_client_root_certificates = AAZListArg(
-            options=["--vpn-client-root-certificates"],
-            arg_group="Root Cert Authentication",
-            help="VpnClientRootCertificate for virtual network gateway.",
-            nullable=True,
-        )
-
-        vpn_client_root_certificates = cls._args_schema.vpn_client_root_certificates
-        vpn_client_root_certificates.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.vpn_client_root_certificates.Element
-        _element.name = AAZStrArg(
-            options=["name"],
-            help="The name of the resource that is unique within a resource group. This name can be used to access the resource.",
-            nullable=True,
-        )
-        _element.public_cert_data = AAZStrArg(
-            options=["public-cert-data"],
-            help="The certificate public data.",
-        )
-
-        # define Arg Group "VPN Client"
-
-        _args_schema = cls._args_schema
-        _args_schema.custom_routes = AAZListArg(
-            options=["--custom-routes"],
-            arg_group="VPN Client",
-            help="Space-separated list of CIDR prefixes representing the custom routes address space specified by the customer for VpnClient.",
-            nullable=True,
-        )
-        _args_schema.radius_server = AAZStrArg(
-            options=["--radius-server"],
-            arg_group="VPN Client",
-            help="Radius server address to connect to.",
-            nullable=True,
-        )
-        _args_schema.radius_secret = AAZStrArg(
-            options=["--radius-secret"],
-            arg_group="VPN Client",
-            help="Radius secret to use for authentication.",
-            nullable=True,
-        )
-        _args_schema.address_prefixes = AAZListArg(
-            options=["--address-prefixes"],
-            singular_options=["--address-prefix"],
-            arg_group="VPN Client",
-            help="Space-separated list of CIDR prefixes representing the address space for the P2S Vpnclient.",
-            nullable=True,
-        )
-        _args_schema.client_protocol = AAZListArg(
-            options=["--client-protocol"],
-            arg_group="VPN Client",
-            help="Protocols to use for connecting.  Allowed values: IkeV2, OpenVPN, SSTP.",
-            nullable=True,
-        )
-
-        custom_routes = cls._args_schema.custom_routes
-        custom_routes.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        address_prefixes = cls._args_schema.address_prefixes
-        address_prefixes.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        client_protocol = cls._args_schema.client_protocol
-        client_protocol.Element = AAZStrArg(
-            nullable=True,
-            enum={"IkeV2": "IkeV2", "OpenVPN": "OpenVPN", "SSTP": "SSTP"},
-        )
-
-        # define Arg Group "VpnClientConfiguration"
-
-        _args_schema = cls._args_schema
-        _args_schema.vpn_client_ipsec_policies = AAZListArg(
-            options=["--vpn-client-ipsec-policies"],
-            arg_group="VpnClientConfiguration",
-            help="VpnClientIpsecPolicies for virtual network gateway P2S client.",
-            nullable=True,
-        )
-
-        vpn_client_ipsec_policies = cls._args_schema.vpn_client_ipsec_policies
-        vpn_client_ipsec_policies.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_schema.vpn_client_ipsec_policies.Element
-        _element.dh_group = AAZStrArg(
-            options=["dh-group"],
-            help="The DH Group used in IKE Phase 1 for initial SA.",
-            enum={"DHGroup1": "DHGroup1", "DHGroup14": "DHGroup14", "DHGroup2": "DHGroup2", "DHGroup2048": "DHGroup2048", "DHGroup24": "DHGroup24", "ECP256": "ECP256", "ECP384": "ECP384", "None": "None"},
-        )
-        _element.ike_encryption = AAZStrArg(
-            options=["ike-encryption"],
-            help="The IKE encryption algorithm (IKE phase 2).",
-            enum={"AES128": "AES128", "AES192": "AES192", "AES256": "AES256", "DES": "DES", "DES3": "DES3", "GCMAES128": "GCMAES128", "GCMAES256": "GCMAES256"},
-        )
-        _element.ike_integrity = AAZStrArg(
-            options=["ike-integrity"],
-            help="The IKE integrity algorithm (IKE phase 2).",
-            enum={"GCMAES128": "GCMAES128", "GCMAES256": "GCMAES256", "MD5": "MD5", "SHA1": "SHA1", "SHA256": "SHA256", "SHA384": "SHA384"},
-        )
-        _element.ipsec_encryption = AAZStrArg(
-            options=["ipsec-encryption"],
-            help="The IPSec encryption algorithm (IKE phase 1).",
-            enum={"AES128": "AES128", "AES192": "AES192", "AES256": "AES256", "DES": "DES", "DES3": "DES3", "GCMAES128": "GCMAES128", "GCMAES192": "GCMAES192", "GCMAES256": "GCMAES256", "None": "None"},
-        )
-        _element.ipsec_integrity = AAZStrArg(
-            options=["ipsec-integrity"],
-            help="The IPSec integrity algorithm (IKE phase 1).",
-            enum={"GCMAES128": "GCMAES128", "GCMAES192": "GCMAES192", "GCMAES256": "GCMAES256", "MD5": "MD5", "SHA1": "SHA1", "SHA256": "SHA256"},
-        )
-        _element.pfs_group = AAZStrArg(
-            options=["pfs-group"],
-            help="The Pfs Group used in IKE Phase 2 for new child SA.",
-            enum={"ECP256": "ECP256", "ECP384": "ECP384", "None": "None", "PFS1": "PFS1", "PFS14": "PFS14", "PFS2": "PFS2", "PFS2048": "PFS2048", "PFS24": "PFS24", "PFSMM": "PFSMM"},
-        )
-        _element.sa_data_size_kilobytes = AAZIntArg(
-            options=["sa-data-size-kilobytes"],
-            help="The IPSec Security Association (also called Quick Mode or Phase 2 SA) payload size in KB for a site to site VPN tunnel.",
-        )
-        _element.sa_life_time_seconds = AAZIntArg(
-            options=["sa-life-time-seconds"],
-            help="The IPSec Security Association (also called Quick Mode or Phase 2 SA) lifetime in seconds for a site to site VPN tunnel.",
-        )
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
         return cls._args_schema
-
-    _args_address_space_update = None
-
-    @classmethod
-    def _build_args_address_space_update(cls, _schema):
-        if cls._args_address_space_update is not None:
-            _schema.address_prefixes = cls._args_address_space_update.address_prefixes
-            _schema.ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
-            return
-
-        cls._args_address_space_update = AAZObjectArg()
-
-        address_space_update = cls._args_address_space_update
-        address_space_update.address_prefixes = AAZListArg(
-            options=["address-prefixes"],
-            help="A list of address blocks reserved for this virtual network in CIDR notation.",
-            nullable=True,
-        )
-        address_space_update.ipam_pool_prefix_allocations = AAZListArg(
-            options=["ipam-pool-prefix-allocations"],
-            help="A list of IPAM Pools allocating IP address prefixes.",
-            nullable=True,
-        )
-
-        address_prefixes = cls._args_address_space_update.address_prefixes
-        address_prefixes.Element = AAZStrArg(
-            nullable=True,
-        )
-
-        ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
-        ipam_pool_prefix_allocations.Element = AAZObjectArg(
-            nullable=True,
-        )
-
-        _element = cls._args_address_space_update.ipam_pool_prefix_allocations.Element
-        _element.number_of_ip_addresses = AAZStrArg(
-            options=["number-of-ip-addresses"],
-            help="Number of IP addresses to allocate.",
-            nullable=True,
-        )
-        _element.id = AAZResourceIdArg(
-            options=["id"],
-            help="Resource id of the associated Azure IpamPool resource.",
-            nullable=True,
-        )
-
-        _schema.address_prefixes = cls._args_address_space_update.address_prefixes
-        _schema.ipam_pool_prefix_allocations = cls._args_address_space_update.ipam_pool_prefix_allocations
-
-    _args_sub_resource_update = None
-
-    @classmethod
-    def _build_args_sub_resource_update(cls, _schema):
-        if cls._args_sub_resource_update is not None:
-            _schema.id = cls._args_sub_resource_update.id
-            return
-
-        cls._args_sub_resource_update = AAZObjectArg(
-            nullable=True,
-        )
-
-        sub_resource_update = cls._args_sub_resource_update
-        sub_resource_update.id = AAZStrArg(
-            options=["id"],
-            help="Resource ID.",
-            nullable=True,
-        )
-
-        _schema.id = cls._args_sub_resource_update.id
-
-    _args_vpn_nat_rule_mapping_update = None
-
-    @classmethod
-    def _build_args_vpn_nat_rule_mapping_update(cls, _schema):
-        if cls._args_vpn_nat_rule_mapping_update is not None:
-            _schema.address_space = cls._args_vpn_nat_rule_mapping_update.address_space
-            return
-
-        cls._args_vpn_nat_rule_mapping_update = AAZObjectArg(
-            nullable=True,
-        )
-
-        vpn_nat_rule_mapping_update = cls._args_vpn_nat_rule_mapping_update
-        vpn_nat_rule_mapping_update.address_space = AAZStrArg(
-            options=["address-space"],
-            help="Address space for Vpn NatRule mapping.",
-            nullable=True,
-        )
-
-        _schema.address_space = cls._args_vpn_nat_rule_mapping_update.address_space
 
     def _execute_operations(self):
         self.pre_operations()
         self.VirtualNetworkGatewaysGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.vars.instance)
+        self.pre_instance_update(self.ctx.selectors.subresource.get())
         self.InstanceUpdateByJson(ctx=self.ctx)()
-        self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.vars.instance)
+        self.post_instance_update(self.ctx.selectors.subresource.get())
         yield self.VirtualNetworkGatewaysCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -529,8 +98,19 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
+
+    class SubresourceSelector(AAZJsonSelector):
+
+        def _get(self):
+            result = self.ctx.vars.instance
+            return result.identity
+
+        def _set(self, value):
+            result = self.ctx.vars.instance
+            result.identity = value
+            return
 
     class VirtualNetworkGatewaysGet(AAZHttpOperation):
         CLIENT_TYPE = "MgmtClient"
@@ -611,7 +191,7 @@ class Update(AAZCommand):
                 return cls._schema_on_200
 
             cls._schema_on_200 = AAZObjectType()
-            _UpdateHelper._build_schema_virtual_network_gateway_read(cls._schema_on_200)
+            _RemoveHelper._build_schema_virtual_network_gateway_read(cls._schema_on_200)
 
             return cls._schema_on_200
 
@@ -722,213 +302,33 @@ class Update(AAZCommand):
                 return cls._schema_on_200_201
 
             cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_virtual_network_gateway_read(cls._schema_on_200_201)
+            _RemoveHelper._build_schema_virtual_network_gateway_read(cls._schema_on_200_201)
 
             return cls._schema_on_200_201
 
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.vars.instance)
+            self._update_instance(self.ctx.selectors.subresource.get())
 
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
                 self.ctx.args,
                 value=instance,
-                typ=AAZObjectType
+                typ=AAZIdentityObjectType
             )
-            _builder.set_prop("extendedLocation", AAZObjectType)
-            _builder.set_prop("identity", AAZIdentityObjectType)
-            _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
-            _builder.set_prop("tags", AAZDictType, ".tags")
+            _builder.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "remove"}})
+            _builder.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "remove"}})
 
-            properties = _builder.get(".properties")
-            if properties is not None:
-                properties.set_prop("activeActive", AAZBoolType, ".active")
-                properties.set_prop("allowRemoteVnetTraffic", AAZBoolType, ".allow_remote_vnet_traffic")
-                properties.set_prop("allowVirtualWanTraffic", AAZBoolType, ".allow_vwan_traffic")
-                properties.set_prop("autoScaleConfiguration", AAZObjectType)
-                properties.set_prop("bgpSettings", AAZObjectType)
-                properties.set_prop("customRoutes", AAZObjectType)
-                properties.set_prop("enableBgp", AAZBoolType, ".enable_bgp")
-                properties.set_prop("enableHighBandwidthVpnGateway", AAZBoolType, ".enable_high_bandwidth_vpn_gateway")
-                properties.set_prop("enablePrivateIpAddress", AAZBoolType, ".enable_private_ip")
-                properties.set_prop("gatewayDefaultSite", AAZObjectType)
-                properties.set_prop("gatewayType", AAZStrType, ".gateway_type")
-                properties.set_prop("ipConfigurations", AAZListType, ".ip_configurations")
-                properties.set_prop("resiliencyModel", AAZStrType, ".resiliency_model")
-                properties.set_prop("sku", AAZObjectType)
-                properties.set_prop("virtualNetworkGatewayMigrationStatus", AAZObjectType, ".virtual_network_gateway_migration_status")
-                properties.set_prop("vpnClientConfiguration", AAZObjectType)
-                properties.set_prop("vpnType", AAZStrType, ".vpn_type")
-
-            auto_scale_configuration = _builder.get(".properties.autoScaleConfiguration")
-            if auto_scale_configuration is not None:
-                auto_scale_configuration.set_prop("bounds", AAZObjectType)
-
-            bounds = _builder.get(".properties.autoScaleConfiguration.bounds")
-            if bounds is not None:
-                bounds.set_prop("max", AAZIntType, ".max_scale_unit")
-                bounds.set_prop("min", AAZIntType, ".min_scale_unit")
-
-            bgp_settings = _builder.get(".properties.bgpSettings")
-            if bgp_settings is not None:
-                bgp_settings.set_prop("asn", AAZIntType, ".asn")
-                bgp_settings.set_prop("bgpPeeringAddress", AAZStrType, ".bgp_peering_address")
-                bgp_settings.set_prop("peerWeight", AAZIntType, ".peer_weight")
-
-            custom_routes = _builder.get(".properties.customRoutes")
-            if custom_routes is not None:
-                custom_routes.set_prop("addressPrefixes", AAZListType, ".custom_routes")
-
-            address_prefixes = _builder.get(".properties.customRoutes.addressPrefixes")
-            if address_prefixes is not None:
-                address_prefixes.set_elements(AAZStrType, ".")
-
-            gateway_default_site = _builder.get(".properties.gatewayDefaultSite")
-            if gateway_default_site is not None:
-                gateway_default_site.set_prop("id", AAZStrType, ".gateway_default_site")
-
-            ip_configurations = _builder.get(".properties.ipConfigurations")
-            if ip_configurations is not None:
-                ip_configurations.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.ipConfigurations[]")
-            if _elements is not None:
-                _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-            properties = _builder.get(".properties.ipConfigurations[].properties")
-            if properties is not None:
-                properties.set_prop("privateIPAllocationMethod", AAZStrType, ".private_ip_allocation_method")
-                _UpdateHelper._build_schema_sub_resource_update(properties.set_prop("publicIPAddress", AAZObjectType, ".public_ip_address"))
-                properties.set_prop("subnet", AAZObjectType)
-
-            subnet = _builder.get(".properties.ipConfigurations[].properties.subnet")
-            if subnet is not None:
-                subnet.set_prop("id", AAZStrType, ".subnet")
-
-            sku = _builder.get(".properties.sku")
-            if sku is not None:
-                sku.set_prop("name", AAZStrType, ".sku")
-                sku.set_prop("tier", AAZStrType, ".sku_tier")
-
-            virtual_network_gateway_migration_status = _builder.get(".properties.virtualNetworkGatewayMigrationStatus")
-            if virtual_network_gateway_migration_status is not None:
-                virtual_network_gateway_migration_status.set_prop("errorMessage", AAZStrType, ".error_message")
-                virtual_network_gateway_migration_status.set_prop("phase", AAZStrType, ".phase")
-                virtual_network_gateway_migration_status.set_prop("state", AAZStrType, ".state")
-
-            vpn_client_configuration = _builder.get(".properties.vpnClientConfiguration")
-            if vpn_client_configuration is not None:
-                vpn_client_configuration.set_prop("aadAudience", AAZStrType, ".aad_audience")
-                vpn_client_configuration.set_prop("aadIssuer", AAZStrType, ".aad_issuer")
-                vpn_client_configuration.set_prop("aadTenant", AAZStrType, ".aad_tenant")
-                vpn_client_configuration.set_prop("radiusServerAddress", AAZStrType, ".radius_server")
-                vpn_client_configuration.set_prop("radiusServerSecret", AAZStrType, ".radius_secret", typ_kwargs={"flags": {"secret": True}})
-                vpn_client_configuration.set_prop("vpnAuthenticationTypes", AAZListType, ".vpn_auth_type")
-                vpn_client_configuration.set_prop("vpnClientAddressPool", AAZObjectType)
-                vpn_client_configuration.set_prop("vpnClientIpsecPolicies", AAZListType, ".vpn_client_ipsec_policies")
-                vpn_client_configuration.set_prop("vpnClientProtocols", AAZListType, ".client_protocol")
-                vpn_client_configuration.set_prop("vpnClientRootCertificates", AAZListType, ".vpn_client_root_certificates")
-
-            vpn_authentication_types = _builder.get(".properties.vpnClientConfiguration.vpnAuthenticationTypes")
-            if vpn_authentication_types is not None:
-                vpn_authentication_types.set_elements(AAZStrType, ".")
-
-            vpn_client_address_pool = _builder.get(".properties.vpnClientConfiguration.vpnClientAddressPool")
-            if vpn_client_address_pool is not None:
-                vpn_client_address_pool.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
-
-            address_prefixes = _builder.get(".properties.vpnClientConfiguration.vpnClientAddressPool.addressPrefixes")
-            if address_prefixes is not None:
-                address_prefixes.set_elements(AAZStrType, ".")
-
-            vpn_client_ipsec_policies = _builder.get(".properties.vpnClientConfiguration.vpnClientIpsecPolicies")
-            if vpn_client_ipsec_policies is not None:
-                vpn_client_ipsec_policies.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.vpnClientConfiguration.vpnClientIpsecPolicies[]")
-            if _elements is not None:
-                _elements.set_prop("dhGroup", AAZStrType, ".dh_group", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("ikeEncryption", AAZStrType, ".ike_encryption", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("ikeIntegrity", AAZStrType, ".ike_integrity", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("ipsecEncryption", AAZStrType, ".ipsec_encryption", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("ipsecIntegrity", AAZStrType, ".ipsec_integrity", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("pfsGroup", AAZStrType, ".pfs_group", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("saDataSizeKilobytes", AAZIntType, ".sa_data_size_kilobytes", typ_kwargs={"flags": {"required": True}})
-                _elements.set_prop("saLifeTimeSeconds", AAZIntType, ".sa_life_time_seconds", typ_kwargs={"flags": {"required": True}})
-
-            vpn_client_protocols = _builder.get(".properties.vpnClientConfiguration.vpnClientProtocols")
-            if vpn_client_protocols is not None:
-                vpn_client_protocols.set_elements(AAZStrType, ".")
-
-            vpn_client_root_certificates = _builder.get(".properties.vpnClientConfiguration.vpnClientRootCertificates")
-            if vpn_client_root_certificates is not None:
-                vpn_client_root_certificates.set_elements(AAZObjectType, ".")
-
-            _elements = _builder.get(".properties.vpnClientConfiguration.vpnClientRootCertificates[]")
-            if _elements is not None:
-                _elements.set_prop("name", AAZStrType, ".name")
-                _elements.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
-
-            properties = _builder.get(".properties.vpnClientConfiguration.vpnClientRootCertificates[].properties")
-            if properties is not None:
-                properties.set_prop("publicCertData", AAZStrType, ".public_cert_data", typ_kwargs={"flags": {"required": True}})
-
-            tags = _builder.get(".tags")
-            if tags is not None:
-                tags.set_elements(AAZStrType, ".")
+            user_assigned = _builder.get(".userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             return _instance_value
 
-    class InstanceUpdateByGeneric(AAZGenericInstanceUpdateOperation):
 
-        def __call__(self, *args, **kwargs):
-            self._update_instance_by_generic(
-                self.ctx.vars.instance,
-                self.ctx.generic_update_args
-            )
-
-
-class _UpdateHelper:
-    """Helper class for Update"""
-
-    @classmethod
-    def _build_schema_address_space_update(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
-        _builder.set_prop("ipamPoolPrefixAllocations", AAZListType, ".ipam_pool_prefix_allocations")
-
-        address_prefixes = _builder.get(".addressPrefixes")
-        if address_prefixes is not None:
-            address_prefixes.set_elements(AAZStrType, ".")
-
-        ipam_pool_prefix_allocations = _builder.get(".ipamPoolPrefixAllocations")
-        if ipam_pool_prefix_allocations is not None:
-            ipam_pool_prefix_allocations.set_elements(AAZObjectType, ".")
-
-        _elements = _builder.get(".ipamPoolPrefixAllocations[]")
-        if _elements is not None:
-            _elements.set_prop("numberOfIpAddresses", AAZStrType, ".number_of_ip_addresses")
-            _elements.set_prop("pool", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
-
-        pool = _builder.get(".ipamPoolPrefixAllocations[].pool")
-        if pool is not None:
-            pool.set_prop("id", AAZStrType, ".id")
-
-    @classmethod
-    def _build_schema_sub_resource_update(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("id", AAZStrType, ".id")
-
-    @classmethod
-    def _build_schema_vpn_nat_rule_mapping_update(cls, _builder):
-        if _builder is None:
-            return
-        _builder.set_prop("addressSpace", AAZStrType, ".address_space")
+class _RemoveHelper:
+    """Helper class for Remove"""
 
     _schema_address_space_read = None
 
@@ -1547,4 +947,4 @@ class _UpdateHelper:
         _schema.port_range = cls._schema_vpn_nat_rule_mapping_read.port_range
 
 
-__all__ = ["Update"]
+__all__ = ["Remove"]
