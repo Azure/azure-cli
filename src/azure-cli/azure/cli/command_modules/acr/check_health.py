@@ -89,7 +89,7 @@ def _get_docker_status_and_version(ignore_errors, yes):
         docker_daemon_available = False
 
     if docker_daemon_available:
-        logger.warning(f"{docker_command.title()} daemon status: available")
+        logger.warning("%s daemon status: available", docker_command.title())
 
     # Docker version check
     output, warning, stderr, succeeded = _subprocess_communicate([docker_command, "version", "--format", "json"])
