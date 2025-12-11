@@ -27,20 +27,16 @@ register_default_value_breaking_change(command_name='sig image-version create',
                                        current_default=None,
                                        new_default=True,
                                        target_version=None)
-# register_other_breaking_change(
-#     "sig image-version create",
-#     "Starting api-version 2026-03-03, gallery image versions will default to:\n"
-#     "  - endOfLifeDate = 6 months from publish date (unless explicitly set)\n"
-#     "  - blockDeletionBeforeEndOfLife = true (unless explicitly set)\n"
-#     "By default, image deletion is blocked for 6 months. "
-#     "To override, set a custom endOfLifeDate or set blockDeletionBeforeEndOfLife = false",
-# )
 
-# register_other_breaking_change(
-#     "sig image-version update",
-#     "Starting api-version 2026-03-03, gallery image versions will default to:\n"
-#     "  - endOfLifeDate = 6 months from publish date (unless explicitly set)\n"
-#     "  - blockDeletionBeforeEndOfLife = true (unless explicitly set)\n"
-#     "By default, image deletion is blocked for 6 months. "
-#     "To override, set a custom endOfLifeDate or set blockDeletionBeforeEndOfLife = false",
-# )
+register_default_value_breaking_change(command_name='sig image-version update',
+                                       arg='--end-of-life-date',
+                                       current_default=None,
+                                       new_default='6 months from publish date',
+                                       target_version=None)
+
+register_default_value_breaking_change(command_name='sig image-version update',
+                                       arg='--block-deletion-before-end-of-life',
+                                       current_default=None,
+                                       new_default=True,
+                                       target_version=None)
+
