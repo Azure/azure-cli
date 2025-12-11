@@ -133,6 +133,9 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
     def get_argument_enable_workload_profiles(self):
         return self.get_param("enable_workload_profiles")
 
+    def get_argument_infrastructure_resource_group(self):
+        return self.get_param("infrastructure_resource_group")
+
     def validate_arguments(self):
         location = self.get_argument_location()
         if self.get_argument_zone_redundant():
@@ -157,6 +160,15 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         # validate mtls and p2p traffic encryption
         if self.get_argument_p2p_encryption_enabled() is False and self.get_argument_mtls_enabled() is True:
             raise ValidationError("Cannot use '--enable-mtls' with '--enable-peer-to-peer-encryption False'")
+
+        # Infrastructure Resource Group
+        if self.get_argument_infrastructure_resource_group() is not None:
+            if not self.get_argument_infrastructure_subnet_resource_id():
+                raise RequiredArgumentMissingError("Cannot use --infrastructure-resource-group/-i without "
+                                                   "--infrastructure-subnet-resource-id/-s")
+            if not self.get_argument_enable_workload_profiles():
+                raise RequiredArgumentMissingError("Cannot use --infrastructure-resource-group/-i without "
+                                                   "--enable-workload-profiles/-w")
 
     def create(self):
         try:
@@ -205,6 +217,12 @@ class ContainerAppEnvCreateDecorator(ContainerAppEnvDecorator):
         self.set_up_vnet_configuration()
 
         self.set_up_peer_to_peer_encryption()
+
+        self.set_up_infrastructure_resource_group()
+
+    def set_up_infrastructure_resource_group(self):
+        if self.get_argument_enable_workload_profiles() and self.get_argument_infrastructure_subnet_resource_id() is not None:
+            self.managed_env_def["properties"]["InfrastructureResourceGroup"] = self.get_argument_infrastructure_resource_group()
 
     def set_up_workload_profiles(self):
         if self.get_argument_enable_workload_profiles():
