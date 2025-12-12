@@ -48,10 +48,12 @@ class StorageQueueScenarioTests(StorageScenarioMixin, ScenarioTest):
         sas = self.cmd('storage queue generate-sas -n {} --permissions r --start {} --expiry {}'
                        .format(queue, start, expiry)).output
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
-        # Test generate-sas with ip and https-only
-        sas2 = self.cmd('storage queue generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r '
-                        '--https-only --connection-string {}'.format(queue, connection_string)).output
-        self.assertIn('sig', sas2, 'The sig segment is not in the sas {}'.format(sas2))
+        # Test generate-sas with ip and https-only, should fail as expiry is required
+        # SDK new FIX, invalidate sas with no expiry component.
+        with self.assertRaisesRegex(ValueError, "'expiry' parameter must be provided when not using a "
+                                                "stored access policy."):
+            self.cmd('storage queue generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r '
+                     '--https-only --connection-string {}'.format(queue, connection_string)).output
 
         # Test delete
         self.cmd('storage queue delete -n {} --connection-string {}'.format(queue, connection_string),
