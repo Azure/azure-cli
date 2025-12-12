@@ -8,13 +8,12 @@ import time
 from datetime import datetime, timedelta
 
 from azure.cli.testsdk import (ScenarioTest, LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, JMESPathCheckExists,
-                               api_version_constraint, RoleBasedServicePrincipalPreparer)
+                               RoleBasedServicePrincipalPreparer)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 from knack.util import CLIError
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09')
 class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)

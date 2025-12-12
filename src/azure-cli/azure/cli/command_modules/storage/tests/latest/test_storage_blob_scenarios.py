@@ -8,7 +8,7 @@ import re
 import unittest
 from datetime import datetime, timedelta
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck, JMESPathCheckExists, NoneCheck, api_version_constraint)
+                               JMESPathCheck, JMESPathCheckExists, NoneCheck)
 from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType
 
@@ -559,7 +559,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    @api_version_constraint(resource_type=ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
     def test_storage_blob_suppress_400(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         # test for azure.cli.command_modules.storage.StorageCommandGroup.get_handler_suppress_some_400
@@ -717,7 +716,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
 class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
@@ -819,7 +817,6 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cold'))
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2020-10-02')
 class StorageBlobImmutabilityTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='version', kind='StorageV2', location='centralus')
@@ -855,7 +852,6 @@ class StorageBlobImmutabilityTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('legal_hold', False))
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
 class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')
