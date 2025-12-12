@@ -97,8 +97,7 @@ from azure.cli.command_modules.acs.agentpool_decorator import (
 from azure.cli.command_modules.acs.azurecontainerstorage.acstor_ops import (
     perform_disable_azure_container_storage_v1,
     perform_enable_azure_container_storage_v1,
-    perform_enable_azure_container_storage,
-    perform_disable_azure_container_storage,
+    perform_azure_container_storage_update,
 )
 from azure.cli.command_modules.acs.azuremonitormetrics.azuremonitorprofile import (
     ensure_azure_monitor_profile_prerequisites
@@ -340,8 +339,7 @@ class AKSManagedClusterContext(BaseAKSContext):
             # azure container storage functions
             external_functions["perform_enable_azure_container_storage_v1"] = perform_enable_azure_container_storage_v1
             external_functions["perform_disable_azure_container_storage_v1"] = perform_disable_azure_container_storage_v1
-            external_functions["perform_enable_azure_container_storage"] = perform_enable_azure_container_storage
-            external_functions["perform_disable_azure_container_storage"] = perform_disable_azure_container_storage
+            external_functions["perform_azure_container_storage_update"] = perform_azure_container_storage_update
             self.__external_functions = SimpleNamespace(**external_functions)
         return self.__external_functions
 
@@ -7010,10 +7008,12 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     validate_enable_azure_container_storage_params,
                 )
                 validate_enable_azure_container_storage_params(
+                    enable_azure_container_storage,
+                    False,
+                    False,
                     False,
                     False,
                     "",
-                    enable_azure_container_storage,
                     storage_pool_name,
                     pool_sku,
                     pool_option,
@@ -7547,10 +7547,11 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                         existing_ephemeral_nvme_perf_tier,
                     )
             else:
-                self.context.external_functions.perform_enable_azure_container_storage(
+                self.context.external_functions.perform_azure_container_storage_update(
                     self.cmd,
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
+                    enable_azure_container_storage,
                 )
 
         # Add role assignments for automatic sku
@@ -9003,7 +9004,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 pool_sku = self.context.raw_param.get("storage_pool_sku")
                 pool_size = self.context.raw_param.get("storage_pool_size")
                 agentpool_details = {}
-                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_extension_installed_and_cluster_configs
+                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_extension_installed_and_cluster_configs_v1
                 (
                     is_extension_installed,
                     is_azureDisk_enabled,
@@ -9013,7 +9014,7 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     current_core_value,
                     existing_ephemeral_disk_volume_type,
                     existing_perf_tier,
-                ) = get_extension_installed_and_cluster_configs(
+                ) = get_extension_installed_and_cluster_configs_v1(
                     self.cmd,
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
@@ -9223,12 +9224,11 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         'and --disable-azure-container-storage together.'
                     )
 
-                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_extension_installed
-                is_extension_installed, _ = get_container_storage_extension_installed(
+                from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_extension_installed_and_cluster_configs
+                is_extension_installed, is_ephemeralDisk_enabled, is_elasticSan_enabled = get_extension_installed_and_cluster_configs(
                     self.cmd,
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
-                    CONST_ACSTOR_EXT_INSTALLATION_NAME,
                 )
 
                 from azure.cli.command_modules.acs.azurecontainerstorage._helpers import get_container_storage_extension_installed
@@ -9250,10 +9250,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         validate_enable_azure_container_storage_params,
                     )
                     validate_enable_azure_container_storage_params(
+                        enable_azure_container_storage_param,
                         is_extension_installed,
+                        is_ephemeralDisk_enabled,
+                        is_elasticSan_enabled,
                         is_containerstorage_v1_installed,
                         v1_extension_version,
-                        enable_azure_container_storage_param,
                         storage_pool_name,
                         pool_sku,
                         pool_option,
@@ -9268,6 +9270,19 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         "The PVs and PVCs can only be cleaned up after re-enabling it by running 'az aks update --enable-azure-container-storage'. "
                         "Would you like to proceed with the disabling?"
                     )
+                    from azure.cli.command_modules.acs.azurecontainerstorage._helpers import should_delete_extension
+                    if not should_delete_extension(disable_azure_container_storage_param):
+                        storage_option_str = disable_azure_container_storage_param
+                        if isinstance(disable_azure_container_storage_param, list):
+                            storage_option_str = " ".join(disable_azure_container_storage_param)
+                        msg = (
+                            "Please make sure there are no existing PVs and PVCs that are provisioned by Azure Container Storage "
+                            f"for {disable_azure_container_storage_param} before disabling. If storage options are disabled "
+                            "with remaining PVs and PVCs, any data associated with those PVs and PVCs will not be erased "
+                            "and the nodes will be left in an unclean state. The PVs and PVCs can only be cleaned up "
+                            f"after re-enabling it by running 'az aks update --enable-azure-container-storage {storage_option_str}'. "
+                            "Would you like to proceed with the disabling?"
+                        )
                     if not self.context.get_yes() and not prompt_y_n(msg, default="n"):
                         raise DecoratorEarlyExitException()
 
@@ -9275,19 +9290,21 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                         validate_disable_azure_container_storage_params
                     )
                     validate_disable_azure_container_storage_params(
-                        is_extension_installed,
                         disable_azure_container_storage_param,
+                        is_extension_installed,
+                        is_ephemeralDisk_enabled,
+                        is_elasticSan_enabled,
                         storage_pool_name,
                         pool_sku,
                         pool_option,
                         pool_size
                     )
 
-                if enable_azure_container_storage_param:
-                    self.context.set_intermediate("enable_azure_container_storage", True)
-
-                if disable_azure_container_storage_param:
-                    self.context.set_intermediate("disable_azure_container_storage", True)
+                self.context.set_intermediate("enable_azure_container_storage", enable_azure_container_storage_param, overwrite_exists=True)
+                self.context.set_intermediate("disable_azure_container_storage", disable_azure_container_storage_param, overwrite_exists=True)
+                self.context.set_intermediate("is_extension_installed", is_extension_installed, overwrite_exists=True)
+                self.context.set_intermediate("is_ephemeralDisk_enabled", is_ephemeralDisk_enabled, overwrite_exists=True)
+                self.context.set_intermediate("is_elasticSan_enabled", is_elasticSan_enabled, overwrite_exists=True)
 
         return mc
 
@@ -9777,10 +9794,12 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     current_core_value,
                 )
             else:
-                self.context.external_functions.perform_enable_azure_container_storage(
+                self.context.external_functions.perform_azure_container_storage_update(
                     self.cmd,
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
+                    enable_azure_container_storage,
+                    is_extension_installed,
                 )
 
         # disable azure container storage
@@ -9810,10 +9829,13 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     )
 
             else:
-                self.context.external_functions.perform_disable_azure_container_storage(
+                self.context.external_functions.perform_azure_container_storage_update(
                     self.cmd,
                     self.context.get_resource_group_name(),
                     self.context.get_name(),
+                    None,
+                    is_extension_installed,
+                    disable_azure_container_storage,
                 )
 
         # attach keyvault to app routing addon
