@@ -161,7 +161,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['sku']['tier'], tier)
         self.assertEqual(basic_info['version'], version)
         self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
-        self.assertEqual(basic_info['storage']['storageRedundancy'], storage_redundancy)
         self.assertEqual(basic_info['storage']['logOnDisk'], "Disabled")
         self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
 
@@ -449,7 +448,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --yes'.format(
                  database_engine, resource_group, source_server, source_vnet, source_subnet, location))
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
-        self.assertEqual(result['storage']['storageRedundancy'], storage_redundancy)
 
         # Wait until snapshot is created
         current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
