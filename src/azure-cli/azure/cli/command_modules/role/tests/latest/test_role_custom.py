@@ -159,3 +159,83 @@ class TestSearchRoleAssignments:
         )
 
         assert len(result) == 2
+
+    def test_include_inherited_false_filters_parent_scope(self, mock_clients):
+        """include_inherited=False filters out assignments at parent scopes."""
+        assignments_client, definitions_client = mock_clients
+        role_def_id = '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7'
+
+        assignments_client.list_for_scope.return_value = [
+            self._create_assignment('/', role_def_id, 'principal-1'),
+            self._create_assignment('/subscriptions/sub1', role_def_id, 'principal-2'),
+        ]
+
+        result = _search_role_assignments(
+            assignments_client, definitions_client,
+            scope='/subscriptions/sub1',
+            assignee_object_id=None, role=None,
+            include_inherited=False, include_groups=False
+        )
+
+        assert len(result) == 1
+        assert result[0].principal_id == 'principal-2'
+
+    def test_assignee_filter(self, mock_clients):
+        """assignee_object_id filters assignments by principal."""
+        assignments_client, definitions_client = mock_clients
+        role_def_id = '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7'
+
+        assignments_client.list_for_scope.return_value = [
+            self._create_assignment('/subscriptions/sub1', role_def_id, 'principal-1'),
+            self._create_assignment('/subscriptions/sub1', role_def_id, 'principal-2'),
+        ]
+
+        result = _search_role_assignments(
+            assignments_client, definitions_client,
+            scope='/subscriptions/sub1',
+            assignee_object_id='principal-1', role=None,
+            include_inherited=False, include_groups=False
+        )
+
+        assert len(result) == 1
+        assert result[0].principal_id == 'principal-1'
+
+    def test_no_scope_uses_subscription_api(self, mock_clients):
+        """When scope is None, list_for_subscription is called and all assignments returned."""
+        assignments_client, definitions_client = mock_clients
+        role_def_id = '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7'
+
+        assignments_client.list_for_subscription.return_value = [
+            self._create_assignment('/subscriptions/sub1', role_def_id, 'principal-1'),
+            self._create_assignment('/subscriptions/sub1/resourceGroups/rg1', role_def_id, 'principal-2'),
+        ]
+
+        result = _search_role_assignments(
+            assignments_client, definitions_client,
+            scope=None,
+            assignee_object_id=None, role=None,
+            include_inherited=False, include_groups=False
+        )
+
+        assert len(result) == 2
+        assignments_client.list_for_subscription.assert_called_once()
+        assignments_client.list_for_scope.assert_not_called()
+
+    def test_none_role_definition_id_is_skipped(self, mock_clients):
+        """Assignments with None role_definition_id are skipped when filtering by role."""
+        assignments_client, definitions_client = mock_clients
+        role_guid = 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+
+        assignment_with_none = self._create_assignment('/', None)
+        assignment_with_role = self._create_assignment(
+            '/', f'/providers/Microsoft.Authorization/roleDefinitions/{role_guid}')
+        assignments_client.list_for_scope.return_value = [assignment_with_none, assignment_with_role]
+
+        result = _search_role_assignments(
+            assignments_client, definitions_client,
+            scope='/', assignee_object_id=None, role=role_guid,
+            include_inherited=False, include_groups=False
+        )
+
+        assert len(result) == 1
+        assert result[0].role_definition_id is not None

@@ -540,7 +540,7 @@ def _search_role_assignments(assignments_client, definitions_client,
 
         if role:
             role_id = _resolve_role_id(role, scope, definitions_client)
-            assignments = [ra for ra in assignments if ra.role_definition_id.endswith(role_id)]
+            assignments = [ra for ra in assignments if ra.role_definition_id and ra.role_definition_id.endswith(role_id)]
 
         # filter the assignee if "include_groups" is not provided because service side
         # does not accept filter "principalId eq and atScope()"
