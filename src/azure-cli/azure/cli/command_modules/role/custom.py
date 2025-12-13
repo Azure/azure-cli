@@ -540,7 +540,7 @@ def _search_role_assignments(assignments_client, definitions_client,
 
         if role:
             role_id = _resolve_role_id(role, scope, definitions_client)
-            assignments = [ra for ra in assignments if ra.role_definition_id == role_id]
+            assignments = [ra for ra in assignments if ra.role_definition_id.endswith(role_id)]
 
         # filter the assignee if "include_groups" is not provided because service side
         # does not accept filter "principalId eq and atScope()"
@@ -567,24 +567,25 @@ def _build_role_scope(resource_group_name, scope, subscription_id):
 
 
 def _resolve_role_id(role, scope, definitions_client):
-    role_id = None
-    if re.match(r'/subscriptions/.+/providers/Microsoft.Authorization/roleDefinitions/',
-                role, re.I):
-        role_id = role
-    else:
-        if is_guid(role):
-            role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
-                definitions_client._config.subscription_id, role)
-        if not role_id:  # retrieve role id
-            role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
-            if not role_defs:
-                raise CLIError("Role '{}' doesn't exist.".format(role))
-            if len(role_defs) > 1:
-                ids = [r.id for r in role_defs]
-                err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
-                raise CLIError(err.format(role, ids))
-            role_id = role_defs[0].id
-    return role_id
+    """Resolve a role to its full role definition resource ID from
+      - role definition resource ID (returned as-is)
+      - role definition GUID
+      - role name (e.g. 'Reader')
+    """
+    if re.match(r'(/subscriptions/.+)?/providers/Microsoft.Authorization/roleDefinitions/', role, re.I):
+        return role
+
+    if is_guid(role):
+        return f"/providers/Microsoft.Authorization/roleDefinitions/{role}"
+
+    role_defs = list(definitions_client.list(scope, "roleName eq '{}'".format(role)))
+    if not role_defs:
+        raise CLIError("Role '{}' doesn't exist.".format(role))
+    if len(role_defs) > 1:
+        ids = [r.id for r in role_defs]
+        err = "More than one role matches the given name '{}'. Please pick a value from '{}'"
+        raise CLIError(err.format(role, ids))
+    return role_defs[0].id
 
 
 def create_application(cmd, client, display_name, identifier_uris=None,
