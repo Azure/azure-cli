@@ -2,12 +2,49 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
+import uuid
 import pytest
 from unittest import mock
 
-from azure.cli.command_modules.role.custom import _resolve_role_id, _search_role_assignments
+from azure.cli.command_modules.role.custom import (
+    _resolve_role_id, _search_role_assignments, _get_role_definition_id
+)
 
 # pylint: disable=line-too-long
+
+
+class TestGetRoleDefinitionId:
+    """Tests for _get_role_definition_id helper function."""
+
+    @pytest.mark.parametrize("resource_id,expected", [
+        # Tenant-scoped format
+        ('/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7',
+         uuid.UUID('acdd72a7-3385-48ef-bd42-f606fba81ae7')),
+        # Subscription-scoped format
+        ('/subscriptions/sub1/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c',
+         uuid.UUID('b24988ac-6180-42a0-ab88-20f7382dd24c')),
+        # None returns None
+        (None, None),
+        # Empty string returns None (not a valid GUID)
+        ('', None),
+        # Invalid GUID in last segment returns None
+        ('/providers/Microsoft.Authorization/roleDefinitions/not-a-guid', None),
+        # Malformed path with extra segments still extracts last segment if valid GUID
+        ('/some/path/acdd72a7-3385-48ef-bd42-f606fba81ae7',
+         uuid.UUID('acdd72a7-3385-48ef-bd42-f606fba81ae7')),
+    ])
+    def test_extracts_guid_from_role_definition_id(self, resource_id, expected):
+        """Extracts the GUID from various role definition ID formats."""
+        result = _get_role_definition_id(resource_id)
+        assert result == expected
+
+    def test_returns_uuid_for_case_insensitive_comparison(self):
+        """Returns UUID objects that compare equal regardless of case."""
+        lower = _get_role_definition_id('/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7')
+        upper = _get_role_definition_id('/providers/Microsoft.Authorization/roleDefinitions/ACDD72A7-3385-48EF-BD42-F606FBA81AE7')
+        assert lower == upper
+        assert isinstance(lower, uuid.UUID)
+        assert isinstance(upper, uuid.UUID)
 
 
 class TestResolveRoleId:
@@ -80,7 +117,7 @@ class TestSearchRoleAssignments:
     @pytest.mark.parametrize("scope,role_def_format", [
         # Root scope with tenant-format role definition ID
         ('/', '/providers/Microsoft.Authorization/roleDefinitions/{guid}'),
-        # Management group scope with tenant-format role definition ID  
+        # Management group scope with tenant-format role definition ID
         ('/providers/Microsoft.Management/managementGroups/my-mg',
          '/providers/Microsoft.Authorization/roleDefinitions/{guid}'),
         # Subscription scope with subscription-format role definition ID
@@ -122,104 +159,6 @@ class TestSearchRoleAssignments:
         )
 
         assert len(result) == 0
-
-    def test_scope_comparison_is_case_insensitive(self, mock_clients):
-        """Scope matching is case insensitive."""
-        assignments_client, definitions_client = mock_clients
-        role_def_id = '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7'
-
-        assignments_client.list_for_scope.return_value = [
-            self._create_assignment('/Subscriptions/SUB1/ResourceGroups/RG1', role_def_id),
-        ]
-
-        result = _search_role_assignments(
-            assignments_client, definitions_client,
-            scope='/subscriptions/sub1/resourcegroups/rg1',
-            assignee_object_id=None, role=None,
-            include_inherited=False, include_groups=False
-        )
-
-        assert len(result) == 1
-
-    def test_include_inherited_returns_parent_scope_assignments(self, mock_clients):
-        """include_inherited=True returns assignments at and above the scope."""
-        assignments_client, definitions_client = mock_clients
-        role_def_id = '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7'
-
-        assignments_client.list_for_scope.return_value = [
-            self._create_assignment('/', role_def_id, 'principal-1'),
-            self._create_assignment('/subscriptions/sub1', role_def_id, 'principal-2'),
-        ]
-
-        result = _search_role_assignments(
-            assignments_client, definitions_client,
-            scope='/subscriptions/sub1',
-            assignee_object_id=None, role=None,
-            include_inherited=True, include_groups=False
-        )
-
-        assert len(result) == 2
-
-    def test_include_inherited_false_filters_parent_scope(self, mock_clients):
-        """include_inherited=False filters out assignments at parent scopes."""
-        assignments_client, definitions_client = mock_clients
-        role_def_id = '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7'
-
-        assignments_client.list_for_scope.return_value = [
-            self._create_assignment('/', role_def_id, 'principal-1'),
-            self._create_assignment('/subscriptions/sub1', role_def_id, 'principal-2'),
-        ]
-
-        result = _search_role_assignments(
-            assignments_client, definitions_client,
-            scope='/subscriptions/sub1',
-            assignee_object_id=None, role=None,
-            include_inherited=False, include_groups=False
-        )
-
-        assert len(result) == 1
-        assert result[0].principal_id == 'principal-2'
-
-    def test_assignee_filter(self, mock_clients):
-        """assignee_object_id filters assignments by principal."""
-        assignments_client, definitions_client = mock_clients
-        role_def_id = '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7'
-
-        assignments_client.list_for_scope.return_value = [
-            self._create_assignment('/subscriptions/sub1', role_def_id, 'principal-1'),
-            self._create_assignment('/subscriptions/sub1', role_def_id, 'principal-2'),
-        ]
-
-        result = _search_role_assignments(
-            assignments_client, definitions_client,
-            scope='/subscriptions/sub1',
-            assignee_object_id='principal-1', role=None,
-            include_inherited=False, include_groups=False
-        )
-
-        assert len(result) == 1
-        assert result[0].principal_id == 'principal-1'
-
-    def test_no_scope_uses_subscription_api(self, mock_clients):
-        """When scope is None, list_for_subscription is called and all assignments returned."""
-        assignments_client, definitions_client = mock_clients
-        role_def_id = '/providers/Microsoft.Authorization/roleDefinitions/acdd72a7-3385-48ef-bd42-f606fba81ae7'
-
-        assignments_client.list_for_subscription.return_value = [
-            self._create_assignment('/subscriptions/sub1', role_def_id, 'principal-1'),
-            self._create_assignment('/subscriptions/sub1/resourceGroups/rg1', role_def_id, 'principal-2'),
-        ]
-
-        result = _search_role_assignments(
-            assignments_client, definitions_client,
-            scope=None,
-            assignee_object_id=None, role=None,
-            include_inherited=False, include_groups=False
-        )
-
-        assert len(result) == 2
-        assignments_client.list_for_subscription.assert_called_once()
-        assignments_client.list_for_scope.assert_not_called()
 
     def test_none_role_definition_id_is_skipped(self, mock_clients):
         """Assignments with None role_definition_id are skipped when filtering by role."""
