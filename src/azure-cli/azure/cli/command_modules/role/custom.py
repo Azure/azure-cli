@@ -596,8 +596,8 @@ def _resolve_role_id(role, scope, definitions_client):
     """
     # Check if it's a role definition resource ID: /providers/Microsoft.Authorization/roleDefinitions/<guid>
     # optionally prefixed with /subscriptions/... The last segment must be a valid GUID.
-    if (re.match(r'(/subscriptions/[^/]+)?/providers/Microsoft.Authorization/roleDefinitions/[^/]+$', role, re.I)
-            and is_guid(role.rsplit('/', 1)[-1])):
+    if (re.match(r'(/subscriptions/[^/]+)?/providers/Microsoft.Authorization/roleDefinitions/[^/]+$', role, re.I) and
+            is_guid(role.rsplit('/', 1)[-1])):
         return role
 
     if is_guid(role):
