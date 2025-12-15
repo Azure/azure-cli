@@ -29,12 +29,11 @@ def update_identity(instance, tags=None, isolation_scope=None, resource_restrict
     parameters = {}
     if tags is not None:
         parameters['tags'] = tags
-
     parameters['isolationScope'] = isolation_scope or instance.isolation_scope
-
     if resource_restriction is not None:
         parameters['resourceRestriction'] = resource_restriction or instance.resource_restriction
     return parameters
+
 
 def list_identity_resources(cmd, resource_group_name, resource_name):
     from azure.cli.command_modules.identity._client_factory import _msi_list_resources_client
