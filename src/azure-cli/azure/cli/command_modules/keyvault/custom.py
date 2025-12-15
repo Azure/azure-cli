@@ -347,9 +347,9 @@ def recover_vault(cmd, client, vault_name, resource_group_name, location, no_wai
     tenant_id = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))[_TENANT_ID]
 
     params = VaultCreateOrUpdateParameters(location=location,
-                                           properties={'tenant_id': tenant_id,
+                                           properties={'tenantId': tenant_id,
                                                        'sku': Sku(name=SkuName.standard.value, family='A'),
-                                                       'create_mode': CreateMode.recover.value})
+                                                       'createMode': CreateMode.recover.value})
 
     return sdk_no_wait(no_wait, client.begin_create_or_update,
                        resource_group_name=resource_group_name,
