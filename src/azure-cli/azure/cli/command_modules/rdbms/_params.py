@@ -1100,7 +1100,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('autonomous_tuning_enabled',
                            options_list=['--enabled'],
                            required=True,
-                           help='Enable or disable index and table tuning feature.',
+                           help='Enable or disable autonomous tuning feature.',
                            arg_type=get_enum_type(['True', 'False']))
 
             with self.argument_context('{} flexible-server autonomous-tuning list-index-recommendations'.format(command_group)) as c:
