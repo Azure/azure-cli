@@ -98,37 +98,3 @@ def load_arguments(self, _):
                    options_list=['--key'],
                    arg_type=get_enum_type(KeyType),
                    help='Whether the operation refers to the primary or secondary key')
-
-    with self.argument_context('maps creator') as c:
-        c.argument('tags', arg_type=tags_type)
-
-    with self.argument_context('maps creator create') as c:
-        c.argument('creator_name', options_list=['--creator-name'], type=str, help='The name of the '
-                   'Maps Creator instance.')
-        c.argument('location', options_list=['--location', '-l'], arg_type=get_location_type(self.cli_ctx),
-                   required=False, validator=get_default_location_from_resource_group)
-        c.argument('storage_units', options_list=['--storage-units'], type=int,
-                   help='The storage units to be allocated. Integer values from 1 to 100, inclusive.')
-
-    with self.argument_context('maps creator update') as c:
-        c.argument('creator_name', options_list=['--creator-name'], type=str, help='The name of the '
-                   'Maps Creator instance.', id_part='child_name_1')
-        c.argument('storage_units', options_list=['--storage-units'], type=int,
-                   help='The storage units to be allocated. Integer values from 1 to 100, inclusive.')
-
-    with self.argument_context('maps creator delete') as c:
-        c.argument('creator_name', options_list=['--creator-name'], type=str, help='The name of the '
-                   'Maps Creator instance.', id_part='child_name_1')
-
-    with self.argument_context('maps creator show') as c:
-        c.argument('creator_name', options_list=['--creator-name'], type=str, help='The name of the '
-                   'Maps Creator instance.', id_part='child_name_1')
-
-    with self.argument_context('maps creator list') as c:
-        c.argument('resource_group_name',
-                   arg_type=resource_group_name_type,
-                   id_part=None,
-                   help='Resource group name')
-        c.argument('account_name',
-                   id_part=None,
-                   arg_type=maps_name_type)
