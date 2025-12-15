@@ -234,7 +234,7 @@ class MainCommandsLoader(CLICommandsLoader):
         import pkgutil
         import traceback
         from azure.cli.core.commands import (
-             _load_extension_command_loader, ExtensionCommandSource)
+            _load_extension_command_loader, ExtensionCommandSource)
         from azure.cli.core.extension import (
             get_extensions, get_extension_path, get_extension_modname)
         from azure.cli.core.breaking_change import (
@@ -565,7 +565,7 @@ class MainCommandsLoader(CLICommandsLoader):
                     logger.warning("Module '%s' load timeout after %s seconds", mod, MODULE_LOAD_TIMEOUT_SECONDS)
                     future.cancel()
                     results.append(ModuleLoadResult(mod, {}, {}, 0,
-                                                    Exception(f"Module '{mod}' load timeout")))
+                                    Exception(f"Module '{mod}' load timeout")))
                 except (ImportError, AttributeError, TypeError, ValueError) as ex:
                     mod = future_to_module[future]
                     logger.warning("Module '%s' load failed: %s", mod, ex)
@@ -592,8 +592,8 @@ class MainCommandsLoader(CLICommandsLoader):
 
         logger.error("Error loading command module '%s': %s", result.module_name, result.error)
         telemetry.set_exception(exception=result.error,
-                               fault_type='module-load-error-' + result.module_name,
-                               summary='Error loading module: {}'.format(result.module_name))
+                                fault_type='module-load-error-' + result.module_name,
+                                summary='Error loading module: {}'.format(result.module_name))
         logger.debug(traceback.format_exc())
 
     def _process_successful_load(self, result):
