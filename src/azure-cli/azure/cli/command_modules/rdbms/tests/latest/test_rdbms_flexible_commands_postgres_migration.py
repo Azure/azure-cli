@@ -22,8 +22,8 @@ class MigrationScenarioTest(ScenarioTest):
         self._test_server_migration('postgres')
 
     def test_postgres_flexible_server_onpremise_migration(self):
-        self._test_server_migration_onpremise('postgres', True, "8e73acbf-9ce7-47e4-ac22-71c9e0b04bb6")
-        self._test_server_migration_onpremise('postgres', False, "bba425ca-e823-46bf-ad5a-6b5a41229ee2")
+        self._test_server_migration_onpremise('postgres', True, "fa286429-31c9-4419-8ce2-eb8d671b6b78")
+        self._test_server_migration_onpremise('postgres', False, "0a3f4141-1c9b-4e92-959d-13521a80a29f")
 
     def _test_server_migration(self, database_engine):
         # Set this to True or False depending on whether we are in live mode or test mode
@@ -37,7 +37,7 @@ class MigrationScenarioTest(ScenarioTest):
         else:
             # Mock test mode values
             target_subscription_id = "00000000-0000-0000-0000-000000000000"
-            migration_name = "f656f0d0-9ba0-4abe-b9ac-77057316363c"
+            migration_name = "30799ac7-f723-4bf5-930d-34d1affac030"
 
         target_resource_group_name = "autobot-resourcegroup-pg-eastus2euap"
         target_server_name = "autobot-e2e-pg-fs-eastus2euap"

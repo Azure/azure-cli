@@ -275,27 +275,27 @@ def cf_postgres_flexible_replica(cli_ctx, _):
 
 
 def cf_postgres_flexible_location_capabilities(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).location_based_capabilities
+    return get_postgresql_flexible_management_client(cli_ctx).capabilities_by_location
 
 
 def cf_postgres_flexible_server_capabilities(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).server_capabilities
+    return get_postgresql_flexible_management_client(cli_ctx).capabilities_by_server
 
 
 def cf_postgres_flexible_backups(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).backups
+    return get_postgresql_flexible_management_client(cli_ctx).backups_automatic_and_on_demand
 
 
 def cf_postgres_flexible_ltr_backups(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).ltr_backup_operations
+    return get_postgresql_flexible_management_client(cli_ctx).backups_long_term_retention
 
 
 def cf_postgres_flexible_operations(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).flexible_server
+    return get_postgresql_flexible_management_client(cli_ctx).operations
 
 
 def cf_postgres_flexible_admin(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).administrators
+    return get_postgresql_flexible_management_client(cli_ctx).administrators_microsoft_entra
 
 
 def cf_postgres_flexible_migrations(cli_ctx, _):
@@ -306,32 +306,28 @@ def cf_postgres_flexible_server_threat_protection_settings(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).server_threat_protection_settings
 
 
+def cf_postgres_flexible_advanced_threat_protection_settings(cli_ctx, _):
+    return get_postgresql_flexible_management_client(cli_ctx).advanced_threat_protection_settings
+
+
 def cf_postgres_flexible_server_log_files(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).log_files
+    return get_postgresql_flexible_management_client(cli_ctx).captured_logs
 
 
 def cf_postgres_check_resource_availability(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).check_name_availability
+    return get_postgresql_flexible_management_client(cli_ctx).name_availability
 
 
 def cf_postgres_flexible_db(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).databases
 
 
-def cf_postgres_check_resource_availability_with_location(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).check_name_availability_with_location
-
-
 def cf_postgres_flexible_private_dns_zone_suffix_operations(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).get_private_dns_zone_suffix
+    return get_postgresql_flexible_management_client(cli_ctx).private_dns_zone_suffix
 
 
 def cf_postgres_flexible_private_endpoint_connections(cli_ctx, _):
     return get_postgresql_flexible_management_client(cli_ctx).private_endpoint_connections
-
-
-def cf_postgres_flexible_private_endpoint_connection(cli_ctx, _):
-    return get_postgresql_flexible_management_client(cli_ctx).private_endpoint_connection
 
 
 def cf_postgres_flexible_private_link_resources(cli_ctx, _):

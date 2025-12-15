@@ -102,6 +102,8 @@ def load_arguments(self, _):
                    help='get regions which support hosting web apps on Windows Container workers')
         c.argument('linux_workers_enabled', action='store_true',
                    help='get regions which support hosting web apps on Linux workers')
+        c.argument('managed_instance_enabled', action='store_true', is_preview=True,
+                   help='get regions which support hosting web apps on Managed Instance workers')
         c.argument('sku', arg_type=sku_arg_type)
 
     with self.argument_context('appservice plan') as c:
