@@ -417,12 +417,16 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storage.throughput', 400 )])
 
+        self.cmd('{} flexible-server update -g {} -n {} --high-availability SameZone'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('highAvailability.mode', 'SameZone' )])
+
+        self.cmd('{} flexible-server update -g {} -n {} --high-availability Disabled'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('highAvailability.mode', 'Disabled' )])
+        
         # test failures
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
-                 .format(database_engine, resource_group, server_name),
-                 expect_failure=True)
-
-        self.cmd('{} flexible-server update -g {} -n {} --high-availability SameZone'
                  .format(database_engine, resource_group, server_name),
                  expect_failure=True)
 
