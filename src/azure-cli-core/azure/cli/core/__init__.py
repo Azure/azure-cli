@@ -9,8 +9,8 @@ __version__ = "2.82.0"
 import os
 import sys
 import timeit
+import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor
-from typing import Dict, Any, Optional
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -199,7 +199,7 @@ class AzCli(CLI):
         format_styled_text.theme = theme
 
 
-class ModuleLoadResult:
+class ModuleLoadResult:  # pylint: disable=too-few-public-methods
     def __init__(self, module_name, command_table, group_table, elapsed_time, error=None):
         self.module_name = module_name
         self.command_table = command_table
@@ -269,7 +269,7 @@ class MainCommandsLoader(CLICommandsLoader):
             results = self._load_modules(args, command_modules)
 
             count, cumulative_elapsed_time, cumulative_group_count, cumulative_command_count = \
-                self._process_results_with_timing(results, command_modules)
+                self._process_results_with_timing(results)
             # Summary line
             logger.debug(self.item_format_string,
                          "Total ({})".format(count), cumulative_elapsed_time,
@@ -554,7 +554,7 @@ class MainCommandsLoader(CLICommandsLoader):
         results = []
         with ThreadPoolExecutor(max_workers=MAX_WORKER_THREAD_COUNT) as executor:
             future_to_module = {executor.submit(self._load_single_module, mod, args): mod
-                               for mod in command_modules if mod not in BLOCKED_MODS}
+                                for mod in command_modules if mod not in BLOCKED_MODS}
 
             for future in future_to_module:
                 try:
@@ -565,8 +565,8 @@ class MainCommandsLoader(CLICommandsLoader):
                     logger.warning("Module '%s' load timeout after %s seconds", mod, MODULE_LOAD_TIMEOUT_SECONDS)
                     future.cancel()
                     results.append(ModuleLoadResult(mod, {}, {}, 0,
-                                  Exception(f"Module '{mod}' load timeout")))
-                except Exception as ex:
+                                                    Exception(f"Module '{mod}' load timeout")))
+                except (ImportError, AttributeError, TypeError, ValueError) as ex:
                     mod = future_to_module[future]
                     logger.warning("Module '%s' load failed: %s", mod, ex)
                     results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
@@ -605,9 +605,9 @@ class MainCommandsLoader(CLICommandsLoader):
         self.command_group_table.update(result.group_table)
 
         logger.debug(self.item_format_string, result.module_name, result.elapsed_time,
-                    len(result.group_table), len(result.command_table))
+                     len(result.group_table), len(result.command_table))
 
-    def _process_results_with_timing(self, results, command_modules):
+    def _process_results_with_timing(self, results):
         """Process pre-loaded module results with timing and progress reporting."""
         logger.debug("Loading command modules:")
         logger.debug(self.header_mod)
