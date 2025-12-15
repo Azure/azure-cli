@@ -348,7 +348,7 @@ def load_arguments(self, _):
                             'Policy definition as JSON, or a path to a file containing JSON policy definition.')
             c.extra('default_cvm_policy', action='store_true',
                     help='Use default policy under which the key can be exported for CVM disk encryption.')
-            c.extra('default_data_disk_policy', action='store_true',
+            c.extra('default_data_disk_policy', action='store_true', options_list=['--default-data-disk-policy', '--default-dd-policy'],
                     help='Use default policy under which the key can be exported for data disk encryption.')
             c.extra('immutable', arg_type=get_three_state_flag(), is_preview=True,
                     help='Mark a release policy as immutable. '

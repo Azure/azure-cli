@@ -18,7 +18,7 @@ from knack.util import CLIError
 
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.commands.validators import validate_tags
-from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, MutuallyExclusiveArgumentError, AzureInternalError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError, AzureInternalError
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import get_file_json, shell_safe_json_parse
 
@@ -208,7 +208,8 @@ def validate_key_type(ns):
     setattr(ns, 'kty', kty)
 
 
-def _fetch_default_release_policy(cli_ctx, vault_url, type = 'cvm'):
+# pylint: disable=line-too-long
+def _fetch_default_release_policy(cli_ctx, vault_url, policy_type='cvm'):
     try:
         # get vault/hsm location
         mgmt_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT)
@@ -233,9 +234,7 @@ def _fetch_default_release_policy(cli_ctx, vault_url, type = 'cvm'):
         _endpoint = cli_ctx.cloud.endpoints.resource_manager
         if _endpoint.endswith('/'):
             _endpoint = _endpoint[:-1]
-        default_release_policy_url = f"{_endpoint}/subscriptions/{get_subscription_id(cli_ctx)}" \
-                                 f"/providers/Microsoft.Attestation/Locations/{location}" \
-                                 f"/defaultProvider?api-version=2020-10-01"
+        default_release_policy_url = f"{_endpoint}/subscriptions/{get_subscription_id(cli_ctx)}/providers/Microsoft.Attestation/Locations/{location}/defaultProvider?api-version=2020-10-01"
         response = send_raw_request(cli_ctx, 'get', default_release_policy_url)
         if response.status_code != 200:
             raise AzureInternalError(f"Fail to fetch default release policy from {default_release_policy_url}")
@@ -244,7 +243,7 @@ def _fetch_default_release_policy(cli_ctx, vault_url, type = 'cvm'):
         import json
         res_json = json.loads(response.text)
         attest_uri = res_json['properties']['attestUri']
-        if type == 'cvm':
+        if policy_type == 'cvm':
             default_release_policy = {
                 'version': '1.0.0',
                 'anyOf': [
@@ -267,20 +266,20 @@ def _fetch_default_release_policy(cli_ctx, vault_url, type = 'cvm'):
                         'authority': attest_uri,
                         'allOf': [
                             {
-                                "anyOf": [
+                                'anyOf': [
                                     {
-                                        "claim": "x-ms-isolation-tee.x-ms-attestation-type",
-                                        "equals": "sevsnpvm"
+                                        'claim': 'x-ms-isolation-tee.x-ms-attestation-type',
+                                        'equals': 'sevsnpvm'
                                     },
                                     {
-                                        "claim": "x-ms-isolation-tee.x-ms-attestation-type",
-                                        "equals": "tdxvm"
+                                        'claim': 'x-ms-isolation-tee.x-ms-attestation-type',
+                                        'equals': 'tdxvm'
                                     }
                                 ]
                             },
                             {
-                                "claim": "x-ms-isolation-tee.x-ms-compliance-status",
-                                "equals": "azure-compliant-cvm"
+                                'claim': 'x-ms-isolation-tee.x-ms-compliance-status',
+                                'equals': 'azure-compliant-cvm'
                             }
                         ]
                     }
@@ -288,7 +287,7 @@ def _fetch_default_release_policy(cli_ctx, vault_url, type = 'cvm'):
             }
         return default_release_policy
     except Exception as ex:  # pylint: disable=broad-except
-        raise AzureInternalError(f"Fail to fetch default cvm policy: {ex}")
+        raise AzureInternalError(f"Fail to fetch default release policy: {ex}")
 
 
 def process_key_release_policy(cmd, ns):
@@ -316,7 +315,9 @@ def process_key_release_policy(cmd, ns):
     if ns.release_policy and default_data_disk_policy:
         raise InvalidArgumentValueError('Can not specify both `--policy` and `--default-data-disk-policy`')
     if default_cvm_policy and default_data_disk_policy:
-        raise MutuallyExclusiveArgumentError('`--default-cvm-policy` and `--default-data-disk-policy` are mutually exclusive')
+        from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+        raise MutuallyExclusiveArgumentError('`--default-cvm-policy` and `--default-data-disk-policy` '
+                                             'are mutually exclusive')
 
     import json
     KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
