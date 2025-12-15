@@ -9,8 +9,7 @@ __version__ = "2.82.0"
 import os
 import sys
 import timeit
-import concurrent.futures
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -549,7 +548,6 @@ class MainCommandsLoader(CLICommandsLoader):
     def _load_modules(self, args, command_modules):
         """Load command modules using ThreadPoolExecutor with timeout protection."""
         from azure.cli.core.commands import BLOCKED_MODS
-        import concurrent.futures
 
         results = []
         with ThreadPoolExecutor(max_workers=MAX_WORKER_THREAD_COUNT) as executor:
@@ -560,7 +558,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 try:
                     result = future.result(timeout=MODULE_LOAD_TIMEOUT_SECONDS)
                     results.append(result)
-                except concurrent.futures.TimeoutError:
+                except TimeoutError:
                     mod = future_to_module[future]
                     logger.warning("Module '%s' load timeout after %s seconds", mod, MODULE_LOAD_TIMEOUT_SECONDS)
                     future.cancel()
