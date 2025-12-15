@@ -565,7 +565,7 @@ class MainCommandsLoader(CLICommandsLoader):
                     logger.warning("Module '%s' load timeout after %s seconds", mod, MODULE_LOAD_TIMEOUT_SECONDS)
                     future.cancel()
                     results.append(ModuleLoadResult(mod, {}, {}, 0,
-                                    Exception(f"Module '{mod}' load timeout")))
+                                                    Exception(f"Module '{mod}' load timeout")))
                 except (ImportError, AttributeError, TypeError, ValueError) as ex:
                     mod = future_to_module[future]
                     logger.warning("Module '%s' load failed: %s", mod, ex)
