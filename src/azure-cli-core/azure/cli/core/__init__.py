@@ -9,7 +9,8 @@ __version__ = "2.82.0"
 import os
 import sys
 import timeit
-from concurrent.futures import ThreadPoolExecutor, TimeoutError
+import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor
 
 from knack.cli import CLI
 from knack.commands import CLICommandsLoader
@@ -558,7 +559,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 try:
                     result = future.result(timeout=MODULE_LOAD_TIMEOUT_SECONDS)
                     results.append(result)
-                except TimeoutError:
+                except concurrent.futures.TimeoutError:
                     mod = future_to_module[future]
                     logger.warning("Module '%s' load timeout after %s seconds", mod, MODULE_LOAD_TIMEOUT_SECONDS)
                     future.cancel()
