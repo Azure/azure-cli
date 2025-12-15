@@ -2239,12 +2239,12 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
 # install kubectl & kubelogin
 def k8s_install_cli(cmd, client_version='latest', install_location=None, base_src_url=None,
                     kubelogin_version='latest', kubelogin_install_location=None,
-                    kubelogin_base_src_url=None):
+                    kubelogin_base_src_url=None, gh_token=None):
     arch = get_arch_for_cli_binary()
-    k8s_install_kubectl(cmd, client_version,
-                        install_location, base_src_url, arch=arch)
+    # k8s_install_kubectl(cmd, client_version,
+    #                     install_location, base_src_url, arch=arch)
     k8s_install_kubelogin(cmd, kubelogin_version,
-                          kubelogin_install_location, kubelogin_base_src_url, arch=arch)
+                          kubelogin_install_location, kubelogin_base_src_url, arch=arch, gh_token=gh_token)
 
 
 # determine the architecture for the binary based on platform.machine()
@@ -2444,7 +2444,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
 
 
 # install kubelogin
-def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None, arch=None):
+def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None, arch=None, gh_token=None):
     """
     Install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
     """
@@ -2462,7 +2462,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
         logger.warning(
             'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
-        latest_release = _urlopen_read(latest_release_url)
+        latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
         client_version = json.loads(latest_release)['tag_name'].strip()
     else:
         client_version = "v%s" % client_version
@@ -2519,11 +2519,15 @@ def _ssl_context():
     return ssl.create_default_context()
 
 
-def _urlopen_read(url, context=None):
+def _urlopen_read(url, context=None, gh_token=None):
     if context is None:
         context = _ssl_context()
     try:
-        return urlopen(url, context=context).read()
+        from urllib.request import Request
+        request = Request(url)
+        if gh_token:
+            request.add_header('Authorization', f'Bearer {gh_token}')
+        return urlopen(request, context=context).read()
     except URLError as ex:
         error_msg = str(ex)
         if "[SSL: CERTIFICATE_VERIFY_FAILED]" in error_msg and "unable to get local issuer certificate" in error_msg:
@@ -2535,9 +2539,9 @@ def _urlopen_read(url, context=None):
         raise ex
 
 
-def _urlretrieve(url, filename):
+def _urlretrieve(url, filename, gh_token=None):
     with open(filename, "wb") as f:
-        f.write(_urlopen_read(url))
+        f.write(_urlopen_read(url, gh_token=gh_token))
 
 
 def _unzip(src, dest):

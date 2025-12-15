@@ -877,6 +877,7 @@ def load_arguments(self, _):
         c.argument('kubelogin_version', validator=validate_kubelogin_version, help='Version of kubelogin to install.')
         c.argument('kubelogin_install_location', default=_get_default_install_location('kubelogin'), help='Path at which to install kubelogin. Note: the path should contain the binary filename.')
         c.argument('kubelogin_base_src_url', options_list=['--kubelogin-base-src-url', '-l'], help='Base download source URL for kubelogin releases.')
+        c.argument('gh_token', help='GitHub token to use to authenticate when downloading kubelogin binaries from GitHub releases to avoid rate limiting.')
 
     with self.argument_context('aks update-credentials', arg_group='Service Principal') as c:
         c.argument('reset_service_principal', action='store_true')
