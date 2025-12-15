@@ -2126,6 +2126,9 @@ parameters:
   - name: --localdns-config
     type: string
     short-summary: Set the localDNS Profile for a nodepool with a JSON config file.
+  - name: --gpu-driver
+    type: string
+    short-summary: Whether to install driver for GPU node pool. Possible values are "Install" or "None".
 examples:
   - name: Reconcile the nodepool back to its current state.
     text: az aks nodepool update -g MyResourceGroup -n nodepool1 --cluster-name MyManagedCluster
