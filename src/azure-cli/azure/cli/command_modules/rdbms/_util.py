@@ -103,18 +103,18 @@ def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condit
     return decorate
 
 
-def get_index_tuning_settings_map():
+def get_autonomous_tuning_settings_map():
     return {
-        'analysis_interval': 'index_tuning.analysis_interval',
-        'max_columns_per_index': 'index_tuning.max_columns_per_index',
-        'max_index_count': 'index_tuning.max_index_count',
-        'max_indexes_per_table': 'index_tuning.max_indexes_per_table',
-        'max_queries_per_database': 'index_tuning.max_queries_per_database',
-        'max_regression_factor': 'index_tuning.max_regression_factor',
-        'max_total_size_factor': 'index_tuning.max_total_size_factor',
-        'min_improvement_factor': 'index_tuning.min_improvement_factor',
-        'mode': 'index_tuning.mode',
-        'unused_dml_per_table': 'index_tuning.unused_dml_per_table',
-        'unused_min_period': 'index_tuning.unused_min_period',
-        'unused_reads_per_table': 'index_tuning.unused_reads_per_table'
+        'analysis_interval': 'autonomous_tuning.analysis_interval',
+        'max_columns_per_index': 'autonomous_tuning.max_columns_per_index',
+        'max_index_count': 'autonomous_tuning.max_index_count',
+        'max_indexes_per_table': 'autonomous_tuning.max_indexes_per_table',
+        'max_queries_per_database': 'autonomous_tuning.max_queries_per_database',
+        'max_regression_factor': 'autonomous_tuning.max_regression_factor',
+        'max_total_size_factor': 'autonomous_tuning.max_total_size_factor',
+        'min_improvement_factor': 'autonomous_tuning.min_improvement_factor',
+        'mode': 'autonomous_tuning.mode',
+        'unused_dml_per_table': 'autonomous_tuning.unused_dml_per_table',
+        'unused_min_period': 'autonomous_tuning.unused_min_period',
+        'unused_reads_per_table': 'autonomous_tuning.unused_reads_per_table'
     }

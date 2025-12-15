@@ -1225,3 +1225,66 @@ examples:
   - name: Get tuning index recommendations for a PostgreSQL flexible server. Filter by selected type.
     text: az postgres flexible-server index-tuning list-recommendations -g testgroup -s testsvr --recommendation-type CreateIndex
 """
+
+helps['postgres flexible-server autonomous-tuning'] = """
+type: group
+short-summary: Autonomous tuning analyzes read queries captured in query store and recommends operations on tables or index changes to optimize these queries.
+"""
+
+helps['postgres flexible-server autonomous-tuning update'] = """
+type: command
+short-summary: Update autonomous tuning to be enabled/disabled for a PostgreSQL flexible server.
+examples:
+  - name: Update autonomous tuning to be enabled for a PostgreSQL flexible server.
+    text: az postgres flexible-server autonomous-tuning update -g testgroup -s testsvr --enabled True
+  - name: Update autonomous tuning to be disabled  for a PostgreSQL flexible server.
+    text: az postgres flexible-server autonomous-tuning update -g testgroup -s testsvr --enabled False
+"""
+
+helps['postgres flexible-server autonomous-tuning show'] = """
+type: command
+short-summary: Show state of autonomous tuning for a PostgreSQL flexible server.
+examples:
+  - name: Show state of autonomous tuning for a PostgreSQL flexible server.
+    text: az postgres flexible-server autonomous-tuning show -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server autonomous-tuning list-settings'] = """
+type: command
+short-summary: Get autonomous tuning settings associated to a PostgreSQL flexible server.
+examples:
+  - name: Get autonomous tuning settings for a PostgreSQL flexible server.
+    text: az postgres flexible-server autonomous-tuning list-settings -g testgroup -s testsvr
+"""
+
+helps['postgres flexible-server autonomous-tuning show-settings'] = """
+type: command
+short-summary: Get an autonomous tuning setting for a PostgreSQL flexible server.
+examples:
+  - name: Get an autonomous tuning setting for a PostgreSQL flexible server.
+    text: az postgres flexible-server autonomous-tuning show-settings -g testgroup -s testsvr --name setting-name
+"""
+
+helps['postgres flexible-server autonomous-tuning set-settings'] = """
+type: command
+short-summary: Update an autonomous tuning setting for a PostgreSQL flexible server.
+examples:
+  - name: Update an autonomous tuning setting for a PostgreSQL flexible server.
+    text: az postgres flexible-server autonomous-tuning set-settings -g testgroup -s testsvr --name setting-name --value setting-value
+"""
+
+helps['postgres flexible-server autonomous-tuning list-index-recommendations'] = """
+type: command
+short-summary: Get available autonomous tuning index recommendations associated with a PostgreSQL flexible server.
+examples:
+  - name: Get autonomous tuning index recommendations for a PostgreSQL flexible server. Filter by selected type.
+    text: az postgres flexible-server autonomous-tuning list-index-recommendations -g testgroup -s testsvr --recommendation-type CreateIndex
+"""
+
+helps['postgres flexible-server autonomous-tuning list-table-recommendations'] = """
+type: command
+short-summary: Get available autonomous tuning table recommendations associated with a PostgreSQL flexible server.
+examples:
+  - name: Get autonomous tuning table recommendations for a PostgreSQL flexible server. Filter by selected type.
+    text: az postgres flexible-server autonomous-tuning list-table-recommendations -g testgroup -s testsvr --recommendation-type AnalyzeTable
+"""

@@ -296,4 +296,14 @@ def load_flexibleserver_command_table(self, _):
         g.custom_command('list-settings', 'index_tuning_settings_list', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('show-settings', 'index_tuning_settings_get', custom_command_type=flexible_servers_custom_postgres)
         g.custom_command('set-settings', 'index_tuning_settings_set', custom_command_type=flexible_servers_custom_postgres)
-        g.custom_command('list-recommendations', 'recommendations_list', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list-recommendations', 'index_tuning_recommendations_list', custom_command_type=flexible_servers_custom_postgres)
+
+    with self.command_group('postgres flexible-server autonomous-tuning', postgres_flexible_config_sdk,
+                            client_factory=cf_postgres_flexible_config) as g:
+        g.custom_command('update', 'autonomous_tuning_update', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_show_command('show', 'autonomous_tuning_show', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list-settings', 'autonomous_tuning_settings_list', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('show-settings', 'autonomous_tuning_settings_get', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('set-settings', 'autonomous_tuning_settings_set', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list-table-recommendations', 'autonomous_tuning_table_recommendations_list', custom_command_type=flexible_servers_custom_postgres)
+        g.custom_command('list-index-recommendations', 'autonomous_tuning_index_recommendations_list', custom_command_type=flexible_servers_custom_postgres)

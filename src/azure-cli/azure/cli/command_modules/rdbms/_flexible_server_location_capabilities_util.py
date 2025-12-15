@@ -53,7 +53,7 @@ def _postgres_parse_list_capability(result, is_offer_restriction_check_required=
     restricted = offer_restricted[0].status if offer_restricted else None
     zone_redundant = [feature for feature in supported_features if feature.name == "ZoneRedundantHa"]
     geo_backup = [feature for feature in supported_features if feature.name == "GeoBackup"]
-    index_tuning = [feature for feature in supported_features if feature.name == "IndexTuning"]
+    autonomous_tuning = [feature for feature in supported_features if feature.name == "IndexTuning"]
 
     if restricted == "Enabled" and not is_offer_restriction_check_required:
         raise InvalidArgumentValueError("The location is restricted for provisioning of flexible servers. Please try using another region.")
@@ -63,7 +63,7 @@ def _postgres_parse_list_capability(result, is_offer_restriction_check_required=
 
     single_az = zone_redundant[0].status != "Enabled" if zone_redundant else True
     geo_backup_supported = geo_backup[0].status == "Enabled" if geo_backup else False
-    index_tuning_supported = index_tuning[0].status == "Enabled" if index_tuning else False
+    autonomous_tuning_supported = autonomous_tuning[0].status == "Enabled" if autonomous_tuning else False
 
     tiers = result[0].supported_server_editions
     tiers_dict = {}
@@ -112,7 +112,7 @@ def _postgres_parse_list_capability(result, is_offer_restriction_check_required=
         'zones': zones,
         'server_versions': versions,
         'supported_server_versions': supported_server_versions,
-        'index_tuning_supported': index_tuning_supported
+        'autonomous_tuning_supported': autonomous_tuning_supported
     }
 
 

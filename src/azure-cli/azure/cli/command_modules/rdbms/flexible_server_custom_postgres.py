@@ -36,7 +36,7 @@ from ._flexible_server_util import generate_missing_parameters, resolve_poller, 
     _is_resource_name, get_tenant_id, get_case_insensitive_key_value, get_enum_value_true_false, \
     get_postgres_tiers, get_postgres_skus
 from ._flexible_server_location_capabilities_util import get_postgres_location_capability_info
-from ._util import get_index_tuning_settings_map
+from ._util import get_autonomous_tuning_settings_map
 from .flexible_server_custom_common import create_firewall_rule
 from .flexible_server_virtual_network import prepare_private_network, prepare_private_dns_zone, prepare_public_network
 from .validators import pg_arguments_validator, validate_server_name, validate_and_format_restore_point_in_time, \
@@ -1734,6 +1734,102 @@ def recommendations_list(cmd, resource_group_name, server_name, recommendation_t
         resource_group_name=resource_group_name,
         server_name=server_name,
         tuning_option="index",
+        recommendation_type=recommendation_type
+    )
+
+def autonomous_tuning_update(cmd, client, resource_group_name, server_name, autonomous_tuning_enabled):
+    validate_resource_group(resource_group_name)
+    source = "user-override"
+
+    if autonomous_tuning_enabled == "True":
+        subscription = get_subscription_id(cmd.cli_ctx)
+        postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, subscription)
+        source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
+        location = ''.join(source_server_object.location.lower().split())
+        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+        autonomous_tuning_supported = list_location_capability_info['index_tuning_supported']
+        if not autonomous_tuning_supported:
+            raise CLIError("Autonomous tuning is not supported for the server.")
+
+        logger.warning("Enabling autonomous tuning for the server.")
+        configuration_name = "index_tuning.mode"
+        value = "report"
+        _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        configuration_name = "pg_qs.query_capture_mode"
+        query_capture_mode_configuration = client.get(resource_group_name, server_name, configuration_name)
+
+        if query_capture_mode_configuration.value.lower() == "none":
+            value = "all"
+            _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        logger.warning("Autonomous tuning is enabled for the server.")
+    else:
+        logger.warning("Disabling autonomous tuning for the server.")
+        configuration_name = "index_tuning.mode"
+        value = "off"
+        _update_parameters(cmd, client, server_name, configuration_name, resource_group_name, source, value)
+        logger.warning("Autonomous tuning is disabled for the server.")
+
+
+def autonomous_tuning_show(client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+    autonomous_tuning_configuration = client.get(resource_group_name, server_name, "index_tuning.mode")
+    query_capture_mode_configuration = client.get(resource_group_name, server_name, "pg_qs.query_capture_mode")
+
+    if autonomous_tuning_configuration.value.lower() == "report" and query_capture_mode_configuration.value.lower() != "none":
+        logger.warning("Autonomous tuning is enabled for the server.")
+    else:
+        logger.warning("Autonomous tuning is disabled for the server.")
+
+
+def autonomous_tuning_settings_list(cmd, client, resource_group_name, server_name):
+    validate_resource_group(resource_group_name)
+    autonomous_tuning_configurations_map_values = get_autonomous_tuning_settings_map().values()
+    configurations_list = client.list_by_server(resource_group_name, server_name)
+
+    # Filter the list based on the values in the dictionary
+    autonomous_tuning_settings = [setting for setting in configurations_list if setting.name in autonomous_tuning_configurations_map_values]
+
+    return autonomous_tuning_settings
+
+
+def autonomous_tuning_settings_get(cmd, client, resource_group_name, server_name, setting_name):
+    validate_resource_group(resource_group_name)
+    autonomous_tuning_configurations_map = get_autonomous_tuning_settings_map()
+    autonomous_tuning_configuration_name = autonomous_tuning_configurations_map[setting_name]
+
+    return client.get(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        configuration_name=autonomous_tuning_configuration_name)
+
+
+def autonomous_tuning_settings_set(client, resource_group_name, server_name, setting_name, value=None):
+    source = "user-override" if value else None
+    tuning_settings = get_autonomous_tuning_settings_map()
+    configuration_name = tuning_settings[setting_name]
+    return flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source, value)
+
+
+def autonomous_tuning_index_recommendations_list(cmd, resource_group_name, server_name, recommendation_type=None):
+    validate_resource_group(resource_group_name)
+    tuning_options_client = cf_postgres_flexible_tuning_options(cmd.cli_ctx, None)
+
+    return tuning_options_client.list_recommendations(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        tuning_option="index",
+        recommendation_type=recommendation_type
+    )
+
+
+def autonomous_tuning_table_recommendations_list(cmd, resource_group_name, server_name, recommendation_type=None):
+    validate_resource_group(resource_group_name)
+    tuning_options_client = cf_postgres_flexible_tuning_options(cmd.cli_ctx, None)
+
+    return tuning_options_client.list_recommendations(
+        resource_group_name=resource_group_name,
+        server_name=server_name,
+        tuning_option="table",
         recommendation_type=recommendation_type
     )
 
