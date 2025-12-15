@@ -2241,8 +2241,8 @@ def k8s_install_cli(cmd, client_version='latest', install_location=None, base_sr
                     kubelogin_version='latest', kubelogin_install_location=None,
                     kubelogin_base_src_url=None, gh_token=None):
     arch = get_arch_for_cli_binary()
-    # k8s_install_kubectl(cmd, client_version,
-    #                     install_location, base_src_url, arch=arch)
+    k8s_install_kubectl(cmd, client_version,
+                        install_location, base_src_url, arch=arch)
     k8s_install_kubelogin(cmd, kubelogin_version,
                           kubelogin_install_location, kubelogin_base_src_url, arch=arch, gh_token=gh_token)
 
