@@ -12,7 +12,7 @@ from collections import defaultdict
 
 def get_postgres_location_capability_info(cmd, location, is_offer_restriction_check_required=False):
     list_location_capability_client = cf_postgres_flexible_location_capabilities(cmd.cli_ctx, '_')
-    list_location_capability_result = list_location_capability_client.execute(location)
+    list_location_capability_result = list_location_capability_client.list(location)
     return _postgres_parse_list_capability(list_location_capability_result, is_offer_restriction_check_required)
 
 

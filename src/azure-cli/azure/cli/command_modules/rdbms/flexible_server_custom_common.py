@@ -50,7 +50,7 @@ def server_list_custom_func(client, resource_group_name=None, show_cluster=None)
     if not check_resource_group(resource_group_name):
         resource_group_name = None
 
-    servers = client.list()
+    servers = client.list_by_subscription()
 
     if resource_group_name:
         servers = client.list_by_resource_group(resource_group_name)

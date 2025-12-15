@@ -212,7 +212,7 @@ AZURE_API_PROFILES = {
         ResourceType.MGMT_SERVICEBUS: None,
         ResourceType.MGMT_EVENTHUB: None,
         ResourceType.MGMT_MONITOR: None,
-        ResourceType.MGMT_MSI: '2023-01-31',
+        ResourceType.MGMT_MSI: '2024-11-30',
         ResourceType.MGMT_APPSERVICE: '2024-11-01',
         ResourceType.MGMT_IOTHUB: None,
         ResourceType.MGMT_IOTDPS: None,

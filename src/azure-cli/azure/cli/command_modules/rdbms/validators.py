@@ -726,14 +726,14 @@ def validate_server_name(db_context, server_name, type_):
     if len(server_name) < 3 or len(server_name) > 63:
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
     try:
-        result = client.execute(db_context.location,
-                                name_availability_request={
-                                    'name': server_name,
-                                    'type': type_})
+        result = client.check_with_location(db_context.location,
+                                            parameters={
+                                                'name': server_name,
+                                                'type': type_})
     except HttpResponseError as e:
         if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
-            client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
-            result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
+            client_without_location = db_context.cf_availability(db_context.cmd.cli_ctx, '_')
+            result = client_without_location.check_globally(parameters={'name': server_name, 'type': type_})
         else:
             raise e
 
@@ -744,7 +744,7 @@ def validate_server_name(db_context, server_name, type_):
 def validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name):
     client = cf_postgres_check_resource_availability(cmd.cli_ctx, '_')
     resource_type = 'Microsoft.DBforPostgreSQL/flexibleServers/virtualendpoints'
-    result = client.execute(name_availability_request={'name': virtual_endpoint_name, 'type': resource_type})
+    result = client.check_globally(parameters={'name': virtual_endpoint_name, 'type': resource_type})
     if result and result.name_available is False:
         raise ValidationError("Virtual endpoint's base name is not available.")
 
