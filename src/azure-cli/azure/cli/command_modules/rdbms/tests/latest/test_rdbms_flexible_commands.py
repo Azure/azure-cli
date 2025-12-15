@@ -414,7 +414,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server update -g {} -n {} --high-availability Disabled'
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('highAvailability.mode', 'Disabled' )])
-        
         # test failures
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
                  .format(database_engine, resource_group, server_name),
