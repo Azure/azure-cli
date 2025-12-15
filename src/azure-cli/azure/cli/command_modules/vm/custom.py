@@ -826,8 +826,12 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 
 # region VirtualMachines Identity
 def show_vm_identity(cmd, resource_group_name, vm_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machines.get(resource_group_name, vm_name).identity
+    from .aaz.latest.vm._show import Show
+    vm = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_name': vm_name
+    })
+    return vm.get("identity") if vm else None
 
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
