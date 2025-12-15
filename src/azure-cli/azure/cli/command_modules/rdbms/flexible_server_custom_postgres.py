@@ -1663,8 +1663,8 @@ def index_tuning_update(cmd, client, resource_group_name, server_name, index_tun
         source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
         location = ''.join(source_server_object.location.lower().split())
         list_location_capability_info = get_postgres_location_capability_info(cmd, location, is_offer_restriction_check_required=True)
-        index_tuning_supported = list_location_capability_info['index_tuning_supported']
-        if not index_tuning_supported:
+        autonomous_tuning_supported = list_location_capability_info['autonomous_tuning_supported']
+        if not autonomous_tuning_supported:
             raise CLIError("Index tuning is not supported for the server.")
 
         logger.warning("Enabling index tuning for the server.")
@@ -1699,7 +1699,7 @@ def index_tuning_show(client, resource_group_name, server_name):
 
 def index_tuning_settings_list(cmd, client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
-    index_tuning_configurations_map_values = get_index_tuning_settings_map().values()
+    index_tuning_configurations_map_values = get_autonomous_tuning_settings_map().values()
     configurations_list = client.list_by_server(resource_group_name, server_name)
 
     # Filter the list based on the values in the dictionary
@@ -1710,7 +1710,7 @@ def index_tuning_settings_list(cmd, client, resource_group_name, server_name):
 
 def index_tuning_settings_get(cmd, client, resource_group_name, server_name, setting_name):
     validate_resource_group(resource_group_name)
-    index_tuning_configurations_map = get_index_tuning_settings_map()
+    index_tuning_configurations_map = get_autonomous_tuning_settings_map()
     index_tuning_configuration_name = index_tuning_configurations_map[setting_name]
 
     return client.get(
@@ -1721,12 +1721,12 @@ def index_tuning_settings_get(cmd, client, resource_group_name, server_name, set
 
 def index_tuning_settings_set(client, resource_group_name, server_name, setting_name, value=None):
     source = "user-override" if value else None
-    tuning_settings = get_index_tuning_settings_map()
+    tuning_settings = get_autonomous_tuning_settings_map()
     configuration_name = tuning_settings[setting_name]
     return flexible_parameter_update(client, server_name, configuration_name, resource_group_name, source, value)
 
 
-def recommendations_list(cmd, resource_group_name, server_name, recommendation_type=None):
+def index_tuning_recommendations_list(cmd, resource_group_name, server_name, recommendation_type=None):
     validate_resource_group(resource_group_name)
     tuning_options_client = cf_postgres_flexible_tuning_options(cmd.cli_ctx, None)
 
@@ -1747,7 +1747,7 @@ def autonomous_tuning_update(cmd, client, resource_group_name, server_name, auto
         source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
         location = ''.join(source_server_object.location.lower().split())
         list_location_capability_info = get_postgres_location_capability_info(cmd, location)
-        autonomous_tuning_supported = list_location_capability_info['index_tuning_supported']
+        autonomous_tuning_supported = list_location_capability_info['autonomous_tuning_supported']
         if not autonomous_tuning_supported:
             raise CLIError("Autonomous tuning is not supported for the server.")
 
