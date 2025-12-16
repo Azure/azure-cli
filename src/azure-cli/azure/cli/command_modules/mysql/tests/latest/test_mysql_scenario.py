@@ -2025,6 +2025,9 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
         self.assertEqual(backup_name, customer_backup['name'])
         self.assertDictEqual(customer_backup, backups[0])
 
+        self.cmd('{} flexible-server backup delete -g {} -n {} --backup-name {}'
+                 .format(database_engine, resource_group, server, backup_name), expect_failure=False)
+
 
 class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
 
