@@ -1737,6 +1737,7 @@ def index_tuning_recommendations_list(cmd, resource_group_name, server_name, rec
         recommendation_type=recommendation_type
     )
 
+
 def autonomous_tuning_update(cmd, client, resource_group_name, server_name, autonomous_tuning_enabled):
     validate_resource_group(resource_group_name)
     source = "user-override"
