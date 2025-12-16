@@ -887,7 +887,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
         result = updateVmIdentity.result()
         return result
 
-    from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
+    from ._vm_utils import assign_identity as assign_identity_helper
     assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
 
     vm = getter()
