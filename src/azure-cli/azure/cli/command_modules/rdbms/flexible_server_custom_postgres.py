@@ -1747,7 +1747,7 @@ def autonomous_tuning_update(cmd, client, resource_group_name, server_name, auto
         postgres_source_client = get_postgresql_flexible_management_client(cmd.cli_ctx, subscription)
         source_server_object = postgres_source_client.servers.get(resource_group_name, server_name)
         location = ''.join(source_server_object.location.lower().split())
-        list_location_capability_info = get_postgres_location_capability_info(cmd, location)
+        list_location_capability_info = get_postgres_location_capability_info(cmd, location, is_offer_restriction_check_required=True)
         autonomous_tuning_supported = list_location_capability_info['autonomous_tuning_supported']
         if not autonomous_tuning_supported:
             raise CLIError("Autonomous tuning is not supported for the server.")
