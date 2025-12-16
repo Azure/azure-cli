@@ -826,8 +826,14 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 
 # region VirtualMachines Identity
 def show_vm_identity(cmd, resource_group_name, vm_name):
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    return vm.get("identity", {}) if vm else {}
+    vm = get_vm_migrated(cmd, resource_group_name, vm_name)
+
+    identity = vm.get("identity", {}) if vm else None
+
+    if identity and not identity.get('userAssignedIdentities'):
+        identity['userAssignedIdentities'] = None
+
+    return identity or {}
 
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
@@ -845,7 +851,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
     command_args = {'resource_group': resource_group_name, 'vm_name': vm_name}
 
     def getter():
-        return get_vm(cmd, resource_group_name, vm_name)
+        return get_vm_migrated(cmd, resource_group_name, vm_name)
 
     def setter(vm, external_identities=external_identities):
         if vm.get('identity') and vm.get('identity').get('type') == system_assigned_user_assigned:
@@ -1375,7 +1381,7 @@ def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False
     return result
 
 
-def get_vm(cmd, resource_group_name, vm_name, expand=None):
+def get_vm_migrated(cmd, resource_group_name, vm_name, expand=None):
     from .aaz.latest.vm._show import Show
     command_args = {
         'resource_group': resource_group_name,
@@ -1387,6 +1393,9 @@ def get_vm(cmd, resource_group_name, vm_name, expand=None):
 
     return Show(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
+def get_vm(cmd, resource_group_name, vm_name, expand=None):
+    client = _compute_client_factory(cmd.cli_ctx)
+    return client.virtual_machines.get(resource_group_name, vm_name, expand=expand)
 
 def get_vm_to_update(cmd, resource_group_name, vm_name):
     client = _compute_client_factory(cmd.cli_ctx)
