@@ -484,4 +484,3 @@ def transform_certificate_issuer_admin_list(result, **command_args):
         } for contact in admin_contacts]
         return ret
     return result
-
