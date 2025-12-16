@@ -1237,7 +1237,7 @@ short-summary: Update autonomous tuning to be enabled/disabled for a PostgreSQL 
 examples:
   - name: Update autonomous tuning to be enabled for a PostgreSQL flexible server.
     text: az postgres flexible-server autonomous-tuning update -g testgroup -s testsvr --enabled True
-  - name: Update autonomous tuning to be disabled  for a PostgreSQL flexible server.
+  - name: Update autonomous tuning to be disabled for a PostgreSQL flexible server.
     text: az postgres flexible-server autonomous-tuning update -g testgroup -s testsvr --enabled False
 """
 
