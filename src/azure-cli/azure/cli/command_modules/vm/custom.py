@@ -833,7 +833,7 @@ def show_vm_identity(cmd, resource_group_name, vm_name):
     if identity and not identity.get('userAssignedIdentities'):
         identity['userAssignedIdentities'] = None
 
-    return identity or {}
+    return identity or None
 
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
