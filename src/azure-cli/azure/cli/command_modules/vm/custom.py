@@ -826,12 +826,8 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 
 # region VirtualMachines Identity
 def show_vm_identity(cmd, resource_group_name, vm_name):
-    from .aaz.latest.vm._show import Show
-    vm = Show(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
-        'vm_name': vm_name
-    })
-    return vm.get("identity") if vm else None
+    vm = get_vm(cmd, resource_group_name, vm_name)
+    return vm.get("identity", {}) if vm else {}
 
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
@@ -1372,8 +1368,16 @@ def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False
 
 
 def get_vm(cmd, resource_group_name, vm_name, expand=None):
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machines.get(resource_group_name, vm_name, expand=expand)
+    from .aaz.latest.vm._show import Show
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+    }
+
+    if expand:
+        command_args['expand'] = expand
+
+    return Show(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def get_vm_to_update(cmd, resource_group_name, vm_name):
