@@ -11,6 +11,8 @@ import importlib
 from urllib.parse import urlparse
 
 from azure.cli.core.commands.arm import ArmTemplateBuilder
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType, get_sdk
 
 from knack.log import get_logger
 from knack.util import CLIError
@@ -757,3 +759,76 @@ def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
         f.write(public_bytes)
 
     return public_bytes.decode()
+
+
+def _gen_guid():
+    import uuid
+    return uuid.uuid4()
+
+
+def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=None):
+    import time
+    from azure.core.exceptions import HttpResponseError
+
+    # get
+    resource = getter()
+    resource = setter(resource)
+
+    # create role assignment:
+    if identity_scope:
+        principal_id = resource.get('identity').get('principal_id')
+
+        identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
+        assignments_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_assignments
+        RoleAssignmentCreateParameters = get_sdk(cli_ctx, ResourceType.MGMT_AUTHORIZATION,
+                                                 'RoleAssignmentCreateParameters', mod='models',
+                                                 operation_group='role_assignments')
+        parameters = RoleAssignmentCreateParameters(role_definition_id=identity_role_id, principal_id=principal_id,
+                                                    principal_type=None)
+
+        logger.info("Creating an assignment with a role '%s' on the scope of '%s'", identity_role_id, identity_scope)
+        retry_times = 36
+        assignment_name = _gen_guid()
+        for retry_time in range(0, retry_times):
+            try:
+                assignments_client.create(scope=identity_scope, role_assignment_name=assignment_name,
+                                          parameters=parameters)
+                break
+            except HttpResponseError as ex:
+                if ex.error.code == 'RoleAssignmentExists':
+                    logger.info('Role assignment already exists')
+                    break
+                if retry_time < retry_times and ' does not exist in the directory ' in ex.message:
+                    time.sleep(5)
+                    logger.warning('Retrying role assignment creation: %s/%s', retry_time + 1,
+                                   retry_times)
+                    continue
+                raise
+    return resource
+
+
+def resolve_role_id(cli_ctx, role, scope):
+    import uuid
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_definitions
+
+    role_id = None
+    if re.match(r'/subscriptions/[^/]+/providers/Microsoft.Authorization/roleDefinitions/',
+                role, re.I):
+        role_id = role
+    else:
+        try:
+            uuid.UUID(role)
+            role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/{}'.format(
+                client.config.subscription_id, role)
+        except ValueError:
+            pass
+        if not role_id:  # retrieve role id
+            role_defs = list(client.list(scope, "roleName eq '{}'".format(role)))
+            if not role_defs:
+                raise CLIError("Role '{}' doesn't exist.".format(role))
+            if len(role_defs) > 1:
+                ids = [r.id for r in role_defs]
+                err = "More than one role matches the given name '{}'. Please pick an id from '{}'"
+                raise CLIError(err.format(role, ids))
+            role_id = role_defs[0].id
+    return role_id
