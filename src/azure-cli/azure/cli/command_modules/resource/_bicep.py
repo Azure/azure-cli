@@ -115,6 +115,12 @@ def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
 
 
 def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, stdout=True):
+    def output(message):
+        if stdout:
+            print(message)
+        else:
+            _logger.info(message)
+
     if _use_binary_from_path(cli_ctx) and release_tag is None:
         # Only use the Bicep executable from PATH when no specific version is requested.
         from shutil import which
@@ -134,13 +140,13 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
 
     if os.path.isfile(installation_path):
         if not release_tag:
-            print(f"Bicep CLI is already installed at '{installation_path}'. Skipping installation as no specific version was requested.")  # pylint: disable=line-too-long
+            output(f"Bicep CLI is already installed at '{installation_path}'. Skipping installation as no specific version was requested.")  # pylint: disable=line-too-long
             return
 
         installed_version = _get_bicep_installed_version(installation_path)
         target_version = _extract_version(release_tag)
         if installed_version and target_version and installed_version == target_version:
-            print(f"Bicep CLI {installed_version} is already installed at '{installation_path}'.")
+            output(f"Bicep CLI {installed_version} is already installed at '{installation_path}'.")
             return
 
     installation_dir = os.path.dirname(installation_path)
@@ -148,11 +154,10 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
 
     try:
         release_tag = release_tag if release_tag else get_bicep_latest_release_tag()
-        if stdout:
-            if release_tag:
-                print(f"Installing Bicep CLI {release_tag}...")
-            else:
-                print("Installing Bicep CLI...")
+        if release_tag:
+            output(f"Installing Bicep CLI {release_tag}...")
+        else:
+            output("Installing Bicep CLI...")
         os.environ.setdefault("CURL_CA_BUNDLE", certifi.where())
 
         download_url = _get_bicep_download_url(system, machine, release_tag, target_platform=target_platform)
@@ -172,13 +177,7 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
             _logger.warning("The configuration value of bicep.use_binary_from_path has been set to 'false'.")
             set_use_binary_from_path_config(cli_ctx, "false")
 
-        if stdout:
-            print(f'Successfully installed Bicep CLI to "{installation_path}".')
-        else:
-            _logger.info(
-                "Successfully installed Bicep CLI to %s",
-                installation_path,
-            )
+        output(f'Successfully installed Bicep CLI to "{installation_path}".')
     except OSError as err:
         raise ClientRequestError(f"Error while attempting to download Bicep CLI: {err}")
 
