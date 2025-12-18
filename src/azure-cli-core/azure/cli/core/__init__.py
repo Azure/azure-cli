@@ -34,7 +34,9 @@ EVENT_FAILED_EXTENSION_LOAD = 'MainLoader.OnFailedExtensionLoad'
 ALWAYS_LOADED_MODULES = []
 # Extensions that will always be loaded if installed. They don't expose commands but hook into CLI core.
 ALWAYS_LOADED_EXTENSIONS = ['azext_ai_examples', 'azext_next']
+# Timeout (in seconds) for loading a single module. Acts as a safety valve to prevent indefinite hangs
 MODULE_LOAD_TIMEOUT_SECONDS = 30
+# Maximum number of worker threads for parallel module loading.
 MAX_WORKER_THREAD_COUNT = 4
 
 
@@ -200,12 +202,13 @@ class AzCli(CLI):
 
 
 class ModuleLoadResult:  # pylint: disable=too-few-public-methods
-    def __init__(self, module_name, command_table, group_table, elapsed_time, error=None):
+    def __init__(self, module_name, command_table, group_table, elapsed_time, error=None, traceback_str=None):
         self.module_name = module_name
         self.command_table = command_table
         self.group_table = group_table
         self.elapsed_time = elapsed_time
         self.error = error
+        self.traceback_str = traceback_str
 
 
 class MainCommandsLoader(CLICommandsLoader):
@@ -555,19 +558,22 @@ class MainCommandsLoader(CLICommandsLoader):
             future_to_module = {executor.submit(self._load_single_module, mod, args): mod
                                 for mod in command_modules if mod not in BLOCKED_MODS}
 
-            for future in future_to_module:
+            for future in concurrent.futures.as_completed(future_to_module):
                 try:
                     result = future.result(timeout=MODULE_LOAD_TIMEOUT_SECONDS)
                     results.append(result)
                 except concurrent.futures.TimeoutError:
                     mod = future_to_module[future]
                     logger.warning("Module '%s' load timeout after %s seconds", mod, MODULE_LOAD_TIMEOUT_SECONDS)
-                    future.cancel()
                     results.append(ModuleLoadResult(mod, {}, {}, 0,
                                                     Exception(f"Module '{mod}' load timeout")))
                 except (ImportError, AttributeError, TypeError, ValueError) as ex:
                     mod = future_to_module[future]
                     logger.warning("Module '%s' load failed: %s", mod, ex)
+                    results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
+                except Exception as ex:
+                    mod = future_to_module[future]
+                    logger.warning("Module '%s' load failed with unexpected exception: %s", mod, ex)
                     results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
 
         return results
@@ -575,6 +581,7 @@ class MainCommandsLoader(CLICommandsLoader):
     def _load_single_module(self, mod, args):
         from azure.cli.core.breaking_change import import_module_breaking_changes
         from azure.cli.core.commands import _load_module_command_loader
+        import traceback
         try:
             start_time = timeit.default_timer()
             module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
@@ -582,18 +589,19 @@ class MainCommandsLoader(CLICommandsLoader):
             elapsed_time = timeit.default_timer() - start_time
             return ModuleLoadResult(mod, module_command_table, module_group_table, elapsed_time)
         except Exception as ex:  # pylint: disable=broad-except
-            return ModuleLoadResult(mod, {}, {}, 0, ex)
+            tb_str = traceback.format_exc()
+            return ModuleLoadResult(mod, {}, {}, 0, ex, tb_str)
 
     def _handle_module_load_error(self, result):
         """Handle errors that occurred during module loading."""
-        import traceback
         from azure.cli.core import telemetry
 
         logger.error("Error loading command module '%s': %s", result.module_name, result.error)
         telemetry.set_exception(exception=result.error,
                                 fault_type='module-load-error-' + result.module_name,
                                 summary='Error loading module: {}'.format(result.module_name))
-        logger.debug(traceback.format_exc())
+        if result.traceback_str:
+            logger.debug(result.traceback_str)
 
     def _process_successful_load(self, result):
         """Process successfully loaded module results."""
