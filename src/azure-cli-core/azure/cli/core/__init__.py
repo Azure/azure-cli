@@ -571,7 +571,7 @@ class MainCommandsLoader(CLICommandsLoader):
                     mod = future_to_module[future]
                     logger.warning("Module '%s' load failed: %s", mod, ex)
                     results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
-                except Exception as ex:
+                except Exception as ex:  # pylint: disable=broad-exception-caught
                     mod = future_to_module[future]
                     logger.warning("Module '%s' load failed with unexpected exception: %s", mod, ex)
                     results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
