@@ -9272,15 +9272,19 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                     )
                     from azure.cli.command_modules.acs.azurecontainerstorage._helpers import should_delete_extension
                     if not should_delete_extension(disable_azure_container_storage_param):
-                        storage_option_str = disable_azure_container_storage_param
+                        storage_option_display = storage_option_param_str = disable_azure_container_storage_param
                         if isinstance(disable_azure_container_storage_param, list):
-                            storage_option_str = " ".join(disable_azure_container_storage_param)
+                            storage_options = disable_azure_container_storage_param
+                            storage_option_param_str = " ".join(storage_options)
+                            if len(storage_options) > 2:
+                                storage_options = [storage_options[:-1].join("', '"), storage_options[-1]]
+                            storage_option_display = "' and '".join(storage_options)
                         msg = (
                             "Please make sure there are no existing PVs and PVCs that are provisioned by Azure Container Storage "
-                            f"for {disable_azure_container_storage_param} before disabling. If storage options are disabled "
+                            f"for '{storage_option_display}' before disabling. If storage options are disabled "
                             "with remaining PVs and PVCs, any data associated with those PVs and PVCs will not be erased "
                             "and the nodes will be left in an unclean state. The PVs and PVCs can only be cleaned up "
-                            f"after re-enabling it by running 'az aks update --enable-azure-container-storage {storage_option_str}'. "
+                            f"after re-enabling it by running 'az aks update --enable-azure-container-storage {storage_option_param_str}'. "
                             "Would you like to proceed with the disabling?"
                         )
                     if not self.context.get_yes() and not prompt_y_n(msg, default="n"):

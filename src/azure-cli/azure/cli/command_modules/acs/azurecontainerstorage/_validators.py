@@ -464,13 +464,14 @@ def validate_enable_azure_container_storage_params(
         for option in enablement_option_arr:
             if option not in [CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK, CONST_STORAGE_POOL_TYPE_ELASTIC_SAN]:
                 raise InvalidArgumentValueError(
-                    f"Unsupported Azure Container Storage option '{option}'. "
+                    f"Unsupported storage option '{option}'. "
                     f"Supported values are '{CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK}' "
                     f"and '{CONST_STORAGE_POOL_TYPE_ELASTIC_SAN}'."
                 )
         if is_ephemeral_disk_enabled == enable_ephemeral_disk and is_elastic_san_enabled == enable_elastic_san:
+            options_display = "', '".join(enablement_option_arr)
             raise InvalidArgumentValueError(
-                f"Cannot enable Azure Container Storage option(s) '{enablement_option}' "
+                f"Cannot enable the requested storage options ('{options_display}') "
                 "as they are already enabled on the cluster."
             )
 
@@ -530,13 +531,14 @@ def validate_disable_azure_container_storage_params(
                 actionable = actionable or is_elastic_san_enabled
             else:
                 raise InvalidArgumentValueError(
-                    f"Cannot disable unsupported Azure Container Storage option '{disable_option}'. "
+                    f"Cannot disable unsupported storage option '{disable_option}'. "
                     f"Supported values are '{CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK}', "
                     f"'{CONST_STORAGE_POOL_TYPE_ELASTIC_SAN}' and '{CONST_ACSTOR_ALL}'."
                 )
         if not actionable:
+            options_display = "', '".join(disablement_option_arr)
             raise InvalidArgumentValueError(
-                f"Cannot disable Azure Container Storage option(s) '{disablement_option}' "
+                f"Cannot disable the requested storage options ('{options_display}') "
                 "as they could not be found on the cluster."
             )
 

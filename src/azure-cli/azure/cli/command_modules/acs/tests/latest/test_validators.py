@@ -1641,7 +1641,7 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
                 storage_pool_type, True, False, False, "", "", "", "",
             )
         err = (
-            f"Cannot disable unsupported Azure Container Storage option '{storage_pool_type}'. "
+            f"Cannot disable unsupported storage option '{storage_pool_type}'. "
             "Supported values are 'ephemeralDisk', 'elasticSan' and 'all'."
         )
         self.assertEqual(str(cm.exception), err)
@@ -1653,7 +1653,7 @@ class TestValidateDisableAzureContainerStorage(unittest.TestCase):
                 storage_pool_type, True, False, False, "", "", "", "",
             )
         err = (
-            f"Cannot disable Azure Container Storage option(s) '{storage_pool_type}' "
+            f"Cannot disable the requested storage options ('{storage_pool_type}') "
             "as they could not be found on the cluster."
         )
         self.assertEqual(str(cm.exception), err)
@@ -1770,7 +1770,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
                 storage_type, True, True, False, False, "", None, None, None, None,
             )
         err = (
-            f"Cannot enable Azure Container Storage option(s) '{storage_type}' "
+            f"Cannot enable the requested storage options ('{storage_type}') "
             "as they are already enabled on the cluster."
         )
         self.assertEqual(str(cm.exception), err)
@@ -1794,7 +1794,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
                 storage_types, True, True, True, False, "", None, None, None, None,
             )
         err = (
-            f"Cannot enable Azure Container Storage option(s) '{storage_types}' "
+            f"Cannot enable the requested storage options ('{storage_types[0]}', '{storage_types[1]}') "
             "as they are already enabled on the cluster."
         )
         self.assertEqual(str(cm.exception), err)
@@ -1808,7 +1808,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
                 storage_types, False, False, False, False, "", None, None, None, None,
             )
         err = (
-            f"Unsupported Azure Container Storage option '{unsupported_storage_type}'. "
+            f"Unsupported storage option '{unsupported_storage_type}'. "
             "Supported values are 'ephemeralDisk' and 'elasticSan'."
         )
         self.assertEqual(str(cm.exception), err)
@@ -1820,7 +1820,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
                 storage_type, False, False, False, False, "", None, None, None, None,
             )
         err = (
-            f"Unsupported Azure Container Storage option '{storage_type}'. "
+            f"Unsupported storage option '{storage_type}'. "
             "Supported values are 'ephemeralDisk' and 'elasticSan'."
         )
         self.assertEqual(str(cm.exception), err)
@@ -1850,7 +1850,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
             f'Please remove --storage-pool-sku {storage_pool_sku} from the command and try again.'
         )
         self.assertEqual(str(cm.exception), err)
-        
+
     def test_enable_with_storage_pool_option(self):
         storage_pool_option = "valid-option"
         with self.assertRaises(InvalidArgumentValueError) as cm:

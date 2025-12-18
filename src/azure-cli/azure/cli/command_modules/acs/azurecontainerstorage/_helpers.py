@@ -291,8 +291,10 @@ def get_extension_installed_and_cluster_configs(
 
 
 def should_delete_extension(storage_options_to_remove) -> bool:
-    return (storage_options_to_remove in [True, CONST_ACSTOR_ALL] or
-            isinstance(storage_options_to_remove, list) and CONST_ACSTOR_ALL in storage_options_to_remove)
+    return (
+        storage_options_to_remove in [True, CONST_ACSTOR_ALL] or
+        (isinstance(storage_options_to_remove, list) and CONST_ACSTOR_ALL in storage_options_to_remove)
+    )
 
 
 def get_container_storage_extension_installed(
