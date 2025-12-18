@@ -541,7 +541,7 @@ def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_s
                                      "To proceed, please set --allow-same-zone.")
 
     if standby_availability_zone:
-        if not high_availability_zone_redundant or not zonal_resiliency_enabled:
+        if not high_availability_zone_redundant and not zonal_resiliency_enabled:
             raise ArgumentUsageError("You need to enable high availability by setting --zonal-resiliency to Enabled "
                                      "to set standby availability zone.")
         if zone == standby_availability_zone:
