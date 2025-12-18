@@ -155,6 +155,9 @@ class Identity:  # pylint: disable=too-many-instance-attributes
                                "If no web browser is available or if the web browser fails to open, use device code "
                                "flow with `az login --use-device-code`.",
                                self._msal_app.authority.authorization_endpoint)
+                logger.warning("Important: The authentication URL you are opening contains account‑sensitive "
+                               "parameters. Never share or paste this URL anywhere.")
+                logger.warning("Sharing it may allow others to authenticate as you.")
             elif ui == 'broker':
                 logger.warning(WAM_PROMPT)
 
