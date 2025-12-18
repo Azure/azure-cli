@@ -4384,11 +4384,11 @@ class VMSSCreateAndModify(ScenarioTest):
         })
 
         self.cmd('vmss create --admin-password testPassword0 --name {vmss} -g {rg} --admin-username myadmin --image Win2022Datacenter '
-                 '--instance-count {count} --orchestration-mode Uniform --lb-sku Standard')
+                 '--instance-count {count} --orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls')
 
         self.cmd('vmss show --name {vmss} -g {rg}', checks=[
             self.check('virtualMachineProfile.priority', None),
-            self.check('sku.name', 'Standard_DS1_v2'),
+            self.check('sku.name', 'Standard_B1ls'),
         ])
 
         self.cmd('vmss list',
@@ -5625,6 +5625,60 @@ class VMSSVMsScenarioTest(ScenarioTest):
         for iid in self.kwargs['instance_ids']:
             result = self.cmd('vmss get-instance-view --resource-group {{rg}} --name {{vmss}} --instance-id {}'.format(iid)).get_output_in_json()
             self.assertTrue(result['statuses'][1]['code'] in args)
+
+    @ResourceGroupPreparer(name_prefix='cli_test_vmss_resiliency_view')
+    def test_vmss_resiliency_view(self, resource_group):
+        self.kwargs.update({
+            'vmss_name_1': self.create_random_name('vmss', 20),
+            'vmss_name_2': self.create_random_name('vmss', 20),
+        })
+
+        self.cmd('vmss create -g {rg} -n {vmss_name_1} '
+                 '--image Debian11 '
+                 '--orchestration-mode Flexible '
+                 '--vm-sku Standard_B1ls')
+
+        instance_list = self.cmd('vmss list-instances -g {rg} -n {vmss_name_1} '
+                                 '--resiliency-view',
+                                 checks=[
+                                     self.exists('[0]'),
+                                     self.exists('[0].resilientVMDeletionStatus'),
+                                     self.check('[0].resilientVMDeletionStatus', 'Disabled')
+                                 ]).get_output_in_json()
+
+        instances_id = [instance['instanceId'] for instance in instance_list]
+        self.kwargs['instance_id'] = instances_id[0]
+
+        self.cmd('vmss get-resiliency-view -g {rg} -n {vmss_name_1} '
+                 '--instance {instance_id}',
+                 checks=[
+                     self.exists('resilientVMDeletionStatus'),
+                     self.check('resilientVMDeletionStatus', 'Disabled')
+                 ])
+
+        self.cmd('vmss create -g {rg} -n {vmss_name_2} '
+                 '--image Debian11 '
+                 '--orchestration-mode Uniform '
+                 '--instance-count 3 '
+                 '--vm-sku Standard_B1ls')
+
+        instance_list = self.cmd('vmss list-instances -g {rg} -n {vmss_name_2} '
+                                 '--resiliency-view',
+                                 checks=[
+                                     self.exists('[0]'),
+                                     self.exists('[0].resilientVMDeletionStatus'),
+                                     self.check('[0].resilientVMDeletionStatus', 'Disabled')
+                                 ]).get_output_in_json()
+
+        instances_id = [instance['instanceId'] for instance in instance_list]
+        self.kwargs['instance_id'] = instances_id[0]
+
+        self.cmd('vmss get-resiliency-view -g {rg} -n {vmss_name_2} '
+                 '--instance {instance_id}',
+                 checks=[
+                     self.exists('resilientVMDeletionStatus'),
+                     self.check('resilientVMDeletionStatus', 'Disabled')
+                 ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_vmss_vms')
     def test_vmss_vms(self, resource_group):
@@ -11094,7 +11148,7 @@ class VMSSSetOrchestrationServiceStateScenarioTest(ScenarioTest):
         self.cmd(
             'network lb rule create -g {rg} --lb-name {lb} -n {lbrule} --probe-name {probe} --protocol Tcp --frontend-port 80 --backend-port 80')
         self.cmd(
-            'vmss create -g {rg} -n {vmss} --image Canonical:UbuntuServer:18.04-LTS:latest --load-balancer {lb} '
+            'vmss create -g {rg} -n {vmss} --image OpenLogic:CentOS:7.5:latest --load-balancer {lb} --vm-sku Standard_B1ls '
             '--health-probe {probe} --automatic-repairs-grace-period 30 --admin-username azureuser --orchestration-mode Uniform --lb-sku Standard',
             checks=[
                 self.check('vmss.automaticRepairsPolicy.enabled', True),

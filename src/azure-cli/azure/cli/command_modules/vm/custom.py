@@ -4109,20 +4109,57 @@ def get_vmss_modified_by_aaz(cmd, resource_group_name, name, instance_id=None, s
     return vmss
 
 
+def get_instances_list(cmd, resource_group_name, virtual_machine_scale_set_name, expand=None, filter=None,
+                       select=None, pagination_limit=None, pagination_token=None, resiliency_view=False, **kwargs):
+    get_list_args = kwargs
+    get_list_args['resource_group'] = resource_group_name
+    get_list_args['virtual_machine_scale_set_name'] = virtual_machine_scale_set_name
+    get_list_args['expand'] = expand
+    get_list_args['filter'] = filter
+    get_list_args['select'] = select
+    get_list_args['pagination_limit'] = pagination_limit
+    get_list_args['pagination_token'] = pagination_token
+
+    from .operations.vmss import VMSSListInstances
+    instances = VMSSListInstances(cli_ctx=cmd.cli_ctx)(command_args=get_list_args)
+
+    if not resiliency_view:
+        return instances
+
+    instances_id = [instance['instanceId'] for instance in instances]
+
+    from .operations.vmss_vms import VMSSGetResiliencyView
+    return [VMSSGetResiliencyView(cli_ctx=cmd.cli_ctx)(command_args={
+        'instance_id': instance_id,
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': virtual_machine_scale_set_name,
+    }) for instance_id in instances_id]
+
+
 def get_vmss_instance_view(cmd, resource_group_name, vm_scale_set_name, instance_id=None):
-    client = _compute_client_factory(cmd.cli_ctx)
     if instance_id:
         if instance_id == '*':
+            from .aaz.latest.vmss import ListInstances as VMSSListInstances
+            result = VMSSListInstances(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'virtual_machine_scale_set_name': vm_scale_set_name,
+                'select': 'instanceView',
+                'expand': 'instanceView',
+            })
+            return [x.get("instanceView", None) for x in result if x is not None]
 
-            return [x.instance_view for x in (client.virtual_machine_scale_set_vms.list(
-                resource_group_name=resource_group_name, virtual_machine_scale_set_name=vm_scale_set_name,
-                select='instanceView', expand='instanceView'))]
+        from .aaz.latest.vmss.vms.instance_view import Show as VMSSVMSInstanceViewShow
+        return VMSSVMSInstanceViewShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            'vm_scale_set_name': vm_scale_set_name,
+            'instance_id': instance_id,
+        })
 
-        return client.virtual_machine_scale_set_vms.get_instance_view(resource_group_name=resource_group_name,
-                                                                      vm_scale_set_name=vm_scale_set_name,
-                                                                      instance_id=instance_id)
-
-    return client.virtual_machine_scale_sets.get_instance_view(resource_group_name, vm_scale_set_name)
+    from .aaz.latest.vmss.instance_view import Show as VMSSInstanceViewShow
+    return VMSSInstanceViewShow(cli_ctx=cmd.cli_ctx)(command_args={
+        'resource_group': resource_group_name,
+        'vm_scale_set_name': vm_scale_set_name,
+    })
 
 
 def list_vmss_instance_connection_info(cmd, resource_group_name, vm_scale_set_name):

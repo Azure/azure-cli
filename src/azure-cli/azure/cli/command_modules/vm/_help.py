@@ -2599,6 +2599,13 @@ examples:
     crafted: true
 """
 
+helps['vmss list-instances'] = """
+type: command
+short-summary: List all virtual machines in a VM scale sets.
+long-summary: Return a list of virtual machines managed by VMSS. For VMSS in Flexible Orchestration mode,
+        please use "az vm list" to get full details.
+"""
+
 helps['vmss reimage'] = """
 type: command
 short-summary: Reimage VMs within a VMSS.

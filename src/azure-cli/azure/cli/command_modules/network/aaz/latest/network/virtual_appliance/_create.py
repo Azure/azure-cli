@@ -12,7 +12,7 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "network virtual-appliance create"
+    "network virtual-appliance create",
 )
 class Create(AAZCommand):
     """Create an Azure network virtual appliance.
@@ -22,9 +22,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkvirtualappliances/{}", "2024-10-01"],
         ]
     }
 
@@ -57,6 +57,11 @@ class Create(AAZCommand):
         # define Arg Group "Parameters"
 
         _args_schema = cls._args_schema
+        _args_schema.identity = AAZObjectArg(
+            options=["--identity"],
+            arg_group="Parameters",
+            help="The service principal that has read access to cloud-init and config blob.",
+        )
         _args_schema.location = AAZResourceLocationArg(
             arg_group="Parameters",
             help="Location. Values from: `az account list-locations`. You can configure the default location using `az configure --defaults location=<location>`.",
@@ -70,22 +75,29 @@ class Create(AAZCommand):
             help="Space-separated tags: key[=value] [key[=value] ...]. Use \"\" to clear existing tags.",
         )
 
-        _args_schema.identity = AAZObjectArg(
-            options=["--identity"],
-            arg_group="Parameters",
-            help="The identity of the Network Virtual Appliance, if configured.",
-        )
-
         identity = cls._args_schema.identity
+        identity.mi_system_assigned = AAZStrArg(
+            options=["system-assigned", "mi-system-assigned"],
+            help="Set the system managed identity.",
+            blank="True",
+        )
         identity.type = AAZStrArg(
             options=["type"],
-            help="The type of identity used for the resource. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the Network Virtual Appliance.",
+            help="The type of identity used for the resource. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual machine.",
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
+        )
+        identity.mi_user_assigned = AAZListArg(
+            options=["user-assigned", "mi-user-assigned"],
+            help="Set the user managed identities.",
+            blank=[],
         )
         identity.user_assigned_identities = AAZDictArg(
             options=["user-assigned-identities"],
             help="The list of user identities associated with resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
         )
+
+        mi_user_assigned = cls._args_schema.identity.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
 
         user_assigned_identities = cls._args_schema.identity.user_assigned_identities
         user_assigned_identities.Element = AAZObjectArg(
@@ -123,10 +135,7 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="The delegation for the Virtual Appliance",
         )
-
-        #Manually changed --internet-ingress-public-ips to --internet-ingress-ips to make it lint compliant.
-        #Will fix in Swagger in next release.
-        _args_schema.internet_ingress_public_ips = AAZListArg(
+        _args_schema.internet_ingress_ips = AAZListArg(
             options=["--internet-ingress-ips"],
             arg_group="Properties",
             help="List of Resource Uri of Public IPs for Internet Ingress Scenario.",
@@ -135,6 +144,14 @@ class Create(AAZCommand):
             options=["--network-profile"],
             arg_group="Properties",
             help="Network Profile containing configurations for Public and Private NIC.",
+        )
+        _args_schema.nva_interface_configurations = AAZListArg(
+            options=["--interface-configs", "--nva-interface-configurations"],
+            arg_group="Properties",
+            help="The NVA in VNet interface configurations",
+            fmt=AAZListArgFormat(
+                max_length=3,
+            ),
         )
         _args_schema.asn = AAZIntArg(
             options=["--asn"],
@@ -171,10 +188,10 @@ class Create(AAZCommand):
             help="The service name to which the NVA is delegated.",
         )
 
-        internet_ingress_public_ips = cls._args_schema.internet_ingress_public_ips
-        internet_ingress_public_ips.Element = AAZObjectArg()
+        internet_ingress_ips = cls._args_schema.internet_ingress_ips
+        internet_ingress_ips.Element = AAZObjectArg()
 
-        _element = cls._args_schema.internet_ingress_public_ips.Element
+        _element = cls._args_schema.internet_ingress_ips.Element
         _element.id = AAZResourceIdArg(
             options=["id"],
             help="Resource Uri of Public Ip",
@@ -209,6 +226,37 @@ class Create(AAZCommand):
         _element.primary = AAZBoolArg(
             options=["primary"],
             help="Whether or not this is primary IP configuration of the NIC.",
+        )
+
+        nva_interface_configurations = cls._args_schema.nva_interface_configurations
+        nva_interface_configurations.Element = AAZObjectArg()
+
+        _element = cls._args_schema.nva_interface_configurations.Element
+        _element.name = AAZStrArg(
+            options=["name"],
+            help="Specifies the name of the interface. Maximum length is 70 characters.",
+            fmt=AAZStrArgFormat(
+                max_length=70,
+            ),
+        )
+        _element.subnet = AAZObjectArg(
+            options=["subnet"],
+            help="A subnet resource id where the NIC will be deployed. Each subnet resource uri should be unique.",
+        )
+        _element.type = AAZListArg(
+            options=["type"],
+            help="Specifies the NIC types for the NVA interface configuration. Allowed values: PrivateNic, PublicNic, AdditionalPrivateNic, AdditionalPublicNic. Only the combination of PrivateNic and PublicNic is currently supported.",
+        )
+
+        subnet = cls._args_schema.nva_interface_configurations.Element.subnet
+        subnet.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource Uri of Subnet",
+        )
+
+        type = cls._args_schema.nva_interface_configurations.Element.type
+        type.Element = AAZStrArg(
+            enum={"AdditionalPrivateNic": "AdditionalPrivateNic", "AdditionalPublicNic": "AdditionalPublicNic", "PrivateNic": "PrivateNic", "PublicNic": "PublicNic"},
         )
 
         # define Arg Group "Sku"
@@ -321,7 +369,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-10-01",
                     required=True,
                 ),
             }
@@ -346,8 +394,8 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
+            _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location")
-            _builder.set_prop("identity", AAZObjectType, ".identity")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
@@ -355,10 +403,16 @@ class Create(AAZCommand):
             if identity is not None:
                 identity.set_prop("type", AAZStrType, ".type")
                 identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
+                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
+                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
                 user_assigned_identities.set_elements(AAZObjectType, ".")
+
+            user_assigned = _builder.get(".identity.userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -367,8 +421,9 @@ class Create(AAZCommand):
                 properties.set_prop("cloudInitConfiguration", AAZStrType, ".cloud_init_config")
                 properties.set_prop("cloudInitConfigurationBlobs", AAZListType, ".cloud_init_config_blobs")
                 properties.set_prop("delegation", AAZObjectType, ".delegation")
-                properties.set_prop("internetIngressPublicIps", AAZListType, ".internet_ingress_public_ips")
+                properties.set_prop("internetIngressPublicIps", AAZListType, ".internet_ingress_ips")
                 properties.set_prop("networkProfile", AAZObjectType, ".network_profile")
+                properties.set_prop("nvaInterfaceConfigurations", AAZListType, ".nva_interface_configurations")
                 properties.set_prop("nvaSku", AAZObjectType)
                 properties.set_prop("virtualApplianceAsn", AAZIntType, ".asn")
                 properties.set_prop("virtualHub", AAZObjectType)
@@ -432,6 +487,24 @@ class Create(AAZCommand):
             if properties is not None:
                 properties.set_prop("primary", AAZBoolType, ".primary")
 
+            nva_interface_configurations = _builder.get(".properties.nvaInterfaceConfigurations")
+            if nva_interface_configurations is not None:
+                nva_interface_configurations.set_elements(AAZObjectType, ".")
+
+            _elements = _builder.get(".properties.nvaInterfaceConfigurations[]")
+            if _elements is not None:
+                _elements.set_prop("name", AAZStrType, ".name")
+                _elements.set_prop("subnet", AAZObjectType, ".subnet")
+                _elements.set_prop("type", AAZListType, ".type")
+
+            subnet = _builder.get(".properties.nvaInterfaceConfigurations[].subnet")
+            if subnet is not None:
+                subnet.set_prop("id", AAZStrType, ".id")
+
+            type = _builder.get(".properties.nvaInterfaceConfigurations[].type")
+            if type is not None:
+                type.set_elements(AAZStrType, ".")
+
             nva_sku = _builder.get(".properties.nvaSku")
             if nva_sku is not None:
                 nva_sku.set_prop("bundledScaleUnit", AAZStrType, ".scale_unit")
@@ -470,7 +543,7 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             _schema_on_200_201.id = AAZStrType()
-            _schema_on_200_201.identity = AAZObjectType()
+            _schema_on_200_201.identity = AAZIdentityObjectType()
             _schema_on_200_201.location = AAZStrType()
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
@@ -542,11 +615,18 @@ class Create(AAZCommand):
             properties.network_profile = AAZObjectType(
                 serialized_name="networkProfile",
             )
+            properties.nva_interface_configurations = AAZListType(
+                serialized_name="nvaInterfaceConfigurations",
+            )
             properties.nva_sku = AAZObjectType(
                 serialized_name="nvaSku",
             )
             properties.partner_managed_resource = AAZObjectType(
                 serialized_name="partnerManagedResource",
+            )
+            properties.private_ip_address = AAZStrType(
+                serialized_name="privateIpAddress",
+                flags={"read_only": True},
             )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
@@ -635,6 +715,20 @@ class Create(AAZCommand):
 
             properties = cls._schema_on_200_201.properties.network_profile.network_interface_configurations.Element.properties.ip_configurations.Element.properties
             properties.primary = AAZBoolType()
+
+            nva_interface_configurations = cls._schema_on_200_201.properties.nva_interface_configurations
+            nva_interface_configurations.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.properties.nva_interface_configurations.Element
+            _element.name = AAZStrType()
+            _element.subnet = AAZObjectType()
+            _element.type = AAZListType()
+
+            subnet = cls._schema_on_200_201.properties.nva_interface_configurations.Element.subnet
+            subnet.id = AAZStrType()
+
+            type = cls._schema_on_200_201.properties.nva_interface_configurations.Element.type
+            type.Element = AAZStrType()
 
             nva_sku = cls._schema_on_200_201.properties.nva_sku
             nva_sku.bundled_scale_unit = AAZStrType(

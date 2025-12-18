@@ -419,6 +419,10 @@ authentication_metadata_param_type = CLIArgumentType(
     help='Preferred metadata to use for authentication of synced on-prem users. Default is AzureAD.',
     arg_type=get_enum_type(['AzureAD', 'Windows', 'Paired']))
 
+memory_size_type = CLIArgumentType(
+    options_list=['--memory'],
+    help='The memory size in gigabytes (GB).')
+
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
@@ -2326,6 +2330,12 @@ def load_arguments(self, _):
                    arg_type=capacity_param_type,
                    help='The capacity of the managed instance in integer number of vcores.')
 
+        c.argument('memory_size_in_gb',
+                   options_list=['--memory'],
+                   arg_type=memory_size_type,
+                   help='The memory size of the managed instance.'
+                   ' Memory size must be specified in GB')
+
         c.argument('collation',
                    help='The collation of the managed instance.')
 
@@ -2395,6 +2405,7 @@ def load_arguments(self, _):
                 'minimal_tls_version',
                 'virtual_network_subnet_id',
                 'vcores',
+                'memory_size_in_gb',
                 'storage_size_in_gb',
                 'storage_iops',
                 'collation',

@@ -87,6 +87,7 @@ def register_providers():
     _register_one_provider('Microsoft.FluidRelay/fluidRelayServers', '2025-03-10-preview', True)
     _register_one_provider('Microsoft.VideoIndexer/accounts', '2025-04-01', True)
     _register_one_provider('Microsoft.Security/privateLinks', '2025-09-01-preview', True)
+    _register_one_provider('Microsoft.Maps/accounts', '2023-12-01-preview', True)
 
 
 def _register_one_provider(provider, api_version, support_list_or_not, resource_get_api_version=None, support_connection_operation=True):  # pylint: disable=line-too-long

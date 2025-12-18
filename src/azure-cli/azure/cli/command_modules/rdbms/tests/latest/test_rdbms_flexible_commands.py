@@ -105,12 +105,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self._test_flexible_server_georestore_mgmt('postgres', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location=postgres_location)
     def test_flexible_server_ssdv2_restore_mgmt(self, resource_group):
         self._test_flexible_server_ssdv2_restore_mgmt('postgres', resource_group)
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location='southcentralus')
+    @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_ltr(self, resource_group):
         self._test_flexible_server_ltr('postgres', resource_group)
 
@@ -133,21 +133,24 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        version = '16'
+        version = '17'
         storage_size = 128
         location = self.postgres_location
-        db_name = self.POSTGRES_DB_NAME
-        sku_name = 'Standard_D2ds_v4'
-        memory_optimized_sku = 'Standard_E2ds_v4'
+        sku_name = 'Standard_D4ads_v5'
+        memory_optimized_sku = 'Standard_E4ds_v5'
         tier = 'GeneralPurpose'
         backup_retention = 7
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        zonal_resiliency_value = 'Enabled'
         ha_value = 'ZoneRedundant'
 
+        self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --tags keys=3 --high-availability {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --zonal-resiliency {} --location {}\
                   --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
-                                               sku_name, tier, storage_size, 'dbadmin', version, ha_value))
+                                               sku_name, tier, storage_size, 'dbadmin', version, zonal_resiliency_value, location))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
@@ -158,9 +161,18 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['version'], version)
         self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
         self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
+        self.assertEqual(basic_info['highAvailability']['mode'], ha_value)
 
-        self.cmd('{} flexible-server db show -g {} -s {} -d {}'
-                    .format(database_engine, resource_group, server_name, db_name), checks=[JMESPathCheck('name', db_name)])
+        self.cmd('{} flexible-server list -g {}'.format(database_engine, resource_group),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        connection_string = self.cmd('{} flexible-server show-connection-string -s {}'
+                                     .format(database_engine, server_name)).get_output_in_json()
+        self.assertIn('jdbc', connection_string['connectionStrings'])
+        self.assertIn('node.js', connection_string['connectionStrings'])
+        self.assertIn('php', connection_string['connectionStrings'])
+        self.assertIn('python', connection_string['connectionStrings'])
+        self.assertIn('ado.net', connection_string['connectionStrings'])
 
         self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
                  .format(database_engine, resource_group, server_name))
@@ -173,9 +185,16 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storage.autoGrow', "Enabled" )])
 
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Disabled'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.autoGrow', "Disabled" )])
+
         self.cmd('{} flexible-server update -g {} -n {} --backup-retention {}'
                  .format(database_engine, resource_group, server_name, backup_retention + 10),
                  checks=[JMESPathCheck('backup.backupRetentionDays', backup_retention + 10)])
+
+        self.cmd('{} flexible-server restart -g {} -n {}'
+                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         tier = 'MemoryOptimized'
         sku_name = memory_optimized_sku
@@ -188,42 +207,13 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('tags.keys', '3')])
 
-        self.cmd('{} flexible-server restart -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
-
         self.cmd('{} flexible-server stop -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         self.cmd('{} flexible-server start -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
-        self.cmd('{} flexible-server list -g {}'.format(database_engine, resource_group),
-                 checks=[JMESPathCheck('type(@)', 'array')])
-
-        restore_server_name = 'restore-' + server_name
-        self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
-                 .format(database_engine, resource_group, restore_server_name, server_name),
-                 checks=[JMESPathCheck('name', restore_server_name)])
-
-        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Disabled'
-                 .format(database_engine, resource_group, server_name),
-                 checks=[JMESPathCheck('storage.autoGrow', "Disabled" )])
-
-        connection_string = self.cmd('{} flexible-server show-connection-string -s {}'
-                                     .format(database_engine, server_name)).get_output_in_json()
-
-        self.assertIn('jdbc', connection_string['connectionStrings'])
-        self.assertIn('node.js', connection_string['connectionStrings'])
-        self.assertIn('php', connection_string['connectionStrings'])
-        self.assertIn('python', connection_string['connectionStrings'])
-        self.assertIn('ado.net', connection_string['connectionStrings'])
-
-        self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
-                 checks=[JMESPathCheck('type(@)', 'array')])
-
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
-
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
 
 
     def _test_flexible_server_mgmt_empty_rg_name_return_error(self, database_engine):
@@ -231,9 +221,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        version = '16'
+        version = '17'
         storage_size = 128
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D2ds_v5'
         tier = 'GeneralPurpose'
         backup_retention = 7
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -288,9 +278,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         sas_url = storage_account['primaryEndpoints']['blob'] + container_account_name + "?" + container_sas_token[1:-2]
 
         # create server
-        version = '16'
+        version = '17'
         storage_size = 128
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D2ds_v5'
         tier = 'GeneralPurpose'
         backup_retention = 7
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -331,7 +321,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         version = '16'
         storage_size = 128
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D4ds_v4'
         tier = 'GeneralPurpose'
         backup_retention = 7
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -417,12 +407,15 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storage.throughput', 400 )])
 
+        self.cmd('{} flexible-server update -g {} -n {} --high-availability SameZone'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('highAvailability.mode', 'SameZone' )])
+
+        self.cmd('{} flexible-server update -g {} -n {} --high-availability Disabled'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('highAvailability.mode', 'Disabled' )])
         # test failures
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
-                 .format(database_engine, resource_group, server_name),
-                 expect_failure=True)
-
-        self.cmd('{} flexible-server update -g {} -n {} --high-availability SameZone'
                  .format(database_engine, resource_group, server_name),
                  expect_failure=True)
 
@@ -437,7 +430,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     def _test_flexible_server_restore_mgmt(self, database_engine, resource_group):
 
         private_dns_param = 'privateDnsZoneArmResourceId'
-        location = 'southcentralus'
+        location = 'canadacentral'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server_default = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -585,7 +578,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     def _test_flexible_server_ssdv2_restore_mgmt(self, database_engine, resource_group):
 
-        location = 'southcentralus'
+        location = 'canadacentral'
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         source_ssdv2_server = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-', 40)
         target_server_ssdv2_migration = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-migrate-', 40)
@@ -1121,7 +1114,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1167,8 +1160,8 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                  database_engine, resource_group, server_name, location, invalid_backup_retention),
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l centraluseuap --high-availability {} '.format(
-                 database_engine, resource_group, server_name, ha_value),
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --high-availability {} '.format(
+                 database_engine, resource_group, server_name, location, ha_value),
                  expect_failure=True)
 
         # high availability validator
@@ -1176,11 +1169,11 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                  database_engine, resource_group, server_name, location, ha_value),
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l centraluseuap --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability {}'.format(
-                 database_engine, resource_group, server_name, ha_value), # single availability zone location
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D4ds_v4 --high-availability {}'.format(
+                 database_engine, resource_group, server_name, location, ha_value), # single availability zone location
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability {} --zone 1 --standby-zone 1'.format(
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2ads_v5 --high-availability {} --zone 1 --standby-zone 1'.format(
                  database_engine, resource_group, server_name, location, ha_value), # single availability zone location
                  expect_failure=True)
 
@@ -1882,7 +1875,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
@@ -2074,7 +2067,7 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'centralindia'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2158,12 +2151,12 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
     def _test_flexible_server_upgrade_mgmt(self, database_engine, resource_group, public_access):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        current_version = '13'
-        new_version = '16'
+        current_version = '15'
+        new_version = '17'
         location = self.postgres_location
 
         create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name {} --location {} --version {} --yes'.format(
-            database_engine, resource_group, server_name, "Standard_D2s_v3", location, current_version)
+            database_engine, resource_group, server_name, "Standard_D2ds_v5", location, current_version)
         if public_access:
             create_command += ' --public-access none'
         else:
@@ -2561,7 +2554,7 @@ class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
                  .format(vnet, resource_group, loc, subnet),
                  checks=self.check('length(newVNet.subnets)', 1))
         self.cmd('network vnet subnet update -n {} --vnet-name {} -g {} '
-                 '--disable-private-endpoint-network-policies true'
+                 '--private-endpoint-network-policies Disabled'
                  .format(subnet, vnet, resource_group),
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
@@ -2785,34 +2778,31 @@ class FlexibleServerFabricMirroringMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
 
 
-class CitusOnFlexMgmtScenarioTest(ScenarioTest):
+class ElasticClustersMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus2'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    def test_citus_on_flex_mgmt(self, resource_group):
-        self._test_citus_on_flex_mgmt('postgres', resource_group)
+    def test_elastic_clusters_mgmt(self, resource_group):
+        self._test_elastic_clusters_mgmt('postgres', resource_group)
 
-    def _test_citus_on_flex_mgmt(self, database_engine, resource_group):
+    def _test_elastic_clusters_mgmt(self, database_engine, resource_group):
 
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
         version = '17'
-        storage_size = 128
         location = self.postgres_location
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D2ds_v4'
         tier = 'GeneralPurpose'
-        backup_retention = 7
         cluster_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         cluster_size = 2
 
-        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --cluster-option ElasticCluster --node-count {} --public-access None'
-                  .format(database_engine, resource_group, cluster_name, backup_retention,
-                                               sku_name, tier, storage_size, 'dbadmin', version, cluster_size))
-
+        self.cmd('{} flexible-server create -g {} -n {} --sku-name {} \
+                   --version {} --cluster-option ElasticCluster --public-access Enabled'
+                  .format(database_engine, resource_group, cluster_name, sku_name, version))
+        
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, cluster_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], cluster_name)
         self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
@@ -2820,8 +2810,6 @@ class CitusOnFlexMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['sku']['name'], sku_name)
         self.assertEqual(basic_info['sku']['tier'], tier)
         self.assertEqual(basic_info['version'], version)
-        self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
-        self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
         self.assertEqual(basic_info['cluster']['clusterSize'], cluster_size)
 
         # test failures
@@ -2835,7 +2823,7 @@ class CitusOnFlexMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, cluster_name), expect_failure=True)
 
         # update cluster
-        update_cluster_size = cluster_size + 1
+        update_cluster_size = 4
         update_info = self.cmd('{} flexible-server update -g {} -n {} --node-count {}'
                                .format(database_engine, resource_group, cluster_name, update_cluster_size)).get_output_in_json()
         self.assertEqual(update_info['cluster']['clusterSize'], update_cluster_size)
@@ -2855,23 +2843,23 @@ class CitusOnFlexMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, cluster_restore_name))
 
 
-class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
+class FlexibleServerIndexTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus2euap'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    def test_postgres_flexible_server_tuning_options(self, resource_group):
-        self._test_tuning_options_mgmt('postgres', resource_group)
+    def test_postgres_flexible_server_index_tuning_options(self, resource_group):
+        self._test_index_tuning_options_mgmt('postgres', resource_group)
 
-    def _test_tuning_options_mgmt(self, database_engine, resource_group):
+    def _test_index_tuning_options_mgmt(self, database_engine, resource_group):
 
         # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
         location = self.postgres_location
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        version = '16'
+        version = '17'
         storage_size = 128
-        sku_name = 'Standard_D4s_v3'
+        sku_name = 'Standard_D4ds_v4'
         tier = 'GeneralPurpose'
 
         self.cmd('{} flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'.format(
@@ -2911,4 +2899,67 @@ class FlexibleServerTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
 
         # Show properties of index tuning setting for server
         self.cmd('{} flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+                 checks=[JMESPathCheck('value', 'off')])
+
+
+class FlexibleServerAutonomousTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
+
+    postgres_location = 'canadacentral'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_autonomous_tuning_options(self, resource_group):
+        self._test_autonomous_tuning_options_mgmt('postgres', resource_group)
+
+    def _test_autonomous_tuning_options_mgmt(self, database_engine, resource_group):
+
+        # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        version = '17'
+        storage_size = 128
+        sku_name = 'Standard_D4ds_v4'
+        tier = 'GeneralPurpose'
+
+        self.cmd('{} flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'.format(
+                 database_engine, resource_group, server_name, sku_name, tier, storage_size, version, location))
+
+        # Enable autonomous tuning for server
+        self.cmd('{} flexible-server autonomous-tuning update -g {} -s {} --enabled True'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # Show that autonomous tuning is enabled
+        self.cmd('{} flexible-server autonomous-tuning show -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # List settings associated with autonomous tuning for server
+        self.cmd('{} flexible-server autonomous-tuning list-settings -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # Show properties of autonomous tuning setting for server
+        self.cmd('{} flexible-server autonomous-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+                 checks=[JMESPathCheck('value', 'report')])
+        self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'pg_qs.query_capture_mode', resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'all')])
+
+        # Set new value of autonomous tuning setting for server
+        value = '1006'
+        self.cmd('{} flexible-server autonomous-tuning set-settings -g {} -s {} -n {} -v {}'.format(database_engine, resource_group, server_name,
+                                                                                               'unused_reads_per_table', value),
+                 checks=[JMESPathCheck('value', value)])
+
+        # List index recommendations associated with autonomous tuning for server
+        self.cmd('{} flexible-server autonomous-tuning list-index-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # List table recommendations associated with autonomous tuning for server
+        self.cmd('{} flexible-server autonomous-tuning list-table-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # Disable autonomous tuning for server
+        self.cmd('{} flexible-server autonomous-tuning update -g {} -s {} --enabled False'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # Show properties of autonomous tuning setting for server
+        self.cmd('{} flexible-server autonomous-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
                  checks=[JMESPathCheck('value', 'off')])

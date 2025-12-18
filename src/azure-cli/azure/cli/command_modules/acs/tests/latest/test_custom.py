@@ -690,6 +690,40 @@ class AcsCustomCommandTest(unittest.TestCase):
         finally:
             shutil.rmtree(temp_dir)
 
+    @mock.patch('azure.cli.command_modules.acs.custom._urlopen_read')
+    @mock.patch('azure.cli.command_modules.acs.custom._urlretrieve')
+    @mock.patch('azure.cli.command_modules.acs.custom.logger')
+    def test_k8s_install_kubelogin_with_gh_token(self, logger_mock, mock_url_retrieve, mock_urlopen_read):
+        """Test that gh_token parameter is properly passed to HTTP requests when installing kubelogin."""
+        # Mock the GitHub API response for latest release
+        mock_urlopen_read.return_value = b'{"tag_name": "v0.0.30"}'
+        # Mock the zip file download
+        mock_url_retrieve.side_effect = create_kubelogin_zip
+        
+        try:
+            temp_dir = tempfile.mkdtemp()
+            test_location = os.path.join(temp_dir, 'foo', 'kubelogin')
+            test_gh_token = 'ghp_test_token_123'
+            
+            # Install kubelogin with gh_token
+            k8s_install_kubelogin(
+                mock.MagicMock(),
+                client_version='latest',
+                install_location=test_location,
+                arch="amd64",
+                gh_token=test_gh_token
+            )
+            
+            # Verify gh_token was passed to _urlopen_read for GitHub API call
+            mock_urlopen_read.assert_called_once()
+            call_args = mock_urlopen_read.call_args
+            self.assertEqual(call_args.kwargs.get('gh_token'), test_gh_token)
+            
+            # Verify the installation completed
+            self.assertTrue(os.path.exists(test_location))
+        finally:
+            shutil.rmtree(temp_dir)
+
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_rg_location', return_value='eastus')
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resource_groups_client', autospec=True)
     @mock.patch('azure.cli.command_modules.acs.addonconfiguration.get_resources_client', autospec=True)

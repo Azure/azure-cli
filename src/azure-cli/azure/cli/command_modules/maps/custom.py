@@ -7,8 +7,6 @@ from knack.log import get_logger
 from knack.prompting import prompt_y_n
 from knack.util import CLIError
 
-ACCOUNT_LOCATION = 'global'
-
 logger = get_logger(__name__)
 
 
@@ -18,6 +16,7 @@ def maps_account_create(client,
                         name,
                         tags=None,
                         kind=None,
+                        location=None,
                         disable_local_auth=None,
                         linked_resources=None,
                         type_=None,
@@ -44,15 +43,13 @@ def maps_account_create(client,
         option = prompt_y_n(hint)
         if not option:
             raise CLIError(client_denied_terms)
-    if kind is None:
-        kind = "Gen1"
     if disable_local_auth is None:
         disable_local_auth = False
     maps_account = {}
     if tags is not None:
         maps_account['tags'] = tags
-    maps_account['location'] = ACCOUNT_LOCATION
-    maps_account['kind'] = "Gen1" if kind is None else kind
+    maps_account['kind'] = kind or 'Gen2'
+    maps_account['location'] = location or 'eastus'
     maps_account['properties'] = {}
     maps_account['properties']['disable_local_auth'] = False if disable_local_auth is None else disable_local_auth
     if linked_resources is not None:
@@ -143,64 +140,3 @@ def maps_account_regenerate_key(client,
 
 def maps_map_list_operation(client):
     return client.list_operations()
-
-
-def maps_creator_list(client,
-                      resource_group_name,
-                      account_name):
-    return client.list_by_account(resource_group_name=resource_group_name,
-                                  account_name=account_name)
-
-
-def maps_creator_show(client,
-                      resource_group_name,
-                      account_name,
-                      creator_name):
-    return client.get(resource_group_name=resource_group_name,
-                      account_name=account_name,
-                      creator_name=creator_name)
-
-
-def maps_creator_create(client,
-                        resource_group_name,
-                        account_name,
-                        creator_name,
-                        location,
-                        storage_units,
-                        tags=None):
-    creator_resource = {}
-    if tags is not None:
-        creator_resource['tags'] = tags
-    creator_resource['location'] = location
-    creator_resource['properties'] = {}
-    creator_resource['properties']['storage_units'] = storage_units
-    return client.create_or_update(resource_group_name=resource_group_name,
-                                   account_name=account_name,
-                                   creator_name=creator_name,
-                                   creator_resource=creator_resource)
-
-
-def maps_creator_update(client,
-                        resource_group_name,
-                        account_name,
-                        creator_name,
-                        tags=None,
-                        storage_units=None):
-    creator_update_parameters = {}
-    if tags is not None:
-        creator_update_parameters['tags'] = tags
-    if storage_units is not None:
-        creator_update_parameters['storage_units'] = storage_units
-    return client.update(resource_group_name=resource_group_name,
-                         account_name=account_name,
-                         creator_name=creator_name,
-                         creator_update_parameters=creator_update_parameters)
-
-
-def maps_creator_delete(client,
-                        resource_group_name,
-                        account_name,
-                        creator_name):
-    return client.delete(resource_group_name=resource_group_name,
-                         account_name=account_name,
-                         creator_name=creator_name)
