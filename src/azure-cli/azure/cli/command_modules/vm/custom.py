@@ -892,8 +892,8 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
 
     vm = getter()
     return _construct_identity_info(identity_scope, identity_role,
-                                   vm.get('identity').get('principalId') or None,
-                                   vm.get('identity').get('userAssignedIdentities') or None)
+                                   vm.get('identity').get('principalId') or None if vm.get('identity') else None,
+                                   vm.get('identity').get('userAssignedIdentities') or None if vm.get('identity') else None)
 # endregion
 
 
