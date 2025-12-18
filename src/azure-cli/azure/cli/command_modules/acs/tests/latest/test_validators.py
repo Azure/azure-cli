@@ -1767,7 +1767,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         storage_type = acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_type, True, True, False, False, "", None, None, None, None, 
+                storage_type, True, True, False, False, "", None, None, None, None,
             )
         err = (
             f"Cannot enable Azure Container Storage option(s) '{storage_type}' "
@@ -1791,7 +1791,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         storage_types = [acstor_consts.CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK, acstor_consts.CONST_STORAGE_POOL_TYPE_ELASTIC_SAN]
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_types, True, True, True, False, "", None, None, None, None, 
+                storage_types, True, True, True, False, "", None, None, None, None,
             )
         err = (
             f"Cannot enable Azure Container Storage option(s) '{storage_types}' "
@@ -1805,7 +1805,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         storage_types = [supported_storage_type, unsupported_storage_type]
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_types, False, False, False, False, "", None, None, None, None, 
+                storage_types, False, False, False, False, "", None, None, None, None,
             )
         err = (
             f"Unsupported Azure Container Storage option '{unsupported_storage_type}'. "
@@ -1817,7 +1817,7 @@ class TestValidateEnableAzureContainerStorage(unittest.TestCase):
         storage_type = acstor_consts.CONST_STORAGE_POOL_TYPE_AZURE_DISK
         with self.assertRaises(InvalidArgumentValueError) as cm:
             acstor_validator.validate_enable_azure_container_storage_params(
-                storage_type, False, False, False, False, "", None, None, None, None, 
+                storage_type, False, False, False, False, "", None, None, None, None,
             )
         err = (
             f"Unsupported Azure Container Storage option '{storage_type}'. "
