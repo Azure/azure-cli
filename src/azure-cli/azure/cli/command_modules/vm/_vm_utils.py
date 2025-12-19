@@ -777,7 +777,7 @@ def assign_identity(cli_ctx, getter, setter, identity_role=None, identity_scope=
 
     # create role assignment:
     if identity_scope:
-        principal_id = resource.get('identity').get('principal_id')
+        principal_id = resource.get('identity', {}).get('principal_id')
 
         identity_role_id = resolve_role_id(cli_ctx, identity_role, identity_scope)
         assignments_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_AUTHORIZATION).role_assignments
@@ -837,6 +837,6 @@ def resolve_role_id(cli_ctx, role, scope):
 
 class IdentityType(Enum):
     SYSTEM_ASSIGNED = 'SystemAssigned'
-    USER_ASSIGNED = "UserAssigned"
-    SYSTEM_ASSIGNED_USER_ASSIGNED = "SystemAssigned, UserAssigned"
+    USER_ASSIGNED = 'UserAssigned'
+    SYSTEM_ASSIGNED_USER_ASSIGNED = 'SystemAssigned, UserAssigned'
     NONE = 'None'

@@ -180,7 +180,7 @@ class VMIdentityRemove(_VMPatch):
 
     class VirtualMachinesUpdate(_VMPatch.VirtualMachinesUpdate):
         def _format_content(self, content):
-            if type(content) == str:
+            if isinstance(content, str):
                 content = json.loads(content)
 
             if not content.get('identity'):
@@ -195,7 +195,7 @@ class VMIdentityRemove(_VMPatch):
                 if 'UserAssigned' in identities.keys():
                     identities.pop('UserAssigned')
 
-                for key in identities.keys():
+                for key in list(identities.keys()):
                     identities[key] = None
 
             if len(content.get('identity', {}).get('userAssignedIdentities', {}).keys()) < 1:
@@ -207,16 +207,7 @@ class VMIdentityRemove(_VMPatch):
             request = self.make_request()
             request.data = self._format_content(request.data)
             session = self.client.send_request(request=request, stream=False, **kwargs)
-            if session.http_response.status_code in [202]:
-                return self.client.build_lro_polling(
-                    self.ctx.args.no_wait,
-                    session,
-                    self.on_200,
-                    self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
-                    path_format_arguments=self.url_parameters,
-                )
-            if session.http_response.status_code in [200]:
+            if session.http_response.status_code in [200, 202]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
