@@ -7,6 +7,7 @@ import json
 import os
 import re
 import importlib
+from enum import Enum
 
 from urllib.parse import urlparse
 
@@ -832,3 +833,10 @@ def resolve_role_id(cli_ctx, role, scope):
                 raise CLIError(err.format(role, ids))
             role_id = role_defs[0].id
     return role_id
+
+
+class IdentityType(Enum):
+    SYSTEM_ASSIGNED = 'SystemAssigned'
+    USER_ASSIGNED = "UserAssigned"
+    SYSTEM_ASSIGNED_USER_ASSIGNED = "SystemAssigned, UserAssigned"
+    NONE = 'None'
