@@ -1022,17 +1022,17 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
             with self.argument_context('{} flexible-server private-endpoint-connection {}'.format(command_group, scope)) as c:
                 c.argument('server_name', arg_type=server_name_resource_arg_type, required=False)
                 c.argument('private_endpoint_connection_name', options_list=['--name', '-n'], required=False,
-                            help='The name of the private endpoint connection associated with the Server. '
-                            'Required if --id is not specified')
+                           help='The name of the private endpoint connection associated with the Server. '
+                           'Required if --id is not specified')
                 c.extra('connection_id', options_list=['--id'], required=False,
                         help='The ID of the private endpoint connection associated with the Server. '
                         'If specified --server-name/-s and --name/-n, this should be omitted.')
                 if scope == "approve" or scope == "reject":
                     c.argument('description', help='Comments for {} operation.'.format(scope), required=True)
 
-        with self.argument_context('{} flexible-server private-endpoint-connection list'.format(command_group, scope)) as c:
+        with self.argument_context('{} flexible-server private-endpoint-connection list'.format(command_group)) as c:
             c.argument('server_name', arg_type=server_name_resource_arg_type, required=False)
-      
+
         # private-link-resource
         for scope in ['list', 'show']:
             with self.argument_context('{} flexible-server private-link-resource {}'.format(command_group, scope)) as c:
