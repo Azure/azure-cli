@@ -832,9 +832,9 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, parameters)
 
 
-def flexible_replica_promote(cmd, client, resource_group_name, server_name, promote_mode='standalone', promote_option='planned'):
+def flexible_replica_promote(cmd, client, resource_group_name, replica_name, promote_mode='standalone', promote_option='planned'):
     validate_resource_group(resource_group_name)
-    if is_citus_cluster(cmd, resource_group_name, server_name):
+    if is_citus_cluster(cmd, resource_group_name, replica_name):
         # some settings validation
         if promote_mode.lower() == 'standalone':
             raise ValidationError("Standalone replica promotion on elastic cluster isn't currently supported. Please use 'switchover' instead.")
@@ -842,12 +842,12 @@ def flexible_replica_promote(cmd, client, resource_group_name, server_name, prom
             raise ValidationError("Planned replica promotion on elastic cluster isn't currently supported. Please use 'forced' instead.")
 
     try:
-        server_object = client.get(resource_group_name, server_name)
+        server_object = client.get(resource_group_name, replica_name)
     except Exception as e:
         raise ResourceNotFoundError(e)
 
     if server_object.replica.role is not None and "replica" not in server_object.replica.role.lower():
-        raise CLIError('Server {} is not a replica server.'.format(server_name))
+        raise CLIError('Server {} is not a replica server.'.format(replica_name))
 
     if promote_mode == "standalone":
         params = postgresql_flexibleservers.models.ServerForPatch(
@@ -866,7 +866,7 @@ def flexible_replica_promote(cmd, client, resource_group_name, server_name, prom
             )
         )
 
-    return client.begin_update(resource_group_name, server_name, params)
+    return client.begin_update(resource_group_name, replica_name, params)
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,
