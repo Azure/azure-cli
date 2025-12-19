@@ -237,12 +237,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                   --public-access None'.format(database_engine, random_rg_name, server_name, backup_retention,
                                                sku_name, tier, storage_size, 'dbadmin', version, ha_value))
 
-        self.cmd('postgres flexible-server replica create -g "" --replica-name {} --source-server {}'.format(
+        self.cmd('postgres flexible-server replica create -g "" --name {} --source-server {}'.format(
                         replica_1_name,
                         server_name
             ), expect_failure=True)
 
-        self.cmd('postgres flexible-server replica create -g \'\' --replica-name {} --source-server {}'.format(
+        self.cmd('postgres flexible-server replica create -g \'\' --name {} --source-server {}'.format(
                         replica_1_name,
                         server_name
             ), expect_failure=True)
@@ -420,7 +420,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  expect_failure=True)
 
         replica_name = 'rep-ssdv2-' + server_name
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
                  .format(database_engine, resource_group, replica_name, basic_info['id']),
                  expect_failure=True)
 
@@ -739,7 +739,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             # create replica 1 with data encryption            
             replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
-            self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {} --key {} --identity {}'.format(
+            self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {} --key {} --identity {}'.format(
                         resource_group,
                         replica_1_name,
                         primary_server_name,
@@ -1284,7 +1284,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                               JMESPathCheck('storage.autoGrow', source_server_auto_grow)]).get_output_in_json()
         
         # test replica create
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {} --zone 2 {}'
                  .format(database_engine, resource_group, replicas[0], result['id'], public_access_arg),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
@@ -1329,7 +1329,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                           checks=[JMESPathCheck('replica.role', primary_role)] + master_vnet_check).get_output_in_json()
         
         # test replica create
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {} {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {} --zone 2 {} {}'
                  .format(database_engine, resource_group, replicas[0], result['id'], replica_vnet_args[0], public_access_arg),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
@@ -1366,7 +1366,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sourceServerResourceId', 'None')])
 
         # test delete master server
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {} {}'
                 .format(database_engine, resource_group, replicas[1], result['id'], replica_vnet_args[1]),
                 checks=[
                     JMESPathCheck('name', replicas[1]),
@@ -1382,7 +1382,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
         # test virtual-endpoint
         if not vnet_enabled:
-            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+            self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
                     .format(database_engine, resource_group, replicas[2], result['id']),
                     checks=[
                         JMESPathCheck('name', replicas[2]),
@@ -2171,7 +2171,7 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('version', current_version)])
 
         # create replica
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
                  .format(database_engine, resource_group, replica_name, server_name),
                  checks=[JMESPathCheck('version', current_version)])
 
@@ -2283,7 +2283,7 @@ class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
                      JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0]))])
 
         # create replica 1
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
                  .format(database_engine, resource_group, replica[0], server))
 
         if database_engine == 'postgres':
@@ -2338,7 +2338,7 @@ class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
                         JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1]))])
 
         # create replica 2
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
                  .format(database_engine, resource_group, replica[1], server))
 
         if database_engine == 'postgres':
