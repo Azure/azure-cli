@@ -826,7 +826,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 
 # region VirtualMachines Identity
 def show_vm_identity(cmd, resource_group_name, vm_name):
-    vm = get_vm_migrated(cmd, resource_group_name, vm_name)
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
 
     identity = vm.get("identity", {}) if vm else None
 
@@ -851,7 +851,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
     command_args = {'resource_group': resource_group_name, 'vm_name': vm_name}
 
     def getter():
-        return get_vm_migrated(cmd, resource_group_name, vm_name)
+        return get_vm_by_aaz(cmd, resource_group_name, vm_name)
 
     def setter(vm, external_identities=external_identities):
         if vm.get('identity') and vm.get('identity').get('type') == system_assigned_user_assigned:
@@ -1381,7 +1381,7 @@ def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False
     return result
 
 
-def get_vm_migrated(cmd, resource_group_name, vm_name, expand=None):
+def get_vm_by_aaz(cmd, resource_group_name, vm_name, expand=None):
     from .aaz.latest.vm._show import Show
     command_args = {
         'resource_group': resource_group_name,
@@ -2619,7 +2619,7 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
         from ._vm_utils import MSI_LOCAL_ID
         identities = [MSI_LOCAL_ID]
 
-    return _remove_identities_by_aaz(cmd, resource_group_name, vm_name, identities, get_vm_migrated, setter)
+    return _remove_identities_by_aaz(cmd, resource_group_name, vm_name, identities, get_vm_by_aaz, setter)
 
 
 # region VirtualMachines Images
