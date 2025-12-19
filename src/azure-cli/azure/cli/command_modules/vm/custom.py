@@ -874,26 +874,32 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
             command_args['mi_user_assigned'] = []
         else:
             command_args['mi_system_assigned'] = "True"
+            command_args['mi_user_assigned'] = []
 
         if vm.get('identity') and vm.get('identity').get('userAssignedIdentities'):
-            [command_args['mi_user_assigned'].append(key) for key in list(vm.get('identity').get('userAssignedIdentities').keys())]
+            for key in vm.get('identity').get('userAssignedIdentities').keys():
+                command_args['mi_user_assigned'].append(key)
 
         if identity.get('userAssignedIdentities'):
-            [command_args['mi_user_assigned'].append(key) for key in list(identity.get('userAssignedIdentities').keys()) if key not in command_args['mi_user_assigned']]
+            for key in identity.get('userAssignedIdentities').keys():
+                if key not in command_args['mi_user_assigned']:
+                    command_args['mi_user_assigned'].append(key)
 
         from .aaz.latest.vm._patch import Patch
-        updateVmIdentity = Patch(cli_ctx=cmd.cli_ctx)(command_args=command_args)
-        LongRunningOperation(cmd.cli_ctx)(updateVmIdentity)
-        result = updateVmIdentity.result()
+        update_vm_identity = Patch(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+        LongRunningOperation(cmd.cli_ctx)(update_vm_identity)
+        result = update_vm_identity.result()
         return result
 
     from ._vm_utils import assign_identity as assign_identity_helper
     assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
 
     vm = getter()
-    return _construct_identity_info(identity_scope, identity_role,
-                                   vm.get('identity').get('principalId') or None if vm.get('identity') else None,
-                                   vm.get('identity').get('userAssignedIdentities') or None if vm.get('identity') else None)
+    return _construct_identity_info(
+        identity_scope,
+        identity_role,
+        vm.get('identity').get('principalId') if vm.get('identity') else None,
+        vm.get('identity').get('userAssignedIdentities') if vm.get('identity') else None)
 # endregion
 
 
@@ -2518,7 +2524,7 @@ def _remove_identities(cmd, resource_group_name, name, identities, getter, sette
         return None
     emsis_to_remove = []
     if identities:
-        existing_emsis = {x.lower() for x in list((resource.identity.user_assigned_identities or {}).keys())}
+        existing_emsis = {x.lower() for x in (resource.identity.user_assigned_identities or {}).keys()}
         emsis_to_remove = {x.lower() for x in identities}
         non_existing = emsis_to_remove.difference(existing_emsis)
         if non_existing:
@@ -2560,18 +2566,18 @@ def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter
     if existing_identity is None:
         return None
 
-    existing_emsis = [x.lower() for x in list((existing_identity.get('userAssignedIdentities') or {}).keys())]
+    existing_emsis = [x.lower() for x in (existing_identity.get('userAssignedIdentities') or {}).keys()]
 
     if identities:
         emsis_to_remove = [x.lower() for x in identities]
 
-        non_existing = [emsis for emsis in emsis_to_remove if not emsis in existing_emsis]
+        non_existing = [emsis for emsis in emsis_to_remove if emsis not in existing_emsis]
         if non_existing:
             raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
 
-        emsis_to_be_retain = [emsis for emsis in existing_emsis if not emsis in emsis_to_remove]
+        emsis_to_retain = [emsis for emsis in existing_emsis if emsis not in emsis_to_remove]
 
-        if not emsis_to_be_retain:  # if all emsis are gone, we need to update the type
+        if not emsis_to_retain:  # if all emsis are gone, we need to update the type
             if existing_identity['type'] == IdentityType.USER_ASSIGNED.value:
                 existing_identity['type'] = IdentityType.NONE.value
             elif existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
@@ -2602,12 +2608,12 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 
         from ._vm_utils import IdentityType
         if vm.get('identity') and vm.get('identity').get('type') == IdentityType.USER_ASSIGNED.value:
-            command_args['mi_user_assigned'] = [key for key in list((vm.get('identity').get('userAssignedIdentities') or {}).keys())] + ['UserAssigned']
+            command_args['mi_user_assigned'] = [key for key in (vm.get('identity').get('userAssignedIdentities') or {}).keys()] + ['UserAssigned']
         elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED.value:
             command_args['mi_user_assigned'] = []
             command_args['mi_system_assigned'] = 'True'
         elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
-            command_args['mi_user_assigned'] = [key for key in list((vm.get('identity').get('userAssignedIdentities') or {}).keys())]
+            command_args['mi_user_assigned'] = [key for key in (vm.get('identity').get('userAssignedIdentities') or {}).keys()]
             command_args['mi_system_assigned'] = 'True'
         else:
             command_args['mi_user_assigned'] = []
