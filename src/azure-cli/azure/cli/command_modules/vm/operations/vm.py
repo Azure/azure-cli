@@ -3,11 +3,15 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument, too-many-statements, too-many-branches, too-many-locals
+from typing import override
+import json
+
 from knack.log import get_logger
 
 from azure.cli.core.aaz import AAZStrType
-from ..aaz.latest.vm import (Show as _VMShow, ListSizes as _VMListSizes,
+from ..aaz.latest.vm import (Show as _VMShow, ListSizes as _VMListSizes, Patch as _VMPatch,
                              Update as _VMUpdate, Capture as _VMCapture, Create as _VMCreate)
+from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
 
@@ -153,6 +157,76 @@ class VMCreate(_VMCreate):
 
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
+
+
+class VMIdentityRemove(_VMPatch):
+    def _output(self, *args, **kwargs):
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+        identity = result.get('identity')
+        if not identity:
+            return result
+
+        if not identity.get('principalId'):
+            identity['principalId'] = None
+
+        if not identity.get('tenantId'):
+            identity['tenantId'] = None
+
+        if not identity.get('userAssignedIdentities'):
+            identity['userAssignedIdentities'] = None
+
+        return result
+
+    class VirtualMachinesUpdate(_VMPatch.VirtualMachinesUpdate):
+        def _format_content(self, content):
+            if type(content) == str:
+                content = json.loads(content)
+
+            if not content.get('identity'):
+                content['identity'] = {
+                    'userAssignedIdentities': None,
+                    'type': IdentityType.NONE.value
+                }
+                return json.dumps(content)
+
+            identities = content.get('identity', {}).get('userAssignedIdentities')
+            if identities:
+                if 'UserAssigned' in identities.keys():
+                    identities.pop('UserAssigned')
+
+                for key in identities.keys():
+                    identities[key] = None
+
+            if len(content.get('identity', {}).get('userAssignedIdentities', {}).keys()) < 1:
+                content['identity']['userAssignedIdentities'] = None
+
+            return json.dumps(content)
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            request.data = self._format_content(request.data)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+            if session.http_response.status_code in [200]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+
+            return self.on_error(session.http_response)
 
 
 def convert_show_result_to_snake_case(result):

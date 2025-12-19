@@ -2545,18 +2545,81 @@ def _remove_identities(cmd, resource_group_name, name, identities, getter, sette
     return result.identity
 
 
+def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter, setter):
+    from ._vm_utils import MSI_LOCAL_ID, IdentityType
+
+    remove_system_assigned_identity = False
+
+    if MSI_LOCAL_ID in identities:
+        remove_system_assigned_identity = True
+        identities.remove(MSI_LOCAL_ID)
+
+    resource = getter(cmd, resource_group_name, name)
+    existing_identity = resource.get('identity')
+
+    if existing_identity is None:
+        return None
+
+    existing_emsis = [x.lower() for x in list((existing_identity.get('userAssignedIdentities') or {}).keys())]
+
+    if identities:
+        emsis_to_remove = [x.lower() for x in identities]
+
+        non_existing = [emsis for emsis in emsis_to_remove if not emsis in existing_emsis]
+        if non_existing:
+            raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+
+        emsis_to_be_retain = [emsis for emsis in existing_emsis if not emsis in emsis_to_remove]
+
+        if not emsis_to_be_retain:  # if all emsis are gone, we need to update the type
+            if existing_identity['type'] == IdentityType.USER_ASSIGNED.value:
+                existing_identity['type'] = IdentityType.NONE.value
+            elif existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+                existing_identity['type'] = IdentityType.SYSTEM_ASSIGNED.value
+
+        existing_identity['userAssignedIdentities'] = {}
+        for emsis in identities:
+            existing_identity['userAssignedIdentities'][emsis] = {}
+    else:
+        existing_identity['userAssignedIdentities'] = None
+
+    if remove_system_assigned_identity:
+        if existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value or existing_identity['type'] == IdentityType.USER_ASSIGNED.value:
+            existing_identity['type'] = IdentityType.USER_ASSIGNED.value
+        else:
+            existing_identity['type'] = IdentityType.NONE.value
+
+    result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
+    return result.get('identity') or None
+
+
 def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
     def setter(resource_group_name, vm_name, vm):
-        client = _compute_client_factory(cmd.cli_ctx)
-        VirtualMachineUpdate = cmd.get_models('VirtualMachineUpdate', operation_group='virtual_machines')
-        vm_update = VirtualMachineUpdate(identity=vm.identity)
-        return client.virtual_machines.begin_update(resource_group_name, vm_name, vm_update)
+        command_args = {
+            'resource_group': resource_group_name,
+            'vm_name': vm_name
+        }
+
+        from ._vm_utils import IdentityType
+        if vm.get('identity') and vm.get('identity').get('type') == IdentityType.USER_ASSIGNED.value:
+            command_args['mi_user_assigned'] = [key for key in list((vm.get('identity').get('userAssignedIdentities') or {}).keys())] + ['UserAssigned']
+        elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED.value:
+            command_args['mi_user_assigned'] = []
+            command_args['mi_system_assigned'] = 'True'
+        elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+            command_args['mi_user_assigned'] = [key for key in list((vm.get('identity').get('userAssignedIdentities') or {}).keys())]
+            command_args['mi_system_assigned'] = 'True'
+        else:
+            command_args['mi_user_assigned'] = []
+
+        from .operations.vm import VMIdentityRemove
+        return VMIdentityRemove(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
     if identities is None:
         from ._vm_utils import MSI_LOCAL_ID
         identities = [MSI_LOCAL_ID]
 
-    return _remove_identities(cmd, resource_group_name, vm_name, identities, get_vm, setter)
+    return _remove_identities_by_aaz(cmd, resource_group_name, vm_name, identities, get_vm_migrated, setter)
 
 
 # region VirtualMachines Images
