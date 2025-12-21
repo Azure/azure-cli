@@ -1399,9 +1399,11 @@ def get_vm_by_aaz(cmd, resource_group_name, vm_name, expand=None):
 
     return Show(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
+
 def get_vm(cmd, resource_group_name, vm_name, expand=None):
     client = _compute_client_factory(cmd.cli_ctx)
     return client.virtual_machines.get(resource_group_name, vm_name, expand=expand)
+
 
 def get_vm_to_update(cmd, resource_group_name, vm_name):
     client = _compute_client_factory(cmd.cli_ctx)
