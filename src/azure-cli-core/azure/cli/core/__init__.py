@@ -202,13 +202,14 @@ class AzCli(CLI):
 
 
 class ModuleLoadResult:  # pylint: disable=too-few-public-methods
-    def __init__(self, module_name, command_table, group_table, elapsed_time, error=None, traceback_str=None):
+    def __init__(self, module_name, command_table, group_table, elapsed_time, error=None, traceback_str=None, command_loader=None):
         self.module_name = module_name
         self.command_table = command_table
         self.group_table = group_table
         self.elapsed_time = elapsed_time
         self.error = error
         self.traceback_str = traceback_str
+        self.command_loader = command_loader
 
 
 class MainCommandsLoader(CLICommandsLoader):
@@ -346,7 +347,7 @@ class MainCommandsLoader(CLICommandsLoader):
                         # from an extension requires this map to be up-to-date.
                         # self._mod_to_ext_map[ext_mod] = ext_name
                         start_time = timeit.default_timer()
-                        extension_command_table, extension_group_table = \
+                        extension_command_table, extension_group_table, _ = \
                             _load_extension_command_loader(self, args, ext_mod)
                         import_extension_breaking_changes(ext_mod)
 
@@ -584,10 +585,10 @@ class MainCommandsLoader(CLICommandsLoader):
         import traceback
         try:
             start_time = timeit.default_timer()
-            module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
+            module_command_table, module_group_table, command_loader = _load_module_command_loader(self, args, mod)
             import_module_breaking_changes(mod)
             elapsed_time = timeit.default_timer() - start_time
-            return ModuleLoadResult(mod, module_command_table, module_group_table, elapsed_time)
+            return ModuleLoadResult(mod, module_command_table, module_group_table, elapsed_time, command_loader=command_loader)
         except Exception as ex:  # pylint: disable=broad-except
             tb_str = traceback.format_exc()
             return ModuleLoadResult(mod, {}, {}, 0, ex, tb_str)
@@ -605,6 +606,12 @@ class MainCommandsLoader(CLICommandsLoader):
 
     def _process_successful_load(self, result):
         """Process successfully loaded module results."""
+        if result.command_loader:
+            self.loaders.append(result.command_loader)
+
+            for cmd in result.command_table:
+                self.cmd_to_loader_map[cmd] = [result.command_loader]
+
         for cmd in result.command_table.values():
             cmd.command_source = result.module_name
 
