@@ -621,6 +621,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
                 c.argument('zonal_resiliency', arg_type=zonal_resiliency_arg_type, default="Disabled")
                 c.argument('allow_same_zone', arg_type=allow_same_zone_arg_type, default=False)
+                c.argument('database_name', arg_type=database_name_create_arg_type)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
