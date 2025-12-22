@@ -1167,17 +1167,15 @@ def apim_graphql_resolver_policy_delete(
                        policy_id="policy",
                        if_match="*" if if_match is None else if_match)
 
+
 def apim_backend_create(
         client, resource_group_name, service_name, backend_id, url, protocol, description=None,
-        title=None, resource_id=None, properties=None, if_match=None, no_wait=False):
+        no_wait=False, if_match=None):
 
     parameters = BackendContract(
         url=url,
         protocol=protocol,
-        description=description,
-        title=title,
-        resource_id=resource_id,
-        properties=properties
+        description=description
     )
 
     return sdk_no_wait(no_wait, client.backend.create_or_update,
@@ -1187,15 +1185,17 @@ def apim_backend_create(
                        parameters=parameters,
                        if_match="*" if if_match is None else if_match)
 
+
 def apim_backend_delete(
         client, resource_group_name, service_name, backend_id, if_match=None, no_wait=False):
 
     return sdk_no_wait(no_wait,
-            client.backend.delete,
-            resource_group_name=resource_group_name,
-            service_name=service_name,
-            backend_id=backend_id,
-            if_match="*" if if_match is None else if_match)
+                       client.backend.delete,
+                       resource_group_name=resource_group_name,
+                       service_name=service_name,
+                       backend_id=backend_id,
+                       if_match="*" if if_match is None else if_match)
+
 
 def apim_backend_show(client, resource_group_name, service_name, backend_id):
 
@@ -1204,15 +1204,16 @@ def apim_backend_show(client, resource_group_name, service_name, backend_id):
         service_name=service_name,
         backend_id=backend_id)
 
+
 def apim_backend_list(client, resource_group_name, service_name):
 
     return client.backend.list_by_service(
         resource_group_name=resource_group_name,
         service_name=service_name)
 
+
 def apim_backend_update(
-        instance, url=None, protocol=None, description=None,
-        title=None, resource_id=None, properties=None):
+        instance, url=None, protocol=None, description=None):
 
     if url is not None:
         instance.url = url
@@ -1222,14 +1223,5 @@ def apim_backend_update(
 
     if description is not None:
         instance.description = description
-
-    if title is not None:
-        instance.title = title
-
-    if resource_id is not None:
-        instance.resource_id = resource_id
-
-    if properties is not None:
-        instance.properties = properties
 
     return instance

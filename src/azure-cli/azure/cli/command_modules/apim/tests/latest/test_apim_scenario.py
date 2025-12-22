@@ -568,7 +568,6 @@ class ApimScenarioTest(ScenarioTest):
 
         # Backends operations
 
-         # named value operations
         self.kwargs.update({
             'backend_id': self.create_random_name('backend-id-', 30)
         })
@@ -580,18 +579,18 @@ class ApimScenarioTest(ScenarioTest):
                     self.check('url', 'https://mybackend.com/api'),
                     self.check('protocol', 'http'),
                     self.check('description', "My backend description")])
-        
+
         # backend show command
         self.cmd(
             'apim backend show -g "{rg}" --service-name "{service_name}" --backend-id "{backend_id}"',
             checks=[self.check('name', '{backend_id}'),
                     self.check('url', 'https://mybackend.com/api')])
-        
+
         # backend update command
         self.cmd(
-            'apim backend update -g "{rg}" --service-name "{service_name}" --backend-id "{backend_id}" --description "Updated backend description" --if-match "*"',
+            'apim backend update -g "{rg}" --service-name "{service_name}" --backend-id "{backend_id}" --description "Updated backend description"',
             checks=[self.check('description', 'Updated backend description')])
-        
+
         # backend list command
         backend_count = len(self.cmd('apim backend list -g "{rg}" --service-name "{service_name}"').get_output_in_json())
         self.assertEqual(backend_count, 1)

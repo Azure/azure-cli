@@ -812,11 +812,8 @@ parameters:
     short-summary: unique name of the Backend to be updated
     long-summary: |
         Must be unique in the current API Management service instance.
-  - name: --if-match
-    type: string
-    short-summary: ETag of the Backend entity. ETag should match the current entity state from the service to perform an update. Use "*" for unconditional update.
 examples:
   - name: Update a Backend.
     text: |-
-        az apim backend update --service-name MyApim -g MyResourceGroup --backend-id MyBackendId --if-match "*"
+        az apim backend update --service-name MyApim -g MyResourceGroup --backend-id MyBackendId --url https://mynewbackend.com
 """

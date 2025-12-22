@@ -185,10 +185,8 @@ def load_command_table(self, _):
         g.custom_command('list', 'apim_graphql_resolver_policy_list')
 
     with self.command_group('apim backend', backend_sdk) as g:
-        g.custom_command('create', 'apim_backend_create', supports_no_wait=True)
+        g.custom_command('create', 'apim_backend_create')
         g.custom_show_command('show', 'apim_backend_show')
         g.custom_command('list', 'apim_backend_list')
-        g.custom_command('delete', 'apim_backend_delete', confirmation=True, supports_no_wait=True)
-        g.generic_update_command('update', custom_func_name='apim_backend_update',
-                                 setter_name='update', getter_name='get', supports_no_wait=True)
-        g.wait_command('wait')
+        g.custom_command('delete', 'apim_backend_delete', confirmation=True)
+        g.generic_update_command('update', custom_func_name='apim_backend_update')

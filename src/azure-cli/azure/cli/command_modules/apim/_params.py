@@ -22,6 +22,7 @@ API_PROTOCOLS = Protocol
 API_TYPES = ApiType
 BACKEND_PROTOCOLS = BackendProtocol
 
+
 class ImportFormat(Enum):
     Wadl = "Wadl"
     Swagger = "Swagger"
@@ -52,7 +53,7 @@ def load_arguments(self, _):
     schema_id = CLIArgumentType(arg_group='Schema',
                                 help='Schema identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
     backend_id = CLIArgumentType(arg_group='Backend',
-                                 help='Backend identifier. Must be unique in the current API Management service instance. Non-current revision has ;rev=n as a suffix where n is the revision number.')
+                                 help='Backend identifier. Must be unique in the current API Management service instance.')
 
     from azure.cli.core.commands.parameters import tags_type
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
@@ -505,14 +506,36 @@ def load_arguments(self, _):
         c.argument('resolver_id', help='Resolver identifier within a GraphQL API. Must be unique in the current API Management service instance.')
         c.argument('if_match', help='ETag of the Entity.')
 
-    with self.argument_context('apim backend') as c:
+    with self.argument_context('apim backend create') as c:
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')
         c.argument('backend_id', arg_type=backend_id, help='Identifier of the Backend.')
         c.argument('url', help='Required. Backend service URL.')
         c.argument('protocol', arg_type=get_enum_type(BACKEND_PROTOCOLS),
                    help='Protocol used to communicate with the backend service. Possible values include: `http`, `soap`.')
-        c.argument('title', help='Backend title.')
         c.argument('description', help='Description of the Backend. May include HTML formatting tags.')
-        c.argument('resource_id', help='Resource ID of the backend service.')
         c.argument('if_match', help='ETag of the Entity.')
+
+    with self.argument_context('apim backend update') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('backend_id', arg_type=backend_id, help='Identifier of the Backend.')
+        c.argument('url', help='Required. Backend service URL.')
+        c.argument('protocol', arg_type=get_enum_type(BACKEND_PROTOCOLS),
+                   help='Protocol used to communicate with the backend service. Possible values include: `http`, `soap`.')
+        c.argument('description', help='Description of the Backend. May include HTML formatting tags.')
+
+    with self.argument_context('apim backend delete') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('backend_id', arg_type=backend_id, help='Identifier of the Backend.')
+        c.argument('if_match', help='ETag of the Entity.')
+
+    with self.argument_context('apim backend show') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
+        c.argument('backend_id', arg_type=backend_id, help='Identifier of the Backend.')
+
+    with self.argument_context('apim backend list') as c:
+        c.argument('service_name', options_list=['--service-name', '-n'],
+                   help='The name of the API Management service instance.')
