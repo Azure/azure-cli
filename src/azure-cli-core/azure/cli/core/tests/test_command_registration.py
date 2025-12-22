@@ -230,7 +230,7 @@ class TestCommandRegistration(unittest.TestCase):
             if command_table:
                 module_command_table.update(command_table)
                 loader.loaders.append(command_loader)  # this will be used later by the load_arguments method
-        return module_command_table, command_loader.command_group_table
+        return module_command_table, command_loader.command_group_table, command_loader
 
     expected_command_index = {'hello': ['azure.cli.command_modules.hello', 'azext_hello2', 'azext_hello1'],
                               'extra': ['azure.cli.command_modules.extra']}
