@@ -702,7 +702,8 @@ def perform_azure_container_storage_update(
         config_settings = []
 
         storage_options_to_add = storage_options_to_add if isinstance(storage_options_to_add, (list, str)) else []
-        storage_options_to_remove = storage_options_to_remove if isinstance(storage_options_to_remove, (list, str)) else []
+        storage_options_to_remove = storage_options_to_remove \
+            if isinstance(storage_options_to_remove, (list, str)) else []
 
         if CONST_STORAGE_POOL_TYPE_EPHEMERAL_DISK in storage_options_to_remove:
             config_settings.append({"csiDriverConfigs.local-csi-driver.enabled": "False"})
