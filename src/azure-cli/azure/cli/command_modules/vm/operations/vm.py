@@ -197,7 +197,7 @@ class VMIdentityRemove(_VMPatch):
                 for key in list(identities.keys()):
                     identities[key] = None
 
-            if len(content.get('identity', {}).get('userAssignedIdentities', {}).keys()) < 1:
+            if not content.get('identity', {}).get('userAssignedIdentities', {}):
                 content['identity']['userAssignedIdentities'] = None
 
             return json.dumps(content)
