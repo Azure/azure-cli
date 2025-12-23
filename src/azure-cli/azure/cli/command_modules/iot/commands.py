@@ -174,8 +174,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
                          transform=EndpointUpdateResultTransform(self.cli_ctx))
 
     # iot hub message enrichment commands
-    with self.command_group('iot hub message-enrichment', client_factory=iot_hub_service_factory,
-                            min_api="2019-07-01-preview") as g:
+    with self.command_group('iot hub message-enrichment', client_factory=iot_hub_service_factory) as g:
         g.custom_command('create', 'iot_message_enrichment_create')
         g.custom_command('list', 'iot_message_enrichment_list')
         g.custom_command('delete', 'iot_message_enrichment_delete')
@@ -190,11 +189,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-statements
         g.custom_command('delete', 'iot_hub_route_delete', transform=RouteUpdateResultTransform(self.cli_ctx))
         g.custom_command('update', 'iot_hub_route_update', transform=RouteUpdateResultTransform(self.cli_ctx))
         g.custom_command('test', 'iot_hub_route_test')
-
-    # iot hub device stream commands
-    with self.command_group('iot hub devicestream', client_factory=iot_hub_service_factory,
-                            min_api="2019-07-01-preview", is_preview=True) as g:
-        g.custom_show_command('show', 'iot_hub_devicestream_show')
 
     # iot central commands
     with self.command_group('iot central app', iot_central_sdk, client_factory=iot_central_service_factory) as g:

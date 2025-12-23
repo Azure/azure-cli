@@ -11,7 +11,6 @@ def load_arguments(self, _):
 
     from azure.mgmt.resource.locks.models import LockLevel
     from azure.mgmt.resource.managedapplications.models import ApplicationLockLevel
-    from azure.mgmt.resource.policy.models import EnforcementMode
     from azure.mgmt.resource.deploymentstacks.models import DenySettingsMode
     from azure.cli.core.commands.validators import get_default_location_from_resource_group
 
@@ -19,20 +18,16 @@ def load_arguments(self, _):
     from azure.cli.core.commands.parameters import (
         resource_group_name_type, get_location_type, tag_type, tags_type, get_resource_group_completion_list, no_wait_type, file_type,
         get_enum_type, get_three_state_flag)
-    from azure.cli.core.profiles import ResourceType
     from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
     from knack.arguments import ignore_type, CLIArgumentType
 
     from azure.cli.command_modules.resource._completers import (
-        get_policy_completion_list, get_policy_set_completion_list, get_policy_assignment_completion_list, get_policy_exemption_completion_list,
         get_resource_types_completion_list, get_providers_completion_list)
     from azure.cli.command_modules.resource._validators import (
-        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, validate_metadata, RollbackAction)
+        validate_lock_parameters, validate_resource_lock, validate_group_lock, validate_subscription_lock, RollbackAction)
     from azure.cli.command_modules.resource.parameters import TagUpdateOperation, StacksActionOnUnmanage
 
-    ExemptionCategory = self.get_models('ExemptionCategory', resource_type=ResourceType.MGMT_RESOURCE_POLICY,
-                                        operation_group='policy_exemptions')
     DeploymentMode, WhatIfResultFormat, ChangeType, ValidationLevel = self.get_models('DeploymentMode', 'WhatIfResultFormat', 'ChangeType', 'ValidationLevel')
 
     # BASIC PARAMETER CONFIGURATION
@@ -41,12 +36,7 @@ def load_arguments(self, _):
     resource_type_type = CLIArgumentType(help="The resource type (Ex: 'resC'). Can also accept namespace/type format (Ex: 'Microsoft.Provider/resC')")
     resource_namespace_type = CLIArgumentType(options_list='--namespace', completer=get_providers_completion_list, help="Provider namespace (Ex: 'Microsoft.Provider')")
     resource_parent_type = CLIArgumentType(required=False, options_list=['--parent'], help="The parent path (Ex: 'resA/myA/resB/myB')")
-    existing_policy_definition_name_type = CLIArgumentType(options_list=['--name', '-n'], completer=get_policy_completion_list, help='The policy definition name.')
-    existing_policy_set_definition_name_type = CLIArgumentType(options_list=['--name', '-n'], completer=get_policy_set_completion_list, help='The policy set definition name.')
-    subscription_type = CLIArgumentType(options_list='--subscription', FilesCompleter=get_subscription_id_list, help='The subscription id of the policy [set] definition.')
-    management_group_name_type = CLIArgumentType(options_list='--management-group', help='The name of the management group of the policy [set] definition. This parameter is required if your policy set is scoped to a management group.')
-    identity_scope_type = CLIArgumentType(help="Scope that the system assigned identity can access")
-    identity_role_type = CLIArgumentType(options_list=['--role'], help="Role name or id that will be assigned to the managed identity")
+    subscription_type = CLIArgumentType(options_list='--subscription', FilesCompleter=get_subscription_id_list, help='The subscription id.')
     extended_json_format_type = CLIArgumentType(options_list=['--handle-extended-json-format', '-j'], action='store_true',
                                                 help='Support to handle extended template content including multiline and comments in deployment')
     deployment_name_type = CLIArgumentType(options_list=['--name', '-n'], required=True, help='The deployment name.')
@@ -219,95 +209,6 @@ def load_arguments(self, _):
 
     with self.argument_context('feature registration list') as c:
         c.argument('resource_provider_namespace', options_list='--namespace', required=False, help=_PROVIDER_HELP_TEXT)
-
-    with self.argument_context('policy') as c:
-        c.argument('resource_group_name', arg_type=resource_group_name_type, help='the resource group where the policy will be applied')
-
-    with self.argument_context('policy definition', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('policy_definition_name', arg_type=existing_policy_definition_name_type)
-        c.argument('rules', help='JSON formatted string or a path to a file with such content', type=file_type, completer=FilesCompleter())
-        c.argument('display_name', help='Display name of policy definition.')
-        c.argument('description', help='Description of policy definition.')
-        c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
-        c.argument('metadata', min_api='2017-06-01-preview', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
-        c.argument('management_group', arg_type=management_group_name_type)
-        c.argument('mode', options_list=['--mode', '-m'], help='Mode of the policy definition, e.g. All, Indexed. Please visit https://aka.ms/azure-policy-mode for more information.', min_api='2016-12-01')
-        c.argument('subscription', arg_type=subscription_type)
-        c.ignore('_subscription')  # disable global subscription
-
-    with self.argument_context('policy definition create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy definition.')
-
-    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('name', options_list=['--name', '-n'], completer=get_policy_assignment_completion_list, help='Name of the policy assignment.')
-        c.argument('scope', help='Scope at which this policy assignment subcommand applies. Defaults to current context subscription.')
-        c.argument('disable_scope_strict_match', action='store_true', help='Include policy assignments either inherited from parent scope or at child scope.')
-        c.argument('display_name', help='Display name of the policy assignment.')
-        c.argument('description', help='Description of the policy assignment.', min_api='2016-12-01')
-        c.argument('policy', help='Name or id of the policy definition. If not provided, a policy set definition parameter must be provided.', completer=get_policy_completion_list)
-        c.argument('params', options_list=['--params', '-p'], help='JSON formatted string or a path to a file or uri with parameter values of the policy rule.', type=file_type, completer=FilesCompleter(), min_api='2016-12-01')
-
-    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2017-06-01-preview') as c:
-        c.argument('policy_set_definition', options_list=['--policy-set-definition', '-d'], help='Name or id of the policy set definition. If not provided, a policy definition parameter must be provided.')
-        c.argument('sku', options_list=['--sku', '-s'], help='policy sku.', arg_type=get_enum_type(['free', 'standard']), deprecate_info=c.deprecate(hide=True))
-        c.argument('notscopes', options_list='--not-scopes', nargs='+')
-
-    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, arg_group='Managed Identity', min_api='2018-05-01') as c:
-        c.argument('assign_identity', nargs='*', help="Assigns a system assigned identity to the policy assignment. This argument will be deprecated, please use --mi-system-assigned instead", deprecate_info=c.deprecate(hide=True))
-        c.argument('mi_system_assigned', action='store_true', help='Provide this flag to use system assigned identity for policy assignment. Check out help for more examples')
-        c.argument('mi_user_assigned', min_api='2021-06-01', help='UserAssigned Identity Id to be used for policy assignment. Check out help for more examples')
-        c.argument('identity_scope', arg_type=identity_scope_type)
-        c.argument('identity_role', arg_type=identity_role_type)
-
-    with self.argument_context('policy assignment', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2019-06-01') as c:
-        c.argument('enforcement_mode', options_list=['--enforcement-mode', '-e'], help='Enforcement mode of the policy assignment, e.g. Default, DoNotEnforce. Please visit https://aka.ms/azure-policyAssignment-enforcement-mode for more information.', arg_type=get_enum_type(EnforcementMode))
-
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy assignment.')
-
-    with self.argument_context('policy assignment create', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), help='The location of the policy assignment. Only required when utilizing managed identity.')
-
-    with self.argument_context('policy assignment identity', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2018-05-01') as c:
-        c.argument('mi_system_assigned', action='store_true', options_list=['--system-assigned'], help='Provide this flag to use system assigned identity for policy assignment. Check out help for more examples')
-        c.argument('mi_user_assigned', options_list=['--user-assigned'], min_api='2021-06-01', help='UserAssigned Identity Id to be used for policy assignment. Check out help for more examples')
-        c.argument('identity_scope', arg_type=identity_scope_type)
-        c.argument('identity_role', arg_type=identity_role_type)
-
-    with self.argument_context('policy assignment non-compliance-message', resource_type=ResourceType.MGMT_RESOURCE_POLICY, min_api='2020-09-01') as c:
-        c.argument('message', options_list=['--message', '-m'], help='Message that will be shown when a resource is denied by policy or evaluation details are inspected.')
-        c.argument('policy_definition_reference_id', options_list=['--policy-definition-reference-id', '-r'], help='Policy definition reference ID within the assigned initiative (policy set) that the message applies to.')
-
-    with self.argument_context('policy set-definition', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('policy_set_definition_name', arg_type=existing_policy_set_definition_name_type)
-        c.argument('display_name', help='Display name of policy set definition.')
-        c.argument('description', help='Description of policy set definition.')
-        c.argument('params', help='JSON formatted string or a path to a file or uri with parameter definitions.', type=file_type, completer=FilesCompleter())
-        c.argument('definitions', help='JSON formatted string or a path to a file or uri containing definitions.', type=file_type, completer=FilesCompleter())
-        c.argument('definition_groups', min_api='2019-09-01', help='JSON formatted string or a path to a file or uri containing policy definition groups. Groups are used to organize policy definitions within a policy set.', type=file_type, completer=FilesCompleter())
-        c.argument('metadata', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
-        c.argument('management_group', arg_type=management_group_name_type)
-        c.argument('subscription', arg_type=subscription_type)
-        c.ignore('_subscription')  # disable global subscription
-
-    with self.argument_context('policy set-definition create', min_api='2017-06-01-preview', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy set definition.')
-
-    with self.argument_context('policy exemption', min_api='2020-09-01', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.ignore('_subscription')
-        c.argument('name', options_list=['--name', '-n'], completer=get_policy_exemption_completion_list, help='Name of the policy exemption.')
-        c.argument('scope', help='Scope to which this policy exemption applies.')
-        c.argument('disable_scope_strict_match', options_list=['--disable-scope-strict-match', '-i'], action='store_true', help='Include policy exemptions either inherited from parent scope or at child scope.')
-        c.argument('display_name', help='Display name of the policy exemption.')
-        c.argument('description', help='Description of policy exemption.')
-        c.argument('exemption_category', options_list=['--exemption-category', '-e'], help='The policy exemption category of the policy exemption', arg_type=get_enum_type(ExemptionCategory))
-        c.argument('policy_definition_reference_ids', nargs='+', options_list=['--policy-definition-reference-ids', '-r'], help='The policy definition reference ids to exempt in the initiative (policy set).')
-        c.argument('expires_on', help='The expiration date and time (in UTC ISO 8601 format yyyy-MM-ddTHH:mm:ssZ) of the policy exemption.')
-        c.argument('metadata', nargs='+', validator=validate_metadata, help='Metadata in space-separated key=value pairs.')
-
-    with self.argument_context('policy exemption create', min_api='2020-09-01', resource_type=ResourceType.MGMT_RESOURCE_POLICY) as c:
-        c.argument('name', options_list=['--name', '-n'], help='Name of the new policy exemption.')
-        c.argument('policy_assignment', options_list=['--policy-assignment', '-a'], help='The referenced policy assignment Id for the policy exemption.')
 
     with self.argument_context('group') as c:
         c.argument('tag', tag_type)

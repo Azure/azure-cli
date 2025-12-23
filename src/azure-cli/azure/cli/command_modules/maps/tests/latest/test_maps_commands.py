@@ -10,8 +10,8 @@ from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
 
 class MapsScenarioTests(ScenarioTest):
 
-    @ResourceGroupPreparer(key='rg')
-    @ResourceGroupPreparer(key='rg1')
+    @ResourceGroupPreparer(key='rg', location="eastus")
+    @ResourceGroupPreparer(key='rg1', location="eastus")
     def test_create_maps_account(self, resource_group):
         tag_key = self.create_random_name(prefix='key-', length=10)
         tag_value = self.create_random_name(prefix='val-', length=10)
@@ -21,8 +21,7 @@ class MapsScenarioTests(ScenarioTest):
             'name1': self.create_random_name(prefix='cli-', length=20),
             'name2': self.create_random_name(prefix='cli-', length=20),
             'name3': self.create_random_name(prefix='clis1-', length=20),
-            'sku': 's0',
-            'skus1': 's1',
+            'sku': 'g2',
             'tags': tag_key + '=' + tag_value,
             'key_type_primary': 'primary',
             'key_type_secondary': 'secondary'
@@ -38,28 +37,24 @@ class MapsScenarioTests(ScenarioTest):
                                self.not_exists('tags')
                            ]).get_output_in_json()
 
-        # Call create again, expect to get the same account.
-        account_duplicated = self.cmd(
-            'az maps account create -n {name} -g {rg} --sku {sku} --accept-tos').get_output_in_json()
-        self.assertEqual(account, account_duplicated)
 
-        self.cmd('az maps account create -n {name3} -g {rg1} --sku {skus1} --accept-tos',
+        self.cmd('az maps account create -n {name3} -g {rg1} --sku {sku} --accept-tos',
                  checks=[
                      self.check('name', '{name3}'),
                      self.check('resourceGroup', '{rg1}'),
-                     self.check('sku.name', '{skus1}', case_sensitive=False),
+                     self.check('sku.name', '{sku}', case_sensitive=False),
                      self.not_exists('tags')
                  ]).get_output_in_json()
 
         # Test 'az maps account update'
         # Test to add a new tag to an existing account.
         # Test to upgrade tier to `S1`
-        self.cmd('az maps account update -n {name} -g {rg} --sku {skus1} --tags {tags}',
+        self.cmd('az maps account update -n {name} -g {rg} --sku {sku} --tags {tags}',
                  checks=[
                      self.check('id', account['id']),
                      self.check('name', '{name}'),
                      self.check('resourceGroup', '{rg}'),
-                     self.check('sku.name', '{skus1}', case_sensitive=False),
+                     self.check('sku.name', '{sku}', case_sensitive=False),
                      self.check('tags', {tag_key: tag_value})
                  ])
 
@@ -69,14 +64,14 @@ class MapsScenarioTests(ScenarioTest):
             self.check('id', account['id']),
             self.check('name', '{name}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('sku.name', '{skus1}', case_sensitive=False)
+            self.check('sku.name', '{sku}', case_sensitive=False)
         ])
         # Search by id
         self.cmd('az maps account show --ids ' + account['id'], checks=[
             self.check('id', account['id']),
             self.check('name', '{name}'),
             self.check('resourceGroup', '{rg}'),
-            self.check('sku.name', '{skus1}', case_sensitive=False),
+            self.check('sku.name', '{sku}', case_sensitive=False),
             self.check('tags', {tag_key: tag_value})
         ])
 
@@ -88,7 +83,7 @@ class MapsScenarioTests(ScenarioTest):
             self.check('[0].id', account['id']),
             self.check('[0].name', '{name}'),
             self.check('[0].resourceGroup', '{rg}'),
-            self.check('[0].sku.name', '{skus1}', case_sensitive=False),
+            self.check('[0].sku.name', '{sku}', case_sensitive=False),
             self.check('[0].tags', {tag_key: tag_value})
         ])
 

@@ -12,6 +12,7 @@ from .__cmd_group import *
 from ._assess_patches import *
 from ._capture import *
 from ._convert import *
+from ._create import *
 from ._deallocate import *
 from ._delete import *
 from ._generalize import *
@@ -20,6 +21,7 @@ from ._list_all import *
 from ._list_sizes import *
 from ._list_skus import *
 from ._list_vm_resize_options import *
+from ._migrate_to_vmss import *
 from ._patch import *
 from ._perform_maintenance import *
 from ._reapply import *

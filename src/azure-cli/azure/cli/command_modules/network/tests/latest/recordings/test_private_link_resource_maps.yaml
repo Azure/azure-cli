@@ -1,0 +1,118 @@
+interactions:
+- request:
+    body: '{"location": "westus2", "sku": {"name": "G2"}, "kind": "Gen2", "properties":
+      {"disableLocalAuth": false}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - maps account create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '105'
+      Content-Type:
+      - application/json
+      ParameterSetName:
+      - -g -s --kind -n --accept-tos -l
+      User-Agent:
+      - AZURECLI/2.80.0 azsdk-python-core/1.35.0 Python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42)
+    method: PUT
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_link_resource_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002?api-version=2021-02-01
+  response:
+    body:
+      string: "{\n  \"kind\": \"Gen2\",\n  \"type\": \"Microsoft.Maps/accounts\",\n
+        \ \"sku\": {\n    \"name\": \"G2\",\n    \"tier\": \"Standard\"\n  },\n  \"properties\":
+        {\n    \"uniqueId\": \"d85d8ad0-b4b9-43cf-b17b-3b9fd0cebaf7\",\n    \"provisioningState\":
+        \"Succeeded\",\n    \"disableLocalAuth\": false\n  },\n  \"systemData\": {\n
+        \   \"createdBy\": \"m@microsoft.mbelt.net\",\n    \"createdByType\": \"User\",\n
+        \   \"createdAt\": \"2025-11-12T21:46:43.9712844Z\",\n    \"lastModifiedBy\":
+        \"m@microsoft.mbelt.net\",\n    \"lastModifiedByType\": \"User\",\n    \"lastModifiedAt\":
+        \"2025-11-12T21:46:43.9712844Z\"\n  },\n  \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_link_resource_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002\",\n
+        \ \"name\": \"maps-privatelink-account000002\",\n  \"location\": \"westus2\"\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '789'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:46:43 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/355bcb24-80ba-4834-9780-72ea341489fe
+      x-ms-ratelimit-remaining-subscription-global-writes:
+      - '2999'
+      x-ms-ratelimit-remaining-subscription-writes:
+      - '199'
+      x-msedge-ref:
+      - 'Ref A: B232FF119EB048368C1F493E217D1AC5 Ref B: MWH011020809034 Ref C: 2025-11-12T21:46:43Z'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - network private-link-resource list
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - --id
+      User-Agent:
+      - python/3.13.7 (Linux-6.17.7-arch1-1-x86_64-with-glibc2.42) AZURECLI/2.80.0
+    method: GET
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_link_resource_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateLinkResources?api-version=2023-12-01-preview
+  response:
+    body:
+      string: "{\n  \"value\": [\n    {\n      \"id\": \"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/test_maps_private_link_resource_000001/providers/Microsoft.Maps/accounts/maps-privatelink-account000002/privateLinkResources/mapsAccount\",\n
+        \     \"name\": \"mapsAccount\",\n      \"type\": \"Microsoft.Maps/accounts/privateLinkResources\",\n
+        \     \"properties\": {\n        \"groupId\": \"mapsAccount\",\n        \"requiredMembers\":
+        [\n          \"mapsAccount_0\"\n        ],\n        \"requiredZoneNames\":
+        [\n          \"privatelink.account.maps.azure.com\"\n        ]\n      }\n
+        \   }\n  ]\n}"
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '560'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Wed, 12 Nov 2025 21:46:44 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-cache:
+      - CONFIG_NOCACHE
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=a1358d2f-a71f-4e96-86b8-33821da3bb29,objectId=1a41d7bc-dc4d-4125-a13e-7c3c9dd0e9e5/westus2/eafb3b25-387c-4f5b-8906-55f6754fd7e9
+      x-ms-ratelimit-remaining-subscription-global-reads:
+      - '3749'
+      x-msedge-ref:
+      - 'Ref A: 35ED60D4562D43C18EED3604A494EB99 Ref B: MWH011020809042 Ref C: 2025-11-12T21:46:44Z'
+    status:
+      code: 200
+      message: OK
+version: 1

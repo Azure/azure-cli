@@ -43,12 +43,15 @@ class Create(AAZCommand):
 
     :example: Create or update flow log
         az network watcher flow-log create --location westus --resource-group MtRGContainingVNet --name MyVNetName-flowlog --vnet MyVNetName --storage-account MyStorageAccountName  --filtering-criteria "dstip=20.252.145.59 || DstPort=443"
+
+    :example: Create flow log with recordtypes filtering
+        az network watcher flow-log create --resource-group rg1 --network-watcher-name nw1 --name fl --location centraluseuap --target-resource-id /subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/networkSecurityGroups/desmondcentral-nsg --storage-account /subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/nwtest1mgvbfmqsigdxe --filtering-criteria srcIP=158.255.7.8 || dstPort=56891 --record-types B,E --enabled True --format JSON --log-version 1 --identity "{type:UserAssigned,user-assigned-identities:{/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1:{}}}"
     """
 
     _aaz_info = {
-        "version": "2024-03-01",
+        "version": "2025-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/flowlogs/{}", "2024-03-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/flowlogs/{}", "2025-03-01"],
         ]
     }
 
@@ -130,16 +133,28 @@ class Create(AAZCommand):
         )
 
         identity = cls._args_schema.identity
-        
+        identity.mi_system_assigned = AAZStrArg(
+            options=["system-assigned", "mi-system-assigned"],
+            help="Set the system managed identity.",
+            blank="True",
+        )
         identity.type = AAZStrArg(
             options=["type"],
             help="The type of identity used for the resource. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual machine.",
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
         )
+        identity.mi_user_assigned = AAZListArg(
+            options=["user-assigned", "mi-user-assigned"],
+            help="Set the user managed identities.",
+            blank=[],
+        )
         identity.user_assigned_identities = AAZDictArg(
             options=["user-assigned-identities"],
             help="The list of user identities associated with resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
         )
+
+        mi_user_assigned = cls._args_schema.identity.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
 
         user_assigned_identities = cls._args_schema.identity.user_assigned_identities
         user_assigned_identities.Element = AAZObjectArg(
@@ -158,6 +173,11 @@ class Create(AAZCommand):
             options=["--flow-analytics-configuration"],
             arg_group="Properties",
             help="Parameters that define the configuration of traffic analytics.",
+        )
+        _args_schema.record_types = AAZStrArg(
+            options=["--record-types"],
+            arg_group="Properties",
+            help="Optional field to filter network traffic logs based on flow states. Value of this field could be any comma separated combination string of letters B,C,E or D. B represents Begin, when a flow is created. C represents Continue for an ongoing flow generated at every five-minute interval. E represents End, when a flow is terminated. D represents Deny, when a flow is denied. If not specified, all network traffic will be logged.",
         )
         _args_schema.retention_policy = AAZObjectArg(
             options=["--retention-policy"],
@@ -290,7 +310,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-03-01",
+                    "api-version", "2025-03-01",
                     required=True,
                 ),
             }
@@ -315,7 +335,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("identity", AAZObjectType, ".identity")
+            _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -324,11 +344,16 @@ class Create(AAZCommand):
             if identity is not None:
                 identity.set_prop("type", AAZStrType, ".type")
                 identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
+                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
+                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
                 user_assigned_identities.set_elements(AAZObjectType, ".")
 
+            user_assigned = _builder.get(".identity.userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -336,6 +361,7 @@ class Create(AAZCommand):
                 properties.set_prop("enabledFilteringCriteria", AAZStrType, ".filtering_criteria")
                 properties.set_prop("flowAnalyticsConfiguration", AAZObjectType, ".flow_analytics_configuration")
                 properties.set_prop("format", AAZObjectType)
+                properties.set_prop("recordTypes", AAZStrType, ".record_types")
                 properties.set_prop("retentionPolicy", AAZObjectType, ".retention_policy")
                 properties.set_prop("storageId", AAZStrType, ".storage_account", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("targetResourceId", AAZStrType, ".target_resource_id", typ_kwargs={"flags": {"required": True}})
@@ -390,7 +416,7 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             _schema_on_200_201.id = AAZStrType()
-            _schema_on_200_201.identity = AAZObjectType()
+            _schema_on_200_201.identity = AAZIdentityObjectType()
             _schema_on_200_201.location = AAZStrType()
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
@@ -442,6 +468,9 @@ class Create(AAZCommand):
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
+            )
+            properties.record_types = AAZStrType(
+                serialized_name="recordTypes",
             )
             properties.retention_policy = AAZObjectType(
                 serialized_name="retentionPolicy",

@@ -175,7 +175,7 @@ class StorageBlobQueryTests(StorageScenarioMixin, LiveScenarioTest):
 
 class StorageBlobURLScenarioTest(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
-    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2euap')
+    @StorageAccountPreparer(kind='StorageV2', name_prefix='clitest', location='eastus2')
     def test_storage_blob_url_scenarios(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         container = self.create_container(account_info, prefix="con1")

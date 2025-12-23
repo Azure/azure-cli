@@ -45,6 +45,7 @@ from ._clients import (
     AuthClient,
     WorkloadProfileClient,
     ContainerAppsJobClient,
+    HttpRouteConfigClient,
     SubscriptionClient
 )
 from ._github_oauth import get_github_access_token
@@ -852,6 +853,7 @@ def create_managed_environment(cmd,
                                instrumentation_key=None,
                                dapr_connection_string=None,
                                infrastructure_subnet_resource_id=None,
+                               infrastructure_resource_group=None,
                                docker_bridge_cidr=None,
                                platform_reserved_cidr=None,
                                platform_reserved_dns_ip=None,
@@ -1174,7 +1176,7 @@ def update_containerappsjob_logic(cmd,
 
     update_map = {}
     update_map['replicaConfigurations'] = replica_timeout or replica_retry_limit
-    update_map['triggerConfigurations'] = replica_completion_count or parallelism or cron_expression or scale_rule_name or scale_rule_type or scale_rule_auth or polling_interval or min_executions or max_executions
+    update_map['triggerConfigurations'] = replica_completion_count or parallelism or cron_expression or scale_rule_name or scale_rule_type or scale_rule_auth or polling_interval or min_executions is not None or max_executions is not None
     update_map['container'] = image or container_name or set_env_vars is not None or remove_env_vars is not None or replace_env_vars is not None or remove_all_env_vars or cpu or memory or startup_command is not None or args is not None
     update_map['registry'] = registry_server or registry_user or registry_pass
 
@@ -2894,9 +2896,10 @@ def show_registry(cmd, name, resource_group_name, server):
 
     registries_def = containerapp_def["properties"]["configuration"]["registries"]
 
-    for r in registries_def:
-        if r['server'].lower() == server.lower():
-            return r
+    if registries_def is not None:
+        for r in registries_def:
+            if r['server'].lower() == server.lower():
+                return r
     raise InvalidArgumentValueError("The containerapp {} does not have specified registry assigned.".format(name))
 
 
@@ -5086,5 +5089,162 @@ def delete_workload_profile(cmd, resource_group_name, env_name, workload_profile
             cmd=cmd, resource_group_name=resource_group_name, name=env_name, managed_environment_envelope=managed_env_def)
 
         return r
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def create_http_route_config(cmd, resource_group_name, name, http_route_config_name, yaml):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    yaml_http_route_config = load_yaml_file(yaml)
+    # check if the type is dict
+    if not isinstance(yaml_http_route_config, dict):
+        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid YAML spec.')
+
+    http_route_config_envelope = {"properties": yaml_http_route_config}
+
+    try:
+        return HttpRouteConfigClient.create(cmd, resource_group_name, name, http_route_config_name, http_route_config_envelope)
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def update_http_route_config(cmd, resource_group_name, name, http_route_config_name, yaml):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    yaml_http_route_config = load_yaml_file(yaml)
+    # check if the type is dict
+    if not isinstance(yaml_http_route_config, dict):
+        raise ValidationError('Invalid YAML provided. Please see https://aka.ms/azure-container-apps-yaml for a valid YAML spec.')
+
+    http_route_config_envelope = {"properties": yaml_http_route_config}
+
+    try:
+        return HttpRouteConfigClient.update(cmd, resource_group_name, name, http_route_config_name, http_route_config_envelope)
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def list_http_route_configs(cmd, resource_group_name, name):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        return HttpRouteConfigClient.list(cmd, resource_group_name, name)
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def show_http_route_config(cmd, resource_group_name, name, http_route_config_name):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        return HttpRouteConfigClient.show(cmd, resource_group_name, name, http_route_config_name)
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def delete_http_route_config(cmd, resource_group_name, name, http_route_config_name):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+    try:
+        return HttpRouteConfigClient.delete(cmd, resource_group_name, name, http_route_config_name)
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def show_environment_premium_ingress(cmd, name, resource_group_name):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+
+    try:
+        env = ManagedEnvironmentClient.show(cmd, resource_group_name, name)
+        ingress_config = safe_get(env, "properties", "ingressConfiguration")
+        if not ingress_config:
+            return {"message": "No premium ingress configuration found for this environment, using default values."}
+
+        return ingress_config
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def add_environment_premium_ingress(cmd, name, resource_group_name, workload_profile_name, termination_grace_period=None, request_idle_timeout=None, header_count_limit=None, no_wait=False):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+
+    try:
+        ManagedEnvironmentClient.show(cmd, resource_group_name, name)
+        env_patch = {}
+        ingress_config = {}
+        safe_set(env_patch, "properties", "ingressConfiguration", value=ingress_config)
+
+        # Required
+        ingress_config["workloadProfileName"] = workload_profile_name
+        # Optional, remove if None
+        ingress_config["terminationGracePeriodSeconds"] = termination_grace_period
+        ingress_config["requestIdleTimeout"] = request_idle_timeout
+        ingress_config["headerCountLimit"] = header_count_limit
+
+        result = ManagedEnvironmentClient.update(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            name=name,
+            managed_environment_envelope=env_patch,
+            no_wait=no_wait
+        )
+
+        return safe_get(result, "properties", "ingressConfiguration")
+
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def update_environment_premium_ingress(cmd, name, resource_group_name, workload_profile_name=None, termination_grace_period=None, request_idle_timeout=None, header_count_limit=None, no_wait=False):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+
+    try:
+        ManagedEnvironmentClient.show(cmd, resource_group_name, name)
+        env_patch = {}
+        ingress_config = {}
+
+        if workload_profile_name is not None:
+            ingress_config["workloadProfileName"] = workload_profile_name
+        if termination_grace_period is not None:
+            ingress_config["terminationGracePeriodSeconds"] = termination_grace_period
+        if request_idle_timeout is not None:
+            ingress_config["requestIdleTimeout"] = request_idle_timeout
+        if header_count_limit is not None:
+            ingress_config["headerCountLimit"] = header_count_limit
+
+        # Only add ingressConfiguration to the patch if any values were specified
+        if ingress_config:
+            safe_set(env_patch, "properties", "ingressConfiguration", value=ingress_config)
+        else:
+            return {"message": "No changes specified for premium ingress configuration"}
+
+        # Update the environment with the patched ingress configuration
+        result = ManagedEnvironmentClient.update(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            name=name,
+            managed_environment_envelope=env_patch,
+            no_wait=no_wait
+        )
+
+        return safe_get(result, "properties", "ingressConfiguration")
+
+    except Exception as e:
+        handle_raw_exception(e)
+
+
+def remove_environment_premium_ingress(cmd, name, resource_group_name, no_wait=False):
+    _validate_subscription_registered(cmd, CONTAINER_APPS_RP)
+
+    try:
+        ManagedEnvironmentClient.show(cmd, resource_group_name, name)
+        env_patch = {}
+        # Remove the whole section to restore defaults
+        safe_set(env_patch, "properties", "ingressConfiguration", value=None)
+
+        ManagedEnvironmentClient.update(
+            cmd=cmd,
+            resource_group_name=resource_group_name,
+            name=name,
+            managed_environment_envelope=env_patch,
+            no_wait=no_wait
+        )
+
     except Exception as e:
         handle_raw_exception(e)

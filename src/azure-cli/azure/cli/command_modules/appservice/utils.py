@@ -109,6 +109,12 @@ def get_sku_name(tier):
     return get_sku_tier(name=tier)
 
 
+def is_sku_tier_enabled_for_managed_instance(sku_tier):
+    sku_tier = sku_tier.upper()
+    enabled_skus = ['PREMIUMV4', 'PREMIUMMV4']
+    return sku_tier in enabled_skus
+
+
 # resource is client.web_apps for webapps, client.app_service_plans for ASPs, etc.
 def get_resource_if_exists(resource, **kwargs):
     from azure.core.exceptions import ResourceNotFoundError as R

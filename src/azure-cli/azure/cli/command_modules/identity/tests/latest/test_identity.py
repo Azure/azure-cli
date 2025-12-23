@@ -22,11 +22,33 @@ class TestIdentity(ScenarioTest):
 
         self.cmd('identity create -n {identity} -g {rg}', checks=[
             self.check('name', '{identity}'),
-            self.check('resourceGroup', '{rg}')
+            self.check('resourceGroup', '{rg}'),
+            self.check('isolationScope', 'None')
         ])
+
+        self.cmd('identity update -n {identity} -g {rg} --isolation-scope Regional', checks=[
+            self.check('name', '{identity}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('isolationScope', 'Regional')
+        ])
+
         self.cmd('identity list-resources -g {rg} -n {identity}')
 
         self.cmd('identity list -g {rg}', checks=self.check('length(@)', 1))
+        self.cmd('identity delete -n {identity} -g {rg}')
+
+        self.cmd('identity create -n {identity} -g {rg} --isolation-scope Regional', checks=[
+            self.check('name', '{identity}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('isolationScope', 'Regional')
+        ])
+
+        self.cmd('identity update -n {identity} -g {rg} --isolation-scope None', checks=[
+            self.check('name', '{identity}'),
+            self.check('resourceGroup', '{rg}'),
+            self.check('isolationScope', 'None')
+        ])
+
         self.cmd('identity delete -n {identity} -g {rg}')
 
     @ResourceGroupPreparer(name_prefix='cli_test_federated_identity_credential_', location='centraluseuap')
@@ -41,7 +63,7 @@ class TestIdentity(ScenarioTest):
             'subject2': 'system:serviceaccount:ns:svcaccount2',
             'subject3': 'system:serviceaccount:ns:svcaccount3',
             'subject4': 'system:serviceaccount:ns:svcaccount4',
-            'issuer': 'https://token.actions.githubusercontent.com',
+            'issuer': 'https://login.microsoftonline.com/72f988bf-86f1-41af-91ab-2d7cd011db47/v2.0',
             'audience': 'api://AzureADTokenExchange',
             'cme_version': '1',
             'cme_value': "claims['sub'] eq 'foo'",

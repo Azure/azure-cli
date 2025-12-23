@@ -64,10 +64,11 @@ def _resource_managementgroups_client_factory(cli_ctx, **_):
     return get_mgmt_service_client(cli_ctx, ManagementGroupsAPI, subscription_bound=False)
 
 
-def _resource_templatespecs_client_factory(cli_ctx, **_):
+def _resource_templatespecs_client_factory(cli_ctx, subscription_id=None, **_):
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.cli.core.profiles import ResourceType
-    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS)
+    kwargs = {'subscription_id': subscription_id} if subscription_id is not None else {}
+    return get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_TEMPLATESPECS, **kwargs)
 
 
 def _resource_deploymentstacks_client_factory(cli_ctx, **_):
@@ -112,18 +113,6 @@ def cf_features(cli_ctx, _):
 
 def cf_feature_registrations(cli_ctx, _):
     return _resource_feature_client_factory(cli_ctx).subscription_feature_registrations
-
-
-def cf_policy_definitions(cli_ctx, _):
-    return _resource_policy_client_factory(cli_ctx).policy_definitions
-
-
-def cf_policy_set_definitions(cli_ctx, _):
-    return _resource_policy_client_factory(cli_ctx).policy_set_definitions
-
-
-def cf_policy_exemptions(cli_ctx, _):
-    return _resource_policy_client_factory(cli_ctx).policy_exemptions
 
 
 def cf_management_locks(cli_ctx, _):

@@ -30,9 +30,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-01-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-09-01"],
         ]
     }
 
@@ -130,12 +130,7 @@ class Create(AAZCommand):
         tags.Element = AAZStrArg()
 
         zones = cls._args_schema.zones
-        zones.Element = AAZStrArg(
-            fmt=AAZStrArgFormat(
-                max_length=255,
-                min_length=1,
-            ),
-        )
+        zones.Element = AAZStrArg()
 
         # define Arg Group "CMK Encryption"
 
@@ -239,6 +234,12 @@ class Create(AAZCommand):
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrArg(
+            options=["--grow-pool-clone-split", "--accept-grow-capacity-pool-for-short-term-clone-split"],
+            arg_group="Properties",
+            help="While auto splitting the short term clone volume, if the parent pool does not have enough space to accommodate the volume after split, it will be automatically resized, which will lead to increased billing. To accept capacity pool size auto grow and create a short term clone volume, set the property as accepted.",
+            enum={"Accepted": "Accepted", "Declined": "Declined"},
+        )
         _args_schema.avs_data_store = AAZStrArg(
             options=["--avs-data-store"],
             arg_group="Properties",
@@ -377,7 +378,7 @@ class Create(AAZCommand):
             arg_group="Properties",
             help="serviceLevel",
             default="Premium",
-            enum={"Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
+            enum={"Flexible": "Flexible", "Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
         )
         _args_schema.smb_access_based_enumeration = AAZStrArg(
             options=["--smb-access-enumeration", "--smb-access-based-enumeration"],
@@ -501,12 +502,6 @@ class Create(AAZCommand):
         # define Arg Group "Replication"
 
         _args_schema = cls._args_schema
-        _args_schema.endpoint_type = AAZStrArg(
-            options=["--endpoint-type"],
-            arg_group="Replication",
-            help="Indicates whether the local volume is the source or destination for the Volume Replication",
-            enum={"dst": "dst", "src": "src"},
-        )
         _args_schema.remote_volume_region = AAZStrArg(
             options=["--remote-volume-region"],
             arg_group="Replication",
@@ -632,7 +627,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-01-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -664,6 +659,7 @@ class Create(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("acceptGrowCapacityPoolForShortTermCloneSplit", AAZStrType, ".accept_grow_capacity_pool_for_short_term_clone_split")
                 properties.set_prop("avsDataStore", AAZStrType, ".avs_data_store")
                 properties.set_prop("backupId", AAZStrType, ".backup_id", typ_kwargs={"nullable": True})
                 properties.set_prop("capacityPoolResourceId", AAZStrType, ".capacity_pool_resource_id")
@@ -718,7 +714,6 @@ class Create(AAZCommand):
 
             replication = _builder.get(".properties.dataProtection.replication")
             if replication is not None:
-                replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
                 replication.set_prop("remotePath", AAZObjectType)
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
                 replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id")
@@ -831,6 +826,9 @@ class Create(AAZCommand):
             _schema_on_200_201.zones = AAZListType()
 
             properties = cls._schema_on_200_201.properties
+            properties.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrType(
+                serialized_name="acceptGrowCapacityPoolForShortTermCloneSplit",
+            )
             properties.actual_throughput_mibps = AAZFloatType(
                 serialized_name="actualThroughputMibps",
                 flags={"read_only": True},
@@ -888,6 +886,7 @@ class Create(AAZCommand):
             )
             properties.effective_network_features = AAZStrType(
                 serialized_name="effectiveNetworkFeatures",
+                flags={"read_only": True},
             )
             properties.enable_subvolumes = AAZStrType(
                 serialized_name="enableSubvolumes",
@@ -907,6 +906,11 @@ class Create(AAZCommand):
             )
             properties.file_system_id = AAZStrType(
                 serialized_name="fileSystemId",
+                flags={"read_only": True},
+            )
+            properties.inherited_size_in_bytes = AAZIntType(
+                serialized_name="inheritedSizeInBytes",
+                nullable=True,
                 flags={"read_only": True},
             )
             properties.is_default_quota_enabled = AAZBoolType(
@@ -1053,6 +1057,7 @@ class Create(AAZCommand):
             )
             replication.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
+                flags={"read_only": True},
             )
             replication.remote_path = AAZObjectType(
                 serialized_name="remotePath",

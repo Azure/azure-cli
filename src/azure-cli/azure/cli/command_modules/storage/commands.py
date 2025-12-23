@@ -3,8 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_container_mgmt, blob_data_service_factory,
-                                                               page_blob_service_factory,
+from azure.cli.command_modules.storage._client_factory import (cf_sa, cf_blob_container_mgmt,
                                                                multi_service_properties_factory,
                                                                cf_mgmt_policy, cf_sa_for_keys,
                                                                cf_mgmt_blob_services, cf_mgmt_file_shares,
@@ -77,12 +76,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
         client_factory=cf_sa)
 
-    block_blob_sdk = CliCommandType(
-        operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
-        client_factory=blob_data_service_factory,
-        resource_type=ResourceType.DATA_STORAGE)
-
-    def get_custom_sdk(custom_module, client_factory, resource_type=ResourceType.DATA_STORAGE):
+    def get_custom_sdk(custom_module, client_factory, resource_type=ResourceType.MGMT_STORAGE):
         """Returns a CliCommandType instance with specified operation template based on the given custom module name.
         This is useful when the command is not defined in the default 'custom' module but instead in a module under
         'operations' package."""
@@ -93,8 +87,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
             resource_type=resource_type
         )
 
-    with self.command_group('storage', command_type=block_blob_sdk,
-                            custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
+    with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', cf_blob_service)) as g:
         g.storage_custom_command_oauth('remove', 'storage_remove')
 
     with self.command_group('storage', custom_command_type=get_custom_sdk('azcopy', None)) as g:
@@ -114,7 +107,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                          'show_storage_account_connection_string')
         g.generic_update_command('update', getter_name='get_properties', setter_name='update',
                                  custom_func_name='update_storage_account')
-        g.custom_command('failover', 'begin_failover', supports_no_wait=True, is_preview=True)
+        g.custom_command('failover', 'begin_failover', supports_no_wait=True)
         g.command('hns-migration start', 'begin_hierarchical_namespace_migration',
                   supports_no_wait=True)
         g.command('hns-migration stop', 'begin_abort_hierarchical_namespace_migration',
@@ -220,7 +213,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         operations_tmpl='azure.cli.command_modules.storage.operations.account#{}',
         client_factory=cf_or_policy)
 
-    with self.command_group('storage account or-policy', or_policy_sdk, is_preview=True,
+    with self.command_group('storage account or-policy', or_policy_sdk,
                             resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=or_policy_custom_type) as g:
         g.show_command('show', 'get')
@@ -229,7 +222,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.generic_update_command('update', setter_name='update_or_policy', setter_type=or_policy_custom_type)
         g.command('delete', 'delete')
 
-    with self.command_group('storage account or-policy rule', or_policy_sdk, is_preview=True,
+    with self.command_group('storage account or-policy rule', or_policy_sdk,
                             resource_type=ResourceType.MGMT_STORAGE,
                             custom_command_type=or_policy_custom_type) as g:
         g.custom_show_command('show', 'get_or_rule')
@@ -382,6 +375,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                 table_transformer=transform_boolean_for_table)
         g.storage_custom_command_oauth('delete-batch', 'storage_blob_delete_batch', client_factory=cf_blob_service,
                                        validator=process_blob_delete_batch_parameters)
+        g.storage_custom_command_oauth('incremental-copy start', 'incremental_copy_start')
+        g.storage_command_oauth('incremental-copy cancel', 'abort_copy')
 
     blob_service_custom_sdk = get_custom_sdk('blob', client_factory=cf_blob_service,
                                              resource_type=ResourceType.DATA_STORAGE_BLOB)
@@ -432,22 +427,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                             custom_command_type=storage_blob_custom_type) as g:
         g.custom_command('restore', 'restore_blob_ranges', supports_no_wait=True)
 
-    with self.command_group('storage blob incremental-copy',
-                            operations_tmpl='azure.multiapi.storage.blob.pageblobservice#PageBlobService.{}',
-                            client_factory=page_blob_service_factory,
-                            resource_type=ResourceType.DATA_STORAGE,
-                            min_api='2016-05-31') as g:
-        g.storage_command_oauth('start', 'incremental_copy_blob')
-
-    with self.command_group('storage blob incremental-copy',
-                            operations_tmpl='azure.multiapi.storage.blob.blockblobservice#BlockBlobService.{}',
-                            client_factory=page_blob_service_factory,
-                            resource_type=ResourceType.DATA_STORAGE,
-                            min_api='2016-05-31') as g:
-        g.storage_command_oauth('cancel', 'abort_copy_blob')
-
-    with self.command_group('storage blob', command_type=block_blob_sdk,
-                            custom_command_type=get_custom_sdk('azcopy', blob_data_service_factory)) as g:
+    with self.command_group('storage blob', custom_command_type=get_custom_sdk('azcopy', cf_blob_service)) as g:
         g.storage_custom_command_oauth('sync', 'storage_blob_sync', is_preview=True)
 
     container_client_sdk = CliCommandType(
@@ -534,8 +514,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage container immutability-policy', command_type=blob_container_mgmt_sdk,
                             custom_command_type=get_custom_sdk('blob', cf_blob_container_mgmt,
-                                                               resource_type=ResourceType.MGMT_STORAGE),
-                            min_api='2018-02-01') as g:
+                                                               resource_type=ResourceType.MGMT_STORAGE)) as g:
         from azure.cli.command_modules.storage._transformers import transform_immutability_policy
 
         g.show_command('show', 'get_immutability_policy',
@@ -548,8 +527,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
 
     with self.command_group('storage container legal-hold', command_type=blob_container_mgmt_sdk,
                             custom_command_type=get_custom_sdk('blob', cf_blob_container_mgmt,
-                                                               resource_type=ResourceType.MGMT_STORAGE),
-                            min_api='2018-02-01') as g:
+                                                               resource_type=ResourceType.MGMT_STORAGE)) as g:
         g.custom_command('set', 'set_legal_hold')
         g.custom_command('clear', 'clear_legal_hold')
         g.show_command(
@@ -721,6 +699,8 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
                                        transform=transform_file_show_result)
         g.storage_custom_command_oauth('download-batch', 'storage_file_download_batch', client_factory=cf_share_client)
         g.storage_command_oauth('hard-link create', 'create_hardlink')
+        g.storage_command_oauth('symbolic-link create', 'create_symlink')
+        g.storage_command_oauth('symbolic-link show', 'get_symlink')
 
     with self.command_group('storage cors', get_custom_sdk('cors', multi_service_properties_factory)) as g:
         from ._transformers import transform_cors_list_output

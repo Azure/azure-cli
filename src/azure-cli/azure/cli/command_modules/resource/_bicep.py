@@ -115,13 +115,16 @@ def run_bicep_command(cli_ctx, args, auto_install=True, custom_env=None):
 
 
 def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, stdout=True):
-    if _use_binary_from_path(cli_ctx):
+    if _use_binary_from_path(cli_ctx) and release_tag is None:
+        # Only use the Bicep executable from PATH when no specific version is requested.
         from shutil import which
 
         if which("bicep") is None:
             raise ValidationError(
                 'Could not find the "bicep" executable on PATH. To install Bicep via Azure CLI, set the "bicep.use_binary_from_path" configuration to False and run "az bicep install".'  # pylint: disable=line-too-long
             )
+
+        _logger.debug("Using Bicep CLI from PATH.")
 
         return
 
@@ -131,11 +134,13 @@ def ensure_bicep_installation(cli_ctx, release_tag=None, target_platform=None, s
 
     if os.path.isfile(installation_path):
         if not release_tag:
+            print(f"Bicep CLI is already installed at '{installation_path}'. Skipping installation as no specific version was requested.")  # pylint: disable=line-too-long
             return
 
         installed_version = _get_bicep_installed_version(installation_path)
         target_version = _extract_version(release_tag)
         if installed_version and target_version and installed_version == target_version:
+            print(f"Bicep CLI {installed_version} is already installed at '{installation_path}'.")
             return
 
     installation_dir = os.path.dirname(installation_path)

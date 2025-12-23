@@ -30,7 +30,7 @@ from ._client_factory import resource_client_factory, cf_mysql_flexible_location
 
 logger = get_logger(__name__)
 
-DEFAULT_LOCATION_PG = 'eastus'  # For testing: 'eastus2euap'
+DEFAULT_LOCATION_PG = 'canadacentral'
 DEFAULT_LOCATION_MySQL = 'westus2'
 AZURE_CREDENTIALS = 'AZURE_CREDENTIALS'
 AZURE_POSTGRESQL_CONNECTION_STRING = 'AZURE_POSTGRESQL_CONNECTION_STRING'
@@ -306,6 +306,8 @@ def _resolve_api_version(client, provider_namespace, resource_type, parent_path)
           if t.resource_type.lower() == resource_type_str.lower()]
     if not rt:
         raise InvalidArgumentValueError('Resource type {} not found.'.format(resource_type_str))
+    if len(rt) == 1 and rt[0].default_api_version not in (None, ''):
+        return rt[0].default_api_version
     if len(rt) == 1 and rt[0].api_versions:
         npv = [v for v in rt[0].api_versions if 'preview' not in v.lower()]
         return npv[0] if npv else rt[0].api_versions[0]

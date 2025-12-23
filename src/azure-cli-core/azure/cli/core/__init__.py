@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.76.0"
+__version__ = "2.81.0"
 
 import os
 import sys
@@ -61,7 +61,7 @@ class AzCli(CLI):
         from azure.cli.core.breaking_change import register_upcoming_breaking_change_info
         from azure.cli.core.commands import register_cache_arguments
         from azure.cli.core.commands.arm import (
-            register_ids_argument, register_global_subscription_argument)
+            register_ids_argument, register_global_subscription_argument, register_global_policy_argument)
         from azure.cli.core.cloud import get_active_cloud
         from azure.cli.core.commands.transform import register_global_transforms
         from azure.cli.core._session import ACCOUNT, CONFIG, SESSION, INDEX, VERSIONS
@@ -90,6 +90,7 @@ class AzCli(CLI):
         register_global_transforms(self)
         register_global_subscription_argument(self)
         register_ids_argument(self)  # global subscription must be registered first!
+        register_global_policy_argument(self)
         register_cache_arguments(self)
         register_upcoming_breaking_change_info(self)
 
@@ -119,6 +120,9 @@ class AzCli(CLI):
 
     def show_version(self):
         from azure.cli.core.util import get_az_version_string, show_updates
+        from azure.cli.core import telemetry
+
+        telemetry.set_command_details(command="", parameters=["--version"])
 
         ver_string, updates_available_components = get_az_version_string()
         print(ver_string)

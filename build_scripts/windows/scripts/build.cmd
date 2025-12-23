@@ -30,7 +30,7 @@ if "%ARCH%"=="x86" (
     echo Please set ARCH to "x86" or "x64"
     goto ERROR
 )
-set PYTHON_VERSION=3.12.10
+set PYTHON_VERSION=3.13.9
 
 set WIX_DOWNLOAD_URL="https://azurecliprod.blob.core.windows.net/msi/wix310-binaries-mirror.zip"
 set PYTHON_DOWNLOAD_URL="https://www.python.org/ftp/python/%PYTHON_VERSION%/python-%PYTHON_VERSION%-embed-%PYTHON_ARCH%.zip"
@@ -153,8 +153,6 @@ if %errorlevel% neq 0 goto ERROR
 
 pushd %BUILDING_DIR%
 %BUILDING_DIR%\python.exe -I %REPO_ROOT%\scripts\compact_aaz.py
-if %errorlevel% neq 0 goto ERROR
-%BUILDING_DIR%\python.exe -I %~dp0\patch_models_v2.py
 if %errorlevel% neq 0 goto ERROR
 %BUILDING_DIR%\python.exe -I %REPO_ROOT%\scripts\trim_sdk.py
 if %errorlevel% neq 0 goto ERROR

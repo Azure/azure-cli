@@ -57,6 +57,10 @@ def vaults_cf(cli_ctx, *_):
     return _common_client_factory(cli_ctx).vaults
 
 
+def deleted_vaults_cf(cli_ctx, *_):
+    return _common_client_factory(cli_ctx).deleted_vaults
+
+
 def registered_identities_cf(cli_ctx, *_):
     return _common_client_factory(cli_ctx).registered_identities
 

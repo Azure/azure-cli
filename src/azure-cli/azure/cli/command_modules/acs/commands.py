@@ -5,6 +5,7 @@
 
 from azure.cli.command_modules.acs._client_factory import (
     cf_agent_pools,
+    cf_managed_namespaces,
     cf_managed_clusters,
     cf_maintenance_configurations,
     cf_snapshots,
@@ -14,6 +15,7 @@ from azure.cli.command_modules.acs._client_factory import (
 )
 from azure.cli.command_modules.acs._format import (
     aks_agentpool_list_table_format,
+    aks_namespace_list_table_format,
     aks_agentpool_show_table_format,
     aks_list_nodepool_snapshot_table_format,
     aks_list_table_format,
@@ -63,6 +65,14 @@ def load_command_table(self, _):
         operation_group='maintenance_configurations',
         resource_type=ResourceType.MGMT_CONTAINERSERVICE,
         client_factory=cf_maintenance_configurations
+    )
+
+    managed_namespaces_sdk = CliCommandType(
+        operations_tmpl='azure.mgmt.containerservice.operations.'
+                        '_managed_namespaces_operations#ManagedNamespacesOperations.{}',
+        operation_group='managed_namespaces',
+        resource_type=ResourceType.MGMT_CONTAINERSERVICE,
+        client_factory=cf_managed_namespaces,
     )
 
     snapshot_sdk = CliCommandType(
@@ -118,9 +128,9 @@ def load_command_table(self, _):
                          confirmation='Kubernetes will be unavailable during certificate rotation process.\n' +
                          'Are you sure you want to perform this operation?')
         g.custom_command('stop', 'aks_stop',
-                         supports_no_wait=True, min_api='2020-09-01')
+                         supports_no_wait=True)
         g.command('start', 'begin_start',
-                  supports_no_wait=True, min_api='2020-09-01')
+                  supports_no_wait=True)
         g.wait_command('wait')
         g.custom_command('use-dev-spaces', 'aks_use_dev_spaces',
                          deprecate_info=g.deprecate())
@@ -144,6 +154,19 @@ def load_command_table(self, _):
         g.custom_command('add', 'aks_maintenanceconfiguration_add')
         g.custom_command('update', 'aks_maintenanceconfiguration_update')
         g.custom_command('delete', 'aks_maintenanceconfiguration_delete')
+
+    # AKS managed namespace commands
+    with self.command_group(
+        "aks namespace",
+        managed_namespaces_sdk,
+        client_factory=cf_managed_namespaces,
+    ) as g:
+        g.custom_command("add", "aks_namespace_add", supports_no_wait=True)
+        g.custom_command("update", "aks_namespace_update", supports_no_wait=True)
+        g.custom_show_command("show", "aks_namespace_show")
+        g.custom_command("list", "aks_namespace_list", table_transformer=aks_namespace_list_table_format)
+        g.custom_command("delete", "aks_namespace_delete", supports_no_wait=True)
+        g.custom_command("get-credentials", "aks_namespace_get_credentials")
 
     # AKS agent pool commands
     with self.command_group('aks nodepool',
@@ -188,7 +211,7 @@ def load_command_table(self, _):
                             client_factory=cf_snapshots,
                             deprecate_info=self.deprecate(
                                 redirect='aks nodepool snapshot', hide=True),
-                            min_api='2021-08-01') as g:
+                            ) as g:
         g.custom_command('list', 'aks_nodepool_snapshot_list',
                          deprecate_info=g.deprecate(
                              redirect='aks nodepool snapshot list'),
@@ -207,7 +230,7 @@ def load_command_table(self, _):
     with self.command_group('aks nodepool snapshot',
                             snapshot_sdk,
                             client_factory=cf_snapshots,
-                            min_api='2021-08-01') as g:
+                            ) as g:
         g.custom_command('list', 'aks_nodepool_snapshot_list',
                          table_transformer=aks_list_nodepool_snapshot_table_format)
         g.custom_show_command('show', 'aks_nodepool_snapshot_show',
@@ -255,8 +278,17 @@ def load_command_table(self, _):
             'aks_mesh_enable_ingress_gateway',
             supports_no_wait=True)
         g.custom_command(
+            "enable-egress-gateway",
+            "aks_mesh_enable_egress_gateway",
+            supports_no_wait=True)
+        g.custom_command(
             'disable-ingress-gateway',
             'aks_mesh_disable_ingress_gateway',
+            supports_no_wait=True,
+            confirmation=True)
+        g.custom_command(
+            "disable-egress-gateway",
+            "aks_mesh_disable_egress_gateway",
             supports_no_wait=True,
             confirmation=True)
         g.custom_command(

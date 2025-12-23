@@ -73,7 +73,7 @@ def log_pprint_template(template):
 
 
 def check_existence(cli_ctx, value, resource_group, provider_namespace, resource_type,
-                    parent_name=None, parent_type=None):
+                    parent_name=None, parent_type=None, static_version=None):
     # check for name or ID and set the type flags
     from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.core.exceptions import HttpResponseError
@@ -93,7 +93,10 @@ def check_existence(cli_ctx, value, resource_group, provider_namespace, resource
         parent_path = ''
         resource_name = id_parts['name']
         resource_type = id_parts.get('type', resource_type)
+
     api_version = _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path)
+    if static_version:  # only for vnet
+        api_version = static_version
 
     try:
         resource_client.get(rg, ns, parent_path, resource_type, resource_name, api_version)
@@ -130,7 +133,7 @@ def list_sku_info(cli_ctx, location=None):
 
 
 # pylint: disable=line-too-long
-def is_sku_available(cmd, sku_info, zone):
+def is_sku_available(sku_info, zone):
     """
     The SKU is unavailable in the following cases:
     1. regional restriction and the region is restricted
@@ -143,16 +146,12 @@ def is_sku_available(cmd, sku_info, zone):
     if not sku_info.get('restrictions', []):
         return is_available
     for restriction in sku_info['restrictions']:
-        if restriction.get('reason_code', '') == 'NotAvailableForSubscription':
-            # The attribute location_info is not supported in versions 2017-03-30 and earlier
-            if cmd.supported_api_version(max_api='2017-03-30'):
-                is_available = False
-                break
+        if restriction.get('reasonCode', '') == 'NotAvailableForSubscription':
             if restriction['type'] == 'Zone' and not (
-                    set(sku_info['location_info'][0].get('zones', []) or []) - set(restriction['restriction_info'].get('zones', []) or [])):
+                    set(sku_info['locationInfo'][0].get('zones', []) or []) - set(restriction['restrictionInfo'].get('zones', []) or [])):
                 is_restrict_zone = True
             if restriction['type'] == 'Location' and (
-                    sku_info['location_info'][0]['location'] in (restriction['restriction_info'].get('locations', []) or [])):
+                    sku_info['locationInfo'][0]['location'] in (restriction['restrictionInfo'].get('locations', []) or [])):
                 is_restrict_location = True
 
             if is_restrict_location or (is_restrict_zone and zone):
@@ -372,26 +371,34 @@ def update_disk_caching(model, caching_settings):
             _update(model, lun, value)
 
 
+def update_disk_caching_by_aaz(model, caching_settings):
+    def _update(model, lun, value):
+        luns = model.keys() if lun is None else [lun]
+        for lun_item in luns:
+            if lun_item not in model:
+                raise CLIError("Data disk with lun of '{}' doesn't exist. Existing luns: {}."
+                               .format(lun_item, list(model.keys())))
+            model[lun_item]['caching'] = value
+
+    if len(caching_settings) == 1 and '=' not in caching_settings[0]:
+        _update(model, None, caching_settings[0])
+    else:
+        for x in caching_settings:
+            if '=' not in x:
+                raise CLIError("usage error: please use 'LUN=VALUE' to configure caching on individual disk")
+            lun, value = x.split('=', 1)
+            lun = lun.lower()
+            lun = int(lun) if lun != 'os' else lun
+            _update(model, lun, value)
+
+
 def update_write_accelerator_settings(model, write_accelerator_settings):
     def _update(model, lun, value):
-        if isinstance(model, dict):
-            luns = model.keys() if lun is None else [lun]
-            for lun_item in luns:
-                if lun_item not in model:
-                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun_item))
-                model[lun_item]['writeAcceleratorEnabled'] = value
-        else:
-            if lun is None:
-                disks = [model.os_disk] + (model.data_disks or [])
-            elif lun == 'os':
-                disks = [model.os_disk]
-            else:
-                disk = next((d for d in model.data_disks if d.lun == lun), None)
-                if not disk:
-                    raise CLIError("data disk with lun of '{}' doesn't exist".format(lun))
-                disks = [disk]
-            for disk in disks:
-                disk.write_accelerator_enabled = value
+        luns = model.keys() if lun is None else [lun]
+        for lun_item in luns:
+            if lun_item not in model:
+                raise CLIError("data disk with lun of '{}' doesn't exist".format(lun_item))
+            model[lun_item]['write_accelerator_enabled'] = value
 
     if len(write_accelerator_settings) == 1 and '=' not in write_accelerator_settings[0]:
         _update(model, None, write_accelerator_settings[0].lower() == 'true')

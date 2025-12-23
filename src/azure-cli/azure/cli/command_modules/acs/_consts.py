@@ -37,7 +37,9 @@ CONST_OS_SKU_MARINER = "Mariner"
 CONST_OS_SKU_WINDOWS2019 = "Windows2019"
 CONST_OS_SKU_WINDOWS2022 = "Windows2022"
 CONST_OS_SKU_AZURELINUX = "AzureLinux"
+CONST_OS_SKU_AZURELINUX3 = "AzureLinux3"
 CONST_OS_SKU_UBUNTU2204 = "Ubuntu2204"
+CONST_OS_SKU_UBUNTU2404 = "Ubuntu2404"
 
 # vm set type
 CONST_VIRTUAL_MACHINE_SCALE_SETS = "VirtualMachineScaleSets"
@@ -67,6 +69,10 @@ CONST_GPU_DRIVER_NONE = "None"
 CONST_LOAD_BALANCER_SKU_BASIC = "basic"
 CONST_LOAD_BALANCER_SKU_STANDARD = "standard"
 
+# ManagedClusterSKU Name
+CONST_MANAGED_CLUSTER_SKU_NAME_BASE = "base"
+CONST_MANAGED_CLUSTER_SKU_NAME_AUTOMATIC = "automatic"
+
 # ManagedClusterSKU Tier
 CONST_MANAGED_CLUSTER_SKU_TIER_FREE = "free"
 CONST_MANAGED_CLUSTER_SKU_TIER_STANDARD = "standard"
@@ -88,8 +94,8 @@ CONST_PRIVATE_DNS_ZONE_SYSTEM = "system"
 CONST_PRIVATE_DNS_ZONE_NONE = "none"
 
 # role assignment for kubelet
-CONST_MANAGED_IDENTITY_OPERATOR_ROLE = 'Managed Identity Operator'
-CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID = 'f1a07417-d97a-45cb-824c-7a7467783830'
+CONST_MANAGED_IDENTITY_OPERATOR_ROLE = "Managed Identity Operator"
+CONST_MANAGED_IDENTITY_OPERATOR_ROLE_ID = "f1a07417-d97a-45cb-824c-7a7467783830"
 
 # role assignment for vnet subnet
 CONST_NETWORK_CONTRIBUTOR_ROLE_ID = "4d97b98b-1d4f-4787-a291-c67834d212e7"
@@ -129,6 +135,11 @@ CONST_NETWORK_POLICY_CILIUM = "cilium"
 CONST_NETWORK_POLICY_CALICO = "calico"
 CONST_NETWORK_POLICY_NONE = "none"
 
+# ACNS advanced network policies
+CONST_ADVANCED_NETWORKPOLICIES_NONE = "None"
+CONST_ADVANCED_NETWORKPOLICIES_FQDN = "FQDN"
+CONST_ADVANCED_NETWORKPOLICIES_L7 = "L7"
+
 # network pod ip allocation mode
 CONST_NETWORK_POD_IP_ALLOCATION_MODE_DYNAMIC_INDIVIDUAL = "DynamicIndividual"
 CONST_NETWORK_POD_IP_ALLOCATION_MODE_STATIC_BLOCK = "StaticBlock"
@@ -151,6 +162,16 @@ CONST_KUBE_DASHBOARD_ADDON_NAME = "kubeDashboard"
 
 # azure policy
 CONST_AZURE_POLICY_ADDON_NAME = "azurepolicy"
+
+# Managed Namespace
+CONST_NAMESPACE_ADOPTION_POLICY_NEVER = "Never"
+CONST_NAMESPACE_ADOPTION_POLICY_IFIDENTICAL = "IfIdentical"
+CONST_NAMESPACE_ADOPTION_POLICY_ALWAYS = "Always"
+CONST_NAMESPACE_NETWORK_POLICY_RULE_DENYALL = "DenyAll"
+CONST_NAMESPACE_NETWORK_POLICY_RULE_ALLOWALL = "AllowAll"
+CONST_NAMESPACE_NETWORK_POLICY_RULE_ALLOWSAMENAMESPACE = "AllowSameNamespace"
+CONST_NAMESPACE_DELETE_POLICY_KEEP = "Keep"
+CONST_NAMESPACE_DELETE_POLICY_DELETE = "Delete"
 
 # ingress application gateway
 CONST_INGRESS_APPGW_ADDON_NAME = "ingressApplicationGateway"
@@ -185,15 +206,15 @@ CONST_APP_ROUTING_NONE_NGINX = "None"
 
 # all supported addons
 ADDONS = {
-    'http_application_routing': CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
-    'monitoring': CONST_MONITORING_ADDON_NAME,
-    'virtual-node': CONST_VIRTUAL_NODE_ADDON_NAME,
-    'kube-dashboard': CONST_KUBE_DASHBOARD_ADDON_NAME,
-    'azure-policy': CONST_AZURE_POLICY_ADDON_NAME,
-    'ingress-appgw': CONST_INGRESS_APPGW_ADDON_NAME,
+    "http_application_routing": CONST_HTTP_APPLICATION_ROUTING_ADDON_NAME,
+    "monitoring": CONST_MONITORING_ADDON_NAME,
+    "virtual-node": CONST_VIRTUAL_NODE_ADDON_NAME,
+    "kube-dashboard": CONST_KUBE_DASHBOARD_ADDON_NAME,
+    "azure-policy": CONST_AZURE_POLICY_ADDON_NAME,
+    "ingress-appgw": CONST_INGRESS_APPGW_ADDON_NAME,
     "confcom": CONST_CONFCOM_ADDON_NAME,
-    'open-service-mesh': CONST_OPEN_SERVICE_MESH_ADDON_NAME,
-    'azure-keyvault-secrets-provider': CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
+    "open-service-mesh": CONST_OPEN_SERVICE_MESH_ADDON_NAME,
+    "azure-keyvault-secrets-provider": CONST_AZURE_KEYVAULT_SECRETS_PROVIDER_ADDON_NAME,
     "web_application_routing": CONST_WEB_APPLICATION_ROUTING_KEY_NAME,
 }
 
@@ -224,6 +245,8 @@ CONST_AZURE_SERVICE_MESH_INGRESS_MODE_INTERNAL = "Internal"
 CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_START = "Start"
 CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_COMPLETE = "Complete"
 CONST_AZURE_SERVICE_MESH_UPGRADE_COMMAND_ROLLBACK = "Rollback"
+CONST_AZURE_SERVICE_MESH_DEFAULT_EGRESS_NAMESPACE = "aks-istio-egress"
+CONST_AZURE_SERVICE_MESH_MAX_EGRESS_NAME_LENGTH = 63
 
 # Dns zone contributor role
 CONST_PRIVATE_DNS_ZONE_CONTRIBUTOR_ROLE = "Private DNS Zone Contributor"
@@ -241,11 +264,14 @@ CONST_NODE_PROVISIONING_MODE_AUTO = "Auto"
 CONST_NODE_PROVISIONING_DEFAULT_POOLS_NONE = "None"
 CONST_NODE_PROVISIONING_DEFAULT_POOLS_AUTO = "Auto"
 
+# consts for workloadruntime
+CONST_WORKLOAD_RUNTIME_KATA_VM_ISOLATION = "KataVmIsolation"
+
 
 # consts for decorator pattern
 class DecoratorMode(Enum):
-    """Enumerations used to distinguish whether to handle creation or update.
-    """
+    """Enumerations used to distinguish whether to handle creation or update."""
+
     CREATE = 1
     UPDATE = 2
 
@@ -254,6 +280,7 @@ class AgentPoolDecoratorMode(Enum):
     """Enumerations used to distinguish whether to deal with the default system agentpool in the context of the cluster
     or any specific agentpool.
     """
+
     MANAGED_CLUSTER = 1
     STANDALONE = 2
 

@@ -267,7 +267,7 @@ class MonitorTests(ScenarioTest):
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v1_2')
-    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1', location='westus')
+    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1', location='westus2')
     def test_metric_alert_for_sql_database_scope(self, resource_group, resource_group_location, server1):
         self.kwargs.update({
             'alert': 'alert1',

@@ -327,12 +327,15 @@ def register_command_group(
         helps[name] = yaml.safe_dump(cls.AZ_HELP)
 
         if is_preview:
-            cls.AZ_PREVIEW_INFO = partial(PreviewItem, target=f'az {name}', object_type='command group')
+            cls.AZ_PREVIEW_INFO = staticmethod(partial(PreviewItem,
+                                                       target=f'az {name}', object_type='command group'))
         if is_experimental:
-            cls.AZ_EXPERIMENTAL_INFO = partial(ExperimentalItem, target=f'az {name}', object_type='command group')
+            cls.AZ_EXPERIMENTAL_INFO = staticmethod(partial(ExperimentalItem,
+                                                            target=f'az {name}', object_type='command group'))
         if deprecated_info:
-            cls.AZ_DEPRECATE_INFO = partial(Deprecated, target=f'az {name}', object_type='command group',
-                                            **deprecated_info)
+            cls.AZ_DEPRECATE_INFO = staticmethod(partial(Deprecated,
+                                                         target=f'az {name}', object_type='command group',
+                                                         **deprecated_info))
         return cls
 
     return decorator
@@ -369,11 +372,13 @@ def register_command(
         if confirmation:
             cls.AZ_CONFIRMATION = confirmation
         if is_preview:
-            cls.AZ_PREVIEW_INFO = partial(PreviewItem, target=f'az {name}', object_type='command')
+            cls.AZ_PREVIEW_INFO = staticmethod(partial(PreviewItem, target=f'az {name}', object_type='command'))
         if is_experimental:
-            cls.AZ_EXPERIMENTAL_INFO = partial(ExperimentalItem, target=f'az {name}', object_type='command')
+            cls.AZ_EXPERIMENTAL_INFO = staticmethod(partial(ExperimentalItem,
+                                                            target=f'az {name}', object_type='command'))
         if deprecated_info:
-            cls.AZ_DEPRECATE_INFO = partial(Deprecated, target=f'az {name}', object_type='command', **deprecated_info)
+            cls.AZ_DEPRECATE_INFO = staticmethod(partial(Deprecated, target=f'az {name}',
+                                                         object_type='command', **deprecated_info))
         return cls
 
     return decorator

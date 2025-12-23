@@ -314,9 +314,39 @@ def load_command_table(self, _):
         g.command('delete', 'delete', confirmation=True)
         g.custom_command('list', 'list_app_service_plans')
         g.custom_show_command('show', 'show_plan')
-        g.generic_update_command('update', setter_name='begin_create_or_update', custom_func_name='update_app_service_plan',
-                                 setter_arg_name='app_service_plan', supports_no_wait=True,
+        g.generic_update_command('update', setter_name='update_app_service_plan_with_progress', custom_func_name='update_app_service_plan',
+                                 setter_arg_name='app_service_plan', setter_type=appservice_custom, supports_no_wait=True,
                                  exception_handler=ex_handler_factory())
+
+    with self.command_group('appservice plan managed-instance install-script') as g:
+        g.custom_command('list', 'list_plan_managed_instance_install_scripts')
+        g.custom_command('add', 'add_plan_managed_instance_install_script')
+        g.custom_command('remove', 'remove_plan_managed_instance_install_script')
+
+    with self.command_group('appservice plan managed-instance storage-mount') as g:
+        g.custom_command('list', 'list_plan_managed_instance_storage_mounts')
+        g.custom_command('add', 'add_plan_managed_instance_storage_mount')
+        g.custom_command('remove', 'remove_plan_managed_instance_storage_mount')
+
+    with self.command_group('appservice plan managed-instance registry-adapter') as g:
+        g.custom_command('list', 'list_plan_managed_instance_registry_adapters')
+        g.custom_command('add', 'add_plan_managed_instance_registry_adapter')
+        g.custom_command('remove', 'remove_plan_managed_instance_registry_adapter')
+
+    with self.command_group('appservice plan managed-instance network') as g:
+        g.custom_show_command('show', 'show_plan_managed_instance_network')
+        g.custom_command('add', 'add_plan_managed_instance_network')
+        g.custom_command('remove', 'remove_plan_managed_instance_network')
+
+    with self.command_group('appservice plan managed-instance instance', custom_command_type=appservice_custom, is_preview=True) as g:
+        g.custom_command('connect', 'connect_to_plan_instance')
+        g.custom_command('recycle', 'recycle_plan_managed_instance')
+
+    with self.command_group('appservice plan identity', is_preview=True) as g:
+        g.custom_show_command('show', 'show_plan_identity')
+        g.custom_command('assign', 'assign_plan_identity')
+        g.custom_command('remove', 'remove_plan_identity')
+        g.custom_command('set-default', 'set_plan_default_identity')
 
     with self.command_group('appservice') as g:
         g.custom_command('list-locations', 'list_locations', transform=transform_list_location_output)
@@ -344,6 +374,10 @@ def load_command_table(self, _):
         g.generic_update_command('update', getter_name="get_functionapp", setter_name='set_functionapp', exception_handler=update_function_ex_handler_factory(),
                                  custom_func_name='update_functionapp', getter_type=appservice_custom, setter_type=appservice_custom, command_type=webapp_sdk,
                                  validator=validate_functionapp_on_containerapp_update)
+
+    with self.command_group('functionapp flex-migration') as g:
+        g.custom_command('start', 'migrate_consumption_to_flex', exception_handler=ex_handler_factory())
+        g.custom_command('list', 'list_flex_migration_candidates', exception_handler=ex_handler_factory())
 
     with self.command_group('functionapp deployment config') as g:
         g.custom_command('set', 'update_deployment_configs', exception_handler=ex_handler_factory(), validator=validate_is_flex_functionapp)

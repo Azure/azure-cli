@@ -419,6 +419,10 @@ authentication_metadata_param_type = CLIArgumentType(
     help='Preferred metadata to use for authentication of synced on-prem users. Default is AzureAD.',
     arg_type=get_enum_type(['AzureAD', 'Windows', 'Paired']))
 
+memory_size_type = CLIArgumentType(
+    options_list=['--memory'],
+    help='The memory size in gigabytes (GB).')
+
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
 
@@ -1313,7 +1317,8 @@ def load_arguments(self, _):
                 'monthly_retention',
                 'yearly_retention',
                 'week_of_year',
-                'make_backups_immutable'])
+                'time_based_immutability',
+                'time_based_immutability_mode'])
 
         c.argument('weekly_retention',
                    help='Retention for the weekly backup. '
@@ -1333,9 +1338,20 @@ def load_arguments(self, _):
         c.argument('week_of_year',
                    help='The Week of Year, 1 to 52, in which to take the yearly LTR backup.')
 
-        c.argument('make_backups_immutable',
-                   help='Whether to make the LTR backups immutable.',
-                   arg_type=get_three_state_flag())
+        c.argument('time_based_immutability',
+                   options_list=['--make-backups-immutable', '--tb-immutability'],
+                   help='Whether to enable time based immutability on the LTR backups. '
+                   'Possible values are: \'True\', \'False\', \'Enabled\', \'Disabled\'.')
+
+        c.argument('time_based_immutability_mode',
+                   options_list=['--tb-immutability-mode'],
+                   help='The mode of time based immutability to be set on the LTR backups. '
+                   'Possible values are: \'Locked\', \'Unlocked\'. '
+                   'This is only valid if make-backups-immutable is enabled')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql db ltr-backup') as c:
         c.argument('location_name',
@@ -1908,7 +1924,8 @@ def load_arguments(self, _):
                 'administrator_login',
                 'administrator_login_password',
                 'location',
-                'minimal_tls_version'
+                'minimal_tls_version',
+                'tags'
             ])
 
         c.argument('administrator_login',
@@ -2313,6 +2330,12 @@ def load_arguments(self, _):
                    arg_type=capacity_param_type,
                    help='The capacity of the managed instance in integer number of vcores.')
 
+        c.argument('memory_size_in_gb',
+                   options_list=['--memory'],
+                   arg_type=memory_size_type,
+                   help='The memory size of the managed instance.'
+                   ' Memory size must be specified in GB')
+
         c.argument('collation',
                    help='The collation of the managed instance.')
 
@@ -2382,6 +2405,7 @@ def load_arguments(self, _):
                 'minimal_tls_version',
                 'virtual_network_subnet_id',
                 'vcores',
+                'memory_size_in_gb',
                 'storage_size_in_gb',
                 'storage_iops',
                 'collation',
