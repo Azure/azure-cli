@@ -23,7 +23,6 @@ from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import (
-    CLIInternalError,
     ResourceNotFoundError,
     ValidationError,
     RequiredArgumentMissingError,
@@ -2592,7 +2591,8 @@ def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter
         existing_identity['userAssignedIdentities'] = None
 
     if remove_system_assigned_identity:
-        if existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value or existing_identity['type'] == IdentityType.USER_ASSIGNED.value:
+        if existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value \
+                or existing_identity['type'] == IdentityType.USER_ASSIGNED.value:
             existing_identity['type'] = IdentityType.USER_ASSIGNED.value
         else:
             existing_identity['type'] = IdentityType.NONE.value
@@ -2610,12 +2610,15 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 
         from ._vm_utils import IdentityType
         if vm.get('identity') and vm.get('identity').get('type') == IdentityType.USER_ASSIGNED.value:
-            command_args['mi_user_assigned'] = [key for key in (vm.get('identity').get('userAssignedIdentities') or {}).keys()] + ['UserAssigned']
+            command_args['mi_user_assigned'] = \
+                ([key for key in list((vm.get('identity', {}).get('userAssignedIdentities', {})).keys())] +
+                 ['UserAssigned'])
         elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED.value:
             command_args['mi_user_assigned'] = []
             command_args['mi_system_assigned'] = 'True'
         elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
-            command_args['mi_user_assigned'] = [key for key in (vm.get('identity').get('userAssignedIdentities') or {}).keys()]
+            command_args['mi_user_assigned'] = \
+                [key for key in list((vm.get('identity', {}).get('userAssignedIdentities', {})).keys())]
             command_args['mi_system_assigned'] = 'True'
         else:
             command_args['mi_user_assigned'] = []
