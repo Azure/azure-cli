@@ -884,7 +884,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
                 if key not in command_args['mi_user_assigned']:
                     command_args['mi_user_assigned'].append(key)
 
-        from .aaz.latest.vm._patch import Patch
+        from .aaz.latest.vm import Patch
         update_vm_identity = Patch(cli_ctx=cmd.cli_ctx)(command_args=command_args)
         LongRunningOperation(cmd.cli_ctx)(update_vm_identity)
         result = update_vm_identity.result()
