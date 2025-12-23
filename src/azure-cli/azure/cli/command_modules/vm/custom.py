@@ -880,7 +880,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
                 command_args['mi_user_assigned'].append(key)
 
         if identity.get('userAssignedIdentities'):
-            for key in identity.get('userAssignedIdentities').keys():
+            for key in identity.get('userAssignedIdentities', {}).keys():
                 if key not in command_args['mi_user_assigned']:
                     command_args['mi_user_assigned'].append(key)
 
