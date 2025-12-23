@@ -1387,7 +1387,7 @@ def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False
 
 
 def get_vm_by_aaz(cmd, resource_group_name, vm_name, expand=None):
-    from .aaz.latest.vm._show import Show
+    from .aaz.latest.vm import Show
     command_args = {
         'resource_group': resource_group_name,
         'vm_name': vm_name,
