@@ -2611,14 +2611,14 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
         from ._vm_utils import IdentityType
         if vm.get('identity') and vm.get('identity').get('type') == IdentityType.USER_ASSIGNED.value:
             command_args['mi_user_assigned'] = \
-                ([key for key in list((vm.get('identity', {}).get('userAssignedIdentities', {})).keys())] +
+                ([key for key in list(vm.get('identity', {}).get('userAssignedIdentities', {}).keys())] +
                  ['UserAssigned'])
         elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED.value:
             command_args['mi_user_assigned'] = []
             command_args['mi_system_assigned'] = 'True'
         elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
             command_args['mi_user_assigned'] = \
-                [key for key in list((vm.get('identity', {}).get('userAssignedIdentities', {})).keys())]
+                [key for key in list(vm.get('identity', {}).get('userAssignedIdentities', {}).keys())]
             command_args['mi_system_assigned'] = 'True'
         else:
             command_args['mi_user_assigned'] = []
