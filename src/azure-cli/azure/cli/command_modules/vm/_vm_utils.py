@@ -35,7 +35,7 @@ def get_target_network_api(cli_ctx):
     if cli_ctx.cloud.profile == 'latest':
         version = '2022-01-01'
     else:
-        from azure.cli.core.profiles import get_api_version, ResourceType
+        from azure.cli.core.profiles import get_api_version
         version = get_api_version(cli_ctx, ResourceType.MGMT_NETWORK)
     return version
 
@@ -49,8 +49,6 @@ def read_content_if_is_file(string_or_file):
 
 
 def _resolve_api_version(cli_ctx, provider_namespace, resource_type, parent_path):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    from azure.cli.core.profiles import ResourceType
     client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     provider = client.providers.get(provider_namespace)
 
@@ -78,10 +76,8 @@ def log_pprint_template(template):
 def check_existence(cli_ctx, value, resource_group, provider_namespace, resource_type,
                     parent_name=None, parent_type=None, static_version=None):
     # check for name or ID and set the type flags
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     from azure.core.exceptions import HttpResponseError
     from azure.mgmt.core.tools import parse_resource_id
-    from azure.cli.core.profiles import ResourceType
     id_parts = parse_resource_id(value)
     resource_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES,
                                               subscription_id=id_parts.get('subscription', None)).resources
@@ -417,8 +413,6 @@ def update_write_accelerator_settings(model, write_accelerator_settings):
 
 
 def get_storage_blob_uri(cli_ctx, storage):
-    from azure.cli.core.profiles._shared import ResourceType
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
     if urlparse(storage).scheme:
         storage_uri = storage
     else:
