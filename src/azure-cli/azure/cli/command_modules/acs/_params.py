@@ -1293,7 +1293,7 @@ def _get_container_storage_enum_type(choices):
 
     class AzureContainerStorageAction(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
-            if values is None:
+            if values in [[], None]:
                 # When used as a flag without value, set as True
                 setattr(namespace, self.dest, True)
                 return

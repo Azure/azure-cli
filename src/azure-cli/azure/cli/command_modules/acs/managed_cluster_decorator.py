@@ -6898,13 +6898,14 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
         """
         self._ensure_mc(mc)
 
-        if self.context.raw_param.get("enable_azure_container_storage") is not None:
-            self.context.set_intermediate("enable_azure_container_storage", True, overwrite_exists=True)
+        enable_azure_container_storage_param = self.context.raw_param.get("enable_azure_container_storage")
+        if enable_azure_container_storage_param:
+            self.context.set_intermediate("enable_azure_container_storage", enable_azure_container_storage_param, overwrite_exists=True)
             container_storage_version = self.context.raw_param.get("container_storage_version")
 
             if container_storage_version is not None and container_storage_version == CONST_ACSTOR_VERSION_V1:
                 # read the azure container storage values passed
-                pool_type = self.context.raw_param.get("enable_azure_container_storage")
+                pool_type = enable_azure_container_storage_param
                 enable_azure_container_storage = pool_type is not None
                 ephemeral_disk_volume_type = self.context.raw_param.get("ephemeral_disk_volume_type")
                 ephemeral_disk_nvme_perf_tier = self.context.raw_param.get("ephemeral_disk_nvme_perf_tier")
@@ -6998,7 +6999,6 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                         overwrite_exists=True
                     )
             else:
-                enable_azure_container_storage = self.context.raw_param.get("enable_azure_container_storage")
                 storage_pool_name = self.context.raw_param.get("storage_pool_name")
                 pool_sku = self.context.raw_param.get("storage_pool_sku")
                 pool_option = self.context.raw_param.get("storage_pool_option")
@@ -7008,7 +7008,7 @@ class AKSManagedClusterCreateDecorator(BaseAKSManagedClusterDecorator):
                     validate_enable_azure_container_storage_params,
                 )
                 validate_enable_azure_container_storage_params(
-                    enable_azure_container_storage,
+                    enable_azure_container_storage_param,
                     False,
                     False,
                     False,
@@ -9307,8 +9307,6 @@ class AKSManagedClusterUpdateDecorator(BaseAKSManagedClusterDecorator):
                 self.context.set_intermediate("enable_azure_container_storage", enable_azure_container_storage_param, overwrite_exists=True)
                 self.context.set_intermediate("disable_azure_container_storage", disable_azure_container_storage_param, overwrite_exists=True)
                 self.context.set_intermediate("is_extension_installed", is_extension_installed, overwrite_exists=True)
-                self.context.set_intermediate("is_ephemeralDisk_enabled", is_ephemeralDisk_enabled, overwrite_exists=True)
-                self.context.set_intermediate("is_elasticSan_enabled", is_elasticSan_enabled, overwrite_exists=True)
 
         return mc
 
