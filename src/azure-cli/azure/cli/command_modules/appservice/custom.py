@@ -510,10 +510,6 @@ def update_app_settings_functionapp(cmd, resource_group_name, name, settings=Non
     check_language_runtime(cmd, resource_group_name, name)
     return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
 
-
-
-
-
 def _parse_json_setting(s, result, slot_result, setting_type):
     """
     Parse JSON format settings.
