@@ -511,31 +511,7 @@ def update_app_settings_functionapp(cmd, resource_group_name, name, settings=Non
     return update_app_settings(cmd, resource_group_name, name, settings, slot, slot_settings)
 
 
-def _parse_simple_key_value_setting(s, dest):
-    """
-    Parse simple key=value settings format.
 
-    Parameters
-    ----------
-    s : str
-        The setting string to parse.
-    dest : dict
-        Dictionary to store the parsed setting.
-
-    Returns
-    -------
-    bool
-        True if parsing succeeded, False otherwise.
-    """
-    if ('=' in s and not s.lstrip().startswith(('{"', "[", "{")) and
-            not s.startswith('@')):  # @ indicates file input
-        try:
-            setting_name, value = s.split('=', 1)
-            dest[setting_name] = value
-            return True
-        except ValueError:
-            pass  # Fall back to JSON parsing if split fails
-    return False
 
 
 def _parse_json_setting(s, result, slot_result, setting_type):
@@ -576,16 +552,7 @@ def _parse_json_setting(s, result, slot_result, setting_type):
         return False
 
 
-def _parse_fallback_key_value_setting(s, result):
-    """Parse key=value as fallback when JSON parsing fails."""
-    try:
-        setting_name, value = s.split('=', 1)
-    except ValueError as ex:
-        raise InvalidArgumentValueError(
-            f"Invalid setting format: '{s}'. Expected 'key=value' format or valid JSON.",
-            recommendation="Use 'key=value' format or provide valid JSON like '{\"key\": \"value\"}'."
-        ) from ex
-    result[setting_name] = value
+
 
 
 def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None, slot_settings=None):
@@ -599,10 +566,14 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                                            'list_application_settings', slot)
     result, slot_result = {}, {}
 
-    for src, dest, setting_type in [(settings, result, "Settings"), (slot_settings, slot_result, "SlotSettings")]:
+    for src, setting_type in [(settings, "Settings"), (slot_settings, "SlotSettings")]:
         for s in src:
             # Try simple key=value parsing first
-            if _parse_simple_key_value_setting(s, dest):
+            if '=' in s and not s.lstrip().startswith(('{"', "[", "{")) and not s.startswith('@'):
+                k, v = s.split('=', 1)
+                result[k] = v
+                if setting_type == "SlotSettings":
+                    slot_result[k] = True
                 continue
 
             # Try JSON parsing
@@ -610,7 +581,17 @@ def update_app_settings(cmd, resource_group_name, name, settings=None, slot=None
                 continue
 
             # Fallback to key=value parsing with error handling
-            _parse_fallback_key_value_setting(s, result)
+            try:
+                k, v = s.split('=', 1)
+            except ValueError as ex:
+                raise InvalidArgumentValueError(
+                    f"Invalid setting format: '{s}'. Expected 'key=value' format or valid JSON.",
+                    recommendation="Use 'key=value' format or provide valid JSON like '{\"key\": \"value\"}'."
+                ) from ex
+
+            result[k] = v
+            if setting_type == "SlotSettings":
+                slot_result[k] = True
 
     for setting_name, value in result.items():
         app_settings.properties[setting_name] = value
