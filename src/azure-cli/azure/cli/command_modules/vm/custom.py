@@ -884,8 +884,8 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
                 if key not in command_args['mi_user_assigned']:
                     command_args['mi_user_assigned'].append(key)
 
-        from .aaz.latest.vm import Patch
-        update_vm_identity = Patch(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+        from .operations.vm import VMPatch
+        update_vm_identity = VMPatch(cli_ctx=cmd.cli_ctx)(command_args=command_args)
         LongRunningOperation(cmd.cli_ctx)(update_vm_identity)
         result = update_vm_identity.result()
         return result
@@ -1387,7 +1387,7 @@ def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False
 
 
 def get_vm_by_aaz(cmd, resource_group_name, vm_name, expand=None):
-    from .aaz.latest.vm import Show
+    from .operations.vm import VMShow
     command_args = {
         'resource_group': resource_group_name,
         'vm_name': vm_name,
@@ -1396,7 +1396,7 @@ def get_vm_by_aaz(cmd, resource_group_name, vm_name, expand=None):
     if expand:
         command_args['expand'] = expand
 
-    return Show(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    return VMShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def get_vm(cmd, resource_group_name, vm_name, expand=None):
@@ -2568,6 +2568,7 @@ def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter
         return None
 
     existing_emsis = [x.lower() for x in (existing_identity.get('userAssignedIdentities') or {}).keys()]
+    existing_identity['userAssignedIdentities'] = {}
 
     if identities:
         emsis_to_remove = [x.lower() for x in identities]
@@ -2584,11 +2585,8 @@ def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter
             elif existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
                 existing_identity['type'] = IdentityType.SYSTEM_ASSIGNED.value
 
-        existing_identity['userAssignedIdentities'] = {}
         for emsis in identities:
             existing_identity['userAssignedIdentities'][emsis] = {}
-    else:
-        existing_identity['userAssignedIdentities'] = None
 
     if remove_system_assigned_identity:
         if existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value \
@@ -2611,7 +2609,7 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
         from ._vm_utils import IdentityType
         if vm.get('identity') and vm.get('identity').get('type') == IdentityType.USER_ASSIGNED.value:
             command_args['mi_user_assigned'] = \
-                vm.get('identity', {}).get('userAssignedIdentities', {}).keys() + ['UserAssigned']
+                list(vm.get('identity', {}).get('userAssignedIdentities', {}).keys()) + ['UserAssigned']
             # NOTE: The literal 'UserAssigned' is intentionally appended as a marker for
             # VMIdentityRemove._format_content, which uses it to apply special handling
             # for purely user-assigned identities. It is not a real identity resource ID.
@@ -2619,7 +2617,7 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
             command_args['mi_user_assigned'] = []
             command_args['mi_system_assigned'] = 'True'
         elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
-            command_args['mi_user_assigned'] = vm.get('identity', {}).get('userAssignedIdentities', {}).keys()
+            command_args['mi_user_assigned'] = list(vm.get('identity', {}).get('userAssignedIdentities', {}).keys())
             command_args['mi_system_assigned'] = 'True'
         else:
             command_args['mi_user_assigned'] = []

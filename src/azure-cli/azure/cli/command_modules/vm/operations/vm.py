@@ -158,8 +158,44 @@ class VMCreate(_VMCreate):
         return result
 
 
+class VMPatch(_VMPatch):
+    class VirtualMachinesUpdate(_VMPatch.VirtualMachinesUpdate):
+        # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing
+        @classmethod
+        def _build_schema_on_200(cls):
+            schema = super()._build_schema_on_200()
+
+            del schema.resources.Element.properties._fields['type']
+            schema.resources.Element.properties.type = AAZStrType(
+                serialized_name="typePropertiesType",
+            )
+            return schema
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.resources):
+            for resource in self.ctx.vars.instance.resources:
+                if has_value(resource.type):
+                    resource.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
 class VMIdentityRemove(_VMPatch):
     def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.resources):
+            for resource in self.ctx.vars.instance.resources:
+                if has_value(resource.type):
+                    resource.type = AAZUndefined
+
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
 
         identity = result.get('identity')
@@ -178,6 +214,17 @@ class VMIdentityRemove(_VMPatch):
         return result
 
     class VirtualMachinesUpdate(_VMPatch.VirtualMachinesUpdate):
+        # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing
+        @classmethod
+        def _build_schema_on_200(cls):
+            schema = super()._build_schema_on_200()
+
+            del schema.resources.Element.properties._fields['type']
+            schema.resources.Element.properties.type = AAZStrType(
+                serialized_name="typePropertiesType",
+            )
+            return schema
+
         def _format_content(self, content):
             if isinstance(content, str):
                 content = json.loads(content)
