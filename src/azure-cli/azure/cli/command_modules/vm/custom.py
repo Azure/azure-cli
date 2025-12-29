@@ -20,7 +20,6 @@ import requests
 # the urlopen is imported for automation purpose
 from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
-from jinja2.filters import do_slice
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import (
@@ -738,7 +737,6 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     public_network_access=None, accelerated_network=None, architecture=None,
                     elastic_san_resource_id=None, bandwidth_copy_speed=None, instant_access_duration_minutes=None):
     from azure.mgmt.core.tools import resource_id, is_valid_resource_id
-    from azure.cli.core.commands.client_factory import get_subscription_id
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
