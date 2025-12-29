@@ -20,6 +20,7 @@ import requests
 # the urlopen is imported for automation purpose
 from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-import,ungrouped-imports
 
+from jinja2.filters import do_slice
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import (
@@ -771,9 +772,11 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
             namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
 
     if disk_access is not None and not is_valid_resource_id(disk_access):
-        disk_access = resource_id(
-            subscription=get_subscription_id(cmd.cli_ctx), resource_group=resource_group_name,
-            namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
+        from .aaz.latest.disk_access import Show as DiskAccessShow
+        disk_access = DiskAccessShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'resource_group': resource_group_name,
+            'disk_access_name': disk_access
+        })['id']
 
     if disk_encryption_set is not None and encryption_type is None:
         raise CLIError('usage error: Please specify --encryption-type.')
