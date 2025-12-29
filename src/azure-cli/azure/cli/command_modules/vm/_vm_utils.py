@@ -774,7 +774,9 @@ def safe_get(d: dict, path: str, default=None):
             except Exception:
                 return default
         elif isinstance(cur, dict):
-            cur = cur.get(key, default)
+            if key not in cur:
+                return default
+            cur = cur[key]
         else:
             return default
     return cur

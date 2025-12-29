@@ -2265,16 +2265,18 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name,
         current_lun = lun
         for disk_id in disk_ids:
             if current_lun is not None:
-                disk_lun = current_lun
-                current_lun += 1
+                disk_lun = _next_lun(start=current_lun)
+                current_lun = disk_lun + 1
             else:
                 disk_lun = _next_lun()
             payload = {
                 'diskId': disk_id,
                 'lun': disk_lun,
                 'caching': caching,
-                'writeAcceleratorEnabled': enable_write_accelerator
             }
+            if enable_write_accelerator:
+                payload['writeAcceleratorEnabled'] = enable_write_accelerator
+
             attach_payload.append(payload)
         return AttachDetachDataDisk(cli_ctx=cmd.cli_ctx)(command_args={
             'vm_name': vm_name,
@@ -2307,8 +2309,17 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name,
 
             # attach existing / new disks
             if disks_to_process:
+                # if a user-specified LUN is provided, allocate it (or the next available
+                # starting from that value) for the first disk, then auto-increment for
+                # subsequent disks to avoid LUN conflicts.
+                next_lun = _next_lun(start=lun) if lun is not None else None
                 for disk_item in disks_to_process:
-                    disk_lun = lun if lun is not None else _next_lun()
+                    if lun is not None:
+                        disk_lun = next_lun
+                        next_lun = _next_lun()
+                    else:
+                        disk_lun = _next_lun()
+
                     if new:
                         disk_name = parse_resource_id(disk_item)['name']
                         disk_obj = {
@@ -2410,14 +2421,16 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None,
 
         vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
             'resource_group': resource_group_name,
-            "vm_name": vm_name
+            'vm_name': vm_name
         })
 
-        # To avoid unnecessary permission check of image
-        storage_profile = vm.get('storageProfile', {})
-        storage_profile["imageReference"] = None
+        # work on a local copy of the VM dict to avoid mutating the original object.
+        vm_result = vm if isinstance(vm, dict) else getattr(vm, 'result', vm)
+        vm_dict = json.loads(json.dumps(vm_result))
 
-        vm_dict = vm if isinstance(vm, dict) else getattr(vm, 'result', vm)
+        # to avoid unnecessary permission check of image
+        storage_profile = vm_dict.get('storageProfile', {})
+        storage_profile["imageReference"] = None
 
         target_disk = None
         data_disks = safe_get(vm_dict, 'storageProfile.dataDisks', default=[]) or []
@@ -2429,7 +2442,7 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None,
                 break
 
         if not target_disk:
-            attached_names = [d.get('name') for d in (_(vm_dict, 'storageProfile.dataDisks', []) or [])]
+            attached_names = [d.get('name') for d in (safe_get(vm_dict, 'storageProfile.dataDisks', []) or [])]
             raise ResourceNotFoundError(
                 "No disk with the name '{}' was found. Attached: {}".format(disk_name, attached_names)
             )
@@ -2437,7 +2450,7 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None,
         disk_id = safe_get(target_disk, 'managedDisk.id')
         if not disk_id:
             raise CLIError(
-                "Disk '{}' is not a managed disk (no managedDisk.id). Only managed disks are supported by AAZ detach."
+                "Disk '{}' is not a managed disk (no managedDisk.id). Only managed disks are supported for this operation."
                 .format(disk_name)
             )
 
