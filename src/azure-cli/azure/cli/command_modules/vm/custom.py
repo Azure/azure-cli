@@ -769,14 +769,24 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
         disk_encryption_set = DiskEncryptionSetShow(cli_ctx=cmd.cli_ctx)(command_args={
             'resource_group': resource_group_name,
             'disk_encryption_set_name': disk_encryption_set
-        })['id']
+        })
+
+        if disk_encryption_set:
+            disk_encryption_set = disk_encryption_set['id']
+        else:
+            disk_encryption_set = None
 
     if disk_access is not None and not is_valid_resource_id(disk_access):
         from .aaz.latest.disk_access import Show as DiskAccessShow
         disk_access = DiskAccessShow(cli_ctx=cmd.cli_ctx)(command_args={
             'resource_group': resource_group_name,
             'disk_access_name': disk_access
-        })['id']
+        })
+
+        if disk_access:
+            disk_access = disk_access['id']
+        else:
+            disk_access = None
 
     if disk_encryption_set is not None and encryption_type is None:
         raise CLIError('usage error: Please specify --encryption-type.')
