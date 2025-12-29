@@ -757,3 +757,31 @@ def generate_ssh_keys_ed25519(private_key_filepath, public_key_filepath):
         f.write(public_bytes)
 
     return public_bytes.decode()
+
+
+def safe_get(d: dict, path: str, default=None):
+    """
+    Safely fetch nested keys from a dict.
+    Path format supports lists by index, e.g. 'storageProfile.dataDisks.0.managedDisk.id'.
+    Returns `default` when any segment is missing or type doesn't match.
+    """
+    cur = d
+    for key in path.split('.'):
+        if isinstance(cur, list):
+            # list index access: only allow integer segments
+            try:
+                idx = int(key)
+            except ValueError:
+                return default
+            try:
+                cur = cur[idx]
+            except IndexError:
+                return default
+        elif isinstance(cur, dict):
+            # dict key access
+            if key not in cur:
+                return default
+            cur = cur[key]
+        else:
+            return default
+    return cur
