@@ -766,26 +766,34 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 
     if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
         from .aaz.latest.disk_encryption_set import Show as DiskEncryptionSetShow
-        disk_encryption_set = DiskEncryptionSetShow(cli_ctx=cmd.cli_ctx)(command_args={
-            'resource_group': resource_group_name,
-            'disk_encryption_set_name': disk_encryption_set
-        })
+        from azure.core.exceptions import HttpResponseError
+        try:
+            disk_encryption_set = DiskEncryptionSetShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'disk_encryption_set_name': disk_encryption_set
+            })
 
-        if disk_encryption_set:
-            disk_encryption_set = disk_encryption_set['id']
-        else:
+            if disk_encryption_set:
+                disk_encryption_set = disk_encryption_set['id']
+            else:
+                disk_encryption_set = None
+        except HttpResponseError:
             disk_encryption_set = None
 
     if disk_access is not None and not is_valid_resource_id(disk_access):
         from .aaz.latest.disk_access import Show as DiskAccessShow
-        disk_access = DiskAccessShow(cli_ctx=cmd.cli_ctx)(command_args={
-            'resource_group': resource_group_name,
-            'disk_access_name': disk_access
-        })
+        from azure.core.exceptions import HttpResponseError
+        try:
+            disk_access = DiskAccessShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'disk_access_name': disk_access
+            })
 
-        if disk_access:
-            disk_access = disk_access['id']
-        else:
+            if disk_access:
+                disk_access = disk_access['id']
+            else:
+                disk_access = None
+        except HttpResponseError:
             disk_access = None
 
     if disk_encryption_set is not None and encryption_type is None:
