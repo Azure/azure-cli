@@ -1981,11 +1981,38 @@ def _validate_gallery_image_reference(cmd, namespace):
                                     'format, please refer to the help sample'.format(gallery_image_reference))
 
 
+def _validate_gallery_image_reference_by_aaz(namespace):
+    is_validate = 'gallery_image_reference' in namespace and namespace.gallery_image_reference is not None
+
+    if not is_validate:
+        return
+
+    from azure.cli.command_modules.vm._image_builder import GalleryImageReferenceType
+    from ._vm_utils import is_compute_gallery_image_id, is_community_gallery_image_id, \
+        is_shared_gallery_image_id
+
+    gallery_image_reference = namespace.gallery_image_reference
+    if is_compute_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.COMPUTE.backend_key
+        return
+    if is_community_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.COMMUNITY.backend_key
+        return
+    if is_shared_gallery_image_id(gallery_image_reference):
+        namespace.gallery_image_reference_type = GalleryImageReferenceType.SHARED.backend_key
+        return
+
+    from azure.cli.core.parser import InvalidArgumentValueError
+    raise InvalidArgumentValueError('usage error: {} is an invalid gallery image reference, please provide valid '
+                                    'compute, shared or community gallery image version. For details about valid '
+                                    'format, please refer to the help sample'.format(gallery_image_reference))
+
+
 def process_disk_create_namespace(cmd, namespace):
     from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
-    _validate_gallery_image_reference(cmd, namespace)
+    _validate_gallery_image_reference_by_aaz(namespace)
     _validate_security_data_uri(namespace)
     _validate_upload_type(cmd, namespace)
     _validate_secure_vm_disk_encryption_set(namespace)
@@ -2029,10 +2056,10 @@ def _validate_upload_type(cmd, namespace):
 
     if namespace.upload_type == 'UploadWithSecurityData':
 
-        if not cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
-            raise ArgumentUsageError(
-                "'UploadWithSecurityData' is not supported in the current profile. "
-                "Please upgrade your profile with 'az cloud set --profile newerProfile' and try again")
+        # if not cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
+        #     raise ArgumentUsageError(
+        #         "'UploadWithSecurityData' is not supported in the current profile. "
+        #         "Please upgrade your profile with 'az cloud set --profile newerProfile' and try again")
 
         if not namespace.security_type:
             raise RequiredArgumentMissingError(
