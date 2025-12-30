@@ -551,38 +551,50 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
 
     if disk_encryption_set is not None and not is_valid_resource_id(disk_encryption_set):
         from .aaz.latest.disk_encryption_set import Show as DiskEncryptionSetShow
-        disk_encryption_set = DiskEncryptionSetShow(cli_ctx=cmd.cli_ctx)(command_args={
-            'resource_group': resource_group_name,
-            'disk_encryption_set_name': disk_encryption_set
-        })
+        from azure.core.exceptions import HttpResponseError
+        try:
+            disk_encryption_set = DiskEncryptionSetShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'disk_encryption_set_name': disk_encryption_set
+            })
 
-        if disk_encryption_set:
-            disk_encryption_set = disk_encryption_set['id']
-        else:
+            if disk_encryption_set:
+                disk_encryption_set = disk_encryption_set['id']
+            else:
+                disk_encryption_set = None
+        except HttpResponseError:
             disk_encryption_set = None
 
     if disk_access is not None and not is_valid_resource_id(disk_access):
         from .aaz.latest.disk_access import Show as DiskAccessShow
-        disk_access = DiskAccessShow(cli_ctx=cmd.cli_ctx)(command_args={
-            'resource_group': resource_group_name,
-            'disk_access_name': disk_access
-        })
+        from azure.core.exceptions import HttpResponseError
+        try:
+            disk_access = DiskAccessShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'disk_access_name': disk_access
+            })
 
-        if disk_access:
-            disk_access = disk_access['id']
-        else:
+            if disk_access:
+                disk_access = disk_access['id']
+            else:
+                disk_access = None
+        except HttpResponseError:
             disk_access = None
 
     if secure_vm_disk_encryption_set is not None and not is_valid_resource_id(secure_vm_disk_encryption_set):
         from .aaz.latest.disk_encryption_set import Show as DiskEncryptionSetShow
-        secure_vm_disk_encryption_set = DiskEncryptionSetShow(cli_ctx=cmd.cli_ctx)(command_args={
-            'resource_group': resource_group_name,
-            'disk_encryption_set_name': secure_vm_disk_encryption_set
-        })
+        from azure.core.exceptions import HttpResponseError
+        try:
+            secure_vm_disk_encryption_set = DiskEncryptionSetShow(cli_ctx=cmd.cli_ctx)(command_args={
+                'resource_group': resource_group_name,
+                'disk_encryption_set_name': secure_vm_disk_encryption_set
+            })
 
-        if secure_vm_disk_encryption_set:
-            secure_vm_disk_encryption_set = secure_vm_disk_encryption_set['id']
-        else:
+            if secure_vm_disk_encryption_set:
+                secure_vm_disk_encryption_set = secure_vm_disk_encryption_set['id']
+            else:
+                secure_vm_disk_encryption_set = None
+        except HttpResponseError:
             secure_vm_disk_encryption_set = None
 
     encryption = None

@@ -2055,12 +2055,6 @@ def _validate_upload_type(cmd, namespace):
         namespace.upload_type = 'Upload'
 
     if namespace.upload_type == 'UploadWithSecurityData':
-
-        # if not cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
-        #     raise ArgumentUsageError(
-        #         "'UploadWithSecurityData' is not supported in the current profile. "
-        #         "Please upgrade your profile with 'az cloud set --profile newerProfile' and try again")
-
         if not namespace.security_type:
             raise RequiredArgumentMissingError(
                 "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'")
