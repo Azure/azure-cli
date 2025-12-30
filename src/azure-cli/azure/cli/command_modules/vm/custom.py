@@ -580,7 +580,6 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             'disk_encryption_set_name': secure_vm_disk_encryption_set
         })
 
-
         if secure_vm_disk_encryption_set:
             secure_vm_disk_encryption_set = secure_vm_disk_encryption_set['id']
         else:

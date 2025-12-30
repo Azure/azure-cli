@@ -8,6 +8,8 @@ from knack.util import CLIError
 
 from azure.cli.core.aaz import has_value, register_command, register_command_group, AAZCommandGroup
 from ..aaz.latest.disk import Update as _DiskUpdate, GrantAccess as _DiskGrantAccess, Show, UpdatePatch as _UpdatePatch
+from ..aaz.latest.disk_encryption_set import Show as DiskEncryptionSetShow
+from ..aaz.latest.disk_access import Show as DiskAccessShow
 
 logger = get_logger(__name__)
 
@@ -45,9 +47,15 @@ class DiskUpdate(_DiskUpdate):
 
             disk_encryption_set = args.disk_encryption_set
             if not is_valid_resource_id(disk_encryption_set.to_serialized_data()):
-                disk_encryption_set = resource_id(
-                    subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
-                    namespace='Microsoft.Compute', type='diskEncryptionSets', name=disk_encryption_set)
+                disk_encryption_set = DiskEncryptionSetShow(cli_ctx=self.cli_ctx)(command_args={
+                    'resource_group': args.resource_group,
+                    'disk_encryption_set_name': disk_encryption_set
+                })
+
+                if disk_encryption_set:
+                    disk_encryption_set = disk_encryption_set['id']
+                else:
+                    disk_encryption_set = None
 
             instance.properties.encryption.disk_encryption_set_id = disk_encryption_set
 
@@ -58,9 +66,16 @@ class DiskUpdate(_DiskUpdate):
         if has_value(args.disk_access):
             disk_access = args.disk_access
             if not is_valid_resource_id(disk_access.to_serialized_data()):
-                disk_access = resource_id(
-                    subscription=get_subscription_id(self.cli_ctx), resource_group=args.resource_group,
-                    namespace='Microsoft.Compute', type='diskAccesses', name=disk_access)
+                disk_access = DiskAccessShow(cli_ctx=self.cli_ctx)(command_args={
+                    'resource_group': args.resource_group,
+                    'disk_access_name': disk_access
+                })
+
+                if disk_access:
+                    disk_access = disk_access['id']
+                else:
+                    disk_access = None
+                    
             instance.properties.disk_access_id = disk_access
 
 
