@@ -288,11 +288,12 @@ def load_command_table(self, _):
         from .operations.snapshot import SnapshotUpdate
         self.command_table['snapshot update'] = SnapshotUpdate(loader=self)
 
-    with self.command_group('vm', compute_vm_sdk) as g:
-        g.custom_command('identity assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
-        g.custom_command('identity remove', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
-        g.custom_show_command('identity show', 'show_vm_identity')
+    with self.command_group('vm identity') as g:
+        g.custom_command('assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
+        g.custom_command('remove', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
+        g.custom_show_command('show', 'show_vm_identity')
 
+    with self.command_group('vm', compute_vm_sdk) as g:
         g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
         g.custom_command('application list', 'list_vm_applications', min_api='2021-07-01')
 
