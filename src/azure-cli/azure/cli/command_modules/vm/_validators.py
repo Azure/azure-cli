@@ -1980,7 +1980,8 @@ def _validate_gallery_image_reference(cmd, namespace):
                                     'compute, shared or community gallery image version. For details about valid '
                                     'format, please refer to the help sample'.format(gallery_image_reference))
 
-def _validate_gallery_image_reference_by_aaz(cmd, namespace):
+
+def _validate_gallery_image_reference_by_aaz(namespace):
     is_validate = 'gallery_image_reference' in namespace and namespace.gallery_image_reference is not None
 
     if not is_validate:
@@ -2095,7 +2096,7 @@ def process_snapshot_create_namespace(cmd, namespace):
     from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
-    _validate_gallery_image_reference_by_aaz(cmd, namespace)
+    _validate_gallery_image_reference_by_aaz(namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:

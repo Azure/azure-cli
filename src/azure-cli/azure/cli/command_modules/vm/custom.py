@@ -736,7 +736,7 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
                     encryption_type=None, network_access_policy=None, disk_access=None, edge_zone=None,
                     public_network_access=None, accelerated_network=None, architecture=None,
                     elastic_san_resource_id=None, bandwidth_copy_speed=None, instant_access_duration_minutes=None):
-    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
 
     location = location or _get_resource_group_location(cmd.cli_ctx, resource_group_name)
     if source_blob_uri:
