@@ -284,11 +284,11 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 name='database_name',
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
                 scopes=['{} flexible-server'.format(command_group)]))
-        
+
         database_name_arg_type_cluster = CLIArgumentType(
             metavar='NAME',
             options_list=['--database-name', '-d'],
-            help='The name of the database. Only applicable when --cluster-option is set to ElasticCluster.',
+            help='The default database name for an elastic cluster. Only applicable when --cluster-option is set to ElasticCluster.',
             local_context_attribute=LocalContextAttribute(
                 name='database_name',
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
