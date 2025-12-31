@@ -203,6 +203,13 @@ build_snap() {
     mkdir -p "$OUTPUT_DIR"
     cp *.snap "$OUTPUT_DIR/" 2>/dev/null || true
     log_success "Copied snap files to: $OUTPUT_DIR"
+
+    # Copy build logs to output directory
+    local log_dir="$HOME/.local/state/snapcraft/log"
+    if [ -d "$log_dir" ]; then
+        cp "$log_dir"/snapcraft-*.log "$OUTPUT_DIR/" 2>/dev/null || true
+        log_info "Copied build logs to: $OUTPUT_DIR"
+    fi
 }
 
 # Main
