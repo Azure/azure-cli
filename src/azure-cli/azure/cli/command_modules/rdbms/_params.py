@@ -14,7 +14,7 @@ from azure.cli.core.commands.parameters import (
     get_enum_type, file_type,
     resource_group_name_type,
     get_three_state_flag)
-from azure.cli.command_modules.rdbms.validators import configuration_value_validator, validate_subnet, \
+from azure.cli.command_modules.rdbms.validators import configuration_value_validator, db_renaming_cluster_validator, validate_subnet, \
     tls_validator, public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, validate_identity, validate_byok_identity, validate_identities, \
     virtual_endpoint_name_validator, node_count_validator, postgres_firewall_rule_name_validator
@@ -284,6 +284,16 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 name='database_name',
                 actions=[LocalContextAction.GET, LocalContextAction.SET],
                 scopes=['{} flexible-server'.format(command_group)]))
+        
+        database_name_arg_type_cluster = CLIArgumentType(
+            metavar='NAME',
+            options_list=['--database-name', '-d'],
+            help='The name of the database. Only applicable when --cluster-option is set to ElasticCluster.',
+            local_context_attribute=LocalContextAttribute(
+                name='database_name',
+                actions=[LocalContextAction.GET, LocalContextAction.SET],
+                scopes=['{} flexible-server'.format(command_group)]),
+            validator=db_renaming_cluster_validator)
 
         tier_arg_type = CLIArgumentType(
             options_list=['--tier'],
@@ -628,7 +638,7 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
                 c.argument('cluster_size', default=None, arg_type=create_node_count_arg_type)
                 c.argument('zonal_resiliency', arg_type=zonal_resiliency_arg_type, default="Disabled")
                 c.argument('allow_same_zone', arg_type=allow_same_zone_arg_type, default=False)
-                c.argument('database_name', default=None, arg_type=database_name_arg_type)
+                c.argument('database_name', default=None, arg_type=database_name_arg_type_cluster)
             elif command_group == 'mysql':
                 c.argument('tier', default='Burstable', arg_type=tier_arg_type)
                 c.argument('sku_name', default='Standard_B1ms', arg_type=sku_name_arg_type)
