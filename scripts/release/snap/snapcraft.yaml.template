@@ -42,8 +42,6 @@ parts:
   azure-cli:
     plugin: python
     source: wheels/
-    python-packages:
-      - ./azure_cli-${CLI_VERSION}-py3-none-any.whl
     build-packages:
       - python3-dev
       - libffi-dev
@@ -55,7 +53,7 @@ parts:
       - libssl3
     override-build: |
       craftctl default
-      ${CRAFT_PART_INSTALL}/bin/pip3 install --no-index --find-links=${CRAFT_PART_SRC} ${CRAFT_PART_SRC}/*.whl
+      ${CRAFT_PART_INSTALL}/bin/pip3 install --find-links=${CRAFT_PART_SRC} ${CRAFT_PART_SRC}/azure_cli*.whl
     organize:
       bin: opt/az/bin
       lib: opt/az/lib
