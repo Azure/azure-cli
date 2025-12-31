@@ -850,23 +850,23 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
         return get_vm_by_aaz(cmd, resource_group_name, vm_name)
 
     def setter(vm, external_identities=external_identities):
-        if vm.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
-        elif vm.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED and external_identities:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
-        elif vm.get('identity', {}).get('type', None) == IdentityType.USER_ASSIGNED and enable_local_identity:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+        if vm.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+        elif vm.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED.value and external_identities:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+        elif vm.get('identity', {}).get('type', None) == IdentityType.USER_ASSIGNED.value and enable_local_identity:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
         elif external_identities and enable_local_identity:
-            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
         elif external_identities:
-            identity_types = IdentityType.USER_ASSIGNED
+            identity_types = IdentityType.USER_ASSIGNED.value
         else:
-            identity_types = IdentityType.SYSTEM_ASSIGNED
+            identity_types = IdentityType.SYSTEM_ASSIGNED.value
 
-        if identity_types == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
+        if identity_types == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
             command_args['mi_system_assigned'] = "True"
             command_args['mi_user_assigned'] = []
-        elif identity_types == IdentityType.USER_ASSIGNED:
+        elif identity_types == IdentityType.USER_ASSIGNED.value:
             command_args['mi_user_assigned'] = []
         else:
             command_args['mi_system_assigned'] = "True"
