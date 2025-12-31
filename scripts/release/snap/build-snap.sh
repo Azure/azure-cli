@@ -116,7 +116,12 @@ create_snapcraft_yaml() {
     # Wrapper script
     cat > "$BUILD_DIR/scripts/az-wrapper" << 'WRAPPER'
 #!/bin/bash
-export PYTHONPATH="${SNAP}/opt/az/lib/python3.11/site-packages"
+PYTHON_VERSION="$("${SNAP}/opt/az/bin/python3" - << 'EOF'
+import sys
+print(f"python{sys.version_info.major}.{sys.version_info.minor}")
+EOF
+)"
+export PYTHONPATH="${SNAP}/opt/az/lib/${PYTHON_VERSION}/site-packages"
 export PATH="${SNAP}/opt/az/bin:${PATH}"
 export AZ_INSTALLER="SNAP"
 exec "${SNAP}/opt/az/bin/python3" -m azure.cli "$@"
