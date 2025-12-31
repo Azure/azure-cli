@@ -178,7 +178,14 @@ build_snap() {
             snapcraft clean 2>/dev/null || true
         fi
 
-        snapcraft --use-lxd --verbosity=verbose
+        # Use --destructive-mode in CI (no LXD container, better network access)
+        # Use --use-lxd for local builds (isolated environment)
+        if [ -n "$CI" ] || [ -n "$BUILD_BUILDID" ]; then
+            log_info "CI environment detected, using destructive mode..."
+            snapcraft --destructive-mode --verbosity=verbose
+        else
+            snapcraft --use-lxd --verbosity=verbose
+        fi
 
         local snap_file
         snap_file=$(ls -1 *.snap 2>/dev/null | head -1)
