@@ -1141,6 +1141,75 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('autoPauseDelay', auto_pause_delay),
                 JMESPathCheck('minCapacity', min_capacity)])
 
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
+    @AllowLargeResponse()
+    def test_sql_db_serverless_to_provisioned_slo_update(self, resource_group, resource_group_location, server):
+        """
+        Test for bug fix: Updating from serverless to provisioned using --service-objective
+        should use the specified service objective, not fall back to default (S0).
+        
+        Scenario: Database starts as serverless (GP_S_Gen5_1), then updated to Standard S1.
+        Expected: Database should be updated to S1, not S0.
+        """
+        database_name = "cliautomationdb01"
+        compute_model_serverless = ComputeModelType.serverless.value
+        
+        # Create serverless database
+        vcore_edition = 'GeneralPurpose'
+        vcore_family = 'Gen5'
+        vcore_capacity = 1
+        
+        self.cmd('sql db create -g {} --server {} --name {} -e {} -c {} -f {} --compute-model {} --yes'
+                 .format(resource_group, server, database_name, vcore_edition, vcore_capacity, 
+                         vcore_family, compute_model_serverless),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5')])
+        
+        # Update from serverless to provisioned Standard S1 using --service-objective
+        # This should result in S1, not S0 (the default for Standard tier)
+        # Also need to specify max-size because Standard tier has different size limits than GeneralPurpose
+        target_slo = 'S1'
+        target_edition = 'Standard'
+        
+        self.cmd('sql db update -g {} --server {} --name {} --edition {} --service-objective {} --max-size 250GB'
+                 .format(resource_group, server, database_name, target_edition, target_slo),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', target_edition),
+                     JMESPathCheck('sku.tier', target_edition),
+                     JMESPathCheck('currentServiceObjectiveName', target_slo),
+                     JMESPathCheck('requestedServiceObjectiveName', target_slo)])
+        
+        # Verify the database is now at S1, not S0
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', target_edition),
+                     JMESPathCheck('currentServiceObjectiveName', target_slo)])
+        
+        # Test the reverse: Update from provisioned S1 to serverless
+        # This should work correctly (already did before the fix)
+        # Need to specify family and capacity when converting back to serverless
+        self.cmd('sql db update -g {} --server {} --name {} --edition {} --compute-model {} -f {} -c {}'
+                 .format(resource_group, server, database_name, vcore_edition, compute_model_serverless, 
+                         vcore_family, vcore_capacity),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition)])
+
+
+
+
 class SqlServerFreeDbMgmtScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus')
     @SqlServerPreparer(location='eastus')
@@ -8672,6 +8741,99 @@ class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
         managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
         self.assertEqual(managed_instance['isGeneralPurposeV2'], True)
         self.assertEqual(managed_instance['storageIops'], 1000)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
+class SqlManagedInstanceMemorySizeInGBCreateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_memorysizeingb_create(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'uroskrstic'
+        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
+        subnet_name = 'ManagedInstance'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'westeurope',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'memory_size_in_gb': '64',
+            'storage_size_in_gb': '256',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'True',
+            'family': 'Gen8IM'
+        })
+
+        # Create MI
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --iops {storage_iops} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} '
+                                    '--memory {memory_size_in_gb}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('memorySizeInGb', '{memory_size_in_gb}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('storageIops', '{storage_iops}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}')])
+
+        # Get the managed instance and check memory size in gb
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['memorySizeInGb'], 64)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
+class SqlManagedInstanceMemorySizeInGBUpdateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_memorysizeingb_update(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'uroskrstic'
+        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
+        subnet_name = 'ManagedInstance'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': 'uroskrstic-flexi-test-azpowershell',
+            'loc': 'westeurope',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'memory_size_in_gb': '64',
+            'storage_size_in_gb': '128',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'True',
+            'family': 'Gen8IM'
+        })
+
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --memory {memory_size_in_gb}',
+                 checks=[self.check('memorySizeInGb', '{memory_size_in_gb}')])
+
+        # Get the managed instance and check memory size in GB
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['memorySizeInGb'], int(self.kwargs['memory_size_in_gb']))
 
         # Delete the managed instance
         self.cmd('sql mi delete --ids {} --yes'

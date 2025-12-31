@@ -99,7 +99,7 @@ IGNORE_PARAMETERS = [
     'resource_file.blob_prefix',
     'resource_file.auto_storage_container_name',
     'virtual_machine_configuration.service_artifact_reference',
-
+    'target_node_communication_mode'
 ]
 
 # Options to be flattened into multiple arguments.

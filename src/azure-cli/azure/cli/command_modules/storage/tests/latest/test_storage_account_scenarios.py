@@ -1828,6 +1828,65 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('azureFilesIdentityBasedAuthentication.smbOAuthSettings.isSmbOAuthEnabled', True)
         ])
 
+    def test_storage_account_zone_with_placement(self):
+        self.kwargs.update({
+            'rg': 'yifantestzp',
+            'sazones': self.create_random_name('sa', 24),
+            'sazones2': self.create_random_name('sa', 24),
+            'sazoneplacement': self.create_random_name('sa', 24),
+            'sazoneplacement2': self.create_random_name('sa', 24),
+        })
+
+        self.cmd('storage account create -n {sazones} -g {rg} --sku Premium_LRS --kind FileStorage '
+                 '--zones 1', checks=[
+            JMESPathCheck('zones', ['1'])
+        ])
+        self.cmd('storage account create -n {sazones2} -g {rg} --sku Premium_LRS --kind FileStorage', checks=[
+            JMESPathCheck('zones', None)
+        ])
+        self.cmd('storage account update -n {sazones2} -g {rg} '
+                 '--zones 1', checks=[
+            JMESPathCheck('zones', ['1'])
+        ])
+
+        self.cmd('storage account create -n {sazoneplacement} -g {rg} --sku Premium_LRS --kind FileStorage '
+                 '--location centraluseuap --zone-placement-policy Any', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'Any')
+        ])
+        self.cmd('storage account update -n {sazoneplacement} -g {rg}  --zone-placement-policy None', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'None')
+        ])
+        self.cmd('storage account update -n {sazoneplacement} -g {rg}', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'None')
+        ])
+
+        self.cmd('storage account create -n {sazoneplacement2} -g {rg} --sku Premium_LRS --kind FileStorage '
+                 '--location centraluseuap --zone-placement-policy None', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'None')
+        ])
+        self.cmd('storage account update -n {sazoneplacement2} -g {rg} --zone-placement-policy Any', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'Any')
+        ])
+        self.cmd('storage account update -n {sazoneplacement2} -g {rg}', checks=[
+            JMESPathCheck('placement.zonePlacementPolicy', 'Any')
+        ])
+
+    def test_storage_account_geo_sla(self):
+        self.kwargs.update({
+            'rg': 'yifantestzp',
+            'sa': self.create_random_name('sa', 24)
+        })
+
+        self.cmd('storage account create -n {sa} -g {rg} --sku Standard_GRS '
+                 '--enable-blob-geo-priority-replication true', checks=[
+            JMESPathCheck('geoPriorityReplicationStatus.isBlobEnabled', True)
+        ])
+        self.cmd('storage account update -n {sa} -g {rg} '
+                 '--enable-blob-geo-priority-replication false', checks=[
+            JMESPathCheck('geoPriorityReplicationStatus.isBlobEnabled', False)
+        ])
+
+
 class RoleScenarioTest(LiveScenarioTest):
     def run_under_service_principal(self):
         account_info = self.cmd('account show').get_output_in_json()
@@ -2377,8 +2436,11 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
     def test_storage_account_failover(self, resource_group):
         self.kwargs = {
             'sa': self.create_random_name(prefix="storagegrzs", length=24),
+            'sa2': self.create_random_name(prefix="storagegrzs", length=24),
+            'sa3': self.create_random_name(prefix="storagegrzs", length=24),
             'rg': resource_group
         }
+        # planned failover
         self.cmd('storage account create -n {sa} -g {rg} -l eastus2 --kind StorageV2 --sku Standard_RAGRS --https-only',
                  checks=[self.check('name', '{sa}'),
                          self.check('sku.name', 'Standard_RAGRS')])
@@ -2395,11 +2457,59 @@ class StorageAccountFailoverScenarioTest(ScenarioTest):
             self.check('failoverInProgress', None)
         ])
 
-        # time.sleep(900)
         self.cmd('storage account failover -n {sa} -g {rg} --failover-type Planned --no-wait -y')
 
         self.cmd('storage account show -n {sa} -g {rg} --expand geoReplicationStats', checks=[
             self.check('name', '{sa}'),
+            self.check('failoverInProgress', True)
+        ])
+
+        # unplanned failover
+        self.cmd('storage account create -n {sa2} -g {rg} -l eastus2 --kind StorageV2 --sku Standard_RAGRS --https-only',
+                 checks=[self.check('name', '{sa2}'),
+                         self.check('sku.name', 'Standard_RAGRS')])
+
+        while True:
+            can_failover = self.cmd('storage account show -n {sa2} -g {rg} --expand geoReplicationStats --query '
+                                    'geoReplicationStats.canFailover -o tsv').output.strip('\n')
+            if can_failover == 'true':
+                break
+            time.sleep(10)
+
+        self.cmd('storage account show -n {sa2} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('geoReplicationStats.canFailover', True),
+            self.check('failoverInProgress', None)
+        ])
+
+        self.cmd('storage account failover -n {sa2} -g {rg} --failover-type Unplanned --no-wait -y')
+
+        self.cmd('storage account show -n {sa2} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa2}'),
+            self.check('failoverInProgress', True)
+        ])
+
+        # unplanned failover if not specified
+        self.cmd(
+            'storage account create -n {sa3} -g {rg} -l eastus2 --kind StorageV2 --sku Standard_RAGRS --https-only',
+            checks=[self.check('name', '{sa3}'),
+                    self.check('sku.name', 'Standard_RAGRS')])
+
+        while True:
+            can_failover = self.cmd('storage account show -n {sa3} -g {rg} --expand geoReplicationStats --query '
+                                    'geoReplicationStats.canFailover -o tsv').output.strip('\n')
+            if can_failover == 'true':
+                break
+            time.sleep(10)
+
+        self.cmd('storage account show -n {sa3} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('geoReplicationStats.canFailover', True),
+            self.check('failoverInProgress', None)
+        ])
+
+        self.cmd('storage account failover -n {sa3} -g {rg} --no-wait -y')
+
+        self.cmd('storage account show -n {sa3} -g {rg} --expand geoReplicationStats', checks=[
+            self.check('name', '{sa3}'),
             self.check('failoverInProgress', True)
         ])
 
@@ -2422,10 +2532,10 @@ class StorageAccountLocalContextScenarioTest(LocalContextScenarioTest):
 
 class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
     @AllowLargeResponse()
-    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='eastus2')
-    @StorageAccountPreparer(parameter_name='source_account', location='eastus2', kind='StorageV2')
-    @StorageAccountPreparer(parameter_name='destination_account', location='eastus2', kind='StorageV2')
-    @StorageAccountPreparer(parameter_name='new_account', location='eastus2', kind='StorageV2')
+    @ResourceGroupPreparer(name_prefix='cli_test_storage_account_ors', location='centraluseuap')
+    @StorageAccountPreparer(parameter_name='source_account', location='centraluseuap', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='destination_account', location='centraluseuap', kind='StorageV2')
+    @StorageAccountPreparer(parameter_name='new_account', location='centraluseuap', kind='StorageV2')
     def test_storage_account_or_policy(self, resource_group, source_account, destination_account,
                                        new_account):
         src_account_info = self.get_account_info(resource_group, source_account)
@@ -2457,11 +2567,13 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
 
         # Create ORS policy on destination account
         result = self.cmd('storage account or-policy create -n {dest_sc} -s {src_sc} --dcont {dcont} '
-                          '--scont {scont} -t "2020-02-19T16:05:00Z" --enable-metrics True').get_output_in_json()
+                          '--scont {scont} -t "2020-02-19T16:05:00Z" --enable-metrics True '
+                          '--priority-replication true').get_output_in_json()
         self.assertIn('policyId', result)
         self.assertIn('ruleId', result['rules'][0])
         self.assertEqual(result["rules"][0]["filters"]["minCreationTime"], "2020-02-19T16:05:00Z")
         self.assertEqual(result["metrics"]["enabled"], True)
+        self.assertEqual(result["priorityReplication"]["enabled"], True)
 
         self.kwargs.update({
             'policy_id': result["policyId"],
@@ -2469,7 +2581,9 @@ class StorageAccountORScenarioTest(StorageScenarioMixin, ScenarioTest):
         })
 
         self.cmd('storage account or-policy update -g {rg} -n {dest_sc} -s {src_sc} --policy-id {policy_id} '
-                 '--enable-metrics False', checks=[JMESPathCheck('metrics.enabled', False)])
+                 '--enable-metrics False --priority-replication false',
+                 checks=[JMESPathCheck('metrics.enabled', False),
+                         JMESPathCheck('priorityReplication.enabled', False)])
 
         # Get policy properties from destination account
         self.cmd('storage account or-policy show -g {rg} -n {dest_sc} --policy-id {policy_id}') \
@@ -2880,3 +2994,41 @@ class StorageSkuTests(ScenarioTest):
         sku_list = self.cmd('storage sku list').get_output_in_json()
         assert sku_list is not None
         assert len(sku_list) > 0
+
+class StorageAccountNetworkSecurityPerimeterConfigurationTests(StorageScenarioMixin, ScenarioTest):
+    @record_only()
+    @AllowLargeResponse(size_kb=10000)
+    def test_storage_account_nsp(self):
+        self.kwargs.update({
+            'sa': 'satestnsp1',
+            'rg': 'rgtestnsp',
+            'cmd': 'storage account network-security-perimeter-configuration',
+            'nsp_name': 'nsp1',
+            'nsp_profile_name': 'nspprofile1',
+            'nsp_association_name': 'nspassociation1',
+        })
+        self.cmd('group create -g {rg} -l eastus')
+        account_id = self.cmd('storage account create -n {sa} -g {rg}').get_output_in_json()['id']
+
+        # requires nsp extension, so run beforehand
+        # self.cmd('network perimeter create --name {nsp_name} --resource-group {rg}')
+        # nsp_profile_id = self.cmd('network perimeter profile create --name {nsp_profile_name} --resource-group {rg} '
+        #          '--perimeter-name {nsp_name}').get_output_in_json()['id']
+        # self.kwargs.update({"account_id": account_id, "nsp_profile_id": nsp_profile_id})
+        # self.cmd('network perimeter association create --name {nsp_association_name} '
+        #          '--perimeter-name {nsp_name} --resource-group {rg} --access-mode Learning '
+        #          '--private-link-resource {{id:{account_id}}} --profile {{id:{nsp_profile_id}}}')
+
+        config_list = self.cmd('{cmd} list --account-name {sa} -g {rg}').get_output_in_json()
+        self.assertEqual(config_list[0]['profile']['name'], "nspprofile1")
+        self.assertEqual(config_list[0]['resourceAssociation']['name'], "nspassociation1")
+        self.assertEqual(config_list[0]['resourceAssociation']['accessMode'], "Learning")
+        config_name = config_list[0]['name']
+        self.kwargs.update({'config_name': config_name})
+
+        self.cmd('{cmd} show --account-name {sa} -g {rg} -n {config_name}').assert_with_checks(
+            JMESPathCheck('profile.name', "nspprofile1"),
+            JMESPathCheck('resourceAssociation.name', "nspassociation1"),
+            JMESPathCheck('resourceAssociation.accessMode', "Learning"))
+
+        self.cmd('{cmd} reconcile --account-name {sa} -g {rg} -n {config_name}')

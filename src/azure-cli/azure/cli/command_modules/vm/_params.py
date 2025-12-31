@@ -910,6 +910,20 @@ def load_arguments(self, _):
     with self.argument_context('vmss set-orchestration-service-state') as c:
         c.argument('service_name', arg_type=get_enum_type(OrchestrationServiceNames), help='The name of the orchestration service.')
         c.argument('action', arg_type=get_enum_type(OrchestrationServiceStateAction), help='The action to be performed.')
+
+    with self.argument_context('vmss list-instances') as c:
+        c.argument('virtual_machine_scale_set_name', id_part='virtual_machine_scale_set_name', required=True, options_list=["-n", "--name", "--virtual-machine-scale-set-name"],
+                   help='The name of the VM scale set.')
+        c.argument('expand', help="The expand expression to apply to the operation. Allowed values are 'instanceView'.")
+        c.argument('filter', help="The filter to apply to the operation. Allowed values are 'startswith(instanceView/statuses/code, 'PowerState') eq true', 'properties/latestModelApplied eq true', 'properties/latestModelApplied eq false'.")
+        c.argument('select', help="The list parameters. Allowed values are 'instanceView', 'instanceView/statuses'.")
+        c.argument('resiliency_view', action='store_true', help="Show resiliency status of each instance.")
+        c.argument('pagination_limit', options_list=['--max-items'], type=int, arg_group="Pagination",
+                   help="Total number of items to return in the command's output. If the total number of items available is "
+                        "more than the value specified, a token is provided in the command's output. To resume pagination, "
+                        "provide the token value in `--next-token` argument of a subsequent command.")
+        c.argument('pagination_token', options_list=['--next-token'], arg_group="Pagination",
+                   help="Token to specify where to start paginating. This is the token value from a previously truncated response.")
     # endregion
 
     # region VM & VMSS Shared
@@ -1053,6 +1067,7 @@ def load_arguments(self, _):
                        'It should have the same number of items as the application version ids. Null is available for a application '
                        'which does not have a configuration override.')
             c.argument('treat_deployment_as_failure', nargs='*', help="Space-separated list of true or false corresponding to the application version ids. If set to true, failure to install or update gallery application version operation will fail this operation")
+            c.argument('enable_automatic_upgrade', nargs='*', options_list=['--enable-automatic-upgrade', '--enable-auto-upgrade'], help='Space-separated list of true or false corresponding to the application version ids. If set to true, when a new Gallery Application version is available in PIR/SIG, it will be automatically updated for the VM/VMSS')
 
     for scope in ['vm application list', 'vmss application list']:
         with self.argument_context(scope) as c:
@@ -1254,6 +1269,7 @@ def load_arguments(self, _):
             c.argument('wire_server_access_control_profile_reference_id', options_list=['--wire-server-access-control-profile-reference-id', '--wire-server-profile-id'], min_api='2024-11-01', help='Specify the access control profile version resource id of wire server.')
             c.argument('imds_mode', arg_type=get_enum_type(self.get_models('Mode')), min_api='2024-11-01', help='Specify the mode that proxy agent will execute on if the feature is enabled.')
             c.argument('imds_access_control_profile_reference_id', options_list=['--imds-access-control-profile-reference-id', '--imds-profile-id'], min_api='2024-11-01', help='Specify the access control profile version resource id resource id of imds.')
+            c.argument('add_proxy_agent_extension', options_list=['--add-proxy-agent-extension', '--add-proxy-agent-ext'], arg_type=get_three_state_flag(), help="Specify whether to implicitly install the ProxyAgent Extension. This option is currently applicable only for Linux OS. Use with --enable-proxy-agent.")
 
     with self.argument_context('vm update') as c:
         c.argument('license_type', license_type)
@@ -1516,16 +1532,6 @@ def load_arguments(self, _):
     # endRegion
 
     # region Restore point collection
-    with self.argument_context('restore-point collection create') as c:
-        c.argument('location', arg_type=get_location_type(self.cli_ctx), required=False,
-                   validator=get_default_location_from_resource_group)
-        c.argument('tags', tags_type)
-        c.argument('source_id', help='Resource Id of the source resource used to create this restore point collection',
-                   arg_group='Source')
-
-    with self.argument_context('restore-point collection update') as c:
-        c.argument('tags', tags_type)
-
     with self.argument_context('restore-point collection show') as c:
         c.argument('expand', help='The expand expression to apply on the operation.',
                    deprecate_info=c.deprecate(hide=True))

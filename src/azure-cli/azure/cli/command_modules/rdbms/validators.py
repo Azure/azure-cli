@@ -306,7 +306,8 @@ def _mysql_iops_validator(iops, auto_io_scaling, instance):
 
 
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
-                           zone=None, standby_availability_zone=None, high_availability=None, subnet=None,
+                           zone=None, standby_availability_zone=None, high_availability=None,
+                           zonal_resiliency=None, allow_same_zone=False, subnet=None,
                            public_access=None, version=None, instance=None, geo_redundant_backup=None,
                            byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
@@ -329,8 +330,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     sku_info = {k.lower(): v for k, v in sku_info.items()}
     single_az = list_location_capability_info['single_az']
     geo_backup_supported = list_location_capability_info['geo_backup_supported']
-    _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
-                       byok_identity, byok_key, backup_byok_identity, backup_byok_key, instance)
+    _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, instance)
     _network_arg_validator(subnet, public_access)
     _pg_tier_validator(tier, sku_info)  # need to be validated first
     if tier is None and instance is not None:
@@ -339,7 +339,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
         supported_storageV2_size = sku_info[tier.lower()]["supported_storageV2_size"]
     else:
         supported_storageV2_size = None
-    _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier,
+    _pg_storage_type_validator(storage_type, auto_grow, geo_redundant_backup, performance_tier,
                                tier, supported_storageV2_size, iops, throughput, instance)
     _pg_storage_performance_tier_validator(performance_tier,
                                            sku_info,
@@ -350,7 +350,8 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
     _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported)
     _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance)
     _pg_sku_name_validator(sku_name, sku_info, tier, instance)
-    _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance)
+    _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
+                                    standby_availability_zone, zone, tier, single_az, instance)
     _pg_version_validator(version, list_location_capability_info['server_versions'])
     pg_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key, geo_redundant_backup, instance)
     is_microsoft_entra_auth = bool(microsoft_entra_auth is not None and microsoft_entra_auth.lower() == 'enabled')
@@ -358,35 +359,21 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
                                  admin_name, admin_id, admin_type, instance)
 
 
-def _cluster_validator(create_cluster, cluster_size, auto_grow, geo_redundant_backup, version, tier,
-                       byok_identity, byok_key, backup_byok_identity, backup_byok_key, instance):
+def _cluster_validator(create_cluster, cluster_size, auto_grow, version, tier, instance):
     if create_cluster == 'ElasticCluster' or (instance and instance.cluster and instance.cluster.cluster_size > 0):
-        if instance is None and version == '17':
-            raise ValidationError("PostgreSQL version 17 is currently not supported for elastic cluster.")
+        if instance is None and version != '17':
+            raise ValidationError("Elastic cluster is only supported for PostgreSQL version 17.")
 
         if cluster_size and instance and instance.cluster.cluster_size > cluster_size:
             raise ValidationError('Updating node count cannot be less than the current size of {} nodes.'
                                   .format(instance.cluster.cluster_size))
         if auto_grow and auto_grow.lower() != 'disabled':
             raise ValidationError("Storage Auto-grow is currently not supported for elastic cluster.")
-        if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
-            raise ValidationError("Geo-redundancy is currently not supported for elastic cluster.")
-        if byok_identity or byok_key or backup_byok_identity or backup_byok_key:
-            raise ValidationError("Data encryption is currently not supported for elastic cluster.")
         if tier == 'Burstable':
             raise ValidationError("Burstable tier is currently not supported for elastic cluster.")
 
     if cluster_size and instance and not instance.cluster:
         raise ValidationError("Node count can only be specified for an elastic cluster.")
-
-
-def cluster_byok_validator(byok_identity, byok_key, backup_byok_identity, backup_byok_key,
-                           geo_redundant_backup, instance):
-    if instance and instance.cluster and instance.cluster.cluster_size > 0:
-        if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
-            raise ValidationError("Geo-redundancy is currently not supported for elastic cluster.")
-        if byok_identity or byok_key or backup_byok_identity or backup_byok_key:
-            raise ValidationError("Data encryption is currently not supported for elastic cluster.")
 
 
 def _pg_storage_validator(storage_gb, sku_info, tier, storage_type, iops, throughput, instance):
@@ -524,26 +511,45 @@ def _pg_version_validator(version, versions):
                            "maintain security, performance, and supportability.")
 
 
-def _pg_high_availability_validator(high_availability, standby_availability_zone, zone, tier, single_az, instance):
+def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_same_zone,
+                                    standby_availability_zone, zone, tier, single_az, instance):
+    high_availability_enabled = (high_availability is not None and high_availability.lower() != 'disabled')
+    zonal_resiliency_enabled = (zonal_resiliency is not None and zonal_resiliency.lower() != 'disabled')
+    high_availability_zone_redundant = (high_availability_enabled and high_availability.lower() == 'zoneredundant')
+
+    if high_availability_enabled and zonal_resiliency_enabled:
+        raise ArgumentUsageError("Setting both --high-availability and --zonal-resiliency is not allowed. "
+                                 "Please set only --zonal-resiliency to move forward.")
+
     if instance:
         tier = instance.sku.tier if tier is None else tier
         zone = instance.availability_zone if zone is None else zone
 
-    if high_availability is not None and high_availability.lower() != 'disabled':
+    if high_availability_enabled:
         if tier == 'Burstable':
             raise ArgumentUsageError("High availability is not supported for Burstable tier")
-        if single_az and high_availability.lower() == 'zoneredundant':
+        if single_az and high_availability_zone_redundant:
             raise ArgumentUsageError("This region is single availability zone. "
                                      "Zone redundant high availability is not supported "
                                      "in a single availability zone region.")
 
+    if zonal_resiliency_enabled:
+        if tier == 'Burstable':
+            raise ArgumentUsageError("High availability is not supported for Burstable tier")
+        if single_az and allow_same_zone is False:
+            raise ArgumentUsageError("This region is single availability zone. "
+                                     "To proceed, please set --allow-same-zone.")
+
     if standby_availability_zone:
-        if not high_availability or high_availability.lower() != 'zoneredundant':
-            raise ArgumentUsageError("You need to enable zone redundant high availability "
+        if not high_availability_zone_redundant and not zonal_resiliency_enabled:
+            raise ArgumentUsageError("You need to enable high availability by setting --zonal-resiliency to Enabled "
                                      "to set standby availability zone.")
         if zone == standby_availability_zone:
             raise ArgumentUsageError("Your server is in availability zone {}. "
                                      "The zone of the server cannot be same as the standby zone.".format(zone))
+
+    if allow_same_zone and not zonal_resiliency_enabled:
+        raise ArgumentUsageError("You can only set --allow-same-zone when --zonal-resiliency is Enabled.")
 
 
 def _pg_georedundant_backup_validator(geo_redundant_backup, geo_backup_supported):
@@ -720,14 +726,14 @@ def validate_server_name(db_context, server_name, type_):
     if len(server_name) < 3 or len(server_name) > 63:
         raise ValidationError("Server name must be at least 3 characters and at most 63 characters.")
     try:
-        result = client.execute(db_context.location,
-                                name_availability_request={
-                                    'name': server_name,
-                                    'type': type_})
+        result = client.check_with_location(db_context.location,
+                                            parameters={
+                                                'name': server_name,
+                                                'type': type_})
     except HttpResponseError as e:
         if e.status_code == 403 and e.error and e.error.code == 'AuthorizationFailed':
-            client_without_location = db_context.cf_availability_without_location(db_context.cmd.cli_ctx, '_')
-            result = client_without_location.execute(name_availability_request={'name': server_name, 'type': type_})
+            client_without_location = db_context.cf_availability(db_context.cmd.cli_ctx, '_')
+            result = client_without_location.check_globally(parameters={'name': server_name, 'type': type_})
         else:
             raise e
 
@@ -738,7 +744,7 @@ def validate_server_name(db_context, server_name, type_):
 def validate_virtual_endpoint_name_availability(cmd, virtual_endpoint_name):
     client = cf_postgres_check_resource_availability(cmd.cli_ctx, '_')
     resource_type = 'Microsoft.DBforPostgreSQL/flexibleServers/virtualendpoints'
-    result = client.execute(name_availability_request={'name': virtual_endpoint_name, 'type': resource_type})
+    result = client.check_globally(parameters={'name': virtual_endpoint_name, 'type': resource_type})
     if result and result.name_available is False:
         raise ValidationError("Virtual endpoint's base name is not available.")
 
@@ -905,7 +911,7 @@ def validate_identities(cmd, namespace):
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
 
 
-def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_redundant_backup, performance_tier, tier,
+def _pg_storage_type_validator(storage_type, auto_grow, geo_redundant_backup, performance_tier, tier,
                                supported_storageV2_size, iops, throughput, instance):
     is_create_ssdv2 = storage_type == "PremiumV2_LRS"
     is_update_ssdv2 = instance is not None and instance.storage.type == "PremiumV2_LRS"
@@ -922,8 +928,6 @@ def _pg_storage_type_validator(storage_type, auto_grow, high_availability, geo_r
     if is_create_ssdv2 or is_update_ssdv2:
         if auto_grow and auto_grow.lower() != 'disabled':
             raise ValidationError("Storage Auto-grow is not supported for servers with Premium SSD V2.")
-        if high_availability and high_availability.lower() != 'disabled':
-            raise ValidationError("High availability is not supported for servers with Premium SSD V2.")
         if geo_redundant_backup and geo_redundant_backup.lower() != 'disabled':
             raise ValidationError("Geo-redundancy is not supported for servers with Premium SSD V2.")
         if performance_tier:

@@ -379,7 +379,7 @@ short-summary: Create a signature from a digest using a key that is stored in a 
 examples:
   - name: Create a signature from a digest using keyvault's key.
     text: |
-        az keyvault key sign --name mykey --vault-name myvault --algorithm RS256 --digest "12345678901234567890123456789012"
+        az keyvault key sign --name mykey --vault-name myvault --algorithm RS256 --digest "rsBwZF/lPuOzdjBZN2E08FjMM3JHyXit0Xi2zN+wAZ8="
 """
 
 helps['keyvault key verify'] = """
@@ -388,7 +388,7 @@ short-summary: Verify a signature using the key that is stored in a Vault or HSM
 examples:
   - name: Verify a signature using keyvault's key.
     text: |
-        az keyvault key verify --name mykey --vault-name myvault --algorithm RS256 --digest "12345678901234567890123456789012" --signature XXXYYYZZZ
+        az keyvault key verify --name mykey --vault-name myvault --algorithm RS256 --digest "rsBwZF/lPuOzdjBZN2E08FjMM3JHyXit0Xi2zN+wAZ8=" --signature XXXYYYZZZ
 """
 
 helps['keyvault key backup'] = """

@@ -67,7 +67,7 @@ def transform_resource_list(result):
     for r in result:
         res = OrderedDict([('Name', r['name']), ('ResourceGroup', r['resourceGroup']), ('Location', r['location']), ('Type', r['type'])])
         try:
-            res['Status'] = r['properties']['provisioningStatus']
+            res['Status'] = r['provisioningState']
         except TypeError:
             res['Status'] = ' '
         transformed.append(res)
