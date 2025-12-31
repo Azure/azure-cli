@@ -37,7 +37,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
 
-from ._vm_utils import read_content_if_is_file, import_aaz_by_profile
+from ._vm_utils import read_content_if_is_file, import_aaz_by_profile, IdentityType
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
@@ -844,32 +844,29 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
                        identity_role_id=None, identity_scope=None):
     identity, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
 
-    system_assigned = "SystemAssigned"
-    user_assigned = "UserAssigned"
-    system_assigned_user_assigned = "SystemAssigned, UserAssigned"
     command_args = {'resource_group': resource_group_name, 'vm_name': vm_name}
 
     def getter():
         return get_vm_by_aaz(cmd, resource_group_name, vm_name)
 
     def setter(vm, external_identities=external_identities):
-        if vm.get('identity', {}).get('type', None) == system_assigned_user_assigned:
-            identity_types = system_assigned_user_assigned
-        elif vm.get('identity', {}).get('type', None) == system_assigned and external_identities:
-            identity_types = system_assigned_user_assigned
-        elif vm.get('identity', {}).get('type', None) == user_assigned and enable_local_identity:
-            identity_types = system_assigned_user_assigned
+        if vm.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+        elif vm.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED and external_identities:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
+        elif vm.get('identity', {}).get('type', None) == IdentityType.USER_ASSIGNED and enable_local_identity:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
         elif external_identities and enable_local_identity:
-            identity_types = system_assigned_user_assigned
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED
         elif external_identities:
-            identity_types = user_assigned
+            identity_types = IdentityType.USER_ASSIGNED
         else:
-            identity_types = system_assigned
+            identity_types = IdentityType.SYSTEM_ASSIGNED
 
-        if identity_types == system_assigned_user_assigned:
+        if identity_types == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED:
             command_args['mi_system_assigned'] = "True"
             command_args['mi_user_assigned'] = []
-        elif identity_types == user_assigned:
+        elif identity_types == IdentityType.USER_ASSIGNED:
             command_args['mi_user_assigned'] = []
         else:
             command_args['mi_system_assigned'] = "True"
@@ -2608,11 +2605,11 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
 
         from ._vm_utils import IdentityType
         if vm.get('identity') and vm.get('identity').get('type') == IdentityType.USER_ASSIGNED.value:
-            command_args['mi_user_assigned'] = \
-                list(vm.get('identity', {}).get('userAssignedIdentities', {}).keys()) + ['UserAssigned']
             # NOTE: The literal 'UserAssigned' is intentionally appended as a marker for
             # VMIdentityRemove._format_content, which uses it to apply special handling
             # for purely user-assigned identities. It is not a real identity resource ID.
+            command_args['mi_user_assigned'] = \
+                list(vm.get('identity', {}).get('userAssignedIdentities', {}).keys()) + ['UserAssigned']
         elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED.value:
             command_args['mi_user_assigned'] = []
             command_args['mi_system_assigned'] = 'True'
