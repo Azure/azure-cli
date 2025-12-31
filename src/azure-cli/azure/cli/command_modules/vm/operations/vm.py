@@ -202,12 +202,6 @@ class VMIdentityRemove(_VMPatch):
         if not identity:
             return result
 
-        if not identity.get('principalId'):
-            identity['principalId'] = None
-
-        if not identity.get('tenantId'):
-            identity['tenantId'] = None
-
         if not identity.get('userAssignedIdentities'):
             identity['userAssignedIdentities'] = None
 
