@@ -2550,7 +2550,7 @@ def _remove_identities(cmd, resource_group_name, name, identities, getter, sette
 
 
 def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter, setter):
-    from ._vm_utils import MSI_LOCAL_ID, IdentityType
+    from ._vm_utils import MSI_LOCAL_ID
 
     remove_system_assigned_identity = False
 
@@ -2603,7 +2603,6 @@ def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
             'vm_name': vm_name
         }
 
-        from ._vm_utils import IdentityType
         if vm.get('identity') and vm.get('identity').get('type') == IdentityType.USER_ASSIGNED.value:
             # NOTE: The literal 'UserAssigned' is intentionally appended as a marker for
             # VMIdentityRemove._format_content, which uses it to apply special handling
