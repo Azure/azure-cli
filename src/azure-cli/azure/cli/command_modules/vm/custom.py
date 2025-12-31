@@ -853,11 +853,11 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
         return get_vm_by_aaz(cmd, resource_group_name, vm_name)
 
     def setter(vm, external_identities=external_identities):
-        if vm.get('identity') and vm.get('identity').get('type') == system_assigned_user_assigned:
+        if vm.get('identity', {}).get('type', None) == system_assigned_user_assigned:
             identity_types = system_assigned_user_assigned
-        elif vm.get('identity') and vm.get('identity').get('type') == system_assigned and external_identities:
+        elif vm.get('identity', {}).get('type', None) == system_assigned and external_identities:
             identity_types = system_assigned_user_assigned
-        elif vm.get('identity') and vm.get('identity').get('type') == user_assigned and enable_local_identity:
+        elif vm.get('identity', {}).get('type', None) == user_assigned and enable_local_identity:
             identity_types = system_assigned_user_assigned
         elif external_identities and enable_local_identity:
             identity_types = system_assigned_user_assigned
@@ -875,7 +875,7 @@ def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, 
             command_args['mi_system_assigned'] = "True"
             command_args['mi_user_assigned'] = []
 
-        if vm.get('identity') and vm.get('identity').get('userAssignedIdentities'):
+        if vm.get('identity', {}).get('userAssignedIdentities', None):
             for key in vm.get('identity').get('userAssignedIdentities').keys():
                 command_args['mi_user_assigned'].append(key)
 
