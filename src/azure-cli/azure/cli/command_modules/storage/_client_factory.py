@@ -225,6 +225,9 @@ def cf_adls_service(cli_ctx, kwargs):
     if not account_url:
         account_url = get_account_url(cli_ctx, account_name=account_name, service='dfs')
     credential = account_key or sas_token or token_credential
+    if sas_token and 'sduoid=' in sas_token and token_credential:
+        credential = token_credential
+        account_url = account_url + '?' + sas_token
 
     return t_adls_service(account_url=account_url, credential=credential, **client_kwargs)
 

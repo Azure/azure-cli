@@ -924,6 +924,9 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('metadata show', 'get_file_properties', exception_handler=show_exception_handler,
                                 transform=transform_metadata)
         g.storage_command_oauth('set-expiry', "set_file_expiry")
+        g.storage_custom_command_oauth('generate-sas', 'generate_sas_file_uri',
+                                       custom_command_type=get_custom_sdk('fs_file',
+                                                                          client_factory=cf_adls_service))
 
     with self.command_group('storage fs access', adls_directory_sdk, custom_command_type=custom_adls_directory_sdk,
                             resource_type=ResourceType.DATA_STORAGE_FILEDATALAKE) as g:
