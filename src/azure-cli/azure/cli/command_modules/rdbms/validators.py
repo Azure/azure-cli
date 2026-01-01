@@ -103,7 +103,8 @@ def node_count_validator(ns):
 
 def db_renaming_cluster_validator(ns):
     if ns.database_name is not None and ns.create_cluster != 'ElasticCluster':
-        raise ArgumentUsageError('incorrect usage: --database-name can only be used when --cluster-option is set to ElasticCluster.')
+        raise ArgumentUsageError('incorrect usage: --database-name can only be '
+                                 'used when --cluster-option is set to ElasticCluster.')
 
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
