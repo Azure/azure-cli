@@ -24,7 +24,7 @@ from ._validators import (get_datetime_type, validate_metadata, get_permission_v
                           get_api_version_type, blob_download_file_path_validator, blob_tier_validator, validate_subnet,
                           validate_immutability_arguments, validate_blob_name_for_upload, validate_share_close_handle,
                           blob_tier_validator_track2, services_type_v2, resource_type_type_v2, PermissionScopeAddAction,
-                          SshPublicKeyAddAction)
+                          SshPublicKeyAddAction, user_delegation_oid_validator)
 
 
 def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statements, too-many-lines, too-many-branches, line-too-long
@@ -961,6 +961,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                                     'specifies the blob snapshot to grant permission.')
         c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
+        c.argument('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                   help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                        'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                        'to the user specified in this value.')
 
     with self.argument_context('storage blob restore', resource_type=ResourceType.MGMT_STORAGE) as c:
         from ._validators import BlobRangeAddAction
@@ -1680,6 +1684,10 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                         "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
         c.extra('encryption_scope', help='A predefined encryption scope used to encrypt the data on the service.')
         c.ignore('sas_token')
+        c.argument('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                   help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                        'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                        'to the user specified in this value.')
 
     for cmd in ['acquire', 'renew', 'break', 'change', 'release']:
         with self.argument_context(f'storage container lease {cmd}') as c:
