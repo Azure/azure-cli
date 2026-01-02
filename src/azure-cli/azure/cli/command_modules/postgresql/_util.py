@@ -14,7 +14,7 @@ logger = get_logger(__name__)
 
 
 # pylint: disable=too-few-public-methods, import-outside-toplevel
-class RdbmsArgumentContext(AzArgumentContext):
+class PostgreSQLArgumentContext(AzArgumentContext):
 
     def __init__(self, command_loader, scope, **kwargs):    # pylint: disable=unused-argument
         super().__init__(command_loader, scope)
