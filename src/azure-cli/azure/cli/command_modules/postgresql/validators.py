@@ -135,6 +135,7 @@ def validate_private_endpoint_connection_id(cmd, namespace):
     del namespace.connection_id
 
 
+# pylint: disable=too-many-locals
 def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, server_name=None, database_name=None,
                            zone=None, standby_availability_zone=None, high_availability=None,
                            zonal_resiliency=None, allow_same_zone=False, subnet=None,
@@ -656,7 +657,7 @@ def validate_citus_cluster(cmd, resource_group_name, server_name):
         raise ValidationError("Elastic cluster does not currently support this operation.")
 
 
-def validate_public_access_server(cmd, client, resource_group_name, server_name):
+def validate_public_access_server(cmd, resource_group_name, server_name):
     server_operations_client = cf_postgres_flexible_servers(cmd.cli_ctx, '_')
 
     server = server_operations_client.get(resource_group_name, server_name)

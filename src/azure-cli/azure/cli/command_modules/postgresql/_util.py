@@ -2,7 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
-from datetime import datetime
 from time import sleep
 from knack.arguments import ignore_type
 from knack.log import get_logger
@@ -52,36 +51,6 @@ def parse_public_network_access_input(public_network_access):
             raise CLIError('incorrect usage: --public/--public-network-access. Acceptable values are \'all\','
                            ' \'enabled\', \'disabled\', \'<startIP>\' and \'<startIP>-<destinationIP>\' '
                            'where startIP and destinationIP ranges from 0.0.0.0 to 255.255.255.255')
-
-
-def create_firewall_rule(cmd, resource_group_name, server_name, start_ip, end_ip, db_engine):
-    now = datetime.now()
-    firewall_name = 'FirewallIPAddress_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
-                                                                 now.second)
-    if start_ip == '0.0.0.0' and end_ip == '0.0.0.0':
-        logger.warning('Configuring server firewall rule, \'azure-access\', to accept connections from all '
-                       'Azure resources...')
-        firewall_name = 'AllowAllAzureServicesAndResourcesWithinAzureIps_{}-{}-{}_{}-{}-{}'.format(now.year, now.month,
-                                                                                                   now.day, now.hour,
-                                                                                                   now.minute,
-                                                                                                   now.second)
-    elif start_ip == end_ip:
-        logger.warning('Configuring server firewall rule to accept connections from \'%s\'...', start_ip)
-    else:
-        if start_ip == '0.0.0.0' and end_ip == '255.255.255.255':
-            firewall_name = 'AllowAll_{}-{}-{}_{}-{}-{}'.format(now.year, now.month, now.day, now.hour, now.minute,
-                                                                now.second)
-        logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip,
-                       end_ip)
-    firewall_client = cf_mysql_firewall_rules(cmd.cli_ctx, None)
-    if db_engine == 'mariadb':
-        firewall_client = cf_mariadb_firewall_rules(cmd.cli_ctx, None)
-
-    parameters = {'name': firewall_name, 'start_ip_address': start_ip, 'end_ip_address': end_ip}
-
-    firewall = firewall_client.begin_create_or_update(resource_group_name, server_name, firewall_name, parameters)
-
-    return firewall.result().name
 
 
 def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condition=None):

@@ -24,7 +24,7 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
-from azure.mgmt.postgresqlflexibleservers import postgresql_flexibleservers
+from azure.mgmt import postgresqlflexibleservers as postgresql_flexibleservers
 from azure.mgmt.resource.resources.models import ResourceGroup
 from ._client_factory import resource_client_factory
 
@@ -129,9 +129,6 @@ def parse_maintenance_window(maintenance_window_string):
     elif len(parsed_input) == 3:
         return _map_maintenance_window(parsed_input[0]), parsed_input[1], parsed_input[2]
     return None, None, None
-
-
-
 
 
 def get_postgres_versions(sku_info, tier):
