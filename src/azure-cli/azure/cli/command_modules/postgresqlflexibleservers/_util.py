@@ -8,7 +8,6 @@ from knack.arguments import ignore_type
 from knack.log import get_logger
 from azure.cli.core.commands import AzArgumentContext
 from azure.cli.core.util import CLIError
-from ._client_factory import cf_mariadb_firewall_rules, cf_mysql_firewall_rules
 from .validators import get_combined_validator
 
 logger = get_logger(__name__)

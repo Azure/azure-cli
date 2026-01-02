@@ -60,7 +60,7 @@ def load_flexibleserver_command_table(self, _):
     )
 
     postgres_flexible_location_capabilities_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.rdbms.postgresqlflexibleservers.operations#CapabilitiesByLocationOperations.{}',
+        operations_tmpl='azure.mgmt.postgresqlflexibleservers.operations#CapabilitiesByLocationOperations.{}',
         client_factory=cf_postgres_flexible_location_capabilities
     )
 

@@ -24,17 +24,15 @@ from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.commands import LongRunningOperation, _is_poller
 from azure.cli.core.azclierror import RequiredArgumentMissingError, InvalidArgumentValueError
 from azure.cli.command_modules.role.custom import create_service_principal_for_rbac
-from azure.mgmt.rdbms import mysql_flexibleservers, postgresql_flexibleservers
+from azure.mgmt.postgresqlflexibleservers import postgresql_flexibleservers
 from azure.mgmt.resource.resources.models import ResourceGroup
-from ._client_factory import resource_client_factory, cf_mysql_flexible_location_capabilities
+from ._client_factory import resource_client_factory
 
 logger = get_logger(__name__)
 
 DEFAULT_LOCATION_PG = 'canadacentral'
-DEFAULT_LOCATION_MySQL = 'westus2'
 AZURE_CREDENTIALS = 'AZURE_CREDENTIALS'
 AZURE_POSTGRESQL_CONNECTION_STRING = 'AZURE_POSTGRESQL_CONNECTION_STRING'
-AZURE_MYSQL_CONNECTION_STRING = 'AZURE_MYSQL_CONNECTION_STRING'
 GITHUB_ACTION_PATH = '/.github/workflows/'
 
 
@@ -62,7 +60,7 @@ def generate_missing_parameters(cmd, location, resource_group_name, server_name,
     # set location to be same as RG's if not specified
     if not resource_group_exists:
         if not location:
-            location = DEFAULT_LOCATION_PG if db_engine == 'postgres' else DEFAULT_LOCATION_MySQL
+            location = DEFAULT_LOCATION_PG
         resource_group_name = _create_resource_group(cmd, location, resource_group_name)
     else:
         resource_group_client = resource_client_factory(cmd.cli_ctx).resource_groups
@@ -133,24 +131,7 @@ def parse_maintenance_window(maintenance_window_string):
     return None, None, None
 
 
-def get_mysql_versions(sku_info, tier):
-    return _get_available_values(sku_info, 'versions', tier)
 
-
-def get_mysql_skus(sku_info, tier):
-    return _get_available_values(sku_info, 'skus', tier)
-
-
-def get_mysql_storage_size(sku_info, tier):
-    return _get_available_values(sku_info, 'storage_sizes', tier)
-
-
-def get_mysql_backup_retention(sku_info, tier):
-    return _get_available_values(sku_info, 'backup_retention', tier)
-
-
-def get_mysql_tiers(sku_info):
-    return list(sku_info.keys())
 
 
 def get_postgres_versions(sku_info, tier):
@@ -167,51 +148,6 @@ def get_postgres_storage_sizes(sku_info, tier):
 
 def get_postgres_tiers(sku_info):
     return list(sku_info.keys())
-
-
-def get_mysql_list_skus_info(cmd, location, server_name=None):
-    list_skus_client = cf_mysql_flexible_location_capabilities(cmd.cli_ctx, '_')
-    params = {'serverName': server_name} if server_name else None
-    list_skus_result = list_skus_client.list(location, params=params)
-    return _mysql_parse_list_skus(list_skus_result)
-
-
-def _mysql_parse_list_skus(result):
-    result = _get_list_from_paged_response(result)
-    if not result:
-        raise InvalidArgumentValueError("No available SKUs in this location")
-    single_az = 'ZoneRedundant' not in result[0].supported_ha_mode
-    geo_paried_region = result[0].supported_geo_backup_regions
-
-    tiers = result[0].supported_flexible_server_editions
-    tiers_dict = {}
-    iops_dict = {}
-    for tier_info in tiers:
-        tier_name = tier_info.name
-        tier_dict = {}
-        sku_iops_dict = {}
-
-        skus = set()
-        versions = set()
-        for version in tier_info.supported_server_versions:
-            versions.add(version.name)
-            for supported_sku in version.supported_skus:
-                skus.add(supported_sku.name)
-                sku_iops_dict[supported_sku.name] = supported_sku.supported_iops
-        tier_dict["skus"] = skus
-        tier_dict["versions"] = versions
-
-        storage_info = tier_info.supported_storage_editions[0]
-
-        tier_dict["backup_retention"] = (storage_info.min_backup_retention_days, storage_info.max_backup_retention_days)
-        tier_dict["storage_sizes"] = (int(storage_info.min_storage_size) // 1024, int(storage_info.max_storage_size) // 1024)
-        iops_dict[tier_name] = sku_iops_dict
-        tiers_dict[tier_name] = tier_dict
-
-    return {'sku_info': tiers_dict,
-            'single_az': single_az,
-            'iops_info': iops_dict,
-            'geo_paired_regions': geo_paried_region}
 
 
 def _get_available_values(sku_info, argument, tier=None):
@@ -330,9 +266,7 @@ def run_subprocess(command, stdout_show=None):
 def register_credential_secrets(cmd, database_engine, server, repository):
     logger.warning('Adding secret "AZURE_CREDENTIALS" to github repository')
     resource_group = parse_resource_id(server.id)["resource_group"]
-    provider = "DBforMySQL"
-    if database_engine == "postgresql":
-        provider = "DBforPostgreSQL"
+    provider = "DBforPostgreSQL"
     scope = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.{}/flexibleServers/{}".format(get_subscription_id(cmd.cli_ctx), resource_group, provider, server.name)
 
     app = create_service_principal_for_rbac(cmd, display_name=server.name, role='contributor', scopes=[scope])
@@ -356,12 +290,8 @@ def register_credential_secrets(cmd, database_engine, server, repository):
 
 def register_connection_secrets(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, repository, connection_string_name):
     logger.warning("Added secret %s to github repository", connection_string_name)
-    if database_engine == 'postgresql':
-        connection_string = "host={} port=5432 dbname={} user={} password={} sslmode=require".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-        run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
-    elif database_engine == 'mysql':
-        connection_string = "Server={}; Port=3306; Database={}; Uid={}; Pwd={}; SslMode=Preferred;".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
-        run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
+    connection_string = "host={} port=5432 dbname={} user={} password={} sslmode=require".format(server.fully_qualified_domain_name, database_name, administrator_login, administrator_login_password)
+    run_subprocess('gh secret set {} --repo {} -b"{}"'.format(connection_string_name, repository, connection_string))
 
 
 def fill_action_template(cmd, database_engine, server, database_name, administrator_login, administrator_login_password, file_name, action_name, repository):
@@ -372,7 +302,7 @@ def fill_action_template(cmd, database_engine, server, database_name, administra
 
     process = run_cmd(["gh", "secret", "list", "--repo", repository], capture_output=True)
     github_secrets = process.stdout.strip().decode('UTF-8')
-    # connection_string = AZURE_POSTGRESQL_CONNECTION_STRING if database_engine == 'postgresql' else AZURE_MYSQL_CONNECTION_STRING
+    # connection_string = AZURE_POSTGRESQL_CONNECTION_STRING
 
     if AZURE_CREDENTIALS not in github_secrets:
         try:
@@ -462,26 +392,15 @@ def build_identity_and_data_encryption(db_engine, byok_identity=None, backup_byo
         if geo_backup_user_assigned_identity_id:
             identities[geo_backup_user_assigned_identity_id] = {}
 
-        if db_engine == 'mysql':
-            identity = mysql_flexibleservers.models.Identity(user_assigned_identities=identities,
-                                                             type="UserAssigned")
+        identity = postgresql_flexibleservers.models.UserAssignedIdentity(user_assigned_identities=identities,
+                                                                          type="UserAssigned")
 
-            data_encryption = mysql_flexibleservers.models.DataEncryption(
-                primary_user_assigned_identity_id=primary_user_assigned_identity_id,
-                primary_key_uri=primary_key_uri,
-                geo_backup_user_assigned_identity_id=geo_backup_user_assigned_identity_id,
-                geo_backup_key_uri=geo_backup_key_uri,
-                type="AzureKeyVault")
-        else:
-            identity = postgresql_flexibleservers.models.UserAssignedIdentity(user_assigned_identities=identities,
-                                                                              type="UserAssigned")
-
-            data_encryption = postgresql_flexibleservers.models.DataEncryption(
-                primary_user_assigned_identity_id=primary_user_assigned_identity_id,
-                primary_key_uri=primary_key_uri,
-                geo_backup_user_assigned_identity_id=geo_backup_user_assigned_identity_id,
-                geo_backup_key_uri=geo_backup_key_uri,
-                type="AzureKeyVault")
+        data_encryption = postgresql_flexibleservers.models.DataEncryption(
+            primary_user_assigned_identity_id=primary_user_assigned_identity_id,
+            primary_key_uri=primary_key_uri,
+            geo_backup_user_assigned_identity_id=geo_backup_user_assigned_identity_id,
+            geo_backup_key_uri=geo_backup_key_uri,
+            type="AzureKeyVault")
 
     return identity, data_encryption
 

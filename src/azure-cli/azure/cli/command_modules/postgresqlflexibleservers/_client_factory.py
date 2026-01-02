@@ -9,10 +9,8 @@ from azure.cli.core.auth.identity import get_environment_credential, AZURE_CLIEN
 
 # pylint: disable=import-outside-toplevel
 
-RM_URI_OVERRIDE = 'AZURE_CLI_RDBMS_RM_URI'
-SUB_ID_OVERRIDE = 'AZURE_CLI_RDBMS_SUB_ID'
-
-
+RM_URI_OVERRIDE = 'AZURE_CLI_POSTGRESQL_FLEXIBLE_RM_URI'
+SUB_ID_OVERRIDE = 'AZURE_CLI_POSTGRESQL_FLEXIBLE_SUB_ID'
 
 
 def get_postgresql_flexible_management_client(cli_ctx, subscription_id=None, **_):
@@ -37,31 +35,6 @@ def get_postgresql_flexible_management_client(cli_ctx, subscription_id=None, **_
             credential=credentials)
     # Normal production scenario.
     return get_mgmt_service_client(cli_ctx, PostgreSQLManagementClient, subscription_id=subscription)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 def cf_postgres_flexible_servers(cli_ctx, _):
