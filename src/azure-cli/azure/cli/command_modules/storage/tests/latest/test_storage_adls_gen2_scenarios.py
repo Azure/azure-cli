@@ -720,7 +720,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sr=b', file_sas)
 
         self.cmd('storage fs file upload --account-name {} -f {} -s "{}" '
-                 '-p {}'.format(storage_account, filesystem, local_file, file_path, file_sas))
+                 '-p {} --sas-token {}'.format(storage_account, filesystem, local_file, file_path, file_sas))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
@@ -747,7 +747,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sks=', file_sas)
         self.assertIn('skv=', file_sas)
         self.assertIn('sr=b', file_sas)
-        self.assertIn('skoid=', file_sas)
+        self.assertIn('sduoid=', file_sas)
 
         self.cmd('storage fs file upload --account-name {} -f {} -s "{}" -p {} --sas-token {} '
                  '--auth-mode login'.format(storage_account, filesystem, local_file, file_path, file_sas))

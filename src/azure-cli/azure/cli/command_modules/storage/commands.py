@@ -597,7 +597,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('delete', 'delete_share',
                                  transform=create_boolean_result_output_transformer('deleted'),
                                  table_transformer=transform_boolean_for_table)
-        g.storage_custom_command('generate-sas', 'generate_share_sas')
         g.storage_custom_command('stats', 'get_share_stats')
         g.storage_custom_command('snapshot', 'create_snapshot')
         g.storage_command('show', 'get_share_properties', exception_handler=show_exception_handler,
@@ -621,6 +620,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command('list', 'list_shares', transform=transform_storage_list_output,
                                  table_transformer=transform_share_list)
         g.storage_custom_command('url', 'create_share_url', transform=transform_url_without_encode)
+        g.storage_custom_command_oauth('generate-sas', 'generate_share_sas')
 
     with self.command_group('storage share policy',
                             custom_command_type=get_custom_sdk('access_policy', cf_share_client,

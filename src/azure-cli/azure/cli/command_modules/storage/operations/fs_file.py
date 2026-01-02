@@ -147,6 +147,7 @@ def upload_file(cmd, client, local_path, overwrite=None, content_settings=None, 
         response = client.upload_data(data=stream, length=count, overwrite=overwrite, **upload_file_args)
     return response
 
+
 def generate_sas_file_uri(client, cmd, file_system_name, path, permission=None,
                           expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                           protocol=None, cache_control=None, content_disposition=None,
@@ -180,6 +181,7 @@ def generate_sas_file_uri(client, cmd, file_system_name, path, permission=None,
         t_file_client = cmd.get_models('_data_lake_file_client#DataLakeFileClient')
         file_client = t_file_client(account_url=client.url, file_system_name=file_system_name,
                                     file_path=path, credential=sas_token)
+        from .fs_directory import fix_url_path
         return fix_url_path(file_client.url)
 
     return sas_token

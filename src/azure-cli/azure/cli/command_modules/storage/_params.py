@@ -1949,6 +1949,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    help=sas_help.format(get_permission_help_string(t_share_permissions)),
                    validator=get_permission_validator(t_share_permissions))
         c.ignore('sas_token')
+        c.argument('as_user', action='store_true', validator=as_user_validator, is_preview=True,
+                   help="Indicates that this command return the SAS signed with the user delegation key. "
+                        "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.argument('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                   help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                        'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                        'to the user specified in this value.')
 
     with self.argument_context('storage share update') as c:
         c.extra('share_name', share_name_type, options_list=('--name', '-n'), required=True)

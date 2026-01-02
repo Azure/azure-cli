@@ -156,26 +156,29 @@ def cf_blob_service(cli_ctx, kwargs):
                           connection_timeout=kwargs.pop('connection_timeout', None), **client_kwargs)
 
 
-def get_credential(kwargs):
+def get_credential(client_url, kwargs):
     account_key = kwargs.pop('account_key', None)
     token_credential = kwargs.pop('token_credential', None)
     sas_token = kwargs.pop('sas_token', None)
     credential = account_key or sas_token or token_credential
-    return credential
+    if sas_token and 'sduoid=' in sas_token and token_credential:
+        credential = token_credential
+        client_url = client_url + '?' + sas_token
+    return client_url, credential
 
 
 def cf_blob_client(cli_ctx, kwargs):
     # track2 partial migration
     if kwargs.get('blob_url'):
         t_blob_client = get_sdk(cli_ctx, ResourceType.DATA_STORAGE_BLOB, '_blob_client#BlobClient')
-        credential = get_credential(kwargs)
+        blob_url, credential = get_credential(kwargs.pop('blob_url'), kwargs)
         # del unused kwargs
         kwargs.pop('connection_string')
         kwargs.pop('account_name')
         kwargs.pop('account_url')
         kwargs.pop('container_name')
         kwargs.pop('blob_name')
-        return t_blob_client.from_blob_url(blob_url=kwargs.pop('blob_url'),
+        return t_blob_client.from_blob_url(blob_url=blob_url,
                                            credential=credential,
                                            snapshot=kwargs.pop('snapshot', None),
                                            connection_timeout=kwargs.pop('connection_timeout', None))
@@ -337,6 +340,9 @@ def cf_share_service(cli_ctx, kwargs):
     if not account_url:
         account_url = get_account_url(cli_ctx, account_name=account_name, service='file')
     credential = account_key or sas_token or token_credential
+    if sas_token and 'sduoid=' in sas_token and token_credential:
+        credential = token_credential
+        account_url = account_url + '?' + sas_token
 
     return t_share_service(account_url=account_url, credential=credential, **client_kwargs)
 
@@ -360,6 +366,7 @@ def cf_share_file_client(cli_ctx, kwargs):
         if token_credential is not None and not enable_file_backup_request_intent:
             raise RequiredArgumentMissingError("--enable-file-backup-request-intent is required for file share OAuth")
         credential = get_credential(kwargs)
+        file_url, credential = get_credential(kwargs.pop('file_url'), kwargs)
         # del unused kwargs
         kwargs.pop('connection_string')
         kwargs.pop('account_name')
@@ -380,7 +387,7 @@ def cf_share_file_client(cli_ctx, kwargs):
             if kwargs.get("source_share") or (copy_url and re.match(r"https?:\/\/.*?\.file\..*", copy_url)):
                 client_kwargs["allow_source_trailing_dot"] = not disallow_source_trailing_dot
 
-        return t_file_client.from_file_url(file_url=kwargs.pop('file_url'),
+        return t_file_client.from_file_url(file_url=file_url,
                                            credential=credential, token_intent=token_intent, **client_kwargs)
     if 'file_url' in kwargs:
         kwargs.pop('file_url')
