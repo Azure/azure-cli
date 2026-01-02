@@ -101,6 +101,12 @@ def node_count_validator(ns):
             raise CLIError('incorrect usage: --node-count. Range is 1 to 10 for an elastic cluster.')
 
 
+def db_renaming_cluster_validator(ns):
+    if ns.database_name is not None and ns.create_cluster != 'ElasticCluster':
+        raise ArgumentUsageError('incorrect usage: --database-name can only be '
+                                 'used when --cluster-option is set to ElasticCluster.')
+
+
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
 
@@ -541,7 +547,7 @@ def _pg_high_availability_validator(high_availability, zonal_resiliency, allow_s
                                      "To proceed, please set --allow-same-zone.")
 
     if standby_availability_zone:
-        if not high_availability_zone_redundant or not zonal_resiliency_enabled:
+        if not high_availability_zone_redundant and not zonal_resiliency_enabled:
             raise ArgumentUsageError("You need to enable high availability by setting --zonal-resiliency to Enabled "
                                      "to set standby availability zone.")
         if zone == standby_availability_zone:

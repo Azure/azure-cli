@@ -644,7 +644,7 @@ def todict(obj, post_processor=None):
     """
     from datetime import date, time, datetime, timedelta
     from enum import Enum
-    from azure.core.serialization import attribute_list
+    from azure.core.serialization import attribute_list, get_backcompat_attr_name
     if isinstance(obj, dict):
         result = {k: todict(v, post_processor) for (k, v) in obj.items()}
         return post_processor(obj, result) if post_processor else result
@@ -662,7 +662,7 @@ def todict(obj, post_processor=None):
     # azure-core provided new function `attribute_list` to list all attribute names
     # so that we don't need to use raw __dict__ directly
     if getattr(obj, "_is_model", False):
-        result = {to_camel_case(attr): todict(getattr(obj, attr), post_processor)
+        result = {to_camel_case(get_backcompat_attr_name(obj, attr)): todict(getattr(obj, attr), post_processor)
                   for attr in attribute_list(obj) if hasattr(obj, attr)}
         return post_processor(obj, result) if post_processor else result
     if hasattr(obj, '_asdict'):

@@ -68,7 +68,7 @@ def flexible_server_create(cmd, client,
                            zone=None, standby_availability_zone=None,
                            geo_redundant_backup=None, byok_identity=None, byok_key=None, backup_byok_identity=None, backup_byok_key=None,
                            auto_grow=None, performance_tier=None,
-                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None, yes=False):
+                           storage_type=None, iops=None, throughput=None, create_cluster=None, cluster_size=None, database_name=None, yes=False):
 
     if not check_resource_group(resource_group_name):
         resource_group_name = None
@@ -138,7 +138,7 @@ def flexible_server_create(cmd, client,
     cluster = None
     if create_cluster == 'ElasticCluster':
         cluster_size = cluster_size if cluster_size else 2
-        cluster = postgresql_flexibleservers.models.Cluster(cluster_size=cluster_size, default_database_name=POSTGRES_DB_NAME)
+        cluster = postgresql_flexibleservers.models.Cluster(cluster_size=cluster_size, default_database_name=database_name if database_name else POSTGRES_DB_NAME)
 
     server_result = firewall_id = None
 
@@ -464,6 +464,7 @@ def flexible_server_update_custom_func(cmd, client, instance,
                             backup=instance.backup,
                             administrator_login=administrator_login,
                             administrator_login_password=administrator_login_password,
+                            availability_zone=instance.availability_zone,
                             maintenance_window=instance.maintenance_window,
                             network=instance.network,
                             identity=identity,
@@ -835,9 +836,9 @@ def flexible_server_revivedropped(cmd, client, resource_group_name, server_name,
     return sdk_no_wait(no_wait, client.begin_create_or_update, resource_group_name, server_name, parameters)
 
 
-def flexible_replica_promote(cmd, client, resource_group_name, server_name, promote_mode='standalone', promote_option='planned'):
+def flexible_replica_promote(cmd, client, resource_group_name, replica_name, promote_mode='standalone', promote_option='planned'):
     validate_resource_group(resource_group_name)
-    if is_citus_cluster(cmd, resource_group_name, server_name):
+    if is_citus_cluster(cmd, resource_group_name, replica_name):
         # some settings validation
         if promote_mode.lower() == 'standalone':
             raise ValidationError("Standalone replica promotion on elastic cluster isn't currently supported. Please use 'switchover' instead.")
@@ -845,12 +846,12 @@ def flexible_replica_promote(cmd, client, resource_group_name, server_name, prom
             raise ValidationError("Planned replica promotion on elastic cluster isn't currently supported. Please use 'forced' instead.")
 
     try:
-        server_object = client.get(resource_group_name, server_name)
+        server_object = client.get(resource_group_name, replica_name)
     except Exception as e:
         raise ResourceNotFoundError(e)
 
     if server_object.replica.role is not None and "replica" not in server_object.replica.role.lower():
-        raise CLIError('Server {} is not a replica server.'.format(server_name))
+        raise CLIError('Server {} is not a replica server.'.format(replica_name))
 
     if promote_mode == "standalone":
         params = postgresql_flexibleservers.models.ServerForPatch(
@@ -869,7 +870,7 @@ def flexible_replica_promote(cmd, client, resource_group_name, server_name, prom
             )
         )
 
-    return client.begin_update(resource_group_name, server_name, params)
+    return client.begin_update(resource_group_name, replica_name, params)
 
 
 def _create_server(db_context, cmd, resource_group_name, server_name, tags, location, sku, administrator_login, administrator_login_password,

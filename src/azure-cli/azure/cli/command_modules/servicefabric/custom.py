@@ -1604,34 +1604,9 @@ def _create_keyvault(cmd,
     if no_self_perms:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.get,
-                                        KeyPermissions.create,
-                                        KeyPermissions.delete,
-                                        KeyPermissions.list,
-                                        KeyPermissions.update,
-                                        KeyPermissions.import_enum,
-                                        KeyPermissions.backup,
-                                        KeyPermissions.restore],
-                                  secrets=[SecretPermissions.get,
-                                           SecretPermissions.list,
-                                           SecretPermissions.set,
-                                           SecretPermissions.delete,
-                                           SecretPermissions.backup,
-                                           SecretPermissions.restore,
-                                           SecretPermissions.recover],
-                                  certificates=[CertificatePermissions.get,
-                                                CertificatePermissions.list,
-                                                CertificatePermissions.delete,
-                                                CertificatePermissions.create,
-                                                CertificatePermissions.import_enum,
-                                                CertificatePermissions.update,
-                                                CertificatePermissions.managecontacts,
-                                                CertificatePermissions.getissuers,
-                                                CertificatePermissions.listissuers,
-                                                CertificatePermissions.setissuers,
-                                                CertificatePermissions.deleteissuers,
-                                                CertificatePermissions.manageissuers,
-                                                CertificatePermissions.recover])
+        permissions = Permissions(keys_property=[KeyPermissions.all],
+                                  secrets=[SecretPermissions.all],
+                                  certificates=[CertificatePermissions.all])
 
         from azure.cli.command_modules.role.util import get_current_identity_object_id
         object_id = get_current_identity_object_id(cli_ctx)
