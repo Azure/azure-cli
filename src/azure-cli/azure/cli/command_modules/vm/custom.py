@@ -41,7 +41,7 @@ from ._vm_utils import read_content_if_is_file, import_aaz_by_profile, IdentityT
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
-                       load_images_thru_services, _get_latest_image_version)
+                       load_images_thru_services, _get_latest_image_version, _get_latest_image_version_by_aaz)
 from ._client_factory import (_compute_client_factory, cf_vm_image_term)
 
 from .aaz.latest.vm.disk import AttachDetachDataDisk
@@ -484,7 +484,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             if len(terms) == 4:  # URN
                 disk_publisher, disk_offer, disk_sku, disk_version = terms[0], terms[1], terms[2], terms[3]
                 if disk_version.lower() == 'latest':
-                    disk_version = _get_latest_image_version(cmd.cli_ctx, location, disk_publisher, disk_offer,
+                    disk_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, location, disk_publisher, disk_offer,
                                                              disk_sku)
             else:  # error
                 raise CLIError('usage error: --image-reference should be ID or URN (publisher:offer:sku:version).')
@@ -494,14 +494,20 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
             disk_publisher, disk_offer, disk_sku, disk_version = \
                 terms['child_name_1'], terms['child_name_3'], terms['child_name_4'], terms['child_name_5']
 
-        client = _compute_client_factory(cmd.cli_ctx)
-        response = client.virtual_machine_images.get(location=location, publisher_name=disk_publisher,
-                                                     offer=disk_offer, skus=disk_sku, version=disk_version)
+        from .aaz.latest.vm.image import Show as VmImageShow
+        command_args = {
+            'location': location,
+            'offer': disk_offer,
+            'publisher': disk_publisher,
+            'sku': disk_sku,
+            'version': disk_version,
+        }
+        response = VmImageShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
-        if hasattr(response, 'hyper_v_generation'):
-            if response.hyper_v_generation == 'V1':
+        if response.get('hyper_v_generation'):
+            if response.get('hyper_v_generation') == 'V1':
                 logger.warning(UPGRADE_SECURITY_HINT)
-            elif response.hyper_v_generation == 'V2':
+            elif response.get('hyper_v_generation') == 'V2':
                 # set default value of hyper_v_generation
                 if hyper_v_generation == 'V1':
                     hyper_v_generation = 'V2'
@@ -512,7 +518,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                     logger.warning(UPGRADE_SECURITY_HINT)
 
         # image_reference is an ID now
-        image_reference = {'id': response.id}
+        image_reference = {'id': response.get('id')}
         if image_reference_lun is not None:
             image_reference['lun'] = image_reference_lun
 
