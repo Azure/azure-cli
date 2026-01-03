@@ -691,9 +691,6 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         local_file = self.create_temp_file(1024)
         file_name = os.path.basename(local_file)
 
-        # self.cmd('storage file upload --account-name {} --source "{}" '
-        #          '-s {}'.format(storage_account, local_file, share))
-
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
@@ -725,9 +722,6 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         file_name = os.path.basename(local_file)
         logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
         logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
-        #
-        # self.cmd('storage file upload --account-name {} --source "{}" '
-        #          '-s {}'.format(storage_account, local_file, share))
 
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')

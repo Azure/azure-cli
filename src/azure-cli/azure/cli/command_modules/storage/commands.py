@@ -725,8 +725,6 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_custom_command_oauth('delete', 'delete_queue',
                                        transform=create_boolean_result_output_transformer('deleted'),
                                        table_transformer=transform_boolean_for_table)
-        g.storage_custom_command(
-            'generate-sas', 'generate_queue_sas')
         g.storage_custom_command_oauth('exists', 'queue_exists',
                                        transform=create_boolean_result_output_transformer('exists'))
 
@@ -781,6 +779,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         from ._transformers import transform_queue_stats_output
         g.storage_command_oauth('stats', 'get_service_stats', transform=transform_queue_stats_output)
         g.storage_custom_command_oauth('list', 'list_queues', transform=transform_storage_list_output)
+        g.storage_custom_command_oauth('generate-sas', 'generate_queue_sas')
 
     table_service_sdk = CliCommandType(operations_tmpl='azure.data.tables._table_service_client#TableServiceClient.{}',
                                        client_factory=cf_table_service,
