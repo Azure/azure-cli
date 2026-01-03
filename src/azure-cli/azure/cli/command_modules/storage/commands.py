@@ -675,7 +675,7 @@ def load_command_table(self, _):  # pylint: disable=too-many-locals, too-many-st
         g.storage_command_oauth('resize', 'resize_file')
         g.storage_custom_command_oauth('url', 'create_file_url', transform=transform_url_without_encode,
                                        client_factory=cf_share_client)
-        g.storage_custom_command('generate-sas', 'generate_sas_file', client_factory=cf_share_client)
+        g.storage_custom_command_oauth('generate-sas', 'generate_sas_file', client_factory=cf_share_service)
         g.storage_command_oauth('show', 'get_file_properties', transform=transform_file_show_result,
                                 table_transformer=transform_file_output,
                                 exception_handler=show_exception_handler)

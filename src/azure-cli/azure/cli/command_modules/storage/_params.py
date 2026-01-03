@@ -2164,6 +2164,13 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.extra('content_type', help='Response header value for Content-Type when resource is accessed '
                                      'using this shared access signature.')
         c.ignore('sas_token')
+        c.extra('as_user', action='store_true', validator=as_user_validator, is_preview=True,
+                help="Indicates that this command return the SAS signed with the user delegation key. "
+                     "The expiry parameter and '--auth-mode login' are required if this argument is specified. ")
+        c.extra('user_delegation_oid', validator=user_delegation_oid_validator, is_preview=True,
+                help='Specifies the Entra ID of the user that is authorized to use the resulting SAS URL. '
+                     'The resulting SAS URL must be used in conjunction with an Entra ID token that has been issued '
+                     'to the user specified in this value.')
 
     with self.argument_context('storage file list') as c:
         c.extra('share_name', share_name_type, required=True)

@@ -163,7 +163,6 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         account_info = self.get_account_info(resource_group, storage_account)
         share = self.create_share(account_info)
         local_file = self.create_temp_file(1024)
-        file_name = self.create_random_name('file', 16) + '.txt'
 
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
@@ -193,7 +192,6 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         account_info = self.get_account_info(resource_group, storage_account)
         share = self.create_share(account_info)
         local_file = self.create_temp_file(1024)
-        file_name = self.create_random_name('file', 16) + '.txt'
         logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
         logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
 
