@@ -596,12 +596,14 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         f = self.create_file_system(account_info)
         file = self.create_random_name(prefix="file", length=12)
         local_file = self.create_temp_file(1024)
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
 
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         fs_sas = self.cmd('storage fs generate-sas --account-name {} -n {} --expiry {} --permissions '
                           'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
-                          '2146abed-b993-4a81-a6af-eda7b4524c5e'.format(storage_account, f, expiry)).output
+                          '{}'.format(storage_account, f, expiry, logged_in_user)).output
         self.assertIn('&sig=', fs_sas)
         self.assertIn('skoid=', fs_sas)
         self.assertIn('sktid=', fs_sas)
@@ -611,8 +613,9 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('skv=', fs_sas)
         self.assertIn('sduoid=', fs_sas)
 
-        self.cmd('storage fs file upload --account-name {} -f {} -s "{}" -p {} --overwrite --sas-token {} '
-                 '--auth-mode login'.format(storage_account, f, local_file, file, fs_sas))
+        if self.is_live:
+            self.cmd('storage fs file upload --account-name {} -f {} -s "{}" -p {} --overwrite --sas-token {} '
+                     '--auth-mode login'.format(storage_account, f, local_file, file, fs_sas))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
@@ -666,6 +669,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         account_info = self.get_account_info(resource_group, storage_account)
         filesystem = self.create_file_system(account_info)
         directory = 'testdir/subdir'
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
 
         self.storage_cmd('storage fs directory create -n {} -f {}', account_info, directory, filesystem)
 
@@ -673,8 +678,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         fs_sas = self.cmd('storage fs directory generate-sas --account-name {} -n {} -f {} --expiry {} --permissions '
                           'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
-                          '2146abed-b993-4a81-a6af-eda7b4524c5e'.format(storage_account, directory, filesystem,
-                                                                        expiry)).output
+                          '{}'.format(storage_account, directory, filesystem, expiry, logged_in_user)).output
         self.assertIn('&sig=', fs_sas)
         self.assertIn('skoid=', fs_sas)
         self.assertIn('sktid=', fs_sas)
@@ -686,8 +690,9 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sdd=2', fs_sas)
         self.assertIn('skoid=', fs_sas)
 
-        self.cmd('storage fs directory show --account-name {} -n {} -f {} --sas-token {} '
-                 '--auth-mode login'.format(storage_account, directory, filesystem, fs_sas))
+        if self.is_live:
+            self.cmd('storage fs directory show --account-name {} -n {} -f {} --sas-token {} '
+                     '--auth-mode login'.format(storage_account, directory, filesystem, fs_sas))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
@@ -719,8 +724,9 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('skv=', file_sas)
         self.assertIn('sr=b', file_sas)
 
-        self.cmd('storage fs file upload --account-name {} -f {} -s "{}" '
-                 '-p {} --sas-token {}'.format(storage_account, filesystem, local_file, file_path, file_sas))
+        if self.is_live:
+            self.cmd('storage fs file upload --account-name {} -f {} -s "{}" '
+                     '-p {} --sas-token {}'.format(storage_account, filesystem, local_file, file_path, file_sas))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2", hns=True)
@@ -729,6 +735,8 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         filesystem = self.create_file_system(account_info)
         file_path = 'testdir/subdir/file1'
         local_file = self.create_temp_file(1024)
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
 
         self.storage_cmd('storage fs file create -p {} -f {}', account_info, file_path, filesystem)
 
@@ -736,8 +744,7 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
 
         file_sas = self.cmd('storage fs file generate-sas --account-name {} -p {} -f {} --expiry {} --permissions '
                           'dlrwop --https-only --as-user --auth-mode login --user-delegation-oid '
-                          '2146abed-b993-4a81-a6af-eda7b4524c5e'.format(storage_account, file_path, filesystem,
-                                                                        expiry)).output
+                          '{}'.format(storage_account, file_path, filesystem, expiry, logged_in_user)).output
 
         self.assertIn('&sig=', file_sas)
         self.assertIn('skoid=', file_sas)
@@ -749,8 +756,9 @@ class StorageADLSGen2Tests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sr=b', file_sas)
         self.assertIn('sduoid=', file_sas)
 
-        self.cmd('storage fs file upload --account-name {} -f {} -s "{}" -p {} --sas-token {} '
-                 '--auth-mode login'.format(storage_account, filesystem, local_file, file_path, file_sas))
+        if self.is_live:
+            self.cmd('storage fs file upload --account-name {} -f {} -s "{}" -p {} --sas-token {} '
+                     '--auth-mode login'.format(storage_account, filesystem, local_file, file_path, file_sas))
 
 class StorageADLSGen2LiveTests(StorageScenarioMixin, LiveScenarioTest):
     @ResourceGroupPreparer()

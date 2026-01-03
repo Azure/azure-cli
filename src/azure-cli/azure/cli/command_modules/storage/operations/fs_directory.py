@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 """Custom operations for storage file datalake"""
+# pylint: disable=too-many-locals
 
 from datetime import datetime
 from azure.cli.core.profiles import ResourceType

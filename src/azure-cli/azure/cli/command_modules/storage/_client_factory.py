@@ -365,7 +365,6 @@ def cf_share_file_client(cli_ctx, kwargs):
         token_intent = 'backup' if enable_file_backup_request_intent else None
         if token_credential is not None and not enable_file_backup_request_intent:
             raise RequiredArgumentMissingError("--enable-file-backup-request-intent is required for file share OAuth")
-        credential = get_credential(kwargs)
         file_url, credential = get_credential(kwargs.pop('file_url'), kwargs)
         # del unused kwargs
         kwargs.pop('connection_string')

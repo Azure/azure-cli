@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 """Custom operations for storage file datalake"""
+# pylint: disable=too-many-locals
 
 import os
 from datetime import datetime

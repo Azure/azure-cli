@@ -71,7 +71,6 @@ def generate_share_sas(cmd, client, share_name=None, permission=None, expiry=Non
     else:
         account_key = client.credential.account_key
 
-    credential = user_delegation_key if as_user else client.credential.account_key,
     sas_token = generate_share_sas_fn(account_name=client.account_name, share_name=share_name,
                                       account_key=account_key, permission=permission,
                                       expiry=expiry, start=start, ip=ip, cache_control=cache_control,

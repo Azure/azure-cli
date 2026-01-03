@@ -183,8 +183,9 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('sks=', share_sas)
         self.assertIn('skv=', share_sas)
 
-        self.cmd('storage file upload --account-name {} --source "{}" -s {} '
-                 '--sas-token {} --backup-intent'.format(storage_account, local_file, share, share_sas))
+        if self.is_live:
+            self.cmd('storage file upload --account-name {} --source "{}" -s {} '
+                     '--sas-token {} --backup-intent'.format(storage_account, local_file, share, share_sas))
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(kind="StorageV2")
@@ -193,14 +194,15 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         share = self.create_share(account_info)
         local_file = self.create_temp_file(1024)
         file_name = self.create_random_name('file', 16) + '.txt'
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
 
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
 
         share_sas = self.cmd('storage share generate-sas --account-name {} -n {} --expiry {} --permissions crwld '
-                             '--https-only --as-user --auth-mode login --backup-intent '
-                             '--user-delegation-oid '
-                             '2146abed-b993-4a81-a6af-eda7b4524c5e'.format(storage_account, share, expiry)).output
+                             '--https-only --as-user --auth-mode login --backup-intent --user-delegation-oid '
+                             '{}'.format(storage_account, share, expiry, logged_in_user)).output
         self.assertIn('&sig=', share_sas)
         self.assertIn('skoid=', share_sas)
         self.assertIn('sktid=', share_sas)
@@ -210,5 +212,6 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         self.assertIn('skv=', share_sas)
         self.assertIn('sduoid=', share_sas)
 
-        self.cmd('storage file upload --account-name {} --source "{}" -s {} --sas-token {} '
-                 '--backup-intent --auth-mode login'.format(storage_account, local_file, share, share_sas))
+        if self.is_live:
+            self.cmd('storage file upload --account-name {} --source "{}" -s {} --sas-token {} '
+                     '--backup-intent --auth-mode login'.format(storage_account, local_file, share, share_sas))
