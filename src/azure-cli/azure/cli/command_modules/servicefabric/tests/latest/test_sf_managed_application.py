@@ -153,16 +153,16 @@ class ServiceFabricManagedApplicationTests(ScenarioTest):
         updated_app = self.cmd('az sf managed-application update -g {rg} -c {cluster_name} --application-name {app_name} --application-type-version {v2} '
                                '--health-check-stable-duration 0 --health-check-wait-duration 0 --health-check-retry-timeout 0 '
                                '--upgrade-domain-timeout 5000 --upgrade-timeout 7000 --failure-action Rollback --replica-check-timeout 300 --force-restart',
-                               checks=[self.check('provisioningState', 'Succeeded'),
-                                       self.check('upgradePolicy.forceRestart', True),
-                                       self.check('upgradePolicy.upgradeReplicaSetCheckTimeout', '300'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckRetryTimeout', '00:00:00'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckWaitDuration', '00:00:00'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckStableDuration', '00:00:00'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.upgradeTimeout', '01:56:40'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.upgradeDomainTimeout', '01:23:20'),
-                                       self.check('upgradePolicy.rollingUpgradeMonitoringPolicy.failureAction', 'Rollback')]).get_output_in_json()
-        assert updated_app['version'].endswith(updated_version)
+                               checks=[self.check('properties.provisioningState', 'Succeeded'),
+                                       self.check('properties.upgradePolicy.forceRestart', True),
+                                       self.check('properties.upgradePolicy.upgradeReplicaSetCheckTimeout', '300'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckRetryTimeout', '00:00:00'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckWaitDuration', '00:00:00'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.healthCheckStableDuration', '00:00:00'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.upgradeTimeout', '01:56:40'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.upgradeDomainTimeout', '01:23:20'),
+                                       self.check('properties.upgradePolicy.rollingUpgradeMonitoringPolicy.failureAction', 'Rollback')]).get_output_in_json()
+        assert updated_app['properties']['version'].endswith(updated_version)
         # Delete Application
         self.cmd('az sf managed-application delete -g {rg} -c {cluster_name} --application-name {app_name}')
         # Delete Application Type
