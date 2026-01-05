@@ -103,7 +103,7 @@ def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir
         pages = generator.by_page(continuation_token=marker)
         results = list_generator(pages=pages, num_results=num_results)
     except HttpResponseError as ex:
-        if ex.error_code=="UnsupportedQueryParameter":
+        if ex.error_code == "UnsupportedQueryParameter":
             # try NFS share if include fails:
             if exclude_extended_info:
                 logger.warning('--exclude-extended-info is not supported for NFS shares.')
