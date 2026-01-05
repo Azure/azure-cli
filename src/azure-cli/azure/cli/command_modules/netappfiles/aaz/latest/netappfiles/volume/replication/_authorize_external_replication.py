@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class AuthorizeExternalReplication(AAZCommand):
     """Starts SVM peering and returns a command to be run on the external ONTAP to accept it.  Once the SVM have been peered a SnapMirror will be created
+
+    :example: Volumes_AuthorizeExternalReplication
+        az netappfiles volume replication authorize-external-replication --resource-group myRG --account-name account1 --pool-name pool1 --volume-name volume1
     """
 
     _aaz_info = {

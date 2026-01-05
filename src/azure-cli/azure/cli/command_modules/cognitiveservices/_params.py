@@ -32,6 +32,41 @@ logger = get_logger(__name__)
 name_arg_type = CLIArgumentType(options_list=["--name", "-n"], metavar="NAME")
 
 
+def _environment_variables_type(value: str) -> dict:
+    """
+    Parse environment variable in key=value format.
+
+    Args:
+        value: String in format 'KEY=value'
+
+    Returns:
+        dict: Dictionary with 'key' and 'value' keys
+
+    Raises:
+        ValueError: If format is invalid
+
+    Examples:
+        >>> _environment_variables_type('FOO=bar')
+        {'key': 'FOO', 'value': 'bar'}
+        >>> _environment_variables_type('CONNECTION_STRING=Server=localhost;Database=mydb')
+        {'key': 'CONNECTION_STRING', 'value': 'Server=localhost;Database=mydb'}
+    """
+    if '=' not in value:
+        raise ValueError(
+            f"Environment variable must be in 'key=value' format. Got: '{value}'"
+        )
+
+    # Split on first equals sign only (value might contain '=')
+    key, _, val = value.partition('=')
+
+    if not key:
+        raise ValueError(
+            f"Environment variable key cannot be empty. Got: '{value}'"
+        )
+
+    return {'key': key, 'value': val}
+
+
 def extract_key_values_pairs(api_properties):
     api_properties_dict = {}
     for item in api_properties:
@@ -340,13 +375,142 @@ def load_arguments(self, _):
             options_list=["--account-name", "-a"],
             help="cognitive service account name."
         )
-        c.argument("project_name", help="AI Project name")
+        c.argument(
+            "project_name",
+            options_list=["--project-name", "-p"],
+            help="AI project name"
+        )
         c.argument(
             "agent_name",
             options_list=["--name", "-n"],
             help="Cognitive Services hosted agent name",
         )
         c.argument("agent_version", help="Cognitive Services hosted agent version")
+
+    with self.argument_context('cognitiveservices agent create') as c:
+        c.argument(
+            'agent_name',
+            options_list=['--name', '-n'],
+            help='Name of the agent to create',
+            required=True
+        )
+        c.argument(
+            'image',
+            help=(
+                'Container image URI including tag '
+                '(e.g., myregistry.azurecr.io/myagent:v1 or myagent:v1 if using --registry). '
+                'The image tag becomes the agent version. Mutually exclusive with --source.'
+            )
+        )
+        c.argument(
+            'source',
+            help=(
+                'Path to source directory containing Dockerfile. '
+                'When provided, the image will be built and pushed automatically. '
+                'Mutually exclusive with --image.'
+            )
+        )
+        c.argument(
+            'dockerfile',
+            help=(
+                'Name of the Dockerfile in the source directory. '
+                'Default: "Dockerfile". Only used with --source.'
+            )
+        )
+        c.argument(
+            'build_remote',
+            options_list=['--build-remote'],
+            action='store_true',
+            help=(
+                'Force remote build using Azure Container Registry Task. '
+                'By default, builds locally if Docker is available, '
+                'otherwise builds remotely. Only used with --source.'
+            )
+        )
+        c.argument(
+            'registry',
+            help=(
+                'Azure Container Registry name (e.g., myregistry). '
+                'If provided, the full ACR URI will be constructed. '
+                'Required when using --source.'
+            )
+        )
+        c.argument(
+            'cpu',
+            help='CPU cores allocation (e.g., "1", "2", "0.5"). Default: "1"',
+            default='1'
+        )
+        c.argument(
+            'memory',
+            help='Memory allocation with units (e.g., "2Gi", "4Gi", "512Mi"). Default: "2Gi"',
+            default='2Gi'
+        )
+        c.argument(
+            'environment_variables',
+            options_list=['--environment-variables', '--env'],
+            nargs='+',
+            type=_environment_variables_type,
+            help="Space-separated environment variables in 'key=value' format (e.g., FOO=bar LOG_LEVEL=debug)"
+        )
+        c.argument(
+            'protocol',
+            help='Agent communication protocol. Default: "responses"',
+            arg_type=get_enum_type(['responses', 'streaming']),
+            default='responses'
+        )
+        c.argument(
+            'protocol_version',
+            help='Protocol version. Default: "v1"',
+            default='v1'
+        )
+        c.argument(
+            'description',
+            help='Human-readable description of the agent'
+        )
+        c.argument(
+            'min_replicas',
+            type=int,
+            help='Minimum number of replicas for horizontal scaling. Default: 0'
+        )
+        c.argument(
+            'max_replicas',
+            type=int,
+            help='Maximum number of replicas for horizontal scaling. Default: 3'
+        )
+        c.argument(
+            'skip_acr_check',
+            action='store_true',
+            help=(
+                'Skip validation that project managed identity has access to '
+                'container registry. Use when access is configured via user-assigned '
+                'identity, service principal, network-level permissions, or other methods '
+                'the check cannot detect.'
+            )
+        )
+        c.argument(
+            'no_wait',
+            action='store_true',
+            help='Do not wait for the long-running operation to finish'
+        )
+        c.argument(
+            'no_start',
+            action='store_true',
+            help=(
+                'Skip automatic deployment after agent version creation. '
+                'Use this to create the agent version without starting the deployment. '
+                'Cannot be used with --min-replicas or --max-replicas.'
+            )
+        )
+        c.argument(
+            'timeout',
+            type=int,
+            help=(
+                'Maximum time in seconds to wait for deployment to be ready. '
+                'Default: 600 seconds (10 minutes). '
+                'Increase for large container images or slow network conditions.'
+            ),
+            default=600
+        )
 
     with self.argument_context("cognitiveservices agent update") as c:
         c.argument(

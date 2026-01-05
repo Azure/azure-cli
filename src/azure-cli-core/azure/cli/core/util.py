@@ -1281,6 +1281,19 @@ def roughly_parse_command(args):
     return ' '.join(nouns).lower()
 
 
+def roughly_parse_command_with_casing(args):
+    # Roughly parse the command part: <az VM create> --name vm1
+    # Similar to knack.invocation.CommandInvoker._rudimentary_get_command, but preserves original casing
+    # and we don't need to bother with positional args
+    nouns = []
+    for arg in args:
+        if arg and arg[0] != '-':
+            nouns.append(arg)
+        else:
+            break
+    return ' '.join(nouns)
+
+
 def is_guid(guid):
     import uuid
     try:
