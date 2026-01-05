@@ -10403,7 +10403,7 @@ spec:
             self.check('provisioningState', 'Succeeded'),
             self.check('networkProfile.ipFamilies', ['IPv4', 'IPv6']),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIPs.countIpv6', 4),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.countIPv6', 4),
             self.check(
                 'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.check(
@@ -10445,7 +10445,7 @@ spec:
                        '172.56.0.0/16', '2001:ffff::/108']),
             self.check('networkProfile.ipFamilies', ['IPv4', 'IPv6']),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIPs.countIpv6', 2),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.countIPv6', 2),
             self.check(
                 'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.check(
@@ -10465,7 +10465,7 @@ spec:
                        '172.56.0.0/16', '2001:ffff::/108']),
             self.check('networkProfile.ipFamilies', ['IPv4', 'IPv6']),
             self.check(
-                'networkProfile.loadBalancerProfile.managedOutboundIPs.countIpv6', 4),
+                'networkProfile.loadBalancerProfile.managedOutboundIPs.countIPv6', 4),
             self.check(
                 'networkProfile.loadBalancerProfile.managedOutboundIPs.count', 1),
             self.check(

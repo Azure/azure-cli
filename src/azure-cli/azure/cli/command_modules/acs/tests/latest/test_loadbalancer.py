@@ -42,7 +42,7 @@ class TestLoadBalancer(unittest.TestCase):
         profile = ManagedClusterLoadBalancerProfile()
         profile.managed_outbound_i_ps = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
             count=2,
-            count_ipv6=3
+            count_i_pv6=3
         )
         profile.outbound_i_ps = ManagedClusterLoadBalancerProfileOutboundIPs(
             public_i_ps="public_i_ps"
@@ -64,7 +64,7 @@ class TestLoadBalancer(unittest.TestCase):
         )
 
         self.assertEqual(p.managed_outbound_i_ps.count, 5)
-        self.assertEqual(p.managed_outbound_i_ps.count_ipv6, 4)
+        self.assertEqual(p.managed_outbound_i_ps.count_i_pv6, 4)
         self.assertEqual(p.outbound_i_ps, None)
         self.assertEqual(p.outbound_ip_prefixes, None)
         self.assertEqual(p.allocated_outbound_ports, 80)
@@ -95,7 +95,7 @@ class TestLoadBalancer(unittest.TestCase):
         profile = ManagedClusterLoadBalancerProfile()
         profile.managed_outbound_i_ps = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
             count=2,
-            count_ipv6=3
+            count_i_pv6=3
         )
 
         p = loadbalancer.configure_load_balancer_profile(
@@ -140,7 +140,7 @@ class TestLoadBalancer(unittest.TestCase):
         profile = ManagedClusterLoadBalancerProfile()
         profile.managed_outbound_i_ps = ManagedClusterLoadBalancerProfileManagedOutboundIPs(
             count=2,
-            count_ipv6=3
+            count_i_pv6=3
         )
 
         p = loadbalancer.configure_load_balancer_profile(
@@ -209,7 +209,7 @@ class TestLoadBalancer(unittest.TestCase):
             load_balancer_models,
         )
         self.assertEqual(p.managed_outbound_i_ps.count, 5)
-        self.assertEqual(p.managed_outbound_i_ps.count_ipv6, 3)
+        self.assertEqual(p.managed_outbound_i_ps.count_i_pv6, 3)
         self.assertEqual(p.outbound_i_ps.public_i_ps,  [load_balancer_models.ResourceReference(id=x.strip()) for x in ["testpip1","testpip2"]])
         self.assertEqual(p.allocated_outbound_ports, 80)
         self.assertEqual(p.idle_timeout_in_minutes, 3600)
