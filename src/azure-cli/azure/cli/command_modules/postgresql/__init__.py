@@ -13,19 +13,19 @@ from azure.cli.command_modules.postgresql._params import load_arguments
 
 
 # pylint: disable=import-outside-toplevel
-class RdbmsCommandsLoader(AzCommandsLoader):
+class PostgreSQLCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
 
-        rdbms_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.postgresql.custom#{}')
+        postgresql_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.postgresql.custom#{}')
         super().__init__(
             cli_ctx=cli_ctx,
-            resource_type=ResourceType.MGMT_RDBMS,
-            custom_command_type=rdbms_custom,
+            resource_type=ResourceType.MGMT_POSTGRESQL,
+            custom_command_type=postgresql_custom,
             argument_context_cls=PostgreSQLArgumentContext,
             suppress_extension=ModExtensionSuppress(
                 __name__,
-                'rdbms-vnet',
+                'postgresql-vnet',
                 '10.0.1',
                 reason='These commands are now in the CLI.',
                 recommend_remove=True))
@@ -50,4 +50,4 @@ class RdbmsCommandsLoader(AzCommandsLoader):
         load_arguments(self, command)
 
 
-COMMAND_LOADER_CLS = RdbmsCommandsLoader
+COMMAND_LOADER_CLS =PostgreSQLCommandsLoader

@@ -38,7 +38,7 @@ def _get_resource_group_from_server_name(cli_ctx, server_name):
     :rtype: str
     """
 
-    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_RDBMS).servers
+    client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_POSTGRESQL).servers
     for server in client.list():
         id_comps = parse_resource_id(server.id)
         if id_comps['name'] == server_name:

@@ -3,10 +3,10 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-from azure.cli.command_modules.rdbms.validators import validate_private_endpoint_connection_id
+from azure.cli.command_modules.postgresql.validators import validate_private_endpoint_connection_id
 from azure.cli.core.commands import CliCommandType
 
-from azure.cli.command_modules.rdbms._client_factory import (
+from azure.cli.command_modules.postgresql._client_factory import (
     cf_postgres_flexible_servers,
     cf_postgres_flexible_firewall_rules,
     cf_postgres_flexible_config,
@@ -121,9 +121,9 @@ def load_flexibleserver_command_table(self, _):
 
     # MERU COMMANDS
     flexible_server_custom_common = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_common#{}')
+        operations_tmpl='azure.cli.command_modules.postgresql.flexible_server_custom_common#{}')
     flexible_servers_custom_postgres = CliCommandType(
-        operations_tmpl='azure.cli.command_modules.rdbms.flexible_server_custom_postgres#{}')
+        operations_tmpl='azure.cli.command_modules.postgresql.flexible_server_custom_postgres#{}')
 
     # Postgres commands
     with self.command_group('postgres flexible-server', postgres_flexible_servers_sdk,

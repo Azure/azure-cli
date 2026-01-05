@@ -13,7 +13,7 @@ from azure.cli.core.commands.parameters import (
     get_enum_type, file_type,
     resource_group_name_type,
     get_three_state_flag)
-from azure.cli.command_modules.rdbms.validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
+from azure.cli.command_modules.postgresql.validators import public_access_validator, maintenance_window_validator, ip_address_validator, \
     retention_validator, validate_identity, validate_byok_identity, validate_identities, \
     virtual_endpoint_name_validator, node_count_validator, postgres_firewall_rule_name_validator
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction
