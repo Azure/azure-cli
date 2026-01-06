@@ -485,7 +485,7 @@ def create_managed_disk(cmd, resource_group_name, disk_name, location=None,  # p
                 disk_publisher, disk_offer, disk_sku, disk_version = terms[0], terms[1], terms[2], terms[3]
                 if disk_version.lower() == 'latest':
                     disk_version = _get_latest_image_version_by_aaz(cmd.cli_ctx, location, disk_publisher, disk_offer,
-                                                             disk_sku)
+                                                                    disk_sku)
             else:  # error
                 raise CLIError('usage error: --image-reference should be ID or URN (publisher:offer:sku:version).')
         else:
