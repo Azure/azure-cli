@@ -115,10 +115,10 @@ class ResourceType(Enum):  # pylint: disable=too-few-public-methods
     MGMT_SQLVM = ('azure.mgmt.sqlvirtualmachine', None)
     MGMT_MANAGEDSERVICES = ('azure.mgmt.managedservices', None)
     MGMT_NETAPPFILES = ('azure.mgmt.netappfiles', None)
-    DATA_STORAGE_BLOB = ('azure.multiapi.storagev2.blob', None)
-    DATA_STORAGE_FILEDATALAKE = ('azure.multiapi.storagev2.filedatalake', None)
-    DATA_STORAGE_FILESHARE = ('azure.multiapi.storagev2.fileshare', None)
-    DATA_STORAGE_QUEUE = ('azure.multiapi.storagev2.queue', None)
+    DATA_STORAGE_BLOB = ('azure.storage.blob', None)
+    DATA_STORAGE_FILEDATALAKE = ('azure.storage.filedatalake', None)
+    DATA_STORAGE_FILESHARE = ('azure.storage.fileshare', None)
+    DATA_STORAGE_QUEUE = ('azure.storage.queue', None)
     DATA_STORAGE_TABLE = ('azure.data.tables', None)
     DATA_BATCH = ('azure.batch', None)
 
@@ -204,10 +204,10 @@ AZURE_API_PROFILES = {
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_SETTING: None,
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_BACKUP: '7.5-preview.1',
         ResourceType.DATA_KEYVAULT_ADMINISTRATION_ACCESS_CONTROL: '7.4',
-        ResourceType.DATA_STORAGE_BLOB: '2022-11-02',
-        ResourceType.DATA_STORAGE_FILEDATALAKE: '2021-08-06',
-        ResourceType.DATA_STORAGE_FILESHARE: '2025-07-05',
-        ResourceType.DATA_STORAGE_QUEUE: '2018-03-28',
+        ResourceType.DATA_STORAGE_BLOB: None,
+        ResourceType.DATA_STORAGE_FILEDATALAKE: None,
+        ResourceType.DATA_STORAGE_FILESHARE: None,
+        ResourceType.DATA_STORAGE_QUEUE: None,
         ResourceType.DATA_STORAGE_TABLE: None,
         ResourceType.MGMT_SERVICEBUS: None,
         ResourceType.MGMT_EVENTHUB: None,

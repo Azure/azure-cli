@@ -21,7 +21,6 @@ from azure.cli.command_modules.storage._validators import (get_permission_valida
                                                            validate_encryption_source, validate_source_uri,
                                                            validate_encryption_services, as_user_validator,
                                                            get_not_none_validator)
-from azure.cli.testsdk import api_version_constraint
 
 
 class MockCLI(CLI):

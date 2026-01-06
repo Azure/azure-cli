@@ -18,6 +18,9 @@ class CheckFilePathAvailability(AAZCommand):
     """Check if a file path is available.
 
     Check if a file path is available
+
+    :example: CheckFilePathAvailability
+        az netappfiles check-file-path-availability --location eastus --name my-exact-filepth --subnet-id /subscriptions/9760acf5-4638-11e7-9bdb-020073ca7778/resourceGroups/myRP/providers/Microsoft.Network/virtualNetworks/testvnet3/subnets/testsubnet3
     """
 
     _aaz_info = {

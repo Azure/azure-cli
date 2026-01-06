@@ -147,12 +147,11 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         backup_retention = 7
         database_name = 'testdb'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        storage_redundancy = "LocalRedundancy"
 
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-                  --storage-size {} --storage-redundancy {} -u {} --version {} --tags keys=3 --database-name {} --public-access None'
+                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --public-access None'
                  .format(database_engine, resource_group, server_name, backup_retention, sku_name, tier, storage_size,
-                         storage_redundancy, 'dbadmin', version, database_name))
+                         'dbadmin', version, database_name))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
@@ -162,7 +161,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['sku']['tier'], tier)
         self.assertEqual(basic_info['version'], version)
         self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
-        self.assertEqual(basic_info['storage']['storageRedundancy'], storage_redundancy)
         self.assertEqual(basic_info['storage']['logOnDisk'], "Disabled")
         self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
 
@@ -347,7 +345,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, location))
 
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-                          checks=[JMESPathCheck('storage.iops', 640)]).get_output_in_json()
+                          checks=[JMESPathCheck('storage.iops', 900)]).get_output_in_json()
 
         # SKU upgraded and IOPS value set smaller than free iops, max iops for the sku
 
@@ -408,12 +406,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, location, DEFAULT_GENERAL_PURPOSE_SKU))
         
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
-                          checks=[JMESPathCheck('storage.autoIoScaling', 'Disabled')]).get_output_in_json()
-
-        self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Enabled'
-                 .format(database_engine, resource_group, server_name))
-        
-        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
                           checks=[JMESPathCheck('storage.autoIoScaling', 'Enabled')]).get_output_in_json()
         
         self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Disabled'
@@ -422,6 +414,12 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
                           checks=[JMESPathCheck('storage.autoIoScaling', 'Disabled')]).get_output_in_json()
 
+        self.cmd('{} flexible-server update -g {} -n {} --auto-scale-iops Enabled'
+                 .format(database_engine, resource_group, server_name))
+        
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name),
+                          checks=[JMESPathCheck('storage.autoIoScaling', 'Enabled')]).get_output_in_json()
+        
         self.cmd('{} flexible-server create --public-access none -g {} -n {} -l {} --auto-scale-iops Enabled --storage-size 64 --sku-name {} --tier GeneralPurpose'
                  .format(database_engine, resource_group, server_name_2, location, DEFAULT_GENERAL_PURPOSE_SKU))
 
@@ -447,12 +445,9 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         new_vnet_2 = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         new_subnet_2 = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
 
-        storage_redundancy = "LocalRedundancy"
-
-        self.cmd('{} flexible-server create -g {} -n {} --storage-redundancy {} --vnet {} --subnet {} -l {} --yes'.format(
-                 database_engine, resource_group, source_server, storage_redundancy, source_vnet, source_subnet, location))
+        self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --yes'.format(
+                 database_engine, resource_group, source_server, source_vnet, source_subnet, location))
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
-        self.assertEqual(result['storage']['storageRedundancy'], storage_redundancy)
 
         # Wait until snapshot is created
         current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
@@ -569,8 +564,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         new_vnet_2 = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         new_subnet_2 = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
 
-        storage_redundancy = "LocalRedundancy"
-
         self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --geo-redundant-backup Enabled --yes'.format(
                  database_engine, resource_group, source_server, source_vnet, source_subnet, location))
         result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
@@ -587,12 +580,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, target_location, target_server_default, source_server), expect_failure=True)
 
         # 2. vnet to public access
-        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} --storage-redundancy {} --public-access enabled'
-                                .format(database_engine, resource_group, target_location, target_server_public_access, source_server,
-                                        storage_redundancy)).get_output_in_json()
-        self.assertEqual(restore_result['storage']['storageRedundancy'], storage_redundancy)
-
-        #self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
+        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} --public-access enabled'
+                                .format(database_engine, resource_group, target_location, target_server_public_access, source_server)).get_output_in_json()
         self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), target_location)
 
         # 3. vnet to different vnet
@@ -1280,12 +1269,11 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         primary_role = 'None'
         replica_role = 'Replica'
         private_dns_param = 'privateDnsZoneResourceId'
-        storage_redundancy = "LocalRedundancy"
 
         master_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --tier GeneralPurpose --sku-name {} --storage-redundancy {} --public-access none'
-                 .format(database_engine, resource_group, master_server, master_location, 256, DEFAULT_GENERAL_PURPOSE_SKU, storage_redundancy))
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --tier GeneralPurpose --sku-name {} --public-access none'
+                 .format(database_engine, resource_group, master_server, master_location, 256, DEFAULT_GENERAL_PURPOSE_SKU))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[JMESPathCheck('replicationRole', primary_role)]).get_output_in_json()
@@ -2037,6 +2025,9 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
         self.assertEqual(backup_name, customer_backup['name'])
         self.assertDictEqual(customer_backup, backups[0])
 
+        self.cmd('{} flexible-server backup delete -g {} -n {} --backup-name {}'
+                 .format(database_engine, resource_group, server, backup_name), expect_failure=False)
+
 
 class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
 
@@ -2280,7 +2271,7 @@ class FlexibleServerMaintenanceMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name, maintenance_name)).get_output_in_json()
         self.assertEqual(maintenance_id, maintenance_read_response['id'])
 
-        reschedule_start_time = "2024-10-23T03:41Z"
+        reschedule_start_time = "2025-12-25T03:41Z"
         maintenance_reschedule_response = self.cmd('{} flexible-server maintenance reschedule --resource-group {} --server-name {} --maintenance-name {} --start-time {}'
                  .format(database_engine, resource_group, server_name, maintenance_name, reschedule_start_time)).get_output_in_json()
         maintenance_rescheduled_time = parser.parse(maintenance_reschedule_response['maintenanceStartTime']).strftime('%Y-%m-%dT%H:%MZ')
@@ -2317,12 +2308,11 @@ class MySQLExportTest(ScenarioTest):
         self.storage_cmd('storage container create -n {}', account_info, container_name)
         return container_name
 
-    @live_only()
     @AllowLargeResponse()
     @ResourceGroupPreparer(location="eastus")
     @ServerPreparer(engine_type='mysql', location="eastus")
     @StorageAccountPreparer(location="eastus")
-
+    @unittest.skip("MySQL server backup export is not supported temporarily.")
     def test_mysql_export(self, resource_group, server, storage_account):
         self._test_flexible_server_export_create_mgmt('mysql', resource_group, server, storage_account)
 

@@ -7,7 +7,7 @@ import time
 import unittest
 
 from azure.cli.testsdk import (ScenarioTest, LocalContextScenarioTest, JMESPathCheck, ResourceGroupPreparer,
-                               StorageAccountPreparer, api_version_constraint, live_only, LiveScenarioTest,
+                               StorageAccountPreparer, live_only, LiveScenarioTest,
                                record_only, KeyVaultPreparer, JMESPathCheckExists)
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
