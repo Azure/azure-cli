@@ -92,7 +92,8 @@ Release History
 **Storage**
 
 * `az storage blob/container/fs generate-sas`: Add `--user-delegation-oid` (#32508)
-* `az storage fs file/directory generate-sas`: New command `az storage fs file generate-sas`, add `--user-delegation-oid` (#32508)
+* `az storage fs file generate-sas`: Add command and support `--user-delegation-oid` (#32508)
+* `az storage fs directory generate-sas`: Add `--user-delegation-oid` (#32508)
 * `az storage share/file/queue generate-sas`: Add `--as-user` and `--user-delegation-oid` (#32508)
 
 2.81.0
