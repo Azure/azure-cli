@@ -6,7 +6,7 @@
 import os
 import unittest
 
-from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, api_version_constraint,
+from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, JMESPathCheckExists)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin

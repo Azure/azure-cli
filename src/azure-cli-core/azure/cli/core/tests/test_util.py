@@ -17,7 +17,7 @@ from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-     _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd)
+     _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, roughly_parse_command_with_casing)
 from azure.cli.core.mock import DummyCli
 
 
@@ -611,6 +611,83 @@ class TestHandleException(unittest.TestCase):
         mock_http_error.response = mock_response
 
         return mock_http_error
+
+    def test_roughly_parse_command(self):
+        """Test roughly_parse_command function that extracts command parts and converts to lowercase"""
+        # Basic command parsing
+        self.assertEqual(roughly_parse_command(['az', 'vm', 'create']), 'az vm create')
+        self.assertEqual(roughly_parse_command(['account', 'show']), 'account show')
+        self.assertEqual(roughly_parse_command(['network', 'vnet', 'list']), 'network vnet list')
+        
+        # Test case conversion - should convert to lowercase
+        self.assertEqual(roughly_parse_command(['az', 'VM', 'CREATE']), 'az vm create')
+        self.assertEqual(roughly_parse_command(['Account', 'Show']), 'account show')
+        
+        # Test with flags - should stop at first flag and not include flag values
+        self.assertEqual(roughly_parse_command(['az', 'vm', 'create', '--name', 'secretVM']), 'az vm create')
+        self.assertEqual(roughly_parse_command(['az', 'storage', 'account', 'create', '--name', 'mystorageaccount']), 'az storage account create')
+        self.assertEqual(roughly_parse_command(['az', 'keyvault', 'create', '--resource-group', 'myRG', '--name', 'myVault']), 'az keyvault create')
+        
+        # Test with short flags
+        self.assertEqual(roughly_parse_command(['az', 'vm', 'list', '-g', 'myResourceGroup']), 'az vm list')
+        self.assertEqual(roughly_parse_command(['az', 'group', 'create', '-n', 'myGroup', '-l', 'eastus']), 'az group create')
+        
+        # Edge cases
+        self.assertEqual(roughly_parse_command([]), '')
+        self.assertEqual(roughly_parse_command(['az']), 'az')
+        self.assertEqual(roughly_parse_command(['--help']), '')  # Starts with flag
+        self.assertEqual(roughly_parse_command(['-h']), '')  # Starts with short flag
+
+    def test_roughly_parse_command_with_casing(self):
+        """Test roughly_parse_command_with_casing function that preserves original casing"""
+        # Basic command parsing with case preservation
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'vm', 'create']), 'az vm create')
+        self.assertEqual(roughly_parse_command_with_casing(['account', 'show']), 'account show')
+        self.assertEqual(roughly_parse_command_with_casing(['network', 'vnet', 'list']), 'network vnet list')
+        
+        # Test case preservation - should keep original casing
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'VM', 'CREATE']), 'az VM CREATE')
+        self.assertEqual(roughly_parse_command_with_casing(['Account', 'Show']), 'Account Show')
+        self.assertEqual(roughly_parse_command_with_casing(['Az', 'Network', 'Vnet', 'List']), 'Az Network Vnet List')
+        
+        # Test with flags - should stop at first flag and not include sensitive flag values
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'vm', 'create', '--name', 'secretVM']), 'az vm create')
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'VM', 'Create', '--name', 'superSecretVM']), 'az VM Create')
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'storage', 'account', 'create', '--name', 'mystorageaccount']), 'az storage account create')
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'keyvault', 'create', '--resource-group', 'myRG', '--name', 'myVault']), 'az keyvault create')
+        
+        # Test with short flags
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'VM', 'list', '-g', 'myResourceGroup']), 'az VM list')
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'Group', 'create', '-n', 'myGroup', '-l', 'eastus']), 'az Group create')
+        
+        # Test mixed case scenarios that might reveal user typing patterns
+        self.assertEqual(roughly_parse_command_with_casing(['Az', 'Vm', 'Create']), 'Az Vm Create')
+        self.assertEqual(roughly_parse_command_with_casing(['AZ', 'STORAGE', 'BLOB', 'LIST']), 'AZ STORAGE BLOB LIST')
+        
+        # Edge cases
+        self.assertEqual(roughly_parse_command_with_casing([]), '')
+        self.assertEqual(roughly_parse_command_with_casing(['az']), 'az')
+        self.assertEqual(roughly_parse_command_with_casing(['Az']), 'Az')
+        self.assertEqual(roughly_parse_command_with_casing(['--help']), '')  # Starts with flag
+        self.assertEqual(roughly_parse_command_with_casing(['-h']), '')  # Starts with short flag
+        
+        # Security test - ensure no sensitive information leaks after flags
+        test_cases_with_secrets = [
+            (['az', 'vm', 'create', '--admin-password', 'SuperSecret123!'], 'az vm create'),
+            (['az', 'sql', 'server', 'create', '--admin-user', 'admin', '--admin-password', 'VerySecret!'], 'az sql server create'),
+            (['az', 'storage', 'account', 'create', '--name', 'storageacct', '--access-tier', 'Hot'], 'az storage account create'),
+            (['Az', 'KeyVault', 'Secret', 'Set', '--vault-name', 'myVault', '--name', 'secretName', '--value', 'topSecret'], 'Az KeyVault Secret Set')
+        ]
+        
+        for args, expected in test_cases_with_secrets:
+            with self.subTest(args=args):
+                result = roughly_parse_command_with_casing(args)
+                self.assertEqual(result, expected)
+                # Ensure no sensitive values made it through
+                self.assertNotIn('SuperSecret123!', result)
+                self.assertNotIn('VerySecret!', result)
+                self.assertNotIn('topSecret', result)
+                self.assertNotIn('storageacct', result)  # Even non-secret values after flags should not appear
 
 
 if __name__ == '__main__':

@@ -4,13 +4,12 @@
 # --------------------------------------------------------------------------------------------
 import os
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, JMESPathCheckExists, ResourceGroupPreparer,
-                               StorageAccountPreparer, api_version_constraint, live_only)
+                               StorageAccountPreparer, live_only)
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin, StorageTestFilesPreparer
 
 
 class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
-    @api_version_constraint(ResourceType.DATA_STORAGE_FILEDATALAKE, min_api='2018-11-09')
     @ResourceGroupPreparer(name_prefix='cli_test_storage_oauth')
     @StorageAccountPreparer(kind="StorageV2", hns=True)
     def test_storage_filedatalake_oauth(self, resource_group, storage_account):
@@ -491,7 +490,6 @@ class StorageOauthTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('length(@)', 1))
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
 class StorageBlobSetTierOauthTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
