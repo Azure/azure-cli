@@ -63,20 +63,9 @@ def load_command_table(self, _):
         operation_group='availability_sets'
     )
 
-    compute_disk_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#DisksOperations.{}',
-        client_factory=cf_disks,
-        operation_group='disks'
-    )
-
     compute_image_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#ImagesOperations.{}',
         client_factory=cf_images
-    )
-
-    compute_snapshot_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#SnapshotsOperations.{}',
-        client_factory=cf_snapshots
     )
 
     compute_vm_sdk = CliCommandType(

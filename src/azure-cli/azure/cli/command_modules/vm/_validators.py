@@ -1984,7 +1984,7 @@ def process_disk_create_namespace(cmd, namespace):
     validate_edge_zone(cmd, namespace)
     _validate_gallery_image_reference(namespace)
     _validate_security_data_uri(namespace)
-    _validate_upload_type(cmd, namespace)
+    _validate_upload_type(namespace)
     _validate_secure_vm_disk_encryption_set(namespace)
     _validate_hyper_v_generation(namespace)
     if namespace.source:
@@ -2017,7 +2017,7 @@ def _validate_security_data_uri(namespace):
             'Please specify --source when using the --security-data-uri parameter')
 
 
-def _validate_upload_type(cmd, namespace):
+def _validate_upload_type(namespace):
     if 'upload_type' not in namespace:
         return
 
