@@ -48,7 +48,7 @@ Release History
 
 **Key Vault**
 
-* `az keyvault create/import`: Add `--default-data-disk-policy` to support new default SKR policy (#32538)
+* `az keyvault key create/import`: Add `--default-data-disk-policy` to support new default SKR policy (#32538)
 
 **Monitor**
 
