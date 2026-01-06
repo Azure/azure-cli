@@ -1636,7 +1636,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'disk4': self.create_random_name('disk', 10),
             'disk5': self.create_random_name('disk', 10),
             'disk6': self.create_random_name('disk', 10),
-            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202507300',
+            'image': '/Subscriptions/' + subs_id + '/Providers/Microsoft.Compute/Locations/westus/Publishers/Canonical/ArtifactTypes/VMImage/Offers/0001-com-ubuntu-server-jammy/Skus/22_04-lts-gen2/Versions/22.04.202512181',
             'image2': self.create_random_name('image', 15),
             'g1': self.create_random_name('g1', 20),
             'vm': self.create_random_name('vm', 10)
@@ -1675,7 +1675,7 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.check('creationData.galleryImageReference.id', '{gallery_image}')
         ])
 
-        self.cmd('disk create -g {rg} -n {disk6} --size-gb 256 --max-shares 2 -l centraluseuap', checks=[
+        self.cmd('disk create -g {rg} -n {disk6} --size-gb 256 --max-shares 2 -l eastasia', checks=[
             self.check('maxShares', 2)
         ])
 
