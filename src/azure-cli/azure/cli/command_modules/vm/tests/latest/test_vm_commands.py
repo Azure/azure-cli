@@ -6056,23 +6056,17 @@ class MSIScenarioTest(ScenarioTest):
         })
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest '
-                     '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! '
-                     '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --scope {scope} '
-                     '--size Standard_B2ms')
+            self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --assign-identity --admin-username admin123 '
+                     '--admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --scope {scope}')
 
         with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope"):
-            self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest '
-                     '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! '
-                     '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --role Contributor '
-                     '--size Standard_B2ms')
+            self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --assign-identity --admin-username admin123 '
+                     '--admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --role Contributor')
 
         with mock.patch('azure.cli.core.commands.arm._gen_guid', side_effect=self.create_guid):
             # create a linux vm with default configuration
-            self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest '
-                     '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! '
-                     '--scope {scope} --role Contributor --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
-                     '--size Standard_B2ms', checks=[
+            self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --assign-identity --admin-username admin123 '
+                     '--admin-password PasswordPassword1! --scope {scope} --role Contributor --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE', checks=[
                 self.check('identity.role', 'Contributor'),
                 self.check('identity.scope', '/subscriptions/{sub}/resourceGroups/{rg}'),
             ])
@@ -6082,21 +6076,16 @@ class MSIScenarioTest(ScenarioTest):
                 'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
             # create a windows vm with reader role on the linux vm
-            result = self.cmd('vm create -g {rg} -n {vm2} --image Win2022Datacenter '
-                              '--assign-identity --scope {vm1_id} --role reader '
-                              '--admin-username admin123 --admin-password PasswordPassword1! '
-                              '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
-                              '--size Standard_B2ms', checks=[
+            result = self.cmd('vm create -g {rg} -n {vm2} --image Win2022Datacenter --assign-identity --scope {vm1_id} --role reader '
+                              '--admin-username admin123 --admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE', checks=[
                 self.check('identity.role', 'reader'),
                 self.check('identity.scope', '{vm1_id}'),
             ])
             uuid.UUID(result.get_output_in_json()['identity']['systemAssignedIdentity'])
 
             # create a linux vm w/o identity and later enable it
-            vm3_result = self.cmd('vm create -g {rg} -n {vm3} --image Debian:debian-10:10:latest '
-                                  '--admin-username admin123 --admin-password PasswordPassword1! '
-                                  '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
-                                  '--size Standard_B2ms').get_output_in_json()
+            vm3_result = self.cmd('vm create -g {rg} -n {vm3} --image Debian:debian-10:10:latest --admin-username admin123 '
+                                  '--admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
             self.assertIsNone(vm3_result.get('identity'))
 
             with self.assertRaisesRegex(ArgumentUsageError, "please specify both --role and --scope when assigning a role to the managed identity"):
@@ -6179,10 +6168,8 @@ class MSIScenarioTest(ScenarioTest):
         })
 
         # create a linux vm with identity but w/o a role assignment (--scope "")
-        self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest '
-                 '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! '
-                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
-                 '--size Standard_B2ms', checks=[
+        self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --assign-identity --admin-username admin123 '
+                 '--admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE', checks=[
             self.check('identity.scope', None),
             self.check('identity.role', None),
         ])
@@ -6192,24 +6179,18 @@ class MSIScenarioTest(ScenarioTest):
             'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         # create a vmss with identity but w/o a role assignment (--scope "")
-        self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest '
-                 '--assign-identity --admin-username admin123 --admin-password PasswordPassword1! '
-                 '--orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls', checks=[
+        self.cmd('vmss create -g {rg} -n {vmss1} --image Debian:debian-10:10:latest --assign-identity --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard', checks=[
             self.check('vmss.identity.scope', None),
         ])
 
         # create a vm w/o identity
-        self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest '
-                 '--admin-username admin123 --admin-password PasswordPassword1! '
-                 '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms')
+        self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --admin-username admin123 --admin-password PasswordPassword1! --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         # assign identity but w/o a role assignment
         self.cmd('vm identity assign -g {rg} -n {vm2}', checks=[
             self.check('scope', None),
         ])
 
-        self.cmd('vmss create -g {rg} -n {vmss2} --image Debian:debian-10:10:latest '
-                 '--admin-username admin123 --admin-password PasswordPassword1! '
-                 '--orchestration-mode Uniform --lb-sku Standard --vm-sku Standard_B1ls')
+        self.cmd('vmss create -g {rg} -n {vmss2} --image Debian:debian-10:10:latest --admin-username admin123 --admin-password PasswordPassword1! --orchestration-mode Uniform --lb-sku Standard')
         self.cmd('vmss identity assign -g {rg} -n {vmss2}', checks=[
             self.check('scope', None),
         ])
@@ -6236,10 +6217,8 @@ class MSIScenarioTest(ScenarioTest):
         emsi2_result = self.cmd('identity create -g {rg} -n {emsi2}').get_output_in_json()
 
         # create a vm with only user assigned identity
-        result = self.cmd('vm create -g {rg} -n vm2 --image Debian:debian-10:10:latest '
-                          '--assign-identity {emsi} --generate-ssh-keys --admin-username {user} '
-                          '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
-                          '--size Standard_B2ms', checks=[
+        result = self.cmd('vm create -g {rg} -n vm2 --image Canonical:UbuntuServer:18.04-LTS:latest --assign-identity {emsi} '
+                          '--generate-ssh-keys --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE', checks=[
             self.check('identity.role', None),
             self.check('identity.scope', None),
         ]).get_output_in_json()
@@ -6253,10 +6232,7 @@ class MSIScenarioTest(ScenarioTest):
         self.assertFalse(result['identity']['systemAssignedIdentity'])
 
         # create a vm with system + user assigned identities
-        result = self.cmd('vm create -g {rg} -n {vm} --image Debian:debian-10:10:latest '
-                          '--assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys '
-                          '--admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE '
-                          '--size Standard_B2ms').get_output_in_json()
+        result = self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
         emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
         result = self.cmd('vm identity show -g {rg} -n {vm}', checks=[
