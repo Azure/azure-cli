@@ -13,7 +13,7 @@ Release History
 **AKS**
 
 * Fix #15932: `az aks install-cli`: Add `--gh-token` parameter to allow authentication when downloading kubelogin (#32536)
-* `az aks nodepool update`: Add GPU driver install options install and none for `--gpu-driver` parameter (#32531)
+* `az aks nodepool update`: Add GPU driver install options `install` and `none` for `--gpu-driver` parameter (#32531)
 * `az aks nodepool add/update`: Add option `Ubuntu2404` to `--os-sku` parameter (#32509)
 
 **App Service**
