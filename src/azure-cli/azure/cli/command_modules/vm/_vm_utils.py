@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 
 from azure.cli.core.commands.arm import ArmTemplateBuilder
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
-from azure.cli.core.profiles import ResourceType, get_sdk
+from azure.cli.core.profiles import ResourceType
 
 from knack.log import get_logger
 from knack.util import CLIError
