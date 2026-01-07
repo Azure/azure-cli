@@ -6,59 +6,20 @@ import os
 import time
 
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
-from azure.cli.testsdk.base import execute
 from azure.cli.testsdk import (
     JMESPathCheck,
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest)
-from azure.cli.testsdk.preparers import (
-    AbstractPreparer,
-    SingleValueReplacer)
-
-# Constants
-SERVER_NAME_PREFIX = 'azuredbclitest-'
-SERVER_NAME_MAX_LENGTH = 20
-DEFAULT_LOCATION = 'canadacentral'
-
-
-class ServerPreparer(AbstractPreparer, SingleValueReplacer):
-
-    def __init__(self, location=DEFAULT_LOCATION, name_prefix=SERVER_NAME_PREFIX, parameter_name='server',
-                 resource_group_parameter_name='resource_group'):
-        super().__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
-        from azure.cli.core.mock import DummyCli
-        self.cli_ctx = DummyCli()
-        self.location = location
-        self.parameter_name = parameter_name
-        self.resource_group_parameter_name = resource_group_parameter_name
-
-    # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
-    def create_resource(self, name, **kwargs):
-        group = self._get_resource_group(**kwargs)
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        version = '17'
-        storage_size = 128
-        sku_name = 'Standard_D4ds_v4'
-        tier = 'GeneralPurpose'
-        template = 'postgres flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'
-        execute(self.cli_ctx, template.format(group, server_name, sku_name, tier, storage_size, version, self.location))
-        return {self.parameter_name: name}
-
-    def remove_resource(self, name, **kwargs):
-        group = self._get_resource_group(**kwargs)
-        execute(self.cli_ctx, 'az postgres flexible-server delete -g {} -n {} --yes'.format(group, name))
-
-    def _get_resource_group(self, **kwargs):
-        return kwargs.get(self.resource_group_parameter_name)
-
+from .constants import DEFAULT_LOCATION
+from .server_preparer import ServerPreparer
 
 @ServerPreparer()
 class FlexibleServerIndexTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @ServerPreparer()
+    @ServerPreparer(location=DEFAULT_LOCATION)
     def test_postgres_flexible_server_index_tuning_options(self, resource_group, server_name):
         self._test_index_tuning_options_mgmt(resource_group, server_name)
 
@@ -105,7 +66,7 @@ class FlexibleServerAutonomousTuningOptionsResourceMgmtScenarioTest(ScenarioTest
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @ServerPreparer()
+    @ServerPreparer(location=DEFAULT_LOCATION)
     def test_postgres_flexible_server_autonomous_tuning_options(self, resource_group, server_name):
         self._test_autonomous_tuning_options_mgmt(resource_group, server_name)
 

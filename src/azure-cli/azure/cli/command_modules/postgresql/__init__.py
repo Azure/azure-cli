@@ -50,4 +50,4 @@ class PostgreSQLCommandsLoader(AzCommandsLoader):
         load_arguments(self, command)
 
 
-COMMAND_LOADER_CLS =PostgreSQLCommandsLoader
+COMMAND_LOADER_CLS = PostgreSQLCommandsLoader
