@@ -8,7 +8,7 @@ import re
 import unittest
 from datetime import datetime, timedelta
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
-                               JMESPathCheck, JMESPathCheckExists, NoneCheck, api_version_constraint)
+                               JMESPathCheck, JMESPathCheckExists, NoneCheck)
 from knack.util import CLIError
 from azure.cli.core.profiles import ResourceType
 
@@ -559,7 +559,54 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer()
-    @api_version_constraint(resource_type=ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
+    def test_storage_blob_generate_sas_with_user_delegation_oid(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        c = self.create_container(account_info)
+        b = self.create_random_name('blob', 24)
+        b2 = self.create_random_name('blob', 24)
+        local_file = self.create_temp_file(128)
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
+
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        self.storage_cmd('storage blob upload -c {} -n {} -f "{}"', account_info, c, b, local_file)
+
+        blob_sas = self.cmd('storage blob generate-sas --account-name {} -n {} -c {} --expiry {} --permissions '
+                            'wr --as-user --auth-mode login --user-delegation-oid '
+                            '{}'.format(storage_account, b, c, expiry, logged_in_user)).output
+        self.assertIn('&sig=', blob_sas)
+        self.assertIn('skoid=', blob_sas)
+        self.assertIn('sktid=', blob_sas)
+        self.assertIn('skt=', blob_sas)
+        self.assertIn('ske=', blob_sas)
+        self.assertIn('sks=', blob_sas)
+        self.assertIn('skv=', blob_sas)
+        self.assertIn('sduoid=', blob_sas)
+
+        if self.is_live:
+            self.cmd('storage blob upload --account-name {} -c {} -n {} -f "{}" --overwrite --sas-token {} '
+                     '--auth-mode login'.format(storage_account, c, b, local_file, blob_sas))
+
+        container_sas = self.cmd('storage container generate-sas --account-name {} -n {} --expiry {} --permissions '
+                                 'wr --https-only --as-user --auth-mode login --user-delegation-oid '
+                                 '{}'.format(storage_account, c, expiry, logged_in_user)).output
+        self.assertIn('&sig=', container_sas)
+        self.assertIn('skoid=', container_sas)
+        self.assertIn('sktid=', container_sas)
+        self.assertIn('skt=', container_sas)
+        self.assertIn('ske=', container_sas)
+        self.assertIn('sks=', container_sas)
+        self.assertIn('skv=', container_sas)
+        self.assertIn('skv=', container_sas)
+        self.assertIn('sduoid=', container_sas)
+
+        if self.is_live:
+            self.cmd('storage blob upload --account-name {} -c {} -n {} -f "{}" --overwrite --sas-token {} '
+                     '--auth-mode login'.format(storage_account, c, b2, local_file, container_sas))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer()
     def test_storage_blob_suppress_400(self, resource_group, storage_account):
         account_info = self.get_account_info(resource_group, storage_account)
         # test for azure.cli.command_modules.storage.StorageCommandGroup.get_handler_suppress_some_400
@@ -717,7 +764,6 @@ class StorageBlobUploadTests(StorageScenarioMixin, ScenarioTest):
 
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
 class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
 
     @ResourceGroupPreparer()
@@ -819,7 +865,6 @@ class StorageBlobSetTierTests(StorageScenarioMixin, ScenarioTest):
                                 JMESPathCheck('properties.rehydrationStatus', 'rehydrate-pending-to-cold'))
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2020-10-02')
 class StorageBlobImmutabilityTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='version', kind='StorageV2', location='centralus')
@@ -855,7 +900,6 @@ class StorageBlobImmutabilityTests(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('legal_hold', False))
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2019-02-02')
 class StorageBlobCommonTests(StorageScenarioMixin, ScenarioTest):
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='storage', kind='StorageV2', location='eastus2', sku='Standard_RAGZRS')

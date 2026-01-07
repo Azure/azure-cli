@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-09-01"],
         ]
     }
 
@@ -422,12 +422,6 @@ class Update(AAZCommand):
             help="The remote region for the other end of the Volume Replication.",
             nullable=True,
         )
-        _args_schema.remote_volume_resource_id = AAZStrArg(
-            options=["--remote-volume-id", "--remote-volume-resource-id"],
-            arg_group="Replication",
-            help="The resource ID of the remote volume.",
-            nullable=True,
-        )
         _args_schema.replication_schedule = AAZStrArg(
             options=["--replication-schedule"],
             arg_group="Replication",
@@ -543,7 +537,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -650,7 +644,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -758,7 +752,6 @@ class Update(AAZCommand):
             replication = _builder.get(".properties.dataProtection.replication")
             if replication is not None:
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
-                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id")
                 replication.set_prop("replicationSchedule", AAZStrType, ".replication_schedule")
 
             snapshot = _builder.get(".properties.dataProtection.snapshot")
@@ -931,6 +924,7 @@ class _UpdateHelper:
         )
         properties.effective_network_features = AAZStrType(
             serialized_name="effectiveNetworkFeatures",
+            flags={"read_only": True},
         )
         properties.enable_subvolumes = AAZStrType(
             serialized_name="enableSubvolumes",

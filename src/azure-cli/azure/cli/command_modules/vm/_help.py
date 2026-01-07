@@ -1550,6 +1550,9 @@ examples:
     text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
 /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.1 \
 --app-config-overrides https://mystorageaccount.blob.core.windows.net/configurations/settings.config null
+  - name: Set applications for vm with auto upgrade
+    text: az vm application set -g MyResourceGroup -n MyVm --app-version-ids /subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication1/versions/1.0 \
+/subscriptions/subid/resourceGroups/MyResourceGroup/providers/Microsoft.Compute/galleries/myGallery1/applications/MyApplication2/versions/1.1 --enable-automatic-upgrade True False
 """
 
 helps['vm application list'] = """
@@ -2594,6 +2597,13 @@ examples:
     text: |
         az vmss list-instance-public-ips --name MyScaleSet --resource-group MyResourceGroup
     crafted: true
+"""
+
+helps['vmss list-instances'] = """
+type: command
+short-summary: List all virtual machines in a VM scale sets.
+long-summary: Return a list of virtual machines managed by VMSS. For VMSS in Flexible Orchestration mode,
+        please use "az vm list" to get full details.
 """
 
 helps['vmss reimage'] = """

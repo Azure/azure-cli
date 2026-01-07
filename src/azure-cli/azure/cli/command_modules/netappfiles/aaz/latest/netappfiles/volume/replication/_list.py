@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2025-06-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/listreplications", "2025-06-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}/listreplications", "2025-09-01"],
         ]
     }
 
@@ -74,6 +74,17 @@ class List(AAZCommand):
                 max_length=64,
                 min_length=1,
             ),
+        )
+
+        # define Arg Group "Body"
+
+        _args_schema = cls._args_schema
+        _args_schema.exclude = AAZStrArg(
+            options=["--exclude"],
+            arg_group="Body",
+            help="Exclude Replications filter. 'None' returns all replications, 'Deleted' excludes deleted replications. Default is 'None'",
+            default="None",
+            enum={"Deleted": "Deleted", "None": "None"},
         )
         return cls._args_schema
 
@@ -150,7 +161,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2025-06-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -160,10 +171,24 @@ class List(AAZCommand):
         def header_parameters(self):
             parameters = {
                 **self.serialize_header_param(
+                    "Content-Type", "application/json",
+                ),
+                **self.serialize_header_param(
                     "Accept", "application/json",
                 ),
             }
             return parameters
+
+        @property
+        def content(self):
+            _content_value, _builder = self.new_content_builder(
+                self.ctx.args,
+                typ=AAZObjectType,
+                typ_kwargs={"flags": {"client_flatten": True}}
+            )
+            _builder.set_prop("exclude", AAZStrType, ".exclude")
+
+            return self.serialize_content(_content_value)
 
         def on_200(self, session):
             data = self.deserialize_http_content(session)
@@ -183,7 +208,12 @@ class List(AAZCommand):
             cls._schema_on_200 = AAZObjectType()
 
             _schema_on_200 = cls._schema_on_200
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.next_link = AAZStrType(
+                serialized_name="nextLink",
+            )
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -192,12 +222,24 @@ class List(AAZCommand):
             _element.endpoint_type = AAZStrType(
                 serialized_name="endpointType",
             )
+            _element.mirror_state = AAZStrType(
+                serialized_name="mirrorState",
+                flags={"read_only": True},
+            )
             _element.remote_volume_region = AAZStrType(
                 serialized_name="remoteVolumeRegion",
             )
             _element.remote_volume_resource_id = AAZStrType(
                 serialized_name="remoteVolumeResourceId",
                 flags={"required": True},
+            )
+            _element.replication_creation_time = AAZStrType(
+                serialized_name="replicationCreationTime",
+                flags={"read_only": True},
+            )
+            _element.replication_deletion_time = AAZStrType(
+                serialized_name="replicationDeletionTime",
+                flags={"read_only": True},
             )
             _element.replication_id = AAZStrType(
                 serialized_name="replicationId",

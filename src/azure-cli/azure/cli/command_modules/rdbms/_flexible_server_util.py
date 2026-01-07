@@ -30,7 +30,7 @@ from ._client_factory import resource_client_factory, cf_mysql_flexible_location
 
 logger = get_logger(__name__)
 
-DEFAULT_LOCATION_PG = 'eastus'  # For testing: 'eastus2euap'
+DEFAULT_LOCATION_PG = 'canadacentral'
 DEFAULT_LOCATION_MySQL = 'westus2'
 AZURE_CREDENTIALS = 'AZURE_CREDENTIALS'
 AZURE_POSTGRESQL_CONNECTION_STRING = 'AZURE_POSTGRESQL_CONNECTION_STRING'

@@ -2073,6 +2073,232 @@ class NetworkPrivateLinkDiskAccessScenarioTest(ScenarioTest):
                      self.check('@[0].properties.privateLinkServiceConnectionState.status', 'Approved')
                  ])
 
+class NetworkPrivateLinkMapsScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(
+        name_prefix="test_maps_private_link_resource_", location="westus2"
+    )
+    def test_private_link_resource_maps(self, resource_group):
+        self.kwargs.update(
+            {
+                "maps_account": self.create_random_name("maps-privatelink-account", 40),
+                "resource_group": resource_group,
+            }
+        )
+
+        result = self.cmd(
+            "maps account create -g {resource_group} -s G2 --kind Gen2 -n {maps_account} --accept-tos -l westus2"
+        ).get_output_in_json()
+        self.kwargs["maps_account_id"] = result["id"]
+
+        self.cmd(
+            "network private-link-resource list --id {maps_account_id}",
+            checks=[
+                self.check("length(@)", 1),
+            ],
+        )
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(
+        name_prefix="test_maps_private_endpoint_connection_", location="westus2"
+    )
+    def test_private_endpoint_connection_maps(self, resource_group):
+        self.kwargs.update(
+            {
+                "resource_group": resource_group,
+                "maps_account": self.create_random_name("maps-privatelink-account", 40),
+                "vnet_name": self.create_random_name("maps-privatelink-vnet", 40),
+                "subnet_name": self.create_random_name("maps-privatelink-subnet", 40),
+                "endpoint_name": self.create_random_name(
+                    "maps-privatelink-endpoint", 40
+                ),
+                "endpoint_conn_name": self.create_random_name(
+                    "maps-privatelink-endpointconn", 40
+                ),
+                "second_endpoint_name": self.create_random_name(
+                    "maps-privatelink-endpoint2", 40
+                ),
+                "second_endpoint_conn_name": self.create_random_name(
+                    "maps-privatelink-endpointconn2", 40
+                ),
+                "description_msg": "somedescription",
+            }
+        )
+
+        # Prepare network
+        self.cmd(
+            "network vnet create -n {vnet_name} -g {resource_group} --subnet-name {subnet_name}",
+            checks=self.check("length(newVNet.subnets)", 1),
+        )
+        self.cmd(
+            "network vnet subnet update -n {subnet_name} --vnet-name {vnet_name} -g {resource_group} "
+            "--disable-private-endpoint-network-policies true",
+            checks=self.check("privateEndpointNetworkPolicies", "Disabled"),
+        )
+
+        # Create maps account
+        maps_account = self.cmd(
+            "maps account create -g {resource_group} -s G2 --kind Gen2 -n {maps_account} --accept-tos -l westus2"
+        ).get_output_in_json()
+        self.kwargs["maps_account_id"] = maps_account["id"]
+
+        # Create endpoint with manual request
+        result = self.cmd(
+            "network private-endpoint create -g {resource_group} -n {endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} "
+            "--connection-name {endpoint_conn_name} --private-connection-resource-id {maps_account_id} "
+            "--group-id mapsAccount --manual-request"
+        ).get_output_in_json()
+        self.assertTrue(self.kwargs["endpoint_name"].lower() in result["name"].lower())
+
+        result = self.cmd(
+            "network private-endpoint-connection list -g {resource_group} -n {maps_account} --type Microsoft.Maps/accounts",
+            checks=[
+                self.check("length(@)", 1),
+                self.check(
+                    "@[0].properties.privateLinkServiceConnectionState.status",
+                    "Pending",
+                ),
+            ],
+        ).get_output_in_json()
+        self.kwargs["endpoint_request"] = result[0]["name"]
+
+        # Approve the first endpoint connection
+        self.cmd(
+            "network private-endpoint-connection approve -g {resource_group} --resource-name {maps_account} -n {endpoint_request} --type Microsoft.Maps/accounts",
+            checks=[
+                self.check(
+                    "properties.privateLinkServiceConnectionState.status", "Approved"
+                )
+            ],
+        )
+
+        # Wait for provisioning state to be "Succeeded" after approval
+        for _ in range(6):
+            result = self.cmd(
+                "network private-endpoint-connection show -g {resource_group} --resource-name {maps_account} -n {endpoint_request} --type Microsoft.Maps/accounts"
+            ).get_output_in_json()
+            provisioning_state = result.get("properties", {}).get(
+                "provisioningState", ""
+            )
+            if provisioning_state == "Succeeded":
+                if (
+                    not result.get("properties", {})
+                    .get("privateLinkServiceConnectionState", {})
+                    .get("status")
+                    == "Approved"
+                ):
+                    self.fail("Private endpoint connection approval failed")
+                break
+            time.sleep(10)
+        else:
+            self.fail("Private endpoint connection approval did not complete in time")
+
+        # Create second endpoint with manual request
+        result = self.cmd(
+            "network private-endpoint create -g {resource_group} -n {second_endpoint_name} --vnet-name {vnet_name} --subnet {subnet_name} "
+            "--connection-name {second_endpoint_conn_name} --private-connection-resource-id {maps_account_id} "
+            "--group-id mapsAccount --manual-request"
+        ).get_output_in_json()
+        self.assertTrue(
+            self.kwargs["second_endpoint_name"].lower() in result["name"].lower()
+        )
+
+        result = self.cmd(
+            "network private-endpoint-connection list -g {resource_group} -n {maps_account} --type Microsoft.Maps/accounts",
+            checks=[
+                self.check("length(@)", 2),
+            ],
+        ).get_output_in_json()
+        self.kwargs["second_endpoint_request"] = [
+            conn["name"]
+            for conn in result
+            if self.kwargs["second_endpoint_name"].lower()
+            in conn["properties"]["privateEndpoint"]["id"].lower()
+        ][0]
+
+        # Reject the second endpoint connection
+        self.cmd(
+            "network private-endpoint-connection reject -g {resource_group} --resource-name {maps_account} -n {second_endpoint_request} --type Microsoft.Maps/accounts",
+            checks=[
+                self.check(
+                    "properties.privateLinkServiceConnectionState.status", "Rejected"
+                )
+            ],
+        )
+
+        for _ in range(6):
+            result = self.cmd(
+                "network private-endpoint-connection show -g {resource_group} --resource-name {maps_account} -n {second_endpoint_request} --type Microsoft.Maps/accounts"
+            ).get_output_in_json()
+            provisioning_state = result.get("properties", {}).get(
+                "provisioningState", ""
+            )
+            if provisioning_state == "Succeeded":
+                if (
+                    not result.get("properties", {})
+                    .get("privateLinkServiceConnectionState", {})
+                    .get("status")
+                    == "Rejected"
+                ):
+                    self.fail("Private endpoint connection rejection failed")
+                break
+            time.sleep(10)
+        else:
+            self.fail("Private endpoint connection rejection did not complete in time")
+
+        # Remove second endpoint
+        self.cmd(
+            "network private-endpoint-connection delete -g {resource_group} --resource-name {maps_account} -n {second_endpoint_request} --type Microsoft.Maps/accounts -y"
+        )
+
+        # Wait for deletion to complete
+        for _ in range(6):
+            connections = self.cmd(
+                "network private-endpoint-connection list -g {resource_group} -n {maps_account} --type Microsoft.Maps/accounts"
+            ).get_output_in_json()
+
+            # Check if second endpoint is gone
+            second_endpoint_exists = any(
+                conn["name"] == self.kwargs["second_endpoint_request"]
+                for conn in connections
+            )
+
+            if not second_endpoint_exists:
+                break
+            time.sleep(10)
+        else:
+            self.fail("Second endpoint connection deletion did not complete in time")
+
+        # Verify first endpoint is still approved
+        self.cmd(
+            "network private-endpoint-connection show -g {resource_group} --resource-name {maps_account} -n {endpoint_request} --type Microsoft.Maps/accounts",
+            checks=[
+                self.check(
+                    "properties.privateLinkServiceConnectionState.status", "Approved"
+                ),
+                self.check("name", "{endpoint_request}"),
+            ],
+        )
+
+        # Remove first endpoint
+        self.cmd(
+            "network private-endpoint-connection delete -g {resource_group} --resource-name {maps_account} -n {endpoint_request} --type Microsoft.Maps/accounts -y"
+        )
+
+        # Wait for deletion to complete
+        for _ in range(6):
+            connections = self.cmd(
+                "network private-endpoint-connection list -g {resource_group} -n {maps_account} --type Microsoft.Maps/accounts"
+            ).get_output_in_json()
+
+            if len(connections) == 0:
+                break
+            time.sleep(10)
+        else:
+            self.fail("First endpoint connection deletion did not complete in time")
+
+        self.assertEqual(len(connections), 0)
+
 
 class NetworkARMTemplateBasedScenarioTest(ScenarioTest):
     def _test_private_endpoint_connection_scenario(self, resource_group, target_resource_name, resource_type):
@@ -4726,7 +4952,7 @@ class NetworkPrivateLinkElasticSANScenarioTest(ScenarioTest):
 
         # Test delete
         self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
-    
+
 class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_mongo_cl', location='eastus2euap')
     def test_private_link_resource_cosmosdb_mongo_clusters(self, resource_group):
@@ -4788,13 +5014,13 @@ class NetworkPrivateLinkMongoClustersTest(ScenarioTest):
         # check for resource provisioning state
         self.check_provisioning_state_for_mongocluster_resource()
         self.kwargs['cluster_id'] = cluster['id']
-        
+
         self.cmd('az network vnet create -n {vnet} -g {rg} -l {loc} --subnet-name {subnet}',
                  checks=self.check('length(newVNet.subnets)', 1))
         self.cmd('az network vnet subnet update -n {subnet} --vnet-name {vnet} -g {rg} '
                  '--disable-private-endpoint-network-policies true',
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
-        
+
         target_private_link_resource = self.cmd('az network private-link-resource list --name {cluster_name} --resource-group {rg} --type {namespace}/{resource_type}').get_output_in_json()
         self.kwargs.update({
             'group_id': target_private_link_resource[0]['properties']['groupId']
@@ -5002,7 +5228,7 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
     def check_provisioning_state_for_postgresql_flexible_server(self):
 
         # Wait for a moment before the server provisioning has begun to avoid inaccurate 404 errors.
-        time.sleep(10) 
+        time.sleep(10)
         count = 0
         print("checking status of creation...........")
         state = self.get_provisioning_state_for_postgresql_flexible_server()
@@ -5095,7 +5321,7 @@ class NetworkPrivateLinkPostgreSQLFlexibleServerScenarioTest(ScenarioTest):
             self.cmd('az network private-endpoint-connection delete --id {pec_id} -y')
 
 class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
-    
+
     @live_only()
     @AllowLargeResponse(size_kb=8024) # set size to 8024KB 'az extension add' has a rather large index
     @ResourceGroupPreparer(name_prefix='cli_test_deidservice_plr')
@@ -5106,7 +5332,7 @@ class NetworkPrivateLinkDeidServiceScenarioTest(ScenarioTest):
             'loc': 'eastus',
             'rg': resource_group
         })
-       
+
         self.cmd('az extension add -n healthcareapis')
         self.cmd(
             'az healthcareapis deidservice create --name {serviceName} -g {rg} --location {loc}'

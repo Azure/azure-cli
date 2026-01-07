@@ -2343,6 +2343,15 @@ class WebappListLocationsTest(ScenarioTest):
             JMESPathCheck('length(@) > `0`', True)
         ])
 
+    @ResourceGroupPreparer(name_prefix='cli_test_webapp_list-locations-managed-instance-enabled-test')
+    def test_webapp_list_locations_managed_instance_enabled(self, resource_group):
+        self.cmd('appservice list-locations --sku P1V4 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+        self.cmd('appservice list-locations --sku P1MV4 --managed-instance-enabled', checks = [
+            JMESPathCheck('length(@) > `0`', True)
+        ])
+
 
 class ContainerWebappE2ETest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test', location='australiaeast')

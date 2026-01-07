@@ -2622,6 +2622,18 @@ class AKSAgentPoolUpdateDecorator:
 
         return agentpool
 
+    def update_gpu_profile(self, agentpool: AgentPool) -> AgentPool:
+        self._ensure_agentpool(agentpool)
+
+        gpu_driver = self.context.get_gpu_driver()
+
+        # Construct AgentPoolGPUProfile if one of the fields has been set
+        if gpu_driver:
+            agentpool.gpu_profile = self.models.GPUProfile()
+            agentpool.gpu_profile.driver = gpu_driver
+
+        return agentpool
+
     def update_agentpool_profile_default(self, agentpools: List[AgentPool] = None) -> AgentPool:
         """The overall controller used to update AgentPool profile by default.
 
@@ -2652,6 +2664,8 @@ class AKSAgentPoolUpdateDecorator:
         agentpool = self.update_secure_boot(agentpool)
         # update local DNS profile
         agentpool = self.update_localdns_profile(agentpool)
+        # update gpu profile
+        agentpool = self.update_gpu_profile(agentpool)
         return agentpool
 
     def update_agentpool(self, agentpool: AgentPool) -> AgentPool:

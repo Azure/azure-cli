@@ -1975,7 +1975,7 @@ def get_default_flex_configuration(tier, sku_name, storage_gb, auto_grow, backup
     if not storage_gb:
         storage_gb = 32
     if not version:
-        allowed_versions = ['5.7', '8.0.21']
+        allowed_versions = ['5.7', '8.0.21', '8.4']
         raise CLIError('--version is a required parameter for external migrations. Allowed values: {}'.format(allowed_versions))
     if not auto_grow:
         auto_grow = 'Enabled'

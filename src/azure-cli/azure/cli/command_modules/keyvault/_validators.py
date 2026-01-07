@@ -208,7 +208,8 @@ def validate_key_type(ns):
     setattr(ns, 'kty', kty)
 
 
-def _fetch_default_cvm_policy(cli_ctx, vault_url):
+# pylint: disable=line-too-long
+def _fetch_default_release_policy(cli_ctx, vault_url, policy_type='cvm'):
     try:
         # get vault/hsm location
         mgmt_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT)
@@ -233,63 +234,99 @@ def _fetch_default_cvm_policy(cli_ctx, vault_url):
         _endpoint = cli_ctx.cloud.endpoints.resource_manager
         if _endpoint.endswith('/'):
             _endpoint = _endpoint[:-1]
-        default_cvm_policy_url = f"{_endpoint}/subscriptions/{get_subscription_id(cli_ctx)}" \
-                                 f"/providers/Microsoft.Attestation/Locations/{location}" \
-                                 f"/defaultProvider?api-version=2020-10-01"
-        response = send_raw_request(cli_ctx, 'get', default_cvm_policy_url)
+        default_release_policy_url = f"{_endpoint}/subscriptions/{get_subscription_id(cli_ctx)}/providers/Microsoft.Attestation/Locations/{location}/defaultProvider?api-version=2020-10-01"
+        response = send_raw_request(cli_ctx, 'get', default_release_policy_url)
         if response.status_code != 200:
-            raise AzureInternalError(f"Fail to fetch default cvm policy from {default_cvm_policy_url}")
+            raise AzureInternalError(f"Fail to fetch default release policy from {default_release_policy_url}")
 
         # extract attest uri from response as authority in cvm policy
         import json
         res_json = json.loads(response.text)
         attest_uri = res_json['properties']['attestUri']
-        default_cvm_policy = {
-            'version': '1.0.0',
-            'anyOf': [
-                {
-                    'authority': attest_uri,
-                    'allOf': [
-                        {
-                            'claim': 'x-ms-compliance-status',
-                            'equals': 'azure-compliant-cvm'
-                        }
-                    ]
-                }
-            ]
-        }
-        return default_cvm_policy
+        if policy_type == 'cvm':
+            default_release_policy = {
+                'version': '1.0.0',
+                'anyOf': [
+                    {
+                        'authority': attest_uri,
+                        'allOf': [
+                            {
+                                'claim': 'x-ms-compliance-status',
+                                'equals': 'azure-compliant-cvm'
+                            }
+                        ]
+                    }
+                ]
+            }
+        else:
+            default_release_policy = {
+                'version': '1.0.0',
+                'anyOf': [
+                    {
+                        'authority': attest_uri,
+                        'allOf': [
+                            {
+                                'anyOf': [
+                                    {
+                                        'claim': 'x-ms-isolation-tee.x-ms-attestation-type',
+                                        'equals': 'sevsnpvm'
+                                    },
+                                    {
+                                        'claim': 'x-ms-isolation-tee.x-ms-attestation-type',
+                                        'equals': 'tdxvm'
+                                    }
+                                ]
+                            },
+                            {
+                                'claim': 'x-ms-isolation-tee.x-ms-compliance-status',
+                                'equals': 'azure-compliant-cvm'
+                            }
+                        ]
+                    }
+                ]
+            }
+        return default_release_policy
     except Exception as ex:  # pylint: disable=broad-except
-        raise AzureInternalError(f"Fail to fetch default cvm policy: {ex}")
+        raise AzureInternalError(f"Fail to fetch default release policy: {ex}")
 
 
 def process_key_release_policy(cmd, ns):
     default_cvm_policy = None
+    default_data_disk_policy = None
     if hasattr(ns, 'default_cvm_policy'):
         default_cvm_policy = ns.default_cvm_policy
         del ns.default_cvm_policy
+    if hasattr(ns, 'default_data_disk_policy'):
+        default_data_disk_policy = ns.default_data_disk_policy
+        del ns.default_data_disk_policy
 
     immutable = None
     if hasattr(ns, 'immutable'):
         immutable = ns.immutable
         del ns.immutable
 
-    if not ns.release_policy and not default_cvm_policy:
+    if not ns.release_policy and not default_cvm_policy and not default_data_disk_policy:
         if immutable is not None:
             raise InvalidArgumentValueError('Please provide policy when setting `--immutable`')
         return
 
     if ns.release_policy and default_cvm_policy:
         raise InvalidArgumentValueError('Can not specify both `--policy` and `--default-cvm-policy`')
+    if ns.release_policy and default_data_disk_policy:
+        raise InvalidArgumentValueError('Can not specify both `--policy` and `--default-data-disk-policy`')
+    if default_cvm_policy and default_data_disk_policy:
+        from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+        raise MutuallyExclusiveArgumentError('`--default-cvm-policy` and `--default-data-disk-policy` '
+                                             'are mutually exclusive')
 
     import json
     KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
-    if default_cvm_policy:
+    if default_cvm_policy or default_data_disk_policy:
         vault_url = getattr(ns, 'hsm_name', None) or getattr(ns, 'vault_base_url', None)
         if not vault_url:
             vault_url = getattr(ns, 'identifier', None)
-        policy = _fetch_default_cvm_policy(cmd.cli_ctx, vault_url)
+        policy = _fetch_default_release_policy(cmd.cli_ctx, vault_url, 'cvm' if default_cvm_policy else 'data_disk')
         ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(policy).encode('utf-8'),
                                              immutable=immutable)
         return
