@@ -71,7 +71,7 @@ class FlexibleServerIdentityCMKMgmtScenarioTest(ScenarioTest):
         # create replica 1 with data encryption            
         replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
-        self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {} --key {} --identity {}'.format(
+        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {} --key {} --identity {}'.format(
                     resource_group,
                     replica_1_name,
                     server_name,

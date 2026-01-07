@@ -54,7 +54,7 @@ class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
                      JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0]))])
 
         # create replica 1
-        self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {}'
                  .format(resource_group, replica[0], server))
 
         # assign identity 1 to replica 1
@@ -108,7 +108,7 @@ class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
                         JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1]))])
 
         # create replica 2
-        self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {}'
                  .format(resource_group, replica[1], server))
 
         # assign identities 1 and 2 to replica 2

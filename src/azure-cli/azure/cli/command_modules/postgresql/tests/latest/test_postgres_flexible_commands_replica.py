@@ -49,7 +49,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                           checks=[JMESPathCheck('replica.role', primary_role)]).get_output_in_json()
         
         # test replica create
-        self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 --public-access none'
+        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {} --zone 2 --public-access none'
                  .format(resource_group, replicas[0], result['id']),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
@@ -82,7 +82,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                      JMESPathCheck('sourceServerResourceId', 'None')])
 
         # Create second replica
-        self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {}'
                 .format(resource_group, replicas[1], result['id']),
                 checks=[
                     JMESPathCheck('name', replicas[1]),
@@ -186,7 +186,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
         replica_subnet = self.create_random_name(F'SUBNET1', SERVER_NAME_MAX_LENGTH)
         replica_vnet_args = F'--vnet {master_vnet} --subnet {replica_subnet} --address-prefixes 10.0.0.0/16 --subnet-prefixes 10.0.1.0/24 --yes'
         replica_vnet_check = [JMESPathCheck('network.delegatedSubnetResourceId', F'/subscriptions/{self.get_subscription_id()}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{master_vnet}/subnets/{replica_subnet}')]
-        self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {} {}'
+        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {} --zone 2 {} {}'
                  .format(resource_group, replica, result['id'], replica_vnet_args, public_access_arg),
                  checks=[
                      JMESPathCheck('name', replica),
@@ -243,7 +243,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
                               JMESPathCheck('storage.autoGrow', storage_auto_grow)]).get_output_in_json()
         
         # test replica create
-        self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {}'
+        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {} --zone 2 {}'
                  .format(resource_group, replicas[0], result['id'], public_access_arg),
                  checks=[
                      JMESPathCheck('name', replicas[0]),

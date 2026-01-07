@@ -89,7 +89,7 @@ class FlexibleServerSSDV2MgmtScenarioTest(ScenarioTest):
 
         # test create replica - error
         replica_name = 'rep-ssdv2-' + server_name
-        self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {}'
                  .format(resource_group, replica_name, basic_info['id']),
                  expect_failure=True)
 
