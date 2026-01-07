@@ -17,7 +17,7 @@ from ...flexible_server_custom_postgres import DbContext as PostgresDbContext
 from .constants import DEFAULT_LOCATION, SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH
 
 
-class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
+class PostgreSQLFlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
     postgres_location = DEFAULT_LOCATION
 
     @AllowLargeResponse()

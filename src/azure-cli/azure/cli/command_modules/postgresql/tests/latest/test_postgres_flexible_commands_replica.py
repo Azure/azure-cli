@@ -12,7 +12,7 @@ from azure.cli.testsdk import (
 from .constants import SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH
 
 
-class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
+class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
     postgres_location = 'canadacentral'
 

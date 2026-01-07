@@ -13,7 +13,7 @@ from azure.cli.testsdk import (
 from .constants import SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH, DEFAULT_LOCATION
 
 
-class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
+class PostgreSQLFlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)

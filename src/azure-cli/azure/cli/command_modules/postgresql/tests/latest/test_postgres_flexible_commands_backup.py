@@ -15,7 +15,7 @@ from .server_preparer import ServerPreparer
 from .constants import DEFAULT_LOCATION
 
 
-class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
+class PostgreSQLFlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)

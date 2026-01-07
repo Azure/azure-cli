@@ -14,7 +14,7 @@ from azure.cli.testsdk import (
     ScenarioTest)
 from .constants import DEFAULT_LOCATION, SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH
 
-class FlexibleServerMgmtScenarioTest(ScenarioTest):
+class PostgreSQLFlexibleServerMgmtScenarioTest(ScenarioTest):
 
     postgres_location = DEFAULT_LOCATION
 
@@ -160,7 +160,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(revive_dropped_server['name'], revived_server_name)
 
 
-class FlexibleServerValidatorScenarioTest(ScenarioTest):
+class PostgreSQLFlexibleServerValidatorScenarioTest(ScenarioTest):
 
     postgres_location = DEFAULT_LOCATION
 

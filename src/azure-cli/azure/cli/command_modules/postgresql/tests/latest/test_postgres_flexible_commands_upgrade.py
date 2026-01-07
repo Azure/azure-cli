@@ -11,7 +11,7 @@ from azure.cli.testsdk import (
 from .constants import SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH, DEFAULT_LOCATION
 
 
-class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
+class PostgreSQLFlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
