@@ -10,6 +10,7 @@ from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.postgresql._util import PostgreSQLArgumentContext
 from azure.cli.command_modules.postgresql.flexible_server_commands import load_flexibleserver_command_table
 from azure.cli.command_modules.postgresql._params import load_arguments
+import azure.cli.command_modules.postgresql._help  # pylint: disable=unused-import
 
 
 # pylint: disable=import-outside-toplevel
