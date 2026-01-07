@@ -65,7 +65,7 @@ def server_list_custom_func(client, resource_group_name=None, show_cluster=None)
 
 def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, firewall_rule_name, yes=None):
     validate_resource_group(resource_group_name)
-    validate_public_access_server(cmd, client, resource_group_name, server_name)
+    validate_public_access_server(cmd, resource_group_name, server_name)
 
     result = None
     if not yes:
@@ -81,7 +81,7 @@ def firewall_rule_delete_func(cmd, client, resource_group_name, server_name, fir
 
 def firewall_rule_create_func(cmd, client, resource_group_name, server_name, firewall_rule_name=None, start_ip_address=None, end_ip_address=None):
     validate_resource_group(resource_group_name)
-    validate_public_access_server(cmd, client, resource_group_name, server_name)
+    validate_public_access_server(cmd, resource_group_name, server_name)
 
     if end_ip_address is None and start_ip_address is not None:
         end_ip_address = start_ip_address
@@ -124,7 +124,7 @@ def firewall_rule_create_func(cmd, client, resource_group_name, server_name, fir
 
 def flexible_firewall_rule_custom_getter(cmd, client, resource_group_name, server_name, firewall_rule_name):
     validate_resource_group(resource_group_name)
-    validate_public_access_server(cmd, client, resource_group_name, server_name)
+    validate_public_access_server(cmd, resource_group_name, server_name)
     return client.get(resource_group_name, server_name, firewall_rule_name)
 
 
@@ -148,13 +148,13 @@ def flexible_firewall_rule_update_custom_func(instance, start_ip_address=None, e
 
 def firewall_rule_get_func(cmd, client, resource_group_name, server_name, firewall_rule_name):
     validate_resource_group(resource_group_name)
-    validate_public_access_server(cmd, client, resource_group_name, server_name)
+    validate_public_access_server(cmd, resource_group_name, server_name)
     return client.get(resource_group_name, server_name, firewall_rule_name)
 
 
 def firewall_rule_list_func(cmd, client, resource_group_name, server_name):
     validate_resource_group(resource_group_name)
-    validate_public_access_server(cmd, client, resource_group_name, server_name)
+    validate_public_access_server(cmd, resource_group_name, server_name)
     return client.list_by_server(resource_group_name, server_name)
 
 

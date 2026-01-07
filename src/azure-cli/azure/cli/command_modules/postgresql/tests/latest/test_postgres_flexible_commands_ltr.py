@@ -4,13 +4,13 @@
 # --------------------------------------------------------------------------------------------
 
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (
     JMESPathCheck,
     ResourceGroupPreparer,
     ScenarioTest)
-from .constants import DEFAULT_LOCATION, SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH
+from .constants import DEFAULT_LOCATION
 from .server_preparer import ServerPreparer
 
 
@@ -21,18 +21,19 @@ class FlexibleServerLtrMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     @ServerPreparer(location=postgres_location)
-    def test_postgres_flexible_server_ltr(self, resource_group, server_name):
-        self._test_flexible_server_ltr(resource_group, server_name)
+    def test_postgres_flexible_server_ltr(self, resource_group, server):
+        self._test_flexible_server_ltr(resource_group, server)
 
-    def _test_flexible_server_ltr(self, resource_group, server_name):
+    def _test_flexible_server_ltr(self, resource_group, server):
 
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
+        server_name = server
         storage_account_name = self.create_random_name('teststorage', 24)
         container_account_name = self.create_random_name('testcontainer', 24)
-        start_time = (datetime.now(datetime.timezone.utc) - timedelta(minutes=60)).strftime(f"%Y-%m-%dT%H:%MZ")
-        expiry_time = (datetime.now(datetime.timezone.utc) + timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
+        start_time = (datetime.now(timezone.utc) - timedelta(minutes=60)).strftime(f"%Y-%m-%dT%H:%MZ")
+        expiry_time = (datetime.now(timezone.utc) + timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
 
         # create storage account
         storage_account = self.cmd('az storage account create -n {} -g {} --encryption-services \

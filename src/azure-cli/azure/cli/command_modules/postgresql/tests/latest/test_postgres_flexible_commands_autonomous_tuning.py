@@ -20,10 +20,12 @@ class FlexibleServerIndexTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @ServerPreparer(location=DEFAULT_LOCATION)
-    def test_postgres_flexible_server_index_tuning_options(self, resource_group, server_name):
-        self._test_index_tuning_options_mgmt(resource_group, server_name)
+    def test_postgres_flexible_server_index_tuning_options(self, resource_group, server):
+        self._test_index_tuning_options_mgmt(resource_group, server)
 
-    def _test_index_tuning_options_mgmt(self, resource_group, server_name):
+    def _test_index_tuning_options_mgmt(self, resource_group, server):
+
+        server_name = server
 
         # Enable index tuning for server
         self.cmd('postgres flexible-server index-tuning update -g {} -s {} --enabled True'.format(resource_group, server_name),
@@ -67,10 +69,12 @@ class FlexibleServerAutonomousTuningOptionsResourceMgmtScenarioTest(ScenarioTest
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
     @ServerPreparer(location=DEFAULT_LOCATION)
-    def test_postgres_flexible_server_autonomous_tuning_options(self, resource_group, server_name):
-        self._test_autonomous_tuning_options_mgmt(resource_group, server_name)
+    def test_postgres_flexible_server_autonomous_tuning_options(self, resource_group, server):
+        self._test_autonomous_tuning_options_mgmt(resource_group, server)
 
-    def _test_autonomous_tuning_options_mgmt(self, resource_group, server_name):
+    def _test_autonomous_tuning_options_mgmt(self, resource_group, server):
+
+        server_name = server
 
         # Enable autonomous tuning for server
         self.cmd('postgres flexible-server autonomous-tuning update -g {} -s {} --enabled True'.format(resource_group, server_name),

@@ -12,7 +12,7 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest)
-from .constants import SERVER_NAME_PREFIX, DEFAULT_LOCATION
+from .constants import DEFAULT_LOCATION
 from .server_preparer import ServerPreparer
 
 
@@ -24,7 +24,6 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
     @ServerPreparer(location=postgres_location)
     def test_postgres_flexible_server_logs_mgmt(self, resource_group, server):
         self._test_server_logs_mgmt(resource_group, server)
-
 
     def _test_server_logs_mgmt(self, resource_group, server):
         # enable server logs for server

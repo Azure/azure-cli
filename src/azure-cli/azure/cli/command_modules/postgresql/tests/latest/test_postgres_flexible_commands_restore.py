@@ -22,10 +22,12 @@ class FlexibleServerRestoreMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     @ServerPreparer(location=postgres_location)
-    def test_postgres_flexible_server_restore_mgmt(self, resource_group, server_name):
-        self._test_flexible_server_restore_mgmt(resource_group, server_name)
+    def test_postgres_flexible_server_restore_mgmt(self, resource_group, server):
+        self._test_flexible_server_restore_mgmt(resource_group, server)
 
-    def _test_flexible_server_restore_mgmt(self, resource_group, server_name):
+    def _test_flexible_server_restore_mgmt(self, resource_group, server):
+
+        server_name = server
 
         self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name)).get_output_in_json()
 

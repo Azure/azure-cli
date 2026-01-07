@@ -12,7 +12,6 @@ from azure.cli.testsdk import (
     ResourceGroupPreparer,
     ScenarioTest)
 from .constants import BACKUP_LOCATION, DEFAULT_LOCATION, SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH
-from .server_preparer import ServerPreparer
 
 
 class FlexibleServerGeoRestoreMgmtScenarioTest(ScenarioTest):
@@ -21,13 +20,31 @@ class FlexibleServerGeoRestoreMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    @ServerPreparer(location=postgres_location)
-    def test_postgres_flexible_server_geo_restore_mgmt(self, resource_group, server_name):
-        self._test_flexible_server_geo_restore_mgmt(resource_group, server_name)
+    def test_postgres_flexible_server_geo_restore_mgmt(self, resource_group):
+        self._test_flexible_server_geo_restore_mgmt(resource_group)
 
-    def _test_flexible_server_geo_restore_mgmt(self, resource_group, server_name):
+    def _test_flexible_server_geo_restore_mgmt(self, resource_group):
 
-        self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name)).get_output_in_json()
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        location = self.postgres_location
+        sku_name = 'Standard_D2ds_v4'
+        tier = 'GeneralPurpose'
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+
+        # create geo redundant server
+        self.cmd('postgres flexible-server create -g {} -n {} --sku-name {} \
+                   --geo-redundant-backup Enabled --public-access Enabled'
+                  .format(resource_group, server_name, sku_name))
+        
+        basic_info = self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name)).get_output_in_json()
+        self.assertEqual(basic_info['name'], server_name)
+        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
+        self.assertEqual(basic_info['resourceGroup'], resource_group)
+        self.assertEqual(basic_info['sku']['name'], sku_name)
+        self.assertEqual(basic_info['sku']['tier'], tier)
+        self.assertEqual(basic_info['backup']['geoRedundantBackup'], 'Enabled')
 
         # Wait until snapshot is created
         os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
