@@ -3,6 +3,11 @@
 Release History
 ===============
 
+2.82.0
+++++++
+* Resolve CVE-2025-66418 (#32506)
+* Resolve CVE-2025-66471 (#32506)
+
 2.81.0
 ++++++
 * Minor fixes

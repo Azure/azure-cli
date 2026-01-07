@@ -484,6 +484,160 @@ short-summary: Control foundry agents.
 """
 
 helps[
+    "cognitiveservices agent create"
+] = """
+type: command
+short-summary: Create a new hosted agent from a container image or source code.
+long-summary: |
+    Create a new hosted agent deployment by either specifying a pre-built container image
+    or by building one from source code. When using --source, the container image is
+    automatically built and pushed to Azure Container Registry. Configure compute resources,
+    scaling behavior, environment variables, and communication protocols.
+parameters:
+  - name: --account-name -a
+    short-summary: Name of the Cognitive Services account.
+  - name: --project-name -p
+    short-summary: Name of the AI Foundry project.
+  - name: --name -n
+    short-summary: Name of the agent to create.
+  - name: --image
+    short-summary: Docker image URI with tag to use for the agent.
+    long-summary: |
+        Full Docker image URI including tag (e.g., myregistry.azurecr.io/myagent:v1.0).
+        The tag identifies which container image version to use. The AI Foundry service
+        automatically creates and manages the agent version independently.
+        Mutually exclusive with --source.
+  - name: --source
+    short-summary: Path to source directory containing Dockerfile.
+    long-summary: |
+        When provided, builds the Docker image from source code and pushes to ACR.
+        The image is built either locally (if Docker is available) or remotely using ACR Task.
+        Mutually exclusive with --image.
+  - name: --dockerfile
+    short-summary: Name of the Dockerfile in source directory (default is 'Dockerfile').
+    long-summary: Only used when --source is specified.
+  - name: --build-remote
+    short-summary: Force remote build using Azure Container Registry Task.
+    long-summary: |
+        By default, the CLI attempts to build locally if Docker is available,
+        otherwise builds remotely. Use this flag to force remote build.
+        Only used when --source is specified.
+  - name: --registry
+    short-summary: Azure Container Registry name or full URI.
+    long-summary: |
+        Short name (e.g., 'myregistry') will be expanded to myregistry.azurecr.io.
+        Full URIs (myregistry.azurecr.io) are also accepted.
+        Required when using --source.
+  - name: --cpu
+    short-summary: CPU allocation (default is 1 core).
+  - name: --memory
+    short-summary: Memory allocation with unit (default is 2Gi).
+    long-summary: Use units like '2Gi' for 2 gibibytes or '512Mi' for 512 mebibytes.
+  - name: --min-replicas
+    short-summary: Minimum number of replicas for scaling (default is 0).
+  - name: --max-replicas
+    short-summary: Maximum number of replicas for scaling (default is 3).
+  - name: --env --environment-variables
+    short-summary: Environment variables in key=value format.
+    long-summary: Space-separated list in format 'key1=value1 key2=value2'.
+  - name: --protocol
+    short-summary: Communication protocol (responses or streaming).
+  - name: --protocol-version
+    short-summary: Protocol version (default is v1).
+  - name: --timeout
+    short-summary: Maximum time in seconds to wait for deployment to be ready.
+    long-summary: |
+        Default is 600 seconds (10 minutes). Increase for large container images
+        or slow network conditions. The deployment process includes pulling the
+        container image, starting the container, and health checks.
+examples:
+  - name: Create agent from existing container image
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --image myregistry.azurecr.io/my-agent:v1.0
+  - name: Create agent by building from source (auto-detect build method)
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --source ./my-agent-code \\
+          --registry myregistry
+  - name: Create agent by building from source with custom Dockerfile name
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --source ./my-agent-code \\
+          --dockerfile Dockerfile.prod \\
+          --registry myregistry
+  - name: Create agent by building remotely with ACR Task
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --source ./my-agent-code \\
+          --registry myregistry \\
+          --build-remote
+  - name: Create agent with custom CPU and memory
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --image myregistry.azurecr.io/my-agent:v2.0 \\
+          --cpu 2 \\
+          --memory 4Gi
+  - name: Create agent with scaling configuration
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --image myregistry.azurecr.io/my-agent:v1.0 \\
+          --min-replicas 2 \\
+          --max-replicas 10
+  - name: Create agent with environment variables
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --image myregistry.azurecr.io/my-agent:v1.0 \\
+          --env MODEL_NAME=gpt-4 API_TIMEOUT=30 LOG_LEVEL=info
+  - name: Create agent with streaming protocol
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --image myregistry.azurecr.io/my-agent:v1.0 \\
+          --protocol streaming \\
+          --protocol-version v1
+  - name: Create agent using short registry name
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --image my-agent:v1.0 \\
+          --registry myregistry
+  - name: Create agent with extended timeout for large images
+    text: |
+        az cognitiveservices agent create \\
+          --account-name myAccount \\
+          --project-name myProject \\
+          --name my-agent \\
+          --image myregistry.azurecr.io/my-large-agent:v1.0 \\
+          --timeout 1200
+"""
+
+helps[
     "cognitiveservices agent start"
 ] = """
 type: command

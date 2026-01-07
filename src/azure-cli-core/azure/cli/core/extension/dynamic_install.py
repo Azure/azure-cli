@@ -194,6 +194,7 @@ def _check_value_in_extensions(cli_ctx, parser, args, no_prompt):  # pylint: dis
     # extension is already installed and return if yes as the error is not caused by extension not installed.
     from azure.cli.core.extension import get_extension, ExtensionNotInstalledException
     from azure.cli.core.extension._resolve import resolve_from_index, NoExtensionCandidatesError
+    from azure.cli.core.util import roughly_parse_command_with_casing
     extension_allow_preview = _get_extension_allow_preview_install_config(cli_ctx)
     try:
         ext = get_extension(ext_name)
@@ -208,7 +209,8 @@ def _check_value_in_extensions(cli_ctx, parser, args, no_prompt):  # pylint: dis
 
     telemetry.set_command_details(command_str,
                                   parameters=AzCliCommandInvoker._extract_parameter_names(args),  # pylint: disable=protected-access
-                                  extension_name=ext_name)
+                                  extension_name=ext_name,
+                                  command_preserve_casing=roughly_parse_command_with_casing(args))
     run_after_extension_installed = _get_extension_run_after_dynamic_install_config(cli_ctx)
     prompt_info = ""
     if no_prompt:

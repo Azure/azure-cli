@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class PerformReplicationTransfer(AAZCommand):
     """Performs an adhoc replication transfer on a volume with volumeType Migration
+
+    :example: Volumes_PerformReplicationTransfer
+        az netappfiles volume replication perform-replication-transfer --resource-group myRG --account-name account1 --pool-name pool1 --volume-name volume1
     """
 
     _aaz_info = {

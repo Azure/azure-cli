@@ -6,6 +6,7 @@
 from knack.log import get_logger
 
 from azure.cli.core.profiles import ResourceType
+from ..util import get_datetime_from_string
 
 logger = get_logger(__name__)
 
@@ -41,14 +42,27 @@ def queue_exists(cmd, client, **kwargs):
         return _dont_fail_on_exist(ex, StorageErrorCode.queue_not_found)
 
 
-def generate_queue_sas(cmd, client, permission=None, expiry=None, start=None,
-                       policy_id=None, ip=None, protocol=None):
+def generate_queue_sas(cmd, client, queue_name=None, permission=None, expiry=None, start=None,
+                       policy_id=None, ip=None, protocol=None, as_user=False, user_delegation_oid=None):
     generate_queue_sas_fn = cmd.get_models('_shared_access_signature#generate_queue_sas')
 
     sas_kwargs = {'protocol': protocol}
-    sas_token = generate_queue_sas_fn(account_name=client.account_name, queue_name=client.queue_name,
-                                      account_key=client.credential.account_key, permission=permission,
-                                      expiry=expiry, start=start, policy_id=policy_id, ip=ip, **sas_kwargs)
+
+    account_key = None
+    user_delegation_key = None
+    if as_user:
+        from datetime import datetime
+        user_delegation_key = client.get_user_delegation_key(
+            start=get_datetime_from_string(start) if start else datetime.utcnow(),
+            expiry=get_datetime_from_string(expiry))
+    else:
+        account_key = client.credential.account_key
+
+    sas_token = generate_queue_sas_fn(account_name=client.account_name, queue_name=queue_name,
+                                      account_key=account_key, permission=permission,
+                                      expiry=expiry, start=start, policy_id=policy_id, ip=ip,
+                                      user_delegation_key=user_delegation_key, user_delegation_oid=user_delegation_oid,
+                                      **sas_kwargs)
 
     return sas_token
 

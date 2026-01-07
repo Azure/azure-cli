@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 # pylint: disable=line-too-long
 
-__version__ = "2.81.0"
+__version__ = "2.82.0"
 
 import os
 import sys
@@ -242,6 +242,8 @@ class MainCommandsLoader(CLICommandsLoader):
                 command_modules.extend(ALWAYS_LOADED_MODULES)
             else:
                 # Perform module discovery
+                from azure.cli.core import telemetry
+                telemetry.set_command_index_rebuild_triggered(True)
                 command_modules = []
                 try:
                     mods_ns_pkg = import_module('azure.cli.command_modules')

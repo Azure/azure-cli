@@ -591,14 +591,17 @@ def flexible_replica_list_by_server(cmd, client, resource_group_name, server_nam
     return client.list_by_server(resource_group_name, server_name)
 
 
-def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name, zone=None,
+def flexible_replica_create(cmd, client, resource_group_name, source_server, replica_name=None, name=None, zone=None,
                             location=None, vnet=None, vnet_address_prefix=None, subnet=None,
                             subnet_address_prefix=None, private_dns_zone_arguments=None, no_wait=False,
                             byok_identity=None, byok_key=None,
                             sku_name=None, tier=None,
                             storage_gb=None, performance_tier=None, yes=False, tags=None):
     validate_resource_group(resource_group_name)
-    replica_name = replica_name.lower()
+
+    if replica_name is None and name is None:
+        raise RequiredArgumentMissingError('the following arguments are required: --name')
+    replica_name = replica_name.lower() if name is None else name.lower()
 
     if not is_valid_resource_id(source_server):
         if _is_resource_name(source_server):
