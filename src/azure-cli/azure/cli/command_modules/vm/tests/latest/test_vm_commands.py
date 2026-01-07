@@ -6218,8 +6218,8 @@ class MSIScenarioTest(ScenarioTest):
 
         # create a vm with only user assigned identity
         result = self.cmd(
-            'vm create -g {rg} -n vm2 --image Canonical:UbuntuServer:18.04-LTS:latest --assign-identity {emsi} '
-            '--generate-ssh-keys --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE', checks=[
+            'vm create -g {rg} -n vm2 --image Debian11 --assign-identity {emsi} '
+            '--generate-ssh-keys --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms', checks=[
             self.check('identity.role', None),
             self.check('identity.scope', None),
         ]).get_output_in_json()
@@ -6233,7 +6233,7 @@ class MSIScenarioTest(ScenarioTest):
         self.assertFalse(result['identity']['systemAssignedIdentity'])
 
         # create a vm with system + user assigned identities
-        result = self.cmd('vm create -g {rg} -n {vm} --image Canonical:UbuntuServer:18.04-LTS:latest --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE').get_output_in_json()
+        result = self.cmd('vm create -g {rg} -n {vm} --image Debian11 --assign-identity {emsi} [system] --role reader --scope {scope} --generate-ssh-keys --admin-username {user} --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE --size Standard_B2ms').get_output_in_json()
         emsis = [x.lower() for x in result['identity']['userAssignedIdentities'].keys()]
         self.assertEqual(emsis, [emsi_result['id'].lower()])
         result = self.cmd('vm identity show -g {rg} -n {vm}', checks=[
