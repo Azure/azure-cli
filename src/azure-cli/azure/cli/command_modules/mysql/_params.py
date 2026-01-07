@@ -633,8 +633,15 @@ def load_arguments(self, _):    # pylint: disable=too-many-statements, too-many-
     with self.argument_context('mysql flexible-server backup create') as c:
         c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the new backup.')
 
+    with self.argument_context('mysql flexible-server backup delete') as c:
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+        c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the backup.')
+
     with self.argument_context('mysql flexible-server backup show') as c:
-        c.argument('backup_name', id_part='child_name_1', options_list=['--backup-name', '-b'], help='The name of the backup.')
+        c.argument('resource_group_name', arg_type=resource_group_name_type)
+        c.argument('server_name', id_part=None, arg_type=server_name_arg_type)
+        c.argument('backup_name', options_list=['--backup-name', '-b'], help='The name of the backup.')
 
     with self.argument_context('mysql flexible-server backup list') as c:
         c.argument('server_name', id_part=None, arg_type=server_name_arg_type)

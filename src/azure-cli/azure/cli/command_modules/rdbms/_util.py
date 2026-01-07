@@ -103,7 +103,7 @@ def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condit
     return decorate
 
 
-def get_index_tuning_settings_map():
+def get_autonomous_tuning_settings_map():
     return {
         'analysis_interval': 'index_tuning.analysis_interval',
         'max_columns_per_index': 'index_tuning.max_columns_per_index',

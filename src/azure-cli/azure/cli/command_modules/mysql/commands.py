@@ -194,6 +194,7 @@ def load_command_table(self, _):
     with self.command_group('mysql flexible-server backup', mysql_flexible_long_running_backup_sdk,
                             client_factory=cf_mysql_flexible_backup) as g:
         g.command('create', 'begin_create')
+        g.command('delete', 'begin_delete')
 
     with self.command_group('mysql flexible-server backup', mysql_flexible_long_running_backups_sdk,
                             client_factory=cf_mysql_flexible_backups) as g:
@@ -202,7 +203,9 @@ def load_command_table(self, _):
 
     with self.command_group('mysql flexible-server export', mysql_flexible_export_sdk,
                             custom_command_type=mysql_custom,
-                            client_factory=cf_mysql_flexible_export, is_preview=True) as g:
+                            client_factory=cf_mysql_flexible_export,
+                            is_preview=True,
+                            deprecate_info=self.deprecate(hide=True)) as g:
         g.custom_command('create', 'flexible_server_export_create')
 
     with self.command_group('mysql flexible-server identity', mysql_flexible_servers_sdk,

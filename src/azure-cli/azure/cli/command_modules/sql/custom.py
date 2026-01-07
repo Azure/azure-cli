@@ -5369,6 +5369,7 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         administrator_login_password=None,
         license_type=None,
         vcores=None,
+        memory_size_in_gb=None,
         storage_size_in_gb=None,
         storage_iops=None,
         assign_identity=False,
@@ -5425,6 +5426,8 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         license_type or instance.license_type)
     instance.v_cores = (
         vcores or instance.v_cores)
+    instance.memory_size_in_gb = (
+        memory_size_in_gb or instance.memory_size_in_gb)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
     instance.storage_iops = storage_iops
@@ -5455,6 +5458,10 @@ def managed_instance_update(  # pylint: disable=too-many-locals
     if requested_backup_storage_redundancy is not None:
         instance.requested_backup_storage_redundancy = requested_backup_storage_redundancy
         instance.zone_redundant = None
+
+    # Have to set requested logical avail zone to none explicitly otherwise requests will fail
+    # as the default value is string 'NoPreference' which is invalid for update requests currently
+    instance.requested_logical_availability_zone = None
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled

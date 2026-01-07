@@ -43,7 +43,7 @@ import colorama
 import requests
 import yaml
 from azure.cli.command_modules.acs._client_factory import (
-    cf_agent_pools
+    cf_agent_pools,
 )
 from azure.cli.command_modules.acs._consts import (
     ADDONS,
@@ -126,6 +126,8 @@ logger = get_logger(__name__)
 
 
 def _validate_and_set_managed_cluster_argument(ctx):
+    from azure.mgmt.core.tools import is_valid_resource_id
+
     args = ctx.args
     has_managed_cluster = has_value(args.managed_cluster)
     has_rg_and_cluster = has_value(
@@ -138,7 +140,25 @@ def _validate_and_set_managed_cluster_argument(ctx):
 
     if not has_managed_cluster:
         # pylint: disable=line-too-long
-        args.managed_cluster = f"subscriptions/{ctx.subscription_id}/resourceGroups/{args.resource_group}/providers/Microsoft.ContainerService/managedClusters/{args.cluster_name}"
+        args.managed_cluster = f"/subscriptions/{ctx.subscription_id}/resourceGroups/{args.resource_group}/providers/Microsoft.ContainerService/managedClusters/{args.cluster_name}"
+    else:
+        # If managed_cluster is provided but is not a full resource ID, treat it as a cluster name
+        # and require resource_group to be provided
+        managed_cluster_value = args.managed_cluster.to_serialized_data()
+
+        # Normalize resource ID: add leading slash if missing for backward compatibility
+        if managed_cluster_value and not managed_cluster_value.startswith('/'):
+            managed_cluster_value = f"/{managed_cluster_value}"
+
+        if not is_valid_resource_id(managed_cluster_value):
+            # It's just a cluster name, need resource group
+            if not has_value(args.resource_group):
+                raise ArgumentUsageError(
+                    "When providing cluster name via -c/--cluster, you must also provide -g/--resource-group.")
+            # Build the full resource ID
+            managed_cluster_value = f"/subscriptions/{ctx.subscription_id}/resourceGroups/{args.resource_group}/providers/Microsoft.ContainerService/managedClusters/{managed_cluster_value.lstrip('/')}"
+
+        args.managed_cluster = managed_cluster_value
 
 
 def _add_resource_group_cluster_name_subscription_id_args(_args_schema):
@@ -154,12 +174,11 @@ def _add_resource_group_cluster_name_subscription_id_args(_args_schema):
         help="The name of the Managed Cluster.You may provide either 'managed_cluster' or both 'resource_group' and name', but not both.",
         required=False,
     )
-    _args_schema.managed_cluster.required = False
+    _args_schema.managed_cluster._required = False  # pylint: disable=protected-access
     return _args_schema
 
 
 class AKSSafeguardsShowCustom(Show):
-
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
 
@@ -172,7 +191,6 @@ class AKSSafeguardsShowCustom(Show):
 
 
 class AKSSafeguardsDeleteCustom(Delete):
-
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
 
@@ -183,7 +201,6 @@ class AKSSafeguardsDeleteCustom(Delete):
 
 
 class AKSSafeguardsUpdateCustom(Update):
-
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
 
@@ -194,18 +211,51 @@ class AKSSafeguardsUpdateCustom(Update):
 
 
 class AKSSafeguardsCreateCustom(Create):
-
-    def pre_operations(self):
-        _validate_and_set_managed_cluster_argument(self.ctx)
-
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         _args_schema = super()._build_arguments_schema(*args, **kwargs)
         return _add_resource_group_cluster_name_subscription_id_args(_args_schema)
 
+    def pre_operations(self):
+        from azure.cli.core.util import send_raw_request
+        from azure.cli.core.azclierror import HTTPError
+
+        # Validate and set managed cluster argument
+        _validate_and_set_managed_cluster_argument(self.ctx)
+
+        # Check if Deployment Safeguards already exists before attempting create
+        resource_uri = self.ctx.args.managed_cluster.to_serialized_data()
+
+        # Validate resource_uri format to prevent URL injection
+        if not resource_uri.startswith('/subscriptions/'):
+            raise CLIError(f"Invalid managed cluster resource ID format: {resource_uri}")
+
+        # Construct the GET URL to check if resource already exists
+        api_version = self._aaz_info['version']
+        safeguards_url = f"https://management.azure.com{resource_uri}/providers/Microsoft.ContainerService/deploymentSafeguards/default?api-version={api_version}"
+
+        # Check if resource already exists
+        resource_exists = False
+        try:
+            response = send_raw_request(self.ctx.cli_ctx, "GET", safeguards_url)
+            if response.status_code == 200:
+                resource_exists = True
+        except HTTPError as ex:
+            # 404 means resource doesn't exist, which is expected for create
+            if ex.response.status_code != 404:
+                # Re-raise if it's not a 404 - could be auth issue, network problem, etc.
+                raise
+
+        # If resource exists, block the create
+        if resource_exists:
+            raise CLIError(
+                "Deployment Safeguards instance already exists for this cluster. "
+                "Please use 'az aks safeguards update' to modify the configuration, "
+                "or 'az aks safeguards delete' to remove it before creating a new one."
+            )
+
 
 class AKSSafeguardsListCustom(List):
-
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
 
@@ -216,7 +266,6 @@ class AKSSafeguardsListCustom(List):
 
 
 class AKSSafeguardsWaitCustom(Wait):
-
     def pre_operations(self):
         _validate_and_set_managed_cluster_argument(self.ctx)
 
@@ -1354,7 +1403,7 @@ def _update_upgrade_settings(cmd, instance,
                     f"{upgrade_override_until} is not a valid datatime format."
                 )
         elif force_upgrade:
-            default_extended_until = datetime.datetime.utcnow() + datetime.timedelta(days=3)
+            default_extended_until = datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=3)
             if existing_until is None or existing_until.timestamp() < default_extended_until.timestamp():
                 instance.upgrade_settings.override_settings.until = default_extended_until
     return instance
@@ -2190,12 +2239,12 @@ def aks_check_acr(cmd, client, resource_group_name, name, acr, node_name=None):
 # install kubectl & kubelogin
 def k8s_install_cli(cmd, client_version='latest', install_location=None, base_src_url=None,
                     kubelogin_version='latest', kubelogin_install_location=None,
-                    kubelogin_base_src_url=None):
+                    kubelogin_base_src_url=None, gh_token=None):
     arch = get_arch_for_cli_binary()
     k8s_install_kubectl(cmd, client_version,
                         install_location, base_src_url, arch=arch)
     k8s_install_kubelogin(cmd, kubelogin_version,
-                          kubelogin_install_location, kubelogin_base_src_url, arch=arch)
+                          kubelogin_install_location, kubelogin_base_src_url, arch=arch, gh_token=gh_token)
 
 
 # determine the architecture for the binary based on platform.machine()
@@ -2395,7 +2444,7 @@ def k8s_install_kubectl(cmd, client_version='latest', install_location=None, sou
 
 
 # install kubelogin
-def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None, arch=None):
+def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, source_url=None, arch=None, gh_token=None):
     """
     Install kubelogin, a client-go credential (exec) plugin implementing azure authentication.
     """
@@ -2413,7 +2462,7 @@ def k8s_install_kubelogin(cmd, client_version='latest', install_location=None, s
             latest_release_url = 'https://mirror.azure.cn/kubernetes/kubelogin/latest'
         logger.warning(
             'No version specified, will get the latest version of kubelogin from "%s"', latest_release_url)
-        latest_release = _urlopen_read(latest_release_url)
+        latest_release = _urlopen_read(latest_release_url, gh_token=gh_token)
         client_version = json.loads(latest_release)['tag_name'].strip()
     else:
         client_version = "v%s" % client_version
@@ -2470,11 +2519,15 @@ def _ssl_context():
     return ssl.create_default_context()
 
 
-def _urlopen_read(url, context=None):
+def _urlopen_read(url, context=None, gh_token=None):
     if context is None:
         context = _ssl_context()
     try:
-        return urlopen(url, context=context).read()
+        from urllib.request import Request
+        request = Request(url)
+        if gh_token:
+            request.add_header('Authorization', f'Bearer {gh_token}')
+        return urlopen(request, context=context).read()
     except URLError as ex:
         error_msg = str(ex)
         if "[SSL: CERTIFICATE_VERIFY_FAILED]" in error_msg and "unable to get local issuer certificate" in error_msg:
@@ -2486,9 +2539,9 @@ def _urlopen_read(url, context=None):
         raise ex
 
 
-def _urlretrieve(url, filename):
+def _urlretrieve(url, filename, gh_token=None):
     with open(filename, "wb") as f:
-        f.write(_urlopen_read(url))
+        f.write(_urlopen_read(url, gh_token=gh_token))
 
 
 def _unzip(src, dest):
@@ -2933,6 +2986,7 @@ def aks_agentpool_update(
     if_none_match=None,
     # local DNS
     localdns_config=None,
+    gpu_driver=None,
 ):
     # DO NOT MOVE: get all the original parameters and save them as a dictionary
     raw_parameters = locals()

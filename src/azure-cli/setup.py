@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.80.0"
+VERSION = "2.82.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -78,8 +78,8 @@ DEPENDENCIES = [
     'azure-mgmt-compute~=34.1.0',
     'azure-mgmt-containerinstance==10.2.0b1',
     'azure-mgmt-containerregistry==14.1.0b1',
-    'azure-mgmt-containerservice~=40.1.0',
-    'azure-mgmt-cosmosdb==9.8.0',
+    'azure-mgmt-containerservice~=40.2.0',
+    'azure-mgmt-cosmosdb==9.9.0',
     'azure-mgmt-datalake-store~=1.1.0b1',
     'azure-mgmt-datamigration~=10.0.0',
     'azure-mgmt-eventgrid==10.2.0b2',
@@ -90,20 +90,20 @@ DEPENDENCIES = [
     'azure-mgmt-iotcentral~=10.0.0b1',
     'azure-mgmt-iothub==5.0.0b1',
     'azure-mgmt-iothubprovisioningservices==1.1.0',
-    'azure-mgmt-keyvault==12.1.0',
+    'azure-mgmt-keyvault==13.0.0',
     'azure-mgmt-loganalytics==13.0.0b4',
     'azure-mgmt-managementgroups~=1.0.0',
     'azure-mgmt-maps~=2.0.0',
     'azure-mgmt-marketplaceordering==1.1.0',
     'azure-mgmt-media~=9.0',
     'azure-mgmt-monitor~=7.0.0b1',
-    'azure-mgmt-msi~=7.0.0',
+    'azure-mgmt-msi~=7.1.0',
     'azure-mgmt-netapp~=10.1.0',
     'azure-mgmt-policyinsights==1.1.0b4',
-    'azure-mgmt-postgresqlflexibleservers==1.1.0b2',
+    'azure-mgmt-postgresqlflexibleservers==2.0.0',
     'azure-mgmt-privatedns~=1.0.0',
     'azure-mgmt-rdbms==10.2.0b17',
-    'azure-mgmt-mysqlflexibleservers==1.0.0b3',
+    'azure-mgmt-mysqlflexibleservers==1.1.0b2',
     'azure-mgmt-recoveryservicesbackup~=9.2.0',
     'azure-mgmt-recoveryservices~=4.0.0',
     'azure-mgmt-redhatopenshift~=1.5.0',
@@ -127,8 +127,11 @@ DEPENDENCIES = [
     'azure-mgmt-trafficmanager~=1.0.0',
     'azure-mgmt-web==9.0.0',
     'azure-monitor-query==1.2.0',
-    'azure-multiapi-storage==1.6.0',
     'azure-storage-common~=1.4',
+    'azure-storage-blob==12.28.0b1',
+    'azure-storage-file-datalake==12.23.0b1',
+    'azure-storage-file-share==12.24.0b1',
+    'azure-storage-queue==12.15.0b1',
     'azure-synapse-accesscontrol~=0.5.0',
     'azure-synapse-artifacts~=0.21.0',
     'azure-synapse-managedprivateendpoints~=0.4.0',
@@ -142,7 +145,7 @@ DEPENDENCIES = [
     'jsondiff~=2.0.0',
     'packaging>=20.9',
     'paramiko>=2.0.8,<4.0.0',
-    'pycomposefile>=0.0.32',
+    'pycomposefile>=0.0.34',
     'PyGithub~=1.38',
     'PyNaCl~=1.5.0',
     'scp~=0.13.2',
