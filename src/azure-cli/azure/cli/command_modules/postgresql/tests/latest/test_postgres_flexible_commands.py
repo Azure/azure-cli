@@ -155,8 +155,9 @@ class PostgreSQLFlexibleServerMgmtScenarioTest(ScenarioTest):
 
         # revive dropped server
         revived_server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        source_server_id = basic_info['id']
         revive_dropped_server = self.cmd('postgres flexible-server revive-dropped -g {} -n {} --source-server {} --location {}'.format(
-                                         resource_group, revived_server_name, basic_info[id], location)).get_output_in_json()
+                                         resource_group, revived_server_name, source_server_id, location)).get_output_in_json()
         self.assertEqual(revive_dropped_server['name'], revived_server_name)
 
 

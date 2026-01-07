@@ -13,26 +13,24 @@ from .constants import SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH, DEFAULT_LOCAT
 
 class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
-    def __init__(self, location=DEFAULT_LOCATION, name_prefix=SERVER_NAME_PREFIX, parameter_name='server',
+    def __init__(self, location=DEFAULT_LOCATION, name_prefix=SERVER_NAME_PREFIX,
                  resource_group_parameter_name='resource_group'):
         super().__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.location = location
-        self.parameter_name = parameter_name
         self.resource_group_parameter_name = resource_group_parameter_name
 
     # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
     def create_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)
-        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         version = '17'
         storage_size = 128
         sku_name = self.get_random_sku_name()
         tier = 'GeneralPurpose'
         template = 'postgres flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'
-        execute(self.cli_ctx, template.format(group, server_name, sku_name, tier, storage_size, version, self.location))
-        return {self.parameter_name: name}
+        execute(self.cli_ctx, template.format(group, name, sku_name, tier, storage_size, version, self.location))
+        return {'server': name }
 
     def remove_resource(self, name, **kwargs):
         group = self._get_resource_group(**kwargs)

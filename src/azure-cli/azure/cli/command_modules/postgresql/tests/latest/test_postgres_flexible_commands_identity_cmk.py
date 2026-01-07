@@ -47,7 +47,7 @@ class FlexibleServerIdentityCMKMgmtScenarioTest(ScenarioTest):
             self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity['principalId'], scope))
 
         # create primary flexible server with data encryption
-        self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --location {} --geo-redundant-backup {}'.format(
+        self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} --location {}'.format(
                     resource_group,
                     server_name,
                     tier,
