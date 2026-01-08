@@ -22,6 +22,9 @@ class Update(AAZCommand):
 
     :example: Update a VPN connection.
         az network vpn-connection update --name MyConnection --resource-group MyResourceGroup --use-policy-based-traffic-selectors true
+
+    :example: Update certificate authentication using JSON string
+        az network vpn-connection update -g MyResourceGroup -n MyConnection --certificate-authentication '{"outboundAuthCertificate":"https://{kv-name}.vault.azure.net/secrets/{secret-name}/{version}","inboundAuthCertificateChain":["MIIC+TCCAeG..."],"inboundAuthCertificateSubjectName":"CN=rootCert.com"}'
     """
 
     _aaz_info = {

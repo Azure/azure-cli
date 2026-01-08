@@ -5701,9 +5701,6 @@ examples:
     text: |
         az network vpn-connection update --name MyConnection --resource-group MyResourceGroup --use-policy-based-traffic-selectors true
     crafted: true
-  - name: Update certificate authentication using JSON string
-    text: |
-      az network vpn-connection update -g MyResourceGroup -n MyConnection --certificate-authentication '{"outboundAuthCertificate":"https://{kv-name}.vault.azure.net/secrets/{secret-name}/{version}","inboundAuthCertificateChain":["MIIC+TCCAeG..."],"inboundAuthCertificateSubjectName":"CN=rootCert.com"}'
 """
 
 helps['network vpn-connection show-device-config-script'] = """
