@@ -1697,13 +1697,22 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
 
 def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
-    if vm.hardware_profile.vm_size == size:
+    from .operations.vm import VMUpdate, convert_show_result_to_snake_case as to_snake_case
+
+    vm = to_snake_case(get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name) or {}) or {}
+    current_size = (vm.get('hardware_profile') or {}).get('vm_size')
+
+    if current_size == size:
         logger.warning("VM is already %s", size)
         return None
 
-    vm.hardware_profile.vm_size = size  # pylint: disable=no-member
-    return set_vm(cmd, vm, no_wait=no_wait)
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+        'no_wait': no_wait,
+        'hardware_profile': {'vm_size': size},
+    }
+    return VMUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def restart_vm(cmd, resource_group_name, vm_name, no_wait=False, force=False):

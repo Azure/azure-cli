@@ -13775,5 +13775,31 @@ class ArchitectureScenarioTest(ScenarioTest):
         ])
 
 
+class VMResizeScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_resize')
+    def test_vm_resize_changes_size(self, resource_group):
+        vm_name = self.create_random_name('vm', 20)
+
+        self.cmd(
+            'vm create -g {} -n {} --image Debian:debian-10:10:latest --admin-username azureuser '
+            '--admin-password testPassword0 --size Standard_B1ms '
+            '--nsg-rule NONE'.format(resource_group, vm_name)
+        )
+
+        self.cmd(
+            'vm resize -g {} -n {} --size Standard_B2ms'.format(resource_group, vm_name),
+            checks=[
+                JMESPathCheck('hardwareProfile.vmSize', 'Standard_B2ms')
+            ]
+        ).get_output_in_json()
+
+        self.cmd(
+            'vm show -g {} -n {}'.format(resource_group, vm_name),
+            checks=[
+                JMESPathCheck('hardwareProfile.vmSize', 'Standard_B2ms')
+            ]
+        )
+
+
 if __name__ == '__main__':
     unittest.main()
