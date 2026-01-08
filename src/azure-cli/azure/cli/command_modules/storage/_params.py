@@ -762,6 +762,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('channel_encryption', arg_group='SMB Setting',
                    help="SMB channel encryption supported by server. Valid values are AES-128-CCM, AES-128-GCM, "
                         "AES-256-GCM. Should be passed as a string with delimiter ';' ")
+        c.argument('require_smb_encryption_in_transit', arg_group='SMB Setting',
+                   arg_type=get_three_state_flag(), options_list=['--require-smb-encryption-in-transit', '--smb-eit'],
+                   help="Whether SMB Encryption in transit is required.")
+        c.argument('require_nfs_encryption_in_transit', arg_group='NFS Setting',
+                   arg_type=get_three_state_flag(), options_list=['--require-nfs-encryption-in-transit', '--nfs-eit'],
+                   help="Whether NFS Encryption in transit is required.")
 
     with self.argument_context('storage account generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         t_account_permissions = self.get_sdk('_shared.models#AccountSasPermissions',
