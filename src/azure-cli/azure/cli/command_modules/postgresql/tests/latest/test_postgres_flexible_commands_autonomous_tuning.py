@@ -11,21 +11,27 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest)
-from .constants import DEFAULT_LOCATION
-from .server_preparer import ServerPreparer
+from .constants import DEFAULT_LOCATION, SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH
 
-@ServerPreparer()
 class FlexibleServerIndexTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @ServerPreparer(location=DEFAULT_LOCATION)
-    def test_postgres_flexible_server_index_tuning_options(self, resource_group, server):
-        self._test_index_tuning_options_mgmt(resource_group, server)
+    def test_postgres_flexible_server_index_tuning_options(self, resource_group):
+        self._test_index_tuning_options_mgmt(resource_group)
 
-    def _test_index_tuning_options_mgmt(self, resource_group, server):
+    def _test_index_tuning_options_mgmt(self, resource_group):
 
-        server_name = server
+        # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
+        location = DEFAULT_LOCATION
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        version = '16'
+        storage_size = 128
+        sku_name = 'Standard_D4ds_v4'
+        tier = 'GeneralPurpose'
+
+        self.cmd('postgres flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'.format(
+                 resource_group, server_name, sku_name, tier, storage_size, version, location))
 
         # Enable index tuning for server
         self.cmd('postgres flexible-server index-tuning update -g {} -s {} --enabled True'.format(resource_group, server_name),
@@ -63,18 +69,25 @@ class FlexibleServerIndexTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
         self.cmd('postgres flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(resource_group, server_name, 'mode'),
                  checks=[JMESPathCheck('value', 'off')])
 
-@ServerPreparer()
 class FlexibleServerAutonomousTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=DEFAULT_LOCATION)
-    @ServerPreparer(location=DEFAULT_LOCATION)
-    def test_postgres_flexible_server_autonomous_tuning_options(self, resource_group, server):
-        self._test_autonomous_tuning_options_mgmt(resource_group, server)
+    def test_postgres_flexible_server_autonomous_tuning_options(self, resource_group):
+        self._test_autonomous_tuning_options_mgmt(resource_group)
 
-    def _test_autonomous_tuning_options_mgmt(self, resource_group, server):
+    def _test_autonomous_tuning_options_mgmt(self, resource_group):
 
-        server_name = server
+        # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
+        location = DEFAULT_LOCATION
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        version = '16'
+        storage_size = 128
+        sku_name = 'Standard_D4ds_v4'
+        tier = 'GeneralPurpose'
+
+        self.cmd('postgres flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'.format(
+                 resource_group, server_name, sku_name, tier, storage_size, version, location))
 
         # Enable autonomous tuning for server
         self.cmd('postgres flexible-server autonomous-tuning update -g {} -s {} --enabled True'.format(resource_group, server_name),
