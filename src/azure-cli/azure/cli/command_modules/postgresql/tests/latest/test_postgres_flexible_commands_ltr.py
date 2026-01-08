@@ -9,7 +9,8 @@ from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.testsdk import (
     JMESPathCheck,
     ResourceGroupPreparer,
-    ScenarioTest)
+    ScenarioTest,
+    live_only)
 from .constants import DEFAULT_LOCATION
 from .server_preparer import ServerPreparer
 
@@ -21,6 +22,7 @@ class FlexibleServerLtrMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     @ServerPreparer(location=postgres_location)
+    @live_only()
     def test_postgres_flexible_server_ltr(self, resource_group, server):
         self._test_flexible_server_ltr(resource_group, server)
 
@@ -36,8 +38,8 @@ class FlexibleServerLtrMgmtScenarioTest(ScenarioTest):
         expiry_time = (datetime.now(timezone.utc) + timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
 
         # create storage account
-        storage_account = self.cmd('az storage account create -n {} -g {} --encryption-services \
-                                   blob'.format(storage_account_name, resource_group)).get_output_in_json()
+        storage_account = self.cmd('az storage account create -n {} -g {} --encryption-services blob'.format(
+                                    storage_account_name, resource_group)).get_output_in_json()
 
         # create storage container inside storage account
         self.cmd('az storage container create -n {} --account-name {}'.format(container_account_name, storage_account_name))
