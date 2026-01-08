@@ -371,6 +371,9 @@ def unregister_container(cmd, client, vault_name, resource_group_name, container
     containrs_client = backup_protection_containers_cf(cmd.cli_ctx)
     container = show_container(cmd, containrs_client, container_name, resource_group_name, vault_name,
                                backup_management_type)
+    if container is None:
+        container = show_container(cmd, containrs_client, container_name, resource_group_name, vault_name,
+                                   backup_management_type, status="SoftDeleted")
     container_name = container.name
     container_friendly_name = container.properties.friendly_name
 
