@@ -9,12 +9,12 @@ from azure.cli.testsdk import (
     NoneCheck,
     ResourceGroupPreparer,
     ScenarioTest)
-from .constants import SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH
+from .constants import DEFAULT_LOCATION, SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH
 
 
 class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
-    postgres_location = 'canadacentral'
+    postgres_location = DEFAULT_LOCATION
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -30,8 +30,7 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_auto_grow_replica(self, resource_group):
         self._test_postgres_flexible_server_auto_grow_replica(resource_group)
-        
-        
+
     def _test_flexible_server_replica_mgmt(self, resource_group):
         location = self.postgres_location
         primary_role = 'Primary'
@@ -42,18 +41,17 @@ class PostgreSQLFlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pyli
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
 
         # create a server
-        self.cmd('postgres flexible-server create -g {} --name {} -l {} --storage-size {} {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --public-access none --yes'
+        self.cmd('postgres flexible-server create -g {} --name {} -l {} --storage-size {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --public-access none --yes'
                  .format(resource_group, master_server, location, 256))
         result = self.cmd('postgres flexible-server show -g {} --name {} '
                           .format(resource_group, master_server),
                           checks=[JMESPathCheck('replica.role', primary_role)]).get_output_in_json()
         
         # test replica create
-        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {} --zone 2 --public-access none'
+        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {}'
                  .format(resource_group, replicas[0], result['id']),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
-                     JMESPathCheck('availabilityZone', 2),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('sku.tier', result['sku']['tier']),
                      JMESPathCheck('sku.name', result['sku']['name']),

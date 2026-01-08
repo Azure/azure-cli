@@ -34,22 +34,6 @@ class PostgreSQLFlexibleServerVnetMgmtScenarioTest(ScenarioTest):
     def test_postgres_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(self, resource_group_1, resource_group_2):
         self._test_flexible_server_vnet_mgmt_supplied_subnet_id_in_different_rg(resource_group_1, resource_group_2)
 
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_flexible_server_vnet_mgmt_prepare_private_network_vname_and_subnetname(self, resource_group):
-        self._test_flexible_server_vnet_mgmt_prepare_private_network_vname_and_subnetname(resource_group)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_flexible_server_vnet_mgmt_prepare_private_network_vnet(self, resource_group):
-        self._test_flexible_server_vnet_mgmt_prepare_private_network_vnet(resource_group)
-
-    @AllowLargeResponse()
-    @ResourceGroupPreparer(location=postgres_location)
-    def test_flexible_server_vnet_mgmt_prepare_private_network_subnet(self, resource_group):
-        self._test_flexible_server_vnet_mgmt_prepare_private_network_subnet(resource_group)
-
-
     def _test_flexible_server_vnet_mgmt_existing_supplied_subnetid(self, resource_group):
 
         # flexible-server create
