@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.core.profiles import ResourceType
-from azure.cli.testsdk import (ScenarioTest, api_version_constraint,
+from azure.cli.testsdk import (ScenarioTest,
                                ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 

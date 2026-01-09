@@ -2255,6 +2255,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name,
         vm_dict = vm if isinstance(vm, dict) else getattr(vm, 'result', vm)
         data_disks = vm_dict.get('storageProfile', {}).get('dataDisks', []) or []
         used_luns = {d.get('lun') for d in data_disks if isinstance(d, dict) and d.get('lun') is not None}
+
         def _next_lun(start=0):
             i = start
             while i in used_luns:
@@ -2288,16 +2289,19 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name,
     # new / copy / restore
     from azure.mgmt.core.tools import parse_resource_id
     from .operations.vm import VMUpdate as _VMUpdate
+
     class VMUpdate(_VMUpdate):
         def pre_instance_update(self, instance):
             storage_profile = instance.properties.storage_profile
             data_disks = storage_profile.data_disks
-            data_disks_list = data_disks.to_serialized_data() if hasattr(data_disks, 'to_serialized_data') else data_disks
+            data_disks_list = data_disks.to_serialized_data() if hasattr(data_disks, 'to_serialized_data') \
+                else data_disks
             used_luns = set()
             if isinstance(data_disks_list, list):
                 for d in data_disks_list:
                     if isinstance(d, dict) and 'lun' in d and d['lun'] is not None:
                         used_luns.add(d['lun'])
+
             def _next_lun(start=0):
                 i = start
                 while i in used_luns:
@@ -2389,6 +2393,7 @@ def attach_managed_data_disk(cmd, resource_group_name, vm_name,
     }
     return VMUpdate(cli_ctx=cmd.cli_ctx)(command_args=args)
 
+
 def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
     # here we handle unmanaged disk
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
@@ -2450,7 +2455,8 @@ def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None,
         disk_id = safe_get(target_disk, 'managedDisk.id')
         if not disk_id:
             raise CLIError(
-                "Disk '{}' is not a managed disk (no managedDisk.id). Only managed disks are supported for this operation."
+                "Disk '{}' is not a managed disk (no managedDisk.id). Only managed disks are supported for this "
+                "operation."
                 .format(disk_name)
             )
 

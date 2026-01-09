@@ -512,8 +512,10 @@ class AzCliCommandInvoker(CommandInvoker):
                                   EVENT_INVOKER_FILTER_RESULT)
         from azure.cli.core.commands.events import (
             EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, EVENT_INVOKER_PRE_LOAD_ARGUMENTS, EVENT_INVOKER_POST_LOAD_ARGUMENTS)
+        from azure.cli.core.util import roughly_parse_command_with_casing
 
         # TODO: Can't simply be invoked as an event because args are transformed
+        command_preserve_casing = roughly_parse_command_with_casing(args)
         args = _pre_command_table_create(self.cli_ctx, args)
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
@@ -578,7 +580,7 @@ class AzCliCommandInvoker(CommandInvoker):
             self.help.show_welcome(subparser)
 
             # TODO: No event in base with which to target
-            telemetry.set_command_details('az')
+            telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
             telemetry.set_success(summary='welcome')
             return CommandResultItem(None, exit_code=0)
 
@@ -633,7 +635,8 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
         telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                       self.cli_ctx.data['safe_params'],
-                                      extension_name=extension_name, extension_version=extension_version)
+                                      extension_name=extension_name, extension_version=extension_version,
+                                      command_preserve_casing=command_preserve_casing)
         if extension_name:
             self.data['command_extension_name'] = extension_name
             self.cli_ctx.logging.log_cmd_metadata_extension_info(extension_name, extension_version)

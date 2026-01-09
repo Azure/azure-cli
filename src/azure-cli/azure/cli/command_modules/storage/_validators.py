@@ -142,8 +142,10 @@ def validate_client_parameters(cmd, namespace):
         account_key_args = [arg for arg in account_key_args if arg]
 
         if account_key_args:
-            logger.warning('In "login" auth mode, the following arguments are ignored: %s',
-                           ' ,'.join(account_key_args))
+            # user delegation oid with oauth
+            if not (n.sas_token and 'sduoid=' in n.sas_token):
+                logger.warning('In "login" auth mode, the following arguments are ignored: %s',
+                               ' ,'.join(account_key_args))
         return
 
     # When there is no input for credential, we will read environment variable
@@ -1555,6 +1557,13 @@ def as_user_validator(namespace):
                 (not hasattr(namespace, 'auth_mode') or namespace.auth_mode != 'login')):
             raise argparse.ArgumentError(
                 None, "incorrect usage: specify '--auth-mode login' when as-user is enabled")
+
+
+def user_delegation_oid_validator(namespace):
+    if namespace.user_delegation_oid and not namespace.as_user:
+        raise argparse.ArgumentError(
+            None, "incorrect usage: need to specify '--as-user' when '--user-delegation-oid' is "
+                  "provided")
 
 
 def validator_change_feed_retention_days(namespace):

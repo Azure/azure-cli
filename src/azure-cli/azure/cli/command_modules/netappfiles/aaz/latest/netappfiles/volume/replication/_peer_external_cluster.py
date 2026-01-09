@@ -16,6 +16,9 @@ from azure.cli.core.aaz import *
 )
 class PeerExternalCluster(AAZCommand):
     """Starts peering the external cluster for this migration volume
+
+    :example: Volumes_PeerExternalCluster
+        az netappfiles volume replication peer-external-cluster --resource-group myRG --account-name account1 --pool-name pool1 --volume-name volume1 --peer-ip-addresses "[0.0.0.1,0.0.0.2,0.0.0.3,0.0.0.4,0.0.0.5,0.0.0.6]"
     """
 
     _aaz_info = {

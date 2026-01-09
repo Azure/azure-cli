@@ -768,12 +768,17 @@ def safe_get(d: dict, path: str, default=None):
     cur = d
     for key in path.split('.'):
         if isinstance(cur, list):
+            # list index access: only allow integer segments
             try:
                 idx = int(key)
+            except ValueError:
+                return default
+            try:
                 cur = cur[idx]
-            except Exception:
+            except IndexError:
                 return default
         elif isinstance(cur, dict):
+            # dict key access
             if key not in cur:
                 return default
             cur = cur[key]

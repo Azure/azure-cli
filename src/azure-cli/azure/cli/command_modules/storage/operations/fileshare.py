@@ -3,10 +3,12 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 import math
+from datetime import datetime
 
 from knack.log import get_logger
 
 from azure.cli.core.profiles import ResourceType
+from ..util import get_datetime_from_string
 
 logger = get_logger(__name__)
 
@@ -53,18 +55,29 @@ def share_exists(cmd, client, **kwargs):
         return _dont_fail_on_exist(ex, StorageErrorCode.share_not_found)
 
 
-def generate_share_sas(cmd, client, permission=None, expiry=None, start=None, policy_id=None, ip=None, protocol=None,
-                       cache_control=None, content_disposition=None, content_encoding=None,
-                       content_language=None, content_type=None):
+def generate_share_sas(cmd, client, share_name=None, permission=None, expiry=None, start=None, policy_id=None, ip=None,
+                       protocol=None, cache_control=None, content_disposition=None, content_encoding=None,
+                       content_language=None, content_type=None, as_user=False, user_delegation_oid=None):
     generate_share_sas_fn = cmd.get_models('_shared_access_signature#generate_share_sas')
 
     sas_kwargs = {'protocol': protocol}
-    sas_token = generate_share_sas_fn(account_name=client.account_name, share_name=client.share_name,
-                                      account_key=client.credential.account_key, permission=permission,
+
+    account_key = None
+    user_delegation_key = None
+    if as_user:
+        user_delegation_key = client.get_user_delegation_key(
+            start=get_datetime_from_string(start) if start else datetime.utcnow(),
+            expiry=get_datetime_from_string(expiry))
+    else:
+        account_key = client.credential.account_key
+
+    sas_token = generate_share_sas_fn(account_name=client.account_name, share_name=share_name,
+                                      account_key=account_key, permission=permission,
                                       expiry=expiry, start=start, ip=ip, cache_control=cache_control,
                                       policy_id=policy_id, content_disposition=content_disposition,
                                       content_type=content_type, content_encoding=content_encoding,
-                                      content_language=content_language, **sas_kwargs)
+                                      content_language=content_language, user_delegation_key=user_delegation_key,
+                                      user_delegation_oid=user_delegation_oid, **sas_kwargs)
     return sas_token
 
 

@@ -785,6 +785,14 @@ examples:
     text: az mysql flexible-server backup create -g testgroup -n testsvr --backup-name testbackup
 """
 
+helps['mysql flexible-server backup delete'] = """
+type: command
+short-summary: Delete a backup for a given server with specified backup name.
+examples:
+  - name: Delete a backup for 'testsvr' with backup name 'testbackup'.
+    text: az mysql flexible-server backup delete -g testgroup -n testsvr --backup-name testbackup
+"""
+
 helps['mysql flexible-server identity'] = """
 type: group
 short-summary: Manage server user assigned identities.

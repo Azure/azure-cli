@@ -5,13 +5,12 @@
 
 from datetime import datetime, timedelta
 from azure.cli.testsdk import LiveScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,\
-    JMESPathCheck, api_version_constraint
+    JMESPathCheck
 from azure.cli.testsdk.decorators import serial_test
 from azure.cli.core.profiles import ResourceType
 from ..storage_test_util import StorageScenarioMixin
 
 
-@api_version_constraint(ResourceType.DATA_STORAGE_BLOB, min_api='2020-04-08')
 class StorageBlobRewriteTests(StorageScenarioMixin, LiveScenarioTest):
     @serial_test()
     @ResourceGroupPreparer()
