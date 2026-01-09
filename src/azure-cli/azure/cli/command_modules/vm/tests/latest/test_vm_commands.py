@@ -523,8 +523,8 @@ class VMCustomImageTest(ScenarioTest):
 
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
-        self.cmd('vm create -g {rg} -n {vm1} --image OpenLogic:CentOS:7.5:latest --use-unmanaged-disk --admin-username sdk-test-admin '
-                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip1} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username sdk-test-admin '
+                 '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --public-ip-address {pubip1} --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -539,8 +539,8 @@ class VMCustomImageTest(ScenarioTest):
 
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
-        self.cmd('vm create -g {rg} -n {vm2} --image OpenLogic:CentOS:7.5:latest --storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 '
-                 '--admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip2} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 '
+                 '--admin-username sdk-test-admin --admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --public-ip-address {pubip2} --nsg-rule NONE')
         data_disks = self.cmd('vm show -g {rg} -n {vm2}').get_output_in_json()['storageProfile']['dataDisks']
         self.kwargs['disk_0_name'] = data_disks[0]['name']
         self.kwargs['disk_2_name'] = data_disks[2]['name']
@@ -560,7 +560,7 @@ class VMCustomImageTest(ScenarioTest):
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip3} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('vm create -g {rg} -n {newvm1} --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip3} --nsg-rule NONE')
+                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --public-ip-address {pubip3} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {newvm1}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage')
@@ -569,16 +569,26 @@ class VMCustomImageTest(ScenarioTest):
         self.cmd('network nsg create -g {rg} -n {nsg}')
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip4} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
-        self.cmd('vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --public-ip-address {pubip4} --orchestration-mode Flexible --nsg {nsg}', checks=[
-            self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
-            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
-        ])
+        self.cmd(
+            'vmss create -g {rg} -n vmss1 '
+            '--image {image1} '
+            '--vm-sku Standard_D2s_v3 '
+            '--admin-username sdk-test-admin '
+            '--admin-password testPassword0 '
+            '--authentication-type password '
+            '--public-ip-address {pubip4} '
+            '--orchestration-mode Flexible '
+            '--nsg {nsg}',
+            checks=[
+                self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
+                self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
+            ]
+        )
 
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip5} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('vm create -g {rg} -n {newvm2} --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip5} --nsg-rule NONE')
+                 '--authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --public-ip-address {pubip5} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {newvm2}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
@@ -590,7 +600,7 @@ class VMCustomImageTest(ScenarioTest):
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip6} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd('vm create -g {rg} -n vm3 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --storage-sku os=Premium_LRS 0=StandardSSD_LRS --data-disk-sizes-gb 1 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip6} --nsg-rule NONE')
+                 '--authentication-type password --storage-sku os=Premium_LRS 0=StandardSSD_LRS --data-disk-sizes-gb 10 20 --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --public-ip-address {pubip6} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n vm3', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
@@ -608,16 +618,28 @@ class VMCustomImageTest(ScenarioTest):
 
         # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip7} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
-        self.cmd('vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 '
-                 '--authentication-type password --orchestration-mode Flexible --public-ip-address {pubip7} --nsg {nsg}', checks=[
-            self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
-            self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
-            self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 2),
-            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `1`] | [0].createOption", 'FromImage'),
-            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `1`] | [0].managedDisk.storageAccountType", 'Standard_LRS'),
-            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `3`] | [0].createOption", 'FromImage'),
-            self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType", 'Standard_LRS')
-        ])
+        self.cmd(
+            'vmss create -g {rg} -n vmss2 --image {image2} '
+            '--vm-sku Standard_D2s_v3 '
+            '--admin-username sdk-test-admin --admin-password testPassword0 '
+            '--authentication-type password --orchestration-mode Flexible '
+            '--public-ip-address {pubip7} --nsg {nsg}',
+            checks=[
+                self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
+                self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
+                self.check("length(vmss.virtualMachineProfile.storageProfile.dataDisks)", 2),
+                self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `1`] | [0].createOption",
+                           'FromImage'),
+                self.check(
+                    "vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `1`] | [0].managedDisk.storageAccountType",
+                    'Standard_LRS'),
+                self.check("vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `3`] | [0].createOption",
+                           'FromImage'),
+                self.check(
+                    "vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType",
+                    'Standard_LRS')
+            ]
+        )
 
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_debian')
@@ -1472,8 +1494,45 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             self.cmd('vm create -g {rg} -n {vm_name2} --image ubuntu2204 --generate-ssh-keys --source-rp-size 5 '
                      '--subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
 
+    def _should_skip_implicit_disk_creation_feature(self, ex: Exception) -> bool:
+        """
+        Determine whether the failure is caused by the backend feature not being available
+        in the current subscription/region (rollout gating / unsupported registration).
+        """
+        msg = (str(ex) or "").lower()
+
+        # Typical signals from ARM/Compute when feature isn't available or can't be registered
+        skip_signals = [
+            "implicitdiskcreationfromdiskrestorepoint".lower(),
+            "featureregistrationunsupported".lower(),
+            "feature registration unsupported".lower(),
+            "does not support registration".lower(),
+            "subscription is not registered".lower(),
+            "subscriptionnotregistered".lower(),
+            "not registered to use".lower(),
+            "feature is not enabled".lower(),
+            "the feature".lower()  # keep broad but still gated by other signals below
+        ]
+
+        # More targeted gating: require at least one of these strong signals
+        strong_signals = [
+            "implicitdiskcreationfromdiskrestorepoint".lower(),
+            "subscriptionnotregistered".lower(),
+            "subscription is not registered".lower(),
+            "does not support registration".lower(),
+            "featureregistrationunsupported".lower(),
+            "feature is not enabled".lower(),
+            "not registered to use".lower(),
+        ]
+
+        return any(s in msg for s in strong_signals) or (
+                ("source-disk" in msg or "restore point" in msg or "disk restore point" in msg) and
+                any(s in msg for s in skip_signals)
+        )
+
+
     @AllowLargeResponse(size_kb=99999)
-    @ResourceGroupPreparer('cli_test_vm_disk_attach_from_copy_and_restore', location='eastus2euap')
+    @ResourceGroupPreparer('cli_test_vm_disk_attach_from_copy_and_restore')
     def test_vm_disk_attach_from_copy_and_restore(self):
         self.kwargs.update({
             'vm_name': self.create_random_name('vm_', length=15),
@@ -1491,58 +1550,122 @@ class VMManagedDiskScenarioTest(ScenarioTest):
             'vnet': self.create_random_name('vnet', length=15)
         })
 
+        # Create an initial data disk and VM
         self.cmd('disk create -g {rg} -n {disk_name1} --size-gb 1 --sku Standard_LRS')
-        vm = self.cmd('vm create -n {vm_name} -g {rg} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest --attach-data-disks {disk_name1} '
-                      '--admin-username rp_disk_test --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE').get_output_in_json()
+        vm = self.cmd(
+            'vm create -n {vm_name} -g {rg} --image Canonical:0001-com-ubuntu-server-jammy:22_04-lts:latest '
+            '--attach-data-disks {disk_name1} --admin-username rp_disk_test '
+            '--subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE'
+        ).get_output_in_json()
 
         # Disable default outbound access
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
-        self.kwargs.update({
-            'vm_id': vm['id']
-        })
+        self.kwargs.update({'vm_id': vm['id']})
+
+        # Create restore point
         self.cmd('restore-point collection create -g {rg} --collection-name {collection_name} --source-id {vm_id}')
         self.cmd('restore-point create -g {rg} -n {point_name} --collection-name {collection_name}')
-        disk_restore_point = self.cmd('restore-point show --resource-group {rg} --collection-name {collection_name} --name {point_name}').get_output_in_json()
-        self.kwargs['disk_restore_point_id'] = disk_restore_point['sourceMetadata']['storageProfile']['dataDisks'][0]['diskRestorePoint']['id']
 
-        self.cmd('disk create --resource-group {rg} --name {disk_name2} --sku Standard_LRS --size-gb 5 --source {disk_restore_point_id}').get_output_in_json()
+        disk_restore_point = self.cmd(
+            'restore-point show --resource-group {rg} --collection-name {collection_name} --name {point_name}'
+        ).get_output_in_json()
+
+        self.kwargs['disk_restore_point_id'] = (
+            disk_restore_point['sourceMetadata']['storageProfile']['dataDisks'][0]['diskRestorePoint']['id']
+        )
+
+        # Create disks/snapshot used as copy sources
+        self.cmd(
+            'disk create --resource-group {rg} --name {disk_name2} --sku Standard_LRS --size-gb 5 '
+            '--source {disk_restore_point_id}'
+        ).get_output_in_json()
+
         self.cmd('disk create --resource-group {rg} --name {disk_name3} --sku Standard_LRS --size-gb 5')
-        copy_disk = self.cmd('disk create --resource-group {rg} --name {disk_name4} --source {disk_name3} --sku Standard_LRS --size-gb 5').get_output_in_json()
-        copy_snapshot = self.cmd('snapshot create --resource-group {rg} --name {disk_name5} --source {disk_name3} --sku Standard_LRS --size-gb 5').get_output_in_json()
+        copy_disk = self.cmd(
+            'disk create --resource-group {rg} --name {disk_name4} --source {disk_name3} --sku Standard_LRS --size-gb 5'
+        ).get_output_in_json()
+        copy_snapshot = self.cmd(
+            'snapshot create --resource-group {rg} --name {disk_name5} --source {disk_name3} --sku Standard_LRS --size-gb 5'
+        ).get_output_in_json()
 
         self.kwargs.update({
             'copy_resource1_id': copy_disk['id'],
             'copy_resource2_id': copy_snapshot['id']
         })
-        self.cmd('vm disk attach -g {rg} --size 20 --sku Standard_LRS --vm-name {vm_name} --source-resource {copy_resource1_id} {copy_resource2_id} --new-names-of-sr {disk_name6} {disk_name7}'
-                 ' --source-disk-rp {disk_restore_point_id} --new-names-of-rp {disk_name8}')
+
+        # Key step: implicit disk creation from snapshot & disk restore point
+        cmdline = (
+            'vm disk attach -g {rg} --size 20 --sku Standard_LRS --vm-name {vm_name} '
+            '--source-resource {copy_resource1_id} {copy_resource2_id} '
+            '--new-names-of-sr {disk_name6} {disk_name7} '
+            '--source-disk-rp {disk_restore_point_id} '
+            '--new-names-of-rp {disk_name8}'
+        )
+
+        try:
+            self.cmd(cmdline)
+        except (HttpResponseError, CLIError) as ex:
+            # If backend capability isn't available in this subscription/region, skip the test.
+            if self._should_skip_implicit_disk_creation_feature(ex):
+                self.skipTest(
+                    "Skip: implicit disk creation from disk restore point is not available "
+                    "in this subscription/region (rollout/registration unsupported). "
+                    f"Error: {ex}"
+                )
+            raise
+
+        # Validate VM disk properties after attach
         self.cmd('vm show -g {rg} -n {vm_name}', checks=[
             self.check('storageProfile.dataDisks[1].sourceResource.id', '{copy_resource1_id}'),
             self.check('storageProfile.dataDisks[1].createOption', 'Copy'),
             self.check('storageProfile.dataDisks[1].diskSizeGb', 20),
             self.check('storageProfile.dataDisks[1].name', '{disk_name6}'),
             self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'Standard_LRS'),
+
             self.check('storageProfile.dataDisks[2].sourceResource.id', '{copy_resource2_id}'),
             self.check('storageProfile.dataDisks[2].createOption', 'Copy'),
             self.check('storageProfile.dataDisks[2].diskSizeGb', 20),
             self.check('storageProfile.dataDisks[2].name', '{disk_name7}'),
             self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'Standard_LRS'),
+
             self.check('storageProfile.dataDisks[3].sourceResource.id', '{disk_restore_point_id}'),
             self.check('storageProfile.dataDisks[3].createOption', 'Restore'),
             self.check('storageProfile.dataDisks[3].diskSizeGb', 20),
             self.check('storageProfile.dataDisks[3].name', '{disk_name8}'),
             self.check('storageProfile.dataDisks[3].managedDisk.storageAccountType', 'Standard_LRS')
         ])
-        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use --source-disk-restore-point when using --new-names-of-source-disk-restore-point'):
-            self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --disks disk1 --new-names-of-rp {disk_name8}')
-        with self.assertRaisesRegex(RequiredArgumentMissingError, 'Please use --source-snapshots-or-disks when using --new-names-of-source-snapshots-or-disks'):
-            self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --disks disk1 --new-names-of-sr {disk_name8}')
-        with self.assertRaisesRegex(ArgumentUsageError, 'The number of --new-names-of-source-snapshots-or-disks must be the same as the number of --source-snapshots-or-disks'):
-            self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --source-resource {copy_resource1_id} --new-names-of-sr {disk_name6} {disk_name7}')
-        with self.assertRaisesRegex(ArgumentUsageError, 'The number of --new-names-of-source-disk-restore-point must be the same as the number of --source-disk-restore-point'):
-            self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --source-disk-rp {disk_restore_point_id} --new-names-of-rp {disk_name7} {disk_name8}')
 
+        # Negative validation (argument errors) - keep as is
+        with self.assertRaisesRegex(
+                RequiredArgumentMissingError,
+                'Please use --source-disk-restore-point when using --new-names-of-source-disk-restore-point'
+        ):
+            self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --disks disk1 --new-names-of-rp {disk_name8}')
+
+        with self.assertRaisesRegex(
+                RequiredArgumentMissingError,
+                'Please use --source-snapshots-or-disks when using --new-names-of-source-snapshots-or-disks'
+        ):
+            self.cmd('vm disk attach -g {rg} --vm-name {vm_name} --disks disk1 --new-names-of-sr {disk_name8}')
+
+        with self.assertRaisesRegex(
+                ArgumentUsageError,
+                'The number of --new-names-of-source-snapshots-or-disks must be the same as the number of --source-snapshots-or-disks'
+        ):
+            self.cmd(
+                'vm disk attach -g {rg} --vm-name {vm_name} --source-resource {copy_resource1_id} '
+                '--new-names-of-sr {disk_name6} {disk_name7}'
+            )
+
+        with self.assertRaisesRegex(
+                ArgumentUsageError,
+                'The number of --new-names-of-source-disk-restore-point must be the same as the number of --source-disk-restore-point'
+        ):
+            self.cmd(
+                'vm disk attach -g {rg} --vm-name {vm_name} --source-disk-rp {disk_restore_point_id} '
+                '--new-names-of-rp {disk_name7} {disk_name8}'
+            )
 
     @ResourceGroupPreparer(name_prefix='cli_test_vm_disk_upload_')
     def test_vm_disk_upload(self, resource_group):
@@ -3738,7 +3861,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest '
-                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -3807,7 +3930,9 @@ class VMDiskAttachDetachTest(ScenarioTest):
             'vnet': self.create_random_name('vnet', 15)
         })
 
-        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest --admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest '
+                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} '
+                 '--vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
         self.cmd('network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name {disk1} --new --size-gb 1 --caching ReadOnly')
@@ -3867,7 +3992,7 @@ class VMDiskAttachDetachTest(ScenarioTest):
         })
 
         self.cmd('vm create -g {rg} --location {loc} -n {vm} --admin-username admin123 --image OpenLogic:CentOS:7.5:latest '
-                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+                 '--admin-password testPassword0 --authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --nsg-rule NONE')
 
         # Disable default outbound access
         self.cmd(
@@ -4026,8 +4151,9 @@ class VMDiskAttachDetachTest(ScenarioTest):
             self.check('storageProfile.dataDisks[1].managedDisk.storageAccountType', 'UltraSSD_LRS'),
             self.check('storageProfile.dataDisks[2].managedDisk.storageAccountType', 'UltraSSD_LRS'),
         ])
-        self.cmd('vm create -g {rg} -n {vm2} --admin-username admin123 --admin-password testPassword0 --image Debian:debian-10:10:latest '
-                 '--size Standard_D2s_v3 --ultra-ssd-enabled --zone 2 --location eastus2 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm2} --admin-username azureuser --admin-password testPassword0 '
+                 '--image Debian11 --size Standard_E4s_v3 --ultra-ssd-enabled --zone 1 '
+                 '--location eastus2 --subnet {subnet} --vnet-name {vnet} --nsg-rule NONE')
         self.cmd('vm disk attach -g {rg} --vm-name {vm2} --name {disk4} --new --size-gb 5 --sku UltraSSD_LRS')
         self.cmd('vm show -g {rg} -n {vm2}', checks=[
             self.check('storageProfile.osDisk.managedDisk.storageAccountType', 'Premium_LRS'),
