@@ -204,12 +204,16 @@ setup(
             '*.json',
             'randomname/adjectives.txt',
             'randomname/nouns.txt',
-            'templates/mysql_githubaction_template.yaml',
-            'templates/postgresql_githubaction_template.yaml'
+            'templates/mysql_githubaction_template.yaml'
         ],
         'azure.cli.command_modules.mysql': [
             'random/adjectives.txt',
             'random/nouns.txt'
+        ],
+        'azure.cli.command_modules.postgresql': [
+            'random/adjectives.txt',
+            'random/nouns.txt',
+            'templates/postgresql_githubaction_template.yaml'
         ]
     },
     cmdclass=cmdclass
