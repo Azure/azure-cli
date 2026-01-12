@@ -211,8 +211,8 @@ setup(
             'random/nouns.txt'
         ],
         'azure.cli.command_modules.postgresql': [
-            'random/adjectives.txt',
-            'random/nouns.txt',
+            'randomname/adjectives.txt',
+            'randomname/nouns.txt',
             'templates/postgresql_githubaction_template.yaml'
         ]
     },
