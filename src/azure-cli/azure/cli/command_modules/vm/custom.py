@@ -3352,8 +3352,8 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
     elif certificate_store:
         raise CLIError('Usage error: --certificate-store is only applicable on Windows VM')
     vault_cert = {
-        'certificate_store': certificate_store,
-        'certificate_url': certificate
+        'certificateStore': certificate_store,
+        'certificateUrl': certificate
     }
     vault_secret_group = next((x for x in vm.get('osProfile', {}).get('secrets', [])
                                if x.get('sourceVault', {}).get('id', '').lower() == keyvault.lower()), None)
@@ -3366,7 +3366,14 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
             },
             'vaultCertificates': [vault_cert]
         }
-        vm.get('osProfile', {}).get('secrets', []).append(vault_secret_group)
+
+        if not vm.get('osProfile'):
+            vm['osProfile'] = {'secret': []}
+
+        if not vm.get('osProfile').get('secrets'):
+            vm['osProfile']['secrets'] = []
+
+        vm['osProfile']['secrets'].append(vault_secret_group)
 
     vm = set_vm_by_aaz(cmd, vm)
     return vm.get('osProfile', {}).get('secrets', [])
@@ -3395,7 +3402,7 @@ def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=No
     keyvault_matched = []
     if keyvault:
         keyvault = keyvault.lower()
-        keyvault_matched = [x for x in to_keep if x.get("sourceVault", {}).get('id', '').lower() == keyvault]
+        keyvault_matched = [x for x in to_keep if x.get('sourceVault', {}).get('id', '').lower() == keyvault]
 
     if keyvault and not certificate:
         to_keep = [x for x in to_keep if x not in keyvault_matched]
@@ -3406,7 +3413,8 @@ def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=No
             cert_url_pattern = '/' + cert_url_pattern + '/'
         for x in temp:
             x['vaultCertificates'] = [v for v in x.get('vaultCertificates')
-                                      if not (v.get('certificateUrl') and cert_url_pattern in v.get('certificateUrl', '').lower())]
+                                      if not (v.get('certificateUrl') and
+                                              cert_url_pattern in v.get('certificateUrl', '').lower())]
         to_keep = [x for x in to_keep if x.get('vaultCertificates')]  # purge all groups w/o any cert entries
 
     vm['osProfile']['secrets'] = to_keep
