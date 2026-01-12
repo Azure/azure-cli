@@ -447,7 +447,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
                    help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
         c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(),
-                   arg_group='IPv6 Endpoint',
+                   arg_group='IPv6 Endpoint', is_preview=True,
                    help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
 
     with self.argument_context('storage account private-endpoint-connection',
@@ -551,7 +551,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                    options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
                    help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
         c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(),
-                   arg_group='IPv6 Endpoint',
+                   arg_group='IPv6 Endpoint', is_preview=True,
                    help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
 
     for scope in ['storage account create', 'storage account update']:
@@ -670,7 +670,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 '
                                                  '[ip2]...', validator=validate_ip_address)
         c.argument('ipv6_address', nargs='*', help='IPv6 address or CIDR range. Can supply a list: --ipv6-address ip1 '
-                                                   '[ip2]...', validator=validate_ipv6_address)
+                                                   '[ip2]...', validator=validate_ipv6_address, is_preview=True)
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
         c.argument('action', action_type)
