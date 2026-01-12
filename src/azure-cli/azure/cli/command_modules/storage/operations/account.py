@@ -963,10 +963,11 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
     nfsSetting = cmd.get_models('NfsSetting')
     if not instance.protocol_settings:
         instance.protocol_settings = cmd.get_models('ProtocolSettings')(smb=smbSetting(), nfs=nfsSetting())
-    elif not instance.protocol_settings.smb:
-        instance.protocol_settings.smb = smbSetting()
-    elif not instance.protocol_settings.nfs:
-        instance.protocol_settings.nfs = nfsSetting()
+    else:
+        if not instance.protocol_settings.smb:
+            instance.protocol_settings.smb = smbSetting()
+        if not instance.protocol_settings.nfs:
+            instance.protocol_settings.nfs = nfsSetting()
 
     if enable_smb_multichannel is not None:
         instance.protocol_settings.smb.multichannel = cmd.get_models('Multichannel')(enabled=enable_smb_multichannel)
