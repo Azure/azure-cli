@@ -3385,17 +3385,17 @@ def list_vm_secrets(cmd, resource_group_name, vm_name):
 
 
 def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=None):
-    vm = get_vm_to_update(cmd, resource_group_name, vm_name)
+    vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
 
     # support 2 kinds of filter:
     # a. if only keyvault is supplied, we delete its whole vault group.
     # b. if both keyvault and certificate are supplied, we only delete the specific cert entry.
 
-    to_keep = vm.os_profile.secrets
+    to_keep = vm.get('osProfile', {}).get('secrets', [])
     keyvault_matched = []
     if keyvault:
         keyvault = keyvault.lower()
-        keyvault_matched = [x for x in to_keep if x.source_vault and x.source_vault.id.lower() == keyvault]
+        keyvault_matched = [x for x in to_keep if x.get("sourceVault", {}).get('id', '').lower() == keyvault]
 
     if keyvault and not certificate:
         to_keep = [x for x in to_keep if x not in keyvault_matched]
@@ -3405,13 +3405,13 @@ def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=No
         if '://' not in cert_url_pattern:  # just a cert name?
             cert_url_pattern = '/' + cert_url_pattern + '/'
         for x in temp:
-            x.vault_certificates = ([v for v in x.vault_certificates
-                                     if not (v.certificate_url and cert_url_pattern in v.certificate_url.lower())])
-        to_keep = [x for x in to_keep if x.vault_certificates]  # purge all groups w/o any cert entries
+            x['vaultCertificates'] = [v for v in x.get('vaultCertificates')
+                                      if not (v.get('certificateUrl') and cert_url_pattern in v.get('certificateUrl', '').lower())]
+        to_keep = [x for x in to_keep if x.get('vaultCertificates')]  # purge all groups w/o any cert entries
 
-    vm.os_profile.secrets = to_keep
-    vm = set_vm(cmd, vm)
-    return vm.os_profile.secrets
+    vm['osProfile']['secrets'] = to_keep
+    vm = set_vm_by_aaz(cmd, vm)
+    return vm.get('osProfile', {}).get('secrets', [])
 # endregion
 
 
