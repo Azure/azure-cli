@@ -7545,7 +7545,7 @@ class VMSecretTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_vm_secrets')
-    @KeyVaultPreparer(name_prefix='vmsecretkv', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption true --enabled-for-deployment true')
+    @KeyVaultPreparer(name_prefix='vmsecretkv', name_len=20, key='vault', additional_params='--enabled-for-disk-encryption true --enabled-for-deployment true --enable-rbac-authorization false')
     def test_vm_secret_e2e_test(self, resource_group, resource_group_location, key_vault):
         self.kwargs.update({
             'vm': 'vm1',
@@ -7555,7 +7555,7 @@ class VMSecretTest(ScenarioTest):
 
         self.kwargs['policy_path'] = os.path.join(TEST_DIR, 'keyvault', 'policy.json')
 
-        self.cmd('vm create -g {rg} -n {vm} --image Ubuntu2204 --generate-ssh-keys --admin-username rheladmin --nsg-rule NONE')
+        self.cmd('vm create -g {rg} -n {vm} --image Ubuntu2204 --generate-ssh-keys --admin-username rheladmin --nsg-rule NONE --size Standard_B2ms')
         time.sleep(60)  # ensure we don't hit the DNS exception (ignored under playback)
 
         self.cmd('keyvault certificate create --vault-name {vault} -n {cert} -p @"{policy_path}"')
