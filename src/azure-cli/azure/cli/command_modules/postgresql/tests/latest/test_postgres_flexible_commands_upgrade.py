@@ -25,7 +25,7 @@ class PostgreSQLFlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
         location = DEFAULT_LOCATION
 
         # create server
-        self.cmd('postgres flexible-server create -g {} -n {} --tier GeneralPurpose --location {} --version {} --yes'.format(
+        self.cmd('postgres flexible-server create -g {} -n {} --tier GeneralPurpose --location {} --version {} --public-access none --yes'.format(
             resource_group, server_name, location, current_version))
 
         self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, server_name),
