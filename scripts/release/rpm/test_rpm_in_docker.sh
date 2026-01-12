@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# This script should be run in a centos7 docker.
+# This script should be run in a ubi8, ubi9 docker.
 set -exv
 
 export USERNAME=azureuser
 
 dnf --nogpgcheck install /mnt/rpm/$RPM_NAME -y
 
-dnf install git gcc $PYTHON_PACKAGE-devel findutils -y
+dnf install git findutils $PYTHON_PACKAGE-pip -y
 
 ln -s -f /usr/bin/$PYTHON_CMD /usr/bin/python
 ln -s -f /usr/bin/$PIP_CMD /usr/bin/pip
@@ -15,7 +15,7 @@ time az self-test
 time az --version
 
 cd /azure-cli/
-pip install wheel
+python -m pip install --upgrade pip setuptools
 ./scripts/ci/build.sh
 
 # From Fedora36, when using `pip install --prefix` with root privileges, the package is installed into `{prefix}/local/lib`.

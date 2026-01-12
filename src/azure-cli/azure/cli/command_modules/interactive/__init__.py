@@ -20,7 +20,7 @@ class InteractiveCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
         from azure.cli.core import ModExtensionSuppress
-        super(InteractiveCommandsLoader, self).__init__(
+        super().__init__(
             cli_ctx=cli_ctx,
             suppress_extension=ModExtensionSuppress(
                 __name__, 'alias', '0.5.1',

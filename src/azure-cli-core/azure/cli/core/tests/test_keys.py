@@ -6,12 +6,12 @@
 
 import unittest
 import tempfile
-import paramiko
-import io
-import os
 import shutil
 from knack.util import CLIError
 from unittest import mock
+
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
 
 from azure.cli.core.keys import generate_ssh_keys
 
@@ -22,12 +22,16 @@ class TestGenerateSSHKeys(unittest.TestCase):
         # set up temporary directory to be used for temp files.
         self._tempdirName = tempfile.mkdtemp(prefix="key_tmp_")
 
-        self.key = paramiko.RSAKey.generate(2048)
-        keyOutput = io.StringIO()
-        self.key.write_private_key(keyOutput)
-
-        self.private_key = keyOutput.getvalue()
-        self.public_key = '{} {}'.format(self.key.get_name(), self.key.get_base64())
+        self.key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+        self.private_key = self.key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption()
+        ).decode()
+        self.public_key = self.key.public_key().public_bytes(
+            encoding=serialization.Encoding.OpenSSH,
+            format=serialization.PublicFormat.OpenSSH
+        ).decode()
 
     def tearDown(self):
         # delete temporary directory to be used for temp files.
@@ -60,7 +64,7 @@ class TestGenerateSSHKeys(unittest.TestCase):
         with mock.patch('azure.cli.core.keys.open') as mocked_open:
             # mock failed call to read
             mocked_f = mocked_open.return_value.__enter__.return_value
-            mocked_f.read = mock.MagicMock(side_effect=IOError("Mocked IOError"))
+            mocked_f.read = mock.MagicMock(side_effect=OSError("Mocked IOError"))
 
             # assert that CLIError raised when generate_ssh_keys is called
             with self.assertRaises(CLIError):
@@ -70,31 +74,22 @@ class TestGenerateSSHKeys(unittest.TestCase):
             mocked_open.assert_called_once_with(public_key_path, 'r')
             mocked_f.read.assert_called_once()
 
-    def test_error_raised_when_private_key_file_exists_IOError(self):
-        # Create private key file
-        private_key_path = self._create_new_temp_key_file(self.private_key)
-
-        with mock.patch('paramiko.RSAKey') as mocked_RSAKey:
-            # mock failed RSAKey generation
-            mocked_RSAKey.side_effect = IOError("Mocked IOError")
-
-            # assert that CLIError raised when generate_ssh_keys is called
-            with self.assertRaises(CLIError):
-                public_key_path = private_key_path + ".pub"
-                generate_ssh_keys(private_key_path, public_key_path)
-
-            # assert that CLIError raised because of attempt to generate key from private key file.
-            mocked_RSAKey.assert_called_once_with(filename=private_key_path)
-
     def test_error_raised_when_private_key_file_exists_encrypted(self):
         # Create empty private key file
         private_key_path = self._create_new_temp_key_file("")
 
         # Write encrypted / passworded key into file
-        self.key.write_private_key_file(private_key_path, password="test")
+        private_bytes = self.key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.BestAvailableEncryption(b'test')
+        )
+        with open(private_key_path, 'wb') as f:
+            f.write(private_bytes)
 
-        # Check that CLIError exception is raised when generate_ssh_keys is called.
-        with self.assertRaises(CLIError):
+        # generate_ssh_keys should raise
+        #   TypeError: Password was not given but private key is encrypted
+        with self.assertRaises(TypeError):
             public_key_path = private_key_path + ".pub"
             generate_ssh_keys(private_key_path, public_key_path)
 
@@ -133,10 +128,15 @@ class TestGenerateSSHKeys(unittest.TestCase):
             self.assertEqual(public_key, new_public_key)
 
         # Check that public key corresponds to private key
-        with open(private_key_path, 'r') as f:
-            key = paramiko.RSAKey(filename=private_key_path)
-            public_key = '{} {}'.format(key.get_name(), key.get_base64())
-            self.assertEqual(public_key, new_public_key)
+        with open(private_key_path, 'rb') as f:
+            private_bytes = f.read()
+
+        private_key = serialization.load_pem_private_key(private_bytes, password=None)
+        public_key = private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.OpenSSH,
+            format=serialization.PublicFormat.OpenSSH
+        ).decode()
+        self.assertEqual(public_key, new_public_key)
 
     def _create_new_temp_key_file(self, key_data, suffix=""):
         with tempfile.NamedTemporaryFile(mode='w', dir=self._tempdirName, delete=False, suffix=suffix) as f:

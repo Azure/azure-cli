@@ -25,9 +25,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-09-01"],
         ]
     }
 
@@ -53,7 +53,7 @@ class Create(AAZCommand):
             help="The name of the NetApp account",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -83,11 +83,6 @@ class Create(AAZCommand):
         # define Arg Group "Encryption"
 
         _args_schema = cls._args_schema
-        _args_schema.encryption_identity = AAZObjectArg(
-            options=["--encryption-identity"],
-            arg_group="Encryption",
-            help="Identity used to authenticate to KeyVault. Applicable if keySource is 'Microsoft.KeyVault'.",
-        )
         _args_schema.key_source = AAZStrArg(
             options=["--key-source"],
             arg_group="Encryption",
@@ -100,7 +95,7 @@ class Create(AAZCommand):
             arg_group="Encryption",
             help="The name of KeyVault key.",
         )
-        _args_schema.key_vault_resource_id = AAZStrArg(
+        _args_schema.key_vault_resource_id = AAZResourceIdArg(
             options=["--keyvault-resource-id", "--key-vault-resource-id"],
             arg_group="Encryption",
             help="The resource ID of KeyVault.",
@@ -111,26 +106,49 @@ class Create(AAZCommand):
             help="The Uri of KeyVault.",
         )
 
-        encryption_identity = cls._args_schema.encryption_identity
-        encryption_identity.user_assigned_identity = AAZStrArg(
-            options=["user-assigned-identity"],
+        # define Arg Group "EncryptionIdentity"
+
+        _args_schema = cls._args_schema
+        _args_schema.federated_client_id = AAZStrArg(
+            options=["--federated-client-id"],
+            arg_group="EncryptionIdentity",
+            help="ClientId of the multi-tenant AAD Application. Used to access cross-tenant keyvaults.",
+        )
+        _args_schema.user_assigned_identity = AAZStrArg(
+            options=["-u", "--user-assigned-identity"],
+            arg_group="EncryptionIdentity",
             help="The ARM resource identifier of the user assigned identity used to authenticate with key vault. Applicable if identity.type has 'UserAssigned'. It should match key of identity.userAssignedIdentities.",
         )
 
         # define Arg Group "Identity"
 
         _args_schema = cls._args_schema
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Identity",
+            help="Set the system managed identity.",
+            blank="True",
+        )
         _args_schema.identity_type = AAZStrArg(
             options=["--type", "--identity-type"],
             arg_group="Identity",
             help="Type of managed service identity (where both SystemAssigned and UserAssigned types are allowed).",
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned,UserAssigned": "SystemAssigned,UserAssigned", "UserAssigned": "UserAssigned"},
         )
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Identity",
+            help="Set the user managed identities.",
+            blank=[],
+        )
         _args_schema.user_assigned_identities = AAZDictArg(
             options=["--user-ids", "--user-assigned-identities"],
             arg_group="Identity",
             help="The set of user assigned identities associated with the resource. The userAssignedIdentities dictionary keys will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}. The dictionary values can be empty objects ({}) in requests.",
         )
+
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
 
         user_assigned_identities = cls._args_schema.user_assigned_identities
         user_assigned_identities.Element = AAZObjectArg(
@@ -145,6 +163,16 @@ class Create(AAZCommand):
             options=["--active-directories"],
             arg_group="Properties",
             help="Active Directories",
+        )
+        _args_schema.nfs_v4_id_domain = AAZStrArg(
+            options=["--nfs-v4-id-domain"],
+            arg_group="Properties",
+            help="Domain for NFSv4 user ID mapping. This property will be set for all NetApp accounts in the subscription and region and only affect non ldap NFSv4 volumes.",
+            nullable=True,
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9.-]{0,253}[a-zA-Z0-9]$",
+                max_length=255,
+            ),
         )
 
         active_directories = cls._args_schema.active_directories
@@ -184,7 +212,7 @@ class Create(AAZCommand):
             options=["dns"],
             help="Comma separated list of DNS server IP addresses (IPv4 only) for the Active Directory domain",
             fmt=AAZStrArgFormat(
-                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
+                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
             ),
         )
         _element.domain = AAZStrArg(
@@ -197,9 +225,9 @@ class Create(AAZCommand):
         )
         _element.kdc_ip = AAZStrArg(
             options=["kdc-ip"],
-            help="kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume.",
+            help="kdc server IP address for the active directory machine. This optional parameter is used only while creating kerberos volume.",
             fmt=AAZStrArgFormat(
-                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
+                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
             ),
         )
         _element.ldap_over_tls = AAZBoolArg(
@@ -219,18 +247,21 @@ class Create(AAZCommand):
             help="The Organizational Unit (OU) within the Windows Active Directory",
             default="CN=Computers",
         )
-        _element.password = AAZStrArg(
+        _element.password = AAZPasswordArg(
             options=["password"],
             help="Plain text password of Active Directory domain administrator, value is masked in the response",
             fmt=AAZStrArgFormat(
                 max_length=64,
+            ),
+            blank=AAZPromptPasswordInput(
+                msg="Password:",
             ),
         )
         _element.preferred_servers_for_ldap_client = AAZStrArg(
             options=["preferred-servers-for-ldap-client"],
             help="Comma separated list of IPv4 addresses of preferred servers for LDAP client. At most two comma separated IPv4 addresses can be passed.",
             fmt=AAZStrArgFormat(
-                pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))?)?$",
+                pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))?)?$",
                 max_length=32,
             ),
         )
@@ -238,12 +269,15 @@ class Create(AAZCommand):
             options=["security-operators"],
             help="Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier",
         )
-        _element.server_root_ca_certificate = AAZStrArg(
+        _element.server_root_ca_certificate = AAZPasswordArg(
             options=["server-root-ca-certificate"],
             help="When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.",
             fmt=AAZStrArgFormat(
                 max_length=10240,
                 min_length=1,
+            ),
+            blank=AAZPromptPasswordInput(
+                msg="Password:",
             ),
         )
         _element.site = AAZStrArg(
@@ -388,7 +422,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -413,7 +447,7 @@ class Create(AAZCommand):
                 typ=AAZObjectType,
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
-            _builder.set_prop("identity", AAZObjectType)
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("location", AAZStrType, ".location", typ_kwargs={"flags": {"required": True}})
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -422,15 +456,22 @@ class Create(AAZCommand):
             if identity is not None:
                 identity.set_prop("type", AAZStrType, ".identity_type", typ_kwargs={"flags": {"required": True}})
                 identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
+                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
+                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
 
             user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
             if user_assigned_identities is not None:
                 user_assigned_identities.set_elements(AAZObjectType, ".", typ_kwargs={"nullable": True})
 
+            user_assigned = _builder.get(".identity.userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
+
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("activeDirectories", AAZListType, ".active_directories")
                 properties.set_prop("encryption", AAZObjectType)
+                properties.set_prop("nfsV4IDDomain", AAZStrType, ".nfs_v4_id_domain", typ_kwargs={"nullable": True})
 
             active_directories = _builder.get(".properties.activeDirectories")
             if active_directories is not None:
@@ -480,18 +521,19 @@ class Create(AAZCommand):
 
             encryption = _builder.get(".properties.encryption")
             if encryption is not None:
-                encryption.set_prop("identity", AAZObjectType, ".encryption_identity")
+                encryption.set_prop("identity", AAZObjectType)
                 encryption.set_prop("keySource", AAZStrType, ".key_source")
                 encryption.set_prop("keyVaultProperties", AAZObjectType)
 
             identity = _builder.get(".properties.encryption.identity")
             if identity is not None:
+                identity.set_prop("federatedClientId", AAZStrType, ".federated_client_id")
                 identity.set_prop("userAssignedIdentity", AAZStrType, ".user_assigned_identity")
 
             key_vault_properties = _builder.get(".properties.encryption.keyVaultProperties")
             if key_vault_properties is not None:
                 key_vault_properties.set_prop("keyName", AAZStrType, ".key_name", typ_kwargs={"flags": {"required": True}})
-                key_vault_properties.set_prop("keyVaultResourceId", AAZStrType, ".key_vault_resource_id", typ_kwargs={"flags": {"required": True}})
+                key_vault_properties.set_prop("keyVaultResourceId", AAZStrType, ".key_vault_resource_id")
                 key_vault_properties.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri", typ_kwargs={"flags": {"required": True}})
 
             tags = _builder.get(".tags")
@@ -524,7 +566,7 @@ class Create(AAZCommand):
             _schema_on_200_201.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200_201.identity = AAZObjectType()
+            _schema_on_200_201.identity = AAZIdentityObjectType()
             _schema_on_200_201.location = AAZStrType(
                 flags={"required": True},
             )
@@ -584,6 +626,14 @@ class Create(AAZCommand):
                 flags={"read_only": True},
             )
             properties.encryption = AAZObjectType()
+            properties.multi_ad_status = AAZStrType(
+                serialized_name="multiAdStatus",
+                flags={"read_only": True},
+            )
+            properties.nfs_v4_id_domain = AAZStrType(
+                serialized_name="nfsV4IDDomain",
+                nullable=True,
+            )
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
@@ -686,6 +736,9 @@ class Create(AAZCommand):
             )
 
             identity = cls._schema_on_200_201.properties.encryption.identity
+            identity.federated_client_id = AAZStrType(
+                serialized_name="federatedClientId",
+            )
             identity.principal_id = AAZStrType(
                 serialized_name="principalId",
                 flags={"read_only": True},
@@ -705,7 +758,6 @@ class Create(AAZCommand):
             )
             key_vault_properties.key_vault_resource_id = AAZStrType(
                 serialized_name="keyVaultResourceId",
-                flags={"required": True},
             )
             key_vault_properties.key_vault_uri = AAZStrType(
                 serialized_name="keyVaultUri",

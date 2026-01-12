@@ -12,11 +12,12 @@ from azure.cli.command_modules.sql.tests.latest.test_sql_commands import SqlServ
 
 class MonitorTests(ScenarioTest):
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v2')
     @StorageAccountPreparer()
     def test_metric_alert_v2_scenario(self, resource_group, storage_account):
 
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'alert': 'alert1',
             'sa': storage_account,
@@ -237,7 +238,7 @@ class MonitorTests(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v1')
     @VMPreparer(parameter_name='vm1')
     def test_metric_alert_single_scope(self, resource_group, vm1):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'alert': 'alert1',
             'plan': 'plan1',
@@ -266,7 +267,7 @@ class MonitorTests(ScenarioTest):
                  ])
 
     @ResourceGroupPreparer(name_prefix='cli_test_metric_alert_v1_2')
-    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1', location='eastus')
+    @SqlServerPreparer(name_prefix='clitestservermatricalertA', parameter_name='server1', location='westus2')
     def test_metric_alert_for_sql_database_scope(self, resource_group, resource_group_location, server1):
         self.kwargs.update({
             'alert': 'alert1',
@@ -301,7 +302,7 @@ class MonitorTests(ScenarioTest):
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     def test_metric_alert_multiple_scopes(self, resource_group, vm1, vm2):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'alert': 'alert1',
             'plan': 'plan1',
@@ -511,7 +512,7 @@ class MonitorTests(ScenarioTest):
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2', resource_group_parameter_name='resource_group_2')
     def test_metric_alert_for_rg_and_sub(self, resource_group, resource_group_2):
-        from msrestazure.tools import resource_id
+        from azure.mgmt.core.tools import resource_id
         self.kwargs.update({
             'alert': 'rg-alert',
             'alert2': 'sub-alert',
@@ -599,12 +600,12 @@ class MonitorTests(ScenarioTest):
             ])
         self.cmd(
             'monitor metrics alert create -g {rg} -n {alert2} --scopes {sa_id} --region westus --description "Test"'
-            ' --condition "avg My-Ns.\\LogicalDisk(C:)\% Free Space = 1 with skipMetricValidation"',
+            ' --condition "avg My-Ns.\\LogicalDisk(C:)\\% Free Space = 1 with skipMetricValidation"',
             checks=[
                 self.check('description', 'Test'),
                 self.check('length(criteria.allOf)', 1),
                 self.check('criteria.allOf[0].metricNamespace', 'My-Ns'),
-                self.check('criteria.allOf[0].metricName', '\\LogicalDisk(C:)\% Free Space'),
+                self.check('criteria.allOf[0].metricName', '\\LogicalDisk(C:)\\% Free Space'),
                 self.check('criteria.allOf[0].skipMetricValidation', True)
             ])
 

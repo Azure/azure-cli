@@ -5,8 +5,8 @@
 
 # pylint: disable=unused-argument, line-too-long, import-outside-toplevel
 from requests import get
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id  # pylint: disable=import-error
 from knack.log import get_logger
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, is_valid_resource_name, resource_id  # pylint: disable=import-error
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.util import CLIError, user_confirmation
@@ -224,9 +224,11 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
             "subscription": nw_subscription,
             "resource_group": resource_group
         })
-        vnet_subnet_prefixes = [subnet["addressPrefix"] for subnet in vnet.get("subnets", [])]
-        if subnet_address_pref in vnet_subnet_prefixes:
-            raise ValidationError(f"The Subnet (default) prefix {subnet_address_pref} is already taken by another Subnet in the Vnet. Please provide a different prefix for --subnet-prefix parameter")
+        subnets = vnet.get("subnets", [])
+        for subnet in subnets:
+            vnet_subnet_prefixes = subnet.get("addressPrefix", "") if 'addressPrefix' in subnet else subnet.get("addressPrefixes", "")
+            if subnet_address_pref in vnet_subnet_prefixes:
+                raise ValidationError(f"The Subnet (default) prefix {subnet_address_pref} is already taken by another Subnet in the Vnet. Please provide a different prefix for --subnet-prefix parameter")
 
         user_confirmation("Do you want to create a new Subnet {0} in resource group {1}".format(subnet_name, resource_group), yes=yes)
         logger.warning('Creating new Subnet "%s" in resource group "%s"', subnet_name, resource_group)
@@ -248,8 +250,9 @@ def _create_subnet_delegation(cmd, nw_subscription, resource_client, delegation_
             "resource_group": resource_group
         })
         logger.warning('Using existing Subnet "%s" in resource group "%s"', subnet_name, resource_group)
-        if subnet_address_pref not in (DEFAULT_SUBNET_ADDRESS_PREFIX, subnet["addressPrefix"]):
-            logger.warning("The prefix of the subnet you provided does not match the --subnet-prefix value %s. Using current prefix %s", subnet_address_pref, subnet["addressPrefix"])
+        subnet_address_prefix = subnet["addressPrefix"] if 'addressPrefix' in subnet else subnet["addressPrefixes"]
+        if subnet_address_pref not in (DEFAULT_SUBNET_ADDRESS_PREFIX, subnet_address_prefix):
+            logger.warning("The prefix of the subnet you provided does not match the --subnet-prefix value %s. Using current prefix %s", subnet_address_pref, subnet_address_prefix)
 
         # Add Delegation if not delegated already
         if not subnet.get("delegations", None):
@@ -359,7 +362,7 @@ def prepare_private_dns_zone(db_context, resource_group, server_name, private_dn
         private_dns_zone_suffix = cluster["privateDnsZoneDomain"]
     else:
         dns_suffix_client = db_context.cf_private_dns_zone_suffix(cmd.cli_ctx, '_')
-        private_dns_zone_suffix = dns_suffix_client.execute()
+        private_dns_zone_suffix = dns_suffix_client.get()
         if db_context.command_group == 'mysql':
             private_dns_zone_suffix = private_dns_zone_suffix.private_dns_zone_suffix
 
@@ -451,7 +454,15 @@ def prepare_private_dns_zone(db_context, resource_group, server_name, private_dn
 
 def prepare_public_network(public_access, yes):
     if public_access is None:
-        ip_address = get(IP_ADDRESS_CHECKER).text
+        try:
+            # In USSec and USNat, the IP address checker is not available as the public Internet is not accessible.
+            # When the user does not provide a public IP address or does not disble public access,
+            # the `az cli postgres flexible-server create` command will fail with the error
+            # HTTPSConnectionPool(host='api.ipify.org', port443): Max retries excceeded with url
+            ip_address = get(IP_ADDRESS_CHECKER).text
+        except Exception as ex:
+            raise CLIError("Unable to detect your current IP address. Please provide a valid IP address or CIDR range for --public-access parameter or set --public-access Disabled. Error: {}".format(ex))
+
         logger.warning("Detected current client IP : %s", ip_address)
         if yes:
             return ip_address, ip_address

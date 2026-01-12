@@ -22,9 +22,9 @@ class Purge(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-02-01",
+        "version": "2025-06-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/afdendpoints/{}/purge", "2024-02-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.cdn/profiles/{}/afdendpoints/{}/purge", "2025-06-01"],
         ]
     }
 
@@ -56,6 +56,11 @@ class Purge(AAZCommand):
             help="Name of the Azure Front Door Standard or Azure Front Door Premium profile which is unique within the resource group.",
             required=True,
             id_part="name",
+            fmt=AAZStrArgFormat(
+                pattern="^[a-zA-Z0-9]+(-*[a-zA-Z0-9])*$",
+                max_length=260,
+                min_length=1,
+            ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
             required=True,
@@ -73,7 +78,7 @@ class Purge(AAZCommand):
         _args_schema.domains = AAZListArg(
             options=["--domains"],
             arg_group="Contents",
-            help="List of domains.",
+            help="List of domains. Example: \"www.contoso.com, www.contoso1.com\"",
         )
 
         content_paths = cls._args_schema.content_paths
@@ -164,7 +169,7 @@ class Purge(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-02-01",
+                    "api-version", "2025-06-01",
                     required=True,
                 ),
             }

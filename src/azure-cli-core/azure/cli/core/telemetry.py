@@ -51,6 +51,8 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.feedback = None
         self.extension_management_detail = None
         self.raw_command = None
+        self.command_preserve_casing = None
+        self.is_cmd_idx_rebuild_triggered = False
         self.show_survey_message = False
         self.region_input = None
         self.region_identified = None
@@ -72,6 +74,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.poll_end_time = None
         self.secrets_detected = None
         self.secret_keys = None
+        self.secret_names = None
         self.user_agent = None
         # authentication-related
         self.enable_broker_on_windows = None
@@ -157,6 +160,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
             'Context.Default.VS.Core.Distro.Id': _get_distro_id(),  # eg. 'centos'
             'Context.Default.VS.Core.Distro.Version': _get_distro_version(),  # eg. '8.4.2105'
             'Context.Dafault.VS.Core.Istty': str(sys.stdin.isatty()),
+            'Context.Default.VS.Core.DevDeviceId': _get_device_id(),
             'Context.Default.VS.Core.User.Id': _get_installation_id(),
             'Context.Default.VS.Core.User.IsMicrosoftInternal': 'False',
             'Context.Default.VS.Core.User.IsOptedIn': 'True',
@@ -205,6 +209,9 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'InvokeTimeElapsed', str(self.invoke_time_elapsed))
         set_custom_properties(result, 'OutputType', self.output_type)
         set_custom_properties(result, 'RawCommand', self.raw_command)
+        set_custom_properties(result, 'CommandPreserveCasing',
+                              self.command_preserve_casing or '')
+        set_custom_properties(result, 'IsCmdIdxRebuildTriggered', str(self.is_cmd_idx_rebuild_triggered))
         set_custom_properties(result, 'Params', ','.join(self.parameters or []))
         set_custom_properties(result, 'PythonVersion', platform.python_version())
         set_custom_properties(result, 'ModuleCorrelation', self.module_correlation)
@@ -227,6 +234,7 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'SecretsWarning', _get_secrets_warning_config())
         set_custom_properties(result, 'SecretsDetected', str(self.secrets_detected))
         set_custom_properties(result, 'SecretKeys', ','.join(self.secret_keys or []))
+        set_custom_properties(result, 'SecretNames', ','.join(self.secret_names or []))
         # authentication-related
         set_custom_properties(result, 'EnableBrokerOnWindows', str(self.enable_broker_on_windows))
         set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
@@ -314,7 +322,7 @@ def flush():
     save(get_config_dir(), _session.generate_payload())
 
     # reset session fields, retaining correlation id and application
-    _session.__init__(correlation_id=_session.correlation_id, application=_session.application)
+    _session.__init__(correlation_id=_session.correlation_id, application=_session.application)  # pylint: disable=unnecessary-dunder-call
 
 
 @_user_agrees_to_telemetry
@@ -434,12 +442,19 @@ def set_extension_management_detail(ext_name, ext_version):
 
 
 @decorators.suppress_all_exceptions()
-def set_command_details(command, output_type=None, parameters=None, extension_name=None, extension_version=None):
+def set_command_index_rebuild_triggered(is_cmd_idx_rebuild_triggered=False):
+    _session.is_cmd_idx_rebuild_triggered = is_cmd_idx_rebuild_triggered
+
+
+@decorators.suppress_all_exceptions()
+def set_command_details(command, output_type=None, parameters=None, extension_name=None,
+                        extension_version=None, command_preserve_casing=None):
     _session.command = command
     _session.output_type = output_type
     _session.parameters = parameters
     _session.extension_name = extension_name
     _session.extension_version = extension_version
+    _session.command_preserve_casing = command_preserve_casing
 
 
 @decorators.suppress_all_exceptions()
@@ -467,6 +482,7 @@ def set_region_identified(region_input, region_identified):
     _session.region_identified = region_identified
 
 
+# region authentication-related
 @decorators.suppress_all_exceptions()
 def set_broker_info(enable_broker_on_windows):
     # Log the value of `enable_broker_on_windows`
@@ -482,6 +498,7 @@ def set_msal_telemetry(msal_telemetry):
 @decorators.suppress_all_exceptions()
 def set_login_experience_v2(login_experience_v2):
     _session.login_experience_v2 = login_experience_v2
+# endregion
 
 
 @decorators.suppress_all_exceptions()
@@ -491,10 +508,12 @@ def set_user_agent(user_agent):
 
 
 @decorators.suppress_all_exceptions()
-def set_secrets_detected(secrets_detected, secret_keys=None):
+def set_secrets_detected(secrets_detected, secret_keys=None, secret_names=None):
     _session.secrets_detected = secrets_detected
     if secret_keys:
         _session.secret_keys = secret_keys
+    if secret_names:
+        _session.secret_names = secret_names
 
 
 @decorators.suppress_all_exceptions()
@@ -565,6 +584,13 @@ def _get_secrets_warning_config():
 def _get_core_version():
     from azure.cli.core import __version__ as core_version
     return core_version
+
+
+@decorators.suppress_all_exceptions(fallback_return=None)
+def _get_device_id():
+    # This is a shared id with VS code telemetry
+    from deviceid import get_device_id
+    return get_device_id()
 
 
 @decorators.suppress_all_exceptions(fallback_return=None)

@@ -7,13 +7,14 @@ from azure.cli.core.commands.parameters import (
     resource_group_name_type, get_enum_type)
 
 from azure.cli.command_modules.resource._completers import (
-    get_policy_set_completion_list, get_policy_completion_list,
-    get_policy_assignment_completion_list, get_providers_completion_list, get_resource_types_completion_list)
+    get_providers_completion_list, get_resource_types_completion_list)
 
 from ._validators import (validate_resource, validate_expand)
 from azure.cli.command_modules.resource._validators import validate_metadata
 
-from ._completers import get_policy_remediation_completion_list, get_policy_metadata_completion_list
+from ._completers import (
+    get_policy_set_completion_list, get_policy_completion_list, get_policy_assignment_completion_list,
+    get_policy_remediation_completion_list, get_policy_metadata_completion_list)
 
 from ._actions import AttestationEvidenceAddAction
 
@@ -42,17 +43,17 @@ def load_arguments(self, _):
                 'namespace',
                 completer=get_providers_completion_list,
                 arg_group='Resource ID',
-                help='Provider namespace (Ex: ''Microsoft.Provider'').')
+                help='Provider namespace (Ex: Microsoft.Provider).')
             c.argument(
                 'resource_type_parent',
                 options_list=['--parent'],
                 arg_group='Resource ID',
-                help='The parent path (Ex: ''resourceTypeA/nameA/resourceTypeB/nameB'').')
+                help='The parent path (Ex: resourceTypeA/nameA/resourceTypeB/nameB).')
             c.argument(
                 'resource_type',
                 completer=get_resource_types_completion_list,
                 arg_group='Resource ID',
-                help='Resource type (Ex: ''resourceTypeC'').')
+                help='Resource type (Ex: resourceTypeC).')
 
     for scope in ['state', 'event']:
         with self.argument_context('policy {}'.format(scope)) as c:
@@ -137,7 +138,7 @@ def load_arguments(self, _):
             'location_filters',
             options_list='--location-filters',
             nargs='+',
-            help='Space separated list of resource locations that should be remediated (Ex: ''centralus westeurope'').')  # pylint: disable=line-too-long
+            help='Space separated list of resource locations that should be remediated (Ex: centralus westeurope).')  # pylint: disable=line-too-long
         c.argument(
             'policy_assignment',
             options_list=['--policy-assignment', '-a'],

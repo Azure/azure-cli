@@ -63,7 +63,7 @@ class Create(AAZCommand):
             help="The name of the cluster role.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[-\w\._]+$",
+                pattern=r"^[-\w\._]+$",
             ),
         )
 

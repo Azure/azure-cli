@@ -65,7 +65,7 @@ def load_arguments(self, _):
             "invoice_name",
             options_list=["--name", "-n", "--invoice-name"],
             type=str,
-            help="The ID that " "uniquely identifies an invoice.",
+            help="The ID that uniquely identifies an invoice.",
         )
         c.argument(
             "by_subscription",
@@ -129,7 +129,7 @@ def load_arguments(self, _):
             "name",
             options_list=["--name", "-n"],
             type=str,
-            help="The ID that uniquely identifies a role " "assignment.",
+            help="The ID that uniquely identifies a role assignment.",
         )
         c.argument(
             "profile_name",

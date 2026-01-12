@@ -63,7 +63,7 @@ class Delete(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[-\w\._]+$",
+                pattern=r"^[-\w\._]+$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(

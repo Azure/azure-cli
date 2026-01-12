@@ -174,7 +174,7 @@ class SecurityConnectorsDevOpsTests(ScenarioTest):
         ])
 
         from azure.core.exceptions import HttpResponseError
-        with self.assertRaisesRegexp(HttpResponseError, expected_regex=".*TokenExchangeFailed.*"):
+        with self.assertRaisesRegex(HttpResponseError, expected_regex=".*TokenExchangeFailed.*"):
             self.cmd("az security security-connector devops create --resource-group {} --security-connector-name {} --auto-discovery Disabled --inventory-list {} --authorization-code {}".format(resource_group, name, org_name, code))
 
         devops = self.cmd("az security security-connector devops show --resource-group {} --security-connector-name {}".format(resource_group, name)).get_output_in_json()
@@ -184,4 +184,3 @@ class SecurityConnectorsDevOpsTests(ScenarioTest):
         assert devops['properties']['provisioningState'] == 'Failed'
 
         self.cmd("az security security-connector devops delete --yes --resource-group {} --security-connector-name {}".format(resource_group, name))
-        

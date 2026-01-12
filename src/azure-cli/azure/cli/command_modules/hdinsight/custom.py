@@ -6,7 +6,7 @@ from knack.log import get_logger
 from knack.prompting import prompt_pass, NoTTYException
 from knack.util import CLIError
 from azure.cli.core.util import sdk_no_wait, user_confirmation
-from azure.cli.core.azclierror import RequiredArgumentMissingError
+from azure.cli.core.azclierror import RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 
 logger = get_logger(__name__)
 
@@ -20,7 +20,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    kafka_client_group_id=None, kafka_client_group_name=None,
                    workernode_count=3, workernode_data_disks_per_node=None,
                    workernode_data_disk_storage_account_type=None, workernode_data_disk_size=None,
-                   http_username=None, http_password=None,
+                   http_username=None, http_password=None, entra_user_identity=None, entra_user_full_info=None,
                    ssh_username='sshuser', ssh_password=None, ssh_public_key=None,
                    storage_account=None, storage_account_key=None,
                    storage_default_container=None, storage_default_filesystem=None,
@@ -36,18 +36,20 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
                    autoscale_type=None, autoscale_min_workernode_count=None, autoscale_max_workernode_count=None,
                    timezone=None, days=None, time=None, autoscale_workernode_count=None,
                    encryption_at_host=None, esp=False, idbroker=False,
-                   resource_provider_connection=None, enable_private_link=None, enable_compute_isolation=None,
-                   host_sku=None, zones=None, private_link_configurations=None,
-                   no_validation_timeout=False):
+                   resource_provider_connection=None, enable_private_link=None,
+                   public_ip_tag_type=None, public_ip_tag_value=None,
+                   enable_compute_isolation=None, host_sku=None, zones=None, private_link_configurations=None,
+                   no_validation_timeout=False, outbound_dependencies_managed_type=None):
     from .util import build_identities_info, build_virtual_network_profile, parse_domain_name, \
-        get_storage_account_endpoint, validate_esp_cluster_create_params, set_vm_size
+        get_storage_account_endpoint, validate_esp_cluster_create_params, set_vm_size, \
+        is_wasb_storage_account, get_entra_user_info
     from azure.mgmt.hdinsight.models import ClusterCreateParametersExtended, ClusterCreateProperties, OSType, \
         ClusterDefinition, ComputeProfile, HardwareProfile, Role, OsProfile, LinuxOperatingSystemProfile, \
         StorageProfile, StorageAccount, DataDisksGroups, SecurityProfile, \
         DiskEncryptionProperties, Tier, SshProfile, SshPublicKey, \
         KafkaRestProperties, ClientGroupInfo, EncryptionInTransitProperties, \
         Autoscale, AutoscaleCapacity, AutoscaleRecurrence, AutoscaleSchedule, AutoscaleTimeAndCapacity, \
-        NetworkProperties, PrivateLink, ComputeIsolationProperties
+        NetworkProperties, IpTag, PrivateLink, ComputeIsolationProperties
 
     validate_esp_cluster_create_params(esp, cluster_name, resource_group_name, cluster_type,
                                        subnet, domain, cluster_admin_account, assign_identity,
@@ -65,7 +67,7 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
 
     # Format dictionary/free-form arguments
     if not cluster_configurations:
-        cluster_configurations = dict()
+        cluster_configurations = {}
 
     if component_version:
         # See validator
@@ -76,24 +78,32 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
     if 'gateway' in cluster_configurations:
         gateway_config = cluster_configurations['gateway']
     else:
-        gateway_config = dict()
+        gateway_config = {}
     if http_username and 'restAuthCredential.username' in gateway_config:
         raise CLIError('An HTTP username must be specified either as a command-line parameter '
                        'or in the cluster configuration, but not both.')
     if not http_username:
         http_username = 'admin'  # Implement default logic here, in case a user specifies the username in configurations
 
-    if not http_password:
+    if not http_password and not entra_user_identity and not entra_user_full_info:
         try:
             http_password = prompt_pass('HTTP password for the cluster:', confirm=True)
         except NoTTYException:
             raise CLIError('Please specify --http-password in non-interactive mode.')
 
     # Update the cluster config with the HTTP credentials
-    gateway_config['restAuthCredential.isEnabled'] = 'true'  # HTTP credentials are required
-    http_username = http_username or gateway_config['restAuthCredential.username']
-    gateway_config['restAuthCredential.username'] = http_username
-    gateway_config['restAuthCredential.password'] = http_password
+    if not entra_user_identity and not entra_user_full_info:
+        gateway_config['restAuthCredential.isEnabled'] = 'true'  # HTTP credentials are required
+        http_username = http_username or gateway_config['restAuthCredential.username']
+        gateway_config['restAuthCredential.username'] = http_username
+        gateway_config['restAuthCredential.password'] = http_password
+    else:
+        if entra_user_identity and entra_user_full_info:
+            raise MutuallyExclusiveArgumentError(
+                'Cannot provide both --entra-user-identity and'
+                ' --entra-user-full-info parameters.')
+        gateway_config['restAuthCredential.isEnabled'] = 'false'
+        gateway_config['restAuthEntraUsers'] = get_entra_user_info(cmd, entra_user_identity, entra_user_full_info)
     cluster_configurations['gateway'] = gateway_config
 
     # Validate whether SSH credentials were provided
@@ -106,13 +116,19 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         raise CLIError('Either the default container or the default filesystem can be specified, but not both.')
 
     # Retrieve primary blob service endpoint
-    is_wasb = not storage_account_managed_identity
+    is_wasb = None
+    if storage_default_container:
+        is_wasb = True
+    elif storage_default_filesystem:
+        is_wasb = False
+    else:
+        is_wasb = is_wasb_storage_account(cmd, storage_account)
     storage_account_endpoint = None
     if storage_account:
         storage_account_endpoint = get_storage_account_endpoint(cmd, storage_account, is_wasb)
 
     # Attempt to infer the storage account key from the endpoint
-    if not storage_account_key and storage_account and is_wasb:
+    if not storage_account_key and storage_account and not storage_account_managed_identity and is_wasb:
         from .util import get_key_for_storage_account
         logger.info('Storage account key not specified. Attempting to retrieve key...')
         key = get_key_for_storage_account(cmd, storage_account)
@@ -129,8 +145,8 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         logger.warning('Default ADLS file system not specified, using "%s".', storage_default_filesystem)
 
     # Validate storage info parameters
-    if is_wasb and not _all_or_none(storage_account, storage_account_key, storage_default_container):
-        raise CLIError('If storage details are specified, the storage account, storage account key, '
+    if is_wasb and not _all_or_none(storage_account, storage_default_container):
+        raise CLIError('If storage details are specified, the storage account, '
                        'and the default container must be specified.')
     if not is_wasb and not _all_or_none(storage_account, storage_default_filesystem):
         raise CLIError('If storage details are specified, the storage account, '
@@ -361,6 +377,13 @@ def create_cluster(cmd, client, cluster_name, resource_group_name, cluster_type,
         resource_provider_connection=resource_provider_connection,
         private_link=PrivateLink.enabled if enable_private_link is True else PrivateLink.disabled
     ) if (resource_provider_connection is not None or enable_private_link is not None) else None
+    if outbound_dependencies_managed_type:
+        network_properties.outbound_dependencies_managed_type = outbound_dependencies_managed_type
+    if public_ip_tag_type and public_ip_tag_value:
+        network_properties.public_ip_tag = IpTag(
+            ip_tag_type=public_ip_tag_type,
+            tag=public_ip_tag_value
+        )
 
     # compute isolation
     compute_isolation_properties = ComputeIsolationProperties(
@@ -409,10 +432,17 @@ def list_clusters(cmd, client, resource_group_name=None):  # pylint: disable=unu
     return list(clusters_list)
 
 
-def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None, no_wait=False):
+def update_cluster(cmd, client, cluster_name, resource_group_name, tags=None,
+                   assign_identity_type=None, assign_identity=None, no_wait=False):
     from azure.mgmt.hdinsight.models import ClusterPatchParameters
+    from .util import build_update_identities_info
+    assign_identities = []
+    if assign_identity:
+        assign_identities.append(assign_identity)
+
     cluster_patch_parameters = ClusterPatchParameters(
-        tags=tags
+        tags=tags,
+        identity=build_update_identities_info(assign_identity_type, assign_identities)
     )
 
     return sdk_no_wait(no_wait, client.update, resource_group_name, cluster_name, cluster_patch_parameters)
@@ -533,7 +563,7 @@ def create_hdi_application(cmd, client, resource_group_name, cluster_name, appli
 def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, workspace,
                           primary_key=None, workspace_type='resource_id', no_validation_timeout=False):
     from azure.mgmt.hdinsight.models import ClusterMonitoringRequest
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from ._client_factory import cf_log_analytics
 
     if workspace_type != 'resource_id' and not primary_key:
@@ -575,7 +605,7 @@ def enable_hdi_monitoring(cmd, client, resource_group_name, cluster_name, worksp
 def enable_hdi_azure_monitor(cmd, client, resource_group_name, cluster_name, workspace, primary_key=None,
                              workspace_type='resource_id', no_validation_timeout=False):
     from azure.mgmt.hdinsight.models import AzureMonitorRequest
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     from ._client_factory import cf_log_analytics
 
     if workspace_type != 'resource_id' and not primary_key:
@@ -611,6 +641,49 @@ def enable_hdi_azure_monitor(cmd, client, resource_group_name, cluster_name, wor
         resource_group_name,
         cluster_name,
         azure_monitor_request_parameter)
+
+# pylint: disable=unused-argument
+
+
+def enable_hdi_azure_monitor_agent(cmd, client, resource_group_name, cluster_name, workspace, primary_key=None,
+                                   workspace_type='resource_id', no_validation_timeout=False):
+    from azure.mgmt.hdinsight.models import AzureMonitorRequest
+    from azure.mgmt.core.tools import parse_resource_id
+    from ._client_factory import cf_log_analytics
+
+    if workspace_type != 'resource_id' and not primary_key:
+        raise RequiredArgumentMissingError('primary key is required when workspace ID is provided.')
+
+    workspace_id = workspace
+    if workspace_type == 'resource_id':
+        parsed_workspace = parse_resource_id(workspace)
+        workspace_resource_group_name = parsed_workspace['resource_group']
+        workspace_name = parsed_workspace['resource_name']
+
+        log_analytics_client = cf_log_analytics(cmd.cli_ctx)
+        log_analytics_workspace = log_analytics_client.workspaces.get(workspace_resource_group_name, workspace_name)
+        if not log_analytics_workspace:
+            raise CLIError('Fails to retrieve workspace by {}'.format(workspace))
+
+        # Only retrieve primary key when not provided
+        if not primary_key:
+            shared_keys = log_analytics_client.shared_keys.get_shared_keys(workspace_resource_group_name,
+                                                                           workspace_name)
+            if not shared_keys:
+                raise CLIError('Fails to retrieve shared key for workspace {}'.format(log_analytics_workspace))
+
+            primary_key = shared_keys.primary_shared_key
+
+        workspace_id = log_analytics_workspace.customer_id
+
+    azure_monitor_agent_request_parameter = AzureMonitorRequest(
+        workspace_id=workspace_id,
+        primary_key=primary_key
+    )
+    return client.begin_enable_azure_monitor_agent(
+        resource_group_name,
+        cluster_name,
+        azure_monitor_agent_request_parameter)
 
 
 # pylint: disable=unused-argument
@@ -845,3 +918,34 @@ def _extract_and_validate_autoscale_configuration(cluster):
 def _validate_schedule_configuration(autoscale_configuration):
     if not autoscale_configuration.recurrence:
         raise CLIError('The cluster has not enabled Schedule-based autoscale.')
+
+
+def update_gateway_settings(cmd, client, cluster_name, resource_group_name, http_username=None,
+                            http_password=None, entra_user_identity=None, entra_user_full_info=None, no_wait=False):
+    from azure.mgmt.hdinsight.models import UpdateGatewaySettingsParameters
+    from .util import get_entra_user_info
+    if not http_password and not entra_user_identity and not entra_user_full_info:
+        try:
+            http_password = prompt_pass('HTTP password for the cluster:', confirm=True)
+        except NoTTYException:
+            raise CLIError('Please specify --http-password in non-interactive mode.')
+    if http_password and not http_username:
+        http_username = 'admin'
+    if entra_user_identity and entra_user_full_info:
+        raise MutuallyExclusiveArgumentError(
+            'Cannot provide both --entra-user-identity and'
+            ' --entra-user-full-info parameters.')
+    rest_auth_entra_users_data = None
+    if entra_user_identity or entra_user_full_info:
+        rest_auth_entra_users_data = get_entra_user_info(cmd, entra_user_identity, entra_user_full_info, False)
+    update_gateway_settings_parameters = UpdateGatewaySettingsParameters(
+        is_credential_enabled=bool(http_password),
+        user_name=http_username,
+        password=http_password,
+        rest_auth_entra_users=rest_auth_entra_users_data
+    )
+    try:
+        return sdk_no_wait(no_wait, client.begin_update_gateway_settings, resource_group_name,
+                           cluster_name, update_gateway_settings_parameters)
+    except Exception as ex:
+        raise CLIError(str(ex))

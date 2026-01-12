@@ -13,7 +13,8 @@ from ._up_utils import (ContainerApp,
                         ResourceGroup,
                         _get_registry_from_app,
                         _get_registry_details,
-                        )   # pylint: disable=unused-import
+                        _get_acr_from_image,
+                        )  # pylint: disable=unused-import
 
 logger = get_logger(__name__)
 
@@ -74,6 +75,9 @@ def build_containerapp_from_compose_service(cmd,
 
     if not registry_server:
         _get_registry_from_app(app, True)  # if the app exists, get the registry
+
+    if app.registry_server is None and app.image is not None:
+        _get_acr_from_image(cmd, app)
     _get_registry_details(cmd, app, True)  # fetch ACR creds from arguments registry arguments
 
     app.create_acr_if_needed()
@@ -266,7 +270,7 @@ def resolve_replicas_from_service(service):
 
 def valid_resource_settings():
     # vCPU and Memory reservations
-    # https://docs.microsoft.com/azure/container-apps/containers#configuration
+    # https://learn.microsoft.com/azure/container-apps/containers#configuration
     return {
         "0.25": "0.5",
         "0.5": "1.0",

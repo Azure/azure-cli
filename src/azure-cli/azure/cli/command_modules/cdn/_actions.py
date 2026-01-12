@@ -11,7 +11,7 @@ import argparse
 class OriginType(argparse._AppendAction):
     def __call__(self, parser, namespace, values, option_string=None):
         deep_created_origin = self.get_origin(values, option_string)
-        super(OriginType, self).__call__(parser, namespace, deep_created_origin, option_string)
+        super().__call__(parser, namespace, deep_created_origin, option_string)
 
     def get_origin(self, values, option_string):
         from azure.mgmt.cdn.models import DeepCreatedOrigin

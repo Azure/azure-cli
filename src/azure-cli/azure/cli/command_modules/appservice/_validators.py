@@ -10,9 +10,9 @@ from azure.cli.core.azclierror import (InvalidArgumentValueError, ArgumentUsageE
                                        ResourceNotFoundError, ValidationError, MutuallyExclusiveArgumentError)
 from azure.cli.core.commands.client_factory import get_mgmt_service_client, get_subscription_id
 from azure.cli.core.commands.validators import validate_tags
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
 from knack.log import get_logger
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
 
 from ._appservice_utils import _generic_site_operation
 from ._client_factory import web_client_factory
@@ -91,7 +91,7 @@ def validate_ase_create(cmd, namespace):
 
 
 def _validate_asp_sku(sku, app_service_environment, zone_redundant):
-    supported_skus = ['PREMIUMV2', 'PREMIUMV3', 'PREMIUMMV3', 'PREMIUM0V3', 'ISOLATEDV2', 'ISOLATEDMV2']
+    supported_skus = ['PREMIUMV2', 'PREMIUMV3', 'PREMIUMMV3', 'PREMIUM0V3', 'PREMIUMV4', 'PREMIUMMV4', 'ISOLATEDV2', 'ISOLATEDMV2', 'ELASTICPREMIUM']  # pylint: disable=line-too-long
     if zone_redundant and get_sku_tier(sku).upper() not in supported_skus:
         raise ValidationError("Zone redundancy cannot be enabled for sku {}".format(sku))
     # Isolated SKU is supported only for ASE
@@ -99,12 +99,12 @@ def _validate_asp_sku(sku, app_service_environment, zone_redundant):
         if not app_service_environment:
             raise ValidationError("The pricing tier 'Isolated' is not allowed for this app service plan. "
                                   "Use this link to learn more: "
-                                  "https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
+                                  "https://learn.microsoft.com/azure/app-service/overview-hosting-plans")
     else:
         if app_service_environment:
             raise ValidationError("Only pricing tier 'IsolatedV2' and 'IsolatedMV2' is allowed in this "
                                   "app service plan. Use this link to "
-                                  "learn more: https://docs.microsoft.com/azure/app-service/overview-hosting-plans")
+                                  "learn more: https://learn.microsoft.com/azure/app-service/overview-hosting-plans")
 
 
 def validate_asp_create(namespace):
@@ -268,16 +268,6 @@ def validate_add_vnet(cmd, namespace):
                               "Web app location: {}. Vnet location: {}".format(webapp_loc, vnet_loc))
 
 
-def validate_front_end_scale_factor(namespace):
-    if namespace.front_end_scale_factor:
-        min_scale_factor = 5
-        max_scale_factor = 15
-        scale_error_text = "Frontend Scale Factor '{}' is invalid. Must be between {} and {}"
-        scale_factor = namespace.front_end_scale_factor
-        if scale_factor < min_scale_factor or scale_factor > max_scale_factor:
-            raise ValidationError(scale_error_text.format(scale_factor, min_scale_factor, max_scale_factor))
-
-
 def validate_ip_address(cmd, namespace):
     if namespace.ip_address is not None:
         _validate_ip_address_format(namespace)
@@ -348,17 +338,18 @@ def _validate_service_tag_format(cmd, namespace):
         service_tag_full_list = ListServiceTags(cli_ctx=cmd.cli_ctx)(command_args={
             "location": webapp.location
         })
-        if service_tag_full_list is None:
-            logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
-            return
-        for tag in input_tags:
-            valid_tag = False
-            for tag_full_list in service_tag_full_list["values"]:
-                if tag.lower() == tag_full_list["name"].lower():
-                    valid_tag = True
-                    continue
-            if not valid_tag:
-                raise InvalidArgumentValueError('Unknown Service Tag: ' + tag)
+        if namespace.skip_service_tag_validation is None:
+            if service_tag_full_list is None or "values" not in service_tag_full_list:
+                logger.warning('Not able to get full Service Tag list. Cannot validate Service Tag.')
+                return
+            for tag in input_tags:
+                valid_tag = False
+                for tag_full_list in service_tag_full_list["values"]:
+                    if tag.lower() == tag_full_list["name"].lower():
+                        valid_tag = True
+                        continue
+                if not valid_tag:
+                    raise InvalidArgumentValueError('Unknown Service Tag: ' + tag)
 
 
 def _validate_service_tag_existence(cmd, namespace):

@@ -19,9 +19,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/volumegroups/{}", "2025-09-01"],
         ]
     }
 
@@ -50,7 +50,7 @@ class Update(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -62,7 +62,7 @@ class Update(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -125,12 +125,6 @@ class Update(AAZCommand):
             help="Resource name",
             nullable=True,
         )
-        _element.avs_data_store = AAZStrArg(
-            options=["avs-data-store"],
-            help="Specifies whether the volume is enabled for Azure VMware Solution (AVS) datastore purpose",
-            nullable=True,
-            enum={"Disabled": "Disabled", "Enabled": "Enabled"},
-        )
         _element.capacity_pool_resource_id = AAZStrArg(
             options=["capacity-pool-resource-id"],
             help="Pool Resource Id used in case of creating a volume through volume group",
@@ -147,22 +141,19 @@ class Update(AAZCommand):
             nullable=True,
             enum={"Default": "Default", "Never": "Never", "OnRead": "OnRead"},
         )
+        _element.cool_access_tiering_policy = AAZStrArg(
+            options=["cool-access-tiering-policy"],
+            help="coolAccessTieringPolicy determines which cold data blocks are moved to cool tier. The possible values for this field are: Auto - Moves cold user data blocks in both the Snapshot copies and the active file system to the cool tier tier. This policy is the default. SnapshotOnly - Moves user data blocks of the Volume Snapshot copies that are not associated with the active file system to the cool tier.",
+            nullable=True,
+            enum={"Auto": "Auto", "SnapshotOnly": "SnapshotOnly"},
+        )
         _element.coolness_period = AAZIntArg(
             options=["coolness-period"],
             help="Specifies the number of days after which data that is not accessed by clients will be tiered.",
             nullable=True,
             fmt=AAZIntArgFormat(
                 maximum=183,
-                minimum=7,
-            ),
-        )
-        _element.creation_token = AAZStrArg(
-            options=["creation-token"],
-            help="A unique file path for the volume. Used when creating mount targets",
-            fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-]{0,79}$",
-                max_length=80,
-                min_length=1,
+                minimum=2,
             ),
         )
         _element.data_protection = AAZObjectArg(
@@ -207,31 +198,10 @@ class Update(AAZCommand):
             help="Specifies if default quota is enabled for the volume.",
             nullable=True,
         )
-        _element.is_large_volume = AAZBoolArg(
-            options=["is-large-volume"],
-            help="Specifies whether volume is a Large Volume or Regular Volume.",
-            nullable=True,
-        )
-        _element.is_restoring = AAZBoolArg(
-            options=["is-restoring"],
-            help="Restoring",
-            nullable=True,
-        )
         _element.key_vault_private_endpoint_resource_id = AAZStrArg(
             options=["key-vault-private-endpoint-resource-id"],
             help="The resource ID of private endpoint for KeyVault. It must reside in the same VNET as the volume. Only applicable if encryptionKeySource = 'Microsoft.KeyVault'.",
             nullable=True,
-        )
-        _element.ldap_enabled = AAZBoolArg(
-            options=["ldap-enabled"],
-            help="Specifies whether LDAP is enabled or not for a given NFS volume.",
-            nullable=True,
-        )
-        _element.network_features = AAZStrArg(
-            options=["network-features"],
-            help="Network features available to the volume, or current state of update.",
-            nullable=True,
-            enum={"Basic": "Basic", "Basic_Standard": "Basic_Standard", "Standard": "Standard", "Standard_Basic": "Standard_Basic"},
         )
         _element.placement_rules = AAZListArg(
             options=["placement-rules"],
@@ -248,17 +218,11 @@ class Update(AAZCommand):
             help="Proximity placement group associated with the volume",
             nullable=True,
         )
-        _element.security_style = AAZStrArg(
-            options=["security-style"],
-            help="The security style of volume, default unix, defaults to ntfs for dual protocol or CIFS protocol",
-            nullable=True,
-            enum={"ntfs": "ntfs", "unix": "unix"},
-        )
         _element.service_level = AAZStrArg(
             options=["service-level"],
             help="serviceLevel",
             nullable=True,
-            enum={"Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
+            enum={"Flexible": "Flexible", "Premium": "Premium", "Standard": "Standard", "StandardZRS": "StandardZRS", "Ultra": "Ultra"},
         )
         _element.smb_access_based_enumeration = AAZStrArg(
             options=["smb-access-based-enumeration"],
@@ -310,17 +274,12 @@ class Update(AAZCommand):
             help="Maximum storage quota allowed for a file system in bytes. This is a soft quota used for alerting only. Minimum size is 100 GiB. Upper limit is 100TiB, 500Tib for LargeVolume or 2400Tib for LargeVolume on exceptional basis. Specified in bytes.",
             fmt=AAZIntArgFormat(
                 maximum=2638827906662400,
-                minimum=107374182400,
+                minimum=53687091200,
             ),
         )
         _element.volume_spec_name = AAZStrArg(
             options=["volume-spec-name"],
             help="Volume spec name is the application specific designation or identifier for the particular volume in a volume group for e.g. data, log",
-            nullable=True,
-        )
-        _element.volume_type = AAZStrArg(
-            options=["volume-type"],
-            help="What type of volume is this. For destination volumes in Cross Region Replication, set type to DataProtection",
             nullable=True,
         )
         _element.tags = AAZDictArg(
@@ -352,12 +311,12 @@ class Update(AAZCommand):
         )
 
         backup = cls._args_schema.volumes.Element.data_protection.backup
-        backup.backup_policy_id = AAZStrArg(
+        backup.backup_policy_id = AAZResourceIdArg(
             options=["backup-policy-id"],
             help="Backup Policy Resource ID",
             nullable=True,
         )
-        backup.backup_vault_id = AAZStrArg(
+        backup.backup_vault_id = AAZResourceIdArg(
             options=["backup-vault-id"],
             help="Backup Vault Resource ID",
             nullable=True,
@@ -369,20 +328,10 @@ class Update(AAZCommand):
         )
 
         replication = cls._args_schema.volumes.Element.data_protection.replication
-        replication.endpoint_type = AAZStrArg(
-            options=["endpoint-type"],
-            help="Indicates whether the local volume is the source or destination for the Volume Replication",
-            nullable=True,
-            enum={"dst": "dst", "src": "src"},
-        )
         replication.remote_volume_region = AAZStrArg(
             options=["remote-volume-region"],
             help="The remote region for the other end of the Volume Replication.",
             nullable=True,
-        )
-        replication.remote_volume_resource_id = AAZStrArg(
-            options=["remote-volume-resource-id"],
-            help="The resource ID of the remote volume.",
         )
         replication.replication_schedule = AAZStrArg(
             options=["replication-schedule"],
@@ -620,7 +569,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -667,7 +616,7 @@ class Update(AAZCommand):
                     session,
                     self.on_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
             if session.http_response.status_code in [201]:
@@ -676,7 +625,7 @@ class Update(AAZCommand):
                     session,
                     self.on_201,
                     self.on_error,
-                    lro_options={"final-state-via": "azure-async-operation"},
+                    lro_options={"final-state-via": "location"},
                     path_format_arguments=self.url_parameters,
                 )
 
@@ -723,7 +672,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -811,12 +760,11 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties.volumes[].properties")
             if properties is not None:
-                properties.set_prop("avsDataStore", AAZStrType, ".avs_data_store")
                 properties.set_prop("capacityPoolResourceId", AAZStrType, ".capacity_pool_resource_id")
                 properties.set_prop("coolAccess", AAZBoolType, ".cool_access")
                 properties.set_prop("coolAccessRetrievalPolicy", AAZStrType, ".cool_access_retrieval_policy")
+                properties.set_prop("coolAccessTieringPolicy", AAZStrType, ".cool_access_tiering_policy")
                 properties.set_prop("coolnessPeriod", AAZIntType, ".coolness_period")
-                properties.set_prop("creationToken", AAZStrType, ".creation_token", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("dataProtection", AAZObjectType, ".data_protection")
                 properties.set_prop("defaultGroupQuotaInKiBs", AAZIntType, ".default_group_quota_in_ki_bs")
                 properties.set_prop("defaultUserQuotaInKiBs", AAZIntType, ".default_user_quota_in_ki_bs")
@@ -825,15 +773,10 @@ class Update(AAZCommand):
                 properties.set_prop("encryptionKeySource", AAZStrType, ".encryption_key_source")
                 properties.set_prop("exportPolicy", AAZObjectType, ".export_policy")
                 properties.set_prop("isDefaultQuotaEnabled", AAZBoolType, ".is_default_quota_enabled")
-                properties.set_prop("isLargeVolume", AAZBoolType, ".is_large_volume")
-                properties.set_prop("isRestoring", AAZBoolType, ".is_restoring")
                 properties.set_prop("keyVaultPrivateEndpointResourceId", AAZStrType, ".key_vault_private_endpoint_resource_id")
-                properties.set_prop("ldapEnabled", AAZBoolType, ".ldap_enabled")
-                properties.set_prop("networkFeatures", AAZStrType, ".network_features")
                 properties.set_prop("placementRules", AAZListType, ".placement_rules")
                 properties.set_prop("protocolTypes", AAZListType, ".protocol_types")
                 properties.set_prop("proximityPlacementGroup", AAZStrType, ".proximity_placement_group")
-                properties.set_prop("securityStyle", AAZStrType, ".security_style")
                 properties.set_prop("serviceLevel", AAZStrType, ".service_level")
                 properties.set_prop("smbAccessBasedEnumeration", AAZStrType, ".smb_access_based_enumeration", typ_kwargs={"nullable": True})
                 properties.set_prop("smbContinuouslyAvailable", AAZBoolType, ".smb_continuously_available")
@@ -845,7 +788,6 @@ class Update(AAZCommand):
                 properties.set_prop("unixPermissions", AAZStrType, ".unix_permissions", typ_kwargs={"nullable": True})
                 properties.set_prop("usageThreshold", AAZIntType, ".usage_threshold", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("volumeSpecName", AAZStrType, ".volume_spec_name")
-                properties.set_prop("volumeType", AAZStrType, ".volume_type")
 
             data_protection = _builder.get(".properties.volumes[].properties.dataProtection")
             if data_protection is not None:
@@ -862,9 +804,7 @@ class Update(AAZCommand):
 
             replication = _builder.get(".properties.volumes[].properties.dataProtection.replication")
             if replication is not None:
-                replication.set_prop("endpointType", AAZStrType, ".endpoint_type")
                 replication.set_prop("remoteVolumeRegion", AAZStrType, ".remote_volume_region")
-                replication.set_prop("remoteVolumeResourceId", AAZStrType, ".remote_volume_resource_id", typ_kwargs={"flags": {"required": True}})
                 replication.set_prop("replicationSchedule", AAZStrType, ".replication_schedule")
 
             snapshot = _builder.get(".properties.volumes[].properties.dataProtection.snapshot")
@@ -965,6 +905,7 @@ class _UpdateHelper:
             _schema.location = cls._schema_volume_group_details_read.location
             _schema.name = cls._schema_volume_group_details_read.name
             _schema.properties = cls._schema_volume_group_details_read.properties
+            _schema.system_data = cls._schema_volume_group_details_read.system_data
             _schema.type = cls._schema_volume_group_details_read.type
             return
 
@@ -980,6 +921,10 @@ class _UpdateHelper:
         )
         volume_group_details_read.properties = AAZObjectType(
             flags={"client_flatten": True},
+        )
+        volume_group_details_read.system_data = AAZObjectType(
+            serialized_name="systemData",
+            flags={"read_only": True},
         )
         volume_group_details_read.type = AAZStrType(
             flags={"read_only": True},
@@ -1035,6 +980,9 @@ class _UpdateHelper:
         _element.zones = AAZListType()
 
         properties = _schema_volume_group_details_read.properties.volumes.Element.properties
+        properties.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrType(
+            serialized_name="acceptGrowCapacityPoolForShortTermCloneSplit",
+        )
         properties.actual_throughput_mibps = AAZFloatType(
             serialized_name="actualThroughputMibps",
             flags={"read_only": True},
@@ -1064,6 +1012,9 @@ class _UpdateHelper:
         properties.cool_access_retrieval_policy = AAZStrType(
             serialized_name="coolAccessRetrievalPolicy",
         )
+        properties.cool_access_tiering_policy = AAZStrType(
+            serialized_name="coolAccessTieringPolicy",
+        )
         properties.coolness_period = AAZIntType(
             serialized_name="coolnessPeriod",
         )
@@ -1087,6 +1038,10 @@ class _UpdateHelper:
         properties.delete_base_snapshot = AAZBoolType(
             serialized_name="deleteBaseSnapshot",
         )
+        properties.effective_network_features = AAZStrType(
+            serialized_name="effectiveNetworkFeatures",
+            flags={"read_only": True},
+        )
         properties.enable_subvolumes = AAZStrType(
             serialized_name="enableSubvolumes",
         )
@@ -1107,6 +1062,11 @@ class _UpdateHelper:
             serialized_name="fileSystemId",
             flags={"read_only": True},
         )
+        properties.inherited_size_in_bytes = AAZIntType(
+            serialized_name="inheritedSizeInBytes",
+            nullable=True,
+            flags={"read_only": True},
+        )
         properties.is_default_quota_enabled = AAZBoolType(
             serialized_name="isDefaultQuotaEnabled",
         )
@@ -1115,6 +1075,7 @@ class _UpdateHelper:
         )
         properties.is_restoring = AAZBoolType(
             serialized_name="isRestoring",
+            flags={"read_only": True},
         )
         properties.kerberos_enabled = AAZBoolType(
             serialized_name="kerberosEnabled",
@@ -1244,15 +1205,22 @@ class _UpdateHelper:
         )
 
         replication = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection.replication
+        replication.destination_replications = AAZListType(
+            serialized_name="destinationReplications",
+            flags={"read_only": True},
+        )
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
+            flags={"read_only": True},
+        )
+        replication.remote_path = AAZObjectType(
+            serialized_name="remotePath",
         )
         replication.remote_volume_region = AAZStrType(
             serialized_name="remoteVolumeRegion",
         )
         replication.remote_volume_resource_id = AAZStrType(
             serialized_name="remoteVolumeResourceId",
-            flags={"required": True},
         )
         replication.replication_id = AAZStrType(
             serialized_name="replicationId",
@@ -1260,6 +1228,33 @@ class _UpdateHelper:
         )
         replication.replication_schedule = AAZStrType(
             serialized_name="replicationSchedule",
+        )
+
+        destination_replications = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection.replication.destination_replications
+        destination_replications.Element = AAZObjectType()
+
+        _element = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection.replication.destination_replications.Element
+        _element.region = AAZStrType()
+        _element.replication_type = AAZStrType(
+            serialized_name="replicationType",
+        )
+        _element.resource_id = AAZStrType(
+            serialized_name="resourceId",
+        )
+        _element.zone = AAZStrType()
+
+        remote_path = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection.replication.remote_path
+        remote_path.external_host_name = AAZStrType(
+            serialized_name="externalHostName",
+            flags={"required": True},
+        )
+        remote_path.server_name = AAZStrType(
+            serialized_name="serverName",
+            flags={"required": True},
+        )
+        remote_path.volume_name = AAZStrType(
+            serialized_name="volumeName",
+            flags={"required": True},
         )
 
         snapshot = _schema_volume_group_details_read.properties.volumes.Element.properties.data_protection.snapshot
@@ -1359,10 +1354,31 @@ class _UpdateHelper:
         zones = _schema_volume_group_details_read.properties.volumes.Element.zones
         zones.Element = AAZStrType()
 
+        system_data = _schema_volume_group_details_read.system_data
+        system_data.created_at = AAZStrType(
+            serialized_name="createdAt",
+        )
+        system_data.created_by = AAZStrType(
+            serialized_name="createdBy",
+        )
+        system_data.created_by_type = AAZStrType(
+            serialized_name="createdByType",
+        )
+        system_data.last_modified_at = AAZStrType(
+            serialized_name="lastModifiedAt",
+        )
+        system_data.last_modified_by = AAZStrType(
+            serialized_name="lastModifiedBy",
+        )
+        system_data.last_modified_by_type = AAZStrType(
+            serialized_name="lastModifiedByType",
+        )
+
         _schema.id = cls._schema_volume_group_details_read.id
         _schema.location = cls._schema_volume_group_details_read.location
         _schema.name = cls._schema_volume_group_details_read.name
         _schema.properties = cls._schema_volume_group_details_read.properties
+        _schema.system_data = cls._schema_volume_group_details_read.system_data
         _schema.type = cls._schema_volume_group_details_read.type
 
 

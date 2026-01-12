@@ -18,7 +18,7 @@ class TestHelper(unittest.TestCase):
         # Test case where resource_id needs leading slash and trailing slash removed
         self.assertEqual(sanitize_resource_id("test/resource/"), "/test/resource")
 
-    @patch('msrestazure.tools.parse_resource_id')
+    @patch('azure.mgmt.core.tools.parse_resource_id')
     @patch('azure.cli.command_modules.acs.azuremonitormetrics.helper.register_rps')
     def test_subscription_id_selection(self, mock_register_rps, mock_parse_resource_id):
         # Mocking return value of parse_resource_id

@@ -5,12 +5,12 @@
 
 # pylint: disable=too-few-public-methods, protected-access, too-many-nested-blocks, too-many-branches
 
+from urllib.parse import parse_qs, urljoin, urlparse, quote
 import json
 
 from azure.core.exceptions import ClientAuthenticationError, ResourceExistsError, ResourceNotFoundError, \
     HttpResponseError
 from azure.cli.core.azclierror import InvalidArgumentValueError
-from urllib.parse import parse_qs, urljoin, urlparse
 
 from ._arg_browser import AAZArgBrowser
 from ._base import AAZUndefined, AAZBaseValue, AAZBaseType, has_value
@@ -18,11 +18,6 @@ from ._content_builder import AAZContentBuilder
 from ._field_type import AAZSimpleType, AAZObjectType, AAZBaseDictType, AAZListType
 from ._field_value import AAZList, AAZObject, AAZBaseDictValue
 from .exceptions import AAZInvalidValueError
-
-try:
-    from urllib import quote  # type: ignore
-except ImportError:
-    from urllib.parse import quote  # type: ignore
 
 
 class AAZOperation:
@@ -652,8 +647,7 @@ class AAZGenericInstanceUpdateOperation(AAZOperation):
         if disc_schema is not None:
             schemas.append(disc_schema)
         for schema in schemas:
-            for key in schema._fields:
-                yield key
+            yield from schema._fields
 
     def _throw_and_show_options(self, instance, part, path, flatten):
         parent = '.'.join(path[:-1]).replace('.[', '[')

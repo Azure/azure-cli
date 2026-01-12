@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=line-too-long
+
 from datetime import datetime
 from azure.cli.core.azclierror import RequiredArgumentMissingError, MutuallyExclusiveArgumentError, \
     ArgumentUsageError, InvalidArgumentValueError
@@ -53,10 +55,10 @@ def validate_wl_restore(item, item_type, restore_mode, recovery_mode):
     #        operation. Correct value should be - {}.
     #        """.format(item.properties.workload_type))
 
-    if item_type is None or item_type.lower() not in ['sql', 'saphana']:
+    if item_type is None or item_type.lower() not in ['sql', 'saphana', 'sapase']:
         raise InvalidArgumentValueError("""
             The item_type specified in recovery config file is incorrect. Please correct it and retry the
-            operation. Allowed values are: 'SQL', 'SAPHana'.
+            operation. Allowed values are: 'SQL', 'SAPHana', 'SAPAse'.
             """)
 
     if item_type.lower() not in item.properties.workload_type.lower():
@@ -71,7 +73,7 @@ def validate_wl_restore(item, item_type, restore_mode, recovery_mode):
             operation. Allowed values are: 'OriginalLocation', 'AlternateLocation'.
             """)
 
-    if recovery_mode is not None and recovery_mode != 'FileRecovery':
+    if recovery_mode is not None and recovery_mode not in ['FileRecovery', 'SnapshotAttachAndRecover', 'SnapshotAttach']:
         raise InvalidArgumentValueError("""
             The recovery_mode specified in recovery config file is incorrect. Please correct it and retry the
             operation.
@@ -102,7 +104,9 @@ def validate_czr(backup_config_response, recovery_point, use_secondary_region):
     backup_storage_redundancy = backup_config_response.properties.storage_type
     cross_region_restore_flag = backup_config_response.properties.cross_region_restore_flag
     if (cross_region_restore_flag or backup_storage_redundancy == StorageType.ZONE_REDUNDANT):
-        if recovery_point.tier_type is not None and recovery_point.tier_type == "VaultStandard":
+        if recovery_point.tier_type is not None and (
+           recovery_point.tier_type == "VaultStandard" or
+           recovery_point.tier_type == "SnapshotAndVaultStandard"):
             if backup_storage_redundancy != StorageType.ZONE_REDUNDANT:
                 if recovery_point.properties.zones is None:
                     raise ArgumentUsageError("""
@@ -116,8 +120,8 @@ def validate_czr(backup_config_response, recovery_point, use_secondary_region):
                     """)
         else:
             raise ArgumentUsageError("""
-            Please ensure that the given RP tier type is 'VaultStandard' or remove --target-zone argument.
-            """)
+            Please ensure that the given RP tier type is either 'VaultStandard' or 'SnapshotAndVaultStandard',
+            or remove --target-zone argument.""")
     else:
         raise ArgumentUsageError("""
         Please ensure either the vault storage redundancy is ZoneRedundant or the vault has CRR enabled or try
@@ -130,3 +134,36 @@ def validate_archive_restore(recovery_point, rehydration_priority):
             rehydration_priority is None):
         raise InvalidArgumentValueError("""The selected recovery point is in archive tier, provide additional
         parameters of rehydration duration and rehydration priority.""")
+
+
+def validate_reconfigure_cli_parameters(source_vault_name, source_vault_resource_group, new_vault_name, new_vault_resource_group,
+                                        backup_management_type, workload_type):
+    """Top-level CLI validation for backup reconfiguration (name / type sanity checks).
+
+    Note: Source vault is always the vault specified by --vault-name / --resource-group in the command context."""
+
+    # Ensure old and new vaults are different
+    if (source_vault_name.lower() == new_vault_name.lower() and
+            source_vault_resource_group.lower() == new_vault_resource_group.lower()):
+        raise InvalidArgumentValueError("Source and destination vaults cannot be the same")
+
+    # Validate workload type is provided for Azure workloads
+    if backup_management_type.lower() == 'azureworkload' and not workload_type:
+        raise RequiredArgumentMissingError("Workload type is required for Azure workload reconfiguration")
+
+    # Validate incompatible parameter combinations
+    if backup_management_type.lower() == 'azureiaasvm' and workload_type:
+        raise MutuallyExclusiveArgumentError("Workload type should not be specified for VM backup reconfiguration")
+
+
+def validate_afs_policy_compatibility(old_policy_type, new_policy_type):
+    """Validate AFS policy type compatibility for reconfiguration"""
+
+    # AFS policy validation: cannot go from vault-based to snapshot-based
+    if old_policy_type == 'vault' and new_policy_type == 'snapshot':
+        raise InvalidArgumentValueError("""
+        Cannot reconfigure from vault-based policy to snapshot-based policy for Azure File Share.
+        This transition is not supported.""")
+
+    # Allow snapshot to vault transition
+    return True

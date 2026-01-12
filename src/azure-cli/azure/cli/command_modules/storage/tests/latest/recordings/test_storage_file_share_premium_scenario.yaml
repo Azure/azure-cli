@@ -1,0 +1,175 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage account keys list
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n -g --query -o
+      User-Agent:
+      - AZURECLI/2.78.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+    method: POST
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/clitest000001/providers/Microsoft.Storage/storageAccounts/share000002/listKeys?api-version=2025-06-01&$expand=kerb
+  response:
+    body:
+      string: '{"keys":[{"creationTime":"2025-10-24T09:57:37.9819203Z","keyName":"key1","value":"veryFakedStorageAccountKey==","permissions":"FULL"},{"creationTime":"2025-10-24T09:57:37.9819203Z","keyName":"key2","value":"veryFakedStorageAccountKey==","permissions":"FULL"}]}'
+    headers:
+      cache-control:
+      - no-cache
+      content-length:
+      - '260'
+      content-type:
+      - application/json
+      date:
+      - Fri, 24 Oct 2025 09:58:02 GMT
+      expires:
+      - '-1'
+      pragma:
+      - no-cache
+      server:
+      - Microsoft-Azure-Storage-Resource-Provider/1.0,Microsoft-HTTPAPI/2.0 Microsoft-HTTPAPI/2.0
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains
+      x-content-type-options:
+      - nosniff
+      x-ms-operation-identifier:
+      - tenantId=7b31ddc4-9101-4ef0-a387-79ce181cacdb,objectId=7b1bdbe4-80ac-47f9-882b-33d6e62950ab/eastus2euap/eac88684-0660-48e0-9c8f-423a177a9a04
+      x-ms-ratelimit-remaining-subscription-resource-requests:
+      - '799'
+      x-ms-throttling-version:
+      - v1
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share create
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      ParameterSetName:
+      - -n --fail-on-exist --metadata --enable-snapshot-virtual-directory-access --protocol
+        --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.78.0 azsdk-python-storage-file-share/12.22.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 24 Oct 2025 09:58:02 GMT
+      x-ms-enable-snapshot-virtual-directory-access:
+      - 'false'
+      x-ms-enabled-protocols:
+      - NFS
+      x-ms-meta:
+      - '{''foo'': ''bar'', ''cat'': ''hat''}'
+      x-ms-meta-cat:
+      - hat
+      x-ms-meta-foo:
+      - bar
+      x-ms-version:
+      - '2025-07-05'
+    method: PUT
+    uri: https://share000002.file.core.windows.net/share000003?restype=share
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Fri, 24 Oct 2025 09:58:04 GMT
+      etag:
+      - '"0x8DE12E3D313DF26"'
+      last-modified:
+      - Fri, 24 Oct 2025 09:58:04 GMT
+      x-ms-version:
+      - '2025-07-05'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/xml
+      Accept-Encoding:
+      - gzip, deflate
+      CommandName:
+      - storage share show
+      Connection:
+      - keep-alive
+      ParameterSetName:
+      - -n --account-name --account-key
+      User-Agent:
+      - AZURECLI/2.78.0 azsdk-python-storage-file-share/12.22.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
+      x-ms-date:
+      - Fri, 24 Oct 2025 09:58:04 GMT
+      x-ms-version:
+      - '2025-07-05'
+    method: GET
+    uri: https://share000002.file.core.windows.net/share000003?restype=share
+  response:
+    body:
+      string: ''
+    headers:
+      content-length:
+      - '0'
+      date:
+      - Fri, 24 Oct 2025 09:58:05 GMT
+      etag:
+      - '"0x8DE12E3D313DF26"'
+      last-modified:
+      - Fri, 24 Oct 2025 09:58:04 GMT
+      x-ms-access-tier:
+      - Premium
+      x-ms-enable-snapshot-virtual-directory-access:
+      - 'false'
+      x-ms-enabled-protocols:
+      - NFS
+      x-ms-has-immutability-policy:
+      - 'false'
+      x-ms-has-legal-hold:
+      - 'false'
+      x-ms-lease-state:
+      - available
+      x-ms-lease-status:
+      - unlocked
+      x-ms-meta-cat:
+      - hat
+      x-ms-meta-foo:
+      - bar
+      x-ms-root-squash:
+      - NoRootSquash
+      x-ms-share-next-allowed-quota-downgrade-time:
+      - Fri, 24 Oct 2025 09:58:04 GMT
+      x-ms-share-paid-bursting-enabled:
+      - 'false'
+      x-ms-share-provisioned-bandwidth-mibps:
+      - '110'
+      x-ms-share-provisioned-egress-mbps:
+      - '110'
+      x-ms-share-provisioned-ingress-mbps:
+      - '110'
+      x-ms-share-provisioned-iops:
+      - '3100'
+      x-ms-share-quota:
+      - '100'
+      x-ms-version:
+      - '2025-07-05'
+    status:
+      code: 200
+      message: OK
+version: 1

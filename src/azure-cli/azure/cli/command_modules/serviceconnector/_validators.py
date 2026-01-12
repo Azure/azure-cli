@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 
 import re
+import requests
 import random
 import string
 
@@ -12,9 +13,8 @@ from knack.prompting import (
     prompt,
     prompt_pass
 )
-from msrestazure.tools import (
+from azure.mgmt.core.tools import (
     parse_resource_id,
-    is_valid_resource_id
 )
 from azure.cli.core import telemetry
 from azure.cli.core.commands.client_factory import get_subscription_id
@@ -26,9 +26,11 @@ from azure.cli.core.azclierror import (
 
 from ._utils import (
     run_cli_cmd,
-    get_object_id_of_current_user
+    get_object_id_of_current_user,
+    is_valid_resource_id
 )
 from ._resource_config import (
+    AUTH_TYPE,
     CLIENT_TYPE,
     RESOURCE,
     SOURCE_RESOURCES,
@@ -80,7 +82,7 @@ def get_resource_type_by_id(resource_id):
     '''Get source or target resource type by resource id
     '''
     target_type = None
-    all_resources = dict()
+    all_resources = {}
     all_resources.update(SOURCE_RESOURCES)
     all_resources.update(TARGET_RESOURCES)
     for _type, _id in all_resources.items():
@@ -103,11 +105,37 @@ def check_required_args(resource, cmd_arg_values):
     '''Check whether a resource's required arguments are in cmd_arg_values
     '''
     args = re.findall(r'\{([^\{\}]*)\}', resource)
-    args.remove('subscription')
+
+    if 'subscription' in args:
+        args.remove('subscription')
     for arg in args:
         if not cmd_arg_values.get(arg, None):
             return False
     return True
+
+
+def get_fabric_access_token():
+    get_fabric_token_cmd = 'az account get-access-token --output json --resource https://api.fabric.microsoft.com/'
+    return run_cli_cmd(get_fabric_token_cmd).get('accessToken')
+
+
+def generate_fabric_connstr_props(target_id):
+    fabric_token = get_fabric_access_token()
+    headers = {"Authorization": "Bearer {}".format(fabric_token)}
+    response = requests.get(target_id, headers=headers)
+
+    if response:
+        response_json = response.json()
+
+        if "properties" in response_json:
+            properties = response_json["properties"]
+            if "databaseName" in properties and "serverFqdn" in properties:
+                return {
+                    "Server": properties["serverFqdn"],
+                    "Database": properties["databaseName"]
+                }
+
+    return None
 
 
 def generate_connection_name(cmd):
@@ -147,7 +175,7 @@ def get_client_type(cmd, namespace):
 
         client_type = None
         try:
-            output = run_cli_cmd('az webapp show --id {} -o json'.format(source_id))
+            output = run_cli_cmd('az webapp show --id "{}" -o json'.format(source_id))
             prop = output.get('siteConfig').get('linuxFxVersion', None) or\
                 output.get('siteConfig').get('windowsFxVersion', None)
             # use 'linuxFxVersion' and 'windowsFxVersion' property to decide
@@ -157,7 +185,7 @@ def get_client_type(cmd, namespace):
             # use '*Version' property to decide
             if client_type is None:
                 for prop, _type in prop_type_map.items():
-                    if output.get('siteConfig', dict()).get(prop, None) is not None:
+                    if output.get('siteConfig', {}).get(prop, None) is not None:
                         client_type = _type
                         break
         except Exception:  # pylint: disable=broad-except
@@ -169,7 +197,7 @@ def get_client_type(cmd, namespace):
         client_type = CLIENT_TYPE.SpringBoot
         try:
             segments = parse_resource_id(source_id)
-            output = run_cli_cmd('az spring app show -g {} -s {} -n {}'
+            output = run_cli_cmd('az spring app show -g "{}" -s "{}" -n "{}"'
                                  ' -o json'.format(segments.get('resource_group'), segments.get('name'),
                                                    segments.get('child_name_1')))
             prop_val = output.get('properties')\
@@ -204,23 +232,35 @@ def get_client_type(cmd, namespace):
     return client_type.value
 
 
-def interactive_input(arg, hint):
+def interactive_input(arg, hint, cmd):
     '''Get interactive inputs from users
     '''
     value = None
     cmd_value = None
     if arg == 'secret_auth_info':
-        name = prompt('User name of database (--secret name=): ')
-        secret = prompt_pass('Password of database (--secret secret=): ')
-        value = {
-            'name': name,
-            'secret_info': {
-                'secret_type': 'rawValue',
-                'value': secret
-            },
-            'auth_type': 'secret'
-        }
-        cmd_value = 'name={} secret={}'.format(name, '*' * len(secret))
+        if 'mongodb-atlas' in cmd.name:
+            secret = prompt_pass('Connection string of cluster (--secret secret=): ')
+            value = {
+                'name': 'NA',
+                'secret_info': {
+                    'secret_type': 'rawValue',
+                    'value': secret
+                },
+                'auth_type': 'secret'
+            }
+            cmd_value = 'secret={}'.format('*' * len(secret))
+        else:
+            name = prompt('User name of database (--secret name=): ')
+            secret = prompt_pass('Password of database (--secret secret=): ')
+            value = {
+                'name': name,
+                'secret_info': {
+                    'secret_type': 'rawValue',
+                    'value': secret
+                },
+                'auth_type': 'secret'
+            }
+            cmd_value = 'name={} secret={}'.format(name, '*' * len(secret))
     elif arg == 'service_principal_auth_info_secret':
         client_id = prompt('ServicePrincipal client-id (--service-principal client_id=): ')
         object_id = prompt('Enterprise Application object-id (--service-principal object-id=): ')
@@ -296,7 +336,7 @@ def opt_out_auth(namespace):
 def intelligent_experience(cmd, namespace, missing_args):
     '''Use local context and interactive inputs to get arg values
     '''
-    cmd_arg_values = dict()
+    cmd_arg_values = {}
     # use commandline source/target resource args
     for arg in missing_args:
         if getattr(namespace, arg, None) is not None:
@@ -324,7 +364,7 @@ def intelligent_experience(cmd, namespace, missing_args):
             'Auth info is not specified, use default one: --user-account')
     if cmd.cli_ctx.local_context.is_on:
         # arguments found in local context
-        context_arg_values = dict()
+        context_arg_values = {}
         for arg in missing_args:
             if arg not in cmd_arg_values:
                 if get_local_context_value(cmd, arg):
@@ -332,9 +372,9 @@ def intelligent_experience(cmd, namespace, missing_args):
 
         # apply local context arguments
         param_str = ''
-        for arg in context_arg_values:
-            option = missing_args[arg].get('options')[0]
-            value = context_arg_values[arg]
+        for k, v in context_arg_values.items():
+            option = missing_args[k].get('options')[0]
+            value = v
             param_str += '{} {} '.format(option, value)
         if param_str:
             logger.warning('Apply local context arguments: %s', param_str.strip())
@@ -345,7 +385,7 @@ def intelligent_experience(cmd, namespace, missing_args):
     for arg in missing_args:
         if arg not in cmd_arg_values:
             hint = '{} ({})'.format(missing_args[arg].get('help'), '/'.join(missing_args[arg].get('options')))
-            value, cmd_value = interactive_input(arg, hint)
+            value, cmd_value = interactive_input(arg, hint, cmd)
             cmd_arg_values[arg] = value
 
             # show applied params
@@ -369,7 +409,7 @@ def validate_source_resource_id(cmd, namespace):
         source = get_source_resource_name(cmd)
 
         # For Web App, match slot pattern first:
-        if source == RESOURCE.WebApp:
+        if source == RESOURCE.WebApp or source == RESOURCE.FunctionApp:
             slotPattern = WEB_APP_SLOT_RESOURCE
             matched = re.match(get_resource_regex(slotPattern), namespace.source_id, re.IGNORECASE)
             if matched:
@@ -421,12 +461,11 @@ def validate_target_resource_id(cmd, namespace):
     '''Validate resource id of a target resource
     '''
     if getattr(namespace, 'target_id', None):
-        if not is_valid_resource_id(namespace.target_id):
+        target = get_target_resource_name(cmd)
+        if not (target == RESOURCE.FabricSql) and not is_valid_resource_id(namespace.target_id):
             e = InvalidArgumentValueError('Resource id is invalid: {}'.format(namespace.target_id))
             telemetry.set_exception(e, 'target-id-invalid')
             raise e
-
-        target = get_target_resource_name(cmd)
         pattern = TARGET_RESOURCES.get(target)
         matched = re.match(get_resource_regex(pattern), namespace.target_id, re.IGNORECASE)
         if matched:
@@ -455,7 +494,7 @@ def get_missing_source_args(cmd, namespace):
     '''Get source resource related args
     '''
     source = get_source_resource_name(cmd)
-    missing_args = dict()
+    missing_args = {}
 
     for arg, content in SOURCE_RESOURCES_PARAMS.get(source, {}).items():
         missing_args[arg] = content
@@ -473,7 +512,7 @@ def get_missing_source_create_args(cmd, namespace):
     '''Get source resource related args in create
     '''
     source = get_source_resource_name(cmd)
-    missing_args = dict()
+    missing_args = {}
 
     args = SOURCE_RESOURCES_CREATE_PARAMS.get(source)
     if args:
@@ -488,10 +527,11 @@ def get_missing_target_args(cmd):
     '''Get target resource related args
     '''
     target = get_target_resource_name(cmd)
-    missing_args = dict()
+    missing_args = {}
 
-    for arg, content in TARGET_RESOURCES_PARAMS.get(target).items():
-        missing_args[arg] = content
+    if target in TARGET_RESOURCES_PARAMS:
+        for arg, content in TARGET_RESOURCES_PARAMS.get(target).items():
+            missing_args[arg] = content
 
     return missing_args
 
@@ -501,7 +541,7 @@ def get_missing_auth_args(cmd, namespace):
     '''
     source = get_source_resource_name(cmd)
     target = get_target_resource_name(cmd)
-    missing_args = dict()
+    missing_args = {}
 
     # check if there are auth_info related params
     auth_param_exist = False
@@ -511,6 +551,8 @@ def get_missing_auth_args(cmd, namespace):
                 auth_param_exist = True
                 break
 
+    if target == RESOURCE.ConfluentKafka:
+        return missing_args
     # when keyvault csi is enabled, auth_type is userIdentity without subs_id and client_id
     if source == RESOURCE.KubernetesCluster and target == RESOURCE.KeyVault:
         if getattr(namespace, 'enable_csi', None):
@@ -531,6 +573,10 @@ def get_missing_auth_args(cmd, namespace):
             logger.warning('Auth info is not specified, use secrets store csi driver as default: --enable-csi')
             return missing_args
 
+    # ACA as target use null auth
+    if target == RESOURCE.ContainerApp:
+        return missing_args
+
     if source and target and not auth_param_exist:
         default_auth_type = SUPPORTED_AUTH_TYPE.get(source, {}).get(target, {})[0]
 
@@ -544,7 +590,7 @@ def get_missing_auth_args(cmd, namespace):
 def get_missing_connection_name(namespace):
     '''Get connection_name arg if user didn't provide it in command line
     '''
-    missing_args = dict()
+    missing_args = {}
     if getattr(namespace, 'connection_name', None) is None:
         missing_args['connection_name'] = {
             'help': 'The connection name',
@@ -557,7 +603,7 @@ def get_missing_connection_name(namespace):
 def get_missing_client_type(namespace):
     '''Get client_type arg if user didn't provide it in command line
     '''
-    missing_args = dict()
+    missing_args = {}
     if getattr(namespace, 'client_type', None) is None:
         missing_args['client_type'] = {
             'help': 'Client type of the connection',
@@ -570,7 +616,7 @@ def get_missing_client_type(namespace):
 def validate_local_default_params(cmd, namespace):  # pylint: disable=unused-argument
     '''Get missing args of local connection command
     '''
-    missing_args = dict()
+    missing_args = {}
 
     if getattr(namespace, 'id', None):
         namespace.id = namespace.id.lower()
@@ -603,7 +649,7 @@ def apply_local_default_params(cmd, namespace, arg_values):  # pylint: disable=u
 
 
 def validate_local_list_params(cmd, namespace):  # pylint: disable=unused-argument
-    missing_args = dict()
+    missing_args = {}
     if getattr(namespace, 'resource_group', None) is None:
         missing_args.update(LOCAL_CONNECTION_PARAMS.get("resource_group"))
     return missing_args
@@ -612,7 +658,7 @@ def validate_local_list_params(cmd, namespace):  # pylint: disable=unused-argume
 def validate_list_params(cmd, namespace):
     '''Get missing args of list command
     '''
-    missing_args = dict()
+    missing_args = {}
     if not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
     return missing_args
@@ -621,7 +667,7 @@ def validate_list_params(cmd, namespace):
 def validate_create_params(cmd, namespace):
     '''Get missing args of create command
     '''
-    missing_args = dict()
+    missing_args = {}
     if not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
     missing_args.update(get_missing_source_create_args(cmd, namespace))
@@ -635,7 +681,7 @@ def validate_create_params(cmd, namespace):
 def validate_local_create_params(cmd, namespace):
     '''Get missing args of create command
     '''
-    missing_args = dict()
+    missing_args = {}
 
     if not validate_target_resource_id(cmd, namespace):
         missing_args.update(get_missing_target_args(cmd))
@@ -646,7 +692,7 @@ def validate_local_create_params(cmd, namespace):
 def validate_addon_params(cmd, namespace):
     '''Get missing args of add command with '--new'
     '''
-    missing_args = dict()
+    missing_args = {}
     if not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
     missing_args.update(get_missing_auth_args(cmd, namespace))
@@ -656,8 +702,8 @@ def validate_addon_params(cmd, namespace):
 def validate_update_params(cmd, namespace):
     '''Get missing args of update command
     '''
-    missing_args = dict()
-    if not validate_connection_id(namespace):
+    missing_args = {}
+    if not validate_connection_id(namespace) and not validate_source_resource_id(cmd, namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
     # missing_args.update(get_missing_auth_args(cmd, namespace))
     missing_args.update(get_missing_connection_name(namespace))
@@ -667,7 +713,7 @@ def validate_update_params(cmd, namespace):
 def validate_local_update_params(cmd, namespace):  # pylint: disable=unused-argument
     '''Get missing args of update command
     '''
-    missing_args = dict()
+    missing_args = {}
     # missing_args.update(get_missing_auth_args(cmd, namespace))
     return missing_args
 
@@ -675,7 +721,7 @@ def validate_local_update_params(cmd, namespace):  # pylint: disable=unused-argu
 def validate_default_params(cmd, namespace):
     '''Get missing args of commands except for list, create
     '''
-    missing_args = dict()
+    missing_args = {}
     if not validate_connection_id(namespace):
         missing_args.update(get_missing_source_args(cmd, namespace))
     missing_args.update(get_missing_connection_name(namespace))
@@ -708,7 +754,7 @@ def apply_source_optional_args(cmd, namespace, arg_values):
     '''Set source resource id by optional arg_values
     '''
     source = get_source_resource_name(cmd)
-    if source == RESOURCE.WebApp:
+    if source == RESOURCE.WebApp or source == RESOURCE.FunctionApp:
         if arg_values.get('slot', None):
             resource = WEB_APP_SLOT_RESOURCE
             if check_required_args(resource, arg_values):
@@ -755,6 +801,8 @@ def apply_auth_args(cmd, namespace, arg_values):
     if source and target:
         auth_types = SUPPORTED_AUTH_TYPE.get(source, {}).get(target, {})
         for auth_type in auth_types:
+            if auth_type == AUTH_TYPE.Null:
+                continue
             for arg in AUTH_TYPE_PARAMS.get(auth_type):
                 if arg in arg_values:
                     setattr(namespace, arg, arg_values.get(arg, None))
@@ -763,7 +811,7 @@ def apply_auth_args(cmd, namespace, arg_values):
 
 
 def apply_workload_identity(namespace, arg_values):
-    output = run_cli_cmd('az identity show --ids {}'.format(
+    output = run_cli_cmd('az identity show --ids "{}"'.format(
         arg_values.get('workload_identity_auth_info')
     ))
     if output:
@@ -898,7 +946,7 @@ def validate_params(cmd, namespace):
             namespace.connection_name = generate_connection_name(cmd)
         else:
             validate_connection_name(namespace.connection_name)
-        if getattr(namespace, 'new_addon'):
+        if getattr(namespace, 'new_addon', None):
             _validate_and_apply(validate_addon_params, apply_addon_params)
         else:
             _validate_and_apply(validate_create_params, apply_create_params)
@@ -933,27 +981,64 @@ def validate_kafka_params(cmd, namespace):
             namespace.client_type = get_client_type(cmd, namespace)
 
 
+def validate_connstr_props(cmd, namespace):
+    if 'create {}'.format(RESOURCE.FabricSql.value) in cmd.name:
+        if getattr(namespace, 'connstr_props', None) is None:
+            namespace.connstr_props = generate_fabric_connstr_props(namespace.target_id)
+
+            if namespace.connstr_props is None:
+                e = InvalidArgumentValueError("Fabric Connection String Properties must be provided")
+                telemetry.set_exception('fabric-connstr-props-unavailable')
+                raise e
+        else:
+            fabric_server = namespace.connstr_props.get('Server') or namespace.connstr_props.get('Data Source')
+            fabric_database = namespace.connstr_props.get('Database') or namespace.connstr_props.get('Initial Catalog')
+
+            if not fabric_server or not fabric_database:
+                e = InvalidArgumentValueError("Fabric Connection String Properties must contain Server and Database")
+                telemetry.set_exception('fabric-connstr-props-invalid')
+                raise e
+
+
 def validate_service_state(linker_parameters):
     '''Validate whether user provided params are applicable to service state
     '''
-    target_type = None
-    target_id = linker_parameters.get('target_service', dict()).get('id')
+    target_type = linker_parameters.get('target_service', {}).get('type')
+
+    # AzureResource and other types (e.g., FabricResource, SelfHostedResource)
+    if target_type == "AzureResource":
+        target_id = linker_parameters.get('target_service', {}).get('id')
+    else:
+        target_id = linker_parameters.get('target_service', {}).get('endpoint')
+
     for target, resource_id in TARGET_RESOURCES.items():
         matched = re.match(get_resource_regex(resource_id), target_id, re.IGNORECASE)
         if matched:
             target_type = target
 
-    if target_type == RESOURCE.AppConfig and linker_parameters.get('auth_info', dict()).get('auth_type') == 'secret':
+    if target_type == RESOURCE.AppConfig and linker_parameters.get('auth_info', {}).get('auth_type') == 'secret':
         segments = parse_resource_id(target_id)
         rg = segments.get('resource_group')
         name = segments.get('name')
+        sub = segments.get('subscription')
         if not rg or not name:
             return
 
-        output = run_cli_cmd('az appconfig show -g {} -n {}'.format(rg, name))
+        output = run_cli_cmd('az appconfig show -g "{}" -n "{}" --subscription "{}"'.format(rg, name, sub))
         if output and output.get('disableLocalAuth') is True:
             raise ValidationError('Secret as auth type is not allowed when local auth is disabled for the '
                                   'specified appconfig, you may use service principal or managed identity.')
+
+    if target_type == RESOURCE.Redis:
+        auth_type = linker_parameters.get('auth_info', {}).get('auth_type')
+        if auth_type == AUTH_TYPE.Secret.value or auth_type == AUTH_TYPE.SecretAuto.value:
+            return
+        redis = run_cli_cmd('az redis show --ids "{}"'.format(target_id))
+        if redis.get('redisConfiguration', {}).get('aadEnabled', 'False') != "True":
+            raise ValidationError('Please enable Microsoft Entra Authentication on your Redis first. '
+                                  'Note that it will cause your cache instances to reboot to load new '
+                                  'configuration and result in a failover. Consider performing the '
+                                  'operation during low traffic or outside of business hours.')
 
 
 def get_default_object_id_of_current_user(cmd, namespace):  # pylint: disable=unused-argument

@@ -66,8 +66,8 @@ class AmsLiveEventTests(ScenarioTest):
         self.assertIsNotNone(live_event['crossSiteAccessPolicies']['crossDomainPolicy'])
         self.assertIsNotNone(live_event['crossSiteAccessPolicies']['clientAccessPolicy'])
 
-        self.assertNotEquals('Stopping', live_event['resourceState'])
-        self.assertNotEquals('Stopped', live_event['resourceState'])
+        self.assertNotEqual('Stopping', live_event['resourceState'])
+        self.assertNotEqual('Stopped', live_event['resourceState'])
 
         self.cmd('az ams live-event stop -a {amsname} -n {liveEventName} -g {rg}')
 
@@ -106,8 +106,8 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('input.streamingProtocol', 'FragmentedMP4')
         ]).get_output_in_json()
 
-        self.assertNotEquals('Stopping', live_event['resourceState'])
-        self.assertNotEquals('Stopped', live_event['resourceState'])
+        self.assertNotEqual('Stopping', live_event['resourceState'])
+        self.assertNotEqual('Stopped', live_event['resourceState'])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -144,9 +144,9 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('input.accessToken', '{accessToken}'),
         ]).get_output_in_json()
 
-        self.assertNotEquals('Stopping', live_event['resourceState'])
-        self.assertNotEquals('Stopped', live_event['resourceState'])
-        self.assertEquals('StandBy', live_event['resourceState'])
+        self.assertNotEqual('Stopping', live_event['resourceState'])
+        self.assertNotEqual('Stopped', live_event['resourceState'])
+        self.assertEqual('StandBy', live_event['resourceState'])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -174,8 +174,8 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('name', '{liveEventName}')
         ]).get_output_in_json()
 
-        self.assertNotEquals('Starting', live_event['resourceState'])
-        self.assertNotEquals('Running', live_event['resourceState'])
+        self.assertNotEqual('Starting', live_event['resourceState'])
+        self.assertNotEqual('Running', live_event['resourceState'])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -227,8 +227,8 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('name', '{liveEventName}')
         ]).get_output_in_json()
 
-        self.assertNotEquals('Starting', live_event['resourceState'])
-        self.assertNotEquals('Running', live_event['resourceState'])
+        self.assertNotEqual('Starting', live_event['resourceState'])
+        self.assertNotEqual('Running', live_event['resourceState'])
 
         self.cmd('az ams live-output list -a {amsname} -g {rg} --live-event-name {liveEventName}', checks=[
             self.check('length(@)', 0)
@@ -340,8 +340,8 @@ class AmsLiveEventTests(ScenarioTest):
             self.check('location', 'East US')
         ]).get_output_in_json()
 
-        self.assertNotEquals('Stopping', live_event['resourceState'])
-        self.assertNotEquals('Stopped', live_event['resourceState'])
+        self.assertNotEqual('Stopping', live_event['resourceState'])
+        self.assertNotEqual('Stopped', live_event['resourceState'])
 
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
@@ -378,7 +378,7 @@ class AmsLiveEventTests(ScenarioTest):
 
         self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['crossDomainPolicy'])
         self.assertIsNotNone(live_event_updated['crossSiteAccessPolicies']['clientAccessPolicy'])
-    
+
     @ResourceGroupPreparer()
     @StorageAccountPreparer(parameter_name='storage_account_for_create')
     def test_live_event_show(self, storage_account_for_create):

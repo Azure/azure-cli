@@ -14,10 +14,9 @@ from azure.cli.command_modules.aro.aaz.latest.network.vnet.subnet import Show as
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.azclierror import CLIInternalError, InvalidArgumentValueError, \
     RequiredArgumentMissingError
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
 from knack.log import get_logger
-from msrestazure.azure_exceptions import CloudError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 logger = get_logger(__name__)
 
@@ -81,7 +80,7 @@ def validate_disk_encryption_set(cmd, namespace):
     try:
         compute_client.disk_encryption_sets.get(resource_group_name=desid['resource_group'],
                                                 disk_encryption_set_name=desid['name'])
-    except CloudError as err:
+    except HttpResponseError as err:
         raise InvalidArgumentValueError(
             f"Invalid --disk-encryption-set, error when getting '{namespace.disk_encryption_set}':"
             f" {str(err)}") from err
@@ -273,3 +272,14 @@ def validate_refresh_cluster_credentials(namespace):
 def validate_version_format(namespace):
     if namespace.version is not None and not re.match(r'^[4-9]{1}\.[0-9]{1,2}\.[0-9]{1,2}$', namespace.version):
         raise InvalidArgumentValueError('--version is invalid')
+
+
+def validate_load_balancer_managed_outbound_ip_count(namespace):
+    if namespace.load_balancer_managed_outbound_ip_count is None:
+        return
+
+    minimum_managed_outbound_ips = 1
+    maximum_managed_outbound_ips = 20
+    if namespace.load_balancer_managed_outbound_ip_count < minimum_managed_outbound_ips or namespace.load_balancer_managed_outbound_ip_count > maximum_managed_outbound_ips:  # pylint: disable=line-too-long
+        error_msg = f"--load-balancer-managed-outbound-ip-count must be between {minimum_managed_outbound_ips} and {maximum_managed_outbound_ips} (inclusive)."  # pylint: disable=line-too-long
+        raise InvalidArgumentValueError(error_msg)

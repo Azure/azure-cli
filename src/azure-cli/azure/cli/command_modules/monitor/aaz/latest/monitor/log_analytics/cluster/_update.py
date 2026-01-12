@@ -24,9 +24,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01",
+        "version": "2025-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2022-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2025-02-01"],
         ]
     }
 
@@ -63,7 +63,7 @@ class Update(AAZCommand):
 
         _args_schema = cls._args_schema
         _args_schema.identity_type = AAZStrArg(
-            options=["--identity-type"],
+            options=["--type", "--identity-type"],
             arg_group="Identity",
             help="Type of managed service identity.",
             enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned,UserAssigned": "SystemAssigned,UserAssigned", "UserAssigned": "UserAssigned"},
@@ -133,6 +133,16 @@ class Update(AAZCommand):
             help="The cluster's billing type.",
             nullable=True,
             enum={"Cluster": "Cluster", "Workspaces": "Workspaces"},
+        )
+
+        # define Arg Group "Replication"
+
+        _args_schema = cls._args_schema
+        _args_schema.replication_enabled = AAZBoolArg(
+            options=["--replication-enabled"],
+            arg_group="Replication",
+            help="Specifies whether the replication is enabled or not. When true the cluster is replicate to the specified location.",
+            nullable=True,
         )
 
         # define Arg Group "Sku"
@@ -225,7 +235,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -270,16 +280,16 @@ class Update(AAZCommand):
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
                 )
-            if session.http_response.status_code in [200, 201]:
+            if session.http_response.status_code in [200]:
                 return self.client.build_lro_polling(
                     self.ctx.args.no_wait,
                     session,
-                    self.on_200_201,
+                    self.on_200,
                     self.on_error,
                     lro_options={"final-state-via": "azure-async-operation"},
                     path_format_arguments=self.url_parameters,
@@ -324,7 +334,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -351,25 +361,25 @@ class Update(AAZCommand):
 
             return self.serialize_content(_content_value)
 
-        def on_200_201(self, session):
+        def on_200(self, session):
             data = self.deserialize_http_content(session)
             self.ctx.set_var(
                 "instance",
                 data,
-                schema_builder=self._build_schema_on_200_201
+                schema_builder=self._build_schema_on_200
             )
 
-        _schema_on_200_201 = None
+        _schema_on_200 = None
 
         @classmethod
-        def _build_schema_on_200_201(cls):
-            if cls._schema_on_200_201 is not None:
-                return cls._schema_on_200_201
+        def _build_schema_on_200(cls):
+            if cls._schema_on_200 is not None:
+                return cls._schema_on_200
 
-            cls._schema_on_200_201 = AAZObjectType()
-            _UpdateHelper._build_schema_cluster_read(cls._schema_on_200_201)
+            cls._schema_on_200 = AAZObjectType()
+            _UpdateHelper._build_schema_cluster_read(cls._schema_on_200)
 
-            return cls._schema_on_200_201
+            return cls._schema_on_200
 
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
@@ -382,7 +392,7 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
-            _builder.set_prop("identity", AAZObjectType)
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("sku", AAZObjectType)
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -400,6 +410,7 @@ class Update(AAZCommand):
             if properties is not None:
                 properties.set_prop("billingType", AAZStrType, ".billing_type")
                 properties.set_prop("keyVaultProperties", AAZObjectType)
+                properties.set_prop("replication", AAZObjectType)
 
             key_vault_properties = _builder.get(".properties.keyVaultProperties")
             if key_vault_properties is not None:
@@ -407,6 +418,10 @@ class Update(AAZCommand):
                 key_vault_properties.set_prop("keyRsaSize", AAZIntType, ".key_rsa_size")
                 key_vault_properties.set_prop("keyVaultUri", AAZStrType, ".key_vault_uri")
                 key_vault_properties.set_prop("keyVersion", AAZStrType, ".key_version")
+
+            replication = _builder.get(".properties.replication")
+            if replication is not None:
+                replication.set_prop("enabled", AAZBoolType, ".replication_enabled")
 
             sku = _builder.get(".sku")
             if sku is not None:
@@ -451,7 +466,7 @@ class _UpdateHelper:
         cluster_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        cluster_read.identity = AAZObjectType()
+        cluster_read.identity = AAZIdentityObjectType()
         cluster_read.location = AAZStrType(
             flags={"required": True},
         )
@@ -534,6 +549,7 @@ class _UpdateHelper:
             serialized_name="provisioningState",
             flags={"read_only": True},
         )
+        properties.replication = AAZObjectType()
 
         associated_workspaces = _schema_cluster_read.properties.associated_workspaces
         associated_workspaces.Element = AAZObjectType()
@@ -578,6 +594,25 @@ class _UpdateHelper:
         )
         key_vault_properties.key_version = AAZStrType(
             serialized_name="keyVersion",
+        )
+
+        replication = _schema_cluster_read.properties.replication
+        replication.created_date = AAZStrType(
+            serialized_name="createdDate",
+            flags={"read_only": True},
+        )
+        replication.enabled = AAZBoolType()
+        replication.is_availability_zones_enabled = AAZBoolType(
+            serialized_name="isAvailabilityZonesEnabled",
+        )
+        replication.last_modified_date = AAZStrType(
+            serialized_name="lastModifiedDate",
+            flags={"read_only": True},
+        )
+        replication.location = AAZStrType()
+        replication.provisioning_state = AAZStrType(
+            serialized_name="provisioningState",
+            flags={"read_only": True},
         )
 
         sku = _schema_cluster_read.sku

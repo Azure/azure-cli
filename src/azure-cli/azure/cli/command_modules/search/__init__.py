@@ -15,9 +15,9 @@ class AzureSearchCommandsLoader(AzCommandsLoader):
         from azure.cli.core.profiles import ResourceType
         azure_search_custom = CliCommandType(operations_tmpl='azure.cli.command_modules.search.custom#{}')
 
-        super(AzureSearchCommandsLoader, self).__init__(cli_ctx=cli_ctx,
-                                                        resource_type=ResourceType.MGMT_SEARCH,
-                                                        custom_command_type=azure_search_custom)
+        super().__init__(cli_ctx=cli_ctx,
+                         resource_type=ResourceType.MGMT_SEARCH,
+                         custom_command_type=azure_search_custom)
 
     def load_command_table(self, args):
         from azure.cli.command_modules.search.commands import load_command_table

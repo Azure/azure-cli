@@ -5,7 +5,7 @@ The Batch module includes both data plane tests and management tests, which shou
 ## Bootstrap Resources
 
 1. Create (or reuse) a Batch account
-1. Configure the Batch account for [user subscription mode](https://docs.microsoft.com/azure/batch/batch-account-create-portal#additional-configuration-for-user-subscription-mode)
+1. Configure the Batch account for [user subscription mode](https://learn.microsoft.com/azure/batch/batch-account-create-portal#additional-configuration-for-user-subscription-mode)
 1. Set environment variables. For management tests these variables should be empty. In playback mode, the account name and URL will be read from the recorded file instead, and the key will be set to a default value.
 
    ```powershell

@@ -611,7 +611,7 @@ def apim_api_export(client, resource_group_name, service_name, api_id, export_fo
                 f.write(xml_string)
             else:
                 f.write(str(exportedResultContent))
-    except IOError as e:
+    except OSError as e:
         logger.warning("Error writing exported API to file.: %s", e)
 
     # Write the response to a file

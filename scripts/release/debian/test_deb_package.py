@@ -12,7 +12,11 @@ root_dir = f'/opt/az/lib/python3.{python_minor_version}/site-packages/azure/cli/
 mod_list = [mod for mod in sorted(os.listdir(root_dir)) if os.path.isdir(os.path.join(root_dir, mod)) and mod != '__pycache__']
 
 pytest_base_cmd = '/opt/az/bin/python3 -m pytest -v --forked -p no:warnings --log-level=WARN'
-pytest_parallel_cmd = '{} -n auto'.format(pytest_base_cmd)
+pytest_parallel_cmd = '{} -n logical'.format(pytest_base_cmd)
+
+# cloud: https://github.com/Azure/azure-cli/pull/14994
+# appservice: https://github.com/Azure/azure-cli/pull/19810
+# iot, resource, azure-cli-core: https://github.com/Azure/azure-cli/pull/26176
 serial_test_modules = ['botservice', 'network', 'cloud', 'appservice', 'iot', 'resource']
 
 for mod_name in mod_list:

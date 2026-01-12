@@ -8,7 +8,7 @@ from knack.arguments import ignore_type
 from knack.log import get_logger
 from azure.cli.core.commands import AzArgumentContext
 from azure.cli.core.util import CLIError
-from ._client_factory import cf_mariadb_firewall_rules, cf_postgres_firewall_rules, cf_mysql_firewall_rules
+from ._client_factory import cf_mariadb_firewall_rules, cf_mysql_firewall_rules
 from .validators import get_combined_validator
 
 logger = get_logger(__name__)
@@ -74,10 +74,8 @@ def create_firewall_rule(cmd, resource_group_name, server_name, start_ip, end_ip
                                                                 now.second)
         logger.warning('Configuring server firewall rule to accept connections from \'%s\' to \'%s\'...', start_ip,
                        end_ip)
-    firewall_client = cf_postgres_firewall_rules(cmd.cli_ctx, None)
-    if db_engine == 'mysql':
-        firewall_client = cf_mysql_firewall_rules(cmd.cli_ctx, None)
-    elif db_engine == 'mariadb':
+    firewall_client = cf_mysql_firewall_rules(cmd.cli_ctx, None)
+    if db_engine == 'mariadb':
         firewall_client = cf_mariadb_firewall_rules(cmd.cli_ctx, None)
 
     parameters = {'name': firewall_name, 'start_ip_address': start_ip, 'end_ip_address': end_ip}
@@ -103,3 +101,20 @@ def retryable_method(retries=3, interval_sec=5, exception_type=Exception, condit
                 sleep(interval_sec)
         return call
     return decorate
+
+
+def get_autonomous_tuning_settings_map():
+    return {
+        'analysis_interval': 'index_tuning.analysis_interval',
+        'max_columns_per_index': 'index_tuning.max_columns_per_index',
+        'max_index_count': 'index_tuning.max_index_count',
+        'max_indexes_per_table': 'index_tuning.max_indexes_per_table',
+        'max_queries_per_database': 'index_tuning.max_queries_per_database',
+        'max_regression_factor': 'index_tuning.max_regression_factor',
+        'max_total_size_factor': 'index_tuning.max_total_size_factor',
+        'min_improvement_factor': 'index_tuning.min_improvement_factor',
+        'mode': 'index_tuning.mode',
+        'unused_dml_per_table': 'index_tuning.unused_dml_per_table',
+        'unused_min_period': 'index_tuning.unused_min_period',
+        'unused_reads_per_table': 'index_tuning.unused_reads_per_table'
+    }

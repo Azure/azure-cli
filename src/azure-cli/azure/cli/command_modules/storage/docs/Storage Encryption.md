@@ -1,11 +1,11 @@
 ## Azure Storage Encryption
 Azure Storage automatically encrypts your data when it is persisted it to the cloud. Azure Storage encryption protects your data and to help you to meet your organizational security and compliance commitments. 
 See more in
-https://docs.microsoft.com/en-us/azure/storage/common/storage-service-encryption?toc=/azure/storage/blobs/toc.json
+https://learn.microsoft.com/en-us/azure/storage/common/storage-service-encryption?toc=/azure/storage/blobs/toc.json
 
 ### How to use ###
 Install Azure CLI in one of the following ways:
-1. [Public Released Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+1. [Public Released Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
 2. [Try Features before Release](https://github.com/Azure/azure-cli/blob/dev/doc/try_new_features_before_release.md)
 
 ### Included Features

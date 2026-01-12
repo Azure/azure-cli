@@ -3627,11 +3627,11 @@ interactions:
         Command Line: </b> <br> 1. Using a text editor, remove the bindings with the
         \"roles/iam.serviceAccountUser\" or \"roles/iam.serviceAccountTokenCreator\".
         <br> For example, you can use the iam.json file shown below as follows: <br>
-        <code> { &quotbindings&quot: [ { &quotmembers&quot: [ &quotserviceAccount:our-project-123@appspot.gserviceaccount.com&quot,
+        <code> { &quotbindings&quot: [ { &quotmembers&quot: [ &quotserviceAccount:aaa@foo.com,
         ], &quotrole&quot: &quotroles/appengine.appViewer&quot }, { &quotmembers&quot:
-        [ &quotuser:email1@gmail.com&quot ], &quotrole&quot: &quotroles/owner&quot
-        }, { &quotmembers&quot: [ &quotserviceAccount:our-project-123@appspot.gserviceaccount.com&quot,
-        &quotserviceAccount:123456789012-compute@developer.gserviceaccount.com&quot
+        [ &quotuser:aaa@foo.com ], &quotrole&quot: &quotroles/owner&quot
+        }, { &quotmembers&quot: [ &quotserviceAccount:aaa@foo.com,
+        &quotserviceAccount:aaa@foo.com
         ], &quotrole&quot: &quotroles/editor&quot } ], &quotetag&quot: &quotBwUjMhCsNvY=&quot
         }</code> <br> 2. Update the project''s IAM policy: <br> <code> gcloud projects
         set-iam-policy PROJECT_ID iam.json </code>","categories":["IdentityAndAccess"],"severity":"Medium","publishDates":{"ga":"03/29/2022","public":"01/19/2022"},"tactics":["Privilege
@@ -4361,7 +4361,7 @@ interactions:
         gaining access to all of your project, it is recommended to not use the default
         Compute Engine service account.<br>Instead, you should create a new service
         account and assigning only the permissions needed by your instance.<br>The
-        default Compute Engine service account is named <code>[PROJECT_NUMBER]- compute@developer.gserviceaccount.com.</code><br>VMs
+        default Compute Engine service account is named <code>[PROJECT_NUMBER]- aaa@foo.com.</code><br>VMs
         created by GKE should be excluded. These VMs have names that start with \"gke-\"
         and are labeled \"goog-gke-node\".","remediationDescription":"<b>From Console:</b><br>1.
         Go to the <a href=\"https://console.cloud.google.com/compute/instances\">VM
@@ -4994,10 +4994,10 @@ interactions:
         the group members and the role for those members.<br> For example, to grant
         the role roles/appengine.appViewer to the \"ServiceAccount\" which is roles/editor,
         you would change the example shown below as follows:<br><code>{ ''bindings'':
-        [ { ''members'': [ ''serviceAccount:our-project-123@appspot.gserviceaccount.com'',
-        ], ''role'': ''roles/appengine.appViewer'' }, { ''members'': [ ''user:email1@gmail.com''
-        ], ''role'': ''roles/owner'' }, { ''members'': [ ''serviceAccount:our-project-123@appspot.gserviceaccount.com'',
-        ''serviceAccount:123456789012-compute@developer.gserviceaccount.com'' ], ''role'':
+        [ { ''members'': [ ''serviceAccount:aaa@foo.com'',
+        ], ''role'': ''roles/appengine.appViewer'' }, { ''members'': [ ''user:aaa@foo.com''
+        ], ''role'': ''roles/owner'' }, { ''members'': [ ''serviceAccount:aaa@foo.com'',
+        ''serviceAccount:123456789012-aaa@foo.com'' ], ''role'':
         ''roles/editor'' } ], ''etag'': ''BwUjMhCsNvY='' } </code><br> 2. Update the
         project''s IAM policy:<br><code>gcloud projects set-iam-policy PROJECT_ID
         iam.json</code>","categories":["IdentityAndAccess"],"severity":"Medium","publishDates":{"ga":"03/29/2022","public":"01/19/2022"},"tactics":["Privilege
@@ -6950,7 +6950,7 @@ interactions:
         Lambda functions to a VPC","assessmentType":"BuiltIn","policyDefinitionId":"","description":"This
         control checks whether a Lambda function is in a VPC. It does not evaluate
         the VPC subnet routing configuration to determine public reachability. <br>
-        Note that if Lambda@Edge is found in the account, then this control generates
+        Note that if aaa@foo.com is found in the account, then this control generates
         failed findings. To prevent these findings, you can disable this control.","remediationDescription":"To
         configure a function to connect to private subnets in a virtual private cloud
         (VPC) in your account:<br/>1. From the AWS Lambda console, https://console.aws.amazon.com/lambda/,
@@ -9427,7 +9427,7 @@ interactions:
         functions should be in a VPC","assessmentType":"BuiltIn","policyDefinitionId":"","description":"This
         control checks whether a Lambda function is in a VPC. It does not evaluate
         the VPC subnet routing configuration to determine public reachability. Note
-        that if Lambda@Edge is found in the account, then this control generates failed
+        that if aaa@foo.com is found in the account, then this control generates failed
         findings. To prevent these findings, you can disable this control.","remediationDescription":"For
         instructions on how to remediate this issue, please visit the <a href = \"https://docs.aws.amazon.com/console/securityhub/PCI.Lambda.2/remediation
         \">AWS Security Hub PCI DSS documentation</a>","categories":["Networking"],"preview":true,"severity":"Low","userImpact":"Low","implementationEffort":"Low","threats":["AccountBreach","DataExfiltration","DataSpillage","MaliciousInsider"],"publishDates":{"public":"06/01/2021"},"cloudProviders":["AWS"]}},{"id":"/providers/Microsoft.Security/assessmentMetadata/5ce523c5-3508-40ef-98d3-ef440253ba6b","name":"5ce523c5-3508-40ef-98d3-ef440253ba6b","type":"Microsoft.Security/assessmentMetadata","properties":{"displayName":"CodeBuild
@@ -15467,11 +15467,11 @@ interactions:
         Command Line: </b> <br> 1. Using a text editor, remove the bindings with the
         \"roles/iam.serviceAccountUser\" or \"roles/iam.serviceAccountTokenCreator\".
         <br> For example, you can use the iam.json file shown below as follows: <br>
-        <code> { &quotbindings&quot: [ { &quotmembers&quot: [ &quotserviceAccount:our-project-123@appspot.gserviceaccount.com&quot,
+        <code> { &quotbindings&quot: [ { &quotmembers&quot: [ &quotserviceAccount:aaa@foo.com,
         ], &quotrole&quot: &quotroles/appengine.appViewer&quot }, { &quotmembers&quot:
-        [ &quotuser:email1@gmail.com&quot ], &quotrole&quot: &quotroles/owner&quot
-        }, { &quotmembers&quot: [ &quotserviceAccount:our-project-123@appspot.gserviceaccount.com&quot,
-        &quotserviceAccount:123456789012-compute@developer.gserviceaccount.com&quot
+        [ &quotuser:aaa@foo.com ], &quotrole&quot: &quotroles/owner&quot
+        }, { &quotmembers&quot: [ &quotserviceAccount:aaa@foo.com,
+        &quotserviceAccount:aaa@foo.com
         ], &quotrole&quot: &quotroles/editor&quot } ], &quotetag&quot: &quotBwUjMhCsNvY=&quot
         }</code> <br> 2. Update the project''s IAM policy: <br> <code> gcloud projects
         set-iam-policy PROJECT_ID iam.json </code>","categories":["IdentityAndAccess"],"severity":"Medium","publishDates":{"ga":"03/29/2022","public":"01/19/2022"},"tactics":["Privilege
@@ -16201,7 +16201,7 @@ interactions:
         gaining access to all of your project, it is recommended to not use the default
         Compute Engine service account.<br>Instead, you should create a new service
         account and assigning only the permissions needed by your instance.<br>The
-        default Compute Engine service account is named <code>[PROJECT_NUMBER]- compute@developer.gserviceaccount.com.</code><br>VMs
+        default Compute Engine service account is named <code>[PROJECT_NUMBER]- aaa@foo.com.</code><br>VMs
         created by GKE should be excluded. These VMs have names that start with \"gke-\"
         and are labeled \"goog-gke-node\".","remediationDescription":"<b>From Console:</b><br>1.
         Go to the <a href=\"https://console.cloud.google.com/compute/instances\">VM
@@ -16834,10 +16834,10 @@ interactions:
         the group members and the role for those members.<br> For example, to grant
         the role roles/appengine.appViewer to the \"ServiceAccount\" which is roles/editor,
         you would change the example shown below as follows:<br><code>{ ''bindings'':
-        [ { ''members'': [ ''serviceAccount:our-project-123@appspot.gserviceaccount.com'',
-        ], ''role'': ''roles/appengine.appViewer'' }, { ''members'': [ ''user:email1@gmail.com''
-        ], ''role'': ''roles/owner'' }, { ''members'': [ ''serviceAccount:our-project-123@appspot.gserviceaccount.com'',
-        ''serviceAccount:123456789012-compute@developer.gserviceaccount.com'' ], ''role'':
+        [ { ''members'': [ ''serviceAccount:aaa@foo.com'',
+        ], ''role'': ''roles/appengine.appViewer'' }, { ''members'': [ ''user:aaa@foo.com''
+        ], ''role'': ''roles/owner'' }, { ''members'': [ ''serviceAccount:aaa@foo.com'',
+        ''serviceAccount:123456789012-aaa@foo.com'' ], ''role'':
         ''roles/editor'' } ], ''etag'': ''BwUjMhCsNvY='' } </code><br> 2. Update the
         project''s IAM policy:<br><code>gcloud projects set-iam-policy PROJECT_ID
         iam.json</code>","categories":["IdentityAndAccess"],"severity":"Medium","publishDates":{"ga":"03/29/2022","public":"01/19/2022"},"tactics":["Privilege
@@ -18790,7 +18790,7 @@ interactions:
         Lambda functions to a VPC","assessmentType":"BuiltIn","policyDefinitionId":"","description":"This
         control checks whether a Lambda function is in a VPC. It does not evaluate
         the VPC subnet routing configuration to determine public reachability. <br>
-        Note that if Lambda@Edge is found in the account, then this control generates
+        Note that if aaa@foo.com is found in the account, then this control generates
         failed findings. To prevent these findings, you can disable this control.","remediationDescription":"To
         configure a function to connect to private subnets in a virtual private cloud
         (VPC) in your account:<br/>1. From the AWS Lambda console, https://console.aws.amazon.com/lambda/,
@@ -21267,7 +21267,7 @@ interactions:
         functions should be in a VPC","assessmentType":"BuiltIn","policyDefinitionId":"","description":"This
         control checks whether a Lambda function is in a VPC. It does not evaluate
         the VPC subnet routing configuration to determine public reachability. Note
-        that if Lambda@Edge is found in the account, then this control generates failed
+        that if aaa@foo.com is found in the account, then this control generates failed
         findings. To prevent these findings, you can disable this control.","remediationDescription":"For
         instructions on how to remediate this issue, please visit the <a href = \"https://docs.aws.amazon.com/console/securityhub/PCI.Lambda.2/remediation
         \">AWS Security Hub PCI DSS documentation</a>","categories":["Networking"],"preview":true,"severity":"Low","userImpact":"Low","implementationEffort":"Low","threats":["AccountBreach","DataExfiltration","DataSpillage","MaliciousInsider"],"publishDates":{"public":"06/01/2021"},"cloudProviders":["AWS"]}},{"id":"/providers/Microsoft.Security/assessmentMetadata/5ce523c5-3508-40ef-98d3-ef440253ba6b","name":"5ce523c5-3508-40ef-98d3-ef440253ba6b","type":"Microsoft.Security/assessmentMetadata","properties":{"displayName":"CodeBuild
@@ -28061,11 +28061,11 @@ interactions:
         Command Line: </b> <br> 1. Using a text editor, remove the bindings with the
         \"roles/iam.serviceAccountUser\" or \"roles/iam.serviceAccountTokenCreator\".
         <br> For example, you can use the iam.json file shown below as follows: <br>
-        <code> { &quotbindings&quot: [ { &quotmembers&quot: [ &quotserviceAccount:our-project-123@appspot.gserviceaccount.com&quot,
+        <code> { &quotbindings&quot: [ { &quotmembers&quot: [ &quotserviceAccount:aaa@foo.com,
         ], &quotrole&quot: &quotroles/appengine.appViewer&quot }, { &quotmembers&quot:
-        [ &quotuser:email1@gmail.com&quot ], &quotrole&quot: &quotroles/owner&quot
-        }, { &quotmembers&quot: [ &quotserviceAccount:our-project-123@appspot.gserviceaccount.com&quot,
-        &quotserviceAccount:123456789012-compute@developer.gserviceaccount.com&quot
+        [ &quotuser:aaa@foo.com ], &quotrole&quot: &quotroles/owner&quot
+        }, { &quotmembers&quot: [ &quotserviceAccount:aaa@foo.com,
+        &quotserviceAccount:aaa@foo.com
         ], &quotrole&quot: &quotroles/editor&quot } ], &quotetag&quot: &quotBwUjMhCsNvY=&quot
         }</code> <br> 2. Update the project''s IAM policy: <br> <code> gcloud projects
         set-iam-policy PROJECT_ID iam.json </code>","categories":["IdentityAndAccess"],"severity":"Medium","publishDates":{"ga":"03/29/2022","public":"01/19/2022"},"tactics":["Privilege
@@ -28795,7 +28795,7 @@ interactions:
         gaining access to all of your project, it is recommended to not use the default
         Compute Engine service account.<br>Instead, you should create a new service
         account and assigning only the permissions needed by your instance.<br>The
-        default Compute Engine service account is named <code>[PROJECT_NUMBER]- compute@developer.gserviceaccount.com.</code><br>VMs
+        default Compute Engine service account is named <code>[PROJECT_NUMBER]- aaa@foo.com.</code><br>VMs
         created by GKE should be excluded. These VMs have names that start with \"gke-\"
         and are labeled \"goog-gke-node\".","remediationDescription":"<b>From Console:</b><br>1.
         Go to the <a href=\"https://console.cloud.google.com/compute/instances\">VM
@@ -29428,10 +29428,10 @@ interactions:
         the group members and the role for those members.<br> For example, to grant
         the role roles/appengine.appViewer to the \"ServiceAccount\" which is roles/editor,
         you would change the example shown below as follows:<br><code>{ ''bindings'':
-        [ { ''members'': [ ''serviceAccount:our-project-123@appspot.gserviceaccount.com'',
-        ], ''role'': ''roles/appengine.appViewer'' }, { ''members'': [ ''user:email1@gmail.com''
-        ], ''role'': ''roles/owner'' }, { ''members'': [ ''serviceAccount:our-project-123@appspot.gserviceaccount.com'',
-        ''serviceAccount:123456789012-compute@developer.gserviceaccount.com'' ], ''role'':
+        [ { ''members'': [ ''serviceAccount:aaa@foo.com'',
+        ], ''role'': ''roles/appengine.appViewer'' }, { ''members'': [ ''user:aaa@foo.com''
+        ], ''role'': ''roles/owner'' }, { ''members'': [ ''serviceAccount:aaa@foo.com'',
+        ''serviceAccount:123456789012-aaa@foo.com'' ], ''role'':
         ''roles/editor'' } ], ''etag'': ''BwUjMhCsNvY='' } </code><br> 2. Update the
         project''s IAM policy:<br><code>gcloud projects set-iam-policy PROJECT_ID
         iam.json</code>","categories":["IdentityAndAccess"],"severity":"Medium","publishDates":{"ga":"03/29/2022","public":"01/19/2022"},"tactics":["Privilege
@@ -31384,7 +31384,7 @@ interactions:
         Lambda functions to a VPC","assessmentType":"BuiltIn","policyDefinitionId":"","description":"This
         control checks whether a Lambda function is in a VPC. It does not evaluate
         the VPC subnet routing configuration to determine public reachability. <br>
-        Note that if Lambda@Edge is found in the account, then this control generates
+        Note that if aaa@foo.com is found in the account, then this control generates
         failed findings. To prevent these findings, you can disable this control.","remediationDescription":"To
         configure a function to connect to private subnets in a virtual private cloud
         (VPC) in your account:<br/>1. From the AWS Lambda console, https://console.aws.amazon.com/lambda/,
@@ -33861,7 +33861,7 @@ interactions:
         functions should be in a VPC","assessmentType":"BuiltIn","policyDefinitionId":"","description":"This
         control checks whether a Lambda function is in a VPC. It does not evaluate
         the VPC subnet routing configuration to determine public reachability. Note
-        that if Lambda@Edge is found in the account, then this control generates failed
+        that if aaa@foo.com is found in the account, then this control generates failed
         findings. To prevent these findings, you can disable this control.","remediationDescription":"For
         instructions on how to remediate this issue, please visit the <a href = \"https://docs.aws.amazon.com/console/securityhub/PCI.Lambda.2/remediation
         \">AWS Security Hub PCI DSS documentation</a>","categories":["Networking"],"preview":true,"severity":"Low","userImpact":"Low","implementationEffort":"Low","threats":["AccountBreach","DataExfiltration","DataSpillage","MaliciousInsider"],"publishDates":{"public":"06/01/2021"},"cloudProviders":["AWS"]}},{"id":"/providers/Microsoft.Security/assessmentMetadata/5ce523c5-3508-40ef-98d3-ef440253ba6b","name":"5ce523c5-3508-40ef-98d3-ef440253ba6b","type":"Microsoft.Security/assessmentMetadata","properties":{"displayName":"CodeBuild

@@ -35,7 +35,7 @@ class AKSCustomResourceGroupPreparer(ResourceGroupPreparer):
         key="rg",
         preserve_default_location=False,
     ):
-        super(AKSCustomResourceGroupPreparer, self).__init__(
+        super().__init__(
             name_prefix,
             parameter_name,
             parameter_name_for_location,
@@ -74,7 +74,7 @@ class AKSCustomVirtualNetworkPreparer(VirtualNetworkPreparer):
         random_name_length=24,
         key=KEY_VIRTUAL_NETWORK,
     ):
-        super(AKSCustomVirtualNetworkPreparer, self).__init__(
+        super().__init__(
             name_prefix,
             location,
             parameter_name,
@@ -167,7 +167,7 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
         dev_setting_sp_password="AZURE_CLI_TEST_DEV_SP_PASSWORD",
         key="sp",
     ):
-        super(AKSCustomRoleBasedServicePrincipalPreparer, self).__init__(
+        super().__init__(
             name_prefix,
             skip_assignment,
             parameter_name,
@@ -180,7 +180,7 @@ class AKSCustomRoleBasedServicePrincipalPreparer(
     def __call__(self, fn):
         if not self.dev_setting_sp_password:
             return unittest.skip("skip test case that requires service principal as password is not provided")(fn)
-        return super(AKSCustomRoleBasedServicePrincipalPreparer, self).__call__(fn)
+        return super().__call__(fn)
 
     def create_resource(self, name, **kwargs):
         if not self.dev_setting_sp_password:

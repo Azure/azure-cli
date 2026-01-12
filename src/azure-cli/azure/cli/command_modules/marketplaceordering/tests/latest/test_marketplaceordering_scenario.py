@@ -46,8 +46,6 @@ def call_scenario(test):
 # Test class for Scenario
 @try_manual
 class MarketplaceorderingScenarioTest(ScenarioTest):
-    def __init__(self, *args, **kwargs):
-        super(MarketplaceorderingScenarioTest, self).__init__(*args, **kwargs)
 
     def test_marketplaceordering_Scenario(self):
         call_scenario(self)

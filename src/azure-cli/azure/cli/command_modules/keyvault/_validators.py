@@ -45,7 +45,7 @@ def _get_resource_group_from_resource_name(cli_ctx, vault_name, hsm_name=None):
     :return: resource group name or None
     :rtype: str
     """
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     if vault_name:
         client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT).vaults
@@ -208,7 +208,8 @@ def validate_key_type(ns):
     setattr(ns, 'kty', kty)
 
 
-def _fetch_default_cvm_policy(cli_ctx, vault_url):
+# pylint: disable=line-too-long
+def _fetch_default_release_policy(cli_ctx, vault_url, policy_type='cvm'):
     try:
         # get vault/hsm location
         mgmt_client = get_mgmt_service_client(cli_ctx, ResourceType.MGMT_KEYVAULT)
@@ -233,67 +234,99 @@ def _fetch_default_cvm_policy(cli_ctx, vault_url):
         _endpoint = cli_ctx.cloud.endpoints.resource_manager
         if _endpoint.endswith('/'):
             _endpoint = _endpoint[:-1]
-        default_cvm_policy_url = f"{_endpoint}/subscriptions/{get_subscription_id(cli_ctx)}" \
-                                 f"/providers/Microsoft.Attestation/Locations/{location}" \
-                                 f"/defaultProvider?api-version=2020-10-01"
-        response = send_raw_request(cli_ctx, 'get', default_cvm_policy_url)
+        default_release_policy_url = f"{_endpoint}/subscriptions/{get_subscription_id(cli_ctx)}/providers/Microsoft.Attestation/Locations/{location}/defaultProvider?api-version=2020-10-01"
+        response = send_raw_request(cli_ctx, 'get', default_release_policy_url)
         if response.status_code != 200:
-            raise AzureInternalError(f"Fail to fetch default cvm policy from {default_cvm_policy_url}")
+            raise AzureInternalError(f"Fail to fetch default release policy from {default_release_policy_url}")
 
         # extract attest uri from response as authority in cvm policy
         import json
         res_json = json.loads(response.text)
         attest_uri = res_json['properties']['attestUri']
-        default_cvm_policy = {
-            'version': '1.0.0',
-            'anyOf': [
-                {
-                    'authority': attest_uri,
-                    'allOf': [
-                        {
-                            'claim': 'x-ms-attestation-type',
-                            'equals': 'sevsnpvm'
-                        },
-                        {
-                            'claim': 'x-ms-compliance-status',
-                            'equals': 'azure-compliant-cvm'
-                        }
-                    ]
-                }
-            ]
-        }
-        return default_cvm_policy
+        if policy_type == 'cvm':
+            default_release_policy = {
+                'version': '1.0.0',
+                'anyOf': [
+                    {
+                        'authority': attest_uri,
+                        'allOf': [
+                            {
+                                'claim': 'x-ms-compliance-status',
+                                'equals': 'azure-compliant-cvm'
+                            }
+                        ]
+                    }
+                ]
+            }
+        else:
+            default_release_policy = {
+                'version': '1.0.0',
+                'anyOf': [
+                    {
+                        'authority': attest_uri,
+                        'allOf': [
+                            {
+                                'anyOf': [
+                                    {
+                                        'claim': 'x-ms-isolation-tee.x-ms-attestation-type',
+                                        'equals': 'sevsnpvm'
+                                    },
+                                    {
+                                        'claim': 'x-ms-isolation-tee.x-ms-attestation-type',
+                                        'equals': 'tdxvm'
+                                    }
+                                ]
+                            },
+                            {
+                                'claim': 'x-ms-isolation-tee.x-ms-compliance-status',
+                                'equals': 'azure-compliant-cvm'
+                            }
+                        ]
+                    }
+                ]
+            }
+        return default_release_policy
     except Exception as ex:  # pylint: disable=broad-except
-        raise AzureInternalError(f"Fail to fetch default cvm policy: {ex}")
+        raise AzureInternalError(f"Fail to fetch default release policy: {ex}")
 
 
 def process_key_release_policy(cmd, ns):
     default_cvm_policy = None
+    default_data_disk_policy = None
     if hasattr(ns, 'default_cvm_policy'):
         default_cvm_policy = ns.default_cvm_policy
         del ns.default_cvm_policy
+    if hasattr(ns, 'default_data_disk_policy'):
+        default_data_disk_policy = ns.default_data_disk_policy
+        del ns.default_data_disk_policy
 
     immutable = None
     if hasattr(ns, 'immutable'):
         immutable = ns.immutable
         del ns.immutable
 
-    if not ns.release_policy and not default_cvm_policy:
+    if not ns.release_policy and not default_cvm_policy and not default_data_disk_policy:
         if immutable is not None:
             raise InvalidArgumentValueError('Please provide policy when setting `--immutable`')
         return
 
     if ns.release_policy and default_cvm_policy:
         raise InvalidArgumentValueError('Can not specify both `--policy` and `--default-cvm-policy`')
+    if ns.release_policy and default_data_disk_policy:
+        raise InvalidArgumentValueError('Can not specify both `--policy` and `--default-data-disk-policy`')
+    if default_cvm_policy and default_data_disk_policy:
+        from azure.cli.core.azclierror import MutuallyExclusiveArgumentError
+        raise MutuallyExclusiveArgumentError('`--default-cvm-policy` and `--default-data-disk-policy` '
+                                             'are mutually exclusive')
 
     import json
     KeyReleasePolicy = cmd.loader.get_sdk('KeyReleasePolicy', mod='_models',
                                           resource_type=ResourceType.DATA_KEYVAULT_KEYS)
-    if default_cvm_policy:
+    if default_cvm_policy or default_data_disk_policy:
         vault_url = getattr(ns, 'hsm_name', None) or getattr(ns, 'vault_base_url', None)
         if not vault_url:
             vault_url = getattr(ns, 'identifier', None)
-        policy = _fetch_default_cvm_policy(cmd.cli_ctx, vault_url)
+        policy = _fetch_default_release_policy(cmd.cli_ctx, vault_url, 'cvm' if default_cvm_policy else 'data_disk')
         ns.release_policy = KeyReleasePolicy(encoded_policy=json.dumps(policy).encode('utf-8'),
                                              immutable=immutable)
         return
@@ -387,7 +420,7 @@ def validate_deleted_vault_or_hsm_name(cmd, ns):
     """
     Validate a deleted vault name; populate or validate location and resource_group_name
     """
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
 
     vault_name = getattr(ns, 'vault_name', None)
     hsm_name = getattr(ns, 'hsm_name', None)
@@ -463,7 +496,7 @@ def certificate_type(string):
         with open(os.path.expanduser(string), 'rb') as f:
             cert_data = f.read()
         return cert_data
-    except (IOError, OSError) as e:
+    except OSError as e:
         raise CLIError("Unable to load certificate file '{}': {}.".format(string, e.strerror))
 
 
@@ -506,7 +539,7 @@ def get_hsm_base_url_type(cli_ctx):
 
 
 def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     return resource_id(
@@ -520,7 +553,7 @@ def _construct_vnet(cmd, resource_group_name, vnet_name, subnet_name):
 
 
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import is_valid_resource_id
+    from azure.mgmt.core.tools import is_valid_resource_id
 
     subnet = namespace.subnet
     subnet_is_id = is_valid_resource_id(subnet)
@@ -589,14 +622,14 @@ def _show_vault_only_deprecate_message(ns):
                        'Warning! If you have soft-delete protection enabled on this key vault, you will '
                        'not be able to reuse this key vault name until the key vault has been purged from '
                        'the soft deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview'),
+                       'guidance.\nhttps://learn.microsoft.com/azure/key-vault/general/soft-delete-overview'),
         'keyvault key delete':
             Deprecated(ns.cmd.cli_ctx, message_func=lambda x:
                        'Warning! If you have soft-delete protection enabled on this key vault, this key '
                        'will be moved to the soft deleted state. You will not be able to create a key with '
                        'the same name within this key vault until the key has been purged from the '
                        'soft-deleted state. Please see the following documentation for additional '
-                       'guidance.\nhttps://docs.microsoft.com/azure/key-vault/general/soft-delete-overview')
+                       'guidance.\nhttps://learn.microsoft.com/azure/key-vault/general/soft-delete-overview')
     }
     cmds = ['keyvault delete', 'keyvault key delete']
     for cmd in cmds:
@@ -709,11 +742,11 @@ def process_certificate_policy(cmd, ns):
     if policy is None:
         return
     if not isinstance(policy, dict):
-        raise CLIError('incorrect usage: policy should be an JSON encoded string '
+        raise CLIError('incorrect usage: policy should be a JSON encoded string '
                        'or can use @{file} to load from a file(e.g.@my_policy.json).')
 
-    secret_properties = policy.get('secret_properties')
-    if secret_properties and not secret_properties.get('content_type') \
+    secret_properties = policy.get('secret_properties') or {}
+    if not secret_properties.get('content_type') \
             and hasattr(ns, 'certificate_bytes') and ns.certificate_bytes:
         from OpenSSL import crypto
         try:
@@ -723,11 +756,13 @@ def process_certificate_policy(cmd, ns):
         except (ValueError, crypto.Error):
             # else it should be a pfx file
             secret_properties['content_type'] = 'application/x-pkcs12'
+        policy['secret_properties'] = secret_properties
 
     if hasattr(ns, 'validity'):
-        x509_certificate_properties = policy.get('x509_certificate_properties')
-        if x509_certificate_properties and ns.validity:
+        x509_certificate_properties = policy.get('x509_certificate_properties') or {}
+        if ns.validity:
             x509_certificate_properties['validity_in_months'] = ns.validity
+            policy['x509_certificate_properties'] = x509_certificate_properties
         del ns.validity
 
     policyObj = build_certificate_policy(cmd.cli_ctx, policy)

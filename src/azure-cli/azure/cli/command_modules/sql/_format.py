@@ -27,7 +27,7 @@ def _bytes_to_friendly_string(b):
     unit = next(u for u in _units if (b % u[0]) == 0)
 
     # Format the value with the chosen unit
-    return str((b // unit[0])) + unit[1]
+    return str(b // unit[0]) + unit[1]
 
 
 class LongRunningOperationResultTransform(LongRunningOperation):  # pylint: disable=too-few-public-methods
@@ -35,7 +35,7 @@ class LongRunningOperationResultTransform(LongRunningOperation):  # pylint: disa
     Long-running operation poller that also transforms the json response.
     '''
     def __init__(self, cli_ctx, transform_func):
-        super(LongRunningOperationResultTransform, self).__init__(cli_ctx)
+        super().__init__(cli_ctx)
         self._transform_func = transform_func
 
     def __call__(self, result):
@@ -50,7 +50,7 @@ class LongRunningOperationResultTransform(LongRunningOperation):  # pylint: disa
         from azure.cli.core.util import poller_classes
         if isinstance(result, poller_classes()):
             # Poll for long-running operation result result by calling base class
-            result = super(LongRunningOperationResultTransform, self).__call__(result)
+            result = super().__call__(result)
 
         # Apply transform function
         return self._transform_func(result)

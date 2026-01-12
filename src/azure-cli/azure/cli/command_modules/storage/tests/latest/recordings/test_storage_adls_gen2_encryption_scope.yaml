@@ -18,13 +18,12 @@ interactions:
       ParameterSetName:
       - -i --account-name -g -n
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-azure-mgmt-storage/21.1.0 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.81.0 azsdk-python-core/1.35.0 Python/3.12.10 (Windows-10-10.0.19045-SP0)
     method: PUT
-    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption?api-version=2023-01-01
+    uri: https://management.azure.com/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption?api-version=2025-06-01
   response:
     body:
-      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption","properties":{"source":"Microsoft.Storage","keyVaultProperties":{},"creationTime":"2023-10-19T09:43:36.2294672Z","lastModifiedTime":"2023-10-19T09:43:36.2294672Z","state":"Enabled","requireInfrastructureEncryption":true}}'
+      string: '{"id":"/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/cli_test_adls_encryption000001/providers/Microsoft.Storage/storageAccounts/encryption000002/encryptionScopes/testencryption","type":"Microsoft.Storage/storageAccounts/encryptionScopes","name":"testencryption","properties":{"source":"Microsoft.Storage","keyVaultProperties":{},"creationTime":"2025-12-11T08:12:09.2289379Z","lastModifiedTime":"2025-12-11T08:12:09.2289379Z","state":"Enabled","requireInfrastructureEncryption":true}}'
     headers:
       cache-control:
       - no-cache
@@ -33,7 +32,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 19 Oct 2023 09:43:36 GMT
+      - Thu, 11 Dec 2025 08:12:08 GMT
       expires:
       - '-1'
       pragma:
@@ -44,8 +43,12 @@ interactions:
       - max-age=31536000; includeSubDomains
       x-content-type-options:
       - nosniff
+      x-ms-operation-identifier:
+      - tenantId=4b71fe15-44c6-47b7-94ac-5a6b2cc290e9,objectId=2146abed-b993-4a81-a6af-eda7b4524c5e/eastus2euap/4995f606-603c-4b5f-ab64-8e36e6949120
       x-ms-ratelimit-remaining-subscription-writes:
-      - '1192'
+      - '199'
+      x-ms-throttling-version:
+      - v2
     status:
       code: 201
       message: Created
@@ -66,16 +69,15 @@ interactions:
       - -n --default-encryption-scope --prevent-encryption-scope-override --account-name
         --account-key
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-storage-dfs/12.9.0b1 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.81.0 azsdk-python-storage-dfs/12.23.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 19 Oct 2023 09:43:36 GMT
+      - Thu, 11 Dec 2025 08:12:09 GMT
       x-ms-default-encryption-scope:
       - testencryption
       x-ms-deny-encryption-scope-override:
       - 'false'
       x-ms-version:
-      - '2021-08-06'
+      - '2026-02-06'
     method: PUT
     uri: https://encryption000002.blob.core.windows.net/testfs?restype=container
   response:
@@ -85,15 +87,15 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 19 Oct 2023 09:43:35 GMT
+      - Thu, 11 Dec 2025 08:12:10 GMT
       etag:
-      - '"0x8DBD087DE02A4CE"'
+      - '"0x8DE388CFBED4CB2"'
       last-modified:
-      - Thu, 19 Oct 2023 09:43:36 GMT
+      - Thu, 11 Dec 2025 08:12:10 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-version:
-      - '2021-08-06'
+      - '2026-02-06'
     status:
       code: 201
       message: Created
@@ -111,12 +113,11 @@ interactions:
       ParameterSetName:
       - -n --account-name --account-key
       User-Agent:
-      - AZURECLI/2.53.0 azsdk-python-storage-dfs/12.9.0b1 Python/3.10.13 (Linux-5.15.0-1047-azure-x86_64-with-glibc2.31)
-        VSTS_7b238909-6802-4b65-b90d-184bca47f458_build_220_0
+      - AZURECLI/2.81.0 azsdk-python-storage-dfs/12.23.0b1 Python/3.12.10 (Windows-10-10.0.19045-SP0)
       x-ms-date:
-      - Thu, 19 Oct 2023 09:43:36 GMT
+      - Thu, 11 Dec 2025 08:12:11 GMT
       x-ms-version:
-      - '2021-08-06'
+      - '2026-02-06'
     method: GET
     uri: https://encryption000002.blob.core.windows.net/testfs?restype=container
   response:
@@ -126,11 +127,11 @@ interactions:
       content-length:
       - '0'
       date:
-      - Thu, 19 Oct 2023 09:43:36 GMT
+      - Thu, 11 Dec 2025 08:12:11 GMT
       etag:
-      - '"0x8DBD087DE02A4CE"'
+      - '"0x8DE388CFBED4CB2"'
       last-modified:
-      - Thu, 19 Oct 2023 09:43:36 GMT
+      - Thu, 11 Dec 2025 08:12:10 GMT
       server:
       - Windows-Azure-Blob/1.0 Microsoft-HTTPAPI/2.0
       x-ms-default-encryption-scope:
@@ -148,7 +149,7 @@ interactions:
       x-ms-lease-status:
       - unlocked
       x-ms-version:
-      - '2021-08-06'
+      - '2026-02-06'
     status:
       code: 200
       message: OK

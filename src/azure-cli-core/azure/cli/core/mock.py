@@ -50,7 +50,7 @@ class DummyCli(AzCli):
                 except FileNotFoundError:
                     pass
 
-        super(DummyCli, self).__init__(
+        super().__init__(
             cli_name='az',
             config_dir=GLOBAL_CONFIG_DIR,
             config_env_var_prefix=ENV_VAR_PREFIX,

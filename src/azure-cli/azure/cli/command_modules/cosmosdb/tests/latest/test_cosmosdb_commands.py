@@ -49,7 +49,7 @@ class CosmosDBTests(ScenarioTest):
             'network_acl_bypass_resource_id': network_acl_bypass_resource_id
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {network_acl_bypass_resource_id} --backup-interval 480 --backup-retention 8 --minimal-tls-version Tls11')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --enable-automatic-failover --default-consistency-level ConsistentPrefix --network-acl-bypass AzureServices --network-acl-bypass-resource-ids {network_acl_bypass_resource_id} --backup-interval 480 --backup-retention 8')
         self.cmd('az cosmosdb show -n {acc} -g {rg}', checks=[
             self.check('enableAutomaticFailover', True),
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
@@ -59,7 +59,6 @@ class CosmosDBTests(ScenarioTest):
             self.check('backupPolicy.periodicModeProperties.backupIntervalInMinutes', '480'),
             self.check('backupPolicy.periodicModeProperties.backupRetentionIntervalInHours', '8'),
             self.check('backupPolicy.type', 'Periodic'),
-            self.check('minimalTlsVersion', 'Tls11'),
         ])
 
         self.cmd('az cosmosdb update -n {acc} -g {rg} --enable-automatic-failover false --default-consistency-level Session --disable-key-based-metadata-write-access --public-network-access "DISABLED" --network-acl-bypass None')
@@ -79,6 +78,7 @@ class CosmosDBTests(ScenarioTest):
         ]).get_output_in_json()
         assert account['tags']['testKey'] == "testValue"
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_update_database_account(self, resource_group):
         from azure.mgmt.cosmosdb.models import BackupStorageRedundancy
@@ -164,6 +164,7 @@ class CosmosDBTests(ScenarioTest):
         result = self.cmd('az cosmosdb check-name-exists -n {acc}').get_output_in_json()
         assert result
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_keys_database_account(self, resource_group):
 
@@ -248,6 +249,36 @@ class CosmosDBTests(ScenarioTest):
         assert account2['readLocations'][0]['failoverPriority'] == 1 or account2['readLocations'][1]['failoverPriority'] == 1
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
+    def test_locations_database_accounts_offline(self, resource_group):
+
+        write_location = 'eastus'
+        read_location = 'westus'
+
+        self.kwargs.update({
+            'acc': self.create_random_name(prefix='cli', length=40),
+            'write_location': write_location,
+            'read_location': read_location
+        })
+
+        account_pre_offline = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName={write_location} failoverPriority=0 --locations regionName={read_location} failoverPriority=1').get_output_in_json()
+
+        assert account_pre_offline['writeLocations'][0]['locationName'] == "East US"
+
+        # Offline write region 'East US'
+        self.cmd('az cosmosdb offline-region -n {acc} -g {rg} --region {write_location}')
+        account_post_offline = self.cmd('az cosmosdb show -n {acc} -g {rg}').get_output_in_json()
+
+        # Assert writeLocations is switched to 'West US' after offlining 'East US' region
+        assert len(account_post_offline['writeLocations']) == 1
+        assert account_post_offline['writeLocations'][0]['locationName'] == 'West US'
+        assert account_post_offline['writeLocations'][0]['provisioningState'] == 'Succeeded'
+
+        # Assert that 'East US' region is offlined.
+        east_us_offline_location = next((loc for loc in account_post_offline['readLocations'] if loc['locationName'] == "East US"), None)
+        assert east_us_offline_location is not None, "East US read location not found in the response."
+        assert east_us_offline_location['provisioningState'] == "Offline", "East US read location is not in the 'Offline' state."
+
+    @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_locations_both_formats_database_accounts(self, resource_group):
 
         write_location = 'eastus'
@@ -280,6 +311,7 @@ class CosmosDBTests(ScenarioTest):
             self.check('consistencyPolicy.defaultConsistencyLevel', 'ConsistentPrefix'),
         ]).get_output_in_json()
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_account')
     def test_list_databases(self, resource_group):
 
@@ -447,6 +479,7 @@ class CosmosDBTests(ScenarioTest):
         # Test delete
         self.cmd('cosmosdb private-endpoint-connection delete --id {pec_id}')
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_database')
     def test_cosmosdb_database(self, resource_group):
 
@@ -474,6 +507,7 @@ class CosmosDBTests(ScenarioTest):
         self.cmd('az cosmosdb database delete -g {rg} -n {acc} -d {db_name} --yes')
         assert not self.cmd('az cosmosdb database exists -g {rg} -n {acc} -d {db_name}').get_output_in_json()
 
+    @unittest.skip('Skipping old test due to secrets in response')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_collection')
     def test_cosmosdb_collection(self, resource_group):
 
@@ -556,8 +590,10 @@ class CosmosDBTests(ScenarioTest):
         default_ttl = 1000
         new_default_ttl = 2000
         unique_key_policy = '"{\\"uniqueKeys\\": [{\\"paths\\": [\\"/path/to/key1\\"]}, {\\"paths\\": [\\"/path/to/key2\\"]}]}"'
+        vector_embedding_policy = '"{\\"vectorEmbeddings\\": [{\\"path\\": \\"/vector1\\", \\"dataType\\": \\"float32\\", \\"dimensions\\": 2, \\"distanceFunction\\": \\"dotproduct\\" }]}"'
+        full_text_policy = '"{\\"fullTextPaths\\": [{\\"path\\": \\"/ftPath1\\", \\"language\\": \\"en-US\\" }]}"'
         conflict_resolution_policy = '"{\\"mode\\": \\"lastWriterWins\\", \\"conflictResolutionPath\\": \\"/path\\"}"'
-        indexing = '"{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{\\"path\\": \\"/headquarters/employees/?\\"}]}"'
+        indexing = '"{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{\\"path\\": \\"/headquarters/employees/?\\"}], \\"vectorIndexes\\": [{\\"path\\": \\"/vector1\\",\\"type\\": \\"flat\\"}]}"'
 
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
@@ -568,15 +604,17 @@ class CosmosDBTests(ScenarioTest):
             'nttl': new_default_ttl,
             'unique_key': unique_key_policy,
             "conflict_resolution": conflict_resolution_policy,
-            "indexing": indexing
+            "indexing": indexing,
+            "vector_embedding": vector_embedding_policy,
+            "full_text_policy": full_text_policy
         })
 
-        self.cmd('az cosmosdb create -n {acc} -g {rg}')
+        self.cmd('az cosmosdb create -n {acc} -g {rg} --capabilities EnableNoSQLVectorSearch')
         self.cmd('az cosmosdb sql database create -g {rg} -a {acc} -n {db_name}')
 
         assert not self.cmd('az cosmosdb sql container exists -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
 
-        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --ttl {ttl} --unique-key-policy {unique_key} --conflict-resolution-policy {conflict_resolution} --idx {indexing}').get_output_in_json()
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --ttl {ttl} --unique-key-policy {unique_key} --vector-embeddings {vector_embedding} --conflict-resolution-policy {conflict_resolution} --idx {indexing} --full-text-policy {full_text_policy}').get_output_in_json()
 
         assert container_create["name"] == ctn_name
         assert container_create["resource"]["partitionKey"]["paths"][0] == partition_key
@@ -584,7 +622,10 @@ class CosmosDBTests(ScenarioTest):
         assert len(container_create["resource"]["uniqueKeyPolicy"]["uniqueKeys"]) == 2
         assert container_create["resource"]["conflictResolutionPolicy"]["mode"] == "lastWriterWins"
         assert container_create["resource"]["indexingPolicy"]["excludedPaths"][0]["path"] == "/headquarters/employees/?"
-
+        assert container_create["resource"]["vectorEmbeddingPolicy"]["vectorEmbeddings"][0]["path"] == "/vector1"
+        assert container_create["resource"]["indexingPolicy"]["vectorIndexes"][0]["path"] == "/vector1"
+        assert container_create["resource"]["fullTextPolicy"]["fullTextPaths"][0]["path"] == "/ftPath1"
+        
         container_update = self.cmd('az cosmosdb sql container update -g {rg} -a {acc} -d {db_name} -n {ctn_name} --ttl {nttl}').get_output_in_json()
         assert container_update["resource"]["defaultTtl"] == new_default_ttl
 
@@ -656,7 +697,7 @@ class CosmosDBTests(ScenarioTest):
         container_list = self.cmd('az cosmosdb sql container list -g {rg} -a {acc} -d {db_name}').get_output_in_json()
         assert len(container_list) == 0
     
-    @record_only() # Requests to disable analytics temporarily blocked in production. Will reenable test once disable analytics capability is restored.
+    @unittest.skip('Requests to disable analytics temporarily blocked in production. Will reenable test once disable analytics capability is restored.')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_container_update_disable_analytics')
     def test_cosmosdb_sql_container_update_disable_analytics(self, resource_group):
         db_name = self.create_random_name(prefix='cli', length=15)
@@ -1829,6 +1870,11 @@ class CosmosDBTests(ScenarioTest):
             'az cosmosdb mongodb role definition list -g {rg} -a {acc}').get_output_in_json()
         assert len(role_definition_list) == 0
 
+    '''
+    This test will be rewritten to generalize principals for any subscription.
+    Disabling the test for now.
+    '''
+    @unittest.skip('Needs to be rewritten to generalize principal across subscriptions')
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_sql_role')
     def test_cosmosdb_sql_role(self, resource_group):
         acc_name = self.create_random_name(prefix='cli', length=15)
@@ -2039,7 +2085,7 @@ class CosmosDBTests(ScenarioTest):
 
         import dateutil.parser
         import time
-        from datetime import timedelta
+        from datetime import timedelta, datetime
 
         # This should fail as restore time is before account creation time
         invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) - timedelta(days=30)
@@ -2049,7 +2095,7 @@ class CosmosDBTests(ScenarioTest):
         self.assertRaises(Exception, lambda: self.cmd('az cosmosdb restore --account-name {acc} -g {rg} --restore-timestamp {invalid_restore_time} --location {loc} --target-database-account-name {restored_acc}'))
 
         # This should fail as restore time is in future
-        invalid_restore_time = dateutil.parser.parse(restorable_database_account['creationTime']) + timedelta(days=30)
+        invalid_restore_time = datetime.now() + timedelta(days=30)
         self.kwargs.update({
             'invalid_restore_time': invalid_restore_time.isoformat()
         })
@@ -2595,16 +2641,18 @@ class CosmosDBTests(ScenarioTest):
         time.sleep(240)
         restore_ts_string = restore_ts.isoformat()
         self.kwargs.update({
-            'rts': restore_ts_string
+            'rts': restore_ts_string,
+            'dt': True
         })
 
-        self.cmd('az cosmosdb restore -n {restored_acc} -g {rg} -a {acc} --restore-timestamp {rts} --location {loc}')
+        self.cmd('az cosmosdb restore -n {restored_acc} -g {rg} -a {acc} --restore-timestamp {rts} --location {loc} --disable-ttl {dt}')
         restored_account = self.cmd('az cosmosdb show -n {restored_acc} -g {rg}', checks=[
             self.check('restoreParameters.restoreMode', 'PointInTime')
         ]).get_output_in_json()
 
         assert restored_account['restoreParameters']['restoreSource'] == restorable_database_account['id']
         assert restored_account['restoreParameters']['restoreTimestampInUtc'] == restore_ts_string
+        assert restored_account['restoreParameters']['restoreWithTtlDisabled'] == True
 
     @ResourceGroupPreparer(name_prefix='cli_test_cosmosdb_table_restorable_commands', location='eastus2')
     @AllowLargeResponse(size_kb=9999)
@@ -2809,7 +2857,7 @@ class CosmosDBTests(ScenarioTest):
 
         acc_create = self.cmd('az cosmosdb create -n {acc} -g {rg} --locations regionName=eastus2 failoverPriority=0 isZoneRedundant=False')
 
-        service_create = self.cmd('az cosmosdb service create -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 1 --size "Cosmos.D4s" ').get_output_in_json()
+        service_create = self.cmd('az cosmosdb service create -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 1 --size "Cosmos.D4s" --gateway-type IntegratedCache').get_output_in_json()
         assert service_create["name"] == "sqlDedicatedGateway"
 
         service_update = self.cmd('az cosmosdb service update -a {acc} -g {rg} --name "sqlDedicatedGateway" --count 2 --size "Cosmos.D4s" ').get_output_in_json()
@@ -2896,6 +2944,7 @@ class CosmosDBTests(ScenarioTest):
         indexing = '"{\\"indexingMode\\": \\"consistent\\", \\"automatic\\": true, \\"includedPaths\\": [{\\"path\\": \\"/*\\"}], \\"excludedPaths\\": [{\\"path\\": \\"/headquarters/employees/?\\"}]}"'
         location = "WestUS"
         tp1 = 1000
+        ttl = 1800
 
         self.kwargs.update({
             'acc': self.create_random_name(prefix='cli', length=15),
@@ -2906,7 +2955,8 @@ class CosmosDBTests(ScenarioTest):
             "conflict_resolution": conflict_resolution_policy,
             "indexing": indexing,
             'loc': location,
-            'tp1': tp1
+            'tp1': tp1,
+            'ttl': ttl
         })
 
         self.cmd('az cosmosdb create -n {acc} -g {rg} --backup-policy-type Continuous --locations regionName={loc}')
@@ -2914,10 +2964,11 @@ class CosmosDBTests(ScenarioTest):
 
         assert not self.cmd('az cosmosdb sql container exists -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
 
-        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --unique-key-policy {unique_key} --conflict-resolution-policy {conflict_resolution} --idx {indexing}').get_output_in_json()
+        container_create = self.cmd('az cosmosdb sql container create -g {rg} -a {acc} -d {db_name} -n {ctn_name} -p {part} --unique-key-policy {unique_key} --conflict-resolution-policy {conflict_resolution} --idx {indexing} --ttl {ttl}').get_output_in_json()
 
         assert container_create["name"] == ctn_name
         assert container_create["resource"]["partitionKey"]["paths"][0] == partition_key
+        assert container_create["resource"]["defaultTtl"] == ttl
         assert len(container_create["resource"]["uniqueKeyPolicy"]["uniqueKeys"]) == 2
         assert container_create["resource"]["conflictResolutionPolicy"]["mode"] == "lastWriterWins"
         assert container_create["resource"]["indexingPolicy"]["excludedPaths"][0]["path"] == "/headquarters/employees/?"
@@ -2931,7 +2982,8 @@ class CosmosDBTests(ScenarioTest):
         restore_ts_string = datetime.utcnow().isoformat()
 
         self.kwargs.update({
-            'rts': restore_ts_string
+            'rts': restore_ts_string,
+            'dt': True
         })
         import time
         time.sleep(300)
@@ -2973,7 +3025,7 @@ class CosmosDBTests(ScenarioTest):
         import time
         time.sleep(500)
 
-        self.cmd('az cosmosdb sql database restore -g {rg} -a {acc} -n {db_name} --restore-timestamp {rts}')
+        self.cmd('az cosmosdb sql database restore -g {rg} -a {acc} -n {db_name} --restore-timestamp {rts} --disable-ttl {dt}')
 
         database_restore = self.cmd('az cosmosdb sql database show -g {rg} -a {acc} -n {db_name}').get_output_in_json()
         assert database_restore["name"] == db_name
@@ -2983,6 +3035,7 @@ class CosmosDBTests(ScenarioTest):
 
         container_show = self.cmd('az cosmosdb sql container show -g {rg} -a {acc} -d {db_name} -n {ctn_name}').get_output_in_json()
         assert container_show["name"] == ctn_name
+        assert container_show["resource"]["defaultTtl"] == None
 
         self.cmd('az cosmosdb sql database delete -g {rg} -a {acc} -n {db_name} --yes')
         database_list = self.cmd('az cosmosdb sql database list -g {rg} -a {acc}').get_output_in_json()

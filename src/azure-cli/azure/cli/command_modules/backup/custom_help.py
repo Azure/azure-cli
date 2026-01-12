@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
 from knack.log import get_logger
+from knack.prompting import prompt_y_n
 
 from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
 
@@ -48,7 +49,11 @@ operation_name_map = {"deleteProtection": rsc_type + "/backupFabrics/protectionC
                       "disableSoftDelete": rsc_type + "/backupconfig/write",
                       "RecoveryServicesDisableImmutability": rsc_type + "/write#reduceImmutabilityState",
                       "RecoveryServicesStopProtection": rsc_type +
-                      "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData"}
+                      "/backupFabrics/protectionContainers/protectedItems/write#stopProtectionWithRetainData",
+                      "RecoveryServicesRestore": rsc_type +
+                      "/backupFabrics/protectionContainers/protectedItems/recoveryPoints/restore/action",
+                      "RecoveryServicesModifyEncryptionSettings": rsc_type +
+                      "/write#modifyEncryptionSettings"}
 
 # Client Utilities
 
@@ -66,7 +71,11 @@ def is_sql(resource_type):
 
 
 def is_hana(resource_type):
-    return resource_type.lower() == 'saphanadatabase'
+    return resource_type.lower() == 'saphanadatabase' or resource_type.lower() == "saphanadbinstance"
+
+
+def is_sapase(resource_type):
+    return resource_type.lower() == 'sapasedatabase'
 
 
 def is_wl_container(name):
@@ -99,6 +108,32 @@ def get_containers(client, container_type, status, resource_group_name, vault_na
         return [container for container in containers if container.name == container_name]
 
     return containers
+
+
+def extract_arm_resource_group_from_id(resource_id):
+    if not is_valid_resource_id(resource_id):
+        raise InvalidArgumentValueError("Please provide a valid resource id.")
+    id_parts = parse_resource_id(resource_id)
+    if id_parts.get('subscription') is None or id_parts.get('resource_group') is None:
+        raise InvalidArgumentValueError("The resource ID does not contain subscription or resource group information.")
+
+    arm_resource_group = (f"/subscriptions/{id_parts.get('subscription')}/"
+                          f"resourceGroups/{id_parts.get('resource_group')}")
+    return arm_resource_group
+
+
+def get_deleted_vault_parameters(deleted_vault_id):
+    if is_valid_resource_id(deleted_vault_id):
+        id_parts = parse_resource_id(deleted_vault_id)
+        deleted_vault_name = id_parts.get('child_name_1')
+        location = id_parts.get('name')
+        if deleted_vault_name is None or location is None:
+            raise InvalidArgumentValueError("Unable to fetch the deleted vault name and the location. "
+                                            "Please provide a valid deleted vault id.")
+    else:
+        raise InvalidArgumentValueError("Please provide a valid deleted vault id.")
+
+    return deleted_vault_name, location
 
 
 def get_resource_name_and_rg(resource_group_name, name_or_id):
@@ -234,8 +269,7 @@ def calculate_weekly_rpo(schedule_run_days):
         if backup_scheduled:
             if last_active_index is not None:
                 gap = index - last_active_index
-                if gap > largest_gap:
-                    largest_gap = gap
+                largest_gap = max(largest_gap, gap)
             last_active_index = index
 
     return largest_gap * 24
@@ -668,11 +702,45 @@ def validate_and_extract_container_type(container_name, backup_management_type):
     return None
 
 
-def validate_update_policy_request(existing_policy, new_policy):
+def validate_update_policy_request(existing_policy, new_policy, yes=False):
     existing_backup_management_type = existing_policy.properties.backup_management_type
     new_backup_management_type = new_policy.properties.backup_management_type
     if existing_backup_management_type != new_backup_management_type:
         raise CLIError("BackupManagementType cannot be different than the existing type.")
+    vault_to_snapshot = (
+        new_backup_management_type.lower() == 'azurestorage' and
+        hasattr(existing_policy.properties, 'vault_retention_policy') and
+        existing_policy.properties.vault_retention_policy is not None and
+        hasattr(new_policy.properties, 'retention_policy') and
+        new_policy.properties.retention_policy is not None
+    )
+
+    snapshot_to_vault = (
+        new_backup_management_type.lower() == 'azurestorage' and
+        hasattr(existing_policy.properties, 'retention_policy') and
+        existing_policy.properties.retention_policy is not None and
+        hasattr(new_policy.properties, 'vault_retention_policy') and
+        new_policy.properties.vault_retention_policy is not None
+    )
+
+    # vault -> snapshot
+    if vault_to_snapshot:
+        raise CLIError(
+            """
+            Switching the backup tier from vaulted backup to snapshot is not possible.
+            Please create a new policy for snapshot-only backups.
+            """)
+    # snapshot -> vault
+    if snapshot_to_vault:
+        warning_prompt = ('Changing the backup tier keeps current snapshots as-is under the existing policy.'
+                          'Future backups will be stored in the vault with new retention settings. '
+                          'This action is irreversible and incurs additional costs.'
+                          'Switching from vault to snapshot requires reconfiguration.'
+                          'Learn more at'
+                          'https://learn.microsoft.com/en-us/azure/backup/azure-file-share-backup-overview.'
+                          'Do you want to continue?')
+        if not yes and not prompt_y_n(warning_prompt):
+            raise CLIError('Cancelling policy update operation')
 
 
 def transform_softdelete_parameters(parameter):

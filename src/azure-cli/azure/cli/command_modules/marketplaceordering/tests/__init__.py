@@ -23,7 +23,7 @@ logger = logging.getLogger('azure.cli.testsdk')
 logger.addHandler(logging.StreamHandler())
 __path__ = __import__('pkgutil').extend_path(__path__, __name__)
 exceptions = []
-test_map = dict()
+test_map = {}
 SUCCESSED = "successed"
 FAILED = "failed"
 
@@ -56,7 +56,7 @@ def try_manual(func):
         func_to_call = get_func_to_call()
         logger.info("running %s()...", func.__name__)
         try:
-            test_map[func.__name__] = dict()
+            test_map[func.__name__] = {}
             test_map[func.__name__]["result"] = SUCCESSED
             test_map[func.__name__]["error_message"] = ""
             test_map[func.__name__]["error_stack"] = ""

@@ -122,6 +122,10 @@ def process_mx(io, data, name, print_name=False):
     return process_rr(io, data, 'MX', ['preference', 'host'], name, print_name)
 
 
+def process_naptr(io, data, name, print_name=False):
+    return process_rr(io, data, 'NAPTR', ['order', 'preference', 'flags', 'services', 'regexp', 'replacement'], name, print_name)
+
+
 def process_ptr(io, data, name, print_name=False):
     return process_rr(io, data, 'PTR', 'host', name, print_name)
 

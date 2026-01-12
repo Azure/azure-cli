@@ -3,16 +3,11 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
+from urllib.parse import urlencode
 import json
 import unittest
 from unittest import mock
 import sys
-
-from azure.mgmt.containerregistry.v2019_05_01.models import Registry, Sku
 
 from azure.cli.command_modules.acr.repository import (
     acr_repository_list,
@@ -1195,6 +1190,8 @@ class AcrMockCommandsTests(unittest.TestCase):
                                    tenant_suffix=test_tenant_suffix)
 
     def _core_token_scenarios(self, mock_get_raw_token, mock_requests_get, mock_requests_post, mock_get_registry_by_name, registry_exists, registry_name, login_server, tenant_suffix):
+        from azure.mgmt.containerregistry.v2024_11_01_preview.models import Registry, Sku
+
         cmd = self._setup_cmd()
 
         if registry_exists:
@@ -1209,6 +1206,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         # Test get refresh token
         get_login_credentials(cmd, registry_name, tenant_suffix=tenant_suffix)
+        self._validate_raw_token_request(mock_get_raw_token)
         self._validate_refresh_token_request(mock_requests_get, mock_requests_post, login_server)
 
         # Test get access token for container image repository
@@ -1239,6 +1237,9 @@ class AcrMockCommandsTests(unittest.TestCase):
             'refresh_token': TEST_ACR_REFRESH_TOKEN,
             'access_token': TEST_ACR_ACCESS_TOKEN}).encode()
         mock_requests_post.return_value = token_response
+
+    def _validate_raw_token_request(self, mock_get_raw_token):
+        mock_get_raw_token.assert_called_with(mock.ANY, resource="https://containerregistry.azure.net", subscription=mock.ANY)
 
     def _validate_refresh_token_request(self, mock_requests_get, mock_requests_post, login_server):
         mock_requests_get.assert_called_with('https://{}/v2/'.format(login_server), verify=mock.ANY)
@@ -1394,7 +1395,7 @@ class AcrMockCommandsTests(unittest.TestCase):
 
         mock_get_access_credentials.return_value = 'testregistry.azurecr.io', EMPTY_GUID, 'password'
 
-        builtins_open = '__builtin__.open' if sys.version_info[0] < 3 else 'builtins.open'
+        builtins_open = 'builtins.open'
 
         # Push a chart
         with mock.patch(builtins_open) as mock_open:

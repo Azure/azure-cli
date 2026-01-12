@@ -17,7 +17,7 @@ def load_arguments_eh(self, _):
     from knack.arguments import CLIArgumentType
     from azure.cli.core.profiles import ResourceType
     (SkuName, TlsVersion) = self.get_models('SkuName', 'TlsVersion', resource_type=ResourceType.MGMT_EVENTHUB)
-    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption, ConstructPolicy, AlertAddIpRule, AlertAddVirtualNetwork, ConstructPolicyName
+    from azure.cli.command_modules.eventhubs.action import AlertAddEncryption, ConstructPolicy, AlertAddIpRule, AlertAddVirtualNetwork, ConstructPolicyName, AlertAddlocation
 
     namespace_name_arg_type = CLIArgumentType(options_list=['--namespace-name'], help='Name of Namespace', id_part='name')
 
@@ -28,7 +28,7 @@ def load_arguments_eh(self, _):
     with self.argument_context('eventhubs namespace exists') as c:
         c.argument('name', arg_type=name_type, help='Namespace name. Name can contain only letters, numbers, and hyphens. The namespace must start with a letter, and it must end with a letter or number.')
 
-    with self.argument_context('eventhubs namespace', min_api='2021-06-01-preview') as c:
+    with self.argument_context('eventhubs namespace') as c:
         c.argument('namespace_name', arg_type=name_type, id_part='name', completer=get_resource_name_completion_list('Microsoft.eventhubs/namespaces'), help='Name of Namespace')
         c.argument('is_kafka_enabled', options_list=['--enable-kafka'], arg_type=get_three_state_flag(),
                    help='A boolean value that indicates whether Kafka is enabled for eventhub namespace.')
@@ -47,6 +47,7 @@ def load_arguments_eh(self, _):
                    help='Enable System Assigned Identity')
         c.argument('mi_user_assigned', arg_group='Managed Identity', nargs='+', help='List of User Assigned Identity ids.')
         c.argument('encryption_config', action=AlertAddEncryption, nargs='+', help='List of KeyVaultProperties objects.')
+        c.argument('geo_data_replication_config', action=AlertAddlocation, options_list=['--geo-data-replication-config', '--replica-config'], nargs='+', help='A list of regions where replicas of the namespace are maintained Object')
         c.argument('minimum_tls_version', arg_type=get_enum_type(TlsVersion), options_list=['--minimum-tls-version', '--min-tls'], help='The minimum TLS version for the cluster to support, e.g. 1.2')
         c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'],
                    arg_type=get_three_state_flag(),
@@ -55,15 +56,16 @@ def load_arguments_eh(self, _):
                    arg_type=get_enum_type(['Enabled', 'Disabled']),
                    help='This determines if traffic is allowed over public network. By default it is enabled. If value is SecuredByPerimeter then Inbound and Outbound communication is controlled by the network security perimeter and profile\' access rules.')
         c.argument('alternate_name', help='Alternate name specified when alias and namespace names are same.')
+        c.argument('max_replication_lag_duration_in_seconds', type=int, options_list=['--max-replication-lag-duration-in-seconds', '--max-lag'], help='The maximum acceptable lag for data replication operations from the primary replica to a quorum of secondary replicas')
 
-    with self.argument_context('eventhubs namespace create', min_api='2021-06-01-preview') as c:
+    with self.argument_context('eventhubs namespace create') as c:
         c.argument('cluster_arm_id', options_list=['--cluster-arm-id'], help='Cluster ARM ID of the Namespace')
 
 # region - Eventhub Create
     with self.argument_context('eventhubs eventhub') as c:
         c.argument('event_hub_name', arg_type=name_type, id_part='child_name_1', completer=get_eventhubs_command_completion_list, help='Name of Eventhub')
 
-    for scope in ['eventhubs eventhub create']:
+    for scope in ['eventhubs eventhub create', 'eventhubs eventhub update']:
         with self.argument_context(scope) as c:
             c.argument('partition_count', type=int, help='Number of partitions created for the Event Hub. By default, allowed values are 2-32. Lower value of 1 is supported with Kafka enabled namespaces. In presence of a custom quota, the upper limit will match the upper limit of the quota.')
             c.argument('status', arg_type=get_enum_type(['Active', 'Disabled', 'SendDisabled']), help='Status of Eventhub')
@@ -77,10 +79,14 @@ def load_arguments_eh(self, _):
             c.argument('archive_name_format', arg_group='Capture-Destination', help='Blob naming convention for archive, e.g. {Namespace}/{EventHub}/{PartitionId}/{Year}/{Month}/{Day}/{Hour}/{Minute}/{Second}. Here all the parameters (Namespace,EventHub .. etc) are mandatory irrespective of order')
             c.argument('retention_time_in_hours', type=int, arg_group='Retention-Description', options_list=['--retention-time-in-hours', '--retention-time'], help="Number of hours to retain the events for this Event Hub. This value is only used when cleanupPolicy is Delete. If cleanupPolicy is Compaction the returned value of this property is Long.MaxValue")
             c.argument('tombstone_retention_time_in_hours', type=int, arg_group='Retention-Description', options_list=['--tombstone-retention-time-in-hours', '--tombstone-time'], help="Number of hours to retain the tombstone markers of a compacted Event Hub. This value is only used when cleanupPolicy is Compaction. Consumer must complete reading the tombstone marker within this specified amount of time if consumer begins from starting offset to ensure they get a valid snapshot for the specific key described by the tombstone marker within the compacted Event Hub")
-            c.argument('cleanup_policy', arg_group='Retention-Description', arg_type=get_enum_type(['Delete', 'Compact']), help="Enumerates the possible values for cleanup policy")
+            c.argument('cleanup_policy', arg_group='Retention-Description', arg_type=get_enum_type(['Delete', 'Compact', 'DeleteOrCompact']), help="Enumerates the possible values for cleanup policy")
             c.argument('mi_system_assigned', arg_group='Capture-Destination', arg_type=get_three_state_flag(),
                        help='Enable System Assigned Identity')
             c.argument('mi_user_assigned', arg_group='Capture-Destination', help='List of User Assigned Identity ids.')
+            c.argument('user_metadata', help="Gets and Sets Metadata of User.")
+            c.argument('timestamp_type', arg_type=get_enum_type(['Create', 'LogAppend']), help='Denotes the type of timestamp the message will hold.')
+            c.argument('min_compaction_lag_in_mins', type=int, arg_group='Retention-Description', options_list=['--min-lag', '--min-compaction-lag-in-mins'], help="The minimum time a message will remain ineligible for compaction in the log. This value is used when cleanupPolicy is Compact or DeleteOrCompact.")
+            c.argument('encoding', arg_group='Capture', options_list=['encoding'], help='Enumerates the possible values for the encoding format of capture description. Note: \'AvroDeflate\' will be deprecated in New API Version')
     with self.argument_context('eventhubs eventhub list') as c:
         c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of Namespace')
 
@@ -152,6 +158,14 @@ def load_arguments_eh(self, _):
             c.argument('require_infrastructure_encryption', options_list=['--infra-encryption'],
                        arg_type=get_three_state_flag(),
                        help='A boolean value that indicates whether Infrastructure Encryption (Double Encryption) is enabled/disabled')
+# Location
+    with self.argument_context('eventhubs namespace replica', resource_type=ResourceType.MGMT_EVENTHUB) as c:
+        c.argument('namespace_name', options_list=['--namespace-name'], id_part=None, help='Name of the Namespace')
+
+    for scope in ['eventhubs namespace replica add', 'eventhubs namespace replica remove']:
+        with self.argument_context(scope, resource_type=ResourceType.MGMT_EVENTHUB) as c:
+            c.argument('geo_data_replication_config', action=AlertAddlocation, nargs='+',
+                       help='A list of regions where replicas of the namespace are maintained Object')
 
 # Application Group
     with self.argument_context('eventhubs namespace application-group') as c:

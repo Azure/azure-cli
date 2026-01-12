@@ -332,8 +332,7 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-policy',
                             database_long_term_retention_policies_operations,
-                            client_factory=get_sql_database_long_term_retention_policies_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_database_long_term_retention_policies_operations) as g:
 
         g.custom_command('set', 'update_long_term_retention')
         g.custom_show_command('show', 'get_long_term_retention')
@@ -344,17 +343,20 @@ def load_command_table(self, _):
 
     with self.command_group('sql db ltr-backup',
                             database_long_term_retention_backups_operations,
-                            client_factory=get_sql_database_long_term_retention_backups_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_database_long_term_retention_backups_operations) as g:
 
         g.show_command('show', 'get')
         g.custom_command('list', 'list_long_term_retention_backups')
         g.command('delete', 'begin_delete', confirmation=True)
+        g.custom_command('remove-time-based-immutability', 'remove_time_based_immutability', confirmation="Removing the time-based immutability has the effect of removing the immutability on the backup. The backup will continue to be available for the remainder of the configured duration as usual, without immutability. Are you sure you want to disable time-based immutability for the backup?")
+        g.custom_command('lock-time-based-immutability', 'lock_time_based_immutability', confirmation="Locking the time-based immutability enforces immutability for the duration of the configured retention. This action cannot be reversed. Are you sure you want to lock time-based immutability for the backup?")
+        g.custom_command('set-legal-hold-immutability', 'set_legal_hold_immutability', confirmation="When you enable Legal hold immutability on the backup, the backup will not be deleted until the legal hold is removed, even if the retention for the backup expires. Are you sure you want to enable legal hold for the backup?", is_preview=True)
+        g.custom_command('remove-legal-hold-immutability', 'remove_legal_hold_immutability', confirmation="Are you sure you want to disable legal hold for the backup?", is_preview=True)
 
     with self.command_group('sql db ltr-backup',
                             database_operations,
-                            client_factory=get_sql_databases_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_databases_operations) as g:
+
         g.custom_command(
             'restore',
             'restore_long_term_retention_backup',
@@ -367,16 +369,14 @@ def load_command_table(self, _):
 
     with self.command_group('sql db geo-backup',
                             database_geo_backups_operations,
-                            client_factory=get_sql_database_recoverable_databases_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_database_recoverable_databases_operations) as g:
 
         g.custom_show_command('show', 'recoverable_databases_get')
         g.custom_command('list', 'list_geo_backups')
 
     with self.command_group('sql db geo-backup',
                             database_operations,
-                            client_factory=get_sql_databases_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_databases_operations) as g:
         g.custom_command(
             'restore',
             'restore_geo_backup')
@@ -387,8 +387,7 @@ def load_command_table(self, _):
 
     with self.command_group('sql db str-policy',
                             backup_short_term_retention_policies_operations,
-                            client_factory=get_sql_backup_short_term_retention_policies_operations,
-                            is_preview=True) as g:
+                            client_factory=get_sql_backup_short_term_retention_policies_operations) as g:
 
         g.custom_command('set', 'update_short_term_retention', supports_no_wait=True)
         g.custom_show_command('show', 'get_short_term_retention')

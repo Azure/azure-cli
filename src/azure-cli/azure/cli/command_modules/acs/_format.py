@@ -41,6 +41,45 @@ def aks_list_table_format(results):
     return [_aks_table_format(r) for r in results]
 
 
+def aks_machine_list_table_format(results):
+    return [aks_machine_show_table_format(r) for r in results]
+
+
+def aks_machine_show_table_format(result: dict):
+    def parser(entry: dict):
+        ip_addresses = ""
+        zones = ""
+        if "zones" in entry and entry["zones"]:
+            zones_data = entry["zones"]
+            if isinstance(zones_data, list):
+                zones = ', '.join(part.strip() for part in zones_data if part and part.strip())
+            elif isinstance(zones_data, str):
+                zones = zones_data.strip()
+        # If no zones at top-level, check in properties
+        elif "properties" in entry and "zones" in entry["properties"] and entry["properties"]["zones"]:
+            zones_data = entry["properties"]["zones"]
+            if isinstance(zones_data, list):
+                zones = ', '.join(part.strip() for part in zones_data if part and part.strip())
+            elif isinstance(zones_data, str):
+                zones = zones_data.strip()
+        if "properties" in entry and isinstance(entry["properties"], dict):
+            if "network" in entry["properties"] and isinstance(entry["properties"]["network"], dict):
+                if ("ipAddresses" in entry["properties"]["network"] and
+                        isinstance(entry["properties"]["network"]["ipAddresses"], list)):
+                    for k in entry["properties"]["network"]["ipAddresses"]:
+                        if isinstance(k, dict) and "ip" in k and "family" in k:
+                            ip_addresses += f"ip:{k['ip']},family:{k['family']};"
+        entry["ip"] = ip_addresses
+        entry["zones"] = zones
+        parsed = compile_jmes("""{
+                name: name,
+                ip: ip,
+                zones: zones
+            }""")
+        return parsed.search(entry, Options(dict_cls=OrderedDict))
+    return parser(result)
+
+
 def aks_run_command_result_format(cmdResult):
     result = OrderedDict()
     if cmdResult['provisioningState'] == "Succeeded":
@@ -59,6 +98,38 @@ def aks_run_command_result_format(cmdResult):
 def aks_show_table_format(result):
     """Format a managed cluster as summary results for display with "-o table"."""
     return [_aks_table_format(result)]
+
+
+def aks_namespace_list_table_format(results):
+    """Format an managed namespace list for display with "-o table"."""
+    return [_aks_namespace_list_table_format(r) for r in results]
+
+
+def _aks_namespace_list_table_format(result):
+    if not result.get("properties"):
+        parsed = compile_jmes("""{
+            name: name,
+            resourceGroup: resourceGroup,
+            location: location
+        }""")
+    else:
+        parsed = compile_jmes("""{
+            name: name,
+            tags: to_string(tags),
+            provisioningState: to_string(properties.provisioningState),
+            labels: to_string(properties.labels),
+            annotations: to_string(properties.annotations),
+            cpuRequest: to_string(properties.defaultResourceQuota.cpuRequest),
+            cpuLimit: to_string(properties.defaultResourceQuota.cpuLimit),
+            memoryRequest: to_string(properties.defaultResourceQuota.memoryRequest),
+            memoryLimit: to_string(properties.defaultResourceQuota.memoryLimit),
+            ingress: to_string(properties.defaultNetworkPolicy.ingress),
+            egress: to_string(properties.defaultNetworkPolicy.egress),
+            adoptionPolicy: to_string(properties.adoptionPolicy),
+            deletePolicy: to_string(properties.deletePolicy)
+        }""")
+    # use ordered dicts so headers are predictable
+    return parsed.search(result, Options(dict_cls=OrderedDict))
 
 
 def _aks_table_format(result):

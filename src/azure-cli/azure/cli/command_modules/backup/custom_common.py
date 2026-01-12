@@ -23,11 +23,15 @@ workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
                      'SQLDataBase': 'SQLDataBase',
                      'SAPHanaDatabase': 'SAPHanaDatabase',
+                     'SAPHanaDBInstance': 'SAPHanaDBInstance',
+                     'SAPAseDatabase': 'SAPAseDatabase',
                      'VM': 'VM',
                      'AzureFileShare': 'AzureFileShare'}
 
 workload_bmt_map = {'SQLDataBase': 'AzureWorkload',
                     'SAPHanaDatabase': 'AzureWorkload',
+                    'SAPHanaDBInstance': 'AzureWorkload',
+                    'SAPAseDatabase': 'AzureWorkload',
                     'VM': 'AzureIaasVM',
                     'AzureFileShare': 'AzureStorage'}
 
@@ -209,8 +213,8 @@ def fetch_tier_for_rp(rp):
         setattr(rp, "tier_type", None)
         return
 
-    for i in range(len(rp.properties.recovery_point_tier_details)):
-        currRpTierDetails = rp.properties.recovery_point_tier_details[i]
+    for v in rp.properties.recovery_point_tier_details:
+        currRpTierDetails = v
         if (currRpTierDetails.type == RecoveryPointTierType.ARCHIVED_RP and
                 currRpTierDetails.status == RecoveryPointTierStatus.REHYDRATED):
             isRehydrated = True

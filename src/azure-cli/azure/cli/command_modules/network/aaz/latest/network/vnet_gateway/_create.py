@@ -31,9 +31,9 @@ class Create(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-09-01",
+        "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2025-01-01"],
         ]
     }
 
@@ -88,6 +88,10 @@ class Create(AAZCommand):
             options=["--min-scale-unit"],
             help="Minimum scale units for auto-scale configuration.",
         )
+        _args_schema.enable_high_bandwidth_vpn_gateway = AAZBoolArg(
+            options=["--enable-high-bandwidth", "--enable-high-bandwidth-vpn-gateway"],
+            help="To enable Advanced Connectivity feature for VPN gateway",
+        )
         _args_schema.enable_private_ip = AAZBoolArg(
             options=["--enable-private-ip"],
             help="Whether private IP needs to be enabled on this gateway for connections or not.",
@@ -105,6 +109,11 @@ class Create(AAZCommand):
         _args_schema.ip_configurations = AAZListArg(
             options=["--ip-configurations"],
             help="IP configurations for virtual network gateway.",
+        )
+        _args_schema.resiliency_model = AAZStrArg(
+            options=["--resiliency-model"],
+            help="Indicates if the Express Route Gateway has resiliency model of MultiHomed or SingleHomed",
+            enum={"MultiHomed": "MultiHomed", "SingleHomed": "SingleHomed"},
         )
         _args_schema.sku = AAZStrArg(
             options=["--sku"],
@@ -219,6 +228,27 @@ class Create(AAZCommand):
 
         # define Arg Group "BgpSettings"
 
+        # define Arg Group "CustomRoutes"
+
+        # define Arg Group "Identity"
+
+        _args_schema = cls._args_schema
+        _args_schema.mi_system_assigned = AAZStrArg(
+            options=["--system-assigned", "--mi-system-assigned"],
+            arg_group="Identity",
+            help="Set the system managed identity.",
+            blank="True",
+        )
+        _args_schema.mi_user_assigned = AAZListArg(
+            options=["--user-assigned", "--mi-user-assigned"],
+            arg_group="Identity",
+            help="Set the user managed identities.",
+            blank=[],
+        )
+
+        mi_user_assigned = cls._args_schema.mi_user_assigned
+        mi_user_assigned.Element = AAZStrArg()
+
         # define Arg Group "Nat Rule"
 
         _args_schema = cls._args_schema
@@ -300,6 +330,27 @@ class Create(AAZCommand):
             help="Gateway SKU tier.",
             enum={"Basic": "Basic", "ErGw1AZ": "ErGw1AZ", "ErGw2AZ": "ErGw2AZ", "ErGw3AZ": "ErGw3AZ", "ErGwScale": "ErGwScale", "HighPerformance": "HighPerformance", "Standard": "Standard", "UltraPerformance": "UltraPerformance", "VpnGw1": "VpnGw1", "VpnGw1AZ": "VpnGw1AZ", "VpnGw2": "VpnGw2", "VpnGw2AZ": "VpnGw2AZ", "VpnGw3": "VpnGw3", "VpnGw3AZ": "VpnGw3AZ", "VpnGw4": "VpnGw4", "VpnGw4AZ": "VpnGw4AZ", "VpnGw5": "VpnGw5", "VpnGw5AZ": "VpnGw5AZ"},
         )
+        _args_schema.virtual_network_gateway_migration_status = AAZObjectArg(
+            options=["--virtual-network-gateway-migration-status"],
+            arg_group="Properties",
+            help="The reference to the VirtualNetworkGatewayMigrationStatus which represents the status of migration.",
+        )
+
+        virtual_network_gateway_migration_status = cls._args_schema.virtual_network_gateway_migration_status
+        virtual_network_gateway_migration_status.error_message = AAZStrArg(
+            options=["error-message"],
+            help="Error if any occurs during migration.",
+        )
+        virtual_network_gateway_migration_status.phase = AAZStrArg(
+            options=["phase"],
+            help="Represent the current migration phase of gateway.",
+            enum={"Abort": "Abort", "AbortSucceeded": "AbortSucceeded", "Commit": "Commit", "CommitSucceeded": "CommitSucceeded", "Execute": "Execute", "ExecuteSucceeded": "ExecuteSucceeded", "None": "None", "Prepare": "Prepare", "PrepareSucceeded": "PrepareSucceeded"},
+        )
+        virtual_network_gateway_migration_status.state = AAZStrArg(
+            options=["state"],
+            help="Represent the current state of gateway migration.",
+            enum={"Failed": "Failed", "InProgress": "InProgress", "None": "None", "Succeeded": "Succeeded"},
+        )
 
         # define Arg Group "Root Cert Authentication"
 
@@ -374,6 +425,7 @@ class Create(AAZCommand):
     def _build_args_address_space_create(cls, _schema):
         if cls._args_address_space_create is not None:
             _schema.address_prefixes = cls._args_address_space_create.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._args_address_space_create.ipam_pool_prefix_allocations
             return
 
         cls._args_address_space_create = AAZObjectArg()
@@ -383,11 +435,29 @@ class Create(AAZCommand):
             options=["address-prefixes"],
             help="A list of address blocks reserved for this virtual network in CIDR notation.",
         )
+        address_space_create.ipam_pool_prefix_allocations = AAZListArg(
+            options=["ipam-pool-prefix-allocations"],
+            help="A list of IPAM Pools allocating IP address prefixes.",
+        )
 
         address_prefixes = cls._args_address_space_create.address_prefixes
         address_prefixes.Element = AAZStrArg()
 
+        ipam_pool_prefix_allocations = cls._args_address_space_create.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectArg()
+
+        _element = cls._args_address_space_create.ipam_pool_prefix_allocations.Element
+        _element.number_of_ip_addresses = AAZStrArg(
+            options=["number-of-ip-addresses"],
+            help="Number of IP addresses to allocate.",
+        )
+        _element.id = AAZResourceIdArg(
+            options=["id"],
+            help="Resource id of the associated Azure IpamPool resource.",
+        )
+
         _schema.address_prefixes = cls._args_address_space_create.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._args_address_space_create.ipam_pool_prefix_allocations
 
     _args_sub_resource_create = None
 
@@ -488,7 +558,7 @@ class Create(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -514,6 +584,7 @@ class Create(AAZCommand):
                 typ_kwargs={"flags": {"required": True, "client_flatten": True}}
             )
             _builder.set_prop("extendedLocation", AAZObjectType)
+            _builder.set_prop("identity", AAZIdentityObjectType)
             _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, ".", typ_kwargs={"flags": {"required": True, "client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
@@ -522,6 +593,15 @@ class Create(AAZCommand):
             if extended_location is not None:
                 extended_location.set_prop("name", AAZStrType, ".edge_zone")
                 extended_location.set_prop("type", AAZStrType, ".edge_zone_type")
+
+            identity = _builder.get(".identity")
+            if identity is not None:
+                identity.set_prop("userAssigned", AAZListType, ".mi_user_assigned", typ_kwargs={"flags": {"action": "create"}})
+                identity.set_prop("systemAssigned", AAZStrType, ".mi_system_assigned", typ_kwargs={"flags": {"action": "create"}})
+
+            user_assigned = _builder.get(".identity.userAssigned")
+            if user_assigned is not None:
+                user_assigned.set_elements(AAZStrType, ".")
 
             properties = _builder.get(".properties")
             if properties is not None:
@@ -532,13 +612,16 @@ class Create(AAZCommand):
                 properties.set_prop("bgpSettings", AAZObjectType)
                 properties.set_prop("customRoutes", AAZObjectType)
                 properties.set_prop("enableBgp", AAZBoolType, ".enable_bgp")
+                properties.set_prop("enableHighBandwidthVpnGateway", AAZBoolType, ".enable_high_bandwidth_vpn_gateway")
                 properties.set_prop("enablePrivateIpAddress", AAZBoolType, ".enable_private_ip")
                 properties.set_prop("gatewayDefaultSite", AAZObjectType)
                 properties.set_prop("gatewayType", AAZStrType, ".gateway_type")
                 properties.set_prop("ipConfigurations", AAZListType, ".ip_configurations")
                 properties.set_prop("natRules", AAZListType, ".nat_rules")
+                properties.set_prop("resiliencyModel", AAZStrType, ".resiliency_model")
                 properties.set_prop("sku", AAZObjectType)
                 properties.set_prop("vNetExtendedLocationResourceId", AAZStrType, ".edge_zone_vnet_id")
+                properties.set_prop("virtualNetworkGatewayMigrationStatus", AAZObjectType, ".virtual_network_gateway_migration_status")
                 properties.set_prop("vpnClientConfiguration", AAZObjectType)
                 properties.set_prop("vpnGatewayGeneration", AAZStrType, ".vpn_gateway_generation")
                 properties.set_prop("vpnType", AAZStrType, ".vpn_type")
@@ -632,13 +715,19 @@ class Create(AAZCommand):
                 sku.set_prop("name", AAZStrType, ".sku")
                 sku.set_prop("tier", AAZStrType, ".sku_tier")
 
+            virtual_network_gateway_migration_status = _builder.get(".properties.virtualNetworkGatewayMigrationStatus")
+            if virtual_network_gateway_migration_status is not None:
+                virtual_network_gateway_migration_status.set_prop("errorMessage", AAZStrType, ".error_message")
+                virtual_network_gateway_migration_status.set_prop("phase", AAZStrType, ".phase")
+                virtual_network_gateway_migration_status.set_prop("state", AAZStrType, ".state")
+
             vpn_client_configuration = _builder.get(".properties.vpnClientConfiguration")
             if vpn_client_configuration is not None:
                 vpn_client_configuration.set_prop("aadAudience", AAZStrType, ".aad_audience")
                 vpn_client_configuration.set_prop("aadIssuer", AAZStrType, ".aad_issuer")
                 vpn_client_configuration.set_prop("aadTenant", AAZStrType, ".aad_tenant")
                 vpn_client_configuration.set_prop("radiusServerAddress", AAZStrType, ".radius_server")
-                vpn_client_configuration.set_prop("radiusServerSecret", AAZStrType, ".radius_secret")
+                vpn_client_configuration.set_prop("radiusServerSecret", AAZStrType, ".radius_secret", typ_kwargs={"flags": {"secret": True}})
                 vpn_client_configuration.set_prop("vpnAuthenticationTypes", AAZListType, ".vpn_auth_type")
                 vpn_client_configuration.set_prop("vpnClientAddressPool", AAZObjectType)
                 vpn_client_configuration.set_prop("vpnClientProtocols", AAZListType, ".client_protocol")
@@ -704,6 +793,7 @@ class Create(AAZCommand):
                 serialized_name="extendedLocation",
             )
             _schema_on_200_201.id = AAZStrType()
+            _schema_on_200_201.identity = AAZIdentityObjectType()
             _schema_on_200_201.location = AAZStrType()
             _schema_on_200_201.name = AAZStrType(
                 flags={"read_only": True},
@@ -719,6 +809,33 @@ class Create(AAZCommand):
             extended_location = cls._schema_on_200_201.extended_location
             extended_location.name = AAZStrType()
             extended_location.type = AAZStrType()
+
+            identity = cls._schema_on_200_201.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType()
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200_201.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200_201.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
 
             properties = cls._schema_on_200_201.properties
             properties.active_active = AAZBoolType(
@@ -755,6 +872,9 @@ class Create(AAZCommand):
             properties.enable_dns_forwarding = AAZBoolType(
                 serialized_name="enableDnsForwarding",
             )
+            properties.enable_high_bandwidth_vpn_gateway = AAZBoolType(
+                serialized_name="enableHighBandwidthVpnGateway",
+            )
             properties.enable_private_ip_address = AAZBoolType(
                 serialized_name="enablePrivateIpAddress",
             )
@@ -779,6 +899,9 @@ class Create(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+            properties.resiliency_model = AAZStrType(
+                serialized_name="resiliencyModel",
+            )
             properties.resource_guid = AAZStrType(
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
@@ -786,6 +909,9 @@ class Create(AAZCommand):
             properties.sku = AAZObjectType()
             properties.v_net_extended_location_resource_id = AAZStrType(
                 serialized_name="vNetExtendedLocationResourceId",
+            )
+            properties.virtual_network_gateway_migration_status = AAZObjectType(
+                serialized_name="virtualNetworkGatewayMigrationStatus",
             )
             properties.virtual_network_gateway_policy_groups = AAZListType(
                 serialized_name="virtualNetworkGatewayPolicyGroups",
@@ -927,6 +1053,13 @@ class Create(AAZCommand):
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
 
+            virtual_network_gateway_migration_status = cls._schema_on_200_201.properties.virtual_network_gateway_migration_status
+            virtual_network_gateway_migration_status.error_message = AAZStrType(
+                serialized_name="errorMessage",
+            )
+            virtual_network_gateway_migration_status.phase = AAZStrType()
+            virtual_network_gateway_migration_status.state = AAZStrType()
+
             virtual_network_gateway_policy_groups = cls._schema_on_200_201.properties.virtual_network_gateway_policy_groups
             virtual_network_gateway_policy_groups.Element = AAZObjectType()
 
@@ -992,6 +1125,7 @@ class Create(AAZCommand):
             )
             vpn_client_configuration.radius_server_secret = AAZStrType(
                 serialized_name="radiusServerSecret",
+                flags={"secret": True},
             )
             vpn_client_configuration.radius_servers = AAZListType(
                 serialized_name="radiusServers",
@@ -1032,6 +1166,7 @@ class Create(AAZCommand):
             )
             _element.radius_server_secret = AAZStrType(
                 serialized_name="radiusServerSecret",
+                flags={"secret": True},
             )
 
             vng_client_connection_configurations = cls._schema_on_200_201.properties.vpn_client_configuration.vng_client_connection_configurations
@@ -1166,10 +1301,24 @@ class _CreateHelper:
         if _builder is None:
             return
         _builder.set_prop("addressPrefixes", AAZListType, ".address_prefixes")
+        _builder.set_prop("ipamPoolPrefixAllocations", AAZListType, ".ipam_pool_prefix_allocations")
 
         address_prefixes = _builder.get(".addressPrefixes")
         if address_prefixes is not None:
             address_prefixes.set_elements(AAZStrType, ".")
+
+        ipam_pool_prefix_allocations = _builder.get(".ipamPoolPrefixAllocations")
+        if ipam_pool_prefix_allocations is not None:
+            ipam_pool_prefix_allocations.set_elements(AAZObjectType, ".")
+
+        _elements = _builder.get(".ipamPoolPrefixAllocations[]")
+        if _elements is not None:
+            _elements.set_prop("numberOfIpAddresses", AAZStrType, ".number_of_ip_addresses")
+            _elements.set_prop("pool", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
+
+        pool = _builder.get(".ipamPoolPrefixAllocations[].pool")
+        if pool is not None:
+            pool.set_prop("id", AAZStrType, ".id")
 
     @classmethod
     def _build_schema_sub_resource_create(cls, _builder):
@@ -1183,6 +1332,7 @@ class _CreateHelper:
     def _build_schema_address_space_read(cls, _schema):
         if cls._schema_address_space_read is not None:
             _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
             return
 
         cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
@@ -1191,11 +1341,36 @@ class _CreateHelper:
         address_space_read.address_prefixes = AAZListType(
             serialized_name="addressPrefixes",
         )
+        address_space_read.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
 
         address_prefixes = _schema_address_space_read.address_prefixes
         address_prefixes.Element = AAZStrType()
 
+        ipam_pool_prefix_allocations = _schema_address_space_read.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+
+        _element = _schema_address_space_read.ipam_pool_prefix_allocations.Element
+        _element.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        _element.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        _element.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_address_space_read.ipam_pool_prefix_allocations.Element.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_address_space_read.ipam_pool_prefix_allocations.Element.pool
+        pool.id = AAZStrType()
+
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
 
     _schema_sub_resource_read = None
 

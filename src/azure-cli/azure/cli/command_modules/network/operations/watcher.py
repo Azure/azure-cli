@@ -5,7 +5,7 @@
 # pylint: disable=line-too-long, protected-access, too-few-public-methods
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.tools import is_valid_resource_id, parse_resource_id, resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id, resource_id
 
 from azure.cli.core.azclierror import ValidationError, RequiredArgumentMissingError, MutuallyExclusiveArgumentError
 from azure.cli.core.commands.arm import get_arm_resource_by_id
@@ -16,6 +16,7 @@ from azure.cli.core.aaz.utils import assign_aaz_list_arg
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import validate_tags
+from azure.cli.command_modules.network._validators import validate_managed_identity_resource_id
 from .._validators import _resolve_api_version
 
 from ..aaz.latest.network.watcher import RunConfigurationDiagnostic as _RunConfigurationDiagnostic
@@ -1062,6 +1063,11 @@ class NwFlowLogCreate(_NwFlowLogCreate):
                 minimum=10,
             )
         )
+        args_schema.user_assigned_identity = AAZResourceIdArg(
+            options=["--user-assigned-identity"],
+            help="Name or ID of the ManagedIdentity Resource.",
+            required=False,
+        )
         args_schema.retention = AAZIntArg(
             options=['--retention'],
             help="Number of days to retain logs.",
@@ -1134,6 +1140,21 @@ class NwFlowLogCreate(_NwFlowLogCreate):
         elif has_value(args.nsg):
             args.target_resource_id = args.nsg
 
+        if has_value(args.user_assigned_identity):
+            user_assigned_identity = args.user_assigned_identity.to_serialized_data()
+            is_valid_miresource_id = validate_managed_identity_resource_id(user_assigned_identity)
+            if not is_valid_miresource_id:
+                raise CLIError('Managed Identity resource id is invalid')
+            if user_assigned_identity.lower() != 'none':
+                args.identity = {
+                    "type": "UserAssigned",
+                    "user_assigned_identities": {user_assigned_identity: {}}
+                }
+            else:
+                args.identity = {
+                    "type": "None"
+                }
+
         if has_value(args.retention):
             if args.retention > 0:
                 args.retention_policy = {"days": args.retention, "enabled": True}
@@ -1178,6 +1199,11 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
                 maximum=60,
                 minimum=10,
             )
+        )
+        args_schema.user_assigned_identity = AAZResourceIdArg(
+            options=["--user-assigned-identity"],
+            help="Name or ID of the ManagedIdentity Resource.",
+            required=False,
         )
         args_schema.traffic_analytics_enabled = AAZBoolArg(
             options=['--traffic-analytics'], arg_group="Traffic Analytics", nullable=True,
@@ -1245,9 +1271,23 @@ class NwFlowLogUpdate(_NwFlowLogUpdate):
             args.target_resource_id = args.nic
         elif has_value(args.nsg):
             args.target_resource_id = args.nsg
-
         if has_value(args.retention) and args.retention > 0:
             args.retention_policy = {"days": args.retention, "enabled": True}
+
+        if has_value(args.user_assigned_identity):
+            user_assigned_identity = args.user_assigned_identity.to_serialized_data()
+            is_valid_miresource_id = validate_managed_identity_resource_id(user_assigned_identity)
+            if not is_valid_miresource_id:
+                raise CLIError('Managed Identity resource id is invalid')
+            if user_assigned_identity.lower() != 'none':
+                args.identity = {
+                    "type": "UserAssigned",
+                    "user_assigned_identities": {user_assigned_identity: {}}
+                }
+            else:
+                args.identity = {
+                    "type": "None"
+                }
 
         if has_value(args.traffic_analytics_workspace):
             workspace = get_arm_resource_by_id(self.cli_ctx, args.traffic_analytics_workspace.to_serialized_data())

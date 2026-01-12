@@ -15,23 +15,23 @@ class SecurityCenterSecurityContactsTests(ScenarioTest):
         previous_contacts_count = len(security_contacts)
         assert previous_contacts_count >= 0
 
-        contact = self.cmd('az security contact create -n default --emails john@contoso.com --phone 214-275-4038 --notifications-by-role state=On roles=[Owner,ServiceAdmin] --alert-notifications state=On minimalSeverity=Low').get_output_in_json()
+        contact = self.cmd('az security contact create -n default --emails aaa@foo.com --phone 214-275-4038 --notifications-by-role state=On roles=[Owner,ServiceAdmin] --alert-notifications state=On minimalSeverity=Low').get_output_in_json()
         
         assert contact["name"] == "default"
-        assert contact["emails"] == "john@contoso.com"
+        assert contact["emails"] == "aaa@foo.com"
         
         security_contacts = self.cmd('az security contact list').get_output_in_json()
         assert len(security_contacts) > 0
 
         contact = self.cmd('az security contact show -n default').get_output_in_json()
 
-        assert contact["emails"] == "john@contoso.com"
+        assert contact["emails"] == "aaa@foo.com"
 
-        contact = self.cmd('az security contact create -n default --emails john@contoso.com;lisa@contoso.com --phone 214-275-4038 --notifications-by-role state=On roles=[Owner,ServiceAdmin] --alert-notifications state=On minimalSeverity=Low').get_output_in_json()
+        contact = self.cmd('az security contact create -n default --emails aaa@foo.com;bbb@foo.com --phone 214-275-4038 --notifications-by-role state=On roles=[Owner,ServiceAdmin] --alert-notifications state=On minimalSeverity=Low').get_output_in_json()
 
         contact = self.cmd('az security contact show -n default').get_output_in_json()
 
-        assert contact["emails"] == "john@contoso.com;lisa@contoso.com"
+        assert contact["emails"] == "aaa@foo.com;bbb@foo.com"
 
         self.cmd('az security contact delete -n default --yes')
 

@@ -20,7 +20,7 @@ import azure.cli.command_modules.extension._help  # pylint: disable=unused-impor
 class ExtensionCommandsLoader(AzCommandsLoader):
 
     def __init__(self, cli_ctx=None):
-        super(ExtensionCommandsLoader, self).__init__(cli_ctx=cli_ctx)
+        super().__init__(cli_ctx=cli_ctx)
 
     def load_command_table(self, args):
 

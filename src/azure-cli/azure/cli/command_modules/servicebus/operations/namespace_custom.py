@@ -20,11 +20,27 @@ def create_keyvault_object(col):
     return vault_object
 
 
+def create_replica_location_object(col):
+    replica_location_object = {}
+    replica_location_object.update({
+        "location_name": col['locationName'],
+        "role_type": col['roleType']
+    })
+    if 'clusterArmId' in col:
+        replica_location_object.update({
+            "cluster_arm_id": col['clusterArmId']
+        })
+    return replica_location_object
+
+
 def create_servicebus_namespace(cmd, resource_group_name, namespace_name, location=None, tags=None, sku='Standard',
                                 capacity=None, zone_redundant=None, mi_user_assigned=None,
                                 mi_system_assigned=None, encryption_config=None, minimum_tls_version=None,
                                 disable_local_auth=None, alternate_name=None, public_network_access=None,
-                                require_infrastructure_encryption=None, premium_messaging_partitions=None):
+                                require_infrastructure_encryption=None, premium_messaging_partitions=None,
+                                max_replication_lag_duration_in_seconds=None,
+                                geo_data_replication_config=None
+                                ):
 
     from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Create
     user_assigned_identity = {}
@@ -50,6 +66,12 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
 
     if mi_system_assigned:
         identity_type = SYSTEM
+        command_args_dict.update({
+            "identity": {
+                "type": identity_type,
+                "user_assigned_identities": None
+            }
+        })
 
     if mi_user_assigned:
         if mi_system_assigned:
@@ -62,13 +84,6 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
             "type": identity_type,
             "user_assigned_identities": user_assigned_identity
         }})
-    else:
-        command_args_dict.update({
-            "identity": {
-                "type": identity_type,
-                "user_assigned_identities": None
-            }
-        })
 
     if encryption_config:
         command_args_dict.update({"encryption": {
@@ -76,6 +91,18 @@ def create_servicebus_namespace(cmd, resource_group_name, namespace_name, locati
             "key_source": "Microsoft.KeyVault",
             "require_infrastructure_encryption": require_infrastructure_encryption
         }})
+
+    list_replication_object = []
+    if geo_data_replication_config:
+        for val in geo_data_replication_config:
+            list_replication_object.append(val)
+        command_args_dict.update({
+            "geo_data_replication": {
+                "locations": list_replication_object,
+                "max_replication_lag_duration_in_seconds": max_replication_lag_duration_in_seconds
+            }
+        })
+
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_args_dict)
 
 
@@ -341,3 +368,52 @@ def set_georecovery_alias(cmd, resource_group_name, namespace_name, alias,
         "alias": alias
     }
     return Create(cli_ctx=cmd.cli_ctx)(command_args=command_arg_dict)
+
+
+def cli_add_location(cmd, resource_group_name, namespace_name, geo_data_replication_config):
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Update
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Show
+
+    servicebusnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name
+    })
+    location_object = []
+    for col in geo_data_replication_config:
+        location_object.append(col)
+
+    if 'geoDataReplication' in servicebusnm:
+        for col in servicebusnm['geoDataReplication']['locations']:
+            replica_object = create_replica_location_object(col)
+            if replica_object not in location_object:
+                location_object.append(replica_object)
+
+    return Update(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name,
+        "locations": location_object
+    })
+
+
+def cli_remove_location(cmd, resource_group_name, namespace_name, geo_data_replication_config):
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Update
+    from azure.cli.command_modules.servicebus.aaz.latest.servicebus.namespace import Show
+
+    servicebusnm = Show(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name
+    })
+
+    replica_location_object = []
+
+    for col in servicebusnm['geoDataReplication']['locations']:
+        replica_object = create_replica_location_object(col)
+        replica_location_object.append(replica_object)
+    for col in geo_data_replication_config:
+        if col in replica_location_object:
+            replica_location_object.remove(col)
+    return Update(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "namespace_name": namespace_name,
+        "locations": replica_location_object
+    })

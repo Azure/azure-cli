@@ -22,9 +22,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2023-11-01", "properties.activeDirectories[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-09-01", "properties.activeDirectories[]"],
         ]
     }
 
@@ -53,7 +53,7 @@ class Update(AAZCommand):
             help="The name of the NetApp account",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -64,6 +64,14 @@ class Update(AAZCommand):
             help="Id of the Active Directory",
             required=True,
             nullable=True,
+        )
+        _args_schema.kdc_ip = AAZStrArg(
+            options=["--kdc-ip"],
+            help="kdc server IP address for the active directory machine. This optional parameter is used only while creating kerberos volume.",
+            nullable=True,
+            fmt=AAZStrArgFormat(
+                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+            ),
         )
 
         # define Arg Group "Body.properties.activeDirectories[]"
@@ -109,7 +117,7 @@ class Update(AAZCommand):
             help="Comma separated list of DNS server IP addresses (IPv4 only) for the Active Directory domain",
             nullable=True,
             fmt=AAZStrArgFormat(
-                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
+                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
             ),
         )
         _args_schema.domain = AAZStrArg(
@@ -123,15 +131,6 @@ class Update(AAZCommand):
             arg_group="Body.properties.activeDirectories[]",
             help="If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted.",
             nullable=True,
-        )
-        _args_schema.kdc_ip = AAZStrArg(
-            options=["--kdc-ip"],
-            arg_group="Body.properties.activeDirectories[]",
-            help="kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume.",
-            nullable=True,
-            fmt=AAZStrArgFormat(
-                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
-            ),
         )
         _args_schema.ldap_over_tls = AAZBoolArg(
             options=["--ldap-over-tls"],
@@ -157,13 +156,16 @@ class Update(AAZCommand):
             help="The Organizational Unit (OU) within the Windows Active Directory",
             nullable=True,
         )
-        _args_schema.password = AAZStrArg(
+        _args_schema.password = AAZPasswordArg(
             options=["--password"],
             arg_group="Body.properties.activeDirectories[]",
             help="Plain text password of Active Directory domain administrator, value is masked in the response",
             nullable=True,
             fmt=AAZStrArgFormat(
                 max_length=64,
+            ),
+            blank=AAZPromptPasswordInput(
+                msg="Password:",
             ),
         )
         _args_schema.preferred_servers_for_ldap_client = AAZStrArg(
@@ -172,7 +174,7 @@ class Update(AAZCommand):
             help="Comma separated list of IPv4 addresses of preferred servers for LDAP client. At most two comma separated IPv4 addresses can be passed.",
             nullable=True,
             fmt=AAZStrArgFormat(
-                pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))?)?$",
+                pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))?)?$",
                 max_length=32,
             ),
         )
@@ -182,7 +184,7 @@ class Update(AAZCommand):
             help="Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier",
             nullable=True,
         )
-        _args_schema.server_root_ca_certificate = AAZStrArg(
+        _args_schema.server_root_ca_certificate = AAZPasswordArg(
             options=["--server-root-ca-cert", "--server-root-ca-certificate"],
             arg_group="Body.properties.activeDirectories[]",
             help="When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.",
@@ -190,6 +192,9 @@ class Update(AAZCommand):
             fmt=AAZStrArgFormat(
                 max_length=10240,
                 min_length=1,
+            ),
+            blank=AAZPromptPasswordInput(
+                msg="Password:",
             ),
         )
         _args_schema.site = AAZStrArg(
@@ -268,10 +273,10 @@ class Update(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.AccountsGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.selectors.subresource.required())
+        self.pre_instance_update(self.ctx.selectors.subresource.get())
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.selectors.subresource.required())
+        self.post_instance_update(self.ctx.selectors.subresource.get())
         yield self.AccountsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -292,7 +297,7 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
 
     class SubresourceSelector(AAZJsonSelector):
@@ -368,7 +373,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -467,7 +472,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -517,7 +522,7 @@ class Update(AAZCommand):
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.selectors.subresource.required())
+            self._update_instance(self.ctx.selectors.subresource.get())
 
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
@@ -571,7 +576,7 @@ class Update(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             self._update_instance_by_generic(
-                self.ctx.selectors.subresource.required(),
+                self.ctx.selectors.subresource.get(),
                 self.ctx.generic_update_args
             )
 
@@ -604,7 +609,7 @@ class _UpdateHelper:
         net_app_account_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        net_app_account_read.identity = AAZObjectType()
+        net_app_account_read.identity = AAZIdentityObjectType()
         net_app_account_read.location = AAZStrType(
             flags={"required": True},
         )
@@ -664,6 +669,14 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         properties.encryption = AAZObjectType()
+        properties.multi_ad_status = AAZStrType(
+            serialized_name="multiAdStatus",
+            flags={"read_only": True},
+        )
+        properties.nfs_v4_id_domain = AAZStrType(
+            serialized_name="nfsV4IDDomain",
+            nullable=True,
+        )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
@@ -766,6 +779,9 @@ class _UpdateHelper:
         )
 
         identity = _schema_net_app_account_read.properties.encryption.identity
+        identity.federated_client_id = AAZStrType(
+            serialized_name="federatedClientId",
+        )
         identity.principal_id = AAZStrType(
             serialized_name="principalId",
             flags={"read_only": True},
@@ -785,7 +801,6 @@ class _UpdateHelper:
         )
         key_vault_properties.key_vault_resource_id = AAZStrType(
             serialized_name="keyVaultResourceId",
-            flags={"required": True},
         )
         key_vault_properties.key_vault_uri = AAZStrType(
             serialized_name="keyVaultUri",

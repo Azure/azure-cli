@@ -4,6 +4,8 @@
 # --------------------------------------------------------------------------------------------
 
 import os
+from urllib.parse import quote
+from knack.util import CLIError
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer,
                                JMESPathCheck, NoneCheck, StringCheck, StringContainCheck, JMESPathCheckExists)
 from ..storage_test_util import StorageScenarioMixin
@@ -233,8 +235,8 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         self.storage_cmd('storage file exists -p "{}" -s {}', account_info, src_file, s1) \
             .assert_with_checks(JMESPathCheck('exists', False))
 
-        copy_id = self.storage_cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path "{}" --file-snapshot {}',
-                                   account_info, s2, dst_file, s1, src_file, snapshot) \
+        copy_id = self.storage_cmd('storage file copy start -s {} -p "{}" --source-share {} --source-path "{}" '
+                                   '--file-snapshot {}', account_info, s2, dst_file, s1, src_file, snapshot) \
             .assert_with_checks(JMESPathCheck('status', 'success')) \
             .get_output_in_json()['id']
 
@@ -242,6 +244,13 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
             .assert_with_checks(JMESPathCheck('name', os.path.basename(dst_file)),
                                 JMESPathCheck('properties.copy.id', copy_id),
                                 JMESPathCheck('properties.copy.status', 'success'))
+        # without --delete-snapshots, should fail because there is an existing snapshot
+        with self.assertRaises(Exception):
+            self.storage_cmd('storage share delete --name {}', account_info, s1)
+
+        self.cmd('storage share delete --name {} --account-name {} '
+                 '--delete-snapshots include-leased'.format(s1, storage_account),
+                 checks=JMESPathCheck('deleted', True))
 
     def validate_directory_scenario(self, account_info, share):
         directory = self.create_random_name('dir', 16)
@@ -349,6 +358,8 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
         self.assertIn(filename,
                       self.storage_cmd('storage file list -s {} --query "[].name"',
                                        account_info, share).get_output_in_json())
+        file_list = self.storage_cmd('storage file list -s {}', account_info, share).get_output_in_json()
+        self.assertIsNotNone(file_list[0]['lastAccessTime'])
 
         from datetime import datetime, timedelta
         expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
@@ -587,3 +598,146 @@ class StorageFileShareFileScenarios(StorageScenarioMixin, ScenarioTest):
                          '--connection-string {}', account_info, share, source_file, filename, connection_string)
         self.storage_cmd('storage file exists -s {} -p {} --disallow-trailing-dot', account_info, share, filename) \
             .assert_with_checks(JMESPathCheck('exists', True))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(location='eastus2', kind='FileStorage', sku='Premium_LRS')
+    def test_storage_file_share_nfs_scenario(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        share_name = self.create_random_name('share', 24)
+        self.storage_cmd('storage share create --name {} --protocol nfs', account_info, share_name)
+        self.storage_cmd('storage share show --name {}', account_info, share_name)\
+            .assert_with_checks(JMESPathCheck('protocols', ['NFS']))
+        dir_name = self.create_random_name('dir', 16)
+        self.storage_cmd('storage directory create --share-name {} --name {} --file-mode {} --owner {} --group {}',
+                         account_info, share_name, dir_name, 'rwxr--r--', '1', '2')
+        self.storage_cmd('storage directory show --share-name {} --name {}', account_info, share_name, dir_name)\
+            .assert_with_checks(JMESPathCheck('fileMode', '0744'),
+                                JMESPathCheck('owner', '1'),
+                                JMESPathCheck('group', '2'))
+
+        # test upload mode
+        source_file = self.create_temp_file(128, full_random=False)
+        file_name = 'src_file.txt'
+        file_path = dir_name + '/' + file_name
+        self.storage_cmd('storage file upload --share-name {} --source "{}" --path "{}" --file-mode {} --owner {} '
+                         '--group {}', account_info, share_name, source_file, file_path, 'rw-r--r--', '2', '3')
+        self.storage_cmd('storage file show --share-name {} --path {}', account_info, share_name, file_path) \
+            .assert_with_checks(JMESPathCheck('fileMode', '0644'),
+                                JMESPathCheck('owner', '2'),
+                                JMESPathCheck('group', '3'))
+        self.storage_cmd('storage file update --share-name {} --path "{}" --file-mode {} --owner {} '
+                         '--group {}', account_info, share_name, file_path, 'rw-rw-r--', '3', '4')
+        self.storage_cmd('storage file show --share-name {} --path {}', account_info, share_name, file_path) \
+            .assert_with_checks(JMESPathCheck('fileMode', '0664'),
+                                JMESPathCheck('owner', '3'),
+                                JMESPathCheck('group', '4'))
+        self.storage_cmd('storage file list --share-name {}', account_info, share_name)\
+            .assert_with_checks(JMESPathCheck('length(@)', 1))
+
+        # test copy mode
+        dst_file_path = dir_name + '/' + 'dst_file.txt'
+        self.storage_cmd('storage file copy start --source-account-name {} --source-path {} --source-share {} '
+                         '--destination-path {} --destination-share {} --owner-copy-mode Source '
+                         '--file-mode-copy-mode Source', account_info, account_info[0], file_path, share_name,
+                         dst_file_path, share_name)
+        self.storage_cmd('storage file show --share-name {} --path {}', account_info, share_name, dst_file_path) \
+            .assert_with_checks(JMESPathCheck('fileMode', '0664'),
+                                JMESPathCheck('owner', '3'),
+                                JMESPathCheck('group', '4'))
+        dst_file2_path = dir_name + '/' + 'dst_file2.txt'
+        self.storage_cmd('storage file copy start --source-account-name {} --source-path {} --source-share {} '
+                         '--destination-path {} --destination-share {} --owner-copy-mode Override '
+                         '--file-mode-copy-mode Override --file-mode {} --owner {} --group {}',
+                         account_info, account_info[0], file_path, share_name, dst_file2_path, share_name,
+                         'rw-rw-rw-', '4', '5')
+        self.storage_cmd('storage file show --share-name {} --path {}', account_info, share_name, dst_file2_path) \
+            .assert_with_checks(JMESPathCheck('fileMode', '0666'),
+                                JMESPathCheck('owner', '4'),
+                                JMESPathCheck('group', '5'))
+        self.storage_cmd('storage file list --share-name {} --path {}', account_info, share_name, dir_name) \
+            .assert_with_checks(JMESPathCheck('length(@)', 3))
+
+        # hard link
+        link_path = dir_name + '/' + 'linked_file.txt'
+        self.storage_cmd('storage file hard-link create --share-name {} --path {} --target {}', account_info,
+                         share_name, link_path, file_path).\
+            assert_with_checks(JMESPathCheck('mode', '0664'),
+                               JMESPathCheck('owner', '3'),
+                               JMESPathCheck('group', '4'))
+
+        # symbolic link
+        link_path = dir_name + '/' + 'link1'
+        target_path = 'target1/file1'
+        metadata = 'meta1=value1 meta2=value2'
+        owner = '6'
+        group = '7'
+
+        self.storage_cmd('storage file symbolic-link create --share-name {} --path {} --target {} '
+                         '--metadata {} --file-creation-time now --file-last-write-time now --owner {} --group {}',
+                         account_info, share_name, link_path, target_path, metadata, owner, group). \
+            assert_with_checks(JMESPathCheck('owner', '6'),
+                               JMESPathCheck('group', '7'))
+
+        link_text = quote(target_path, safe=[])
+        self.storage_cmd('storage file symbolic-link show --share-name {} --path {}',
+                         account_info, share_name, link_path). \
+            assert_with_checks(JMESPathCheck('link_text', link_text))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
+    def test_storage_file_generate_sas_as_user(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        share = self.create_share(account_info)
+        local_file = self.create_temp_file(1024)
+        file_name = os.path.basename(local_file)
+
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+            self.cmd('storage file generate-sas --account-name {} -p {} -s {} --expiry {} --permissions r --https-only '
+                     '--auth-mode login'.format(storage_account, file_name, share, expiry))
+
+        file_sas = self.cmd('storage file generate-sas --account-name {} -p {} -s {} --expiry {} --permissions crwd '
+                             '--https-only --as-user --auth-mode login '
+                             '--backup-intent'.format(storage_account, file_name, share, expiry)).output
+        self.assertIn('&sig=', file_sas)
+        self.assertIn('skoid=', file_sas)
+        self.assertIn('sktid=', file_sas)
+        self.assertIn('skt=', file_sas)
+        self.assertIn('ske=', file_sas)
+        self.assertIn('sks=', file_sas)
+        self.assertIn('skv=', file_sas)
+
+        if self.is_live:
+            self.cmd('storage file upload --account-name {} --source "{}" -s {} --sas-token {} '
+                     '--backup-intent'.format(storage_account, local_file, share, file_sas))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
+    def test_storage_file_generate_sas_with_user_delegation_oid(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        share = self.create_share(account_info)
+        local_file = self.create_temp_file(1024)
+        file_name = os.path.basename(local_file)
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
+
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        file_sas = self.cmd('storage file generate-sas --account-name {} -p {} -s {} --expiry {} --permissions crwd '
+                            '--https-only --as-user --auth-mode login --backup-intent --user-delegation-oid '
+                             '{}'.format(storage_account, file_name, share, expiry, logged_in_user)).output
+        self.assertIn('&sig=', file_sas)
+        self.assertIn('skoid=', file_sas)
+        self.assertIn('sktid=', file_sas)
+        self.assertIn('skt=', file_sas)
+        self.assertIn('ske=', file_sas)
+        self.assertIn('sks=', file_sas)
+        self.assertIn('skv=', file_sas)
+        self.assertIn('sduoid=', file_sas)
+
+        if self.is_live:
+            self.cmd('storage file upload --account-name {} --source "{}" -s {} --sas-token {} '
+                     '--backup-intent --auth-mode login'.format(storage_account, local_file, share, file_sas))

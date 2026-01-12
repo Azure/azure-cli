@@ -4,7 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from knack.log import get_logger
 
-from msrestazure.tools import is_valid_resource_id, parse_resource_id
+from azure.mgmt.core.tools import is_valid_resource_id, parse_resource_id
 
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.azclierror import MutuallyExclusiveArgumentError

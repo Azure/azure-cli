@@ -26,7 +26,7 @@ from azure.cli.command_modules.cdn.aaz.latest.afd.endpoint import Show as _AFDEn
     Create as _AFDEndpointCreate, Update as _AFDEndpointUpdate
 from azure.cli.command_modules.cdn.aaz.latest.afd.origin_group import Show as _AFDOriginGroupShow, \
     Create as _AFDOriginGroupCreate, Update as _AFDOriginGroupUpdate
-from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg
+from azure.cli.core.aaz import AAZStrArg, AAZBoolArg, AAZListArg, AAZTimeArg, AAZIntArg, AAZIntArgFormat
 from knack.util import CLIError
 from knack.log import get_logger
 from .custom_rule_util import (create_condition, create_action,
@@ -141,11 +141,12 @@ class AFDProfileCreate(_AFDProfileCreate):
         )
         args_schema.user_assigned_identities.Element = AAZStrArg()
         args_schema.location._registered = False
+        args_schema.location._required = False
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        args.location = 'global'
+        args.location = 'global'  # AFD profile location is always global
         user_assigned_identities = {}
         for identity in args.user_assigned_identities:
             user_assigned_identities[identity.to_serialized_data()] = {}
@@ -180,7 +181,6 @@ class AFDProfileUpdate(_AFDProfileUpdate):
             'The dictionary values can be empty objects ({{}}) in requests.',
         )
         args_schema.user_assigned_identities.Element = AAZStrArg()
-        args_schema.location._registered = False
         args_schema.sku._registered = False
         return args_schema
 
@@ -193,8 +193,6 @@ class AFDProfileUpdate(_AFDProfileUpdate):
         if existing['sku']['name'] not in (SkuName.premium_azure_front_door, SkuName.standard_azure_front_door):
             logger.warning('Unexpected SKU type, only Standard_AzureFrontDoor and Premium_AzureFrontDoor are supported')
             raise ResourceNotFoundError("Operation returned an invalid status code 'Not Found'")
-        existing_location = None if 'location' not in existing else existing['location']
-        args.location = existing_location
 
         if has_value(args.identity_type):
             user_assigned_identities = {}
@@ -240,19 +238,43 @@ class AFDEndpointUpdate(_AFDEndpointUpdate):
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.location._registered = False
         args_schema.name_reuse_scope._registered = False
         return args_schema
 
-    def pre_operations(self):
-        args = self.ctx.args
-        existing = _AFDEndpointShow(cli_ctx=self.cli_ctx)(command_args={
-            'resource_group': args.resource_group,
-            'profile_name': args.profile_name,
-            'endpoint_name': args.endpoint_name
-        })
-        existing_location = None if 'location' not in existing else existing['location']
-        args.location = existing_location
+
+def get_health_probe_settings(enable_health_probe, probe_interval_in_seconds,
+                              probe_path, probe_protocol, probe_request_type):
+    params = [probe_interval_in_seconds, probe_path, probe_protocol, probe_request_type]
+    if enable_health_probe is False:
+        return None
+    if enable_health_probe is True:
+        if any(param is None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is set, all of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type must be specified.'
+            )
+    elif any(param is not None for param in params):
+        enable_health_probe = True
+        if any(param is None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is set, all of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type must be specified.'
+            )
+    else:
+        enable_health_probe = False
+        if any(param is not None for param in params):
+            raise InvalidArgumentValueError(
+                'When --enable-health-probe is not set, none of --probe-interval-in-seconds, --probe-path, '
+                '--probe-protocol and --probe-request-type can be specified.'
+            )
+        return None
+
+    return {
+        'probeIntervalInSeconds': probe_interval_in_seconds,
+        'probePath': probe_path,
+        'probeProtocol': probe_protocol,
+        'probeRequestType': probe_request_type
+    }
 
 
 class AFDOriginGroupCreate(_AFDOriginGroupCreate):
@@ -264,15 +286,60 @@ class AFDOriginGroupCreate(_AFDOriginGroupCreate):
             help='Indicates whether to enable probe on the origin group.',
             blank=True,
         )
+        args_schema.probe_interval_in_seconds = AAZIntArg(
+            options=["--probe-interval-in-seconds"],
+            arg_group="HealthProbeSettings",
+            help="The number of seconds between health probes.Default is 240sec.",
+            fmt=AAZIntArgFormat(
+                maximum=255,
+                minimum=1,
+            ),
+        )
+        args_schema.probe_path = AAZStrArg(
+            options=["--probe-path"],
+            arg_group="HealthProbeSettings",
+            help="The path relative to the origin that is used to determine the health of the origin.",
+        )
+        args_schema.probe_protocol = AAZStrArg(
+            options=["--probe-protocol"],
+            arg_group="HealthProbeSettings",
+            help="Protocol to use for health probe.",
+            enum={"Http": "Http", "Https": "Https", "NotSet": "NotSet"},
+        )
+        args_schema.probe_request_type = AAZStrArg(
+            options=["--probe-request-type"],
+            arg_group="HealthProbeSettings",
+            help="The type of health probe request that is made.",
+            enum={"GET": "GET", "HEAD": "HEAD", "NotSet": "NotSet"},
+        )
         return args_schema
 
     def pre_operations(self):
         args = self.ctx.args
-        if not has_value(args.enable_health_probe) or args.enable_health_probe.to_serialized_data() is False:
-            args.probe_path = None
-            args.probe_protocol = None
-            args.probe_interval_in_seconds = None
-            args.probe_request_type = None
+
+        enable_health_probe = None
+        probe_interval_in_seconds = None
+        probe_path = None
+        probe_protocol = None
+        probe_request_type = None
+        if has_value(args.enable_health_probe):
+            enable_health_probe = args.enable_health_probe.to_serialized_data()
+        if has_value(args.probe_interval_in_seconds):
+            probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
+        if has_value(args.probe_path):
+            probe_path = args.probe_path.to_serialized_data()
+        if has_value(args.probe_protocol):
+            probe_protocol = args.probe_protocol.to_serialized_data()
+        if has_value(args.probe_request_type):
+            probe_request_type = args.probe_request_type.to_serialized_data()
+
+        args.health_probe_settings = get_health_probe_settings(
+            enable_health_probe,
+            probe_interval_in_seconds,
+            probe_path,
+            probe_protocol,
+            probe_request_type
+        )
 
 
 class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
@@ -284,6 +351,32 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             help='Indicates whether to enable probe on the origin group.',
             blank=True,
         )
+        args_schema.probe_interval_in_seconds = AAZIntArg(
+            options=["--probe-interval-in-seconds"],
+            arg_group="HealthProbeSettings",
+            help="The number of seconds between health probes.Default is 240sec.",
+            fmt=AAZIntArgFormat(
+                maximum=255,
+                minimum=1,
+            ),
+        )
+        args_schema.probe_path = AAZStrArg(
+            options=["--probe-path"],
+            arg_group="HealthProbeSettings",
+            help="The path relative to the origin that is used to determine the health of the origin.",
+        )
+        args_schema.probe_protocol = AAZStrArg(
+            options=["--probe-protocol"],
+            arg_group="HealthProbeSettings",
+            help="Protocol to use for health probe.",
+            enum={"Http": "Http", "Https": "Https", "NotSet": "NotSet"},
+        )
+        args_schema.probe_request_type = AAZStrArg(
+            options=["--probe-request-type"],
+            arg_group="HealthProbeSettings",
+            help="The type of health probe request that is made.",
+            enum={"GET": "GET", "HEAD": "HEAD", "NotSet": "NotSet"},
+        )
         return args_schema
 
     def pre_operations(self):
@@ -293,23 +386,52 @@ class AFDOriginGroupUpdate(_AFDOriginGroupUpdate):
             'profile_name': args.profile_name,
             'origin_group_name': args.origin_group_name
         })
-        if not has_value(args.enable_health_probe):
-            if existing['healthProbeSettings'] is not None:
-                if 'probePath' in existing['healthProbeSettings'] \
-                        or 'probeProtocol' in existing['healthProbeSettings'] \
-                        or 'probeIntervalInSeconds' in existing['healthProbeSettings'] \
-                        or 'probeRequestType' in existing['healthProbeSettings']:
-                    args.enable_health_probe = True
-                else:
-                    args.enable_health_probe = False
-            else:
-                args.enable_health_probe = False
 
-        if args.enable_health_probe.to_serialized_data() is False:
-            args.probe_path = None
-            args.probe_protocol = None
-            args.probe_interval_in_seconds = None
-            args.probe_request_type = None
+        enable_health_probe = None
+        probe_interval_in_seconds = None
+        probe_path = None
+        probe_protocol = None
+        probe_request_type = None
+
+        if not has_value(args.enable_health_probe):
+            if 'healthProbeSettings' not in existing:
+                enable_health_probe = False
+            else:
+                enable_health_probe = True
+        else:
+            enable_health_probe = args.enable_health_probe.to_serialized_data()
+
+        if has_value(args.probe_path):
+            enable_health_probe = True
+            probe_path = args.probe_path.to_serialized_data()
+        elif 'probePath' in existing['healthProbeSettings']:
+            probe_path = existing['healthProbeSettings']['probePath']
+
+        if has_value(args.probe_protocol):
+            enable_health_probe = True
+            probe_protocol = args.probe_protocol.to_serialized_data()
+        elif 'probeProtocol' in existing['healthProbeSettings']:
+            probe_protocol = existing['healthProbeSettings']['probeProtocol']
+
+        if has_value(args.probe_interval_in_seconds):
+            enable_health_probe = True
+            probe_interval_in_seconds = args.probe_interval_in_seconds.to_serialized_data()
+        elif 'probeIntervalInSeconds' in existing['healthProbeSettings']:
+            probe_interval_in_seconds = existing['healthProbeSettings']['probeIntervalInSeconds']
+
+        if has_value(args.probe_request_type):
+            enable_health_probe = True
+            probe_request_type = args.probe_request_type.to_serialized_data()
+        elif 'probeRequestType' in existing['healthProbeSettings']:
+            probe_request_type = existing['healthProbeSettings']['probeRequestType']
+
+        args.health_probe_settings = get_health_probe_settings(
+            enable_health_probe,
+            probe_interval_in_seconds,
+            probe_path,
+            probe_protocol,
+            probe_request_type
+        )
 
 
 class AFDOriginCreate(_AFDOriginCreate):
@@ -318,7 +440,9 @@ class AFDOriginCreate(_AFDOriginCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_private_link = AAZBoolArg(
             options=['--enable-private-link'],
-            help='Indicates whether private link is enanbled on that origin.',
+            help='Indicates whether private link is enabled on that origin.',
+            blank=True,
+            default=False
         )
         args_schema.private_link_location = AAZStrArg(
             options=['--private-link-location'],
@@ -363,7 +487,8 @@ class AFDOriginUpdate(_AFDOriginUpdate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_private_link = AAZBoolArg(
             options=['--enable-private-link'],
-            help='Indicates whether private link is enanbled on that origin.',
+            help='Indicates whether private link is enabled on that origin.',
+            blank=True
         )
         args_schema.private_link_location = AAZStrArg(
             options=['--private-link-location'],
@@ -456,7 +581,7 @@ class AFDRouteCreate(_AFDRouteCreate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_caching = AAZBoolArg(
             options=['--enable-caching'],
-            help='Indicates whether caching is enanbled on that route.',
+            help='Indicates whether caching is enabled on that route.',
         )
         args_schema.custom_domains = AAZListArg(
             options=['--custom-domains'],
@@ -492,7 +617,7 @@ class AFDRouteCreate(_AFDRouteCreate):
             'Default value is false. If compression is enabled,'
             'content will be served as compressed if user requests for a compressed version.'
             'Content won\'t be compressed on AzureFrontDoor'
-            'when requested content is smaller than 1 byte or larger than 1 MB.',
+            'when requested content is smaller than 8 MB or larger than 1 KB.',
         )
         args_schema.cache_configuration._registered = False
         args_schema.formatted_custom_domains._registered = False
@@ -558,7 +683,7 @@ class AFDRouteUpdate(_AFDRouteUpdate):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.enable_caching = AAZBoolArg(
             options=['--enable-caching'],
-            help='Indicates whether caching is enanbled on that route.',
+            help='Indicates whether caching is enabled on that route.',
         )
         args_schema.custom_domains = AAZListArg(
             options=['--custom-domains'],
@@ -593,7 +718,7 @@ class AFDRouteUpdate(_AFDRouteUpdate):
             help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false.'
             'If compression is enabled, content will be served as compressed if user requests for a compressed version.'
             'Content won\'t be compressed on AzureFrontDoor'
-            'when requested content is smaller than 1 byte or larger than 1 MB.',
+            'when requested content is smaller than 8 MB or larger than 1 KB.',
         )
         args_schema.cache_configuration._registered = False
         args_schema.formatted_custom_domains._registered = False
@@ -702,7 +827,7 @@ class AFDRuleCreate(_AFDRuleCreate):
         args_schema.action_name = AAZStrArg(
             options=['--action-name'],
             help='The name of the action for the delivery rule: '
-            'https://docs.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.',
+            'https://learn.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.',
         )
         args_schema.cache_behavior = AAZStrArg(
             options=['--cache-behavior'],
@@ -710,7 +835,7 @@ class AFDRuleCreate(_AFDRuleCreate):
         )
         args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
-            help='The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.',
+            help='The duration for which the content needs to be cached. Allowed format is hh:mm:ss.xxxxxx',
         )
         args_schema.custom_fragment = AAZStrArg(
             options=['--custom-fragment'],
@@ -743,7 +868,7 @@ class AFDRuleCreate(_AFDRuleCreate):
             help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false.'
             'If compression is enabled, content will be served as compressed if user requests for a compressed version.'
             'Content won\'t be compressed on AzureFrontDoor'
-            'when requested content is smaller than 1 byte or larger than 1 MB.',
+            'when requested content is smaller than 8 MB or larger than 1 KB.',
         )
         args_schema.forwarding_protocol = AAZStrArg(
             options=['--forwarding-protocol'],
@@ -769,7 +894,7 @@ class AFDRuleCreate(_AFDRuleCreate):
         args_schema.match_variable = AAZStrArg(
             options=['--match-variable'],
             help='Name of the match condition: '
-            'https://docs.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.',
+            'https://learn.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.',
         )
         args_schema.negate_condition = AAZBoolArg(
             options=['--negate-condition'],
@@ -857,7 +982,13 @@ class AFDRuleCreate(_AFDRuleCreate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleconditionAdd(_AFDRuleUpdate):
+    """Add a match condition to the specified delivery rule.
+
+    :example: Add a match condition to a delivery rule.
+        az afd rule condition add --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --match-variable RequestMethod --operator Any --match-values GET HTTP --negate-condition false --transforms Lowercase
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -869,7 +1000,7 @@ class AFDRuleconditionAdd(_AFDRuleUpdate):
         args_schema.match_variable = AAZStrArg(
             options=['--match-variable'],
             help='Name of the match condition: '
-            'https://docs.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.',
+            'https://learn.microsoft.com/en-us/azure/frontdoor/rules-match-conditions.',
             required=True,
         )
         args_schema.negate_condition = AAZBoolArg(
@@ -911,7 +1042,13 @@ class AFDRuleconditionAdd(_AFDRuleUpdate):
         args.conditions = conditions
 
 
+# pylint: disable=line-too-long
 class AFDRuleconditionRemove(_AFDRuleUpdate):
+    """Remove a condition from the specified delivery rule.
+
+    :example: Remove a condition from a delivery rule.
+        az afd rule condition remove --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --index 0
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -942,14 +1079,20 @@ class AFDRuleconditionRemove(_AFDRuleUpdate):
         args.conditions = conditions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionCreate(_AFDRuleUpdate):
+    """Update a new delivery rule within the specified rule set.
+
+    :example: Create a new delivery rule with a modify response header action.
+        az afd rule action create --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --action-name Redirect --redirect-type "Found" --redirect-protocol "Https" --destination "www.example.com
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
         args_schema.action_name = AAZStrArg(
             options=['--action-name'],
             help='The name of the action for the delivery rule: '
-            'https://docs.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.',
+            'https://learn.microsoft.com/en-us/azure/frontdoor/front-door-rules-engine-actions.',
             required=True,
         )
         args_schema.cache_behavior = AAZStrArg(
@@ -958,7 +1101,7 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
         )
         args_schema.cache_duration = AAZTimeArg(
             options=['--cache-duration'],
-            help='The duration for which the content needs to be cached. Allowed format is [d.]hh:mm:ss.',
+            help='The duration for which the content needs to be cached. Allowed format is hh:mm:ss.xxxxxx',
         )
         args_schema.custom_fragment = AAZStrArg(
             options=['--custom-fragment'],
@@ -991,7 +1134,7 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
             help='Indicates whether content compression is enabled on AzureFrontDoor. Default value is false.'
             'If compression is enabled, content will be served as compressed if user requests for a compressed version.'
             'Content won\'t be compressed on AzureFrontDoor'
-            'when requested content is smaller than 1 byte or larger than 1 MB.',
+            'when requested content is smaller than 8 MB or larger than 1 KB.',
         )
         args_schema.forwarding_protocol = AAZStrArg(
             options=['--forwarding-protocol'],
@@ -1075,7 +1218,13 @@ class AFDRuleActionCreate(_AFDRuleUpdate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionRemove(_AFDRuleUpdate):
+    """Remove an action from the specified delivery rule.
+
+    :example: Remove an action from a delivery rule.
+        az afd rule action remove --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule --index 0
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
@@ -1104,13 +1253,16 @@ class AFDRuleActionRemove(_AFDRuleUpdate):
         args.actions = actions
 
 
+# pylint: disable=line-too-long
 class AFDRuleActionShow(_RuleShow):
+    """Show the actions of a delivery rule.
+
+    :example: Show the actions of a delivery rule.
+        az afd rule action show --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.actions._registered = False
-        args_schema.conditions._registered = False
-        args_schema.ids._registered = False
         return args_schema
 
     def _output(self, *args, **kwargs):
@@ -1118,13 +1270,16 @@ class AFDRuleActionShow(_RuleShow):
         return existing['actions']
 
 
+# pylint: disable=line-too-long
 class AFDRuleConditionShow(_RuleShow):
+    """Show the conditions of a delivery rule.
+
+    :example: Show the conditions of a delivery rule.
+        az afd rule condition show --resource-group MyResourceGroup --profile-name MyFrontDoorProfile --rule-set-name MyRuleSet --rule-name MyRule
+    """
     @classmethod
     def _build_arguments_schema(cls, *args, **kwargs):
         args_schema = super()._build_arguments_schema(*args, **kwargs)
-        args_schema.actions._registered = False
-        args_schema.conditions._registered = False
-        args_schema.ids._registered = False
         return args_schema
 
     def _output(self, *args, **kwargs):
@@ -1209,11 +1364,12 @@ class AFDSecretUpdate(_AFDSecretUpdate):
         })
 
         para = existing['parameters']
-        secret_source = args.secret_source if has_value(args.secret_source) else para['secretSource']['id']
-        if 'secretVersion' in para and para['secretVersion'] in args.secret_source.to_serialized_data():
+        secret_source = args.secret_source.to_serialized_data() if has_value(args.secret_source) \
+            else para['secretSource']['id']
+        if 'secretVersion' in para and para['secretVersion'] in secret_source:
             existing_secret_version = para['secretVersion']
-            version_start = args.secret_source.to_serialized_data().lower().rindex(f'/{existing_secret_version}')
-            secret_source = args.secret_source.to_serialized_data()[0:version_start]
+            version_start = secret_source.lower().rindex(f'/{existing_secret_version}')
+            secret_source = secret_source[0:version_start]
 
         secret_version = args.secret_version \
             if has_value(args.secret_version) and args.secret_version is not None \
@@ -1320,6 +1476,6 @@ class AFDSecurityPolicyUpdate(_AFDSecurityPolicyUpdate):
 
         args.web_application_firewall = {
             'waf_policy': args.waf_policy if has_value(args.waf_policy)
-            else existing_security_policy['parameters']['wafPolicy'],
+            else existing_security_policy['parameters']['wafPolicy']['id'],
             'associations': associations
         }

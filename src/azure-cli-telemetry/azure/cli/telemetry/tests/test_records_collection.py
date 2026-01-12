@@ -3,7 +3,6 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
-import datetime
 import os
 import shutil
 import tempfile
@@ -27,7 +26,7 @@ class TestRecordsCollection(unittest.TestCase):
         shutil.rmtree(self.work_dir, ignore_errors=True)
 
     def test_create_records_collection(self):
-        collection = RecordsCollection(datetime.datetime.min, self.work_dir)
+        collection = RecordsCollection(os.path.join(self.work_dir, TELEMETRY_CACHE_DIR))
 
         # cache files are not moved while the collection is created
         self.assert_cache_files_count(self.TEST_CACHE_FILE_COUNT)
@@ -35,36 +34,14 @@ class TestRecordsCollection(unittest.TestCase):
         # take snapshot and move the files
         collection.snapshot_and_read()
 
-        # all files are moved, including the 'cache' file.
-        self.assert_cache_files_count(0)
+        # all files are moved, including the directory.
+        self.assertFalse(os.path.exists(os.path.join(self.work_dir, TELEMETRY_CACHE_DIR)))
 
         # total records
         self.assertEqual(1758, len([r for r in collection]))
 
-    def test_create_records_collection_with_last_send(self):
-        last_send = datetime.datetime.now() - datetime.timedelta(minutes=20)
-        collection = RecordsCollection(last_send, self.work_dir)
-        collection.snapshot_and_read()
-
-        # cache strategy has been dropped, so no `cache` file
-        self.assert_cache_files_count(0)
-        # no new records since last_send
-        self.assertEqual(0, len([r for r in collection]))
-
-    def test_create_records_collection_against_missing_config_folder(self):
-        collection = RecordsCollection(datetime.datetime.min, tempfile.mktemp())
-        self.assertEqual(0, len([r for r in collection]))
-
-    def test_create_records_collection_against_missing_folder(self):
-        shutil.rmtree(os.path.join(self.work_dir, TELEMETRY_CACHE_DIR))
-        collection = RecordsCollection(datetime.datetime.min, self.work_dir)
-        self.assertEqual(0, len([r for r in collection]))
-
     def test_create_records_collection_against_empty_folder(self):
-        shutil.rmtree(os.path.join(self.work_dir, TELEMETRY_CACHE_DIR))
-        os.makedirs(os.path.join(self.work_dir, TELEMETRY_CACHE_DIR))
-
-        collection = RecordsCollection(datetime.datetime.min, self.TEST_RESOURCE_FOLDER)
+        collection = RecordsCollection(tempfile.mktemp())
         self.assertEqual(0, len([r for r in collection]))
 
     def assert_cache_files_count(self, count):

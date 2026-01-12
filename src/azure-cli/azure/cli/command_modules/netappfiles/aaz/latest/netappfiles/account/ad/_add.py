@@ -22,9 +22,9 @@ class Add(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2023-11-01", "properties.activeDirectories[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}", "2025-09-01", "properties.activeDirectories[]"],
         ]
     }
 
@@ -51,7 +51,7 @@ class Add(AAZCommand):
             help="The name of the NetApp account",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -62,6 +62,13 @@ class Add(AAZCommand):
             help="Id of the Active Directory",
             required=True,
             nullable=True,
+        )
+        _args_schema.kdc_ip = AAZStrArg(
+            options=["--kdc-ip"],
+            help="kdc server IP address for the active directory machine. This optional parameter is used only while creating kerberos volume.",
+            fmt=AAZStrArgFormat(
+                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
+            ),
         )
 
         # define Arg Group "Body.properties.activeDirectories[]"
@@ -101,7 +108,7 @@ class Add(AAZCommand):
             arg_group="Body.properties.activeDirectories[]",
             help="Comma separated list of DNS server IP addresses (IPv4 only) for the Active Directory domain",
             fmt=AAZStrArgFormat(
-                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
+                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
             ),
         )
         _args_schema.domain = AAZStrArg(
@@ -113,14 +120,6 @@ class Add(AAZCommand):
             options=["--encrypt-dc-conn", "--encrypt-dc-connections"],
             arg_group="Body.properties.activeDirectories[]",
             help="If enabled, Traffic between the SMB server to Domain Controller (DC) will be encrypted.",
-        )
-        _args_schema.kdc_ip = AAZStrArg(
-            options=["--kdc-ip"],
-            arg_group="Body.properties.activeDirectories[]",
-            help="kdc server IP addresses for the active directory machine. This optional parameter is used only while creating kerberos volume.",
-            fmt=AAZStrArgFormat(
-                pattern="^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))*$",
-            ),
         )
         _args_schema.ldap_over_tls = AAZBoolArg(
             options=["--ldap-over-tls"],
@@ -143,12 +142,15 @@ class Add(AAZCommand):
             help="The Organizational Unit (OU) within the Windows Active Directory",
             default="CN=Computers",
         )
-        _args_schema.password = AAZStrArg(
+        _args_schema.password = AAZPasswordArg(
             options=["--password"],
             arg_group="Body.properties.activeDirectories[]",
             help="Plain text password of Active Directory domain administrator, value is masked in the response",
             fmt=AAZStrArgFormat(
                 max_length=64,
+            ),
+            blank=AAZPromptPasswordInput(
+                msg="Password:",
             ),
         )
         _args_schema.preferred_servers_for_ldap_client = AAZStrArg(
@@ -156,7 +158,7 @@ class Add(AAZCommand):
             arg_group="Body.properties.activeDirectories[]",
             help="Comma separated list of IPv4 addresses of preferred servers for LDAP client. At most two comma separated IPv4 addresses can be passed.",
             fmt=AAZStrArgFormat(
-                pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))?)?$",
+                pattern="^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)((, ?)(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))?)?$",
                 max_length=32,
             ),
         )
@@ -165,13 +167,16 @@ class Add(AAZCommand):
             arg_group="Body.properties.activeDirectories[]",
             help="Domain Users in the Active directory to be given SeSecurityPrivilege privilege (Needed for SMB Continuously available shares for SQL). A list of unique usernames without domain specifier",
         )
-        _args_schema.server_root_ca_certificate = AAZStrArg(
+        _args_schema.server_root_ca_certificate = AAZPasswordArg(
             options=["--server-root-ca-cert", "--server-root-ca-certificate"],
             arg_group="Body.properties.activeDirectories[]",
             help="When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.",
             fmt=AAZStrArgFormat(
                 max_length=10240,
                 min_length=1,
+            ),
+            blank=AAZPromptPasswordInput(
+                msg="Password:",
             ),
         )
         _args_schema.site = AAZStrArg(
@@ -243,7 +248,7 @@ class Add(AAZCommand):
         self.AccountsGet(ctx=self.ctx)()
         self.pre_instance_create()
         self.InstanceCreateByJson(ctx=self.ctx)()
-        self.post_instance_create(self.ctx.selectors.subresource.required())
+        self.post_instance_create(self.ctx.selectors.subresource.get())
         yield self.AccountsCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -264,7 +269,7 @@ class Add(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
 
     class SubresourceSelector(AAZJsonSelector):
@@ -340,7 +345,7 @@ class Add(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -439,7 +444,7 @@ class Add(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -567,7 +572,7 @@ class _AddHelper:
         net_app_account_read.id = AAZStrType(
             flags={"read_only": True},
         )
-        net_app_account_read.identity = AAZObjectType()
+        net_app_account_read.identity = AAZIdentityObjectType()
         net_app_account_read.location = AAZStrType(
             flags={"required": True},
         )
@@ -627,6 +632,14 @@ class _AddHelper:
             flags={"read_only": True},
         )
         properties.encryption = AAZObjectType()
+        properties.multi_ad_status = AAZStrType(
+            serialized_name="multiAdStatus",
+            flags={"read_only": True},
+        )
+        properties.nfs_v4_id_domain = AAZStrType(
+            serialized_name="nfsV4IDDomain",
+            nullable=True,
+        )
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
@@ -729,6 +742,9 @@ class _AddHelper:
         )
 
         identity = _schema_net_app_account_read.properties.encryption.identity
+        identity.federated_client_id = AAZStrType(
+            serialized_name="federatedClientId",
+        )
         identity.principal_id = AAZStrType(
             serialized_name="principalId",
             flags={"read_only": True},
@@ -748,7 +764,6 @@ class _AddHelper:
         )
         key_vault_properties.key_vault_resource_id = AAZStrType(
             serialized_name="keyVaultResourceId",
-            flags={"required": True},
         )
         key_vault_properties.key_vault_uri = AAZStrType(
             serialized_name="keyVaultUri",

@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "monitor diagnostic-settings create",
 )
 class Create(AAZCommand):
-    """Create diagnostic settings for the specified resource. For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings.
+    """Create diagnostic settings for the specified resource. For more information, visit: https://learn.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#metricsettings.
 
     :example: Create diagnostic settings, retention here only applies when the target is a storage account.
         az monitor diagnostic-settings create --resource {ID} -n {name} --storage-account {storageAccount} --logs "[{category:WorkflowRuntime,enabled:true,retention-policy:{enabled:false,days:0}}]" --metrics "[{category:WorkflowRuntime,enabled:true,retention-policy:{enabled:false,days:0}}]"
@@ -59,11 +59,11 @@ class Create(AAZCommand):
         )
         _args_schema.log_analytics_destination_type = AAZStrArg(
             options=["--log-analytics-destination-type"],
-            help="A string indicating whether the export to Log Analytics should use the default destination type, i.e. AzureDiagnostics, or use a destination type constructed as follows: <normalized service identity>_<normalized category name>. Possible values are: Dedicated and null (null is default.)",
+            help="A string indicating whether the export to Log Analytics should use the default destination type, i.e. AzureDiagnostics, or use a destination type constructed as follows: `<normalized service identity>_<normalized category name>`. Possible values are: Dedicated and null (null is default.)",
         )
         _args_schema.logs = AAZListArg(
             options=["--logs"],
-            help="JSON encoded list of logs settings. Use '@{file}' to load from a file.For more information, visit: https://docs.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings.",
+            help="JSON encoded list of logs settings. Use '@{file}' to load from a file. For more information, visit: https://learn.microsoft.com/rest/api/monitor/diagnosticsettings/createorupdate#logsettings.",
         )
         _args_schema.marketplace_partner_id = AAZStrArg(
             options=["--marketplace-partner-id"],
@@ -100,12 +100,12 @@ class Create(AAZCommand):
         )
         _element.enabled = AAZBoolArg(
             options=["enabled"],
-            help="a value indicating whether this log is enabled.",
+            help="A value indicating whether this log is enabled.",
             required=True,
         )
         _element.retention_policy = AAZObjectArg(
             options=["retention-policy"],
-            help="the retention policy for this log.",
+            help="The retention policy for this log.",
         )
         cls._build_args_retention_policy_create(_element.retention_policy)
 
@@ -119,17 +119,17 @@ class Create(AAZCommand):
         )
         _element.enabled = AAZBoolArg(
             options=["enabled"],
-            help="a value indicating whether this category is enabled.",
+            help="A value indicating whether this category is enabled.",
             required=True,
         )
         _element.retention_policy = AAZObjectArg(
             options=["retention-policy"],
-            help="the retention policy for this category.",
+            help="The retention policy for this category.",
         )
         cls._build_args_retention_policy_create(_element.retention_policy)
         _element.time_grain = AAZDurationArg(
             options=["time-grain"],
-            help="the timegrain of the metric in ISO8601 format.",
+            help="The timegrain of the metric in ISO8601 format.",
         )
 
         # define Arg Group "Target Resource"
@@ -157,7 +157,7 @@ class Create(AAZCommand):
         retention_policy_create = cls._args_retention_policy_create
         retention_policy_create.days = AAZIntArg(
             options=["days"],
-            help="the number of days for the retention in days. A value of 0 will retain the events indefinitely.",
+            help="The number of days for the retention. A value of 0 will retain the events indefinitely.",
             required=True,
             fmt=AAZIntArgFormat(
                 minimum=0,
@@ -165,7 +165,7 @@ class Create(AAZCommand):
         )
         retention_policy_create.enabled = AAZBoolArg(
             options=["enabled"],
-            help="a value indicating whether the retention policy is enabled.",
+            help="A value indicating whether the retention policy is enabled.",
             required=True,
         )
 

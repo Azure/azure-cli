@@ -18,7 +18,7 @@ class Update(AAZCommand):
     """Update a data export rule for a given workspace.
 
     For more information, see
-    https://docs.microsoft.com/azure/azure-monitor/platform/logs-data-export
+    https://learn.microsoft.com/azure/azure-monitor/platform/logs-data-export
 
     :example: Update a data export rule for a given workspace.
         az monitor log-analytics workspace data-export update -g MyRG --workspace-name MyWS -n MyDataExport --destination <event hub namespace id> -t <table name> --enable false

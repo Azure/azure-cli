@@ -63,13 +63,13 @@ class TestCommandRecommender(unittest.TestCase):
         class TestCommandsLoader(AzCommandsLoader):
 
             def load_command_table(self, args):
-                super(TestCommandsLoader, self).load_command_table(args)
+                super().load_command_table(args)
                 with self.command_group('test group', operations_tmpl='{}#TestCommandRecommender.{{}}'.format(__name__)) as g:
                     g.command('cmd', 'sample_command')
                 return self.command_table
 
             def load_arguments(self, command):
-                super(TestCommandsLoader, self).load_arguments(command)
+                super().load_arguments(command)
                 with self.argument_context('test group cmd') as c:
                     c.argument('arg1', options_list=('--arg1', '--arg1-alias', '-a'))
                     c.argument('arg2', options_list=('--arg2', '--arg2-alias', '--arg2-alias-long'))

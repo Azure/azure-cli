@@ -3,24 +3,30 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+import os
 import re
 import time
 from knack.log import get_logger
 from knack.util import todict, CLIError
-from msrestazure.tools import parse_resource_id
 from azure.cli.core.azclierror import (
     ValidationError,
     CLIInternalError
 )
-from azure.cli.core._profile import Profile
+# from azure.cli.core._profile import Profile
 from ._resource_config import (
-    SOURCE_RESOURCES_USERTOKEN,
-    TARGET_RESOURCES_USERTOKEN,
     RESOURCE
 )
-
+from azure.cli.core import get_default_cli
+from azure.mgmt.core.tools import (
+    parse_resource_id,
+    is_valid_resource_id as is_valid_resource_id_sdk
+)
 
 logger = get_logger(__name__)
+
+
+def is_valid_resource_id(value):
+    return is_valid_resource_id_sdk(value)
 
 
 def should_load_source(source):
@@ -78,34 +84,37 @@ def run_cli_cmd(cmd, retry=0, interval=0, should_retry_func=None):
     :param retry: The times to re-try
     :param interval: The seconds wait before retry
     '''
-    import json
-    import subprocess
+    output = _in_process_execute(cmd)
 
-    output = subprocess.run(cmd, shell=True, check=False,
-                            stderr=subprocess.PIPE, stdout=subprocess.PIPE)
-    logger.debug(output)
-    if output.returncode != 0 or (should_retry_func and should_retry_func(output)):
+    if output.error or (should_retry_func and should_retry_func(output)):
         if retry:
             time.sleep(interval)
             return run_cli_cmd(cmd, retry - 1, interval)
-        err = output.stderr.decode(encoding='UTF-8', errors='ignore')
         raise CLIInternalError('Command execution failed, command is: '
-                               '{}, error message is: \n {}'.format(cmd, err))
-    try:
-        return json.loads(output.stdout.decode(encoding='UTF-8', errors='ignore')) if output.stdout else None
-    except ValueError as e:
-        logger.debug(e)
-        return output.stdout or None
+                               '{}, error message is: \n {}'.format(cmd, output.error))
+    return output.result
 
 
+def _in_process_execute(command):
+    import shlex
+
+    if command.startswith('az '):
+        command = command[3:]
+
+    cli = get_default_cli()
+    cli.invoke(shlex.split(command), out_file=open(os.devnull, 'w'))  # Don't print output
+    return cli.result
+
+
+# pylint: disable=unused-argument
 def set_user_token_header(client, cli_ctx):
     '''Set user token header to work around OBO'''
 
     # pylint: disable=protected-access
     # HACK: set custom header to work around OBO
-    profile = Profile(cli_ctx=cli_ctx)
-    creds, _, _ = profile.get_raw_token()
-    client._client._config.headers_policy._headers['x-ms-serviceconnector-user-token'] = creds[1]
+    # profile = Profile(cli_ctx=cli_ctx)
+    # creds, _, _ = profile.get_raw_token()
+    # client._client._config.headers_policy._headers['x-ms-serviceconnector-user-token'] = creds[1]
     # HACK: hide token header
     client._config.logging_policy.headers_to_redact.append(
         'x-ms-serviceconnector-user-token')
@@ -115,8 +124,9 @@ def set_user_token_header(client, cli_ctx):
 
 def set_user_token_by_source_and_target(client, cli_ctx, source, target):
     '''Set user token header to work around OBO according to source and target'''
-    if source in SOURCE_RESOURCES_USERTOKEN or target in TARGET_RESOURCES_USERTOKEN:
-        return set_user_token_header(client, cli_ctx)
+    # deprecated
+    # if source in SOURCE_RESOURCES_USERTOKEN or target in TARGET_RESOURCES_USERTOKEN:
+    #     return set_user_token_header(client, cli_ctx)
     return client
 
 
@@ -124,7 +134,7 @@ def provider_is_registered(subscription=None):
     # register the provider
     subs_arg = ''
     if subscription:
-        subs_arg = '--subscription {}'.format(subscription)
+        subs_arg = '--subscription "{}"'.format(subscription)
     output = run_cli_cmd(
         'az provider show -n Microsoft.ServiceLinker {}'.format(subs_arg))
     if output.get('registrationState') == 'NotRegistered':
@@ -138,7 +148,7 @@ def register_provider(subscription=None):
 
     subs_arg = ''
     if subscription:
-        subs_arg = '--subscription {}'.format(subscription)
+        subs_arg = '--subscription "{}"'.format(subscription)
 
     # register the provider
     run_cli_cmd(
@@ -208,7 +218,7 @@ def create_key_vault_reference_connection_if_not_exist(cmd, client, source_id, k
     key_vault_connections = []
     for connection in client.list(resource_uri=source_id):
         connection = todict(connection)
-        if connection.get('targetService', dict()).get('id') == key_vault_id:
+        if connection.get('targetService', {}).get('id') == key_vault_id:
             key_vault_connections.append(connection)
 
     source_name = get_source_resource_name(cmd)
@@ -259,8 +269,8 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
     # any connection with csi enabled is a valid connection
     if source_name == RESOURCE.KubernetesCluster:
         for connection in key_vault_connections:
-            if connection.get('targetService', dict()).get(
-                    'resourceProperties', dict()).get('connectAsKubernetesCsiDriver'):
+            if connection.get('targetService', {}).get(
+                    'resourceProperties', {}).get('connectAsKubernetesCsiDriver'):
                 return
         return {'authType': 'userAssignedIdentity'}
 
@@ -273,15 +283,12 @@ def get_auth_if_no_valid_key_vault_connection(source_name, source_id, key_vault_
     return {'authType': 'systemAssignedIdentity'}
 
 
-# https://docs.microsoft.com/azure/app-service/app-service-key-vault-references
+# https://learn.microsoft.com/azure/app-service/app-service-key-vault-references
 def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_connections):
-    from msrestazure.tools import (
-        is_valid_resource_id
-    )
 
     try:
         webapp = run_cli_cmd(
-            'az rest -u {}?api-version=2020-09-01 -o json'.format(source_id))
+            'az rest -u "{}?api-version=2020-09-01" -o json'.format(source_id))
         reference_identity = webapp.get(
             'properties').get('keyVaultReferenceIdentity')
     except Exception as e:
@@ -299,7 +306,7 @@ def get_auth_if_no_valid_key_vault_connection_for_webapp(source_id, key_vault_co
         except Exception:  # pylint: disable=broad-except
             try:
                 identity = run_cli_cmd(
-                    'az identity show --ids {} -o json'.format(reference_identity))
+                    'az identity show --ids "{}" -o json'.format(reference_identity))
                 client_id = identity.get('clientId')
             except Exception:  # pylint: disable=broad-except
                 pass
@@ -341,7 +348,7 @@ def create_app_config_connection_if_not_exist(cmd, client, source_id, app_config
     logger.warning('looking for valid app configuration connections')
     for connection in client.list(resource_uri=source_id):
         connection = todict(connection)
-        if connection.get('targetService', dict()).get('id') == app_config_id:
+        if connection.get('targetService', {}).get('id') == app_config_id:
             logger.warning('Valid app configuration connection found.')
             return
 
@@ -378,15 +385,6 @@ def create_app_config_connection_if_not_exist(cmd, client, source_id, app_config
                          parameters=parameters)
 
 
-def is_packaged_installed(package_name):
-    import pkg_resources
-    installed_packages = pkg_resources.working_set
-    # pylint: disable=not-an-iterable
-    pkg_installed = any((package_name) in d.key.lower()
-                        for d in installed_packages)
-    return pkg_installed
-
-
 def get_object_id_of_current_user():
     signed_in_user_info = run_cli_cmd('az account show -o json')
     if not isinstance(signed_in_user_info, dict):
@@ -405,7 +403,7 @@ def get_object_id_of_current_user():
             return user_object_id
         if user_type == 'servicePrincipal':
             user_info = run_cli_cmd(
-                f'az ad sp show --id {signed_in_user.get("name")} -o json')
+                f'az ad sp show --id "{signed_in_user.get("name")}" -o json')
             user_object_id = user_info.get('id')
             return user_object_id
     except CLIInternalError as e:
@@ -417,7 +415,8 @@ def get_object_id_of_current_user():
 
 def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
                              user_identity_auth_info, system_identity_auth_info,
-                             service_principal_auth_info_secret, new_addon, auth_action=None, config_action=None):
+                             service_principal_auth_info_secret, new_addon,
+                             auth_action=None, config_action=None, target_type=None):
     all_auth_info = []
     if secret_auth_info is not None:
         all_auth_info.append(secret_auth_info)
@@ -430,7 +429,8 @@ def get_cloud_conn_auth_info(secret_auth_info, secret_auth_info_auto,
     if service_principal_auth_info_secret is not None:
         all_auth_info.append(service_principal_auth_info_secret)
     if len(all_auth_info) == 0:
-        if auth_action == 'optOutAllAuth' and config_action == 'optOut':
+        if (auth_action == 'optOutAllAuth' and config_action == 'optOut') \
+           or target_type == RESOURCE.ContainerApp:
             return None
         raise ValidationError('At least one auth info is needed')
     if not new_addon and len(all_auth_info) != 1:
@@ -537,6 +537,8 @@ Learn more at https://spring.io/projects/spring-cloud-azure#overview"
 # LinkerResource Model is converted into dict in update flow,
 # which conflicts with the default behavior of creation wrt the key name format.
 def get_auth_type_for_update(authInfo):
+    if authInfo is None:
+        return None
     if 'auth_type' in authInfo:
         return authInfo['auth_type']
     return authInfo['authType']
@@ -563,10 +565,49 @@ def get_aks_resource_name(linker):
             not (linker["targetService"]["resourceProperties"] is not None and
                  linker["targetService"]["resourceProperties"].get("connectAsKubernetesCsiDriver")):
         service_account_name = f'sc-account-{linker["authInfo"].get("clientId")}'
-        return [secret_name, service_account_name]
-    return [secret_name]
+        return {'secret': secret_name, 'serviceAccount': service_account_name}
+    return {'secret': secret_name}
 
 
 def get_aks_resource_secret_name(connection_name):
     valid_name = re.sub(r'[^a-zA-Z0-9]', '', connection_name, flags=re.IGNORECASE)
     return f'sc-{valid_name}-secret'
+
+
+def compare_properties_changed(new_props, existing_props):
+    """
+    Deep comparison function that checks if there are meaningful differences
+    between new properties and existing properties, ignoring None values.
+    Returns True if there are differences that require an update.
+    """
+    def has_meaningful_changes(new_value, existing_value):
+        if new_value is None or new_value == "":
+            return False
+
+        if isinstance(new_value, dict) and isinstance(existing_value, dict):
+            for key, value in new_value.items():
+                if key == "mysql-identity-id" or key == 'user_object_id':
+                    continue
+                existing_props_key = key
+                if '_' in key:
+                    existing_props_key = to_camel_case(key)
+                existing_nested = existing_value.get(existing_props_key) if existing_value else None
+                if has_meaningful_changes(value, existing_nested):
+                    return True
+            return False
+        if isinstance(new_value, dict) and existing_value is None:
+            for value in new_value.values():
+                if value is not None and value != "":
+                    return True
+            return False
+
+        return new_value != existing_value
+
+    return has_meaningful_changes(new_props, existing_props)
+
+
+def to_camel_case(snake_str):
+    if not snake_str or '_' not in snake_str:
+        return snake_str
+    components = snake_str.split('_')
+    return components[0] + ''.join(word.capitalize() for word in components[1:])

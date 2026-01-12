@@ -38,7 +38,7 @@ helps['backup container re-register'] = """
 type: command
 short-summary: Reset the registration details for a given container.
 examples:
-  - name: Reset the registration details for a given container. To be used only in error scenarios as specified here (https://docs.microsoft.com/azure/backup/backup-sql-server-azure-troubleshoot#re-registration-failures). Understand the failure symptoms and causes before attempting re-registration.
+  - name: Reset the registration details for a given container. To be used only in error scenarios as specified here (https://learn.microsoft.com/azure/backup/backup-sql-server-azure-troubleshoot#re-registration-failures). Understand the failure symptoms and causes before attempting re-registration.
     text: az backup container re-register --resource-group MyResourceGroup --vault-name MyVault --container-name MyContainer --workload-type MSSQL --backup-management-type AzureWorkload --yes
 """
 
@@ -583,6 +583,43 @@ examples:
   - name: Create/Update resource guard mapping of the Recovery Services vault.
     text: az backup vault resource-guard-mapping update --resource-group MyResourceGroup --name MyVault --resource-guard-id MyResourceGuardId
 """
+
+helps['backup protection'] = """
+type: group
+short-summary: Manage protection of items in a Recovery Services vault.
+"""
+
+helps['backup protection reconfigure'] = """
+type: command
+short-summary: Reconfigures backup protection from an old vault to a new vault.
+examples:
+  - name: Reconfigure VM backup from one vault to another
+    text: |
+        az backup protection reconfigure \\
+            --vault-name OldVault \\
+            --resource-group OldVaultRG \\
+            --container-name myVM \\
+            --item-name myVM \\
+            --backup-management-type AzureIaasVM \\
+            --new-vault-name NewVault \\
+            --new-vault-resource-group NewVaultRG \\
+            --new-policy-name DailyPolicy \\
+            --retain-as-per-policy
+  - name: Reconfigure VM backup with cross-tenant MUA scenario
+    text: |
+        az backup protection reconfigure \\
+            --vault-name OldVault \\
+            --resource-group OldVaultRG \\
+            --container-name myVM \\
+            --item-name myVM \\
+            --backup-management-type AzureIaasVM \\
+            --new-vault-name NewVault \\
+            --new-vault-resource-group NewVaultRG \\
+            --new-policy-name DailyPolicy \\
+            --retain-as-per-policy \\
+            --tenant-id 12345678-1234-1234-1234-123456789012
+"""
+
 helps['backup vault resource-guard-mapping show'] = """
 type: command
 short-summary: Get resource guard mapping of the Recovery Services vault.
@@ -596,4 +633,43 @@ short-summary: Delete resource guard mapping of the Recovery Services vault.
 examples:
   - name: Delete resource guard mapping of the Recovery Services vault.
     text: az backup vault resource-guard-mapping delete --resource-group MyResourceGroup --name MyVault
+"""
+
+helps['backup deleted-vault'] = """
+type: group
+short-summary: Manage soft-deleted Recovery Services vaults.
+"""
+
+helps['backup deleted-vault list'] = """
+type: command
+short-summary: List soft-deleted Recovery Services vaults.
+examples:
+  - name: List soft-deleted vaults in a specific location under the active subscription.
+    text: az backup deleted-vault list --location eastus
+"""
+
+helps['backup deleted-vault get'] = """
+type: command
+short-summary: Get details of a soft-deleted Recovery Services vault.
+examples:
+  - name: Get details of a soft-deleted vault by name and location.
+    text: az backup deleted-vault get --location eastus --name deletedVaultName
+"""
+
+helps['backup deleted-vault undelete'] = """
+type: command
+short-summary: Restore a soft-deleted Recovery Services vault.
+examples:
+  - name: Restore a soft-deleted vault by name and location.
+    text: az backup deleted-vault undelete --name MyVault --location eastus
+  - name: Restore a soft-deleted vault using its ARM ID.
+    text: az backup deleted-vault undelete --ids /subscriptions/{subscription-id}/locations/{location}/deletedVaults/{deleted-vault-name}
+"""
+
+helps['backup deleted-vault list-containers'] = """
+type: command
+short-summary: List backup containers in a soft-deleted vault.
+examples:
+  - name: List backup containers in a soft-deleted vault.
+    text: az backup deleted-vault list-containers --name MyVault
 """

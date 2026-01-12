@@ -4,16 +4,22 @@
 # --------------------------------------------------------------------------------------------
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer
+from .recording_processors import KeyReplacer
 import unittest
 
 
 class AzureSearchQueryKeysTests(ScenarioTest):
-
+    def __init__(self, method_name):
+        super(AzureSearchQueryKeysTests, self).__init__(
+            method_name, recording_processors=[KeyReplacer()]
+        )
+    
     # https://vcrpy.readthedocs.io/en/latest/configuration.html#request-matching
     def setUp(self):
         self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
-        super(AzureSearchQueryKeysTests, self).setUp()
+        super().setUp()
 
+    @unittest.skip('This test is skipped because it contain secret keys.')
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_query_key_create_delete_list(self, resource_group):
         self.kwargs.update({

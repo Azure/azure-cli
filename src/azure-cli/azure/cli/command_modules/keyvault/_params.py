@@ -29,7 +29,6 @@ from azure.cli.command_modules.keyvault._validators import (
     validate_vault_name_and_hsm_name, set_vault_base_url, validate_keyvault_resource_id,
     process_hsm_name, KeyEncryptionDataType, process_key_release_policy, process_certificate_policy,
     process_certificate_import)
-from azure.cli.command_modules.keyvault._client_factory import is_azure_stack_profile
 
 # CUSTOM CHOICE LISTS
 
@@ -105,7 +104,7 @@ def load_arguments(self, _):
     # region vault (management)
     with self.argument_context('keyvault') as c:
         c.argument('resource_group_name', resource_group_name_type, id_part=None, required=False,
-                   help='Proceed only if Key Vault belongs to the specified resource group.',
+                   help='Name of resource group.',
                    validator=validate_resource_group_name)
         c.argument('vault_name', vault_name_type, options_list=['--name', '-n'])
         c.argument('object_id', help='a GUID that identifies the principal that will receive permissions')
@@ -126,7 +125,7 @@ def load_arguments(self, _):
                         'Role Based Access Control (RBAC) for authorization of data actions, and the access policies '
                         'specified in vault properties will be ignored. When false, the key vault will use the access '
                         'policies specified in vault properties, and any policy stored on Azure Resource Manager will '
-                        'be ignored. If null or not specified, the vault is created with the default value of false. '
+                        'be ignored. If null or not specified, the vault is created with the default value of true. '
                         'Note that management actions are always authorized with RBAC.')
         c.argument('enable_purge_protection', arg_type=get_three_state_flag(),
                    help='Property specifying whether protection against purge is enabled for this vault/managed HSM '
@@ -138,7 +137,7 @@ def load_arguments(self, _):
                    help='Control permission for data plane traffic coming from public networks '
                         'while private endpoint is enabled')
 
-    with self.argument_context('keyvault', arg_group='Network Rule', min_api='2018-02-14') as c:
+    with self.argument_context('keyvault', arg_group='Network Rule') as c:
         c.argument('bypass', arg_type=get_enum_type(NetworkRuleBypassOptions),
                    help='Bypass traffic for space-separated uses.')
         c.argument('default_action', arg_type=get_enum_type(NetworkRuleAction),
@@ -160,7 +159,7 @@ def load_arguments(self, _):
                    help='[HSM Only] Administrator role for data plane operations for Managed HSM. '
                         'It accepts a space separated list of OIDs that will be assigned.')
         c.argument('sku', help='Required. SKU details. Allowed values for Vault: premium, standard. Default: standard.'
-                               ' Allowed values for HSM: Standard_B1, Custom_B32. Default: Standard_B1')
+                               ' Allowed values for HSM: Standard_B1, Custom_B32, Custom_B6, Custom_C42, Custom_C10. Default: Standard_B1')
         c.argument('no_self_perms', arg_type=get_three_state_flag(),
                    help='[Vault Only] Don\'t add permissions for the current user/service principal in the new vault.')
         c.argument('location', validator=get_default_location_from_resource_group)
@@ -168,7 +167,7 @@ def load_arguments(self, _):
                    help='Soft delete data retention days. It accepts >=7 and <=90. '
                         'Defaults to 90 for keyvault creation. Required for MHSM creation')
         c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*',
-                   min_api='2023-07-01', resource_type=ResourceType.MGMT_KEYVAULT, operation_group="managed_hsms",
+                   resource_type=ResourceType.MGMT_KEYVAULT, operation_group="managed_hsms",
                    help="[HSM Only] Enable user-assigned managed identities for managed HSM. "
                         "Accept space-separated list of identity resource IDs.")
 
@@ -190,8 +189,7 @@ def load_arguments(self, _):
         c.argument('secondary_locations', nargs='+',
                    help='--secondary-locations extends/contracts an HSM pool to listed regions. The primary location '
                         'where the resource was originally created CANNOT be removed.')
-        c.argument('user_identities', options_list=['--mi-user-assigned'],
-                   nargs='*', min_api='2023-07-01',
+        c.argument('user_identities', options_list=['--mi-user-assigned'], nargs='*',
                    help="Enable user-assigned managed identities for managed HSM. "
                         "Accept space-separated list of identity resource IDs.")
 
@@ -245,18 +243,19 @@ def load_arguments(self, _):
         c.argument('storage_permissions', arg_type=get_enum_type(StoragePermissions), metavar='PERM', nargs='*',
                    help='Space-separated list of storage permissions to assign.')
 
-    with self.argument_context('keyvault network-rule', min_api='2018-02-14') as c:
+    with self.argument_context('keyvault network-rule') as c:
+        c.argument('hsm_name', mgmt_plane_hsm_name_type)
         c.argument('ip_address', help='IPv4 address or CIDR range.')
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
 
     for item in ['add', 'remove']:
-        with self.argument_context('keyvault network-rule {}'.format(item), min_api='2018-02-14') as c:
+        with self.argument_context('keyvault network-rule {}'.format(item)) as c:
             c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 '
                                                      '[ip2]...', validator=validate_ip_address)
 
     for item in ['approve', 'reject', 'delete', 'show', 'wait']:
-        with self.argument_context('keyvault private-endpoint-connection {}'.format(item), min_api='2018-02-14') as c:
+        with self.argument_context('keyvault private-endpoint-connection {}'.format(item)) as c:
             c.extra('connection_id', options_list=['--id'], required=False,
                     help='The ID of the private endpoint connection associated with the Key Vault/HSM. '
                          'If specified --vault-name/--hsm-name and --name/-n, this should be omitted.')
@@ -266,16 +265,14 @@ def load_arguments(self, _):
                             'Required if --id is not specified')
             c.argument('vault_name', vault_name_type, required=False,
                        help='Name of the Key Vault. Required if --id is not specified')
-            c.argument('hsm_name', mgmt_plane_hsm_name_type, min_api='2021-04-01-preview',
+            c.argument('hsm_name', mgmt_plane_hsm_name_type,
                        help='Name of the HSM. Required if --id is not specified.'
                             '(--hsm-name and --vault-name are mutually exclusive, please specify just one of them)')
 
     with self.argument_context('keyvault private-endpoint-connection list') as c:
         c.argument("hsm_name", hsm_name_type)
 
-    with self.argument_context('keyvault private-link-resource', min_api='2018-02-14', max_api='2020-04-01-preview') as c:
-        c.argument('vault_name', vault_name_type, required=True)
-    with self.argument_context('keyvault private-link-resource', min_api='2021-04-01-preview') as c:
+    with self.argument_context('keyvault private-link-resource') as c:
         c.argument('vault_name', vault_name_type)
         c.argument('hsm_name', mgmt_plane_hsm_name_type)
     # endregion
@@ -288,7 +285,7 @@ def load_arguments(self, _):
     # keys track2
     for scope in ['create', 'import', 'set-attributes', 'show', 'show-deleted', 'delete', 'list', 'list-deleted',
                   'list-versions', 'encrypt', 'decrypt', 'sign', 'verify', 'recover', 'purge', 'download',
-                  'backup', 'restore', 'rotate', 'rotation-policy show', 'rotation-policy update']:
+                  'backup', 'restore', 'rotate', 'get-attestation', 'rotation-policy show', 'rotation-policy update']:
         with self.argument_context('keyvault key {}'.format(scope), arg_group='Id') as c:
             c.argument('name', options_list=['--name', '-n'], id_part='child_name_1',
                        required=False, completer=get_keyvault_name_completion_list('key'),
@@ -314,6 +311,13 @@ def load_arguments(self, _):
             c.extra('identifier', options_list=['--id'], arg_group='Id',
                     help='The recovery id of the key. If specified all other \'Id\' arguments should be omitted.',
                     validator=validate_keyvault_resource_id('key'))
+
+    with self.argument_context('keyvault key get-attestation') as c:
+        c.argument('file_path', options_list=['--file', '-f'], type=file_type, completer=FilesCompleter(),
+                   help="File to receive the key's attestation if you want to save it.")
+        c.extra('hsm_name', data_plane_hsm_name_type, required=False, arg_group='Id',
+                help='Name of the HSM. Required if --id is not specified.')
+        c.ignore('vault_base_url')
 
     with self.argument_context('keyvault key list') as c:
         c.extra('include_managed', arg_type=get_three_state_flag(), default=False,
@@ -344,6 +348,8 @@ def load_arguments(self, _):
                             'Policy definition as JSON, or a path to a file containing JSON policy definition.')
             c.extra('default_cvm_policy', action='store_true',
                     help='Use default policy under which the key can be exported for CVM disk encryption.')
+            c.extra('default_data_disk_policy', action='store_true', options_list=['--default-data-disk-policy', '--default-dd-policy'],
+                    help='Use default policy under which the key can be exported for data disk encryption.')
             c.extra('immutable', arg_type=get_three_state_flag(), is_preview=True,
                     help='Mark a release policy as immutable. '
                          'An immutable release policy cannot be changed or updated after being marked immutable. '
@@ -351,9 +357,9 @@ def load_arguments(self, _):
 
     with self.argument_context('keyvault key create') as c:
         c.argument('kty', arg_type=get_enum_type(JsonWebKeyType), validator=validate_key_type,
-                   help='The type of key to create. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeytype')
+                   help='The type of key to create. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeytype')
         c.argument('curve', arg_type=get_enum_type(KeyCurveName),
-                   help='Elliptic curve name. For valid values, see: https://docs.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
+                   help='Elliptic curve name. For valid values, see: https://learn.microsoft.com/rest/api/keyvault/keys/create-key/create-key#jsonwebkeycurvename')
 
     with self.argument_context('keyvault key import') as c:
         c.argument('kty', arg_type=get_enum_type(CLIKeyTypeForBYOKImport), validator=validate_key_import_type,
@@ -422,7 +428,7 @@ def load_arguments(self, _):
         with self.argument_context('keyvault key {}'.format(scope)) as c:
             c.argument('algorithm', options_list=['--algorithm', '-a'], arg_type=get_enum_type(SignatureAlgorithm),
                        help='Algorithm identifier')
-            c.argument('digest', help='The value to sign')
+            c.argument('digest', help='The value to sign (base64 encoded)')
             c.argument('signature', help='signature to verify')
 
     with self.argument_context('keyvault key random') as c:
@@ -552,6 +558,7 @@ def load_arguments(self, _):
         c.argument('encoding', arg_type=get_enum_type(secret_encoding_values), options_list=['--encoding', '-e'],
                    help="Encoding of the secret. By default, will look for the 'file-encoding' tag on the secret. "
                         "Otherwise will assume 'utf-8'.", default=None)
+        c.argument('overwrite', action='store_true', options_list=['--overwrite'], help="Overwrite the file if it exists.")
 
     for scope in ['download', 'backup', 'restore']:
         with self.argument_context('keyvault secret {}'.format(scope)) as c:
@@ -564,10 +571,10 @@ def load_arguments(self, _):
     # endregion
 
     # region keyvault security-domain
-    for scope in ['init-recovery', 'download', 'upload']:
+    for scope in ['init-recovery', 'download', 'upload', 'wait']:
         with self.argument_context('keyvault security-domain {}'.format(scope), arg_group='HSM Id') as c:
-            c.argument('hsm_name', hsm_url_type, required=False,
-                       help='Name of the HSM. Can be omitted if --id is specified.')
+            c.extra('hsm_name', hsm_url_type, required=False,
+                    help='Name of the HSM. Can be omitted if --id is specified.')
             c.extra('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Full URI of the HSM.')
             c.ignore('vault_base_url')
 
@@ -605,14 +612,8 @@ def load_arguments(self, _):
                                                'for recovery.')
 
     with self.argument_context('keyvault security-domain wait') as c:
-        c.argument('hsm_name', hsm_url_type, help='Name of the HSM. Can be omitted if --id is specified.',
-                   required=False)
-        c.argument('identifier', options_list=['--id'], validator=validate_vault_or_hsm, help='Full URI of the HSM.')
-        c.argument('resource_group_name', options_list=['--resource-group', '-g'],
-                   help='Proceed only if HSM belongs to the specified resource group.')
         c.argument('target_operation', arg_type=get_enum_type(CLISecurityDomainOperation),
                    help='Target operation that needs waiting.')
-        c.ignore('vault_base_url')
     # endregion
 
     # region keyvault backup/restore
@@ -683,11 +684,10 @@ def load_arguments(self, _):
                 type=get_json_object, validator=process_certificate_policy)
         c.extra('tags', tags_type)
 
-    if not is_azure_stack_profile(self):
-        for cmd in ['list', 'list-deleted']:
-            with self.argument_context('keyvault certificate {}'.format(cmd)) as c:
-                c.extra('include_pending', arg_type=get_three_state_flag(),
-                        help='Specifies whether to include certificates which are not completely provisioned.')
+    for cmd in ['list', 'list-deleted']:
+        with self.argument_context('keyvault certificate {}'.format(cmd)) as c:
+            c.extra('include_pending', arg_type=get_three_state_flag(),
+                    help='Specifies whether to include certificates which are not completely provisioned.')
 
     with self.argument_context('keyvault certificate import') as c:
         c.argument('certificate_name', options_list=['--name', '-n'], required=True, arg_group='Id',

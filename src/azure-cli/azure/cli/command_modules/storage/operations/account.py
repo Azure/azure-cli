@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+# pylint: disable=protected-access
+
 """Custom operations for storage account commands"""
 
 import os
@@ -10,6 +12,8 @@ from ipaddress import ip_network
 from azure.cli.command_modules.storage._client_factory import storage_client_factory, cf_sa_for_keys
 from azure.cli.core.util import get_file_json, shell_safe_json_parse, find_child_item, user_confirmation
 from azure.cli.core.profiles import ResourceType, get_sdk
+from ..aaz.latest.storage.account.migration._start import Start as _AccountMigrationStart
+from ..aaz.latest.storage.account import FileServiceUsage as _FileServiceUsage
 from knack.log import get_logger
 from knack.util import CLIError
 
@@ -52,7 +56,7 @@ def generate_sas(cmd, client, services, resource_types, permission, expiry, star
                          start=start, ip=ip, protocol=protocol, **kwargs)
 
 
-# pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument
+# pylint: disable=too-many-locals, too-many-statements, too-many-branches, unused-argument, line-too-long
 def create_storage_account(cmd, resource_group_name, account_name, sku=None, location=None, kind=None,
                            tags=None, custom_domain=None, encryption_services=None, encryption_key_source=None,
                            encryption_key_name=None, encryption_key_vault=None, encryption_key_version=None,
@@ -69,12 +73,13 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            min_tls_version=None, allow_shared_key_access=None, edge_zone=None,
                            identity_type=None, user_identity_id=None,
                            key_vault_user_identity_id=None, federated_identity_client_id=None,
-                           sas_expiration_period=None, key_expiration_period_in_days=None,
+                           sas_expiration_action=None, sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            enable_nfs_v3=None, subnet=None, vnet_name=None, action='Allow', enable_alw=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
-                           publish_ipv6_endpoint=None):
+                           enable_smb_oauth=None, zones=None, zone_placement_policy=None,
+                           enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -195,6 +200,14 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                 directory_service_options='None')
         params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
 
+    if enable_smb_oauth is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None')
+        params.azure_files_identity_based_authentication.smb_o_auth_settings = {
+            "is_smb_o_auth_enabled": enable_smb_oauth
+        }
+
     if enable_large_file_share:
         LargeFileSharesState = cmd.get_models('LargeFileSharesState')
         params.large_file_shares_state = LargeFileSharesState("Enabled")
@@ -204,7 +217,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         if bypass and not default_action:
             raise CLIError('incorrect usage: --default-action ACTION [--bypass SERVICE ...]')
         if subnet:
-            from msrestazure.tools import is_valid_resource_id
+            from azure.mgmt.core.tools import is_valid_resource_id
             if not is_valid_resource_id(subnet):
                 raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
             VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
@@ -262,9 +275,16 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         KeyPolicy = cmd.get_models('KeyPolicy')
         params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
 
-    if sas_expiration_period:
+    if sas_expiration_period is not None or sas_expiration_action is not None:
         SasPolicy = cmd.get_models('SasPolicy')
-        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
+        if sas_expiration_period is None and sas_expiration_action is not None:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError('--sas-expiration-action can only be specified together with'
+                                            ' --sas-expiration-period')
+        if sas_expiration_action is None:
+            sas_expiration_action = 'Log'
+        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period,
+                                      expiration_action=sas_expiration_action)
 
     if allow_cross_tenant_replication is not None:
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
@@ -293,6 +313,17 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
 
     if dns_endpoint_type is not None:
         params.dns_endpoint_type = dns_endpoint_type
+
+    if zones is not None:
+        params.zones = zones
+
+    if zone_placement_policy is not None:
+        Placement = cmd.get_models('Placement')
+        params.placement = Placement(zone_placement_policy=zone_placement_policy)
+
+    if enable_blob_geo_priority_replication is not None:
+        GeoPriorityReplicationStatus = cmd.get_models('GeoPriorityReplicationStatus')
+        params.geo_priority_replication_status = GeoPriorityReplicationStatus(is_blob_enabled=enable_blob_geo_priority_replication)
 
     if publish_ipv6_endpoint is not None:
         DualStackEndpointPreference = cmd.get_models('DualStackEndpointPreference')
@@ -372,7 +403,7 @@ def show_storage_account_usage_no_location(cmd):
 
 def get_storage_account_properties(cli_ctx, account_id):
     scf = storage_client_factory(cli_ctx)
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     result = parse_resource_id(account_id)
     return scf.storage_accounts.get_properties(result['resource_group'], result['name'])
 
@@ -390,11 +421,12 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            allow_blob_public_access=None, min_tls_version=None, allow_shared_key_access=None,
                            identity_type=None, user_identity_id=None,
                            key_vault_user_identity_id=None, federated_identity_client_id=None,
-                           sas_expiration_period=None, key_expiration_period_in_days=None,
+                           sas_expiration_action=None, sas_expiration_period=None, key_expiration_period_in_days=None,
                            allow_cross_tenant_replication=None, default_share_permission=None,
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
-                           yes=None, publish_ipv6_endpoint=None):
+                           yes=None, enable_smb_oauth=None, zones=None, zone_placement_policy=None,
+                           enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet', 'Kind')
@@ -606,6 +638,15 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                 else instance.azure_files_identity_based_authentication
         params.azure_files_identity_based_authentication.default_share_permission = default_share_permission
 
+    if enable_smb_oauth is not None:
+        if params.azure_files_identity_based_authentication is None:
+            params.azure_files_identity_based_authentication = AzureFilesIdentityBasedAuthentication(
+                directory_service_options='None') if instance.azure_files_identity_based_authentication is None \
+                else instance.azure_files_identity_based_authentication
+        params.azure_files_identity_based_authentication.smb_o_auth_settings = {
+            "is_smb_o_auth_enabled": enable_smb_oauth
+        }
+
     if assign_identity:
         params.identity = Identity(type='SystemAssigned')
     if enable_large_file_share:
@@ -649,9 +690,19 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         KeyPolicy = cmd.get_models('KeyPolicy')
         params.key_policy = KeyPolicy(key_expiration_period_in_days=key_expiration_period_in_days)
 
-    if sas_expiration_period:
+    if sas_expiration_period is not None or sas_expiration_action is not None:
         SasPolicy = cmd.get_models('SasPolicy')
-        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period)
+        if sas_expiration_period is None and sas_expiration_action is not None:
+            from azure.cli.core.azclierror import InvalidArgumentValueError
+            raise InvalidArgumentValueError('--sas-expiration-action can only be specified together '
+                                            'with --sas-expiration-period')
+        if sas_expiration_action is None:
+            sas_expiration_action = 'Log'
+            if instance.sas_policy is not None and instance.sas_policy.expiration_action is not None:
+                sas_expiration_action = instance.sas_policy.expiration_action
+
+        params.sas_policy = SasPolicy(sas_expiration_period=sas_expiration_period,
+                                      expiration_action=sas_expiration_action)
 
     if allow_cross_tenant_replication is not None:
         params.allow_cross_tenant_replication = allow_cross_tenant_replication
@@ -678,6 +729,17 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
     if enable_local_user is not None:
         params.is_local_user_enabled = enable_local_user
 
+    if zones is not None:
+        params.zones = zones
+
+    if zone_placement_policy is not None:
+        Placement = cmd.get_models('Placement')
+        params.placement = Placement(zone_placement_policy=zone_placement_policy)
+
+    if enable_blob_geo_priority_replication is not None:
+        GeoPriorityReplicationStatus = cmd.get_models('GeoPriorityReplicationStatus')
+        params.geo_priority_replication_status = GeoPriorityReplicationStatus(is_blob_enabled=enable_blob_geo_priority_replication)
+
     if publish_ipv6_endpoint is not None:
         DualStackEndpointPreference = cmd.get_models('DualStackEndpointPreference')
         params.dual_stack_endpoint_preference = DualStackEndpointPreference(
@@ -703,7 +765,7 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
         logger.warning('No subnet or ip address supplied.')
 
     if subnet:
-        from msrestazure.tools import is_valid_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
             raise CLIError("Expected fully qualified resource ID: got '{}'".format(subnet))
         VirtualNetworkRule = cmd.get_models('VirtualNetworkRule')
@@ -1005,14 +1067,18 @@ def list_encryption_scope(client, resource_group_name, account_name,
 # pylint: disable=no-member
 def create_or_policy(cmd, client, account_name, resource_group_name=None, properties=None, source_account=None,
                      destination_account=None, policy_id="default", rule_id=None, source_container=None,
-                     destination_container=None, min_creation_time=None, prefix_match=None):
+                     destination_container=None, min_creation_time=None, prefix_match=None, enable_metrics=None,
+                     priority_replication=None):
     from azure.core.exceptions import HttpResponseError
     ObjectReplicationPolicy = cmd.get_models('ObjectReplicationPolicy')
 
     if properties is None:
         rules = []
-        ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter = \
-            cmd.get_models('ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter')
+        (ObjectReplicationPolicyRule, ObjectReplicationPolicyFilter, ObjectReplicationPolicyPropertiesMetrics,
+         ObjectReplicationPolicyPropertiesPriorityReplication) = \
+            cmd.get_models('ObjectReplicationPolicyRule', 'ObjectReplicationPolicyFilter',
+                           'ObjectReplicationPolicyPropertiesMetrics',
+                           'ObjectReplicationPolicyPropertiesPriorityReplication')
         if source_container and destination_container:
             rule = ObjectReplicationPolicyRule(
                 rule_id=rule_id,
@@ -1023,7 +1089,10 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
             rules.append(rule)
         or_policy = ObjectReplicationPolicy(source_account=source_account,
                                             destination_account=destination_account,
-                                            rules=rules)
+                                            rules=rules,
+                                            metrics=ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics),
+                                            priority_replication=ObjectReplicationPolicyPropertiesPriorityReplication(
+                                                enabled=priority_replication))
     else:
         or_policy = properties
     try:
@@ -1031,15 +1100,17 @@ def create_or_policy(cmd, client, account_name, resource_group_name=None, proper
                                        object_replication_policy_id=policy_id, properties=or_policy)
     except HttpResponseError as ex:
         if ex.error.code == 'InvalidRequestPropertyValue' and policy_id == 'default':
-            from msrestazure.tools import parse_resource_id
+            from azure.mgmt.core.tools import parse_resource_id
             if account_name == parse_resource_id(or_policy.source_account)['name']:
                 raise CLIError('ValueError: Please specify --policy-id with auto-generated policy id value on '
                                'destination account.')
         raise ex
 
 
-def update_or_policy(client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
-                     properties=None, source_account=None, destination_account=None, ):
+# pylint: disable=line-too-long
+def update_or_policy(cmd, client, parameters, resource_group_name, account_name, object_replication_policy_id=None,
+                     properties=None, source_account=None, destination_account=None, enable_metrics=None,
+                     priority_replication=None):
 
     if source_account is not None:
         parameters.source_account = source_account
@@ -1050,6 +1121,15 @@ def update_or_policy(client, parameters, resource_group_name, account_name, obje
         parameters = properties
         if "policyId" in properties.keys() and properties["policyId"]:
             object_replication_policy_id = properties["policyId"]
+
+    if enable_metrics is not None:
+        ObjectReplicationPolicyPropertiesMetrics = cmd.get_models('ObjectReplicationPolicyPropertiesMetrics')
+        parameters.metrics = ObjectReplicationPolicyPropertiesMetrics(enabled=enable_metrics)
+
+    if priority_replication is not None:
+        ObjectReplicationPolicyPropertiesPriorityReplication = (
+            cmd.get_models('ObjectReplicationPolicyPropertiesPriorityReplication'))
+        parameters.priority_replication = ObjectReplicationPolicyPropertiesPriorityReplication(enabled=priority_replication)
 
     return client.create_or_update(resource_group_name=resource_group_name, account_name=account_name,
                                    object_replication_policy_id=object_replication_policy_id, properties=parameters)
@@ -1209,7 +1289,8 @@ def begin_failover(client, resource_group_name, account_name, failover_type=None
             3. Once you re-enable GRS/GZRS for your storage account, Microsoft will replicate data to your new secondary region. Replication time is dependent on the amount of data to replicate. Please note that there are bandwidth charges for the bootstrap. Please refer to doc: https://azure.microsoft.com/pricing/details/bandwidth/
         """
         user_confirmation(message, yes)
-    return client.begin_failover(resource_group_name=resource_group_name, account_name=account_name, failover_type=failover_type, **kwargs)
+    return client.begin_failover(resource_group_name=resource_group_name, account_name=account_name,
+                                 failover_type=failover_type, **kwargs)
 
 
 def list_blob_cors_rules(client, resource_group_name, account_name):
@@ -1247,3 +1328,41 @@ def clear_blob_cors_rules(cmd, client, resource_group_name, account_name):
                                   account_name=account_name,
                                   parameters=blob_service_properties)
     return []
+
+
+class AccountMigrationStart(_AccountMigrationStart):
+    def pre_operations(self):
+        logger.warning('After your request to convert the account’s redundancy configuration is validated, the '
+                       'conversion will typically complete in a few days, but can take a few weeks depending on '
+                       'current resource demands in the region, account size, and other factors. The conversion can’t '
+                       'be stopped after being initiated, and for accounts with geo redundancy a failover can’t be '
+                       'initiated while conversion is in progress. The data within the storage account will continue '
+                       'to be accessible with no loss of durability or availability.')
+
+
+def _format_storage_account_id(args_schema):
+    from azure.cli.core.aaz import AAZResourceIdArgFormat
+    args_schema.account_name._fmt = AAZResourceIdArgFormat(
+        template="/subscriptions/{subscription}/resourceGroups/{resource_group}/providers/Microsoft.Storage/"
+                 "storageAccounts/{}"
+    )
+    args_schema.resource_group._required = False
+
+
+class FileServiceUsage(_FileServiceUsage):
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        _format_storage_account_id(args_schema)
+        args_schema.file_services_name._registered = False
+        args_schema.file_services_name._required = False
+        args_schema.file_service_usages_name._registered = False
+        args_schema.file_service_usages_name._required = False
+        return args_schema
+
+    def pre_operations(self):
+        from .._validators import parse_account_name_aaz
+        args = self.ctx.args
+        parse_account_name_aaz(self, args)
+        args.file_services_name = 'default'
+        args.file_service_usages_name = 'default'

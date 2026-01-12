@@ -20,7 +20,7 @@ class Wait(AAZWaitCommand):
 
     _aaz_info = {
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2023-09-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworkgateways/{}", "2025-01-01"],
         ]
     }
 
@@ -116,7 +116,7 @@ class Wait(AAZWaitCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-09-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -156,6 +156,7 @@ class Wait(AAZWaitCommand):
                 serialized_name="extendedLocation",
             )
             _schema_on_200.id = AAZStrType()
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType()
             _schema_on_200.name = AAZStrType(
                 flags={"read_only": True},
@@ -171,6 +172,33 @@ class Wait(AAZWaitCommand):
             extended_location = cls._schema_on_200.extended_location
             extended_location.name = AAZStrType()
             extended_location.type = AAZStrType()
+
+            identity = cls._schema_on_200.identity
+            identity.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
+            identity.tenant_id = AAZStrType(
+                serialized_name="tenantId",
+                flags={"read_only": True},
+            )
+            identity.type = AAZStrType()
+            identity.user_assigned_identities = AAZDictType(
+                serialized_name="userAssignedIdentities",
+            )
+
+            user_assigned_identities = cls._schema_on_200.identity.user_assigned_identities
+            user_assigned_identities.Element = AAZObjectType()
+
+            _element = cls._schema_on_200.identity.user_assigned_identities.Element
+            _element.client_id = AAZStrType(
+                serialized_name="clientId",
+                flags={"read_only": True},
+            )
+            _element.principal_id = AAZStrType(
+                serialized_name="principalId",
+                flags={"read_only": True},
+            )
 
             properties = cls._schema_on_200.properties
             properties.active_active = AAZBoolType(
@@ -207,6 +235,9 @@ class Wait(AAZWaitCommand):
             properties.enable_dns_forwarding = AAZBoolType(
                 serialized_name="enableDnsForwarding",
             )
+            properties.enable_high_bandwidth_vpn_gateway = AAZBoolType(
+                serialized_name="enableHighBandwidthVpnGateway",
+            )
             properties.enable_private_ip_address = AAZBoolType(
                 serialized_name="enablePrivateIpAddress",
             )
@@ -231,6 +262,9 @@ class Wait(AAZWaitCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+            properties.resiliency_model = AAZStrType(
+                serialized_name="resiliencyModel",
+            )
             properties.resource_guid = AAZStrType(
                 serialized_name="resourceGuid",
                 flags={"read_only": True},
@@ -238,6 +272,9 @@ class Wait(AAZWaitCommand):
             properties.sku = AAZObjectType()
             properties.v_net_extended_location_resource_id = AAZStrType(
                 serialized_name="vNetExtendedLocationResourceId",
+            )
+            properties.virtual_network_gateway_migration_status = AAZObjectType(
+                serialized_name="virtualNetworkGatewayMigrationStatus",
             )
             properties.virtual_network_gateway_policy_groups = AAZListType(
                 serialized_name="virtualNetworkGatewayPolicyGroups",
@@ -379,6 +416,13 @@ class Wait(AAZWaitCommand):
             sku.name = AAZStrType()
             sku.tier = AAZStrType()
 
+            virtual_network_gateway_migration_status = cls._schema_on_200.properties.virtual_network_gateway_migration_status
+            virtual_network_gateway_migration_status.error_message = AAZStrType(
+                serialized_name="errorMessage",
+            )
+            virtual_network_gateway_migration_status.phase = AAZStrType()
+            virtual_network_gateway_migration_status.state = AAZStrType()
+
             virtual_network_gateway_policy_groups = cls._schema_on_200.properties.virtual_network_gateway_policy_groups
             virtual_network_gateway_policy_groups.Element = AAZObjectType()
 
@@ -444,6 +488,7 @@ class Wait(AAZWaitCommand):
             )
             vpn_client_configuration.radius_server_secret = AAZStrType(
                 serialized_name="radiusServerSecret",
+                flags={"secret": True},
             )
             vpn_client_configuration.radius_servers = AAZListType(
                 serialized_name="radiusServers",
@@ -484,6 +529,7 @@ class Wait(AAZWaitCommand):
             )
             _element.radius_server_secret = AAZStrType(
                 serialized_name="radiusServerSecret",
+                flags={"secret": True},
             )
 
             vng_client_connection_configurations = cls._schema_on_200.properties.vpn_client_configuration.vng_client_connection_configurations
@@ -619,6 +665,7 @@ class _WaitHelper:
     def _build_schema_address_space_read(cls, _schema):
         if cls._schema_address_space_read is not None:
             _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
             return
 
         cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
@@ -627,11 +674,36 @@ class _WaitHelper:
         address_space_read.address_prefixes = AAZListType(
             serialized_name="addressPrefixes",
         )
+        address_space_read.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
 
         address_prefixes = _schema_address_space_read.address_prefixes
         address_prefixes.Element = AAZStrType()
 
+        ipam_pool_prefix_allocations = _schema_address_space_read.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+
+        _element = _schema_address_space_read.ipam_pool_prefix_allocations.Element
+        _element.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        _element.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        _element.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_address_space_read.ipam_pool_prefix_allocations.Element.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_address_space_read.ipam_pool_prefix_allocations.Element.pool
+        pool.id = AAZStrType()
+
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
 
     _schema_sub_resource_read = None
 

@@ -19,9 +19,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups", "2023-11-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/backupvaults/{}/backups", "2025-09-01"],
         ]
     }
 
@@ -47,7 +47,7 @@ class List(AAZCommand):
             help="The name of the NetApp account",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.backup_vault_name = AAZStrArg(
@@ -55,7 +55,7 @@ class List(AAZCommand):
             help="The name of the Backup Vault",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -140,7 +140,7 @@ class List(AAZCommand):
                     "$filter", self.ctx.args.filter,
                 ),
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -176,7 +176,9 @@ class List(AAZCommand):
             _schema_on_200.next_link = AAZStrType(
                 serialized_name="nextLink",
             )
-            _schema_on_200.value = AAZListType()
+            _schema_on_200.value = AAZListType(
+                flags={"required": True},
+            )
 
             value = cls._schema_on_200.value
             value.Element = AAZObjectType()
@@ -212,6 +214,11 @@ class List(AAZCommand):
                 serialized_name="backupType",
                 flags={"read_only": True},
             )
+            properties.completion_date = AAZStrType(
+                serialized_name="completionDate",
+                nullable=True,
+                flags={"read_only": True},
+            )
             properties.creation_date = AAZStrType(
                 serialized_name="creationDate",
                 flags={"read_only": True},
@@ -220,12 +227,21 @@ class List(AAZCommand):
                 serialized_name="failureReason",
                 flags={"read_only": True},
             )
+            properties.is_large_volume = AAZBoolType(
+                serialized_name="isLargeVolume",
+                flags={"read_only": True},
+            )
             properties.label = AAZStrType()
             properties.provisioning_state = AAZStrType(
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
             properties.size = AAZIntType(
+                flags={"read_only": True},
+            )
+            properties.snapshot_creation_date = AAZStrType(
+                serialized_name="snapshotCreationDate",
+                nullable=True,
                 flags={"read_only": True},
             )
             properties.snapshot_name = AAZStrType(

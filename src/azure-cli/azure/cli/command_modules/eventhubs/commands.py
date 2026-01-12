@@ -73,3 +73,7 @@ def load_command_table(self, _):
     with self.command_group('eventhubs namespace application-group policy', custom_command_type=eh_appgroup_custom) as g:
         g.custom_command('add', 'cli_add_appgroup_policy')
         g.custom_command('remove', 'cli_remove_appgroup_policy')
+# Replica Location Region
+    with self.command_group('eventhubs namespace replica', custom_command_type=eh_namespace_custom) as g:
+        g.custom_command('add', 'cli_add_location')
+        g.custom_command('remove', 'cli_remove_location')

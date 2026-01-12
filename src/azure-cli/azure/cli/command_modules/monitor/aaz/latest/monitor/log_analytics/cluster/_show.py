@@ -22,9 +22,9 @@ class Show(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-10-01",
+        "version": "2025-02-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2022-10-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.operationalinsights/clusters/{}", "2025-02-01"],
         ]
     }
 
@@ -120,7 +120,7 @@ class Show(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-10-01",
+                    "api-version", "2025-02-01",
                     required=True,
                 ),
             }
@@ -156,7 +156,7 @@ class Show(AAZCommand):
             _schema_on_200.id = AAZStrType(
                 flags={"read_only": True},
             )
-            _schema_on_200.identity = AAZObjectType()
+            _schema_on_200.identity = AAZIdentityObjectType()
             _schema_on_200.location = AAZStrType(
                 flags={"required": True},
             )
@@ -239,6 +239,7 @@ class Show(AAZCommand):
                 serialized_name="provisioningState",
                 flags={"read_only": True},
             )
+            properties.replication = AAZObjectType()
 
             associated_workspaces = cls._schema_on_200.properties.associated_workspaces
             associated_workspaces.Element = AAZObjectType()
@@ -283,6 +284,25 @@ class Show(AAZCommand):
             )
             key_vault_properties.key_version = AAZStrType(
                 serialized_name="keyVersion",
+            )
+
+            replication = cls._schema_on_200.properties.replication
+            replication.created_date = AAZStrType(
+                serialized_name="createdDate",
+                flags={"read_only": True},
+            )
+            replication.enabled = AAZBoolType()
+            replication.is_availability_zones_enabled = AAZBoolType(
+                serialized_name="isAvailabilityZonesEnabled",
+            )
+            replication.last_modified_date = AAZStrType(
+                serialized_name="lastModifiedDate",
+                flags={"read_only": True},
+            )
+            replication.location = AAZStrType()
+            replication.provisioning_state = AAZStrType(
+                serialized_name="provisioningState",
+                flags={"read_only": True},
             )
 
             sku = cls._schema_on_200.sku

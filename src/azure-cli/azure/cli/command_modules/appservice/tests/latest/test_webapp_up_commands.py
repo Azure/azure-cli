@@ -477,7 +477,7 @@ class WebAppUpE2ETests(ScenarioTest):
         # the zip contains more than one projects, it is assumed that the user is in this directory
         # when he makes the webapp up.
         up_working_dir = temp_dir
-        os.chdir(os.join(up_working_dir, "WebApplication1"))
+        os.chdir(os.path.join(up_working_dir, "dotnet6-webapi-with-dependencies-up"))
 
         # test dryrun operation
         result = self.cmd('webapp up -n {} --dryrun --os-type Linux'
@@ -1331,7 +1331,7 @@ class WebAppUpE2ETests(ScenarioTest):
         # change the working dir to the dir where the code has been extracted to
         os.chdir(temp_dir)
 
-        with self.assertRaisesRegexp(CLIError, "Deployment failed because the build process failed"):
+        with self.assertRaisesRegex(CLIError, "Deployment failed because the build process failed"):
             self.cmd('webapp up -g {} -n {} --os-type linux -r "NODE|20-LTS"'.format(resource_group, webapp_name))
 
         # cleanup
@@ -1359,7 +1359,7 @@ class WebAppUpE2ETests(ScenarioTest):
         # change the working dir to the dir where the code has been extracted to
         os.chdir(temp_dir)
 
-        with self.assertRaisesRegexp(CLIError, "Deployment failed because the site failed to start within 10 mins."):
+        with self.assertRaisesRegex(CLIError, "Deployment failed because the site failed to start within 10 mins."):
             self.cmd('webapp up -g {} -n {} --os-type linux -r "NODE|20-LTS"'.format(resource_group, webapp_name))
 
         # cleanup

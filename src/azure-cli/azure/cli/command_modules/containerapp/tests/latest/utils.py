@@ -17,7 +17,7 @@ def prepare_containerapp_env_for_app_e2e_tests(test_cls):
     try:
         managed_env = test_cls.cmd('containerapp env show -g {} -n {}'.format(rg_name, env_name)).get_output_in_json()
     except CLIInternalError as e:
-        if e.error_msg.__contains__('ResourceGroupNotFound') or e.error_msg.__contains__('ResourceNotFound'):
+        if 'ResourceGroupNotFound' in e.error_msg or 'ResourceNotFound' in e.error_msg:
             test_cls.cmd(f'group create -n {rg_name}')
             test_cls.cmd(f'containerapp env create -g {rg_name} -n {env_name} --logs-destination none')
             managed_env = test_cls.cmd('containerapp env show -g {} -n {}'.format(rg_name, env_name)).get_output_in_json()
@@ -93,3 +93,12 @@ def create_and_verify_containerapp_up(
         if location:
             up_cmd += f" -l {location.upper()}"
             test_cls.cmd(up_cmd)
+
+
+def create_vnet_subnet(self, resource_group, vnet, delegations='Microsoft.App/environments', location="centralus"):
+    self.cmd(f"az network vnet create --address-prefixes '14.0.0.0/23' -g {resource_group} -n {vnet} --location {location}")
+    subnet_command = f"az network vnet subnet create --address-prefixes '14.0.0.0/23' -n sub -g {resource_group} --vnet-name {vnet}"
+    if delegations is not None:
+        subnet_command += f' --delegations {delegations}'
+    sub_id = self.cmd(subnet_command).get_output_in_json()["id"]
+    return sub_id

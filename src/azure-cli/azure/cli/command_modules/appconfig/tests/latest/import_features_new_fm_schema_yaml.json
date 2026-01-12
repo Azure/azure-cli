@@ -1,0 +1,46 @@
+feature_management:
+  feature_flags:
+    - id: Variant_Override_True
+      description: ''
+      enabled: true
+      conditions:
+        client_filters: []
+      allocation:
+        default_when_enabled: True_Override
+      variants:
+        - name: True_Override
+          status_override: Disabled
+          configuration_value: default
+    - id: Variant_Override_False
+      description: ''
+      enabled: false
+      conditions:
+        client_filters: []
+      allocation:
+        default_when_disabled: False_Override
+      variants:
+        - name: False_Override
+          status_override: Enabled
+          configuration_value: default
+    - id: TestVariants
+      description: ''
+      enabled: true
+      conditions:
+        client_filters:
+          - Name: TimeWindow
+            Parameters:
+              Start: 'Wed, 01 May 2019 13:59:59 GMT'
+              End: 'Mon, 01 July 2019 00:00:00 GMT'
+      allocation:
+        user:
+          - variant: Alpha
+            users:
+              - Adam
+          - variant: Beta
+            users:
+              - Britney
+      variants:
+        - name: Alpha
+          configuration_value: The Variant Alpha.
+        - name: Beta
+          configuration_value: The Variant Beta.

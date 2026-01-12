@@ -21,7 +21,7 @@ class Update(AAZCommand):
         az network lb rule update -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol Udp
 
     :example: Update a load balancing rule to support HA ports.
-        az network lb rule update -g MyResourceGroup --lb-name MyLb -n MyLbRule \ --protocol All --frontend-port 0 --backend-port 0
+        az network lb rule update -g MyResourceGroup --lb-name MyLb -n MyLbRule --protocol All --frontend-port 0 --backend-port 0
     """
 
     _aaz_info = {

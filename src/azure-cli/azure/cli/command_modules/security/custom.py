@@ -31,11 +31,11 @@ from azure.mgmt.security.v2020_07_01_preview.models import (RuleResultsInput, Ru
 from azure.mgmt.security.v2023_01_01.models import (Extension)
 from azure.cli.core.commands.client_factory import get_subscription_id
 from azure.cli.core.azclierror import (MutuallyExclusiveArgumentError)
-from msrestazure.tools import resource_id
-from msrestazure.azure_exceptions import CloudError
+from azure.mgmt.core.tools import resource_id
+from azure.core.exceptions import HttpResponseError
 from knack.log import get_logger
 from ._utils import (
-    run_cli_cmd
+    get_resource_group
 )
 
 logger = get_logger(__name__)
@@ -619,7 +619,7 @@ def get_security_assessment_metadata(client, resource_name):
 
     try:
         return client.get(resource_name)
-    except CloudError:
+    except HttpResponseError:
         return client.get_in_subscription(resource_name)
 
 
@@ -946,20 +946,20 @@ def delete_security_automation(client, resource_group_name, resource_name):
     return client.delete(resource_group_name, resource_name)
 
 
-def create_or_update_security_automation(client, resource_group_name, resource_name, scopes, sources, actions, location=None, etag=None, tags=None, description=None, isEnabled=None):
+def create_or_update_security_automation(cmd, client, resource_group_name, resource_name, scopes, sources, actions, location=None, etag=None, tags=None, description=None, isEnabled=None):
 
     if location is None:
-        resourceGroup = run_cli_cmd('az group show --name {}'.format(resource_group_name))
-        location = resourceGroup['location']
+        resourceGroup = get_resource_group(cmd, resource_group_name)
+        location = resourceGroup.location
     automation = create_security_automation_object(location, scopes, sources, actions, etag, tags, description, isEnabled)
     return client.create_or_update(resource_group_name, resource_name, automation)
 
 
-def validate_security_automation(client, resource_group_name, resource_name, scopes, sources, actions, location=None, etag=None, tags=None, description=None, isEnabled=None):
+def validate_security_automation(cmd, client, resource_group_name, resource_name, scopes, sources, actions, location=None, etag=None, tags=None, description=None, isEnabled=None):
 
     if location is None:
-        resourceGroup = run_cli_cmd('az group show --name {}'.format(resource_group_name))
-        location = resourceGroup['location']
+        resourceGroup = get_resource_group(cmd, resource_group_name)
+        location = resourceGroup.location
     automation = create_security_automation_object(location, scopes, sources, actions, etag, tags, description, isEnabled)
     return client.validate(resource_group_name, resource_name, automation)
 

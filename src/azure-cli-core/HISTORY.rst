@@ -3,6 +3,114 @@
 Release History
 ===============
 
+2.82.0
+++++++
+* Resolve CVE-2025-66418 (#32506)
+* Resolve CVE-2025-66471 (#32506)
+
+2.81.0
+++++++
+* Minor fixes
+
+2.80.0
+++++++
+* Minor fixes
+
+2.79.0
+++++++
+* Resolve CVE-2025-9230 (#32315)
+* Resolve CVE-2025-9232 (#32315)
+
+2.78.0
+++++++
+* Minor fixes
+
+2.77.0
+++++++
+* Resolve CVE-2025-4517 (#31928)
+* Add global policy arguments `--acquire-policy-token` and `--change-reference` to support Change Safety feature (#31741)
+
+2.76.0
+++++++
+* Resolve CVE-2024-47081 (#31708)
+* Provide actionable error recommendation when a command fails because of Multi-Factor Authentication (MFA) policy violation (#31699)
+
+2.75.0
+++++++
+* Resolve CVE-2025-50181 (#31669)
+* Resolve CVE-2025-50182 (#31669)
+
+2.74.0
+++++++
+* Resolve CVE-2024-13176 (#31503)
+* Resolve CVE-2024-9143 (#31503)
+
+2.73.0
+++++++
+* [BREAKING CHANGE] Remove azure stack profiles `2020-09-01-hybrid`, `2019-03-01-hybrid`, `2018-03-01-hybrid` and `2017-03-09-profile` (#31307)
+* Use MSAL for managed identity authentication (#25959)
+
+2.72.0
+++++++
+* Minor fixes
+
+2.71.0
+++++++
+* PREVIEW: Support managed identity authentication with MSAL. Run `az config set core.use_msal_managed_identity=true` or set environment variable `AZURE_CORE_USE_MSAL_MANAGED_IDENTITY` to enable it (#31092)
+
+2.70.0
+++++++
+* Resolve CVE-2024-12797 (#30816)
+* Drop Track 1 SDK authentication (#29631)
+* `aaz`: Add cross tenants control for `AAZResourceIdArgFormat` (#30817)
+* `aaz`: Support `Any` type with full value shorthand syntax allowed (#30868)
+
+2.69.0
+++++++
+* `aaz`: Support simple type parsed from string value (#30623)
+
+2.68.0
+++++++
+* PREVIEW: Support managed identity on Azure Arc-enabled Linux server (#30267)
+* Drop old Track 2 SDK authentication support (#29690)
+* Resolve CVE-2024-50602 (#30533)
+
+2.67.0
+++++++
+* PREVIEW: Support managed identity on Azure Arc-enabled Windows server (#29187)
+
+2.66.0
+++++++
+* `aaz`: Support managed identity (#29953)
+* Resolve CVE-2024-6119 (#29887)
+* Resolve CVE-2024-5535 (#29887)
+* Resolve CVE-2024-4741 (#29887)
+* Resolve CVE-2024-4603 (#29887)
+* Resolve CVE-2024-2511 (#29887)
+* Use MSAL for Cloud Shell authentication (#29637)
+
+2.65.0
+++++++
+* Minor fixes
+
+2.64.0
+++++++
+* Minor fixes
+
+2.63.0
+++++++
+* Resolve CVE-2024-39689 (#29320)
+* Support `az config set extension.dynamic_install_allow_preview` for extension dynamic installation configuration (#29413)
+* Resolve CVE-2024-6345 (#29433)
+* `az logout`: Remove service principal access tokens from token cache (#29441)
+
+2.62.0
+++++++
+* Fix #28997: Fix error "User cancelled the Accounts Control Operation" when logging in with WAM as Administrator (#29088)
+* Resolve CVE-2024-37891 (#29194)
+* Resolve CVE-2024-35195 (#29186)
+* `aaz`: Add argument completer support (#29204)
+
 2.61.0
 ++++++
 * Resolve CVE-2024-34064 (#28895)

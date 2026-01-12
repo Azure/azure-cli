@@ -5,7 +5,7 @@
 import os
 import time
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import sleep
 from azure.cli.core.util import parse_proxy_resource_id
 from dateutil import parser
@@ -42,7 +42,7 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, engine_type, location, engine_parameter_name='database_engine',
                  name_prefix=SERVER_NAME_PREFIX, parameter_name='server',
                  resource_group_parameter_name='resource_group'):
-        super(ServerPreparer, self).__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
+        super().__init__(name_prefix, SERVER_NAME_MAX_LENGTH)
         from azure.cli.core.mock import DummyCli
         self.cli_ctx = DummyCli()
         self.engine_type = engine_type
@@ -70,13 +70,24 @@ class ServerPreparer(AbstractPreparer, SingleValueReplacer):
 
 class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
-    postgres_backup_location = 'westus'
+    postgres_location = 'canadacentral'
+    postgres_backup_location = 'canadaeast'
+    POSTGRES_DB_NAME = 'postgres'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
     def test_postgres_flexible_server_mgmt(self, resource_group):
         self._test_flexible_server_mgmt('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_empty_rg_name(self):
+        self._test_flexible_server_mgmt_empty_rg_name_return_error('postgres')
+    
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_mgmt_case_insensitive(self, resource_group):
+        self._test_flexible_server_mgmt_case_insensitive('postgres', resource_group)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -95,15 +106,25 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_backup_location, additional_params='--enable-purge-protection true --retention-days 90')
+    def test_flexible_server_ssdv2_restore_mgmt(self, resource_group):
+        self._test_flexible_server_ssdv2_restore_mgmt('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_ltr(self, resource_group):
+        self._test_flexible_server_ltr('postgres', resource_group)
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90 --no-self-perms')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_backup_location, additional_params='--enable-purge-protection true --retention-days 90 --no-self-perms')
     def test_postgres_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name):
         self._test_flexible_server_byok_mgmt(resource_group, vault_name, backup_vault_name)
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90')
-    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_backup_location, additional_params='--enable-purge-protection true --retention-days 90')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='vault_name', location=postgres_location, additional_params='--enable-purge-protection true --retention-days 90 --no-self-perms')
+    @KeyVaultPreparer(name_prefix='rdbmsvault', parameter_name='backup_vault_name', location=postgres_backup_location, additional_params='--enable-purge-protection true --retention-days 90 --no-self-perms')
     def test_postgres_flexible_server_public_revivedropped_mgmt(self, resource_group, vault_name, backup_vault_name):
         self._test_flexible_server_revivedropped_mgmt(resource_group, vault_name, backup_vault_name)
 
@@ -112,21 +133,24 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        version = '12'
+        version = '17'
         storage_size = 128
         location = self.postgres_location
-        sku_name = 'Standard_D2s_v3'
-        memory_optimized_sku = 'Standard_E2ds_v4'
+        sku_name = 'Standard_D4ads_v5'
+        memory_optimized_sku = 'Standard_E4ds_v5'
         tier = 'GeneralPurpose'
         backup_retention = 7
-        database_name = 'testdb'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        zonal_resiliency_value = 'Enabled'
         ha_value = 'ZoneRedundant'
 
+        self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --high-availability {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --zonal-resiliency {} --location {}\
                   --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
-                                               sku_name, tier, storage_size, 'dbadmin', version, database_name, ha_value))
+                                               sku_name, tier, storage_size, 'dbadmin', version, zonal_resiliency_value, location))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
@@ -137,14 +161,23 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['version'], version)
         self.assertEqual(basic_info['storage']['storageSizeGb'], storage_size)
         self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
+        self.assertEqual(basic_info['highAvailability']['mode'], ha_value)
 
-        self.cmd('{} flexible-server db show -g {} -s {} -d {}'
-                    .format(database_engine, resource_group, server_name, database_name), checks=[JMESPathCheck('name', database_name)])
+        self.cmd('{} flexible-server list -g {}'.format(database_engine, resource_group),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        connection_string = self.cmd('{} flexible-server show-connection-string -s {}'
+                                     .format(database_engine, server_name)).get_output_in_json()
+        self.assertIn('jdbc', connection_string['connectionStrings'])
+        self.assertIn('node.js', connection_string['connectionStrings'])
+        self.assertIn('php', connection_string['connectionStrings'])
+        self.assertIn('python', connection_string['connectionStrings'])
+        self.assertIn('ado.net', connection_string['connectionStrings'])
 
         self.cmd('{} flexible-server update -g {} -n {} -p randompw321##@!'
                  .format(database_engine, resource_group, server_name))
 
-        self.cmd('{} flexible-server update -g {} -n {} --storage-size 256'
+        self.cmd('{} flexible-server update -g {} -n {} --storage-size 256 --yes'
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storage.storageSizeGb', 256 )])
 
@@ -152,13 +185,20 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storage.autoGrow', "Enabled" )])
 
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Disabled'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('storage.autoGrow', "Disabled" )])
+
         self.cmd('{} flexible-server update -g {} -n {} --backup-retention {}'
                  .format(database_engine, resource_group, server_name, backup_retention + 10),
                  checks=[JMESPathCheck('backup.backupRetentionDays', backup_retention + 10)])
 
+        self.cmd('{} flexible-server restart -g {} -n {}'
+                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
+
         tier = 'MemoryOptimized'
         sku_name = memory_optimized_sku
-        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {}'
+        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {} --yes'
                  .format(database_engine, resource_group, server_name, tier, sku_name),
                  checks=[JMESPathCheck('sku.tier', tier),
                          JMESPathCheck('sku.name', sku_name)])
@@ -167,42 +207,155 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('tags.keys', '3')])
 
-        self.cmd('{} flexible-server restart -g {} -n {}'
-                 .format(database_engine, resource_group, server_name), checks=NoneCheck())
-
         self.cmd('{} flexible-server stop -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
         self.cmd('{} flexible-server start -g {} -n {}'
                  .format(database_engine, resource_group, server_name), checks=NoneCheck())
 
-        self.cmd('{} flexible-server list -g {}'.format(database_engine, resource_group),
-                 checks=[JMESPathCheck('type(@)', 'array')])
-
-        restore_server_name = 'restore-' + server_name
-        self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
-                 .format(database_engine, resource_group, restore_server_name, server_name),
-                 checks=[JMESPathCheck('name', restore_server_name)])
-
-        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Disabled'
-                 .format(database_engine, resource_group, server_name),
-                 checks=[JMESPathCheck('storage.autoGrow', "Disabled" )])
-
-        connection_string = self.cmd('{} flexible-server show-connection-string -s {}'
-                                     .format(database_engine, server_name)).get_output_in_json()
-
-        self.assertIn('jdbc', connection_string['connectionStrings'])
-        self.assertIn('node.js', connection_string['connectionStrings'])
-        self.assertIn('php', connection_string['connectionStrings'])
-        self.assertIn('python', connection_string['connectionStrings'])
-        self.assertIn('ado.net', connection_string['connectionStrings'])
-
-        self.cmd('{} flexible-server list-skus -l {}'.format(database_engine, location),
-                 checks=[JMESPathCheck('type(@)', 'array')])
-
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name), checks=NoneCheck())
 
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, restore_server_name), checks=NoneCheck())
+
+    def _test_flexible_server_mgmt_empty_rg_name_return_error(self, database_engine):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        version = '17'
+        storage_size = 128
+        sku_name = 'Standard_D2ds_v5'
+        tier = 'GeneralPurpose'
+        backup_retention = 7
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        ha_value = 'ZoneRedundant'
+        random_rg_name_prefix = "random_rg"
+        random_rg_name = self.create_random_name(random_rg_name_prefix, 15)
+
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --high-availability {} \
+                  --public-access None'.format(database_engine, random_rg_name, server_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, ha_value))
+
+        self.cmd('postgres flexible-server replica create -g "" --name {} --source-server {}'.format(
+                        replica_1_name,
+                        server_name
+            ), expect_failure=True)
+
+        self.cmd('postgres flexible-server replica create -g \'\' --name {} --source-server {}'.format(
+                        replica_1_name,
+                        server_name
+            ), expect_failure=True)
+
+        self.cmd('{} flexible-server update -g "" -n {} -p randompw321##@!'
+                 .format(database_engine, server_name), expect_failure=True)
+        self.cmd('{} flexible-server update -g \'\' -n {} -p randompw321##@!'
+                 .format(database_engine, server_name), expect_failure=True)
+
+
+    def _test_flexible_server_ltr(self, database_engine, resource_group):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        storage_account_name = self.create_random_name('teststorage', 24)
+        container_account_name = self.create_random_name('testcontainer', 24)
+        start_time = (datetime.utcnow() - timedelta(minutes=60)).strftime(f"%Y-%m-%dT%H:%MZ")
+        expiry_time = (datetime.utcnow() + timedelta(minutes=200)).strftime(f"%Y-%m-%dT%H:%MZ")
+
+        # create storage account
+        storage_account = self.cmd('az storage account create -n {} -g {} --encryption-services \
+                                   blob'.format(storage_account_name, resource_group)).get_output_in_json()
+
+        # create storage container inside storage account
+        self.cmd('az storage container create -n {} --account-name {}'.format(container_account_name, storage_account_name))
+
+        # generate SAS URL for storage account
+        container_sas_token = self.cmd('az storage container generate-sas -n {} --account-name {} \
+                                       --permissions dlrw --expiry {} \
+                                       --start {}'.format(container_account_name, storage_account_name,
+                                                          expiry_time, start_time)).output
+        sas_url = storage_account['primaryEndpoints']['blob'] + container_account_name + "?" + container_sas_token[1:-2]
+
+        # create server
+        version = '17'
+        storage_size = 128
+        sku_name = 'Standard_D2ds_v5'
+        tier = 'GeneralPurpose'
+        backup_retention = 7
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        ha_value = 'ZoneRedundant'
+        backup_name = "testbackup"
+
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --high-availability {} \
+                  --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, ha_value))
+
+        # precheck LTR
+        precheck_result = self.cmd('{} flexible-server long-term-retention pre-check -g {} \
+                 -n {} -b {}'.format(database_engine, resource_group, server_name, backup_name)).get_output_in_json()
+        self.assertGreaterEqual(precheck_result['numberOfContainers'], 0)
+
+        # start LTR
+        self.cmd('{} flexible-server long-term-retention start -g {} -n {} -u {} -b {}'
+                 .format(database_engine, resource_group, server_name, sas_url, backup_name),
+                 checks=[JMESPathCheck('backupName', backup_name)])
+
+        # show LTR
+        self.cmd('{} flexible-server long-term-retention show -g {} -n {} -b {}'
+                 .format(database_engine, resource_group, server_name, backup_name),
+                 checks=[JMESPathCheck('backupName', backup_name)])
+
+        # list LTR
+        list_result = self.cmd('{} flexible-server long-term-retention list -g {} \
+                 -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
+        self.assertEqual(len(list_result), 1)
+        self.assertEqual(list_result[0]['backupName'], backup_name)
+
+
+    def _test_flexible_server_mgmt_case_insensitive(self, database_engine, resource_group):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        version = '16'
+        storage_size = 128
+        sku_name = 'Standard_D4ds_v4'
+        tier = 'GeneralPurpose'
+        backup_retention = 7
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        ha_value = 'ZoneRedundant'
+
+        self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
+                  --storage-size {} -u {} --version {} --tags keys=3 --high-availability {} \
+                  --public-access None'.format(database_engine, resource_group, server_name, backup_retention,
+                                               sku_name, tier, storage_size, 'dbadmin', version, ha_value))
+
+        tier = 'MemoryOptimized'
+        tier_lower = tier.lower()
+
+        sku_name = 'Standard_E2ds_v4'
+        sku_name_lower = sku_name.lower()
+        
+        self.cmd('{} flexible-server update -g {} -n {} --tier {} --sku-name {} --yes'
+                 .format(database_engine, resource_group, server_name, tier_lower, sku_name_lower),
+                 checks=[JMESPathCheck('sku.tier', tier),
+                         JMESPathCheck('sku.name', sku_name)])
+        
+        maintainence_window = 'SUN'
+        maintainence_window_value = 0   # Sunday is defined as 0
+        
+        self.cmd('{} flexible-server update -g {} -n {} --maintenance-window {}'
+                 .format(database_engine, resource_group, server_name, maintainence_window),
+                 checks=[JMESPathCheck('maintenanceWindow.dayOfWeek', maintainence_window_value)])
+
+        performance_tier = 'P15'
+        performance_tier_lower = performance_tier.lower()
+
+        self.cmd('{} flexible-server update -g {} -n {} --performance-tier {}'
+                 .format(database_engine, resource_group, server_name, performance_tier_lower),
+                 checks=[JMESPathCheck('storage.tier', performance_tier)])
 
 
     def _test_flexible_server_ssdv2_mgmt(self, database_engine, resource_group):
@@ -210,29 +363,27 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         if self.cli_ctx.local_context.is_on:
             self.cmd('config param-persist off')
 
-        version = '15'
+        version = '16'
         storage_size = 200
-        location = self.postgres_location
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D2ds_v4'
         tier = 'GeneralPurpose'
         storage_type = 'PremiumV2_LRS'
         iops = 3000
         throughput = 125
         backup_retention = 7
-        database_name = 'testdb'
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        location = 'canadacentral'
 
         # test create
         self.cmd('{} flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
-                  --storage-size {} -u {} --version {} --tags keys=3 --database-name {} --storage-type {} \
-                  --iops {} --throughput {} --public-access None'.format(database_engine, resource_group, server_name,
+                  --storage-size {} -u {} --version {} --tags keys=3 --storage-type {} \
+                  --iops {} --throughput {} --public-access None --location {}'.format(database_engine, resource_group, server_name,
                                                                                     backup_retention, sku_name, tier, storage_size,
-                                                                                    'dbadmin', version, database_name, storage_type,
-                                                                                    iops, throughput))
+                                                                                    'dbadmin', version, storage_type,
+                                                                                    iops, throughput, location))
 
         basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name)).get_output_in_json()
         self.assertEqual(basic_info['name'], server_name)
-        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
         self.assertEqual(basic_info['resourceGroup'], resource_group)
         self.assertEqual(basic_info['sku']['name'], sku_name)
         self.assertEqual(basic_info['sku']['tier'], tier)
@@ -244,7 +395,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.assertEqual(basic_info['backup']['backupRetentionDays'], backup_retention)
 
         # test updates
-        self.cmd('{} flexible-server update -g {} -n {} --storage-size 300'
+        self.cmd('{} flexible-server update -g {} -n {} --storage-size 300 --yes'
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storage.storageSizeGb', 300 )])
 
@@ -256,17 +407,20 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                  .format(database_engine, resource_group, server_name),
                  checks=[JMESPathCheck('storage.throughput', 400 )])
 
+        self.cmd('{} flexible-server update -g {} -n {} --high-availability SameZone'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('highAvailability.mode', 'SameZone' )])
+
+        self.cmd('{} flexible-server update -g {} -n {} --high-availability Disabled'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('highAvailability.mode', 'Disabled' )])
         # test failures
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
                  .format(database_engine, resource_group, server_name),
                  expect_failure=True)
 
-        self.cmd('{} flexible-server update -g {} -n {} --high-availability SameZone'
-                 .format(database_engine, resource_group, server_name),
-                 expect_failure=True)
-
         replica_name = 'rep-ssdv2-' + server_name
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
                  .format(database_engine, resource_group, replica_name, basic_info['id']),
                  expect_failure=True)
 
@@ -276,7 +430,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
     def _test_flexible_server_restore_mgmt(self, database_engine, resource_group):
 
         private_dns_param = 'privateDnsZoneArmResourceId'
-        location = self.postgres_location
+        location = 'canadacentral'
 
         source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server_default = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
@@ -292,13 +446,10 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
         self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --yes'.format(
                  database_engine, resource_group, source_server, source_vnet, source_subnet, location))
-        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
+        self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
 
         # Wait until snapshot is created
-        current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
-        earliest_restore_time = result['backup']['earliestRestoreDate']
-        seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-        os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 180)
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
         # default vnet resources
         restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} '
@@ -315,7 +466,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
                  resource_group, location, new_vnet))
 
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24 --default-outbound false'.format(
                           resource_group, new_subnet, new_vnet)).get_output_in_json()
 
         private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet, database_engine)
@@ -357,49 +508,45 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         location = self.postgres_location
         target_location = self.postgres_backup_location
 
-        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        source_server_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        target_server_default = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        target_server_diff_vnet = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        target_server_diff_vnet_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        source_server_vnet = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        source_server_public = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         target_server_public_access = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        target_server_public_access_2 = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        target_server_config = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_diff_vnet = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        target_server_vnet_fail = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
         source_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         source_subnet = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
         new_vnet = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
         new_subnet = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
-        new_vnet_2 = self.create_random_name('VNET', SERVER_NAME_MAX_LENGTH)
-        new_subnet_2 = self.create_random_name('SUBNET', SERVER_NAME_MAX_LENGTH)
 
         self.cmd('{} flexible-server create -g {} -n {} --vnet {} --subnet {} -l {} --geo-redundant-backup Enabled --yes'.format(
-                 database_engine, resource_group, source_server, source_vnet, source_subnet, location))
-        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server)).get_output_in_json()
-        self.assertEqual(result['backup']['geoRedundantBackup'], 'Enabled')
+                 database_engine, resource_group, source_server_vnet, source_vnet, source_subnet, location))
+        result_vnet = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server_vnet)).get_output_in_json()
+        self.assertEqual(result_vnet['backup']['geoRedundantBackup'], 'Enabled')
 
-        self.cmd('{} flexible-server create -g {} -n {} --public-access None -l {} --geo-redundant-backup Enabled'.format(
-                 database_engine, resource_group, source_server_2, location))
-        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server_2)).get_output_in_json()
+        self.cmd('{} flexible-server create -g {} -n {} --public-access Enabled -l {} --geo-redundant-backup Enabled --yes'.format(
+                 database_engine, resource_group, source_server_public, location))
+        result = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, source_server_public)).get_output_in_json()
         self.assertEqual(result['backup']['geoRedundantBackup'], 'Enabled')
         self.assertEqual(result['network']['publicNetworkAccess'], 'Enabled')
 
-        # vnet -> vnet without network parameters fail
-        self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} '
-                 .format(database_engine, resource_group, target_location, target_server_default, source_server), expect_failure=True)
-
-        # vnet to different vnet
+        # default vnet resources
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
                  resource_group, target_location, new_vnet))
 
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24 --default-outbound false'.format(
                           resource_group, new_subnet, new_vnet)).get_output_in_json()
 
-        restore_result = retryable_method(retries=10, interval_sec=360 if os.environ.get(ENV_LIVE_TEST, False) else 0, exception_type=HttpResponseError,
-                                          condition=lambda ex: 'GeoBackupsNotAvailable' in ex.message)(self.cmd)(
-                                              '{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --subnet {} --yes'.format(
-                                              database_engine, resource_group, target_location, target_server_diff_vnet, source_server, subnet["id"])
-                                          ).get_output_in_json()
+        # Wait until snapshot is created
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+
+        # vnet -> vnet without network parameters fail
+        self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {} '
+                 .format(database_engine, resource_group, target_location, target_server_vnet_fail, source_server_vnet), expect_failure=True)
+
+        # vnet to different vnet
+        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} -n {} --source-server {} --subnet {} --yes'.format(
+                                  database_engine, resource_group, target_location, target_server_diff_vnet, source_server_vnet, subnet["id"])).get_output_in_json()
 
         self.assertEqual(restore_result['network']['delegatedSubnetResourceId'],
                          '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
@@ -410,33 +557,73 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                              self.get_subscription_id(), resource_group, '{}.private.{}.database.azure.com'.format(target_server_diff_vnet, database_engine)))
 
         # public to public
-        restore_result = retryable_method(retries=10, interval_sec=360 if os.environ.get(ENV_LIVE_TEST, False) else 0, exception_type=HttpResponseError,
-                                          condition=lambda ex: 'GeoBackupsNotAvailable' in ex.message)(self.cmd)(
-                                              '{} flexible-server geo-restore -g {} -l {} --name {} --source-server {}'.format(
-                                              database_engine, resource_group, target_location, target_server_public_access_2, source_server_2)
-                                         ).get_output_in_json()
+        restore_result = self.cmd('{} flexible-server geo-restore -g {} -l {} --name {} --source-server {}'.format(
+                                  database_engine, resource_group, target_location, target_server_public_access, source_server_public)).get_output_in_json()
 
-        #self.assertEqual(restore_result['network']['publicNetworkAccess'], 'Enabled')
         self.assertEqual(str(restore_result['location']).replace(' ', '').lower(), target_location)
+
+        # Delete servers
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, source_server_vnet), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, source_server_public), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_diff_vnet), checks=NoneCheck())
+
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
+                 database_engine, resource_group, target_server_public_access), checks=NoneCheck())
+
+
+    def _test_flexible_server_ssdv2_restore_mgmt(self, database_engine, resource_group):
+
+        location = 'canadacentral'
+        source_server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        source_ssdv2_server = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-', 40)
+        target_server_ssdv2_migration = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-migrate-', 40)
+        target_server_ssdv2 = self.create_random_name(SERVER_NAME_PREFIX + 'ssdv2-restore-', 40)
+        storage_type = 'PremiumV2_LRS'
+        iops = 3000
+        throughput = 125
+
+        # Restore to ssdv2
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --public-access None --yes'.format(
+                 database_engine, resource_group, source_server, location))
+
+        # Restore to ssdv2
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --storage-type {} --iops {} --throughput {} --public-access None --yes'.format(
+                 database_engine, resource_group, source_ssdv2_server, location, storage_type, iops, throughput))
+
+        # Wait until snapshot is created
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+
+        # Restore to ssdv2
+        restore_migration_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {} --storage-type {}'
+                                  .format(database_engine, resource_group, target_server_ssdv2_migration, source_server, storage_type)).get_output_in_json()
+        self.assertEqual(restore_migration_result['storage']['type'], storage_type)
+
+        # Restore ssdv2 server
+        restore_ssdv2_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
+                                  .format(database_engine, resource_group, target_server_ssdv2, source_ssdv2_server)).get_output_in_json()
+        self.assertEqual(restore_ssdv2_result['storage']['type'], storage_type)
 
         # Delete servers
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
                  database_engine, resource_group, source_server), checks=NoneCheck())
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
-                 database_engine, resource_group, target_server_diff_vnet), checks=NoneCheck())
+                 database_engine, resource_group, source_ssdv2_server), checks=NoneCheck())
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
-                 database_engine, resource_group, target_server_diff_vnet_2), checks=NoneCheck())
+                 database_engine, resource_group, target_server_ssdv2_migration), checks=NoneCheck())
 
         self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
-                 database_engine, resource_group, target_server_public_access), checks=NoneCheck())
-
-        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(
-                 database_engine, resource_group, target_server_config), checks=NoneCheck())
+                 database_engine, resource_group, target_server_ssdv2), checks=NoneCheck())
 
 
     def _test_flexible_server_byok_mgmt(self, resource_group, vault_name, backup_vault_name=None):
+        live_test = os.environ.get(ENV_LIVE_TEST, False)
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
         backup_key_name = self.create_random_name('rdbmskey', 32)
@@ -449,34 +636,38 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         identity_2_name = self.create_random_name('identity', 32)
         server_2_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         tier = 'GeneralPurpose'
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D2ds_v4'
         location = self.postgres_location
         backup_location = self.postgres_backup_location
         replication_role = 'AsyncReplica'
+        scope = '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
 
+        # Create identity and assign role
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
 
         identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_name, location)).get_output_in_json()
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( identity['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                 .format(resource_group, vault_name, identity['principalId']))
-
+        # Create backup identity and assign role
         backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                                   .format(backup_key_name, backup_vault_name)).get_output_in_json()
 
         backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( backup_identity['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( backup_identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                    .format(resource_group, backup_vault_name, backup_identity['principalId']))
-        
+        # Create identity 2 and assign role
         key_2 = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                             .format(key_2_name, vault_name)).get_output_in_json()
 
         identity_2 = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_2_name, location)).get_output_in_json()
-
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                    .format(resource_group, vault_name, identity_2['principalId']))
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( identity_2['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity_2['principalId'], scope))
 
         def invalid_input_tests():
             # key or identity only
@@ -548,7 +739,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
             # create replica 1 with data encryption            
             replica_1_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
 
-            self.cmd('postgres flexible-server replica create -g {} --replica-name {} --source-server {} --key {} --identity {}'.format(
+            self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {} --key {} --identity {}'.format(
                         resource_group,
                         replica_1_name,
                         primary_server_name,
@@ -568,11 +759,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('dataEncryption.primaryUserAssignedIdentityId', identity_2['id'])
             ])
 
-            # restore backup
-            current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
-            earliest_restore_time = result['backup']['earliestRestoreDate']
-            seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-            sleep(max(0, seconds_to_wait))
+            # Wait until snapshot is created
+            os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
             # By default, Geo-redundant backup is disabled for restore hence no need to pass backup-key and backup-identity
             data_encryption_key_id_flag = '--key {} --identity {}'.format(key['key']['kid'], identity['id'])
@@ -587,10 +775,8 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
             # geo-restore backup
             if geo_redundant_backup:
-                current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
-                earliest_restore_time = result['backup']['earliestRestoreDate']
-                seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-                sleep(max(0, seconds_to_wait))
+                # Wait until snapshot is created
+                os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
 
                 data_encryption_key_id_flag = '--key {} --identity {} --backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id'], key['key']['kid'], identity['id'])
 
@@ -696,7 +882,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         self.cmd('network vnet create -g {} -l {} -n {} --address-prefixes 172.1.0.0/16'.format(
                  resource_group, location, new_vnet))
 
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes 172.1.0.0/24 --default-outbound false'.format(
                           resource_group, new_subnet, new_vnet)).get_output_in_json()
 
         private_dns_zone = '{}.private.{}.database.azure.com'.format(target_server_diff_vnet, database_engine)
@@ -721,6 +907,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 
     def _test_flexible_server_revivedropped_mgmt(self, resource_group, vault_name, backup_vault_name=None):
+        live_test = os.environ.get(ENV_LIVE_TEST, False)
         key_name = self.create_random_name('rdbmskey', 32)
         identity_name = self.create_random_name('identity', 32)
         backup_key_name = self.create_random_name('rdbmskey', 32)
@@ -728,44 +915,34 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         server_with_geo_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         backup_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        backup_name_with_geo = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         tier = 'GeneralPurpose'
-        sku_name = 'Standard_D2s_v3'
+        sku_name = 'Standard_D2ds_v4'
         location = self.postgres_location
         backup_location = self.postgres_backup_location
+        scope = '/subscriptions/{}/resourceGroups/{}'.format(self.get_subscription_id(), resource_group)
 
+        # Create identity and assign role
         key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                        .format(key_name, vault_name)).get_output_in_json()
 
         identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, identity_name, location)).get_output_in_json()
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( identity['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                 .format(resource_group, vault_name, identity['principalId']))
-
+        # Create backup identity and assign role
         backup_key = self.cmd('keyvault key create --name {} -p software --vault-name {}'
                                   .format(backup_key_name, backup_vault_name)).get_output_in_json()
 
         backup_identity = self.cmd('identity create -g {} --name {} --location {}'.format(resource_group, backup_identity_name, backup_location)).get_output_in_json()
+        if (live_test):
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Crypto User" --scope {}'.format( backup_identity['principalId'], scope))
+            self.cmd('role assignment create --assignee-object-id {} --assignee-principal-type ServicePrincipal --role "Key Vault Certificate User" --scope {}'.format( backup_identity['principalId'], scope))
 
-        self.cmd('keyvault set-policy -g {} -n {} --object-id {} --key-permissions wrapKey unwrapKey get list'
-                    .format(resource_group, backup_vault_name, backup_identity['principalId']))
-        
         def main_tests(geo_redundant_backup):
             geo_redundant_backup_enabled = 'Enabled' if geo_redundant_backup else 'Disabled'
             backup_key_id_flags = '--backup-key {} --backup-identity {}'.format(backup_key['key']['kid'], backup_identity['id']) if geo_redundant_backup else ''
             primary_server_name = server_with_geo_name if geo_redundant_backup else server_name
-            # create primary flexible server with data encryption
-            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {}'.format(
-                        resource_group,
-                        primary_server_name,
-                        tier,
-                        sku_name,
-                        key['key']['kid'],
-                        identity['id'],
-                        backup_key_id_flags,
-                        location,
-                        geo_redundant_backup_enabled
-                    ))
 
             main_checks = [
                 JMESPathCheckExists('identity.userAssignedIdentities."{}"'.format(identity['id'])),
@@ -781,18 +958,28 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                     JMESPathCheck('dataEncryption.geoBackupUserAssignedIdentityId', backup_identity['id'])
                 ]
 
-            result = self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, primary_server_name),
-                    checks=main_checks + geo_checks).get_output_in_json()
+            # create primary flexible server with data encryption
+            self.cmd('postgres flexible-server create -g {} -n {} --public-access none --tier {} --sku-name {} --key {} --identity {} {} --location {} --geo-redundant-backup {}'.format(
+                        resource_group,
+                        primary_server_name,
+                        tier,
+                        sku_name,
+                        key['key']['kid'],
+                        identity['id'],
+                        backup_key_id_flags,
+                        location,
+                        geo_redundant_backup_enabled
+                    ))
 
             # Wait until snapshot is created
-            current_time = datetime.utcnow().replace(tzinfo=tzutc()).isoformat()
-            earliest_restore_time = result['backup']['earliestRestoreDate']
-            seconds_to_wait = (parser.isoparse(earliest_restore_time) - parser.isoparse(current_time)).total_seconds()
-            os.environ.get(ENV_LIVE_TEST, False) and sleep(max(0, seconds_to_wait) + 240)
+            os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+
+            result = self.cmd('postgres flexible-server show -g {} -n {}'.format(resource_group, primary_server_name),
+                              checks=main_checks + geo_checks).get_output_in_json()
 
             # Delete the server
             self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, primary_server_name))
-            os.environ.get(ENV_LIVE_TEST, False) and sleep(240)
+            os.environ.get(ENV_LIVE_TEST, False) and sleep(300)
 
             # By default, Geo-redundant backup is disabled for restore hence no need to pass backup-key and backup-identity
             # Revive Dropped server
@@ -812,28 +999,6 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
                                         ), checks=main_checks).get_output_in_json()
             self.assertEqual(str(revive_dropped_server_1['location']).replace(' ', '').lower(), location)
 
-            """ # Revive dropped server with geo-redundant backup enabled. Since operation is revive dropped, it has to be done in same location as the source server
-            if geo_redundant_backup:
-                # By default, Geo-redundant backup is disabled for restore hence explicitly need to set geo-redundant backup Enabled
-                revive_dropped_server_2 = self.cmd('postgres \
-                                                        flexible-server {} \
-                                                        -g {} --name {} \
-                                                        --source-server {} \
-                                                        --geo-redundant-backup Enabled \
-                                                        --key {} --identity {} \
-                                                        {}'.format(
-                                                        'revive-dropped --location {}'.format(location),
-                                                        resource_group,
-                                                        backup_name_with_geo,
-                                                        result['id'],
-                                                        key['key']['kid'],
-                                                        identity['id'],
-                                                        backup_key_id_flags
-                                                    ), checks=main_checks + geo_checks).get_output_in_json()
-                self.assertEqual(str(revive_dropped_server_2['location']).replace(' ', '').lower(), location)
-
-                self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, backup_name_with_geo)) """
-
             # delete all servers
             self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, backup_name))
             self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, primary_server_name))
@@ -845,7 +1010,7 @@ class FlexibleServerMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -863,6 +1028,10 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
         firewall_rule_checks = [JMESPathCheck('name', firewall_rule_name),
                                 JMESPathCheck('endIpAddress', end_ip_address),
                                 JMESPathCheck('startIpAddress', start_ip_address)]
+
+        self.cmd('{} flexible-server update -g {} -n {} --public-access Enabled'
+                 .format(database_engine, resource_group, server),
+                 checks=[JMESPathCheck('network.publicNetworkAccess', "Enabled")])
 
         self.cmd('{} flexible-server firewall-rule create -g {} --name {} --rule-name {} '
                  '--start-ip-address {} --end-ip-address {} '
@@ -945,7 +1114,7 @@ class FlexibleServerProxyResourceMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -991,8 +1160,8 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                  database_engine, resource_group, server_name, location, invalid_backup_retention),
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l centraluseuap --high-availability {} '.format(
-                 database_engine, resource_group, server_name, ha_value),
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --high-availability {} '.format(
+                 database_engine, resource_group, server_name, location, ha_value),
                  expect_failure=True)
 
         # high availability validator
@@ -1000,11 +1169,11 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
                  database_engine, resource_group, server_name, location, ha_value),
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l centraluseuap --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability {}'.format(
-                 database_engine, resource_group, server_name, ha_value), # single availability zone location
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D4ds_v4 --high-availability {}'.format(
+                 database_engine, resource_group, server_name, location, ha_value), # single availability zone location
                  expect_failure=True)
 
-        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --high-availability {} --zone 1 --standby-zone 1'.format(
+        self.cmd('{} flexible-server create -g {} -n {} -l {} --tier GeneralPurpose --sku-name Standard_D2ads_v5 --high-availability {} --zone 1 --standby-zone 1'.format(
                  database_engine, resource_group, server_name, location, ha_value), # single availability zone location
                  expect_failure=True)
 
@@ -1033,7 +1202,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
         invalid_tier = self.create_random_name('tier', RANDOM_VARIABLE_MAX_LENGTH)
         valid_tier = 'GeneralPurpose'
         invalid_backup_retention = 40
-        version = 12
+        version = 16
         storage_size = 128
         location = self.postgres_location
         tier = 'Burstable'
@@ -1084,7 +1253,7 @@ class FlexibleServerValidatorScenarioTest(ScenarioTest):
 
 class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disable=too-few-public-methods
 
-    postgres_location = 'eastus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1102,10 +1271,11 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
         primary_role = 'Primary'
         public_access_arg = ''
         master_server = self.create_random_name(SERVER_NAME_PREFIX, 32)
+        replica_role = 'AsyncReplica'
         replicas = [self.create_random_name(F'azuredbclirep{i+1}', SERVER_NAME_MAX_LENGTH) for i in range(2)]
 
         # create a server
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none --tier GeneralPurpose --sku-name Standard_D2s_v3 --yes --storage-auto-grow {}'
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none --tier GeneralPurpose --sku-name Standard_D4ds_v5 --yes --storage-auto-grow {}'
                  .format(database_engine, resource_group, master_server, location, 256, source_server_auto_grow))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
@@ -1114,9 +1284,17 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                               JMESPathCheck('storage.autoGrow', source_server_auto_grow)]).get_output_in_json()
         
         # test replica create
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {} --zone 2 {}'
                  .format(database_engine, resource_group, replicas[0], result['id'], public_access_arg),
-                 expect_failure=True)
+                 checks=[
+                     JMESPathCheck('name', replicas[0]),
+                     JMESPathCheck('availabilityZone', 2),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('sku.tier', result['sku']['tier']),
+                     JMESPathCheck('sku.name', result['sku']['name']),
+                     JMESPathCheck('replica.role', replica_role),
+                     JMESPathCheck('sourceServerResourceId', result['id']),
+                     JMESPathCheck('storage.autoGrow', source_server_auto_grow)])
         
     def _test_flexible_server_replica_mgmt(self, database_engine, resource_group, vnet_enabled):
         location = self.postgres_location
@@ -1144,14 +1322,14 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
             replica_vnet_check = [[]] * 2
 
         # create a server
-        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} {} --tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} {} --tier GeneralPurpose --sku-name Standard_D2ds_v4 --yes'
                  .format(database_engine, resource_group, master_server, location, 256, master_vnet_args))
         result = self.cmd('{} flexible-server show -g {} --name {} '
                           .format(database_engine, resource_group, master_server),
                           checks=[JMESPathCheck('replica.role', primary_role)] + master_vnet_check).get_output_in_json()
         
         # test replica create
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} --zone 2 {} {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {} --zone 2 {} {}'
                  .format(database_engine, resource_group, replicas[0], result['id'], replica_vnet_args[0], public_access_arg),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
@@ -1160,47 +1338,42 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                      JMESPathCheck('sku.tier', result['sku']['tier']),
                      JMESPathCheck('sku.name', result['sku']['name']),
                      JMESPathCheck('replica.role', replica_role),
-                     JMESPathCheck('sourceServerResourceId', result['id']),
-                     JMESPathCheck('replica.capacity', '0')] + replica_vnet_check[0] + public_access_check)
+                     JMESPathCheck('sourceServerResourceId', result['id'])] + replica_vnet_check[0] + public_access_check)
         
         # test storage auto-grow not allowed for replica server update
         self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
-                 .format(database_engine, resource_group, replicas[0]),
-                 expect_failure=True)
+                 .format(database_engine, resource_group, replicas[0]))
 
         # test replica list
         self.cmd('{} flexible-server replica list -g {} --name {}'
                  .format(database_engine, resource_group, master_server),
                  checks=[JMESPathCheck('length(@)', 1)])
 
-        # test replica stop-replication
-        self.cmd('{} flexible-server replica stop-replication -g {} --name {} --yes'
+        # test replica promote
+        self.cmd('{} flexible-server replica promote -g {} --name {} --yes'
                  .format(database_engine, resource_group, replicas[0]),
                  checks=[
                      JMESPathCheck('name', replicas[0]),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('replica.role', primary_role),
-                     JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+                     JMESPathCheck('sourceServerResourceId', 'None')])
 
         # test show server with replication info, master becomes normal server
         self.cmd('{} flexible-server show -g {} --name {}'
                  .format(database_engine, resource_group, master_server),
                  checks=[
                      JMESPathCheck('replica.role', primary_role),
-                     JMESPathCheck('sourceServerResourceId', 'None'),
-                     JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+                     JMESPathCheck('sourceServerResourceId', 'None')])
 
         # test delete master server
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {} {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {} {}'
                 .format(database_engine, resource_group, replicas[1], result['id'], replica_vnet_args[1]),
                 checks=[
                     JMESPathCheck('name', replicas[1]),
                     JMESPathCheck('resourceGroup', resource_group),
                     JMESPathCheck('sku.name', result['sku']['name']),
                     JMESPathCheck('replica.role', replica_role),
-                    JMESPathCheck('sourceServerResourceId', result['id']),
-                    JMESPathCheck('replica.capacity', '0')] + replica_vnet_check[1])
+                    JMESPathCheck('sourceServerResourceId', result['id'])] + replica_vnet_check[1])
 
         # in postgres we can't delete master server if it has replicas
         self.cmd('{} flexible-server delete -g {} --name {} --yes'
@@ -1209,7 +1382,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
         # test virtual-endpoint
         if not vnet_enabled:
-            self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+            self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
                     .format(database_engine, resource_group, replicas[2], result['id']),
                     checks=[
                         JMESPathCheck('name', replicas[2]),
@@ -1240,16 +1413,14 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     checks=[
                         JMESPathCheck('name', replicas[2]),
                         JMESPathCheck('replica.role', primary_role),
-                        JMESPathCheck('sourceServerResourceId', 'None'),
-                        JMESPathCheck('replica.capacity', result['replica']['capacity'])]).get_output_in_json()
+                        JMESPathCheck('sourceServerResourceId', 'None')]).get_output_in_json()
 
             # test show server with replication info, master became replica server
             self.cmd('{} flexible-server show -g {} --name {}'
                     .format(database_engine, resource_group, master_server),
                     checks=[
                         JMESPathCheck('replica.role',replica_role),
-                        JMESPathCheck('sourceServerResourceId', switchover_result['id']),
-                        JMESPathCheck('replica.capacity', '0')])
+                        JMESPathCheck('sourceServerResourceId', switchover_result['id'])])
 
             # test replica switchover forced
             self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode switchover --promote-option forced --yes'
@@ -1257,8 +1428,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     checks=[
                         JMESPathCheck('name', master_server),
                         JMESPathCheck('replica.role', primary_role),
-                        JMESPathCheck('sourceServerResourceId', 'None'),
-                        JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+                        JMESPathCheck('sourceServerResourceId', 'None')])
 
             # test promote replica standalone forced
             self.cmd('{} flexible-server replica promote -g {} --name {} --promote-mode standalone --promote-option forced --yes'
@@ -1266,8 +1436,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
                     checks=[
                         JMESPathCheck('name',replicas[2]),
                         JMESPathCheck('replica.role', primary_role),
-                        JMESPathCheck('sourceServerResourceId', 'None'),
-                        JMESPathCheck('replica.capacity', result['replica']['capacity'])])
+                        JMESPathCheck('sourceServerResourceId', 'None')])
 
             # test virtual-endpoint delete
             self.cmd('{} flexible-server virtual-endpoint delete -g {} --server-name {} --name {} --yes'
@@ -1276,7 +1445,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
             # test virtual-endpoint list
             self.cmd('{} flexible-server virtual-endpoint list -g {} --server-name {}'
                     .format(database_engine, resource_group, master_server),
-                    checks=[JMESPathCheck('length(@)', 0)])
+                    expect_failure=True)
 
             # delete standalone server
             self.cmd('{} flexible-server delete -g {} --name {} --yes'
@@ -1300,7 +1469,7 @@ class FlexibleServerReplicationMgmtScenarioTest(ScenarioTest):  # pylint: disabl
 
 class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1666,7 +1835,7 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
 
         # subnet exist
         subnet_address_pref = '172.1.1.0/24'
-        self.cmd('network vnet subnet create -g {} -n {} --address-prefixes {} --vnet-name {}'.format(
+        self.cmd('network vnet subnet create -g {} -n {} --address-prefixes {} --vnet-name {} --default-outbound false'.format(
                   resource_group, 'testsubnet2', subnet_address_pref, 'testvnet'))
         subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(
                  self.get_subscription_id(), resource_group, 'testvnet', 'testsubnet2')
@@ -1693,20 +1862,20 @@ class FlexibleServerVnetMgmtScenarioTest(ScenarioTest):
                  resource_group, location, vnet_name, vnet_prefix))
 
         self.cmd('postgres flexible-server create -g {} -l {} --vnet {} --yes'.format(
-                 resource_group, 'westus', vnet_name), # location of vnet and server are different
+                 resource_group, 'southindia', vnet_name), # location of vnet and server are different
                  expect_failure=True)
 
         # delegated to different service
-        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes {} --delegations {}'.format(
+        subnet = self.cmd('network vnet subnet create -g {} -n {} --vnet-name {} --address-prefixes {} --delegations {} --default-outbound false'.format(
                           resource_group, subnet_name, vnet_name, subnet_prefix, "Microsoft.DBforMySQL/flexibleServers")).get_output_in_json()
 
         self.cmd('postgres flexible-server create -g {} -l {} --subnet {} --yes'.format(
-                 resource_group, 'eastus', subnet["id"]), # Delegated to different service
+                 resource_group, location, subnet["id"]), # Delegated to different service
                  expect_failure=True)
 
 
 class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location, parameter_name='server_resource_group')
@@ -1898,7 +2067,7 @@ class FlexibleServerPrivateDnsZoneScenarioTest(ScenarioTest):
 
 
 class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1970,7 +2139,7 @@ class FlexibleServerPublicAccessMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -1982,12 +2151,12 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
     def _test_flexible_server_upgrade_mgmt(self, database_engine, resource_group, public_access):
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        current_version = '11'
-        new_version = '14'
+        current_version = '15'
+        new_version = '17'
         location = self.postgres_location
 
         create_command = '{} flexible-server create -g {} -n {} --tier GeneralPurpose --sku-name {} --location {} --version {} --yes'.format(
-            database_engine, resource_group, server_name, "Standard_D2s_v3", location, current_version)
+            database_engine, resource_group, server_name, "Standard_D2ds_v5", location, current_version)
         if public_access:
             create_command += ' --public-access none'
         else:
@@ -2002,7 +2171,7 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
                  checks=[JMESPathCheck('version', current_version)])
 
         # create replica
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
                  .format(database_engine, resource_group, replica_name, server_name),
                  checks=[JMESPathCheck('version', current_version)])
 
@@ -2023,7 +2192,7 @@ class FlexibleServerUpgradeMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2033,6 +2202,8 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
 
 
     def _test_backups_mgmt(self, database_engine, resource_group, server):
+        # Wait until snapshot is created
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
         attempts = 0
         while attempts < 10:
             backups = self.cmd('{} flexible-server backup list -g {} -n {}'
@@ -2042,38 +2213,60 @@ class FlexibleServerBackupsMgmtScenarioTest(ScenarioTest):
                 break
             os.environ.get(ENV_LIVE_TEST, False) and sleep(60)
 
-        self.assertTrue(len(backups) == 1)
+        backups_length = len(backups)
+        self.assertTrue(backups_length > 0)
 
         automatic_backup = self.cmd('{} flexible-server backup show -g {} -n {} --backup-name {}'
                                     .format(database_engine, resource_group, server, backups[0]['name'])).get_output_in_json()
 
         self.assertDictEqual(automatic_backup, backups[0])
 
+        # test on-demand backup create
+        backup_name = self.create_random_name(F'backup', 16)
 
-class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+        self.cmd('{} flexible-server backup create -g {} -n {} --backup-name {}'
+                .format(database_engine, resource_group, server, backup_name),
+                checks=[JMESPathCheck('name', backup_name)])
+
+        backups_update = self.cmd('{} flexible-server backup list -g {} -n {}'
+                        .format(database_engine, resource_group, server)).get_output_in_json()
+
+        self.assertTrue(backups_length < len(backups_update))
+
+        # test on-demand backup delete
+        self.cmd('{} flexible-server backup delete -g {} -n {} --backup-name {} --yes'
+                .format(database_engine, resource_group, server, backup_name))
+
+        backups_update = self.cmd('{} flexible-server backup list -g {} -n {}'
+                        .format(database_engine, resource_group, server)).get_output_in_json()
+
+        self.assertTrue(backups_length == len(backups_update))
+
+
+class FlexibleServerIdentityMicrosoftEntraAdminMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    def test_postgresql_flexible_server_identity_aad_admin_mgmt(self, resource_group):
-        self._test_identity_aad_admin_mgmt('postgres', resource_group, 'enabled')
+    def test_postgresql_flexible_server_identity_microsoft_entra_admin_mgmt(self, resource_group):
+        self._test_identity_microsoft_entra_admin_mgmt('postgres', resource_group, 'enabled')
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
-    def test_postgresql_flexible_server_identity_aad_admin_only_mgmt(self, resource_group):
-        self._test_identity_aad_admin_mgmt('postgres', resource_group, 'disabled')
+    def test_postgresql_flexible_server_identity_microsoft_entra_admin_only_mgmt(self, resource_group):
+        self._test_identity_microsoft_entra_admin_mgmt('postgres', resource_group, 'disabled')
 
-    def _test_identity_aad_admin_mgmt(self, database_engine, resource_group, password_auth, location=postgres_location):
-        login = 'alanenriqueo@microsoft.com'
+    def _test_identity_microsoft_entra_admin_mgmt(self, database_engine, resource_group, password_auth, location=postgres_location):
+        login = 'aaa@foo.com'
         sid = '894ef8da-7971-4f68-972c-f561441eb329'
-        auth_args = '--password-auth {} --active-directory-auth enabled'.format(password_auth)
+        auth_args = '--password-auth {} --microsoft-entra-auth enabled'.format(password_auth)
         admin_id_arg = '-i {}'.format(sid) if database_engine == 'postgres' else ''
         server = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
         replica = [self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH) for _ in range(2)]
 
         # create server
         self.cmd('{} flexible-server create --location {} -g {} -n {} --public-access none --tier {} --sku-name {} {}'
-                 .format(database_engine, location, resource_group, server, 'GeneralPurpose', 'Standard_D2s_v3', auth_args))
+                 .format(database_engine, location, resource_group, server, 'GeneralPurpose', 'Standard_D2ds_v4', auth_args))
 
         # create 3 identities
         identity = []
@@ -2090,7 +2283,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                      JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0]))])
 
         # create replica 1
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
                  .format(database_engine, resource_group, replica[0], server))
 
         if database_engine == 'postgres':
@@ -2103,7 +2296,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                  checks=[
                      JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0]))])
 
-        admins = self.cmd('{} flexible-server ad-admin list -g {} -s {}'
+        admins = self.cmd('{} flexible-server microsoft-entra-admin list -g {} -s {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(0, len(admins))
 
@@ -2120,21 +2313,21 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                         checks=[
                             JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1]))])
 
-        # try to add AAD admin to replica 1
-        self.cmd('{} flexible-server ad-admin create -g {} -s {} -u {} -i {}'
+        # try to add Microsoft Entra admin to replica 1
+        self.cmd('{} flexible-server microsoft-entra-admin create -g {} -s {} -u {} -i {}'
                     .format(database_engine, resource_group, replica[0], login, sid),
                     expect_failure=True)
         
-        # add AAD admin to primary server
+        # add Microsoft Entra admin to primary server
         admin_checks = [JMESPathCheck('principalType', 'User'),
                         JMESPathCheck('principalName', login),
                         JMESPathCheck('objectId', sid)]
 
-        self.cmd('{} flexible-server ad-admin create -g {} -s {} -u {} -i {}'
+        self.cmd('{} flexible-server microsoft-entra-admin create -g {} -s {} -u {} -i {}'
                     .format(database_engine, resource_group, server, login, sid))
 
         for server_name in [server, replica[0]]:
-            self.cmd('{} flexible-server ad-admin show -g {} -s {} {}'
+            self.cmd('{} flexible-server microsoft-entra-admin show -g {} -s {} {}'
                     .format(database_engine, resource_group, server_name, admin_id_arg),
                     checks=admin_checks)
 
@@ -2145,7 +2338,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                         JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1]))])
 
         # create replica 2
-        self.cmd('{} flexible-server replica create -g {} --replica-name {} --source-server {}'
+        self.cmd('{} flexible-server replica create -g {} --name {} --source-server {}'
                  .format(database_engine, resource_group, replica[1], server))
 
         if database_engine == 'postgres':
@@ -2159,7 +2352,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                      JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[0])),
                      JMESPathCheckExists('userAssignedIdentities."{}"'.format(identity_id[1]))])
 
-        self.cmd('{} flexible-server ad-admin show -g {} -s {} {}'
+        self.cmd('{} flexible-server microsoft-entra-admin show -g {} -s {} {}'
                     .format(database_engine, resource_group, replica[1], admin_id_arg),
                     checks=admin_checks)
 
@@ -2169,17 +2362,17 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
                         JMESPathCheck('authConfig.passwordAuth', password_auth, False)]
             self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, server_name), checks=list_checks)
 
-        # try to remove AAD admin from replica 2
-        self.cmd('{} flexible-server ad-admin delete -g {} -s {} {} --yes'
+        # try to remove Microsoft Entra admin from replica 2
+        self.cmd('{} flexible-server microsoft-entra-admin delete -g {} -s {} {} --yes'
                  .format(database_engine, resource_group, replica[1], admin_id_arg),
                  expect_failure=True)
 
-        # remove AAD admin from primary server
-        self.cmd('{} flexible-server ad-admin delete -g {} -s {} {} --yes'
+        # remove Microsoft Entra admin from primary server
+        self.cmd('{} flexible-server microsoft-entra-admin delete -g {} -s {} {} --yes'
                  .format(database_engine, resource_group, server, admin_id_arg))
 
         for server_name in [server, replica[0], replica[1]]:
-            admins = self.cmd('{} flexible-server ad-admin list -g {} -s {}'
+            admins = self.cmd('{} flexible-server microsoft-entra-admin list -g {} -s {}'
                               .format(database_engine, resource_group, server_name)).get_output_in_json()
             self.assertEqual(0, len(admins))
 
@@ -2223,7 +2416,7 @@ class FlexibleServerIdentityAADAdminMgmtScenarioTest(ScenarioTest):
 
 
 class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2237,7 +2430,7 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
 
         # create a server
         self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
-                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 '--tier GeneralPurpose --sku-name Standard_D4ds_v5 --yes'
                  .format(database_engine, resource_group, server_name, location, 128))
         
         # show advanced threat protection setting for server
@@ -2272,7 +2465,7 @@ class FlexibleServerAdvancedThreatProtectionSettingMgmtScenarioTest(ScenarioTest
 
 
 class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
-    postgres_location = 'eastus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2286,7 +2479,7 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
 
         # create a server
         self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
-                 '--tier GeneralPurpose --sku-name Standard_D2s_v3 --yes'
+                 '--tier GeneralPurpose --sku-name Standard_D4ds_v5 --yes'
                  .format(database_engine, resource_group, server_name, location, 128))
         
         # enable server logs for server
@@ -2331,7 +2524,7 @@ class FlexibleServerLogsMgmtScenarioTest(ScenarioTest):
 
 class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
 
-    postgres_location = 'eastus'
+    postgres_location = 'canadacentral'
 
     @AllowLargeResponse()
     @ResourceGroupPreparer(location=postgres_location)
@@ -2361,7 +2554,7 @@ class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
                  .format(vnet, resource_group, loc, subnet),
                  checks=self.check('length(newVNet.subnets)', 1))
         self.cmd('network vnet subnet update -n {} --vnet-name {} -g {} '
-                 '--disable-private-endpoint-network-policies true'
+                 '--private-endpoint-network-policies Disabled'
                  .format(subnet, vnet, resource_group),
                  checks=self.check('privateEndpointNetworkPolicies', 'Disabled'))
 
@@ -2530,3 +2723,243 @@ class FlexibleServerPrivateEndpointsMgmtScenarioTest(ScenarioTest):
         result = self.cmd('{} flexible-server private-link-resource show -g {} -s {}'
                           .format(database_engine, resource_group, server)).get_output_in_json()
         self.assertEqual(result['groupId'], group_id)
+
+
+class FlexibleServerFabricMirroringMgmtScenarioTest(ScenarioTest):
+    postgres_location = 'canadacentral'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_fabric_mirroring_mgmt(self, resource_group):
+        self._test_fabric_mirroring_mgmt('postgres', resource_group)
+
+
+    def _test_fabric_mirroring_mgmt(self, database_engine, resource_group):
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, 32)
+
+        # create a server
+        self.cmd('{} flexible-server create -g {} --name {} -l {} --storage-size {} --public-access none '
+                 '--tier GeneralPurpose --sku-name Standard_D4ds_v5 --version 17 --yes'
+                 .format(database_engine, resource_group, server_name, location, 128))
+        
+        
+        # create a database
+        database2_name = 'flexibleserverdb'
+        self.cmd('{} flexible-server db create -g {} -s {} -d {}'.format(database_engine, resource_group, server_name, database2_name),
+                 checks=[JMESPathCheck('name', database2_name)])
+
+        # enable system assigned managed identity
+        self.cmd('{} flexible-server identity update -g {} -s {} --system-assigned Enabled'
+                 .format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type', 'SystemAssigned')])
+
+        # enable fabric mirroring
+        database1 = 'postgres'
+        self.cmd('{} flexible-server fabric-mirroring start -g {} --server-name {} --database-names {} --yes'
+                    .format(database_engine, resource_group, server_name, database1))
+        self.cmd('{} flexible-server parameter show --name azure.fabric_mirror_enabled -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'on')])
+        self.cmd('{} flexible-server parameter show --name azure.mirror_databases -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('value', database1)])
+
+        # update mirrored database
+        self.cmd('{} flexible-server fabric-mirroring update-databases -g {} --server-name {} --database-names {} --yes'
+                 .format(database_engine, resource_group, server_name, database2_name),
+                 checks=[JMESPathCheck('value', database2_name)])
+
+        # disable fabric mirroring
+        self.cmd('{} flexible-server fabric-mirroring stop -g {} --server-name {} --yes'
+                 .format(database_engine, resource_group, server_name))
+        self.cmd('{} flexible-server parameter show --name azure.fabric_mirror_enabled -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'off')])
+
+        # delete server
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, server_name))
+
+
+class ElasticClustersMgmtScenarioTest(ScenarioTest):
+
+    postgres_location = 'canadacentral'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_elastic_clusters_mgmt(self, resource_group):
+        self._test_elastic_clusters_mgmt('postgres', resource_group)
+
+    def _test_elastic_clusters_mgmt(self, database_engine, resource_group):
+
+        if self.cli_ctx.local_context.is_on:
+            self.cmd('config param-persist off')
+
+        version = '17'
+        location = self.postgres_location
+        sku_name = 'Standard_D2ds_v4'
+        tier = 'GeneralPurpose'
+        cluster_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        cluster_size = 2
+
+        self.cmd('{} flexible-server create -g {} -n {} --sku-name {} \
+                   --version {} --cluster-option ElasticCluster --public-access Enabled'
+                  .format(database_engine, resource_group, cluster_name, sku_name, version))
+        
+        basic_info = self.cmd('{} flexible-server show -g {} -n {}'.format(database_engine, resource_group, cluster_name)).get_output_in_json()
+        self.assertEqual(basic_info['name'], cluster_name)
+        self.assertEqual(str(basic_info['location']).replace(' ', '').lower(), location)
+        self.assertEqual(basic_info['resourceGroup'], resource_group)
+        self.assertEqual(basic_info['sku']['name'], sku_name)
+        self.assertEqual(basic_info['sku']['tier'], tier)
+        self.assertEqual(basic_info['version'], version)
+        self.assertEqual(basic_info['cluster']['clusterSize'], cluster_size)
+
+        # test failures
+        self.cmd('{} flexible-server update -g {} -n {} --storage-auto-grow Enabled'
+                 .format(database_engine, resource_group, cluster_name), expect_failure=True)
+        self.cmd('{} flexible-server update -g {} -n {} --node-count {}'
+                 .format(database_engine, resource_group, cluster_name, cluster_size - 1), expect_failure=True)
+        self.cmd('{} flexible-server replica list -g {} -n {}'
+                 .format(database_engine, resource_group, cluster_name), expect_failure=True)
+        self.cmd('{} flexible-server db create -g {} -s {} -d dbclusterfail'
+                 .format(database_engine, resource_group, cluster_name), expect_failure=True)
+
+        # update cluster
+        update_cluster_size = 4
+        update_info = self.cmd('{} flexible-server update -g {} -n {} --node-count {}'
+                               .format(database_engine, resource_group, cluster_name, update_cluster_size)).get_output_in_json()
+        self.assertEqual(update_info['cluster']['clusterSize'], update_cluster_size)
+
+        # Wait until snapshot is created
+        os.environ.get(ENV_LIVE_TEST, False) and sleep(1800)
+
+        # Restore
+        cluster_restore_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        restore_result = self.cmd('{} flexible-server restore -g {} --name {} --source-server {}'
+                                  .format(database_engine, resource_group, cluster_restore_name, basic_info['id'])).get_output_in_json()
+        self.assertEqual(restore_result['name'], cluster_restore_name)
+        self.assertEqual(restore_result['cluster']['clusterSize'], update_cluster_size)
+
+        # delete everything
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, cluster_name))
+        self.cmd('{} flexible-server delete -g {} -n {} --yes'.format(database_engine, resource_group, cluster_restore_name))
+
+
+class FlexibleServerIndexTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
+
+    postgres_location = 'canadacentral'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_index_tuning_options(self, resource_group):
+        self._test_index_tuning_options_mgmt('postgres', resource_group)
+
+    def _test_index_tuning_options_mgmt(self, database_engine, resource_group):
+
+        # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        version = '17'
+        storage_size = 128
+        sku_name = 'Standard_D4ds_v4'
+        tier = 'GeneralPurpose'
+
+        self.cmd('{} flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'.format(
+                 database_engine, resource_group, server_name, sku_name, tier, storage_size, version, location))
+
+        # Enable index tuning for server
+        self.cmd('{} flexible-server index-tuning update -g {} -s {} --enabled True'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # Show that index tuning is enabled
+        self.cmd('{} flexible-server index-tuning show -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # List settings associated with index tuning for server
+        self.cmd('{} flexible-server index-tuning list-settings -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # Show properties of index tuning setting for server
+        self.cmd('{} flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+                 checks=[JMESPathCheck('value', 'report')])
+        self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'pg_qs.query_capture_mode', resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'all')])
+
+        # Set new value of index tuning setting for server
+        value = '1006'
+        self.cmd('{} flexible-server index-tuning set-settings -g {} -s {} -n {} -v {}'.format(database_engine, resource_group, server_name,
+                                                                                               'unused_reads_per_table', value),
+                 checks=[JMESPathCheck('value', value)])
+
+        # List recommendations associated with index tuning for server
+        self.cmd('{} flexible-server index-tuning list-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # Disable index tuning for server
+        self.cmd('{} flexible-server index-tuning update -g {} -s {} --enabled False'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # Show properties of index tuning setting for server
+        self.cmd('{} flexible-server index-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+                 checks=[JMESPathCheck('value', 'off')])
+
+
+class FlexibleServerAutonomousTuningOptionsResourceMgmtScenarioTest(ScenarioTest):
+
+    postgres_location = 'canadacentral'
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=postgres_location)
+    def test_postgres_flexible_server_autonomous_tuning_options(self, resource_group):
+        self._test_autonomous_tuning_options_mgmt('postgres', resource_group)
+
+    def _test_autonomous_tuning_options_mgmt(self, database_engine, resource_group):
+
+        # Create server with at least 4 vCores and running PostgreSQL major version of 13 or later
+        location = self.postgres_location
+        server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
+        version = '17'
+        storage_size = 128
+        sku_name = 'Standard_D4ds_v4'
+        tier = 'GeneralPurpose'
+
+        self.cmd('{} flexible-server create -g {} -n {} --sku-name {} --tier {} --storage-size {} --version {} -l {} --public-access none --yes'.format(
+                 database_engine, resource_group, server_name, sku_name, tier, storage_size, version, location))
+
+        # Enable autonomous tuning for server
+        self.cmd('{} flexible-server autonomous-tuning update -g {} -s {} --enabled True'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # Show that autonomous tuning is enabled
+        self.cmd('{} flexible-server autonomous-tuning show -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # List settings associated with autonomous tuning for server
+        self.cmd('{} flexible-server autonomous-tuning list-settings -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # Show properties of autonomous tuning setting for server
+        self.cmd('{} flexible-server autonomous-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+                 checks=[JMESPathCheck('value', 'report')])
+        self.cmd('{} flexible-server parameter show --name {} -g {} -s {}'.format(database_engine, 'pg_qs.query_capture_mode', resource_group, server_name),
+                 checks=[JMESPathCheck('value', 'all')])
+
+        # Set new value of autonomous tuning setting for server
+        value = '1006'
+        self.cmd('{} flexible-server autonomous-tuning set-settings -g {} -s {} -n {} -v {}'.format(database_engine, resource_group, server_name,
+                                                                                               'unused_reads_per_table', value),
+                 checks=[JMESPathCheck('value', value)])
+
+        # List index recommendations associated with autonomous tuning for server
+        self.cmd('{} flexible-server autonomous-tuning list-index-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # List table recommendations associated with autonomous tuning for server
+        self.cmd('{} flexible-server autonomous-tuning list-table-recommendations -g {} -s {}'.format(database_engine, resource_group, server_name),
+                 checks=[JMESPathCheck('type(@)', 'array')])
+
+        # Disable autonomous tuning for server
+        self.cmd('{} flexible-server autonomous-tuning update -g {} -s {} --enabled False'.format(database_engine, resource_group, server_name),
+                 checks=NoneCheck())
+
+        # Show properties of autonomous tuning setting for server
+        self.cmd('{} flexible-server autonomous-tuning show-settings -g {} -s {} -n {}'.format(database_engine, resource_group, server_name, 'mode'),
+                 checks=[JMESPathCheck('value', 'off')])

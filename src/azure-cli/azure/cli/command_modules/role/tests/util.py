@@ -7,7 +7,7 @@ from knack.util import CLIError
 from azure.cli.testsdk.scenario_tests.recording_processors import RecordingProcessor
 
 ROLE_COMMAND_MAX_RETRY = 20
-ROLE_COMMAND_SLEEP_DURATION = 10
+ROLE_COMMAND_SLEEP_DURATION = 20
 
 
 def retry(func, sleep_duration=ROLE_COMMAND_SLEEP_DURATION, max_retry=ROLE_COMMAND_MAX_RETRY):

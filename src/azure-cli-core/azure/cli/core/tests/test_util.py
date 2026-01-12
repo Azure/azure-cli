@@ -11,12 +11,13 @@ import unittest
 from unittest import mock
 import tempfile
 import json
+import platform
 
 from azure.cli.core.util import \
     (get_file_json, truncate_text, shell_safe_json_parse, b64_to_hex, hash_string, random_string,
      open_page_in_browser, can_launch_browser, handle_exception, ConfiguredDefaultSetter, send_raw_request,
      should_disable_connection_verify, parse_proxy_resource_id, get_az_user_agent, get_az_rest_user_agent,
-     _get_parent_proc_name, is_wsl)
+     _get_parent_proc_name, is_wsl, run_cmd, run_az_cmd, roughly_parse_command, roughly_parse_command_with_casing)
 from azure.cli.core.mock import DummyCli
 
 
@@ -268,8 +269,8 @@ class TestUtils(unittest.TestCase):
         expected_header_with_auth['Authorization'] = 'Bearer eyJ0eXAiOiJKV1'
 
         # Test basic usage
-        # Mock Put Blob https://docs.microsoft.com/en-us/rest/api/storageservices/put-blob
-        # Authenticate with service SAS https://docs.microsoft.com/en-us/rest/api/storageservices/create-service-sas
+        # Mock Put Blob https://learn.microsoft.com/en-us/rest/api/storageservices/put-blob
+        # Authenticate with service SAS https://learn.microsoft.com/en-us/rest/api/storageservices/create-service-sas
         sas_token = ['sv=2019-02-02', '{"srt": "s"}', "{'ss': 'bf'}"]
         send_raw_request(cli_ctx, 'PUT', 'https://myaccount.blob.core.windows.net/mycontainer/myblob?timeout=30',
                          uri_parameters=sas_token, body=test_body,
@@ -311,7 +312,7 @@ class TestUtils(unittest.TestCase):
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
         # Test ARM Subscriptions - List
-        # https://docs.microsoft.com/en-us/rest/api/resources/subscriptions/list
+        # https://learn.microsoft.com/en-us/rest/api/resources/subscriptions/list
         # /subscriptions?api-version=2020-01-01
         send_raw_request(cli_ctx, 'GET', '/subscriptions?api-version=2020-01-01', body=test_body,
                          generated_client_request_id_name=None)
@@ -322,7 +323,7 @@ class TestUtils(unittest.TestCase):
         self.assertDictEqual(dict(request.headers), expected_header_with_auth)
 
         # Test ARM Tenants - List
-        # https://docs.microsoft.com/en-us/rest/api/resources/tenants/list
+        # https://learn.microsoft.com/en-us/rest/api/resources/tenants/list
         # /tenants?api-version=2020-01-01
         send_raw_request(cli_ctx, 'GET', '/tenants?api-version=2020-01-01', body=test_body,
                          generated_client_request_id_name=None)
@@ -421,6 +422,34 @@ class TestUtils(unittest.TestCase):
         parent2.name.return_value = "bash"
         self.assertEqual(_get_parent_proc_name(), "pwsh")
 
+    def test_cli_run_cmd(self):
+        cmd = ["echo", "abc"]
+        if platform.system().lower() == "windows":
+            cmd = ["cmd.exe", "/c"] + cmd
+        output = run_cmd(cmd, capture_output=True)
+        self.assertEqual(output.returncode, 0, "error when run cmd in shell")
+        self.assertEqual(output.stdout.decode("utf8").strip(), "abc", "unexpected output when run cmd")
+
+        output = run_cmd(cmd, capture_output=True, encoding="utf8")
+        self.assertEqual(output.returncode, 0, "error when run cmd in shell")
+        self.assertEqual(output.stdout.strip(), "abc", "unexpected output when run cmd")
+
+    def test_run_cmd_arg_error(self):
+        cmd = "echo abc"
+        if platform.system().lower() == "windows":
+            cmd = "cmd.exe /c " + cmd
+        from azure.cli.core.azclierror import ArgumentUsageError
+        with self.assertRaises(ArgumentUsageError):
+            run_cmd(cmd, check=True)
+
+    def test_run_az_cmd(self):
+        cmd = ["az", "version"]
+        output = run_az_cmd(cmd)
+        self.assertEqual(output.exit_code, 0, "unexpected exit_code when run az version")
+        self.assertEqual(output.error, None, "unexpected error when run az cmd")
+        self.assertIsInstance(output.result, dict, "unexpected cmd execution result")
+        self.assertIn("azure-cli-core", output.result, "unexpected cmd execution result")
+
 
 class TestBase64ToHex(unittest.TestCase):
 
@@ -432,6 +461,24 @@ class TestBase64ToHex(unittest.TestCase):
 
     def test_b64_to_hex_type(self):
         self.assertIsInstance(b64_to_hex(self.base64), str)
+
+
+class TestGetProperty(unittest.TestCase):
+
+    def test_getprop(self):
+        from azure.cli.core.util import getprop
+        with self.assertRaises(AttributeError):
+            getprop(self, '__class__')
+        with self.assertRaises(AttributeError):
+            getprop(self, '__init__')
+        with self.assertRaises(AttributeError):
+            getprop(self, 'assertRaises')
+        with self.assertRaises(AttributeError):
+            getprop(self, '_diffThreshold')
+        with self.assertRaises(AttributeError):
+            getprop(self, 'new_props')
+        self.assertEqual(getprop(self, 'maxDiff'), self.maxDiff)
+        self.assertEqual(getprop(self, 'new_props', "new_props"), "new_props")
 
 
 class TestHandleException(unittest.TestCase):
@@ -465,21 +512,19 @@ class TestHandleException(unittest.TestCase):
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
-    def test_handle_exception_clouderror(self, mock_logger_error):
-        from msrestazure.azure_exceptions import CloudError
+    def test_handle_exception_httpresponseerror(self, mock_logger_error):
+        from azure.core.exceptions import HttpResponseError
 
-        # create test CloudError Exception
-        err_detail = "There was a Cloud Error."
-        err_msg = "CloudError"
-        mock_cloud_error = mock.MagicMock(spec=CloudError)
-        mock_cloud_error.args = (err_detail, err_msg)
+        # create test HttpResponseError Exception
+        mock_http_response_error = HttpResponseError(response=mock.MagicMock(status_code="xxx",
+                                                                             reason="There was a Http Response Error."))
 
         # call handle_exception
-        ex_result = handle_exception(mock_cloud_error)
+        ex_result = handle_exception(mock_http_response_error)
 
         # test behavior
         self.assertTrue(mock_logger_error.called)
-        self.assertIn(mock_cloud_error.args[0], mock_logger_error.call_args[0][0])
+        self.assertIn(mock_http_response_error.args[0], mock_logger_error.call_args[0][0])
         self.assertEqual(ex_result, 1)
 
     @mock.patch('azure.cli.core.azclierror.logger.error', autospec=True)
@@ -487,7 +532,7 @@ class TestHandleException(unittest.TestCase):
         # create test HttpOperationError Exception
         err_msg = "Bad Request because of some incorrect param"
         err_code = "BadRequest"
-        err = dict(error=dict(code=err_code, message=err_msg))
+        err = {"error": {"code": err_code, "message": err_msg}}
         response_text = json.dumps(err)
         mock_http_error = self._get_mock_HttpOperationError(response_text)
 
@@ -506,7 +551,7 @@ class TestHandleException(unittest.TestCase):
 
         # create test HttpOperationError Exception
         err_msg = "BadRequest"
-        err = dict(error=err_msg)
+        err = {"error": err_msg}
         response_text = json.dumps(err)
         mock_http_error = self._get_mock_HttpOperationError(response_text)
 
@@ -566,6 +611,83 @@ class TestHandleException(unittest.TestCase):
         mock_http_error.response = mock_response
 
         return mock_http_error
+
+    def test_roughly_parse_command(self):
+        """Test roughly_parse_command function that extracts command parts and converts to lowercase"""
+        # Basic command parsing
+        self.assertEqual(roughly_parse_command(['az', 'vm', 'create']), 'az vm create')
+        self.assertEqual(roughly_parse_command(['account', 'show']), 'account show')
+        self.assertEqual(roughly_parse_command(['network', 'vnet', 'list']), 'network vnet list')
+        
+        # Test case conversion - should convert to lowercase
+        self.assertEqual(roughly_parse_command(['az', 'VM', 'CREATE']), 'az vm create')
+        self.assertEqual(roughly_parse_command(['Account', 'Show']), 'account show')
+        
+        # Test with flags - should stop at first flag and not include flag values
+        self.assertEqual(roughly_parse_command(['az', 'vm', 'create', '--name', 'secretVM']), 'az vm create')
+        self.assertEqual(roughly_parse_command(['az', 'storage', 'account', 'create', '--name', 'mystorageaccount']), 'az storage account create')
+        self.assertEqual(roughly_parse_command(['az', 'keyvault', 'create', '--resource-group', 'myRG', '--name', 'myVault']), 'az keyvault create')
+        
+        # Test with short flags
+        self.assertEqual(roughly_parse_command(['az', 'vm', 'list', '-g', 'myResourceGroup']), 'az vm list')
+        self.assertEqual(roughly_parse_command(['az', 'group', 'create', '-n', 'myGroup', '-l', 'eastus']), 'az group create')
+        
+        # Edge cases
+        self.assertEqual(roughly_parse_command([]), '')
+        self.assertEqual(roughly_parse_command(['az']), 'az')
+        self.assertEqual(roughly_parse_command(['--help']), '')  # Starts with flag
+        self.assertEqual(roughly_parse_command(['-h']), '')  # Starts with short flag
+
+    def test_roughly_parse_command_with_casing(self):
+        """Test roughly_parse_command_with_casing function that preserves original casing"""
+        # Basic command parsing with case preservation
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'vm', 'create']), 'az vm create')
+        self.assertEqual(roughly_parse_command_with_casing(['account', 'show']), 'account show')
+        self.assertEqual(roughly_parse_command_with_casing(['network', 'vnet', 'list']), 'network vnet list')
+        
+        # Test case preservation - should keep original casing
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'VM', 'CREATE']), 'az VM CREATE')
+        self.assertEqual(roughly_parse_command_with_casing(['Account', 'Show']), 'Account Show')
+        self.assertEqual(roughly_parse_command_with_casing(['Az', 'Network', 'Vnet', 'List']), 'Az Network Vnet List')
+        
+        # Test with flags - should stop at first flag and not include sensitive flag values
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'vm', 'create', '--name', 'secretVM']), 'az vm create')
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'VM', 'Create', '--name', 'superSecretVM']), 'az VM Create')
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'storage', 'account', 'create', '--name', 'mystorageaccount']), 'az storage account create')
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'keyvault', 'create', '--resource-group', 'myRG', '--name', 'myVault']), 'az keyvault create')
+        
+        # Test with short flags
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'VM', 'list', '-g', 'myResourceGroup']), 'az VM list')
+        self.assertEqual(roughly_parse_command_with_casing(['az', 'Group', 'create', '-n', 'myGroup', '-l', 'eastus']), 'az Group create')
+        
+        # Test mixed case scenarios that might reveal user typing patterns
+        self.assertEqual(roughly_parse_command_with_casing(['Az', 'Vm', 'Create']), 'Az Vm Create')
+        self.assertEqual(roughly_parse_command_with_casing(['AZ', 'STORAGE', 'BLOB', 'LIST']), 'AZ STORAGE BLOB LIST')
+        
+        # Edge cases
+        self.assertEqual(roughly_parse_command_with_casing([]), '')
+        self.assertEqual(roughly_parse_command_with_casing(['az']), 'az')
+        self.assertEqual(roughly_parse_command_with_casing(['Az']), 'Az')
+        self.assertEqual(roughly_parse_command_with_casing(['--help']), '')  # Starts with flag
+        self.assertEqual(roughly_parse_command_with_casing(['-h']), '')  # Starts with short flag
+        
+        # Security test - ensure no sensitive information leaks after flags
+        test_cases_with_secrets = [
+            (['az', 'vm', 'create', '--admin-password', 'SuperSecret123!'], 'az vm create'),
+            (['az', 'sql', 'server', 'create', '--admin-user', 'admin', '--admin-password', 'VerySecret!'], 'az sql server create'),
+            (['az', 'storage', 'account', 'create', '--name', 'storageacct', '--access-tier', 'Hot'], 'az storage account create'),
+            (['Az', 'KeyVault', 'Secret', 'Set', '--vault-name', 'myVault', '--name', 'secretName', '--value', 'topSecret'], 'Az KeyVault Secret Set')
+        ]
+        
+        for args, expected in test_cases_with_secrets:
+            with self.subTest(args=args):
+                result = roughly_parse_command_with_casing(args)
+                self.assertEqual(result, expected)
+                # Ensure no sensitive values made it through
+                self.assertNotIn('SuperSecret123!', result)
+                self.assertNotIn('VerySecret!', result)
+                self.assertNotIn('topSecret', result)
+                self.assertNotIn('storageacct', result)  # Even non-secret values after flags should not appear
 
 
 if __name__ == '__main__':

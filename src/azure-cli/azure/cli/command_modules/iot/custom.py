@@ -9,7 +9,7 @@ import re
 from enum import Enum
 from knack.log import get_logger
 from knack.util import CLIError
-from msrestazure.azure_exceptions import CloudError
+from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import (
     ArgumentUsageError,
     BadRequestError,
@@ -20,7 +20,6 @@ from azure.cli.core.azclierror import (
 )
 from azure.cli.core.commands import LongRunningOperation
 from azure.cli.core.util import sdk_no_wait
-from azure.cli.core.profiles._shared import AZURE_API_PROFILES, ResourceType
 
 from azure.mgmt.iothub.models import (IotHubSku,
                                       AccessRights,
@@ -70,7 +69,7 @@ from azure.cli.command_modules.iot._constants import SYSTEM_ASSIGNED_IDENTITY
 from azure.cli.command_modules.iot.shared import EndpointType, EncodingFormat, RenewKeyType, AuthenticationType, IdentityType
 from azure.cli.command_modules.iot._client_factory import resource_service_factory
 from azure.cli.command_modules.iot._client_factory import iot_hub_service_factory
-from azure.cli.command_modules.iot._utils import open_certificate, generate_key
+from azure.cli.command_modules.iot._utils import open_certificate
 
 
 logger = get_logger(__name__)
@@ -198,8 +197,12 @@ def iot_dps_policy_update(
         if policy.key_name == access_policy_name:
             if primary_key is not None:
                 policy.primary_key = primary_key
+                if policy.primary_key == '':
+                    policy.primary_key = None
             if secondary_key is not None:
                 policy.secondary_key = secondary_key
+                if policy.secondary_key == '':
+                    policy.secondary_key = None
             if rights is not None:
                 policy.rights = _convert_rights_to_access_rights(rights)
 
@@ -429,10 +432,8 @@ def iot_hub_certificate_create(client, hub_name, certificate_name, certificate_p
         raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
     cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
 
-    if AZURE_API_PROFILES["latest"][ResourceType.MGMT_IOTHUB] in client.profile.label:
-        cert_description = CertificateDescription(properties=cert_properties)
-        return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
-    return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_properties)
+    cert_description = CertificateDescription(properties=cert_properties)
+    return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description)
 
 
 def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_path, etag, resource_group_name=None, is_verified=None):
@@ -445,10 +446,8 @@ def iot_hub_certificate_update(client, hub_name, certificate_name, certificate_p
                 raise CLIError("Error uploading certificate '{0}'.".format(certificate_path))
             cert_properties = CertificateProperties(certificate=certificate, is_verified=is_verified)
 
-            if AZURE_API_PROFILES["latest"][ResourceType.MGMT_IOTHUB] in client.profile.label:
-                cert_description = CertificateDescription(properties=cert_properties)
-                return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
-            return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_properties, etag)
+            cert_description = CertificateDescription(properties=cert_properties)
+            return client.certificates.create_or_update(resource_group_name, hub_name, certificate_name, cert_description, etag)
     raise CLIError("Certificate '{0}' does not exist. Use 'iot hub certificate create' to create a new certificate."
                    .format(certificate_name))
 
@@ -582,7 +581,7 @@ def iot_hub_create(cmd, client, hub_name, resource_group_name, location=None,
                     hub_description.identity.principal_id = principal_id
                     for scope in identity_scopes:
                         assign_identity(cmd.cli_ctx, lambda: hub_description, lambda hub: hub_description, identity_role=identity_role, identity_scope=scope)
-        except CloudError as e:
+        except HttpResponseError as e:
             raise e
 
     create = client.iot_hub_resource.begin_create_or_update(resource_group_name, hub_name, hub_description)
@@ -632,6 +631,7 @@ def update_iot_hub_custom(instance,
                           fileupload_storage_authentication_type=None,
                           fileupload_storage_container_uri=None,
                           fileupload_storage_identity=None,
+                          min_tls_version=None,
                           tags=None):
     from datetime import timedelta
     if tags is not None:
@@ -664,6 +664,8 @@ def update_iot_hub_custom(instance,
     if fileupload_notification_ttl is not None:
         ttl = timedelta(hours=fileupload_notification_ttl)
         instance.properties.messaging_endpoints['fileNotifications'].ttl_as_iso8601 = ttl
+    if min_tls_version is not None:
+        instance.properties.min_tls_version = min_tls_version
     # only bother with $default storage endpoint checking if modifying fileupload params
     if any([
             fileupload_storage_connectionstring, fileupload_storage_container_name, fileupload_sas_ttl,
@@ -691,6 +693,16 @@ def update_iot_hub_custom(instance,
             fileupload_storage_identity,
         )
 
+    _update_iot_hub_auth(
+        instance=instance,
+        disable_local_auth=disable_local_auth,
+        disable_device_sas=disable_device_sas,
+        disable_module_sas=disable_module_sas
+    )
+    return instance
+
+
+def _update_iot_hub_auth(instance, disable_local_auth=None, disable_device_sas=None, disable_module_sas=None):
     # sas token authentication switches
     if disable_local_auth is not None:
         instance.properties.disable_local_auth = disable_local_auth
@@ -698,8 +710,6 @@ def update_iot_hub_custom(instance,
         instance.properties.disable_device_sas = disable_device_sas
     if disable_module_sas is not None:
         instance.properties.disable_module_sas = disable_module_sas
-
-    return instance
 
 
 def iot_hub_update(client, hub_name, parameters, resource_group_name=None):
@@ -900,9 +910,9 @@ def iot_hub_policy_key_renew(cmd, client, hub_name, policy_name, regenerate_key,
     updated_policies = [p for p in policies if p.key_name.lower() != policy_name.lower()]
     requested_policy = [p for p in policies if p.key_name.lower() == policy_name.lower()]
     if regenerate_key == RenewKeyType.Primary.value:
-        requested_policy[0].primary_key = generate_key()
+        requested_policy[0].primary_key = None
     if regenerate_key == RenewKeyType.Secondary.value:
-        requested_policy[0].secondary_key = generate_key()
+        requested_policy[0].secondary_key = None
     if regenerate_key == RenewKeyType.Swap.value:
         temp = requested_policy[0].primary_key
         requested_policy[0].primary_key = requested_policy[0].secondary_key
@@ -940,11 +950,11 @@ def iot_hub_get_stats(client, hub_name, resource_group_name=None):
 
 def validate_authentication_type_input(endpoint_type, connection_string=None, authentication_type=None, endpoint_uri=None, entity_path=None):
     is_keyBased = (AuthenticationType.KeyBased.value == authentication_type) or (authentication_type is None)
-    has_connection_string = (connection_string is not None)
+    has_connection_string = connection_string is not None
     if is_keyBased and not has_connection_string:
         raise CLIError("Please provide a connection string '--connection-string/-c'")
 
-    has_endpoint_uri = (endpoint_uri is not None)
+    has_endpoint_uri = endpoint_uri is not None
     has_endpoint_uri_and_path = (has_endpoint_uri) and (entity_path is not None)
     if EndpointType.AzureStorageContainer.value == endpoint_type.lower() and not has_endpoint_uri:
         raise CLIError("Please provide an endpoint uri '--endpoint-uri'")
@@ -1193,15 +1203,6 @@ def iot_message_enrichment_list(cmd, client, hub_name, resource_group_name=None)
     resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
     hub = iot_hub_get(cmd, client, hub_name, resource_group_name)
     return hub.properties.routing.enrichments
-
-
-def iot_hub_devicestream_show(cmd, client, hub_name, resource_group_name=None):
-    from azure.cli.core.commands.client_factory import get_mgmt_service_client
-    resource_group_name = _ensure_hub_resource_group_name(client, resource_group_name, hub_name)
-    # DeviceStreams property is still in preview, so until GA we need to use a preview API-version
-    client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_IOTHUB, api_version='2019-07-01-preview')
-    hub = client.iot_hub_resource.get(resource_group_name, hub_name)
-    return hub.properties.device_streams
 
 
 def iot_hub_manual_failover(cmd, client, hub_name, resource_group_name=None, no_wait=False):
@@ -1525,7 +1526,6 @@ def get_private_endpoint_connection(client, resource_group_name=None, connection
 
 
 def _update_private_endpoint_connection_status(client, resource_group_name, account_name, connection_id, private_endpoint_connection_name, is_approved=True, description=None):  # pylint: disable=unused-argument
-    from azure.core.exceptions import HttpResponseError
     getInfoArr = get_private_endpoint_connection(client,
                                                  resource_group_name=resource_group_name,
                                                  connection_id=connection_id,

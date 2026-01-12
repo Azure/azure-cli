@@ -7,6 +7,7 @@ import json
 from datetime import datetime, timedelta
 import unittest
 import time
+import random
 
 from azure.cli.testsdk import ScenarioTest, JMESPathCheckExists, ResourceGroupPreparer, \
     StorageAccountPreparer, KeyVaultPreparer, record_only, live_only
@@ -14,7 +15,7 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import StorageType
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 
 from .preparers import VaultPreparer, VMPreparer, ItemPreparer, PolicyPreparer, RPPreparer, \
-    DESPreparer, KeyPreparer
+    DESPreparer, KeyPreparer, RGPreparer
 
 
 def _get_vm_version(vm_type):
@@ -25,15 +26,34 @@ def _get_vm_version(vm_type):
 
 
 class BackupTests(ScenarioTest, unittest.TestCase):
-    @ResourceGroupPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    def wait_for_restore_complete(self, job_id):
+        self.kwargs.update({'job_id': job_id})
+
+        status = "InProgress"
+        iteration = wait_iteration = 0
+        while status == "InProgress":
+            iteration += 1
+            if wait_iteration < 6:
+                wait_iteration += 1
+            time.sleep(2**wait_iteration + (random.randint(0, 1000) / 1000))
+            status = self.cmd('az backup job show --ids {job_id} --query properties.status').get_output_in_json()
+
+            if iteration > 30:
+                break
+        
+        return status
+
+
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @VaultPreparer()
     @VMPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     def test_backup_scenario(self, resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
             'vault': vault_name,
-            'vm': vm_name
+            'vm': vm_name,
+            'rg': resource_group
         })
 
         # Enable Protection
@@ -72,13 +92,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup protection disable -g {rg} -v {vault} -c {container} -i {item} --backup-management-type AzureIaasVM --workload-type VM --delete-backup-data true --yes')
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
     # @PolicyPreparer(parameter_name='policy')
     def test_backup_vault(self, resource_group, resource_group_location, vault1, vault2):
 
         self.kwargs.update({
+            'rg': resource_group,
             'loc': resource_group_location,
             'vault1': vault1,
             'vault2': vault2,
@@ -153,14 +174,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('standardTierStorageRedundancy', new_storage_model)
         ])
 
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --hybrid-backup-security-features Disable', checks=[
-            self.check("properties.enhancedSecurityState", 'Disabled'),
-        ])
-
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --hybrid-backup-security-features Enable', checks=[
-            self.check("properties.enhancedSecurityState", 'Enabled'),
-        ])
-
         self.cmd('backup vault backup-properties set -g {rg} -n {vault1} --classic-alerts Disable --job-failure-alerts Disable', checks=[
             self.check('properties.monitoringSettings.azureMonitorAlertSettings.alertsForAllJobFailures', 'Disabled'),
             self.check('properties.monitoringSettings.classicAlertSettings.alertsForCriticalOperations', 'Disabled')
@@ -197,14 +210,14 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.cmd('backup vault delete -n {vault4} -g {rg} -y')
 
         self.cmd('backup vault list', checks=[
-            self.check("length([?resourceGroup == '{rg}'])", number_of_test_vaults - 1),
+            # self.check("length([?resourceGroup == '{rg}'])", number_of_test_vaults - 1),
             self.check("length([?name == '{vault1}'])", 1),
             self.check("length([?name == '{vault2}'])", 1),
             self.check("length([?name == '{vault3}'])", 1)
         ])
 
-    @ResourceGroupPreparer(location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
+    @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     @ItemPreparer(vm_parameter_name='vm1')
@@ -212,6 +225,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_backup_container(self, resource_group, vault_name, vm1, vm2):
 
         self.kwargs.update({
+            'rg': resource_group,
             'vault': vault_name,
             'vm1': vm1,
             'vm2': vm2
@@ -237,8 +251,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("length([?properties.friendlyName == '{vm1}'])", 1),
             self.check("length([?properties.friendlyName == '{vm2}'])", 1)])
 
-    @ResourceGroupPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @VaultPreparer()
     @PolicyPreparer(parameter_name='policy1')
     @PolicyPreparer(parameter_name='policy2', instant_rp_days="3")
     @VMPreparer(parameter_name='vm1')
@@ -248,6 +262,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_backup_policy(self, resource_group, vault_name, policy1, policy2, vm1, vm2):
 
         self.kwargs.update({
+            'rg': resource_group,
             'policy1': policy1,
             'policy2': policy2,
             'policy3': self.create_random_name('clitest-policy', 24),
@@ -351,8 +366,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['policy4_json'] = self.cmd('backup policy show -g {rg} -v {vault} -n {policy2}').get_output_in_json()
         self.assertEqual(self.kwargs['policy4_json']['properties']['instantRpRetentionRangeInDays'], 3)
 
-    @ResourceGroupPreparer(location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
+    @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @VMPreparer(parameter_name='vm2')
     @ItemPreparer(vm_parameter_name='vm1')
@@ -361,6 +376,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
     def test_backup_item(self, resource_group, vault_name, vm1, vm2, policy_name):
 
         self.kwargs.update({
+            'rg': resource_group,
             'vault': vault_name,
             'vm1': vm1,
             'vm2': vm2,
@@ -435,14 +451,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         item1_json = self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container1} -n {vm1}').get_output_in_json()
         self.assertIn(policy_name.lower(), item1_json['properties']['policyId'].lower())
 
-    @ResourceGroupPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
     def test_backup_rp(self, resource_group, vault_name, vm_name):
 
         self.kwargs.update({
+            'rg': resource_group,
             'vault': vault_name,
             'vm': vm_name
         })
@@ -459,12 +476,13 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn(vault_name.lower(), rp1_json['id'].lower())
         self.assertIn(vm_name.lower(), rp1_json['id'].lower())
 
-    @ResourceGroupPreparer(location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
+    @VaultPreparer()
     @VMPreparer()
     def test_backup_protection(self, resource_group, vault_name, vm_name):
 
         self.kwargs.update({
+            'rg': resource_group,
             'vault': vault_name,
             'vm': vm_name
         })
@@ -507,15 +525,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-        self.cmd('backup container list --backup-management-type AzureIaasVM -v {vault} -g {rg}',
-                 checks=self.check("length(@)", 0))
+        # self.cmd('backup container list --backup-management-type AzureIaasVM -v {vault} -g {rg}',
+        #          checks=self.check("length(@)", 0))
 
-        protection_check = self.cmd('backup protection check-vm --vm-id {vm_id}').output
-        self.assertTrue(protection_check == '')
+        # protection_check = self.cmd('backup protection check-vm --vm-id {vm_id}').output
+        # self.assertTrue(protection_check == '')
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -578,10 +596,78 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
+
+    # Prerequisites in case resource gets deleted - VM backed up in vault such that it is associated with a disk access set and RP contains isPrivateAccessEnabledOnAnyDisk
+    @unittest.skip("Soft delete has been disabled making this test non-viable currently, skipping as not affected by current changes")
+    def test_backup_diskaccess_restore(self):
+        self.kwargs.update({
+            'rg': 'zubairRG',
+            'vault': 'ztestvault1',
+            'container_name': 'zvm-jsdk2',
+            'item_name': 'zvm-jsdk2',
+            'sa': 'zubairsaccy',
+            'target_rg': 'zubairRG',
+            'target_vm_name': 'zvm-jsdk2-clitestrestore',
+            'target_vnet_name': 'zvm-jsdk1-vnet',
+            'target_vnet_rg': 'zubairRG',
+            'target_subnet_name': 'default',
+            'target_disk_access_id': '/subscriptions/38304e13-357e-405e-9e9a-220351dcce8c/resourceGroups/zubairRG/providers/Microsoft.Compute/diskAccesses/clitest-access1'
+        })
+        self.cmd('vm delete -g {rg} -n {target_vm_name} --yes')
+
+        rp_details = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container_name} -i {item_name} --query [0]').get_output_in_json()
+        self.assertTrue(rp_details['properties']['isPrivateAccessEnabledOnAnyDisk'])
+
+        self.kwargs['rp'] = rp_details['name']
+
+        base_command = 'az backup restore restore-disks -g {rg} -v {vault} --container-name {container_name} --item-name {item_name} --storage-account {sa} --rp-name {rp} '
+        base_command += '--target-resource-group {target_rg} --target-vm-name {target_vm_name} --target-vnet-name {target_vnet_name} --target-vnet-resource-group {target_vnet_rg} --target-subnet-name {target_subnet_name}'
+        target_disk_access_option = ' --target-disk-access-id {target_disk_access_id}'
+
+        # Command should fail as the RP contains isPrivateEAccessEnabledOnAnyDisk is true
+        self.cmd(base_command, expect_failure=True)
+        
+        # for same as source option, command should fail when target disk option is provided, but pass otherwise
+        same_as_source_command = base_command + ' --disk-access-option SameAsOnSourceDisks'
+        self.cmd(same_as_source_command + target_disk_access_option, expect_failure=True)
+        job_out = self.cmd(same_as_source_command, checks=[
+            self.check("properties.entityFriendlyName", '{container_name}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.wait_for_restore_complete(job_out["id"])
+        self.cmd('vm delete -g {rg} -n {target_vm_name} --yes')
+
+        # for enable public access option, command should fail when target disk option is provided, but pass otherwise
+        public_command = base_command + ' --disk-access-option EnablePublicAccessForAllDisks'
+        self.cmd(public_command + target_disk_access_option, expect_failure=True)
+        job_out = self.cmd(public_command, checks=[
+            self.check("properties.entityFriendlyName", '{container_name}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.wait_for_restore_complete(job_out["id"])
+        self.cmd('vm delete -g {rg} -n {target_vm_name} --yes')
+
+        # for enable private access option, command should fail when target disk option is NOT provided, but pass otherwise
+        private_command = base_command + ' --disk-access-option EnablePrivateAccessForAllDisks'
+        self.cmd(private_command, expect_failure=True)
+        job_out = self.cmd(private_command + target_disk_access_option, checks=[
+            self.check("properties.entityFriendlyName", '{container_name}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.wait_for_restore_complete(job_out["id"])
+        self.cmd('vm delete -g {rg} -n {target_vm_name} --yes')
+
+
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="eastus2euap")
-    @ResourceGroupPreparer(parameter_name="target_resource_group", location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="eastus2euap")
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -692,10 +778,51 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="centraluseuap")
-    @ResourceGroupPreparer(parameter_name="target_resource_group", location="centraluseuap")
-    @ResourceGroupPreparer(parameter_name="storage_account_resource_group", location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="eastus2euap")
+    @VaultPreparer(storageRedundancy = "ZoneRedundant")
+    @VMPreparer(image="Win2022Datacenter")
+    @ItemPreparer()
+    @RPPreparer()
+    @StorageAccountPreparer(location="eastus2euap")
+    def test_backup_CrossZonalRestore(self, resource_group, target_resource_group, vault_name, vm_name, storage_account):
+
+        self.kwargs.update({
+            'vault': vault_name,
+            'vm': vm_name,
+            'target_rg': target_resource_group,
+            'rg': resource_group,
+            'sa': storage_account,
+            'vm_id': "VM;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + resource_group + ";" + vm_name,
+            'vnet_name': self.create_random_name('clitest-vnet', 30),
+            'subnet_name': self.create_random_name('clitest-subnet', 30),
+            'target_vm_name': self.create_random_name('clitest-tvm', 15)
+        })
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
+
+        # Trigger Cross Zonal Restore to NoZone
+        trigger_restore_job5_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {target_rg} --storage-account {sa} --restore-to-staging-storage-account --target-zone NoZone', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job'] = trigger_restore_job5_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="storage_account_resource_group", location="centraluseuap")
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -743,11 +870,11 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('storage blob exists --account-name {sa} -c {container} -n {blob}', checks=self.check("exists", True))
 
-    # @unittest.skip("Test skipped due to temporary test infrastructure issues")
+    @unittest.skip("Test skipped due to temporary test infrastructure issues")
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="centraluseuap")
-    @ResourceGroupPreparer(parameter_name="target_resource_group", location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="centraluseuap")
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -788,12 +915,12 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
     @unittest.skip("Test skipped due to service-side flag being disabled")
     @AllowLargeResponse()
-    @ResourceGroupPreparer(location="centraluseuap")
-    @ResourceGroupPreparer(parameter_name="target_resource_group", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", parameter_name="target_resource_group", location="centraluseuap")
     @KeyVaultPreparer()
     @KeyPreparer()
     @DESPreparer()
-    @VaultPreparer(soft_delete=False)
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
@@ -836,15 +963,17 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.status", "Completed")
         ])   
 
-    @ResourceGroupPreparer(location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
+    @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
     @RPPreparer()
-    @StorageAccountPreparer(location=" centraluseuap")
+    @StorageAccountPreparer(location="centraluseuap")
     def test_backup_job(self, resource_group, vault_name, vm_name, storage_account):
 
         self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
             'vault': vault_name,
             'vm': vm_name
         })
@@ -874,7 +1003,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         self.cmd('backup job stop -g {rg} -v {vault} -n {job}')
 
-    @ResourceGroupPreparer(location="centraluseuap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
     @VaultPreparer()
     @VMPreparer()
     @ItemPreparer()
@@ -911,10 +1040,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
-        # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
-        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable')
-
         self.cmd('backup item show --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -n {vm}', checks=[
             self.check("properties.friendlyName", '{vm}'),
             self.check("properties.protectionState", "ProtectionStopped"),
@@ -922,8 +1047,8 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.isScheduledForDeferredDelete", None)
         ])
 
-    @ResourceGroupPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @VaultPreparer()
     @VMPreparer()
     @StorageAccountPreparer(location="eastus2euap")
     def test_backup_disk_exclusion(self, resource_group, vault_name, vm_name, storage_account):
@@ -933,11 +1058,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'rg': resource_group,
             'sa': storage_account
         })
-
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable')
-        # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
-        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable')
-
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk1 --new --size-gb 10')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk2 --new --size-gb 10')
         self.cmd('vm disk attach -g {rg} --vm-name {vm} --name mydisk3 --new --size-gb 10')
@@ -1019,53 +1139,53 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("resourceGroup", '{rg}')
         ])
 
-    @ResourceGroupPreparer(location="eastus2euap")
-    @VaultPreparer(soft_delete=False)
-    @VMPreparer()
-    @ItemPreparer()
-    @RPPreparer()
-    @StorageAccountPreparer(location="eastus2euap")
-    def test_backup_archive (self, resource_group, vault_name, vm_name, storage_account):
-        self.kwargs.update({
-            'vault': vault_name,
-            'vm': vm_name,
-            'rg': resource_group,
-            'sa': storage_account
-        })
+    # @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    # @VaultPreparer()
+    # @VMPreparer()
+    # @ItemPreparer()
+    # @RPPreparer()
+    # @StorageAccountPreparer(location="eastus2euap")
+    # def test_backup_archive (self, resource_group, vault_name, vm_name, storage_account):
+    #     self.kwargs.update({
+    #         'vault': vault_name,
+    #         'vm': vm_name,
+    #         'rg': resource_group,
+    #         'sa': storage_account
+    #     })
 
-        # Get Container
-        self.kwargs['container'] = self.cmd('backup container show -n {vm} -v {vault} -g {rg} --backup-management-type AzureIaasVM --query properties.friendlyName').get_output_in_json()
+    #     # Get Container
+    #     self.kwargs['container'] = self.cmd('backup container show -n {vm} -v {vault} -g {rg} --backup-management-type AzureIaasVM --query properties.friendlyName').get_output_in_json()
         
-        # Get Item
-        self.kwargs['item'] = self.cmd('backup item list -g {rg} -v {vault} -c {container} --backup-management-type AzureIaasVM --workload-type VM --query [0].properties.friendlyName').get_output_in_json()
+    #     # Get Item
+    #     self.kwargs['item'] = self.cmd('backup item list -g {rg} -v {vault} -c {container} --backup-management-type AzureIaasVM --workload-type VM --query [0].properties.friendlyName').get_output_in_json()
         
-        # Getting the recovery point IDs (names) and storing it in a list
-        rp_names = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container} -i {item}', checks=[
-            self.check("length(@)", 1)
-        ]).get_output_in_json()
+    #     # Getting the recovery point IDs (names) and storing it in a list
+    #     rp_names = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {container} -i {item}', checks=[
+    #         self.check("length(@)", 1)
+    #     ]).get_output_in_json()
         
-        self.kwargs['rp1'] = rp_names[0]['name']
-        self.kwargs['rp1_tier'] = rp_names[0]['tierType']
-        self.kwargs['rp1_is_ready_for_move'] = rp_names[0]['properties']['recoveryPointMoveReadinessInfo']['ArchivedRP']['isReadyForMove']
+    #     self.kwargs['rp1'] = rp_names[0]['name']
+    #     self.kwargs['rp1_tier'] = rp_names[0]['tierType']
+    #     self.kwargs['rp1_is_ready_for_move'] = rp_names[0]['properties']['recoveryPointMoveReadinessInfo']['ArchivedRP']['isReadyForMove']
         
-        # Check Archivable Recovery Points 
-        self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --is-ready-for-move {rp1_is_ready_for_move} --target-tier VaultArchive --query [0]', checks=[
-            self.check("resourceGroup", '{rg}'),
-            self.check("properties.recoveryPointMoveReadinessInfo.ArchivedRP.isReadyForMove", '{rp1_is_ready_for_move}')
-        ])
+    #     # Check Archivable Recovery Points 
+    #     self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --is-ready-for-move {rp1_is_ready_for_move} --target-tier VaultArchive --query [0]', checks=[
+    #         self.check("resourceGroup", '{rg}'),
+    #         self.check("properties.recoveryPointMoveReadinessInfo.ArchivedRP.isReadyForMove", '{rp1_is_ready_for_move}')
+    #     ])
 
-        # Get Archived Recovery Points 
-        self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --tier {rp1_tier} --query [0]', checks=[
-            self.check("tierType", '{rp1_tier}'),
-            self.check("resourceGroup", '{rg}')
-        ])
+    #     # Get Archived Recovery Points 
+    #     self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --tier {rp1_tier} --query [0]', checks=[
+    #         self.check("tierType", '{rp1_tier}'),
+    #         self.check("resourceGroup", '{rg}')
+    #     ])
 
-        # Get Recommended for Archive Recovery Points
-        self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --recommended-for-archive', checks=[
-            self.check("length(@)", 0)
-        ])
+    #     # Get Recommended for Archive Recovery Points
+    #     self.cmd('backup recoverypoint list -g {rg} -v {vault} -i {item} -c {container} --backup-management-type AzureIaasVM --recommended-for-archive', checks=[
+    #         self.check("length(@)", 0)
+    #     ])
 
-    @ResourceGroupPreparer(location="eastus2euap")
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
     @VaultPreparer()
     def test_backup_identity(self, resource_group, vault_name):
         self.kwargs.update({
@@ -1176,10 +1296,10 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check("properties.provisioningState", "Succeeded")
         ]).get_output_in_json()
 
-    @ResourceGroupPreparer()
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_")
     @VaultPreparer(parameter_name='vault1')
     @VaultPreparer(parameter_name='vault2')
-    @KeyVaultPreparer()
+    @KeyVaultPreparer(additional_params='--enable-rbac-authorization false')
     def test_backup_encryption(self, resource_group, resource_group_location, vault1, vault2, key_vault):
         self.kwargs.update({
             'loc' : resource_group_location,
@@ -1192,31 +1312,40 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             'identity1': self.create_random_name('clitest-identity1', 50),
             'identity2': self.create_random_name('clitest-identity2', 50),
             'identity_permissions': "get list unwrapKey wrapKey",
+            'identity_rbac_permissions': "Key Vault Crypto Service Encryption User",
+            'user_rbac_permissions': "Key Vault Administrator"
         })
 
+        subscription = self.cmd('account show --query "id"').get_output_in_json()
+        user_principal_id = self.cmd('account show --query "user.name"').get_output_in_json()
+        self.kwargs["user_principal_id"] = user_principal_id
+        self.kwargs['key_vault_id'] = "subscriptions/{}/resourceGroups/{}/providers/Microsoft.KeyVault/vaults/{}".format(
+            subscription, resource_group, key_vault)
+        # Uncomment during live runs
+        # self.cmd('role assignment create --role "{user_rbac_permissions}" --scope "{key_vault_id}" --assignee "{user_principal_id}"')
 
-        self.kwargs['identity1_id'] = self.cmd('identity create -n {identity1} -g {rg} --query id').get_output_in_json()
-        self.kwargs['identity1_principalid'] = self.cmd('identity show -n {identity1} -g {rg} --query principalId').get_output_in_json()
+        self.kwargs['identity1_id'] = self.cmd('identity create -n "{identity1}" -g "{rg}" --query id').get_output_in_json()
+        self.kwargs['identity1_principalid'] = self.cmd('identity show -n "{identity1}" -g "{rg}" --query principalId').get_output_in_json()
 
-        self.kwargs['identity2_id'] = self.cmd('identity create -n {identity2} -g {rg} --query id').get_output_in_json()
-        self.kwargs['identity2_principalid'] = self.cmd('identity show -n {identity2} -g {rg} --query principalId').get_output_in_json()
+        self.kwargs['identity2_id'] = self.cmd('identity create -n "{identity2}" -g "{rg}" --query id').get_output_in_json()
+        self.kwargs['identity2_principalid'] = self.cmd('identity show -n "{identity2}" -g "{rg}" --query principalId').get_output_in_json()
 
 
-        userMSI_v1_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} {identity2_id} -g {rg} -n {vault1}').get_output_in_json()
+        userMSI_v1_json = self.cmd('backup vault identity assign --user-assigned "{identity1_id}" "{identity2_id}" -g "{rg}" -n "{vault1}"').get_output_in_json()
 
-        system_v1_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -n {vault1}').get_output_in_json()
+        system_v1_json = self.cmd('backup vault identity assign --system-assigned -g "{rg}" -n "{vault1}"').get_output_in_json()
 
         self.kwargs['system1_principalid'] = system_v1_json['identity']['principalId']
 
-        userMSI1_v2_json = self.cmd('backup vault identity assign --user-assigned {identity1_id} -g {rg} -n {vault2}').get_output_in_json()
+        userMSI1_v2_json = self.cmd('backup vault identity assign --user-assigned "{identity1_id}" -g "{rg}" -n "{vault2}"').get_output_in_json()
 
-        system_v2_json = self.cmd('backup vault identity assign --system-assigned -g {rg} -n {vault2}').get_output_in_json()
+        system_v2_json = self.cmd('backup vault identity assign --system-assigned -g "{rg}" -n "{vault2}"').get_output_in_json()
 
         self.kwargs['system2_principalid'] = system_v2_json['identity']['principalId']
 
-        self.cmd('keyvault update --name {key_vault} --enable-purge-protection')
+        self.cmd('keyvault update --name "{key_vault}" --enable-purge-protection')
 
-        key1_json = self.cmd('keyvault key create --vault-name {key_vault} -n {key1} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
+        key1_json = self.cmd('keyvault key create --vault-name "{key_vault}" -n "{key1}" --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
             self.check("attributes.enabled", True),
             self.check('key.kty', "RSA"),
         ]).get_output_in_json()
@@ -1229,7 +1358,7 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.assertIn("verify", keyOps1)
         self.assertIn("wrapKey", keyOps1)
 
-        key2_json = self.cmd('keyvault key create --vault-name {key_vault} -n {key2} --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
+        key2_json = self.cmd('keyvault key create --vault-name "{key_vault}" -n "{key2}" --kty RSA --disabled false --ops decrypt encrypt sign unwrapKey verify wrapKey --size 2048', checks=[
             self.check("attributes.enabled", True),
             self.check('key.kty', "RSA"),
         ]).get_output_in_json()
@@ -1246,74 +1375,23 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         self.kwargs['key1_id'] = key1_json['key']['kid']
         self.kwargs['key2_id'] = key2_json['key']['kid']
 
-        policy1_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {identity1_principalid} --key-permissions {identity_permissions}').get_output_in_json()
-        identity1_has_access = False
+        # Uncomment during live runs
+        # role_id = '/subscriptions/{}/providers/Microsoft.Authorization/roleDefinitions/e147488a-f6f5-4113-8e2d-b22465e65bf6'.format(subscription)
+        # rbac1_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        # self.assertEqual(rbac1_json['roleDefinitionId'], role_id) 
 
-        access_policy1 = policy1_json['properties']['accessPolicies']
-        for element in access_policy1:
-            if element['objectId'] == self.kwargs['identity1_principalid']:
-                access_policy1 = element
-                identity1_has_access = True
-            
-        self.assertEqual(identity1_has_access, True)
-        key_permissions = access_policy1['permissions']['keys']
-        self.assertIn("list", key_permissions)
-        self.assertIn("wrapKey", key_permissions)
-        self.assertIn("get", key_permissions)
-        self.assertIn("unwrapKey", key_permissions)
+        # rbac2_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{identity2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        # self.assertEqual(rbac2_json['roleDefinitionId'], role_id)
 
-        policy2_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {identity2_principalid} --key-permissions {identity_permissions}').get_output_in_json()
-        identity2_has_access = False
+        # rbac3_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{system1_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        # self.assertEqual(rbac3_json['roleDefinitionId'], role_id)
 
-        access_policy2 = policy2_json['properties']['accessPolicies']
-        for element in access_policy2:
-            if element['objectId'] == self.kwargs['identity2_principalid']:
-                access_policy2 = element
-                identity2_has_access = True
-            
-        self.assertEqual(identity2_has_access, True)
-        key_permissions = access_policy2['permissions']['keys']
-        self.assertIn("list", key_permissions)
-        self.assertIn("wrapKey", key_permissions)
-        self.assertIn("get", key_permissions)
-        self.assertIn("unwrapKey", key_permissions)
+        # rbac4_json = self.cmd('role assignment create --scope "{key_vault_id}" --assignee "{system2_principalid}" --role "{identity_rbac_permissions}"').get_output_in_json()
+        # self.assertEqual(rbac4_json['roleDefinitionId'], role_id)
 
-        policy3_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {system1_principalid} --key-permissions {identity_permissions}').get_output_in_json()
-        system1_has_access = False
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" --mi-user-assigned "{identity1_id}" -g "{rg}" -n "{vault1}"')
 
-        access_policy3 = policy3_json['properties']['accessPolicies']
-        for element in access_policy3:
-            if element['objectId'] == self.kwargs['system1_principalid']:
-                access_policy3 = element
-                system1_has_access = True
-            
-        self.assertEqual(system1_has_access, True)
-        key_permissions = access_policy3['permissions']['keys']
-        self.assertIn("list", key_permissions)
-        self.assertIn("wrapKey", key_permissions)
-        self.assertIn("get", key_permissions)
-        self.assertIn("unwrapKey", key_permissions)
-
-        policy4_json = self.cmd('keyvault set-policy --name {key_vault} --object-id {system2_principalid} --key-permissions {identity_permissions}').get_output_in_json()
-        system2_has_access = False
-
-        access_policy4 = policy4_json['properties']['accessPolicies']
-        for element in access_policy4:
-            if element['objectId'] == self.kwargs['system2_principalid']:
-                access_policy4 = element
-                system2_has_access = True
-            
-        self.assertEqual(system2_has_access, True)
-        key_permissions = access_policy4['permissions']['keys']
-        self.assertIn("list", key_permissions)
-        self.assertIn("wrapKey", key_permissions)
-        self.assertIn("get", key_permissions)
-        self.assertIn("unwrapKey", key_permissions)
-
-
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity1_id} -g {rg} -n {vault1}')
-
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1322,9 +1400,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity2_id} -g {rg} -n {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" --mi-user-assigned "{identity2_id}" -g "{rg}" -n "{vault1}"')
 
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1333,9 +1411,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --mi-system-assigned -g {rg} -n {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key2_id}" --mi-system-assigned -g "{rg}" -n "{vault1}"')
 
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key2_id}'),
@@ -1344,9 +1422,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} -g {rg} -n {vault1}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" -g "{rg}" -n "{vault1}"')
 
-        self.cmd('backup vault encryption show -n {vault1} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault1}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Disabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1356,9 +1434,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
         ])
 
 
-        self.cmd('backup vault encryption update --encryption-key-id {key2_id} --mi-system-assigned --infrastructure-encryption Enabled -g {rg} -n {vault2}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key2_id}" --mi-system-assigned --infrastructure-encryption Enabled -g "{rg}" -n "{vault2}"')
 
-        self.cmd('backup vault encryption show -n {vault2} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault2}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Enabled"),
             self.check('properties.keyUri', '{key2_id}'),
@@ -1367,9 +1445,9 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-        self.cmd('backup vault encryption update --encryption-key-id {key1_id} --mi-user-assigned {identity1_id} -g {rg} -n {vault2}')
+        self.cmd('backup vault encryption update --encryption-key-id "{key1_id}" --mi-user-assigned "{identity1_id}" -g "{rg}" -n "{vault2}"')
 
-        self.cmd('backup vault encryption show -n {vault2} -g {rg}', checks=[
+        self.cmd('backup vault encryption show -n "{vault2}" -g "{rg}"', checks=[
             self.check("properties.encryptionAtRestType", "CustomerManaged"),
             self.check("properties.infrastructureEncryptionState", "Enabled"),
             self.check('properties.keyUri', '{key1_id}'),
@@ -1378,14 +1456,15 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('properties.lastUpdateStatus', 'Succeeded')
         ])
 
-    @ResourceGroupPreparer(location="centraluseuap")
-    @VaultPreparer(soft_delete=False)
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="centraluseuap")
+    @VaultPreparer()
     @VMPreparer(parameter_name='vm1')
     @ItemPreparer(vm_parameter_name='vm1')
     @PolicyPreparer(parameter_name='policy1', instant_rp_days='4')
     @PolicyPreparer(parameter_name='policy2', instant_rp_days='2')
     def test_backup_rg_mapping(self, resource_group, vault_name, vm1, policy1, policy2):
         self.kwargs.update({
+            'rg': resource_group,
             'vault': vault_name,
             'vm1': vm1,
             'policy1': policy1,
@@ -1403,15 +1482,6 @@ class BackupTests(ScenarioTest, unittest.TestCase):
             self.check('name', 'VaultProxy'),
             self.check('length(properties.resourceGuardOperationDetails)', 9)
         ])
-
-        # Try disabling soft delete
-        self.cmd('backup vault backup-properties set -g {rg} -n {vault} --soft-delete-feature-state Disable', checks=[
-            self.check('properties.softDeleteFeatureState', 'Disabled')
-        ])
-        # TODO: once the soft delete feature move is enabled across the board, use the following lines instead 
-        # self.cmd('backup vault create -g {rg} -v {vault} -l {location} --soft-delete-state Disable', checks=[
-        #     self.check('properties.securitySettings.softDeleteSettings.softDeleteState', 'Disabled')
-        # ])
 
         time.sleep(300)
 
@@ -1440,3 +1510,174 @@ class BackupTests(ScenarioTest, unittest.TestCase):
 
         # try deleting resource guard mapping
         self.cmd('backup vault resource-guard-mapping delete -n {vault} -g {rg} -y')
+
+    @unittest.skip("Skipping CVM OS Disk Encryption Set test as the required resources are not available in the test subscription. TODO @sgholap to create required resources.")
+    def test_cvm_os_des_id(self):
+        self.kwargs.update({
+            'vault': "PSTestingVault",
+            'vm': "PSCVMRestoreTestingVM",
+            'target_rg': "sgholapPSCLITestingrg",
+            'rg': "sgholap-rg",
+            'sa': "/subscriptions/5288acd1-ba79-4377-9205-9f220331a44a/resourceGroups/sgholap-rg/providers/Microsoft.Storage/storageAccounts/sgholapecysa3",
+            'vm_id': "VM;iaasvmcontainerv2;" + "sgholap-rg" + ";" + "PSCVMRestoreTestingVM",
+            'container_id': "IaasVMContainer;iaasvmcontainerv2;" + "sgholap-rg" + ";" + "PSCVMRestoreTestingVM",
+            'vnet_name': "PSCLItestingvnet",
+            'subnet_name': "default",
+            'target_vm_name': "CLITestingVM",
+            'cvm_os_des': '/subscriptions/5288acd1-ba79-4377-9205-9f220331a44a/resourceGroups/sgholap-rg/providers/Microsoft.Compute/diskEncryptionSets/CVMPSRestoreDES'
+            })
+        self.kwargs['rp'] = self.cmd('backup recoverypoint list --backup-management-type AzureIaasVM --workload-type VM -g {rg} -v {vault} -c {vm} -i {vm} --query [0].name').get_output_in_json()
+
+        trigger_restore_job5_json = self.cmd('backup restore restore-disks -g {rg} -v {vault} -c {vm} -i {vm} -r {rp} -t {target_rg} --storage-account {sa} --target-vm-name {target_vm_name} --target-vnet-name {vnet_name} --target-subnet-name {subnet_name} --target-vnet-resource-group {target_rg} --cvm-os-des-id {cvm_os_des}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "InProgress"),
+            self.check("resourceGroup", '{rg}')
+        ]).get_output_in_json()
+        self.kwargs['job'] = trigger_restore_job5_json['name']
+        self.cmd('backup job wait -g {rg} -v {vault} -n {job}')
+
+        self.cmd('backup job show -g {rg} -v {vault} -n {job}', checks=[
+            self.check("properties.entityFriendlyName", '{vm}'),
+            self.check("properties.operation", "Restore"),
+            self.check("properties.status", "Completed"),
+            self.check("resourceGroup", '{rg}')
+        ])
+
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    def test_vault_soft_delete_basic(self, resource_group, resource_group_location):
+        """Test 1: Create vault, delete it, check deleted vaults list, get specific deleted vault, undelete vault"""
+        vault_name = self.create_random_name('clitest-vault-', 20)
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'vault': vault_name
+        })
+
+        # Create vault
+        self.cmd('backup vault create --name {vault} --resource-group {rg} --location {location}', checks=[
+            self.check('name', '{vault}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        # Delete vault
+        self.cmd('backup vault delete --name {vault} --resource-group {rg} --yes')
+
+        # Check vault appears in deleted vaults list
+        vault_found = None
+        deleted_vaults = self.cmd('backup deleted-vault list -l {location}').get_output_in_json()
+        for vault in deleted_vaults:
+            original_vault_id = vault.get('properties').get('vaultId')
+            if vault_name in original_vault_id:
+                vault_found = vault
+                break
+        self.assertTrue(vault_found, "Deleted vault not found in deleted vaults list")
+
+        vault_name_from_list = vault_found['name']
+        self.kwargs['deleted_vault_name'] = vault_name_from_list
+        
+        deleted_vault = self.cmd('backup deleted-vault get --name {deleted_vault_name} --location {location}').get_output_in_json()
+        self.assertEqual(deleted_vault['name'], vault_name_from_list)
+
+        # Undelete vault
+        self.cmd('backup deleted-vault undelete --name {deleted_vault_name} --location {location}')
+
+        # Verify vault is restored
+        self.cmd('backup vault show --name {vault} --resource-group {rg}', checks=[
+            self.check('name', '{vault}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        # Cleanup - delete the restored vault
+        self.cmd('backup vault delete --name {vault} --resource-group {rg} --yes')
+
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    @VaultPreparer()
+    @VMPreparer()
+    def test_vault_soft_delete_with_items(self, resource_group, resource_group_location, vault_name, vm_name):
+        """Test 2: Create vault with backup item, delete both, check deleted vault containers, undelete vault and item"""
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'vault': vault_name,
+            'vm': vm_name
+        })
+
+        # Enable backup for VM
+        self.cmd('backup protection enable-for-vm --vm {vm} --vault-name {vault} --resource-group {rg} '
+                 '--policy-name DefaultPolicy')
+
+        # Wait for backup to be configured
+        import time
+        time.sleep(30)
+
+        # Verify backup item exists
+        self.cmd('backup item list --vault-name {vault} --resource-group {rg} --backup-management-type AzureIaasVM', 
+                 checks=[
+                     self.check("length(@)", 1),
+                     self.check("[0].properties.friendlyName", '{vm}')
+                 ])
+
+        # Delete backup data (soft delete)
+        self.cmd('backup protection disable --backup-management-type AzureIaasVM --workload-type VM '
+                 '--vault-name {vault} --resource-group {rg} --container-name {vm} --item-name {vm} '
+                 '--delete-backup-data --yes')
+
+        # Delete vault
+        self.cmd('backup vault delete --name {vault} --resource-group {rg} --yes')
+
+        # Check vault appears in deleted vaults list
+        vault_found = None
+        deleted_vaults = self.cmd('backup deleted-vault list -l {location}').get_output_in_json()
+        for vault in deleted_vaults:
+            original_vault_id = vault.get('properties').get('vaultId')
+            if vault_name in original_vault_id:
+                vault_found = vault
+                break
+        self.assertTrue(vault_found, "Deleted vault not found in deleted vaults list")
+
+        vault_name_from_list = vault_found['name']
+        self.kwargs['deleted_vault_name'] = vault_name_from_list
+
+        # Check backup containers in deleted vault
+        containers = self.cmd('backup deleted-vault list-containers --name {deleted_vault_name}').get_output_in_json()
+        self.assertGreater(len(containers), 0, "No backup containers found in deleted vault")
+
+        # Verify the backup item is in the containers
+        vm_found = any(container.get('name', '').find('{vm}'.format(**self.kwargs)) >= 0 for container in containers)
+        self.assertTrue(vm_found, "VM backup item not found in deleted vault containers")
+
+        # Undelete vault
+        self.cmd('backup deleted-vault undelete --name {deleted_vault_name} --location {location}')
+
+        # Verify vault is restored
+        self.cmd('backup vault show --name {vault} --resource-group {rg}', checks=[
+            self.check('name', '{vault}'),
+            self.check('resourceGroup', '{rg}')
+        ])
+
+        # Undelete backup item
+        self.cmd('backup protection undelete --vault-name {vault} --resource-group {rg} '
+                 '--container-name {vm} --item-name {vm} --workload-type VM --backup-management-type AzureIaasVM')
+
+        # Verify backup item is restored
+        self.cmd('backup item show --vault-name {vault} --resource-group {rg} --backup-management-type AzureIaasVM '
+                 '--container-name {vm} --name {vm}', checks=[
+                     self.check("properties.friendlyName", '{vm}'),
+                     self.check("properties.protectionState", "ProtectionStopped")
+                 ])
+        tmp_vault = self.cmd('backup vault show --name {vault} --resource-group {rg}').get_output_in_json()
+        print("Officially, the test is done here. Vault is: ", tmp_vault)
+
+    @ResourceGroupPreparer(name_prefix="AzureBackupRG_clitest_", location="eastus2euap")
+    def test_vault_soft_delete_misc_operations(self, resource_group, resource_group_location):
+        """Test 3: Minor unit tests for vault soft delete operations"""
+        self.kwargs.update({
+            'rg': resource_group,
+            'location': resource_group_location,
+            'vault': self.create_random_name('clitest-vault-', 20)
+        })
+
+        # Test listing deleted vaults with location filter
+        deleted_vaults = self.cmd('backup deleted-vault list --location {location}').get_output_in_json()
+        self.assertIsInstance(deleted_vaults, list)

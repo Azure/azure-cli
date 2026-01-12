@@ -23,9 +23,9 @@ class Remove(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2025-09-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2023-11-01", "properties.exportPolicy.rules[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.netapp/netappaccounts/{}/capacitypools/{}/volumes/{}", "2025-09-01", "properties.exportPolicy.rules[]"],
         ]
     }
 
@@ -52,7 +52,7 @@ class Remove(AAZCommand):
             help="The name of the NetApp account",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,127}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,127}$",
             ),
         )
         _args_schema.pool_name = AAZStrArg(
@@ -60,7 +60,7 @@ class Remove(AAZCommand):
             help="The name of the capacity pool",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z0-9][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -73,7 +73,7 @@ class Remove(AAZCommand):
             help="The name of the volume",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[a-zA-Z][a-zA-Z0-9\-_]{0,63}$",
+                pattern="^[a-zA-Z][a-zA-Z0-9\\-_]{0,63}$",
                 max_length=64,
                 min_length=1,
             ),
@@ -191,7 +191,7 @@ class Remove(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -298,7 +298,7 @@ class Remove(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2025-09-01",
                     required=True,
                 ),
             }
@@ -399,6 +399,9 @@ class _RemoveHelper:
         volume_read.zones = AAZListType()
 
         properties = _schema_volume_read.properties
+        properties.accept_grow_capacity_pool_for_short_term_clone_split = AAZStrType(
+            serialized_name="acceptGrowCapacityPoolForShortTermCloneSplit",
+        )
         properties.actual_throughput_mibps = AAZFloatType(
             serialized_name="actualThroughputMibps",
             flags={"read_only": True},
@@ -428,6 +431,9 @@ class _RemoveHelper:
         properties.cool_access_retrieval_policy = AAZStrType(
             serialized_name="coolAccessRetrievalPolicy",
         )
+        properties.cool_access_tiering_policy = AAZStrType(
+            serialized_name="coolAccessTieringPolicy",
+        )
         properties.coolness_period = AAZIntType(
             serialized_name="coolnessPeriod",
         )
@@ -451,6 +457,10 @@ class _RemoveHelper:
         properties.delete_base_snapshot = AAZBoolType(
             serialized_name="deleteBaseSnapshot",
         )
+        properties.effective_network_features = AAZStrType(
+            serialized_name="effectiveNetworkFeatures",
+            flags={"read_only": True},
+        )
         properties.enable_subvolumes = AAZStrType(
             serialized_name="enableSubvolumes",
         )
@@ -471,6 +481,11 @@ class _RemoveHelper:
             serialized_name="fileSystemId",
             flags={"read_only": True},
         )
+        properties.inherited_size_in_bytes = AAZIntType(
+            serialized_name="inheritedSizeInBytes",
+            nullable=True,
+            flags={"read_only": True},
+        )
         properties.is_default_quota_enabled = AAZBoolType(
             serialized_name="isDefaultQuotaEnabled",
         )
@@ -479,6 +494,7 @@ class _RemoveHelper:
         )
         properties.is_restoring = AAZBoolType(
             serialized_name="isRestoring",
+            flags={"read_only": True},
         )
         properties.kerberos_enabled = AAZBoolType(
             serialized_name="kerberosEnabled",
@@ -608,15 +624,22 @@ class _RemoveHelper:
         )
 
         replication = _schema_volume_read.properties.data_protection.replication
+        replication.destination_replications = AAZListType(
+            serialized_name="destinationReplications",
+            flags={"read_only": True},
+        )
         replication.endpoint_type = AAZStrType(
             serialized_name="endpointType",
+            flags={"read_only": True},
+        )
+        replication.remote_path = AAZObjectType(
+            serialized_name="remotePath",
         )
         replication.remote_volume_region = AAZStrType(
             serialized_name="remoteVolumeRegion",
         )
         replication.remote_volume_resource_id = AAZStrType(
             serialized_name="remoteVolumeResourceId",
-            flags={"required": True},
         )
         replication.replication_id = AAZStrType(
             serialized_name="replicationId",
@@ -624,6 +647,33 @@ class _RemoveHelper:
         )
         replication.replication_schedule = AAZStrType(
             serialized_name="replicationSchedule",
+        )
+
+        destination_replications = _schema_volume_read.properties.data_protection.replication.destination_replications
+        destination_replications.Element = AAZObjectType()
+
+        _element = _schema_volume_read.properties.data_protection.replication.destination_replications.Element
+        _element.region = AAZStrType()
+        _element.replication_type = AAZStrType(
+            serialized_name="replicationType",
+        )
+        _element.resource_id = AAZStrType(
+            serialized_name="resourceId",
+        )
+        _element.zone = AAZStrType()
+
+        remote_path = _schema_volume_read.properties.data_protection.replication.remote_path
+        remote_path.external_host_name = AAZStrType(
+            serialized_name="externalHostName",
+            flags={"required": True},
+        )
+        remote_path.server_name = AAZStrType(
+            serialized_name="serverName",
+            flags={"required": True},
+        )
+        remote_path.volume_name = AAZStrType(
+            serialized_name="volumeName",
+            flags={"required": True},
         )
 
         snapshot = _schema_volume_read.properties.data_protection.snapshot

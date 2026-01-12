@@ -37,12 +37,15 @@ class Update(AAZCommand):
 
     :example: Update Workspace on another resource group
         az network watcher flow-log update --location westus --resource-group MyAnotherResourceGroup --name MyFlowLog --workspace MyAnotherLogAnalyticWorkspace
+
+    :example: Update flowlog with recordtypes filtering
+        az network watcher flow-log update --resource-group rg1 --network-watcher-name nw1 --name fl --location centraluseuap --target-resource-id /subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Network/networkSecurityGroups/desmondcentral-nsg --storage-account /subscriptions/subid/resourceGroups/rg1/providers/Microsoft.Storage/storageAccounts/nwtest1mgvbfmqsigdxe --filtering-criteria srcIP=158.255.7.8 || dstPort=56891 --record-types B,E --enabled True --format JSON --log-version 1 --identity "{type:UserAssigned,user-assigned-identities:{/subscriptions/subid/resourceGroups/rg1/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id1:{}}}"
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2025-03-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/flowlogs/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/networkwatchers/{}/flowlogs/{}", "2025-03-01"],
         ]
     }
 
@@ -83,9 +86,6 @@ class Update(AAZCommand):
         _args_schema.location = AAZResourceLocationArg(
             help="Location to identify the exclusive Network Watcher under a region. Only one Network Watcher can be existed per subscription and region.",
             nullable=True,
-            fmt=AAZResourceLocationArgFormat(
-                resource_group_arg="resource_group",
-            ),
         )
         _args_schema.enabled = AAZBoolArg(
             options=["--enabled"],
@@ -126,13 +126,52 @@ class Update(AAZCommand):
 
         # define Arg Group "Parameters"
 
+        _args_schema = cls._args_schema
+        _args_schema.identity = AAZObjectArg(
+            options=["--identity"],
+            arg_group="Parameters",
+            help="FlowLog resource Managed Identity",
+            nullable=True,
+        )
+
+        identity = cls._args_schema.identity
+        identity.type = AAZStrArg(
+            options=["type"],
+            help="The type of identity used for the resource. The type 'SystemAssigned, UserAssigned' includes both an implicitly created identity and a set of user assigned identities. The type 'None' will remove any identities from the virtual machine.",
+            nullable=True,
+            enum={"None": "None", "SystemAssigned": "SystemAssigned", "SystemAssigned, UserAssigned": "SystemAssigned, UserAssigned", "UserAssigned": "UserAssigned"},
+        )
+        identity.user_assigned_identities = AAZDictArg(
+            options=["user-assigned-identities"],
+            help="The list of user identities associated with resource. The user identity dictionary key references will be ARM resource ids in the form: '/subscriptions/{subscriptionId}/resourceGroups/{resourceGroupName}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{identityName}'.",
+            nullable=True,
+        )
+
+        user_assigned_identities = cls._args_schema.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectArg(
+            nullable=True,
+            blank={},
+        )
+
         # define Arg Group "Properties"
 
         _args_schema = cls._args_schema
+        _args_schema.filtering_criteria = AAZStrArg(
+            options=["--filtering-criteria"],
+            arg_group="Properties",
+            help="Update condition to filter flowlogs based on SrcIP, SrcPort, DstIP, DstPort, Protocol, Encryption, Direction and Action. If not specified, all flowlogs will be logged.",
+            nullable=True,
+        )
         _args_schema.flow_analytics_configuration = AAZObjectArg(
             options=["--flow-analytics-configuration"],
             arg_group="Properties",
             help="Parameters that define the configuration of traffic analytics.",
+            nullable=True,
+        )
+        _args_schema.record_types = AAZStrArg(
+            options=["--record-types"],
+            arg_group="Properties",
+            help="Optional field to filter network traffic logs based on flow states. Value of this field could be any comma separated combination string of letters B,C,E or D. B represents Begin, when a flow is created. C represents Continue for an ongoing flow generated at every five-minute interval. E represents End, when a flow is terminated. D represents Deny, when a flow is denied. If not specified, all network traffic will be logged.",
             nullable=True,
         )
         _args_schema.retention_policy = AAZObjectArg(
@@ -269,7 +308,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2025-03-01",
                     required=True,
                 ),
             }
@@ -372,7 +411,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2025-03-01",
                     required=True,
                 ),
             }
@@ -430,15 +469,27 @@ class Update(AAZCommand):
                 value=instance,
                 typ=AAZObjectType
             )
+            _builder.set_prop("identity", AAZIdentityObjectType, ".identity")
             _builder.set_prop("location", AAZStrType, ".location")
             _builder.set_prop("properties", AAZObjectType, typ_kwargs={"flags": {"client_flatten": True}})
             _builder.set_prop("tags", AAZDictType, ".tags")
 
+            identity = _builder.get(".identity")
+            if identity is not None:
+                identity.set_prop("type", AAZStrType, ".type")
+                identity.set_prop("userAssignedIdentities", AAZDictType, ".user_assigned_identities")
+
+            user_assigned_identities = _builder.get(".identity.userAssignedIdentities")
+            if user_assigned_identities is not None:
+                user_assigned_identities.set_elements(AAZObjectType, ".")
+
             properties = _builder.get(".properties")
             if properties is not None:
                 properties.set_prop("enabled", AAZBoolType, ".enabled")
+                properties.set_prop("enabledFilteringCriteria", AAZStrType, ".filtering_criteria")
                 properties.set_prop("flowAnalyticsConfiguration", AAZObjectType, ".flow_analytics_configuration")
                 properties.set_prop("format", AAZObjectType)
+                properties.set_prop("recordTypes", AAZStrType, ".record_types")
                 properties.set_prop("retentionPolicy", AAZObjectType, ".retention_policy")
                 properties.set_prop("storageId", AAZStrType, ".storage_account", typ_kwargs={"flags": {"required": True}})
                 properties.set_prop("targetResourceId", AAZStrType, ".target_resource_id", typ_kwargs={"flags": {"required": True}})
@@ -490,6 +541,7 @@ class _UpdateHelper:
         if cls._schema_flow_log_read is not None:
             _schema.etag = cls._schema_flow_log_read.etag
             _schema.id = cls._schema_flow_log_read.id
+            _schema.identity = cls._schema_flow_log_read.identity
             _schema.location = cls._schema_flow_log_read.location
             _schema.name = cls._schema_flow_log_read.name
             _schema.properties = cls._schema_flow_log_read.properties
@@ -504,6 +556,7 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         flow_log_read.id = AAZStrType()
+        flow_log_read.identity = AAZIdentityObjectType()
         flow_log_read.location = AAZStrType()
         flow_log_read.name = AAZStrType(
             flags={"read_only": True},
@@ -516,8 +569,38 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
+        identity = _schema_flow_log_read.identity
+        identity.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        identity.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        identity.type = AAZStrType()
+        identity.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_flow_log_read.identity.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_flow_log_read.identity.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+
         properties = _schema_flow_log_read.properties
         properties.enabled = AAZBoolType()
+        properties.enabled_filtering_criteria = AAZStrType(
+            serialized_name="enabledFilteringCriteria",
+        )
         properties.flow_analytics_configuration = AAZObjectType(
             serialized_name="flowAnalyticsConfiguration",
         )
@@ -525,6 +608,9 @@ class _UpdateHelper:
         properties.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
+        )
+        properties.record_types = AAZStrType(
+            serialized_name="recordTypes",
         )
         properties.retention_policy = AAZObjectType(
             serialized_name="retentionPolicy",
@@ -575,6 +661,7 @@ class _UpdateHelper:
 
         _schema.etag = cls._schema_flow_log_read.etag
         _schema.id = cls._schema_flow_log_read.id
+        _schema.identity = cls._schema_flow_log_read.identity
         _schema.location = cls._schema_flow_log_read.location
         _schema.name = cls._schema_flow_log_read.name
         _schema.properties = cls._schema_flow_log_read.properties

@@ -36,8 +36,7 @@ def create_resource_parameters(arg_schema, arg_group=None):
 
 def update_resource_parameters(ctx, alias="resource"):
     args = ctx.args
-    from msrestazure.tools import is_valid_resource_id
-    from azure.mgmt.core.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id, is_valid_resource_id
     from azure.cli.core.aaz import has_value
     name_or_id = args.resource.to_serialized_data()
     usage_error = CLIError('usage error: --{0} ID | --{0} NAME --resource-group NAME '
@@ -81,8 +80,8 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
             options=['--export-to-resource-specific'],
             help="Indicate that the export to LA must be done to a resource specific table, a.k.a. "
                  "dedicated or fixed schema table, as opposed to the default dynamic schema table called "
-                 "AzureDiagnostics. This argument is effective only when the argument --workspace is also given."
-                 "  Allowed values: false, true."
+                 "AzureDiagnostics. This argument is effective only when the argument --workspace is also given. "
+                 "Allowed values: false, true."
         )
         arg_schema.log_analytics_destination_type._registered = False  # pylint:disable=protected-access
         arg_schema.service_bus_rule_id._registered = False  # pylint:disable=protected-access
@@ -91,7 +90,7 @@ class DiagnosticSettingsCreate(_DiagnosticSettingsCreate):
     def pre_operations(self):
         ctx = self.ctx
         from azure.cli.core.aaz import has_value
-        from msrestazure.tools import is_valid_resource_id, resource_id, parse_resource_id
+        from azure.mgmt.core.tools import is_valid_resource_id, resource_id, parse_resource_id
         update_resource_parameters(ctx)
         args = ctx.args
         rg = args.resource_group_name.to_serialized_data()

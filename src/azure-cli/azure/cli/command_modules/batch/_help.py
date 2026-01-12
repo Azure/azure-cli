@@ -32,6 +32,10 @@ short-summary: Manage the access keys for the auto storage account configured fo
 helps['batch account create'] = """
 type: command
 short-summary: Create a Batch account with the specified parameters.
+examples:
+  - name: Create a Batch account with the specified parameters.
+    text: >
+        az batch account create --name MyBatchAccount --resource-group MyResourceGroup --location eastus
 """
 
 helps['batch account keys'] = """
@@ -91,7 +95,7 @@ examples:
 helps['batch account outbound-endpoints'] = """
 type: command
 short-summary: List an account's outbound network dependencies.
-long-summary: List the endpoints that a Batch Compute Node under this Batch Account may call as part of Batch service administration. If you are deploying a Pool inside of a virtual network that you specify, you must make sure your network allows outbound access to these endpoints. Failure to allow access to these endpoints may cause Batch to mark the affected nodes as unusable. For more information about creating a pool inside of a virtual network, see https://docs.microsoft.com/azure/batch/batch-virtual-network."
+long-summary: List the endpoints that a Batch Compute Node under this Batch Account may call as part of Batch service administration. If you are deploying a Pool inside of a virtual network that you specify, you must make sure your network allows outbound access to these endpoints. Failure to allow access to these endpoints may cause Batch to mark the affected nodes as unusable. For more information about creating a pool inside of a virtual network, see https://learn.microsoft.com/azure/batch/batch-virtual-network."
 """
 
 helps['batch account identity'] = """
@@ -133,7 +137,7 @@ long-summary: >
     {OUTPUT_WITH_SECRET_HELP}
 examples:
   - name: Display managed identities of a batch account.
-    text: |
+    text: >
         az batch account identity show --name MyBatchAccount --resource-group MyResourceGroup
 """
 
@@ -198,6 +202,14 @@ type: group
 short-summary: Manage Batch applications.
 """
 
+helps['batch application create'] = """
+type: command
+examples:
+  - name: Create a Batch application with the specified parameters.
+    text: >
+        az batch application create -g MyResourceGroup -n batch --application-name app
+"""
+
 helps['batch application package'] = """
 type: group
 short-summary: Manage Batch application packages.
@@ -212,6 +224,11 @@ long-summary: This step is unnecessary if the package has already been successfu
 helps['batch application package create'] = """
 type: command
 short-summary: Create a Batch application package record and activate it.
+examples:
+  - name: Create a Batch application package record and activate it.
+    text: >
+        az batch application package create -g rg -n batch --application-name myapp --version 1.0 --package-file PackageFilePath
+
 """
 
 helps['batch application set'] = """
@@ -236,21 +253,6 @@ short-summary: Gets information about the specified application.
 long-summary: This operation returns only applications and versions that are available for use on compute nodes; that is, that can be used in an application package reference. For administrator information about applications and versions that are not yet available to compute nodes, use the Azure portal or the 'az batch application list' command.
 """
 
-helps['batch certificate'] = """
-type: group
-short-summary: Manage Batch certificates.
-"""
-
-helps['batch certificate create'] = """
-type: command
-short-summary: Add a certificate to a Batch account.
-"""
-
-helps['batch certificate delete'] = """
-type: command
-short-summary: Delete a certificate from a Batch account.
-"""
-
 helps['batch job'] = """
 type: group
 short-summary: Manage Batch jobs.
@@ -259,11 +261,49 @@ short-summary: Manage Batch jobs.
 helps['batch job create'] = """
 type: command
 short-summary: Add a job to a Batch account.
+examples:
+  - name: Create an new job associated with an existing pool.
+    text: >
+        az batch job create --id job1 --pool-id pool1
+"""
+
+helps['batch job delete'] = """
+type: command
+short-summary: Deletes a job from a Batch account.
+examples:
+  - name: Delete a job using the job id without prompt for confirmation.
+    text: >
+        az batch job delete --job-id job1 --yes
+"""
+
+helps['batch job disable'] = """
+type: command
+short-summary: Disable a Batch job.
+examples:
+  - name: Disable a job and requeue any running tasks.
+    text: >
+        az batch job disable --job-id job1 --disable-tasks requeue
+"""
+
+helps['batch job enable'] = """
+type: command
+short-summary: Enable a Batch job.
+examples:
+  - name: Enable a job.
+    text: >
+        az batch job enable --job-id job1
 """
 
 helps['batch job list'] = """
 type: command
 short-summary: List all of the jobs or job schedule in a Batch account.
+examples:
+  - name: List all of the jobs in a Batch account
+    text: >
+        az batch job list
+  - name: List all of the job schedule in a Batch account
+    text: >
+        az batch job list --job-schedule-id jobschedule1
 """
 
 helps['batch job prep-release-status'] = """
@@ -274,6 +314,28 @@ short-summary: View the status of Batch job preparation and release tasks.
 helps['batch job reset'] = """
 type: command
 short-summary: Update the properties of a Batch job. Unspecified properties which can be updated are reset to their defaults.
+examples:
+  - name: Reset all job properties except priority.
+    text: >
+        az batch job reset --job-id job1 --priority 100
+"""
+
+helps['batch job set'] = """
+type: command
+short-summary: Update the properties of a Batch job. Updating a property in a subgroup will reset the unspecified properties of that group.
+examples:
+  - name: Update job priority.
+    text: >
+        az batch job set --job-id job1 --priority 100
+"""
+
+helps['batch job show'] = """
+type: command
+short-summary: Gets information about the specified Batch job.
+examples:
+  - name: Shows information details about a job.
+    text: >
+        az batch job show --job-id job1
 """
 
 helps['batch job stop'] = """
@@ -285,11 +347,10 @@ parameters:
     type: string
     short-summary: Termination reason
     long-summary: The text you want to appear as the job's TerminateReason. The default is 'UserTerminate'
-"""
-
-helps['batch job set'] = """
-type: command
-short-summary: Update the properties of a Batch job. Updating a property in a subgroup will reset the unspecified properties of that group.
+examples:
+  - name: Stop a job and give a termination reason
+    text: >
+        az batch job stop --job-id job1 --terminate-reason "Completed workflow"
 """
 
 helps['batch job task-counts'] = """
@@ -305,6 +366,10 @@ short-summary: Manage Batch job schedules.
 helps['batch job-schedule create'] = """
 type: command
 short-summary: Add a Batch job schedule to an account.
+examples:
+  - name: Create an new job schedule with a 1 day interval.
+    text: >
+        az batch job-schedule create --id jobschedule1 --pool-id pool1 --recurrence-interval P1D
 """
 
 helps['batch job-schedule reset'] = """
@@ -379,9 +444,16 @@ type: command
 short-summary: Download the content of the a node file.
 """
 
-helps['batch node remote-desktop'] = """
-type: group
-short-summary: Retrieve the remote desktop protocol file for a Batch compute node.
+helps['batch node reboot'] = """
+type: command
+short-summary: Reboot a Batch compute node.
+examples:
+  - name: Reboot the node and requeue tasks.
+    text: >
+        az batch node reboot --pool-id pool1 --node-id node1
+  - name: Reboot the node when tasks complete.
+    text: >
+        az batch node reboot --pool-id pool1 --node-id node1 --node-reboot-option taskcompletion
 """
 
 helps['batch node remote-login-settings'] = """
@@ -394,9 +466,36 @@ type: group
 short-summary: Manage task scheduling for a Batch compute node.
 """
 
+helps['batch node scheduling disable'] = """
+type: command
+short-summary: Disable scheduling on a Batch compute node.
+examples:
+  - name: Disable scheduling on a node and requeue any running tasks.
+    text: >
+        az batch node scheduling disable --pool-id pool1 --node-id node1 --node-disable-scheduling-option requeue
+"""
+
+helps['batch node scheduling enable'] = """
+type: command
+short-summary: Enable scheduling on a Batch compute node.
+examples:
+  - name: Enable scheduling on a node.
+    text: >
+        az batch node scheduling enable --pool-id pool1 --node-id node1
+"""
+
 helps['batch node service-logs'] = """
 type: group
 short-summary: Manage the service log files of a Batch compute node.
+"""
+
+helps['batch node service-logs upload'] = """
+type: command
+short-summary: Upload service logs from a specified Batch compute node.
+examples:
+  - name: Upload logs to a storage account SAS URL
+    text: >
+        az batch node service-logs upload --pool-id pool1 --node-id node1 --start-time 2025-01-13T00:00:00Z --container-url sas_url
 """
 
 helps['batch node user'] = """
@@ -407,11 +506,19 @@ short-summary: Manage the user accounts of a Batch compute node.
 helps['batch node user create'] = """
 type: command
 short-summary: Add a user account to a Batch compute node.
+examples:
+  - name: Create a regular (non-admin) user with a public SSH key.
+    text: >
+        az batch node user create --pool-id pool1 --node-id node1 --name example_user --ssh-public-key example_public_key
 """
 
 helps['batch node user reset'] = """
 type: command
 short-summary: Update the properties of a user account on a Batch compute node. Unspecified properties which can be updated are reset to their defaults.
+examples:
+  - name: Set a new SSH public key on an existing user and reset all other properties to their defaults.
+    text: >
+        az batch node user reset --pool-id pool1 --node-id node1 --user-name example_user --ssh-public-key new_public_key
 """
 
 helps['batch pool'] = """
@@ -427,6 +534,10 @@ short-summary: Manage automatic scaling of Batch pools.
 helps['batch pool create'] = """
 type: command
 short-summary: Create a Batch pool in an account. When creating a pool, choose arguments from either Cloud Services Configuration or Virtual Machine Configuration.
+examples:
+  - name: Create a Batch pool in an account. When creating a pool, choose arguments from either Cloud Services Configuration or Virtual Machine Configuration.
+    text: >
+        az batch pool create --json-file batch-pool-create.json --account-name clibatch --account-key BatchAccountKey
 """
 
 helps['batch pool node-counts'] = """
@@ -472,6 +583,10 @@ short-summary: Manage Batch tasks.
 helps['batch task create'] = """
 type: command
 short-summary: Create Batch tasks.
+examples:
+  - name: Create a task which sleeps for 1 minute.
+    text: >
+        az batch task create --task-id task1 --job-id job1 --command-line "sleep 60"
 """
 
 helps['batch task file'] = """
@@ -487,6 +602,10 @@ short-summary: Download the content of a Batch task file.
 helps['batch task reset'] = """
 type: command
 short-summary: Reset the properties of a Batch task.
+examples:
+  - name: Set max retry count to 3 and reset other properties to their defaults
+    text: >
+        az batch task reset --task-id task1 --job-id job1 --max-task-retry-count 3
 """
 
 helps['batch task subtask'] = """

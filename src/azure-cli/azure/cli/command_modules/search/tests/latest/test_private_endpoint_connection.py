@@ -12,7 +12,7 @@ class AzureSearchServicesTests(ScenarioTest):
     # https://vcrpy.readthedocs.io/en/latest/configuration.html#request-matching
     def setUp(self):
         self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
-        super(AzureSearchServicesTests, self).setUp()
+        super().setUp()
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='eastus2euap')
     def test_private_endpoint_connection_crud(self, resource_group):
@@ -35,7 +35,7 @@ class AzureSearchServicesTests(ScenarioTest):
 
         # create search service
         _search_service = self.cmd(
-            'az search service create -n {search_service_name} -g {rg} --sku {sku_name} --public-access {public_network_access}',
+            'az search service create -n {search_service_name} -g {rg} --sku {sku_name} --public-network-access {public_network_access}',
             checks=[self.check('name', '{search_service_name}'),
                     self.check('sku.name', '{sku_name}'),
                     self.check('publicNetworkAccess', '{public_network_access}')]).get_output_in_json()
@@ -47,7 +47,7 @@ class AzureSearchServicesTests(ScenarioTest):
 
         # create vnet
         self.cmd('az network vnet create --resource-group {rg} --name {vnet_name} --address-prefix 10.0.0.0/16')
-        self.cmd('az network vnet subnet create --resource-group {rg} --vnet-name {vnet_name} --name {subnet_name} --address-prefixes 10.0.0.0/24')
+        self.cmd('az network vnet subnet create --resource-group {rg} --vnet-name {vnet_name} --name {subnet_name} --address-prefixes 10.0.0.0/24 --default-outbound false')
         self.cmd('az network vnet subnet update --resource-group {rg} --vnet-name {vnet_name} --name {subnet_name} --disable-private-endpoint-network-policies true')
 
         # create private endpoint

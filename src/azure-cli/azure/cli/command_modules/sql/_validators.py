@@ -30,7 +30,7 @@ def create_args_for_complex_type(arg_ctx, dest, model_type, arguments):
             :return: The argument of specific type.
             '''
             ns = vars(namespace)
-            kwargs = dict((k, ns[k]) for k in ns if k in set(expanded_arguments))
+            kwargs = {k: ns[k] for k in ns if k in set(expanded_arguments)}
             setattr(namespace, assigned_arg, model_type(**kwargs))
 
         return _expansion_validator_impl
@@ -79,7 +79,7 @@ def create_args_for_complex_type(arg_ctx, dest, model_type, arguments):
 
 # Validates if a subnet id or name have been given by the user. If subnet id is given, vnet-name should not be provided.
 def validate_subnet(cmd, namespace):
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     # Different custom function arg names, instance pool has subnet_id

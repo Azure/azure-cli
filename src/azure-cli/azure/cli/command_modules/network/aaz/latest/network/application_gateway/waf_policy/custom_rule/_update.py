@@ -25,9 +25,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2023-11-01",
+        "version": "2024-10-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2023-11-01", "properties.customRules[]"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/applicationgatewaywebapplicationfirewallpolicies/{}", "2024-10-01", "properties.customRules[]"],
         ]
     }
 
@@ -138,7 +138,7 @@ class Update(AAZCommand):
         _element.variable_name = AAZStrArg(
             options=["variable-name"],
             help="User Session clause variable.",
-            enum={"ClientAddr": "ClientAddr", "GeoLocation": "GeoLocation", "None": "None"},
+            enum={"ClientAddr": "ClientAddr", "ClientAddrXFFHeader": "ClientAddrXFFHeader", "GeoLocation": "GeoLocation", "GeoLocationXFFHeader": "GeoLocationXFFHeader", "None": "None"},
         )
 
         match_conditions = cls._args_schema.match_conditions
@@ -203,10 +203,10 @@ class Update(AAZCommand):
     def _execute_operations(self):
         self.pre_operations()
         self.WebApplicationFirewallPoliciesGet(ctx=self.ctx)()
-        self.pre_instance_update(self.ctx.selectors.subresource.required())
+        self.pre_instance_update(self.ctx.selectors.subresource.get())
         self.InstanceUpdateByJson(ctx=self.ctx)()
         self.InstanceUpdateByGeneric(ctx=self.ctx)()
-        self.post_instance_update(self.ctx.selectors.subresource.required())
+        self.post_instance_update(self.ctx.selectors.subresource.get())
         self.WebApplicationFirewallPoliciesCreateOrUpdate(ctx=self.ctx)()
         self.post_operations()
 
@@ -227,7 +227,7 @@ class Update(AAZCommand):
         pass
 
     def _output(self, *args, **kwargs):
-        result = self.deserialize_output(self.ctx.selectors.subresource.required(), client_flatten=True)
+        result = self.deserialize_output(self.ctx.selectors.subresource.get(), client_flatten=True)
         return result
 
     class SubresourceSelector(AAZJsonSelector):
@@ -303,7 +303,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-10-01",
                     required=True,
                 ),
             }
@@ -386,7 +386,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2023-11-01",
+                    "api-version", "2024-10-01",
                     required=True,
                 ),
             }
@@ -436,7 +436,7 @@ class Update(AAZCommand):
     class InstanceUpdateByJson(AAZJsonInstanceUpdateOperation):
 
         def __call__(self, *args, **kwargs):
-            self._update_instance(self.ctx.selectors.subresource.required())
+            self._update_instance(self.ctx.selectors.subresource.get())
 
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
@@ -505,7 +505,7 @@ class Update(AAZCommand):
 
         def __call__(self, *args, **kwargs):
             self._update_instance_by_generic(
-                self.ctx.selectors.subresource.required(),
+                self.ctx.selectors.subresource.get(),
                 self.ctx.generic_update_args
             )
 
@@ -766,6 +766,54 @@ class _UpdateHelper:
         _schema.tags = cls._schema_application_security_group_read.tags
         _schema.type = cls._schema_application_security_group_read.type
 
+    _schema_exclusion_managed_rule_set_read = None
+
+    @classmethod
+    def _build_schema_exclusion_managed_rule_set_read(cls, _schema):
+        if cls._schema_exclusion_managed_rule_set_read is not None:
+            _schema.rule_groups = cls._schema_exclusion_managed_rule_set_read.rule_groups
+            _schema.rule_set_type = cls._schema_exclusion_managed_rule_set_read.rule_set_type
+            _schema.rule_set_version = cls._schema_exclusion_managed_rule_set_read.rule_set_version
+            return
+
+        cls._schema_exclusion_managed_rule_set_read = _schema_exclusion_managed_rule_set_read = AAZObjectType()
+
+        exclusion_managed_rule_set_read = _schema_exclusion_managed_rule_set_read
+        exclusion_managed_rule_set_read.rule_groups = AAZListType(
+            serialized_name="ruleGroups",
+        )
+        exclusion_managed_rule_set_read.rule_set_type = AAZStrType(
+            serialized_name="ruleSetType",
+            flags={"required": True},
+        )
+        exclusion_managed_rule_set_read.rule_set_version = AAZStrType(
+            serialized_name="ruleSetVersion",
+            flags={"required": True},
+        )
+
+        rule_groups = _schema_exclusion_managed_rule_set_read.rule_groups
+        rule_groups.Element = AAZObjectType()
+
+        _element = _schema_exclusion_managed_rule_set_read.rule_groups.Element
+        _element.rule_group_name = AAZStrType(
+            serialized_name="ruleGroupName",
+            flags={"required": True},
+        )
+        _element.rules = AAZListType()
+
+        rules = _schema_exclusion_managed_rule_set_read.rule_groups.Element.rules
+        rules.Element = AAZObjectType()
+
+        _element = _schema_exclusion_managed_rule_set_read.rule_groups.Element.rules.Element
+        _element.rule_id = AAZStrType(
+            serialized_name="ruleId",
+            flags={"required": True},
+        )
+
+        _schema.rule_groups = cls._schema_exclusion_managed_rule_set_read.rule_groups
+        _schema.rule_set_type = cls._schema_exclusion_managed_rule_set_read.rule_set_type
+        _schema.rule_set_version = cls._schema_exclusion_managed_rule_set_read.rule_set_version
+
     _schema_extended_location_read = None
 
     @classmethod
@@ -930,6 +978,51 @@ class _UpdateHelper:
         _schema.name = cls._schema_ip_configuration_read.name
         _schema.properties = cls._schema_ip_configuration_read.properties
 
+    _schema_managed_service_identity_read = None
+
+    @classmethod
+    def _build_schema_managed_service_identity_read(cls, _schema):
+        if cls._schema_managed_service_identity_read is not None:
+            _schema.principal_id = cls._schema_managed_service_identity_read.principal_id
+            _schema.tenant_id = cls._schema_managed_service_identity_read.tenant_id
+            _schema.type = cls._schema_managed_service_identity_read.type
+            _schema.user_assigned_identities = cls._schema_managed_service_identity_read.user_assigned_identities
+            return
+
+        cls._schema_managed_service_identity_read = _schema_managed_service_identity_read = AAZIdentityObjectType()
+
+        managed_service_identity_read = _schema_managed_service_identity_read
+        managed_service_identity_read.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+        managed_service_identity_read.tenant_id = AAZStrType(
+            serialized_name="tenantId",
+            flags={"read_only": True},
+        )
+        managed_service_identity_read.type = AAZStrType()
+        managed_service_identity_read.user_assigned_identities = AAZDictType(
+            serialized_name="userAssignedIdentities",
+        )
+
+        user_assigned_identities = _schema_managed_service_identity_read.user_assigned_identities
+        user_assigned_identities.Element = AAZObjectType()
+
+        _element = _schema_managed_service_identity_read.user_assigned_identities.Element
+        _element.client_id = AAZStrType(
+            serialized_name="clientId",
+            flags={"read_only": True},
+        )
+        _element.principal_id = AAZStrType(
+            serialized_name="principalId",
+            flags={"read_only": True},
+        )
+
+        _schema.principal_id = cls._schema_managed_service_identity_read.principal_id
+        _schema.tenant_id = cls._schema_managed_service_identity_read.tenant_id
+        _schema.type = cls._schema_managed_service_identity_read.type
+        _schema.user_assigned_identities = cls._schema_managed_service_identity_read.user_assigned_identities
+
     _schema_network_interface_ip_configuration_read = None
 
     @classmethod
@@ -1050,6 +1143,7 @@ class _UpdateHelper:
         properties.location = AAZStrType()
         properties.outbound_rule = AAZObjectType(
             serialized_name="outboundRule",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.outbound_rule)
         properties.outbound_rules = AAZListType(
@@ -1105,6 +1199,7 @@ class _UpdateHelper:
         cls._build_schema_sub_resource_read(properties.load_balancer_frontend_ip_configuration)
         properties.network_interface_ip_configuration = AAZObjectType(
             serialized_name="networkInterfaceIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.network_interface_ip_configuration)
         properties.subnet = AAZObjectType()
@@ -1168,6 +1263,7 @@ class _UpdateHelper:
         cls._build_schema_sub_resource_read(properties.backend_address_pool)
         properties.backend_ip_configuration = AAZObjectType(
             serialized_name="backendIPConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_network_interface_ip_configuration_read(properties.backend_ip_configuration)
         properties.backend_port = AAZIntType(
@@ -1315,6 +1411,10 @@ class _UpdateHelper:
         properties.auxiliary_sku = AAZStrType(
             serialized_name="auxiliarySku",
         )
+        properties.default_outbound_connectivity_enabled = AAZBoolType(
+            serialized_name="defaultOutboundConnectivityEnabled",
+            flags={"read_only": True},
+        )
         properties.disable_tcp_state_tracking = AAZBoolType(
             serialized_name="disableTcpStateTracking",
         )
@@ -1323,6 +1423,7 @@ class _UpdateHelper:
         )
         properties.dscp_configuration = AAZObjectType(
             serialized_name="dscpConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.dscp_configuration)
         properties.enable_accelerated_networking = AAZBoolType(
@@ -1377,6 +1478,7 @@ class _UpdateHelper:
         )
         properties.virtual_machine = AAZObjectType(
             serialized_name="virtualMachine",
+            flags={"read_only": True},
         )
         cls._build_schema_sub_resource_read(properties.virtual_machine)
         properties.vnet_encryption_supported = AAZBoolType(
@@ -1447,6 +1549,9 @@ class _UpdateHelper:
         )
         properties.auto_approval = AAZObjectType(
             serialized_name="autoApproval",
+        )
+        properties.destination_ip_address = AAZStrType(
+            serialized_name="destinationIPAddress",
         )
         properties.enable_proxy_protocol = AAZBoolType(
             serialized_name="enableProxyProtocol",
@@ -1663,6 +1768,8 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
+        _element.identity = AAZIdentityObjectType()
+        cls._build_schema_managed_service_identity_read(_element.identity)
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},
@@ -1677,6 +1784,9 @@ class _UpdateHelper:
 
         properties = _schema_network_security_group_read.properties.flow_logs.Element.properties
         properties.enabled = AAZBoolType()
+        properties.enabled_filtering_criteria = AAZStrType(
+            serialized_name="enabledFilteringCriteria",
+        )
         properties.flow_analytics_configuration = AAZObjectType(
             serialized_name="flowAnalyticsConfiguration",
         )
@@ -2029,6 +2139,7 @@ class _UpdateHelper:
         )
         properties.ip_configuration = AAZObjectType(
             serialized_name="ipConfiguration",
+            flags={"read_only": True},
         )
         cls._build_schema_ip_configuration_read(properties.ip_configuration)
         properties.ip_tags = AAZListType(
@@ -2127,13 +2238,23 @@ class _UpdateHelper:
         properties.public_ip_addresses = AAZListType(
             serialized_name="publicIpAddresses",
         )
+        properties.public_ip_addresses_v6 = AAZListType(
+            serialized_name="publicIpAddressesV6",
+        )
         properties.public_ip_prefixes = AAZListType(
             serialized_name="publicIpPrefixes",
+        )
+        properties.public_ip_prefixes_v6 = AAZListType(
+            serialized_name="publicIpPrefixesV6",
         )
         properties.resource_guid = AAZStrType(
             serialized_name="resourceGuid",
             flags={"read_only": True},
         )
+        properties.source_virtual_network = AAZObjectType(
+            serialized_name="sourceVirtualNetwork",
+        )
+        cls._build_schema_sub_resource_read(properties.source_virtual_network)
         properties.subnets = AAZListType(
             flags={"read_only": True},
         )
@@ -2142,9 +2263,17 @@ class _UpdateHelper:
         public_ip_addresses.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_addresses.Element)
 
+        public_ip_addresses_v6 = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_addresses_v6
+        public_ip_addresses_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_addresses_v6.Element)
+
         public_ip_prefixes = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_prefixes
         public_ip_prefixes.Element = AAZObjectType()
         cls._build_schema_sub_resource_read(public_ip_prefixes.Element)
+
+        public_ip_prefixes_v6 = _schema_public_ip_address_read.properties.nat_gateway.properties.public_ip_prefixes_v6
+        public_ip_prefixes_v6.Element = AAZObjectType()
+        cls._build_schema_sub_resource_read(public_ip_prefixes_v6.Element)
 
         subnets = _schema_public_ip_address_read.properties.nat_gateway.properties.subnets
         subnets.Element = AAZObjectType()
@@ -2345,6 +2474,9 @@ class _UpdateHelper:
             serialized_name="ipConfigurations",
             flags={"read_only": True},
         )
+        properties.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
         properties.nat_gateway = AAZObjectType(
             serialized_name="natGateway",
         )
@@ -2459,10 +2591,29 @@ class _UpdateHelper:
         ip_configurations.Element = AAZObjectType()
         cls._build_schema_ip_configuration_read(ip_configurations.Element)
 
-        private_endpoints = _schema_subnet_read.properties.private_endpoints
-        private_endpoints.Element = AAZObjectType(
+        ipam_pool_prefix_allocations = _schema_subnet_read.properties.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+
+        _element = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element
+        _element.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
             flags={"read_only": True},
         )
+        _element.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        _element.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_subnet_read.properties.ipam_pool_prefix_allocations.Element.pool
+        pool.id = AAZStrType()
+
+        private_endpoints = _schema_subnet_read.properties.private_endpoints
+        private_endpoints.Element = AAZObjectType()
         cls._build_schema_private_endpoint_read(private_endpoints.Element)
 
         resource_navigation_links = _schema_subnet_read.properties.resource_navigation_links
@@ -2547,6 +2698,7 @@ class _UpdateHelper:
         )
         properties.has_bgp_override = AAZBoolType(
             serialized_name="hasBgpOverride",
+            flags={"read_only": True},
         )
         properties.next_hop_ip_address = AAZStrType(
             serialized_name="nextHopIpAddress",
@@ -2688,6 +2840,10 @@ class _UpdateHelper:
 
         _element = _schema_subnet_read.properties.service_endpoints.Element
         _element.locations = AAZListType()
+        _element.network_identifier = AAZObjectType(
+            serialized_name="networkIdentifier",
+        )
+        cls._build_schema_sub_resource_read(_element.network_identifier)
         _element.provisioning_state = AAZStrType(
             serialized_name="provisioningState",
             flags={"read_only": True},
@@ -2810,6 +2966,10 @@ class _UpdateHelper:
         )
 
         properties = _schema_web_application_firewall_policy_read.properties
+        properties.application_gateway_for_containers = AAZListType(
+            serialized_name="applicationGatewayForContainers",
+            flags={"read_only": True},
+        )
         properties.application_gateways = AAZListType(
             serialized_name="applicationGateways",
             flags={"read_only": True},
@@ -2841,6 +3001,14 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
 
+        application_gateway_for_containers = _schema_web_application_firewall_policy_read.properties.application_gateway_for_containers
+        application_gateway_for_containers.Element = AAZObjectType()
+
+        _element = _schema_web_application_firewall_policy_read.properties.application_gateway_for_containers.Element
+        _element.id = AAZStrType(
+            flags={"required": True},
+        )
+
         application_gateways = _schema_web_application_firewall_policy_read.properties.application_gateways
         application_gateways.Element = AAZObjectType()
 
@@ -2849,7 +3017,8 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         _element.id = AAZStrType()
-        _element.identity = AAZObjectType()
+        _element.identity = AAZIdentityObjectType()
+        cls._build_schema_managed_service_identity_read(_element.identity)
         _element.location = AAZStrType()
         _element.name = AAZStrType(
             flags={"read_only": True},
@@ -2862,33 +3031,6 @@ class _UpdateHelper:
             flags={"read_only": True},
         )
         _element.zones = AAZListType()
-
-        identity = _schema_web_application_firewall_policy_read.properties.application_gateways.Element.identity
-        identity.principal_id = AAZStrType(
-            serialized_name="principalId",
-            flags={"read_only": True},
-        )
-        identity.tenant_id = AAZStrType(
-            serialized_name="tenantId",
-            flags={"read_only": True},
-        )
-        identity.type = AAZStrType()
-        identity.user_assigned_identities = AAZDictType(
-            serialized_name="userAssignedIdentities",
-        )
-
-        user_assigned_identities = _schema_web_application_firewall_policy_read.properties.application_gateways.Element.identity.user_assigned_identities
-        user_assigned_identities.Element = AAZObjectType()
-
-        _element = _schema_web_application_firewall_policy_read.properties.application_gateways.Element.identity.user_assigned_identities.Element
-        _element.client_id = AAZStrType(
-            serialized_name="clientId",
-            flags={"read_only": True},
-        )
-        _element.principal_id = AAZStrType(
-            serialized_name="principalId",
-            flags={"read_only": True},
-        )
 
         properties = _schema_web_application_firewall_policy_read.properties.application_gateways.Element.properties
         properties.authentication_certificates = AAZListType(
@@ -3066,6 +3208,9 @@ class _UpdateHelper:
         properties.cookie_based_affinity = AAZStrType(
             serialized_name="cookieBasedAffinity",
         )
+        properties.dedicated_backend_connection = AAZBoolType(
+            serialized_name="dedicatedBackendConnection",
+        )
         properties.host_name = AAZStrType(
             serialized_name="hostName",
         )
@@ -3087,8 +3232,17 @@ class _UpdateHelper:
         properties.request_timeout = AAZIntType(
             serialized_name="requestTimeout",
         )
+        properties.sni_name = AAZStrType(
+            serialized_name="sniName",
+        )
         properties.trusted_root_certificates = AAZListType(
             serialized_name="trustedRootCertificates",
+        )
+        properties.validate_cert_chain_and_expiry = AAZBoolType(
+            serialized_name="validateCertChainAndExpiry",
+        )
+        properties.validate_sni = AAZBoolType(
+            serialized_name="validateSNI",
         )
 
         authentication_certificates = _schema_web_application_firewall_policy_read.properties.application_gateways.Element.properties.backend_http_settings_collection.Element.properties.authentication_certificates
@@ -4140,11 +4294,40 @@ class _UpdateHelper:
         cls._build_schema_sub_resource_read(http_listeners.Element)
 
         managed_rules = _schema_web_application_firewall_policy_read.properties.managed_rules
+        managed_rules.exceptions = AAZListType()
         managed_rules.exclusions = AAZListType()
         managed_rules.managed_rule_sets = AAZListType(
             serialized_name="managedRuleSets",
             flags={"required": True},
         )
+
+        exceptions = _schema_web_application_firewall_policy_read.properties.managed_rules.exceptions
+        exceptions.Element = AAZObjectType()
+
+        _element = _schema_web_application_firewall_policy_read.properties.managed_rules.exceptions.Element
+        _element.exception_managed_rule_sets = AAZListType(
+            serialized_name="exceptionManagedRuleSets",
+        )
+        _element.match_variable = AAZStrType(
+            serialized_name="matchVariable",
+            flags={"required": True},
+        )
+        _element.selector = AAZStrType()
+        _element.selector_match_operator = AAZStrType(
+            serialized_name="selectorMatchOperator",
+        )
+        _element.value_match_operator = AAZStrType(
+            serialized_name="valueMatchOperator",
+            flags={"required": True},
+        )
+        _element.values = AAZListType()
+
+        exception_managed_rule_sets = _schema_web_application_firewall_policy_read.properties.managed_rules.exceptions.Element.exception_managed_rule_sets
+        exception_managed_rule_sets.Element = AAZObjectType()
+        cls._build_schema_exclusion_managed_rule_set_read(exception_managed_rule_sets.Element)
+
+        values = _schema_web_application_firewall_policy_read.properties.managed_rules.exceptions.Element.values
+        values.Element = AAZStrType()
 
         exclusions = _schema_web_application_firewall_policy_read.properties.managed_rules.exclusions
         exclusions.Element = AAZObjectType()
@@ -4167,43 +4350,16 @@ class _UpdateHelper:
 
         exclusion_managed_rule_sets = _schema_web_application_firewall_policy_read.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets
         exclusion_managed_rule_sets.Element = AAZObjectType()
-
-        _element = _schema_web_application_firewall_policy_read.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element
-        _element.rule_groups = AAZListType(
-            serialized_name="ruleGroups",
-        )
-        _element.rule_set_type = AAZStrType(
-            serialized_name="ruleSetType",
-            flags={"required": True},
-        )
-        _element.rule_set_version = AAZStrType(
-            serialized_name="ruleSetVersion",
-            flags={"required": True},
-        )
-
-        rule_groups = _schema_web_application_firewall_policy_read.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups
-        rule_groups.Element = AAZObjectType()
-
-        _element = _schema_web_application_firewall_policy_read.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element
-        _element.rule_group_name = AAZStrType(
-            serialized_name="ruleGroupName",
-            flags={"required": True},
-        )
-        _element.rules = AAZListType()
-
-        rules = _schema_web_application_firewall_policy_read.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element.rules
-        rules.Element = AAZObjectType()
-
-        _element = _schema_web_application_firewall_policy_read.properties.managed_rules.exclusions.Element.exclusion_managed_rule_sets.Element.rule_groups.Element.rules.Element
-        _element.rule_id = AAZStrType(
-            serialized_name="ruleId",
-            flags={"required": True},
-        )
+        cls._build_schema_exclusion_managed_rule_set_read(exclusion_managed_rule_sets.Element)
 
         managed_rule_sets = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets
         managed_rule_sets.Element = AAZObjectType()
 
         _element = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets.Element
+        _element.computed_disabled_rules = AAZListType(
+            serialized_name="computedDisabledRules",
+            flags={"read_only": True},
+        )
         _element.rule_group_overrides = AAZListType(
             serialized_name="ruleGroupOverrides",
         )
@@ -4215,6 +4371,19 @@ class _UpdateHelper:
             serialized_name="ruleSetVersion",
             flags={"required": True},
         )
+
+        computed_disabled_rules = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets.Element.computed_disabled_rules
+        computed_disabled_rules.Element = AAZObjectType()
+
+        _element = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets.Element.computed_disabled_rules.Element
+        _element.rule_group_name = AAZStrType(
+            serialized_name="ruleGroupName",
+            flags={"required": True},
+        )
+        _element.rules = AAZListType()
+
+        rules = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets.Element.computed_disabled_rules.Element.rules
+        rules.Element = AAZAnyType()
 
         rule_group_overrides = _schema_web_application_firewall_policy_read.properties.managed_rules.managed_rule_sets.Element.rule_group_overrides
         rule_group_overrides.Element = AAZObjectType()
@@ -4235,6 +4404,7 @@ class _UpdateHelper:
             serialized_name="ruleId",
             flags={"required": True},
         )
+        _element.sensitivity = AAZStrType()
         _element.state = AAZStrType()
 
         path_based_rules = _schema_web_application_firewall_policy_read.properties.path_based_rules

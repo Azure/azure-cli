@@ -17,7 +17,7 @@ from azure.cli.core.aaz import *
 class Redeploy(AAZCommand):
     """Redeploy the dedicated host.
 
-    The operation will complete successfully once the dedicated host has migrated to a new node and is running. To determine the health of VMs deployed on the dedicated host after the redeploy check the Resource Health Center in the Azure Portal. Please refer to https://docs.microsoft.com/azure/service-health/resource-health-overview for more details.
+    The operation will complete successfully once the dedicated host has migrated to a new node and is running. To determine the health of VMs deployed on the dedicated host after the redeploy check the Resource Health Center in the Azure Portal. Please refer to https://learn.microsoft.com/azure/service-health/resource-health-overview for more details.
     """
 
     _aaz_info = {
@@ -50,7 +50,7 @@ class Redeploy(AAZCommand):
             required=True,
             id_part="name",
             fmt=AAZStrArgFormat(
-                pattern="^[-\w\._]+$",
+                pattern="^[-\\w\\._]+$",
             ),
         )
         _args_schema.host_name = AAZStrArg(
@@ -59,7 +59,7 @@ class Redeploy(AAZCommand):
             required=True,
             id_part="child_name_1",
             fmt=AAZStrArgFormat(
-                pattern="^[-\w\._]+$",
+                pattern="^[-\\w\\._]+$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(

@@ -15,7 +15,7 @@ class SecurityCommandsLoader(AzCommandsLoader):
         security_custom = CliCommandType(
             operations_tmpl='azure.cli.command_modules.security.custom#{}')
 
-        super(SecurityCommandsLoader, self).__init__(
+        super().__init__(
             cli_ctx=cli_ctx,
             custom_command_type=security_custom)
 

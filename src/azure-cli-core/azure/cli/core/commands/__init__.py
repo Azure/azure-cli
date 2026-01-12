@@ -14,8 +14,10 @@ import re
 import sys
 import time
 import copy
+from collections import OrderedDict
 from importlib import import_module
 
+from azure.cli.core.breaking_change import UpcomingBreakingChangeTag, MergedStatusTag
 # pylint: disable=unused-import
 from azure.cli.core.commands.constants import (
     BLOCKED_MODS, DEFAULT_QUERY_TIME_RANGE, CLI_COMMON_KWARGS, CLI_COMMAND_KWARGS, CLI_PARAM_KWARGS,
@@ -31,12 +33,12 @@ from azure.cli.core.commands.progress import IndeterminateProgressBar
 
 from knack.arguments import CLICommandArgument
 from knack.commands import CLICommand, CommandGroup, PREVIEW_EXPERIMENTAL_CONFLICT_ERROR
-from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info
+from knack.deprecation import ImplicitDeprecated, resolve_deprecate_info, Deprecated
 from knack.invocation import CommandInvoker
 from knack.preview import ImplicitPreviewItem, PreviewItem, resolve_preview_info
 from knack.experimental import ImplicitExperimentalItem, ExperimentalItem, resolve_experimental_info
 from knack.log import get_logger, CLILogging
-from knack.util import CLIError, CommandResultItem, todict
+from knack.util import CLIError, CommandResultItem
 from knack.events import EVENT_INVOKER_TRANSFORM_RESULT
 from knack.validators import DefaultStr
 
@@ -93,7 +95,7 @@ def _expand_file_prefixed_files(args):
         if ix == 0:
             try:
                 return _load_file(poss_file)
-            except IOError:
+            except OSError:
                 logger.debug("Failed to load '%s', assume not a file", arg)
                 return arg
 
@@ -253,13 +255,13 @@ class CacheObject:
             payload = object.__getattribute__(self, '_payload')
             return payload.__getattribute__(key)
         except AttributeError:
-            return super(CacheObject, self).__getattribute__(key)
+            return super().__getattribute__(key)
 
     def __setattr__(self, key, value):
         try:
             return self._payload.__setattr__(key, value)
         except AttributeError:
-            return super(CacheObject, self).__setattr__(key, value)
+            return super().__setattr__(key, value)
 
 
 class AzCliCommand(CLICommand):
@@ -267,10 +269,10 @@ class AzCliCommand(CLICommand):
     def __init__(self, loader, name, handler, description=None, table_transformer=None,
                  arguments_loader=None, description_loader=None,
                  formatter_class=None, sensitive_info=None, deprecate_info=None, validator=None, **kwargs):
-        super(AzCliCommand, self).__init__(loader.cli_ctx, name, handler, description=description,
-                                           table_transformer=table_transformer, arguments_loader=arguments_loader,
-                                           description_loader=description_loader, formatter_class=formatter_class,
-                                           deprecate_info=deprecate_info, validator=validator, **kwargs)
+        super().__init__(loader.cli_ctx, name, handler, description=description,
+                         table_transformer=table_transformer, arguments_loader=arguments_loader,
+                         description_loader=description_loader, formatter_class=formatter_class,
+                         deprecate_info=deprecate_info, validator=validator, **kwargs)
         self.loader = loader
         self.command_source = None
         self.sensitive_info = sensitive_info
@@ -297,7 +299,7 @@ class AzCliCommand(CLICommand):
 
         # same blunt mechanism like we handled id-parts, for create command, no name default
         if not (self.name.split()[-1] == 'create' and overrides.settings.get('metavar', None) == 'NAME'):
-            super(AzCliCommand, self)._resolve_default_value_from_config_file(arg, overrides)
+            super()._resolve_default_value_from_config_file(arg, overrides)
 
         self._resolve_default_value_from_local_context(arg, overrides)
 
@@ -316,7 +318,7 @@ class AzCliCommand(CLICommand):
                     overrides.settings['default_value_source'] = 'Local Context'
 
     def load_arguments(self):
-        super(AzCliCommand, self).load_arguments()
+        super().load_arguments()
         if self.arguments_loader:
             cmd_args = self.arguments_loader()
             if self.supports_no_wait or self.no_wait_param:
@@ -469,7 +471,7 @@ def cached_put(cmd_obj, operation, parameters, *args, setter_arg_name='parameter
     obj_path = os.path.join(obj_dir, obj_file)
     try:
         os.remove(obj_path)
-    except (OSError, IOError):  # FileNotFoundError introduced in Python 3
+    except OSError:  # FileNotFoundError introduced in Python 3
         pass
     return result
 
@@ -510,8 +512,10 @@ class AzCliCommandInvoker(CommandInvoker):
                                   EVENT_INVOKER_FILTER_RESULT)
         from azure.cli.core.commands.events import (
             EVENT_INVOKER_PRE_CMD_TBL_TRUNCATE, EVENT_INVOKER_PRE_LOAD_ARGUMENTS, EVENT_INVOKER_POST_LOAD_ARGUMENTS)
+        from azure.cli.core.util import roughly_parse_command_with_casing
 
         # TODO: Can't simply be invoked as an event because args are transformed
+        command_preserve_casing = roughly_parse_command_with_casing(args)
         args = _pre_command_table_create(self.cli_ctx, args)
 
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_CMD_TBL_CREATE, args=args)
@@ -576,7 +580,7 @@ class AzCliCommandInvoker(CommandInvoker):
             self.help.show_welcome(subparser)
 
             # TODO: No event in base with which to target
-            telemetry.set_command_details('az')
+            telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
             telemetry.set_success(summary='welcome')
             return CommandResultItem(None, exit_code=0)
 
@@ -631,7 +635,8 @@ class AzCliCommandInvoker(CommandInvoker):
             pass
         telemetry.set_command_details(self.cli_ctx.data['command'], self.data['output'],
                                       self.cli_ctx.data['safe_params'],
-                                      extension_name=extension_name, extension_version=extension_version)
+                                      extension_name=extension_name, extension_version=extension_version,
+                                      command_preserve_casing=command_preserve_casing)
         if extension_name:
             self.data['command_extension_name'] = extension_name
             self.cli_ctx.logging.log_cmd_metadata_extension_info(extension_name, extension_version)
@@ -713,6 +718,7 @@ class AzCliCommandInvoker(CommandInvoker):
             elif _is_paged(result):
                 result = list(result)
 
+            from ..util import todict
             result = todict(result, AzCliCommandInvoker.remove_additional_prop_layer)
 
             event_data = {'result': result}
@@ -751,15 +757,36 @@ class AzCliCommandInvoker(CommandInvoker):
         self._resolve_extension_override_warning(cmd)
 
     def _resolve_preview_and_deprecation_warnings(self, cmd, parsed_args):
-        deprecations = [] + getattr(parsed_args, '_argument_deprecations', [])
+        deprecations = getattr(parsed_args, '_argument_deprecations', [])
+        # Handle `always_display` argument breaking changes
+        for _, argument in parsed_args.func.arguments.items():
+            # Some arguments have breaking changes that must always be displayed.
+            # Iterate through them and show the warnings.
+            if isinstance(argument.deprecate_info, UpcomingBreakingChangeTag):
+                if argument.deprecate_info.always_display:
+                    deprecations.append(argument.deprecate_info)
+            elif isinstance(argument.deprecate_info, MergedStatusTag):
+                for deprecation in argument.deprecate_info.tags:
+                    if isinstance(deprecation, UpcomingBreakingChangeTag) and deprecation.always_display:
+                        deprecations.append(deprecation)
+        # Dedup the deprecations
+        # If an argument has multiple breaking changes or deprecations,
+        # duplicated deprecations would be produced due to the inherent logic of action
+        deprecations = list(OrderedDict.fromkeys(deprecations))
         if cmd.deprecate_info:
             deprecations.append(cmd.deprecate_info)
 
         # search for implicit deprecation
         path_comps = cmd.name.split()[:-1]
         implicit_deprecate_info = None
-        while path_comps and not implicit_deprecate_info:
-            implicit_deprecate_info = resolve_deprecate_info(self.cli_ctx, ' '.join(path_comps))
+        while path_comps:
+            deprecate_info = resolve_deprecate_info(self.cli_ctx, ' '.join(path_comps))
+            if isinstance(deprecate_info, Deprecated) and implicit_deprecate_info is None:
+                implicit_deprecate_info = deprecate_info
+            elif isinstance(deprecate_info, UpcomingBreakingChangeTag):
+                deprecations.append(deprecate_info)
+            elif isinstance(deprecate_info, MergedStatusTag):
+                deprecations.extend(deprecate_info.tags)
             del path_comps[-1]
 
         if implicit_deprecate_info:
@@ -806,6 +833,9 @@ class AzCliCommandInvoker(CommandInvoker):
                 experimentals.append(ImplicitExperimentalItem(cli_ctx=self.cli_ctx, **experimental_kwargs))
 
         if not self.cli_ctx.only_show_errors:
+            from azure.cli.core.breaking_change import upcoming_breaking_changes
+            for bc in upcoming_breaking_changes.get('', []):
+                print(bc.message, file=sys.stderr)
             for d in deprecations:
                 print(d.message, file=sys.stderr)
             for p in previews:
@@ -837,7 +867,7 @@ class AzCliCommandInvoker(CommandInvoker):
         from ..credential_helper import distinguish_credential
         from ..telemetry import set_secrets_detected
         try:
-            containing_credential, secret_property_names = distinguish_credential(result)
+            containing_credential, secret_property_names, secret_names = distinguish_credential(result)
             if not containing_credential:
                 set_secrets_detected(False)
                 return
@@ -846,10 +876,10 @@ class AzCliCommandInvoker(CommandInvoker):
             if secret_property_names:
                 message = sensitive_data_detailed_warning_message.format(', '.join(secret_property_names))
             logger.warning(message)
-            set_secrets_detected(True, secret_property_names)
-        except Exception:  # pylint: disable=broad-except
+            set_secrets_detected(True, secret_property_names, secret_names)
+        except Exception as ex:  # pylint: disable=broad-except
             # ignore all exceptions, as this is just a warning
-            pass
+            logger.debug('Scan credentials failed with %s', str(ex))
 
     def resolve_confirmation(self, cmd, parsed_args):
         confirm = cmd.confirmation and not parsed_args.__dict__.pop('yes', None) \
@@ -975,10 +1005,10 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
 
                     if deploy_values.get('timestamp', None) is None or \
                             event.event_timestamp > deploy_values.get('timestamp'):
-                        for value in checked_values:
-                            if deploy_values.get(checked_values[value], None) != value:
+                        for k, v in checked_values.items():
+                            if deploy_values.get(v, None) != k:
                                 update = True
-                            deploy_values[checked_values[value]] = value
+                            deploy_values[v] = k
                         deploy_values['timestamp'] = event.event_timestamp
 
                         # don't want to show the timestamp
@@ -1027,7 +1057,13 @@ class LongRunningOperation:  # pylint: disable=too-few-public-methods
                     logger.warning('%s during progress reporting: %s', getattr(type(ex), '__name__', type(ex)), ex)
             try:
                 if self.progress_bar:
-                    self.progress_bar.update_progress()
+                    status = ""
+                    # some pollers do not have a status method (eg. AAZLROPoller)
+                    try:
+                        status = poller.status()
+                    except AttributeError:
+                        pass
+                    self.progress_bar.update_progress_with_msg(status)
                 self._delay()
             except KeyboardInterrupt:
                 if self.progress_bar:
@@ -1066,7 +1102,7 @@ class DeploymentOutputLongRunningOperation(LongRunningOperation):
 
         if isinstance(result, poller_classes()):
             # most deployment operations return a poller
-            result = super(DeploymentOutputLongRunningOperation, self).__call__(result)
+            result = super().__call__(result)
             outputs = None
             try:
                 if isinstance(result, str) and result:
@@ -1128,7 +1164,7 @@ class ExtensionCommandSource:
     """ Class for commands contributed by an extension """
 
     def __init__(self, overrides_command=False, extension_name=None, preview=False, experimental=False):
-        super(ExtensionCommandSource, self).__init__()
+        super().__init__()
         # True if the command overrides a CLI command
         self.overrides_command = overrides_command
         self.extension_name = extension_name
@@ -1191,7 +1227,7 @@ def _is_paged(obj):
 
 def _is_poller(obj):
     # Since loading msrest is expensive, we avoid it until we have to
-    if obj.__class__.__name__ in ['AzureOperationPoller', 'LROPoller', 'AAZLROPoller']:
+    if obj.__class__.__name__ in ['LROPoller', 'AAZLROPoller']:
         return isinstance(obj, poller_classes())
     return False
 
@@ -1234,8 +1270,8 @@ class AzCommandGroup(CommandGroup):
         """
         merged_kwargs = self._merge_kwargs(kwargs, base_kwargs=command_loader.module_kwargs)
         operations_tmpl = merged_kwargs.pop('operations_tmpl', None)
-        super(AzCommandGroup, self).__init__(command_loader, group_name,
-                                             operations_tmpl, **merged_kwargs)
+        super().__init__(command_loader, group_name,
+                         operations_tmpl, **merged_kwargs)
         self.group_kwargs = merged_kwargs
         if operations_tmpl:
             self.group_kwargs['operations_tmpl'] = operations_tmpl
@@ -1267,14 +1303,13 @@ class AzCommandGroup(CommandGroup):
             return arg_source_copy
         return merged_kwargs
 
-    # pylint: disable=arguments-differ
-    def command(self, name, method_name=None, **kwargs):
+    def command(self, name, handler_name=None, **kwargs):
         """
         Register a CLI command.
         :param name: Name of the command as it will be called on the command line
         :type name: str
-        :param method_name: Name of the method the command maps to
-        :type method_name: str
+        :param handler_name: Name of the method the command maps to
+        :type handler_name: str
         :param kwargs: Keyword arguments. Supported keyword arguments include:
             - client_factory: Callable which returns a client needed to access the underlying command method. (function)
             - confirmation: Prompt prior to the action being executed. This is useful if the action
@@ -1291,7 +1326,7 @@ class AzCommandGroup(CommandGroup):
             - max_api: Maximum API version required for commands within the group (string)
         :rtype: None
         """
-        return self._command(name, method_name=method_name, **kwargs)
+        return self._command(name, method_name=handler_name, **kwargs)
 
     def custom_command(self, name, method_name=None, **kwargs):
         """

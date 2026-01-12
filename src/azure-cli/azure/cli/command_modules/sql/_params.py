@@ -32,7 +32,6 @@ from azure.mgmt.sql.models import (
     ServerKeyType,
     StorageKeyType,
     TransparentDataEncryptionState,
-    FreemiumType,
     ManagedInstanceDatabaseFormat
 )
 
@@ -59,12 +58,15 @@ from .custom import (
     DatabaseCapabilitiesAdditionalDetails,
     ElasticPoolCapabilitiesAdditionalDetails,
     FailoverPolicyType,
+    FailoverReadOnlyEndpointPolicy,
     ResourceIdType,
     ServicePrincipalType,
     SqlServerMinimalTlsVersionType,
     SqlManagedInstanceMinimalTlsVersionType,
     AuthenticationType,
-    FreeLimitExhaustionBehavior
+    FreemiumType,
+    FreeLimitExhaustionBehavior,
+    FailoverGroupDatabasesSecondaryType
 )
 
 from ._validators import (
@@ -74,13 +76,12 @@ from ._validators import (
     validate_subnet
 )
 
-
 #####
 #        SizeWithUnitConverter - consider moving to common code (azure.cli.core.commands.parameters)
 #####
 
 
-class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
+class SizeWithUnitConverter:  # pylint: disable=too-few-public-methods
 
     def __init__(
             self,
@@ -89,8 +90,8 @@ class SizeWithUnitConverter():  # pylint: disable=too-few-public-methods
             unit_map=None):
         self.unit = unit
         self.result_type = result_type
-        self.unit_map = unit_map or dict(B=1, kB=1024, MB=1024 * 1024, GB=1024 * 1024 * 1024,
-                                         TB=1024 * 1024 * 1024 * 1024)
+        self.unit_map = unit_map or {"B": 1, "kB": 1024, "MB": 1024 * 1024, "GB": 1024 * 1024 * 1024,
+                                     "TB": 1024 * 1024 * 1024 * 1024}
 
     def __call__(self, value):
         numeric_part = ''.join(itertools.takewhile(str.isdigit, value))
@@ -292,13 +293,18 @@ server_key_type_param_type = CLIArgumentType(
 
 storage_param_type = CLIArgumentType(
     options_list=['--storage'],
-    type=SizeWithUnitConverter('GB', result_type=int, unit_map=dict(B=1.0 / (1024 * 1024 * 1024),
-                                                                    kB=1.0 / (1024 * 1024),
-                                                                    MB=1.0 / 1024,
-                                                                    GB=1,
-                                                                    TB=1024)),
+    type=SizeWithUnitConverter('GB', result_type=int, unit_map={"B": 1.0 / (1024 * 1024 * 1024),
+                                                                "kB": 1.0 / (1024 * 1024),
+                                                                "MB": 1.0 / 1024,
+                                                                "GB": 1,
+                                                                "TB": 1024}),
     help='The storage size. If no unit is specified, defaults to gigabytes (GB).',
     validator=validate_managed_instance_storage_size)
+
+iops_param_type = CLIArgumentType(
+    options_list=['--iops'],
+    type=int,
+    help='The storage iops.')
 
 backup_storage_redundancy_param_type = CLIArgumentType(
     options_list=['--backup-storage-redundancy', '--bsr'],
@@ -407,6 +413,15 @@ perform_cutover_param_type = CLIArgumentType(
     options_list=['--perform-cutover'],
     help='Whether to perform cutover when updating database to Hyperscale tier is in progress.',
     arg_type=get_three_state_flag())
+
+authentication_metadata_param_type = CLIArgumentType(
+    options_list=['--authentication-metadata', '--am'],
+    help='Preferred metadata to use for authentication of synced on-prem users. Default is AzureAD.',
+    arg_type=get_enum_type(['AzureAD', 'Windows', 'Paired']))
+
+memory_size_type = CLIArgumentType(
+    options_list=['--memory'],
+    help='The memory size in gigabytes (GB).')
 
 db_service_objective_examples = 'Basic, S0, P1, GP_Gen4_1, GP_S_Gen5_8, BC_Gen5_2, HS_Gen5_32.'
 dw_service_objective_examples = 'DW100, DW1000c'
@@ -1123,6 +1138,11 @@ def load_arguments(self, _):
                    help='Type of secondary to create.'
                    ' Allowed values include: Geo, Named.')
 
+        c.argument('partner_sub_id',
+                   options_list=['--partner-sub-id'],
+                   help='Subscription id to create the new replica in.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
     with self.argument_context('sql db replica set-primary') as c:
         c.argument('database_name',
                    help='Name of the database to fail over.')
@@ -1297,8 +1317,8 @@ def load_arguments(self, _):
                 'monthly_retention',
                 'yearly_retention',
                 'week_of_year',
-                'make_backups_immutable',
-                'backup_storage_access_tier'])
+                'time_based_immutability',
+                'time_based_immutability_mode'])
 
         c.argument('weekly_retention',
                    help='Retention for the weekly backup. '
@@ -1318,15 +1338,20 @@ def load_arguments(self, _):
         c.argument('week_of_year',
                    help='The Week of Year, 1 to 52, in which to take the yearly LTR backup.')
 
-        c.argument('make_backups_immutable',
-                   help='Whether to make the LTR backups immutable.',
-                   arg_type=get_three_state_flag())
+        c.argument('time_based_immutability',
+                   options_list=['--make-backups-immutable', '--tb-immutability'],
+                   help='Whether to enable time based immutability on the LTR backups. '
+                   'Possible values are: \'True\', \'False\', \'Enabled\', \'Disabled\'.')
 
-        c.argument('backup_storage_access_tier',
-                   options_list=['--access-tier', '--backup-storage-access-tier'],
-                   arg_type=get_enum_type(["Hot", "Archive"]),
-                   help='The access tier of a LTR backup.'
-                   'Possible values = [Hot, Archive]')
+        c.argument('time_based_immutability_mode',
+                   options_list=['--tb-immutability-mode'],
+                   help='The mode of time based immutability to be set on the LTR backups. '
+                   'Possible values are: \'Locked\', \'Unlocked\'. '
+                   'This is only valid if make-backups-immutable is enabled')
+
+        c.argument('yes',
+                   options_list=['--yes', '-y'],
+                   help='Do not prompt for confirmation.', action='store_true')
 
     with self.argument_context('sql db ltr-backup') as c:
         c.argument('location_name',
@@ -1710,6 +1735,13 @@ def load_arguments(self, _):
                    arg_type=allow_data_loss_param_type)
         c.argument('try_planned_before_forced_failover',
                    arg_type=try_planned_before_forced_failover_param_type)
+        c.argument('secondary_type', help="Databases secondary type on partner server",
+                   arg_type=get_enum_type(FailoverGroupDatabasesSecondaryType))
+        c.argument('partner_server_ids', nargs='+',
+                   help="The list of partner server resource id's of the Failover Group")
+        c.argument('ro_failover_policy', help="The policy of the read only endpoint of the Failover Group",
+                   arg_type=get_enum_type(FailoverReadOnlyEndpointPolicy))
+        c.argument('ro_endpoint_target', help="The resource id of the read only endpoint target server")
 
     ###############################################
     #             sql instance pool               #
@@ -1892,7 +1924,8 @@ def load_arguments(self, _):
                 'administrator_login',
                 'administrator_login_password',
                 'location',
-                'minimal_tls_version'
+                'minimal_tls_version',
+                'tags'
             ])
 
         c.argument('administrator_login',
@@ -2272,11 +2305,22 @@ def load_arguments(self, _):
                    help='The compute generation component of the sku. '
                    'Allowed values include: Gen4, Gen5.')
 
+        c.argument('is_general_purpose_v2',
+                   options_list=['--gpv2'],
+                   arg_type=get_three_state_flag(),
+                   help='Whether or not this is a GPv2 variant of General Purpose edition.')
+
         c.argument('storage_size_in_gb',
                    options_list=['--storage'],
                    arg_type=storage_param_type,
                    help='The storage size of the managed instance. '
                    'Storage size must be specified in increments of 32 GB')
+
+        c.argument('storage_iops',
+                   options_list=['--iops'],
+                   arg_type=iops_param_type,
+                   help='The storage iops of the managed instance. '
+                   'Storage iops can be specified in increments of 1.')
 
         c.argument('license_type',
                    arg_type=get_enum_type(DatabaseLicenseType),
@@ -2285,6 +2329,12 @@ def load_arguments(self, _):
         c.argument('vcores',
                    arg_type=capacity_param_type,
                    help='The capacity of the managed instance in integer number of vcores.')
+
+        c.argument('memory_size_in_gb',
+                   options_list=['--memory'],
+                   arg_type=memory_size_type,
+                   help='The memory size of the managed instance.'
+                   ' Memory size must be specified in GB')
 
         c.argument('collation',
                    help='The collation of the managed instance.')
@@ -2333,20 +2383,31 @@ def load_arguments(self, _):
         c.argument('zone_redundant',
                    arg_type=zone_redundant_param_type)
 
+        c.argument('authentication_metadata',
+                   arg_type=authentication_metadata_param_type)
+
     with self.argument_context('sql mi create') as c:
         c.argument('location',
                    arg_type=get_location_type_with_default_from_resource_group(self.cli_ctx))
 
+        c.argument('dns_zone_partner',
+                   required=False,
+                   help='The resource id of the partner Managed Instance to inherit DnsZone property from for Managed '
+                        'Instance creation.')
+
         # Create args that will be used to build up the ManagedInstance object
         create_args_for_complex_type(
             c, 'parameters', ManagedInstance, [
+                'is_general_purpose_v2',
                 'administrator_login',
                 'administrator_login_password',
                 'license_type',
                 'minimal_tls_version',
                 'virtual_network_subnet_id',
                 'vcores',
+                'memory_size_in_gb',
                 'storage_size_in_gb',
+                'storage_iops',
                 'collation',
                 'proxy_override',
                 'public_data_endpoint_enabled',
@@ -2360,7 +2421,8 @@ def load_arguments(self, _):
                 'zone_redundant',
                 'instance_pool_name',
                 'database_format',
-                'pricing_model'
+                'pricing_model',
+                'dns_zone_partner'
             ])
 
         # Create args that will be used to build up the Managed Instance's Sku object
@@ -2906,6 +2968,12 @@ def load_arguments(self, _):
     #           sql midb move/copy
     ######
     with self.argument_context('sql midb move') as c:
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_resource_group_name',
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
@@ -2918,6 +2986,12 @@ def load_arguments(self, _):
                    help='Name of the managed instance to move the managed database to.')
 
     with self.argument_context('sql midb copy') as c:
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
+
         c.argument('dest_resource_group_name',
                    required=False,
                    options_list=['--dest-resource-group', '--dest-rg'],
@@ -2939,6 +3013,12 @@ def load_arguments(self, _):
                    options_list=['--managed-instance', '--mi'],
                    required=True,
                    help='Name of the source managed instance.')
+
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
 
         c.argument('dest_instance_name',
                    required=False,
@@ -2965,6 +3045,12 @@ def load_arguments(self, _):
                    options_list=['--managed-instance', '--mi'],
                    required=True,
                    help='Name of the source managed instance.')
+
+        c.argument('dest_subscription_id',
+                   required=False,
+                   options_list=['--dest-subscription-id', '--dest-sub-id'],
+                   help='Id of the subscription to move the managed database to.'
+                   ' If unspecified, defaults to the origin subscription id.')
 
         c.argument('dest_instance_name',
                    required=False,

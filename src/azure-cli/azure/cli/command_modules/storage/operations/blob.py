@@ -69,22 +69,19 @@ def create_container_rm(cmd, client, container_name, resource_group_name, accoun
                                              account_name=account_name, container_name=container_name):
         raise CLIError('The specified container already exists.')
 
-    if cmd.supported_api_version(min_api='2019-06-01', resource_type=ResourceType.MGMT_STORAGE):
-        BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
-        blob_container = BlobContainer(public_access=public_access,
-                                       default_encryption_scope=default_encryption_scope,
-                                       deny_encryption_scope_override=deny_encryption_scope_override,
-                                       metadata=metadata,
-                                       enable_nfs_v3_all_squash=enable_nfs_v3_all_squash,
-                                       enable_nfs_v3_root_squash=enable_nfs_v3_root_squash)
-        if enable_vlw is not None:
-            ImmutableStorageWithVersioning = cmd.get_models('ImmutableStorageWithVersioning',
-                                                            resource_type=ResourceType.MGMT_STORAGE)
-            blob_container.immutable_storage_with_versioning = ImmutableStorageWithVersioning(enabled=enable_vlw)
-        return client.create(resource_group_name=resource_group_name, account_name=account_name,
-                             container_name=container_name, blob_container=blob_container)
+    BlobContainer = cmd.get_models('BlobContainer', resource_type=ResourceType.MGMT_STORAGE)
+    blob_container = BlobContainer(public_access=public_access,
+                                   default_encryption_scope=default_encryption_scope,
+                                   deny_encryption_scope_override=deny_encryption_scope_override,
+                                   metadata=metadata,
+                                   enable_nfs_v3_all_squash=enable_nfs_v3_all_squash,
+                                   enable_nfs_v3_root_squash=enable_nfs_v3_root_squash)
+    if enable_vlw is not None:
+        ImmutableStorageWithVersioning = cmd.get_models('ImmutableStorageWithVersioning',
+                                                        resource_type=ResourceType.MGMT_STORAGE)
+        blob_container.immutable_storage_with_versioning = ImmutableStorageWithVersioning(enabled=enable_vlw)
     return client.create(resource_group_name=resource_group_name, account_name=account_name,
-                         container_name=container_name, public_access=public_access, metadata=metadata)
+                         container_name=container_name, blob_container=blob_container)
 
 
 def update_container_rm(cmd, instance, metadata=None, public_access=None,
@@ -329,12 +326,15 @@ def set_service_properties_track2(client, parameters, delete_retention=None, del
 
     if hasattr(parameters, 'static_website'):
         kwargs['static_website'] = parameters.static_website
-    if static_website is not None:
-        parameters.static_website.enabled = static_website
     if index_document is not None:
         parameters.static_website.index_document = index_document
     if error_document_404_path is not None:
         parameters.static_website.error_document404_path = error_document_404_path
+    if static_website is not None:
+        parameters.static_website.enabled = static_website
+        if not static_website:
+            parameters.static_website.index_document = None
+            parameters.static_website.error_document404_path = None
     if hasattr(parameters, 'hour_metrics'):
         kwargs['hour_metrics'] = parameters.hour_metrics
     if hasattr(parameters, 'logging'):
@@ -374,6 +374,9 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
     if source_container:
         # copy blobs for blob container, skip empty dir
         # pylint: disable=inconsistent-return-statements
+        if source_client is None:
+            source_client = client
+
         def action_blob_copy(blob_name):
             if dryrun:
                 logger.warning('  - copy blob %s', blob_name)
@@ -392,12 +395,25 @@ def storage_blob_copy_batch(cmd, client, source_client, container_name=None, des
     if source_share:
         # copy blob from file share, skip empty dir
         # pylint: disable=inconsistent-return-statements
+        if source_client is None:
+            t_share_service = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                      '_share_service_client#ShareServiceClient')
+            account_url = client.url.replace('blob', 'file')
+            if client.credential and client.credential.account_key:
+                credential = {
+                    "account_name": client.credential.account_name,
+                    "account_key": client.credential.account_key
+                }
+                source_client = t_share_service(account_url=account_url, credential=credential)
+            else:
+                source_client = t_share_service(account_url=account_url, credential=client.credential)
+
         def action_file_copy(file_info):
             dir_name, file_name = file_info
             if dryrun:
-                logger.warning('  - copy file %s', os.path.join(dir_name, file_name))
+                logger.warning('  - copy file %s', '/'.join(dir_name, file_name))
             else:
-                return _copy_file_to_blob_container(client, source_client, container_name, destination_path,
+                return _copy_file_to_blob_container(cmd, client, source_client, container_name, destination_path,
                                                     source_share, source_sas, dir_name, file_name)
 
         return list(filter_none(action_file_copy(file) for file in collect_files_track2(source_client,
@@ -608,8 +624,7 @@ def upload_blob(cmd, client, file_path=None, container_name=None, blob_name=None
     if maxsize_condition:
         upload_args['maxsize_condition'] = maxsize_condition
 
-    if cmd.supported_api_version(min_api='2016-05-31'):
-        upload_args['validate_content'] = validate_content
+    upload_args['validate_content'] = validate_content
 
     if progress_callback:
         upload_args['progress_hook'] = progress_callback
@@ -823,7 +838,8 @@ def storage_blob_delete_batch(client, source, source_container_name, pattern=Non
 def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                           protocol=None, cache_control=None, content_disposition=None,
                           content_encoding=None, content_language=None,
-                          content_type=None, full_uri=False, as_user=False, snapshot=None, **kwargs):
+                          content_type=None, full_uri=False, as_user=False, snapshot=None, user_delegation_oid=None,
+                          **kwargs):
     from ..url_quote_util import encode_url_path
     from urllib.parse import quote
     t_generate_blob_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
@@ -859,7 +875,8 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
                                     permission=permission, expiry=expiry, start=start, policy_id=id, ip=ip,
                                     protocol=protocol, cache_control=cache_control,
                                     content_disposition=content_disposition, content_encoding=content_encoding,
-                                    content_language=content_language, content_type=content_type, **kwargs)
+                                    content_language=content_language, content_type=content_type,
+                                    user_delegation_oid=user_delegation_oid, **kwargs)
 
     if full_uri:
         blob_client = t_blob_client(account_url=client.url, container_name=container_name, blob_name=blob_name,
@@ -872,7 +889,7 @@ def generate_sas_blob_uri(cmd, client, permission=None, expiry=None, start=None,
 def generate_container_shared_access_signature(cmd, client, container_name, permission=None, expiry=None,
                                                start=None, id=None, ip=None, protocol=None, cache_control=None,
                                                content_disposition=None, content_encoding=None, content_language=None,
-                                               content_type=None, as_user=False, **kwargs):
+                                               content_type=None, user_delegation_oid=None, as_user=False, **kwargs):
     t_generate_container_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_BLOB,
                                        '_shared_access_signature#generate_container_sas')
 
@@ -890,7 +907,8 @@ def generate_container_shared_access_signature(cmd, client, container_name, perm
                                     permission=permission, expiry=expiry, start=start, policy_id=id, ip=ip,
                                     protocol=protocol, cache_control=cache_control,
                                     content_disposition=content_disposition, content_encoding=content_encoding,
-                                    content_language=content_language, content_type=content_type, **kwargs)
+                                    content_language=content_language, content_type=content_type,
+                                    user_delegation_oid=user_delegation_oid, **kwargs)
 
 
 def create_blob_url(client, container_name, blob_name, snapshot, protocol='https'):
@@ -899,7 +917,7 @@ def create_blob_url(client, container_name, blob_name, snapshot, protocol='https
         url = blob_client.url
     else:
         container_client = client.get_container_client(container=container_name)
-        url = container_client.url + '/'
+        url = container_client.url if '?' in container_client.url else container_client.url + '/'
     if protocol == 'http':
         return url.replace('https', 'http', 1)
     return url
@@ -908,8 +926,21 @@ def create_blob_url(client, container_name, blob_name, snapshot, protocol='https
 def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destination_container, destination_path,
                                  source_container, source_blob_name, source_sas, **kwargs):
     t_blob_client = cmd.get_models('_blob_client#BlobClient')
-    source_client = t_blob_client(account_url=source_blob_service.url, container_name=source_container,
-                                  blob_name=source_blob_name, credential=source_sas)
+    # if blob_service and source_blob_service are the same
+    if blob_service == source_blob_service:
+        source_client = source_blob_service.get_blob_client(container=source_container, blob=source_blob_name)
+    else:
+        # generate sas for oauth copy source
+        if not source_sas:
+            from ..util import create_short_lived_blob_sas_v2
+            start = datetime.utcnow()
+            expiry = datetime.utcnow() + timedelta(days=1)
+            source_user_delegation_key = source_blob_service.get_user_delegation_key(start, expiry)
+            source_sas = create_short_lived_blob_sas_v2(cmd, source_blob_service.account_name, source_container,
+                                                        source_blob_name,
+                                                        user_delegation_key=source_user_delegation_key)
+        source_client = t_blob_client(account_url=source_blob_service.url, container_name=source_container,
+                                      blob_name=source_blob_name, credential=source_sas)
     source_blob_url = source_client.url
 
     destination_blob_name = normalize_blob_file_path(destination_path, source_blob_name)
@@ -927,13 +958,30 @@ def _copy_blob_to_blob_container(cmd, blob_service, source_blob_service, destina
             raise CLIError(error_template.format(source_blob_name, destination_container, ex))
 
 
-def _copy_file_to_blob_container(blob_service, source_file_service, destination_container, destination_path,
+def _copy_file_to_blob_container(cmd, blob_service, source_file_service, destination_container, destination_path,
                                  source_share, source_sas, source_file_dir, source_file_name):
     t_share_client = source_file_service.get_share_client(source_share)
-    t_file_client = t_share_client.get_file_client(os.path.join(source_file_dir, source_file_name))
-    source_file_url = '{}?{}'.format(t_file_client.url, source_sas)
-
     source_path = os.path.join(source_file_dir, source_file_name) if source_file_dir else source_file_name
+    source_path = normalize_blob_file_path(None, source_path)
+    t_file_client = t_share_client.get_file_client(source_path)
+    if source_sas is None:
+        t_generate_share_sas = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                       '_shared_access_signature#generate_share_sas')
+        t_file_permissions = get_sdk(cmd.cli_ctx, ResourceType.DATA_STORAGE_FILESHARE,
+                                     '_models#FileSasPermissions')
+        start = datetime.utcnow()
+        expiry = datetime.utcnow() + timedelta(days=1)
+        source_sas = t_generate_share_sas(account_name=t_file_client.account_name, share_name=source_share,
+                                          account_key=t_file_client.credential.account_key,
+                                          permission=t_file_permissions(read=True),
+                                          expiry=expiry, start=start)
+        from urllib.parse import quote
+        source_sas = quote(source_sas, safe='&%()$=\',~')
+    if '?' not in t_file_client.url:
+        source_file_url = '{}?{}'.format(t_file_client.url, source_sas)
+    else:
+        source_file_url = t_file_client.url
+
     destination_blob_name = normalize_blob_file_path(destination_path, source_path)
     try:
         blob_client = blob_service.get_blob_client(container=destination_container, blob=destination_blob_name)
@@ -1078,3 +1126,40 @@ def exists(client, container_name, blob_name, snapshot, timeout):
     else:
         client = client.get_container_client(container=container_name)
     return client.exists(timeout=timeout)
+
+
+def incremental_copy_start(client, cmd, copy_source=None, metadata=None,
+                           destination_if_modified_since=None, destination_if_unmodified_since=None,
+                           destination_if_match=None, destination_if_none_match=None, **kwargs):
+    from ..aaz.latest.storage.blob.incremental_copy import Start
+
+    cmd_args = {
+        "x_ms_version": "2025-07-05",
+        "account_name": client.account_name,
+        "destination_blob": client.blob_name,
+        "destination_container": client.container_name,
+        "source_uri": copy_source,
+        "comp": 'incrementalcopy',
+        "destination_if_modified_since": destination_if_modified_since,
+        "destination_if_unmodified_since": destination_if_unmodified_since,
+        "destination_if_match": destination_if_match,
+        "destination_if_none_match": destination_if_none_match,
+    }
+    _Start = Start(cli_ctx=cmd.cli_ctx)
+
+    def on_202(self, session):
+        result = dict(session.http_response.headers._store)
+        output = {
+            "completionTime": None,
+            "id": result.get('x-ms-copy-id')[1],
+            "progress": None,
+            "source": None,
+            "status": result.get('x-ms-copy-status')[1],
+            "statusDescription": None
+        }
+        self.ctx.vars._output = output
+
+    _Start.PageBlobCopyIncremental.on_202 = on_202
+
+    _Start(command_args=cmd_args)
+    return _Start.ctx.vars._output

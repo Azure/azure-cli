@@ -8,24 +8,18 @@
 import os
 import time
 
+from urllib.parse import urlparse
+
 from OpenSSL import crypto
 from cryptography.hazmat.primitives.serialization import pkcs12
 from cryptography.hazmat.primitives import hashes
 
-try:
-    from urllib.parse import urlparse
-except ImportError:
-    from urlparse import urlparse  # pylint: disable=import-error
-
-from msrestazure.azure_exceptions import CloudError
-
 from azure.cli.core.util import CLIError, get_file_json, b64_to_hex, sdk_no_wait
 from azure.cli.core.commands import LongRunningOperation
-from azure.graphrbac import GraphRbacManagementClient
 from azure.cli.core.profiles import ResourceType, get_sdk
 from azure.cli.command_modules.servicefabric._arm_deployment_utils import validate_and_deploy_arm_template
 from azure.cli.command_modules.servicefabric._sf_utils import _get_resource_group_by_name, _create_resource_group_name
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 
 from azure.mgmt.servicefabric.models import (ClusterUpdateParameters,
                                              ClientCertificateThumbprint,
@@ -81,6 +75,7 @@ DEFAULT_BACKEND_PORT = 3389
 SERVICE_FABRIC_WINDOWS_NODE_EXT_NAME = "servicefabricnode"
 SERVICE_FABRIC_LINUX_NODE_EXT_NAME = "servicefabriclinuxnode"
 
+CLUSTER_NAME_VALUE = "clusterName"
 SOURCE_VAULT_VALUE = "sourceVaultValue"
 CERTIFICATE_THUMBPRINT = "certificateThumbprint"
 CERTIFICATE_URL_VALUE = "certificateUrlValue"
@@ -90,6 +85,11 @@ SEC_CERTIFICATE_URL_VALUE = "secCertificateUrlValue"
 
 os_dic = {'WindowsServer2012R2Datacenter': '2012-R2-Datacenter',
           'UbuntuServer1604': '16.04-LTS',
+          'UbuntuServer1804': '18.04-LTS',
+          'UbuntuServer1804Gen2': '18_04-LTS-Gen2',
+          'UbuntuServer2004': '20_04-LTS',
+          'UbuntuServer2204': '22_04-LTS',
+          'UbuntuServer2204Gen2': '22_04-LTS-Gen2',
           'WindowsServer2016DatacenterwithContainers': '2016-Datacenter-with-Containers',
           'WindowsServer2016Datacenter': '2016-Datacenter',
           'WindowsServer1709': "Datacenter-Core-1709-smalldisk",
@@ -97,7 +97,13 @@ os_dic = {'WindowsServer2012R2Datacenter': '2012-R2-Datacenter',
           'WindowsServer1803withContainers': "Datacenter-Core-1803-with-Containers-smalldisk",
           'WindowsServer1809withContainers': "Datacenter-Core-1809-with-Containers-smalldisk",
           'WindowsServer2019Datacenter': "2019-Datacenter",
-          'WindowsServer2019DatacenterwithContainers': "2019-Datacenter-Core-with-Containers"}
+          'WindowsServer2019DatacenterGen2': "2019-Datacenter-gensecond",
+          'WindowsServer2019DatacenterwithContainers': "2019-Datacenter-Core-with-Containers",
+          'WindowsServer2022Datacenter': "2022-Datacenter",
+          'WindowsServer2022DatacenterGen2': "2022-Datacenter-G2",
+          'WindowsServer2022DatacenterAzureEdition': "2022-Datacenter-Azure-Edition",
+          'WindowsServer2022DatacenterCoreSmallDisk': "2022-Datacenter-Core-SmallDisk",
+          'WindowsServer2022DatacenterGS': "2022-Datacenter-GS"}
 
 
 def list_cluster(client, resource_group_name=None):
@@ -140,7 +146,7 @@ def new_cluster(cmd,
                 'when \'--secret-identifier\' is specified')
     if parameter_file or template_file:
         if parameter_file is None or template_file is None:
-            raise CLIError('If using customize template to deploy,both \'--parameter-file\' and \'--template-file\' can not be None ' + '\n For example:\n az sf cluster create --resource-group myRg --location westus --certificate-subject-name test.com --parameter-file c:\\parameter.json --template-file c:\\template.json' +
+            raise CLIError('If using customize template to deploy, neither \'--parameter-file\' and \'--template-file\' can be None ' + '\n For example:\n az sf cluster create --resource-group myRg --location westus --certificate-subject-name test.com --parameter-file c:\\parameter.json --template-file c:\\template.json' +
                            '\n az sf cluster create --resource-group myRg --location westus --parameter-file c:\\parameter.json --template-file c:\\template.json --certificate_file c:\\test.pfx' + '\n az sf cluster create --resource-group myRg --location westus --certificate-subject-name test.com --parameter-file c:\\parameter.json --template-file c:\\template.json --certificate-output-folder c:\\certoutput')
         if cluster_size or vm_sku or vm_user_name:
             raise CLIError('\'cluster_size\',\'vm_sku\',\'vm_os\',\'vm_user_name\' can not be specified when using customize template deployment')
@@ -189,7 +195,6 @@ def new_cluster(cmd,
     cert_thumbprint = None
     output_file = None
     if parameter_file is None:
-        vm_os = os_dic[vm_os]
         reliability_level = _get_reliability_level(cluster_size)
         result = _create_certificate(cmd,
                                      cli_ctx,
@@ -200,15 +205,17 @@ def new_cluster(cmd,
                                      vault_resource_group_name,
                                      certificate_output_folder,
                                      certificate_subject_name,
-                                     secret_identifier)
+                                     secret_identifier,
+                                     location)
         vault_id = result[0]
         certificate_uri = result[1]
         cert_thumbprint = result[2]
         output_file = result[3]
 
         linux = None
-        if vm_os == '16.04-LTS':
+        if vm_os.startswith('Ubuntu'):
             linux = True
+        vm_os = os_dic[vm_os]
         template = _modify_template(linux)
         parameters = _set_parameters_for_default_template(cluster_location=location,
                                                           cluster_name=cluster_name,
@@ -224,18 +231,19 @@ def new_cluster(cmd,
                                                           os_type=vm_os,
                                                           linux=linux)
     else:
-        parameters, output_file = _set_parameters_for_customize_template(cmd,
-                                                                         cli_ctx,
-                                                                         resource_group_name,
-                                                                         certificate_file,
-                                                                         certificate_password,
-                                                                         vault_name,
-                                                                         vault_resource_group_name,
-                                                                         certificate_output_folder,
-                                                                         certificate_subject_name,
-                                                                         secret_identifier,
-                                                                         parameter_file)
+        parameters, output_file = _set_parameters_for_customize_template(cmd=cmd,
+                                                                         cli_ctx=cli_ctx,
+                                                                         resource_group_name=resource_group_name,
+                                                                         certificate_file=certificate_file,
+                                                                         certificate_password=certificate_password,
+                                                                         vault_name=vault_name,
+                                                                         vault_resource_group_name=vault_resource_group_name,
+                                                                         certificate_output_folder=certificate_output_folder,
+                                                                         certificate_subject_name=certificate_subject_name,
+                                                                         secret_identifier=secret_identifier,
+                                                                         parameter_file=parameter_file)
 
+        cluster_name = parameters[CLUSTER_NAME_VALUE]['value']
         vault_id = parameters[SOURCE_VAULT_VALUE]['value']
         certificate_uri = parameters[CERTIFICATE_URL_VALUE]['value']
         cert_thumbprint = parameters[CERTIFICATE_THUMBPRINT]['value']
@@ -279,6 +287,8 @@ def add_app_cert(cmd,
                  certificate_subject_name=None,
                  secret_identifier=None):
     cli_ctx = cmd.cli_ctx
+    cluster = client.get(resource_group_name, cluster_name)
+    location = cluster.location
     result = _create_certificate(cmd,
                                  cli_ctx,
                                  resource_group_name,
@@ -288,7 +298,8 @@ def add_app_cert(cmd,
                                  vault_resource_group_name,
                                  certificate_output_folder,
                                  certificate_subject_name,
-                                 secret_identifier)
+                                 secret_identifier,
+                                 location)
 
     _add_cert_to_all_vmss(cli_ctx, resource_group_name, None, result[0], result[1])
     return client.get(resource_group_name, cluster_name)
@@ -339,13 +350,20 @@ def add_client_cert(cmd,
             ClientCertificateThumbprint(is_admin, thumbprint))
 
     def _add_common_name(cluster, is_admin, certificate_common_name, certificate_issuer_thumbprint):
+        remove = False
         for t in cluster.client_certificate_common_names:
             if t.certificate_common_name.lower() == certificate_common_name.lower() and t.certificate_issuer_thumbprint.lower() == certificate_issuer_thumbprint.lower():
                 remove = t
+
         if remove:
             cluster.client_certificate_common_names.remove(remove)
-        cluster.client_certificate_common_names.add(ClientCertificateCommonName(
-            is_admin, certificate_common_name, certificate_issuer_thumbprint))
+
+        client_certificate_common_name = ClientCertificateCommonName(
+            is_admin=is_admin,
+            certificate_common_name=certificate_common_name,
+            certificate_issuer_thumbprint=certificate_issuer_thumbprint,
+        )
+        cluster.client_certificate_common_names.append(client_certificate_common_name)
         return cluster.client_certificate_common_names
 
     if thumbprint:
@@ -1060,7 +1078,8 @@ def _create_certificate(cmd,
                         vault_resource_group_name=None,
                         certificate_output_folder=None,
                         certificate_subject_name=None,
-                        secret_identifier=None):
+                        secret_identifier=None,
+                        location=None):
     _verify_cert_function_parameter(certificate_file, certificate_password,
                                     vault_name, vault_resource_group_name,
                                     certificate_output_folder,
@@ -1068,9 +1087,8 @@ def _create_certificate(cmd,
                                     secret_identifier)
 
     output_file = None
-    rg = _get_resource_group_by_name(cli_ctx, resource_group_name)
-    location = rg.location
-
+    if location is None:
+        location = _get_resource_group_by_name(cli_ctx, resource_group_name).location
     vault_id = None
     secret_url = None
     certificate_thumbprint = None
@@ -1360,8 +1378,8 @@ def _safe_get_vault(cli_ctx, resource_group_name, vault_name):
         return vault
     except ResourceNotFoundError:
         return None
-    except CloudError as ex:
-        if ex.error.error == 'ResourceNotFound':
+    except HttpResponseError as ex:
+        if ex.status_code == '404':
             return None
         raise
 
@@ -1565,16 +1583,6 @@ def _create_keyvault(cmd,
                      enabled_for_disk_encryption=None,
                      enabled_for_template_deployment=None,
                      no_self_perms=None, tags=None):
-
-    from azure.cli.core._profile import Profile
-    from azure.graphrbac.models import GraphErrorException
-    profile = Profile(cli_ctx=cli_ctx)
-    cred, _, tenant_id = profile.get_login_credentials(
-        resource=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    graph_client = GraphRbacManagementClient(cred,
-                                             tenant_id,
-                                             base_url=cli_ctx.cloud.endpoints.active_directory_graph_resource_id)
-    subscription = profile.get_subscription()
     VaultCreateOrUpdateParameters = cmd.get_models('VaultCreateOrUpdateParameters', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
     VaultProperties = cmd.get_models('VaultProperties', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
     KeyVaultSku = cmd.get_models('Sku', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
@@ -1585,44 +1593,23 @@ def _create_keyvault(cmd,
     SecretPermissions = get_sdk(cli_ctx, ResourceType.MGMT_KEYVAULT, 'models#SecretPermissions', operation_group='vaults')
     KeyVaultSkuName = cmd.get_models('SkuName', resource_type=ResourceType.MGMT_KEYVAULT, operation_group='vaults')
 
+    from azure.cli.core._profile import Profile, _TENANT_ID
+    profile = Profile(cli_ctx=cmd.cli_ctx)
+    subscription = profile.get_subscription(subscription=cmd.cli_ctx.data.get('subscription_id', None))
+    tenant_id = subscription[_TENANT_ID]
+
     if not sku:
         sku = KeyVaultSkuName.standard.value
 
     if no_self_perms:
         access_policies = []
     else:
-        permissions = Permissions(keys=[KeyPermissions.get,
-                                        KeyPermissions.create,
-                                        KeyPermissions.delete,
-                                        KeyPermissions.list,
-                                        KeyPermissions.update,
-                                        KeyPermissions.import_enum,
-                                        KeyPermissions.backup,
-                                        KeyPermissions.restore],
-                                  secrets=[SecretPermissions.get,
-                                           SecretPermissions.list,
-                                           SecretPermissions.set,
-                                           SecretPermissions.delete,
-                                           SecretPermissions.backup,
-                                           SecretPermissions.restore,
-                                           SecretPermissions.recover],
-                                  certificates=[CertificatePermissions.get,
-                                                CertificatePermissions.list,
-                                                CertificatePermissions.delete,
-                                                CertificatePermissions.create,
-                                                CertificatePermissions.import_enum,
-                                                CertificatePermissions.update,
-                                                CertificatePermissions.managecontacts,
-                                                CertificatePermissions.getissuers,
-                                                CertificatePermissions.listissuers,
-                                                CertificatePermissions.setissuers,
-                                                CertificatePermissions.deleteissuers,
-                                                CertificatePermissions.manageissuers,
-                                                CertificatePermissions.recover])
-        try:
-            object_id = _get_current_user_object_id(graph_client)
-        except GraphErrorException:
-            object_id = _get_object_id(graph_client, subscription=subscription)
+        permissions = Permissions(keys_property=[KeyPermissions.all],
+                                  secrets=[SecretPermissions.all],
+                                  certificates=[CertificatePermissions.all])
+
+        from azure.cli.command_modules.role.util import get_current_identity_object_id
+        object_id = get_current_identity_object_id(cli_ctx)
         if not object_id:
             raise CLIError('Cannot create vault.\n'
                            'Unable to query active directory for information '
@@ -1659,7 +1646,7 @@ def _get_current_user_object_id(graph_client):
         current_user = graph_client.signed_in_user.get()
         if current_user and current_user.object_id:  # pylint:disable=no-member
             return current_user.object_id  # pylint:disable=no-member
-    except CloudError:
+    except HttpResponseError:
         pass
 
 
@@ -1772,6 +1759,9 @@ def _set_parameters_for_customize_template(cmd,
     parameters = get_file_json(parameter_file)['parameters']
     if parameters is None:
         raise CLIError('Invalid parameters file')
+
+    location = parameters['clusterLocation']['value']
+
     if SOURCE_VAULT_VALUE in parameters and CERTIFICATE_THUMBPRINT in parameters and CERTIFICATE_URL_VALUE in parameters:
         logger.info('Found primary certificate parameters in parameters file')
         result = _create_certificate(cmd,
@@ -1783,7 +1773,8 @@ def _set_parameters_for_customize_template(cmd,
                                      vault_resource_group_name,
                                      certificate_output_folder,
                                      certificate_subject_name,
-                                     secret_identifier)
+                                     secret_identifier,
+                                     location)
         parameters[SOURCE_VAULT_VALUE]['value'] = result[0]
         parameters[CERTIFICATE_URL_VALUE]['value'] = result[1]
         parameters[CERTIFICATE_THUMBPRINT]['value'] = result[2]
@@ -1804,7 +1795,8 @@ def _set_parameters_for_customize_template(cmd,
                                      vault_resource_group_name,
                                      certificate_output_folder,
                                      certificate_subject_name,
-                                     secret_identifier)
+                                     secret_identifier,
+                                     location)
         parameters[SOURCE_VAULT_VALUE]['value'] = result[0]
         parameters[CERTIFICATE_URL_VALUE]['value'] = result[1]
         parameters[CERTIFICATE_THUMBPRINT]['value'] = result[2]

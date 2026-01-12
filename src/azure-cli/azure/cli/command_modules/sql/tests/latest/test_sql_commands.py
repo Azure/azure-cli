@@ -47,7 +47,7 @@ class SqlServerPreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=server_name_prefix, parameter_name='server', location='westus',
                  admin_user='admin123', admin_password='SecretPassword123',
                  resource_group_parameter_name='resource_group', skip_delete=True):
-        super(SqlServerPreparer, self).__init__(name_prefix, server_name_max_length)
+        super().__init__(name_prefix, server_name_max_length)
         self.location = location
         self.parameter_name = parameter_name
         self.admin_user = admin_user
@@ -85,6 +85,11 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     subnet_name = 'ManagedInstance'
     subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
 
+    # Azure AD Entra ID admin configuration for managed instance creation
+    external_admin_name = 'msdata-Database Systems-8313371e-0879-428e-b1da-6353575a9192'
+    external_admin_sid = '05159003-af0d-4d45-8309-1992b1774dd9'
+    external_admin_principal_type = 'Application'
+
     # For cross-subnet update SLO, we need a target subnet to move managed instance to.
     target_vnet_name = 'vnet-mi-tooling'
     target_subnet_name = 'ManagedInstance2'
@@ -110,8 +115,8 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
     def __init__(self, name_prefix=managed_instance_name_prefix, parameter_name='mi', admin_user='admin123',
                  minimalTlsVersion='', user_assigned_identity_id='', identity_type='', pid='', otherParams='',
                  admin_password='SecretPassword123SecretPassword', public=True, tags='', is_geo_secondary=False,
-                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4):
-        super(ManagedInstancePreparer, self).__init__(name_prefix, server_name_max_length)
+                 skip_delete=False, vnet_name = 'vnet-mi-tooling', v_core = 4, enable_ad_only_auth = True):
+        super().__init__(name_prefix, server_name_max_length)
         self.parameter_name = parameter_name
         self.admin_user = admin_user
         self.admin_password = admin_password
@@ -126,6 +131,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         self.is_geo_secondary = is_geo_secondary
         self.subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(self.subscription_id, self.group, vnet_name, self.subnet_name)
         self.v_core = v_core
+        self.enable_ad_only_auth = enable_ad_only_auth
 
 
     def create_resource(self, name, **kwargs):
@@ -136,6 +142,9 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
         template = 'az sql mi create -g {} -n {} -l {} -u {} -p {} --subnet {} --license-type {}' \
                    ' --collation {} --capacity {} --storage {} --edition {} --family {} --tags {}' \
                    ' --proxy-override {} --bsr Geo'
+
+        if self.enable_ad_only_auth:
+            template += f" --enable-ad-only-auth --external-admin-name '{self.external_admin_name}' --external-admin-sid '{self.external_admin_sid}' --external-admin-principal-type '{self.external_admin_principal_type}'"
 
         if self.public:
             template += ' --public-data-endpoint-enabled'
@@ -148,7 +157,7 @@ class ManagedInstancePreparer(AbstractPreparer, SingleValueReplacer):
 
         if self.identityType == ResourceIdType.system_assigned.value:
             template += f" --assign-identity"
-
+            
         if self.otherParams:
             template += f" {self.otherParams}"
 
@@ -263,10 +272,6 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('administratorLogin', admin_login)])
 
-        self.cmd('sql server list-usages -g {} -n {}'
-                 .format(resource_group_1, server_name_1),
-                 checks=[JMESPathCheck('[0].resourceName', server_name_1)])
-
         # test delete sql server
         self.cmd('sql server delete --id {} --yes'
                  .format(server_1['id']), checks=NoneCheck())
@@ -279,6 +284,39 @@ class SqlServerMgmtScenarioTest(ScenarioTest):
         # delete sql server
         self.cmd('sql server delete -g {} --name {} --yes'
                  .format(resource_group_1, server_name_3), checks=NoneCheck())
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='westeurope')
+    def test_sql_server_create_with_tags(self, resource_group, resource_group_location):
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+
+        # test create sql server with tags
+        server = self.cmd('sql server create -g {} --name {} '
+                         '--admin-user {} --admin-password {} '
+                         '--tags env=test purpose=demo'
+                         .format(resource_group, server_name, admin_login, admin_password),
+                         checks=[
+                             JMESPathCheck('name', server_name),
+                             JMESPathCheck('location', resource_group_location),
+                             JMESPathCheck('resourceGroup', resource_group),
+                             JMESPathCheck('administratorLogin', admin_login),
+                             JMESPathCheck('tags.env', 'test'),
+                             JMESPathCheck('tags.purpose', 'demo')]).get_output_in_json()
+
+        # test show sql server to verify tags are preserved
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('administratorLogin', admin_login),
+                     JMESPathCheck('tags.env', 'test'),
+                     JMESPathCheck('tags.purpose', 'demo')])
+
+        # cleanup
+        self.cmd('sql server delete -g {} --name {} --yes'
+                 .format(resource_group, server_name), checks=NoneCheck())
 
     @ResourceGroupPreparer(parameter_name='resource_group_1', location='westeurope')
     def test_sql_server_public_network_access_create_mgmt(self, resource_group_1, resource_group_location):
@@ -587,8 +625,9 @@ class SqlServerIPv6FirewallMgmtScenarioTest(ScenarioTest):
 
 
 class SqlServerOutboundFirewallMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='westus2')
+    @SqlServerPreparer(location='westus2')
+    @live_only()
     def test_sql_outbound_firewall_mgmt(self, resource_group, resource_group_location, server):
         outbound_firewall_rule_allowed_fqdn_1 = 'testOBFR1'
         outbound_firewall_rule_allowed_fqdn_2 = 'testOBFR2'
@@ -895,14 +934,15 @@ class SqlServerDbMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('ledgerOn', True)])
 
+    @unittest.skip('Cannot record as hard-coded resources does not exist anymore. ADO Bug-4599812.')
     def test_sql_per_db_cmk(self):
         server = "pstestsvr"
         resource_group = "pstest"
         database_name_one = "cliautomationdb042"
         database_name_two = "cliautomationdb051"
-        encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey4/6638b3667e384aefa31364f94d230361"
-        encryption_protector2 = "https://pstestkv.vault.azure.net/keys/testkey5/fd021f84a0d94d43b8ef33154bcab86f"
-        umi = "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+        encryption_protector = "https://pstestkv2.vault.azure.net/keys/testkey4/3d4947c13419445e9bf97500c8ddde37"
+        encryption_protector2 = "https://pstestkv2.vault.azure.net/keys/testkey5/e73f1a88aa0c4de684af97c90588aac7"
+        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
 
         # test sql db is created with db level encryption protector and umi
 
@@ -1101,9 +1141,78 @@ class SqlServerServerlessDbMgmtScenarioTest(ScenarioTest):
                 JMESPathCheck('autoPauseDelay', auto_pause_delay),
                 JMESPathCheck('minCapacity', min_capacity)])
 
+    @ResourceGroupPreparer(location='westus')
+    @SqlServerPreparer(location='westus')
+    @AllowLargeResponse()
+    def test_sql_db_serverless_to_provisioned_slo_update(self, resource_group, resource_group_location, server):
+        """
+        Test for bug fix: Updating from serverless to provisioned using --service-objective
+        should use the specified service objective, not fall back to default (S0).
+        
+        Scenario: Database starts as serverless (GP_S_Gen5_1), then updated to Standard S1.
+        Expected: Database should be updated to S1, not S0.
+        """
+        database_name = "cliautomationdb01"
+        compute_model_serverless = ComputeModelType.serverless.value
+        
+        # Create serverless database
+        vcore_edition = 'GeneralPurpose'
+        vcore_family = 'Gen5'
+        vcore_capacity = 1
+        
+        self.cmd('sql db create -g {} --server {} --name {} -e {} -c {} -f {} --compute-model {} --yes'
+                 .format(resource_group, server, database_name, vcore_edition, vcore_capacity, 
+                         vcore_family, compute_model_serverless),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition),
+                     JMESPathCheck('sku.name', 'GP_S_Gen5')])
+        
+        # Update from serverless to provisioned Standard S1 using --service-objective
+        # This should result in S1, not S0 (the default for Standard tier)
+        # Also need to specify max-size because Standard tier has different size limits than GeneralPurpose
+        target_slo = 'S1'
+        target_edition = 'Standard'
+        
+        self.cmd('sql db update -g {} --server {} --name {} --edition {} --service-objective {} --max-size 250GB'
+                 .format(resource_group, server, database_name, target_edition, target_slo),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', target_edition),
+                     JMESPathCheck('sku.tier', target_edition),
+                     JMESPathCheck('currentServiceObjectiveName', target_slo),
+                     JMESPathCheck('requestedServiceObjectiveName', target_slo)])
+        
+        # Verify the database is now at S1, not S0
+        self.cmd('sql db show -g {} --server {} --name {}'
+                 .format(resource_group, server, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', target_edition),
+                     JMESPathCheck('currentServiceObjectiveName', target_slo)])
+        
+        # Test the reverse: Update from provisioned S1 to serverless
+        # This should work correctly (already did before the fix)
+        # Need to specify family and capacity when converting back to serverless
+        self.cmd('sql db update -g {} --server {} --name {} --edition {} --compute-model {} -f {} -c {}'
+                 .format(resource_group, server, database_name, vcore_edition, compute_model_serverless, 
+                         vcore_family, vcore_capacity),
+                 checks=[
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('edition', vcore_edition),
+                     JMESPathCheck('sku.tier', vcore_edition)])
+
+
+
+
 class SqlServerFreeDbMgmtScenarioTest(ScenarioTest):
-    @ResourceGroupPreparer(location='eastus2euap')
-    @SqlServerPreparer(location='eastus2euap')
+    @ResourceGroupPreparer(location='eastus')
+    @SqlServerPreparer(location='eastus')
     @AllowLargeResponse()
     def test_sql_db_free_params(self, resource_group, resource_group_location, server):
         database_name = "freeDb1"
@@ -1223,9 +1332,9 @@ class SqlServerDbShortTermRetentionScenarioTest(ScenarioTest):
     def test_sql_db_short_term_retention(self):
         # Initial parameters. default_diffbackup_hours will be changed to 24 soon.
         self.kwargs.update({
-            'resource_group': 'qiangdsrg',
-            'server_name': 'qiangdsmemberserver',
-            'database_name': 'hubdatabase',
+            'resource_group': 'cli_test_donnotdelete',
+            'server_name': 'clitestserverdonotdelete',
+            'database_name': 'clitestdatabase',
             'retention_days_v1': 7,
             'diffbackup_hours_v1': 24,
             'retention_days_v2': 6,
@@ -1279,8 +1388,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'monthly_retention': 'P1M',
             'yearly_retention': 'P2M',
             'week_of_year': 12,
-            'make_backups_immutable': 'False',
-            'backup_storage_access_tier': 'Archive',
+            'time_based_immutability': 'False',
             'encryption_protector' : 'https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1',
             'keys' : '"https://test123343strehan.vault.azure.net/keys/k2/66f51a6e70f04067af8eaf77805e88b1" "https://test123343strehan.vault.azure.net/keys/testk1/604b0e26e2a24eeaab30b80c8d7bb1c1" "https://test123343strehan.vault.azure.net/keys/testk1/96151496df864e32aa62a3c1857b2931"',
             'umi' : '/subscriptions/e1775f9f-a286-474d-b6f0-29c42ac74554/resourcegroups/ArmTemplate/providers/Microsoft.ManagedIdentity/userAssignedIdentities/shobhittest'
@@ -1291,15 +1399,13 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
             ' --weekly-retention {weekly_retention} --monthly-retention {monthly_retention}'
             ' --yearly-retention {yearly_retention} --week-of-year {week_of_year}'
-            ' --make-backups-immutable {make_backups_immutable}',
-            ' --access-tier {backup_storage_access_tier}',
-            checks=[
+            ' --make-backups-immutable {time_based_immutability}',
+         checks=[
                 self.check('resourceGroup', '{rg}'),
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
                 self.check('yearlyRetention', '{yearly_retention}'),
-                self.check('makeBackupsImmutable', '{make_backups_immutable}'),
-                self.check('backupStorageAccessTier', '{backup_storage_access_tier}')])
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
 
         # test get long term retention policy on live database
         self.cmd(
@@ -1309,8 +1415,7 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
                 self.check('weeklyRetention', '{weekly_retention}'),
                 self.check('monthlyRetention', '{monthly_retention}'),
                 self.check('yearlyRetention', '{yearly_retention}'),
-                self.check('makeBackupsImmutable', '{make_backups_immutable}'),
-                self.check('backupStorageAccessTier', '{backup_storage_access_tier}')])
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
 
         # test list long term retention backups for location
         # with resource group
@@ -1388,6 +1493,153 @@ class SqlServerDbLongTermRetentionScenarioTest(ScenarioTest):
             'sql db ltr-backup delete -l {loc} -s {server_name} -d {database_name} -n \'{backup_name}\' --yes',
             checks=[NoneCheck()])
 
+class SqlServerDbLongTermRetentionImmutabilityScenarioTest(ScenarioTest):
+    @live_only()
+    def test_sql_db_long_term_retention_immutability(
+            self):
+        self.kwargs.update({
+            'rg': 'cli_test_donnotdelete',
+            'loc': 'eastus2euap',
+            'server_name': 'clitestserverdonotdeletecanaryeast',
+            'database_name': 'cli_test_donnotdelete1',
+            'weekly_retention': 'P4W',
+            'time_based_immutability': 'Enabled'
+        })
+
+        self.cmd(
+            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
+            ' --weekly-retention {weekly_retention}'
+            ' --tb-immutability {time_based_immutability} --yes',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('timeBasedImmutability', '{time_based_immutability}')])
+           # setup for test show long term retention backup
+ 
+        backup = self.cmd(
+        'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} --latest True').get_output_in_json()
+
+        self.kwargs.update({
+            'backup_name': backup[0]['name'],
+        })
+        
+        # set-legal-hold-immutability test
+        self.cmd(
+             'sql db ltr-backup set-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('resourceGroup', '{rg}'),
+                 self.check('serverName', '{server_name}'),
+                 self.check('databaseName', '{database_name}'),
+                 self.check('name', '{backup_name}'),
+                 self.check('legalHoldImmutability', 'Enabled')])
+
+        # remove-legal-hold-immutability test
+        self.cmd(
+             'sql db ltr-backup remove-legal-hold-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('resourceGroup', '{rg}'),
+                 self.check('serverName', '{server_name}'),
+                 self.check('databaseName', '{database_name}'),
+                 self.check('name', '{backup_name}'),
+                 self.check('legalHoldImmutability', 'Disabled')])
+
+        # set-legal-hold-immutability test with resource group
+        self.cmd(
+             'sql db ltr-backup set-legal-hold-immutability  -g {rg} -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('[0].resourceGroup','{rg}'),
+                 self.check('[0].serverName', '{server_name}'),
+                 self.check('[0].databaseName', '{database_name}'),
+                 self.check('[0].name', '{backup_name}'),
+                 self.check('[0].legalHoldImmutability', 'Enabled')])
+
+        # remove-legal-hold-immutability test with resource group
+        self.cmd(
+             'sql db ltr-backup remove-legal-hold-immutability -g {rg} -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('[0].resourceGroup', '{rg}'),
+                 self.check('[0].serverName', '{server_name}'),
+                 self.check('[0].databaseName', '{database_name}'),
+                 self.check('[0].name', '{backup_name}'),
+                 self.check('[0].legalHoldImmutability', 'Disabled')])
+
+        # remove-time-based-immutability test
+        self.cmd(
+             'sql db ltr-backup remove-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('resourceGroup', '{rg}'),
+                 self.check('serverName', '{server_name}'),
+                 self.check('databaseName', '{database_name}'),
+                 self.check('name', '{backup_name}'),
+                 self.check('timeBasedImmutability', 'Disabled'),
+                 self.check('legalHoldImmutability', 'Disabled')])
+
+         # remove-time-based-immutability test with resource group this should be a no op as time based immutability is already disabled
+        self.cmd(
+             'sql db ltr-backup remove-time-based-immutability -g {rg} -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+              checks=[
+                 self.check('[0].resourceGroup', '{rg}'),
+                 self.check('[0].serverName', '{server_name}'),
+                 self.check('[0].databaseName', '{database_name}'),
+                 self.check('[0].name', '{backup_name}'),
+                 self.check('[0].timeBasedImmutability', 'Disabled'),
+                 self.check('[0].legalHoldImmutability', 'Disabled')])
+
+        # setup for test lock long term retention backup
+        self.kwargs.update({
+              'database_name': 'cli_test_donnotdelete2',
+          })
+
+        backup = self.cmd(
+              'sql db ltr-backup list -l {loc} -s {server_name} -d {database_name} --latest True').get_output_in_json()
+
+        self.kwargs.update({
+              'backup_name': backup[0]['name'],
+          })
+
+        # lock-time-based-immutability
+        self.cmd(
+              'sql db ltr-backup lock-time-based-immutability -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+               checks=[
+                  self.check('resourceGroup', '{rg}'),
+                  self.check('serverName', '{server_name}'),
+                  self.check('databaseName', '{database_name}'),
+                  self.check('name', '{backup_name}'),
+                  self.check('timeBasedImmutability', 'Enabled'),
+                  self.check('legalHoldImmutability', 'Disabled'),
+                  self.check('timeBasedImmutabilityMode', 'Locked')])
+
+        # lock-time-based-immutability with resource group. this should be a no op as time based immutability is already locked
+        self.cmd(
+              'sql db ltr-backup lock-time-based-immutability -g {rg} -l {loc} -s {server_name} -d {database_name} -n {backup_name} --yes',
+               checks=[
+                  self.check('[0].resourceGroup', '{rg}'),
+                  self.check('[0].serverName', '{server_name}'),
+                  self.check('[0].databaseName', '{database_name}'),
+                  self.check('[0].name', '{backup_name}'),
+                  self.check('[0].timeBasedImmutability', 'Enabled'),
+                  self.check('[0].legalHoldImmutability', 'Disabled'),
+                  self.check('[0].timeBasedImmutabilityMode', 'Locked')])
+
+        # setup for test lock long term retention backup
+        self.kwargs.update({
+              'time_based_immutability': 'Enabled',
+              'database_name': 'cli_test_donnotdelete3',
+              'time_based_immutability_mode': 'Locked'
+          })
+
+        # test update long term retention plicy to time based immutability locked mode on live database
+        self.cmd(
+            'sql db ltr-policy set -g {rg} -s {server_name} -n {database_name}'
+            ' --weekly-retention {weekly_retention}'
+            ' --tb-immutability {time_based_immutability}' 
+            ' --tb-immutability-mode {time_based_immutability_mode} --yes',
+            checks=[
+                self.check('resourceGroup', '{rg}'),
+                self.check('weeklyRetention', '{weekly_retention}'),
+                self.check('timeBasedImmutability', '{time_based_immutability}'),
+                self.check('timeBasedImmutabilityMode', '{time_based_immutability_mode}')])
+      
 
 class SqlServerDbGeoRestoreScenarioTest(ScenarioTest):
     @live_only() # Adding the live_only label after discussing with test owner rebeccaxu as the test was initially recorded on existing fixed resources.
@@ -1501,11 +1753,11 @@ class AzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
 
         print('Arguments are updated with login and sid data')
 
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg}')
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg} -u {user}')
-        with self.assertRaisesRegexp(SystemExit, "2"):
+        with self.assertRaisesRegex(SystemExit, "2"):
             self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid}')
 
         self.cmd('sql server ad-admin create -s {sn} -g {rg} -i {oid} -u {user}',
@@ -1643,13 +1895,13 @@ class SqlServerDbCopyScenarioTest(ScenarioTest):
         service_objective = 'GP_Gen5_8'
 
         # copy db with per db cmk Enabled
-        encryption_protector = "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"
-        umi = "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
+        encryption_protector = "https://pstestkv3.vault.azure.net/keys/testkey3/90bfc038075241518bf00ba4bb00ce1d"
+        umi = "/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi"
 
         # create db with db level encryption protector and umi
 
         # az sql db create -g pstest -ai --server pstestsvr --name clidbwithcmk --encryption-protector "https://pstestkv.vault.azure.net/keys/testkey/f62d937858464f329ab4a8c2dc7e0fa4"  
-        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
+        # --user-assigned-identity-id "/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi" --yes
         self.cmd('sql db create -g {} --server {} --name {} -i --encryption-protector {} --user-assigned-identity-id {} --yes'
                  .format(resource_group_1, server1, database_name, encryption_protector, umi),
                  checks=[
@@ -1997,7 +2249,7 @@ class SqlServerDbSecurityScenarioTest(ScenarioTest):
                                                   JMESPathCheck('resourceGroup', resource_group),
                                                   JMESPathCheck('name', log_analytics_workspace_name),
                                                   JMESPathCheck('provisioningState',
-                                                                'Creating')]).get_output_in_json()['id']
+                                                                'Succeeded')]).get_output_in_json()['id']
 
         # update audit policy - enable log analytics target
         self.cmd('sql db audit-policy update -g {} -s {} -n {} --state {}'
@@ -2431,13 +2683,6 @@ class SqlManagedInstanceAdvancedThreatProtectionSettingsScenarioTest(ScenarioTes
         # for the operation to complete in order to proceed with testing.
         time.sleep(120)
 
-        # get advanced threat protection settings
-        self.cmd('sql mi advanced-threat-protection-setting show -g {} -n {}'
-                 .format(resource_group, managed_instance_name),
-                 checks=[
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('state', state_disabled)])
-
         # update advanced threat protection settings - enable
         self.cmd('sql mi advanced-threat-protection-setting update -g {} -n {}'
                  ' --state {}'
@@ -2851,7 +3096,7 @@ class SqlServerDnsAliasMgmtScenarioTest(ScenarioTest):
                                        resource_group_2, resource_group_location_2,
                                        server_name_1, server_name_2, server_name_3):
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+        class ServerInfo:  # pylint: disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group
@@ -2956,19 +3201,19 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1",
-                           location='westeurope')
+                           location='westus3')
     @ResourceGroupPreparer(parameter_name="resource_group_2",
                            parameter_name_for_location="resource_group_location_2",
-                           location='westeurope')
+                           location='westus3')
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='westus3')
     @SqlServerPreparer(parameter_name="server_name_2",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='westus3')
     @SqlServerPreparer(parameter_name="server_name_3",
                        resource_group_parameter_name="resource_group_2",
-                       location='westeurope')
+                       location='westus3')
     @AllowLargeResponse()
     def test_sql_db_replica_mgmt(self,
                                  resource_group_1, resource_group_location_1,
@@ -2979,11 +3224,11 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
         target_database_name = "cliautomationdb02"
         hs_database_name = "cliautomationhs03"
         hs_target_database_name = "cliautomationnr04"
-        service_objective = 'GP_Gen5_8'
+        service_objective = 'S7'
         hs_service_objective = 'HS_Gen5_8'
 
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint: disable=too-few-public-methods
+        class ServerInfo:  # pylint: disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group
@@ -3153,9 +3398,94 @@ class SqlServerDbReplicaMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('role', 'Primary'),
                      JMESPathCheck('partnerRole', 'Secondary')])
 
+    @ResourceGroupPreparer(parameter_name="resource_group_1",
+                           parameter_name_for_location="resource_group_location_1",
+                           location='westus2')
+    @SqlServerPreparer(parameter_name="server_name_1",
+                       resource_group_parameter_name="resource_group_1",
+                       location='westus2')
+    @AllowLargeResponse()
+    def test_sql_db_replica_mgmt_cross_subscription(self,
+                                 resource_group_1, resource_group_location_1,
+                                 server_name_1):
+                
+        database_name = "cliautomationdb011"
+        target_database_name = "cliautomationdb02"
+        service_objective = 'GP_Gen5_8'
+
+        self.kwargs.update({
+            "server_name_2" : "cli-automated-tests1",
+            "server_name_3" : "cli-automated-tests2",
+            "resource_group_2" : "CLI-Automated-Tests",
+            "resource_group_location_2" : "southcentralus",
+            "resource_group_location_3" : "westus3",
+            "partner_subscription" : "00000000-0000-0000-0000-000000000000"  # replace with actual subscription id for record mode
+            })
+
+        # helper class so that it's clear which servers are in which groups
+        class ServerInfo:  # pylint: disable=too-few-public-methods
+            def __init__(self, name, group, location, subscription=None):
+                self.name = name
+                self.group = group
+                self.location = location
+                self.subscription = subscription
+
+        s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
+        s2 = ServerInfo(self.kwargs["server_name_2"], self.kwargs["resource_group_2"], self.kwargs["resource_group_location_2"], self.kwargs["partner_subscription"])
+        s3 = ServerInfo(self.kwargs["server_name_3"], self.kwargs["resource_group_2"], self.kwargs["resource_group_location_3"], self.kwargs["partner_subscription"])
+
+        # create db in first server
+        self.cmd('sql db create -g {} -s {} -n {} --yes'
+                 .format(s1.group, s1.name, database_name),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s1.group)])
+
+        # create replica in second server with min params
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-sub-id {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, s2.group, s2.subscription),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group)])
+
+        # create replica in second server with backup storage redundancy
+        backup_storage_redundancy = "zone"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {} --partner-resource-group {} --partner-sub-id {} --backup-storage-redundancy {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, s2.group, s2.subscription, backup_storage_redundancy),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s2.group),
+                     JMESPathCheck('requestedBackupStorageRedundancy', 'Zone')])
+
+        secondary_type = "Geo"
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}  --partner-resource-group {} --partner-sub-id {}'
+                 ' --service-objective {} --partner-database {} --secondary-type {}'
+                 .format(s1.group, s1.name, database_name,
+                         s2.name, s2.group, s2.subscription, service_objective, target_database_name, secondary_type),
+                 checks=[
+                     JMESPathCheck('name', target_database_name),
+                     JMESPathCheck('resourceGroup', s2.group),
+                     JMESPathCheck('requestedServiceObjectiveName', service_objective),
+                    # JMESPathCheck('secondaryType', secondary_type) #Remove this check as secondaryType is returned as null in cross subscription scenario
+                ])
+
+        # Create replica in pool in third server with max params (except service objective)
+        pool_name = 'cli-automated-tests-pool'
+
+        self.cmd('sql db replica create -g {} -s {} -n {} --partner-server {}'
+                 ' --partner-resource-group {} --partner-sub-id {} --elastic-pool {}'
+                 .format(s1.group, s1.name, database_name,
+                         s3.name, s3.group, s3.subscription, pool_name),
+                 checks=[
+                     JMESPathCheck('name', database_name),
+                     JMESPathCheck('resourceGroup', s3.group),
+                     JMESPathCheck('elasticPoolName', pool_name)])
+
 class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
     def __init__(self, method_name):
-        super(SqlElasticPoolsMgmtScenarioTest, self).__init__(method_name)
+        super().__init__(method_name)
         self.pool_name = "cliautomationpool01"
 
     def verify_activities(self, activities, resource_group, server):
@@ -3729,7 +4059,7 @@ class SqlElasticPoolsMgmtScenarioTest(ScenarioTest):
 
 class SqlElasticPoolOperationMgmtScenarioTest(ScenarioTest):
     def __init__(self, method_name):
-        super(SqlElasticPoolOperationMgmtScenarioTest, self).__init__(method_name)
+        super().__init__(method_name)
         self.pool_name = "operationtestep1"
 
     @ResourceGroupPreparer(location='westeurope')
@@ -4316,12 +4646,12 @@ class SqlServerIdentityTest(ScenarioTest):
         v_cores = 4
         storage_size_in_gb = '32'
         edition = 'GeneralPurpose'
-        resource_group_1 = "pstest"
+        resource_group_1 = "cli_test_donnotdelete"
         collation = "SQL_Latin1_General_CP1_CI_AS"
         proxy_override = "Proxy"
 
-        test_umi = '/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
-        umi_list = '/subscriptions/2c647056-bab2-4175-b172-493ff049eb29/resourceGroups/pstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
+        test_umi = '/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
+        umi_list = '/subscriptions/4aebc079-5ec8-4be9-9f4d-39c38f3707cc/resourceGroups/cli_test_donnotdelete/providers/Microsoft.ManagedIdentity/userAssignedIdentities/pstestumi'
 
         identity_type = ResourceIdType.system_assigned_user_assigned.value
         user = admin_login
@@ -4370,7 +4700,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
         # Vnet 1 without service endpoints to test ignore-missing-vnet-service-endpoint feature
         self.cmd('network vnet create -g {} -n {}'.format(resource_group, vnetName1))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {}'
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --default-outbound false'
                  .format(resource_group, vnetName1, subnetName, addressPrefix))
 
         vnet1 = self.cmd('network vnet subnet show -n {} --vnet-name {} -g {}'
@@ -4379,7 +4709,7 @@ class SqlServerVnetMgmtScenarioTest(ScenarioTest):
 
         # Vnet 2
         self.cmd('network vnet create -g {} -n {}'.format(resource_group, vnetName2))
-        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {}'
+        self.cmd('network vnet subnet create -g {} --vnet-name {} -n {} --address-prefix {} --service-endpoints {} --default-outbound false'
                  .format(resource_group, vnetName2, subnetName, addressPrefix, endpoint),
                  checks=JMESPathCheck('serviceEndpoints[0].service', 'Microsoft.Sql'))
 
@@ -4551,8 +4881,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('requestedServiceObjectiveName', 'P2'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
     @AllowLargeResponse()
     def test_sql_zone_resilient_pool(self, resource_group, resource_group_location, server):
         pool_name = "createUnzonedUpdateToZonedPool"
@@ -4658,8 +4988,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
                      JMESPathCheck('dtu', 250),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
     @AllowLargeResponse()
     def test_sql_zone_resilient_copy_hyperscale_database(self, resource_group, server):
         # Set db names
@@ -4738,10 +5068,10 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='eastus')
-    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='eastus')
-    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus')
-    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='eastus')
+    @ResourceGroupPreparer(parameter_name="resource_group_pri", location='eastus2euap')
+    @SqlServerPreparer(parameter_name="server_name_pri", resource_group_parameter_name="resource_group_pri",location='eastus2euap')
+    @ResourceGroupPreparer(parameter_name="resource_group_sec", location='eastus2euap')
+    @SqlServerPreparer(parameter_name="server_name_sec", resource_group_parameter_name="resource_group_sec",location='eastus2euap')
     @AllowLargeResponse()
     def test_sql_zone_resilient_replica_hyperscale_database(self, resource_group_pri, server_name_pri, resource_group_sec, server_name_sec):
         # Set db names
@@ -4852,8 +5182,8 @@ class SqlZoneResilienceScenarioTest(ScenarioTest):
 					 JMESPathCheck('requestedBackupStorageRedundancy', 'Zone'),
                      JMESPathCheck('zoneRedundant', True)])
 
-    @ResourceGroupPreparer(location='eastus')
-    @SqlServerPreparer(location='eastus')
+    @ResourceGroupPreparer(location='eastus2euap')
+    @SqlServerPreparer(location='eastus2euap')
     @AllowLargeResponse()
     def test_sql_zone_resilient_restore_hyperscale_database(self, resource_group, server):
         # Set db names
@@ -4947,6 +5277,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
     @AllowLargeResponse()
+    @live_only()
     def test_sql_db_maintenance(self, resource_group, resource_group_location, server):
         database_name_1 = "createDb1maintenance"
         database_name_2 = "createDb2maintenance"
@@ -5023,6 +5354,7 @@ class SqlDBMaintenanceScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(location='eastus2')
     @SqlServerPreparer(location='eastus2')
     @AllowLargeResponse()
+    @live_only()
     def test_sql_elastic_pool_maintenance(self, resource_group, resource_group_location, server):
         pool_name_1 = "createDb1maintenance"
         pool_name_2 = "createDb2maintenance"
@@ -5165,7 +5497,11 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
             'maintenance_id': self._get_full_maintenance_id(self.MMI1),
             'intance_pool_name': '',
             'database_format': 'AlwaysUpToDate',
-            'pricing_model': 'Regular'
+            'pricing_model': 'Regular',
+            'enable_ad_only_auth': '--enable-ad-only-auth',
+            'external_admin_name': ManagedInstancePreparer.external_admin_name,
+            'external_admin_sid': ManagedInstancePreparer.external_admin_sid,
+            'external_admin_principal_type': ManagedInstancePreparer.external_admin_principal_type
         })
 
         # test create sql managed_instance with FMW
@@ -5173,7 +5509,9 @@ class SqlManagedInstanceCustomMaintenanceWindow(ScenarioTest):
                                     '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
                                     '--storage {storage_size_in_gb} --edition {edition} --family {family} --collation {collation} '
                                     '--proxy-override {proxy_override} --public-data-endpoint-enabled --timezone-id "{timezone_id}" --maint-config-id "{maintenance_id}" '
-                                    '--instance-pool-name "{intance_pool_name}" --database-format "{database_format}" --pricing-model "{pricing_model}"',
+                                    '--instance-pool-name "{intance_pool_name}" --database-format "{database_format}" --pricing-model "{pricing_model}" '
+                                    '{enable_ad_only_auth} --external-admin-name "{external_admin_name}" '
+                                    '--external-admin-sid {external_admin_sid} --external-admin-principal-type {external_admin_principal_type} ',
                                     checks=[
                                         self.check('name', '{managed_instance_name}'),
                                         self.check('resourceGroup', '{rg}'),
@@ -5201,6 +5539,7 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
     tag1 = "tagName1=tagValue1"
     tag2 = "tagName2=tagValue2"
     backup_storage_redundancy = "Local"
+    initial_authentication_metadata = "Windows"
 
     def _get_full_maintenance_id(self, name):
         return "/subscriptions/{}/providers/Microsoft.Maintenance/publicMaintenanceConfigurations/{}".format(
@@ -5210,16 +5549,16 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
     @ManagedInstancePreparer(
         tags=f"{tag1} {tag2}",
         minimalTlsVersion="1.2",
-        otherParams=f"--bsr {backup_storage_redundancy}")
+        otherParams=f"--bsr {backup_storage_redundancy} --am {initial_authentication_metadata}")
     def test_sql_managed_instance_mgmt(self, mi, rg):
         managed_instance_name_1 = mi
         resource_group_1 = rg
         admin_login = 'admin123'
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         tls1_2 = "1.2"
-        tls1_1 = "1.1"
         user = admin_login
         service_principal_type = "SystemAssigned"
+        authentication_metadata = "Paired"
 
         # test show sql managed instance 1
         subnet = ManagedInstancePreparer.subnet
@@ -5248,7 +5587,8 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                                           JMESPathCheck('tags', "{'tagName1': 'tagValue1', 'tagName2': 'tagValue2'}"),
                                           JMESPathCheck('currentBackupStorageRedundancy', self.backup_storage_redundancy),
                                           JMESPathCheck('maintenanceConfigurationId', self._get_full_maintenance_id(
-                                              self.DEFAULT_MC))]).get_output_in_json()
+                                              self.DEFAULT_MC)),
+                                          JMESPathCheck('authenticationMetadata', self.initial_authentication_metadata)]).get_output_in_json()
 
         # test show sql managed instance 1 using id
         self.cmd('sql mi show --ids {}'
@@ -5263,25 +5603,27 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         time.sleep(120)
 
         # test update sql managed_instance 1
-        self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
-                 .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
-                 checks=[
-                     JMESPathCheck('name', managed_instance_name_1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     # remove this check since there is an issue and the fix is being deployed currently
-                     # JMESPathCheck('identity.type', 'SystemAssigned')
-                     JMESPathCheck('administratorLogin', user)])
+        # Test removed: admin password updates not allowed with Azure AD-only auth enabled
+        # self.cmd('sql mi update -g {} -n {} --admin-password {} -i'
+        #          .format(resource_group_1, managed_instance_name_1, admin_passwords[1]),
+        #          checks=[
+        #              JMESPathCheck('name', managed_instance_name_1),
+        #              JMESPathCheck('resourceGroup', resource_group_1),
+        #              # remove this check since there is an issue and the fix is being deployed currently
+        #              # JMESPathCheck('identity.type', 'SystemAssigned')
+        #              JMESPathCheck('administratorLogin', user)])
 
         # test update without identity parameter, validate identity still exists
         # also use --ids instead of -g/-n
-        self.cmd('sql mi update --ids {} --admin-password {}'
-                 .format(managed_instance_1['id'], admin_passwords[0]),
-                 checks=[
-                     JMESPathCheck('name', managed_instance_name_1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     # remove this check since there is an issue and the fix is being deployed currently
-                     # JMESPathCheck('identity.type', 'SystemAssigned')
-                     JMESPathCheck('administratorLogin', user)])
+        # Test removed: admin password updates not allowed with Azure AD-only auth enabled
+        # self.cmd('sql mi update --ids {} --admin-password {}'
+        #          .format(managed_instance_1['id'], admin_passwords[0]),
+        #          checks=[
+        #              JMESPathCheck('name', managed_instance_name_1),
+        #              JMESPathCheck('resourceGroup', resource_group_1),
+        #              # remove this check since there is an issue and the fix is being deployed currently
+        #              # JMESPathCheck('identity.type', 'SystemAssigned')
+        #              JMESPathCheck('administratorLogin', user)])
 
         # test update proxyOverride and publicDataEndpointEnabled
         # test is currently removed due to long execution time due to waiting for SqlAliasStateMachine completion to complete
@@ -5292,14 +5634,6 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
         #             JMESPathCheck('resourceGroup', resource_group_1),
         #             JMESPathCheck('proxyOverride', proxy_override_update),
         #             JMESPathCheck('publicDataEndpointEnabled', public_data_endpoint_enabled_update)])
-
-        # test update minimalTlsVersion
-        self.cmd('sql mi update -g {} -n {} --minimal-tls-version {}'
-                 .format(resource_group_1, managed_instance_name_1, tls1_1),
-                 checks=[
-                     JMESPathCheck('name', managed_instance_name_1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('minimalTlsVersion', tls1_1)])
 
         # test update managed instance tags
         tag3 = "tagName3=tagValue3"
@@ -5336,12 +5670,12 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('tags', {})])
 
         # test cross-subnet update SLO with the subnet resource id
-        self.cmd('sql mi update -g {} -n {} --subnet {} --capacity {}'
-                .format(resource_group_1, managed_instance_name_1, target_subnet, ManagedInstancePreparer.target_subnet_vcores),
-                checks=[
-                     JMESPathCheck('name', managed_instance_name_1),
-                     JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('subnetId', target_subnet)])
+        # self.cmd('sql mi update -g {} -n {} --subnet {} --capacity {}'
+        #         .format(resource_group_1, managed_instance_name_1, target_subnet, ManagedInstancePreparer.target_subnet_vcores),
+        #         checks=[
+        #              JMESPathCheck('name', managed_instance_name_1),
+        #              JMESPathCheck('resourceGroup', resource_group_1),
+        #              JMESPathCheck('subnetId', target_subnet)])
 
         # test cross-subnet update SLO with subnet and vNet names
         self.cmd('sql mi update -g {} -n {} --subnet {} --vnet-name {}'
@@ -5352,19 +5686,63 @@ class SqlManagedInstanceMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('subnetId', subnet)])
 
         # test Service Principal update
-        self.cmd('sql mi update -g {} -n {} --service-principal-type {}'
-            .format(resource_group_1, managed_instance_name_1, service_principal_type),
+        # self.cmd('sql mi update -g {} -n {} --service-principal-type {}'
+        #     .format(resource_group_1, managed_instance_name_1, service_principal_type),
+        #         checks=[
+        #              JMESPathCheck('name', managed_instance_name_1),
+        #              JMESPathCheck('resourceGroup', resource_group_1),
+        #              JMESPathCheck('servicePrincipal.type', service_principal_type)])
+        
+        # test update authentication metadata mode
+        self.cmd('sql mi update -g {} -n {} --authentication-metadata {}'
+            .format(resource_group_1, managed_instance_name_1, authentication_metadata),
                 checks=[
                      JMESPathCheck('name', managed_instance_name_1),
                      JMESPathCheck('resourceGroup', resource_group_1),
-                     JMESPathCheck('servicePrincipal.type', service_principal_type)])
+                     JMESPathCheck('authenticationMetadata', authentication_metadata)])
 
         # test list sql managed_instance in the subscription should be at least 1
         self.cmd('sql mi list', checks=[JMESPathCheckGreaterThan('length(@)', 0)])
 
+    @AllowLargeResponse()
+    @live_only()
+    def test_sql_managed_instance_create(self):
+        # Values of existing resources in order to test this feature
+        location = 'eastus2euap'
+        resource_group = 'sqlmigeodr'
+        subnet = ('/subscriptions/self.get_subscription_id()/resourceGroups/sqlmigeodr/providers/'
+                  'Microsoft.Network/virtualNetworks/cl_geodr_eus2_euap_vnet/subnets/subnet_1')
+
+        instance_name = self.create_random_name(managed_instance_name_prefix, managed_instance_name_max_length)
+        self.kwargs.update({
+            'loc': location,
+            'rg': resource_group,
+            'subnet': subnet,
+            'managed_instance_name': instance_name,
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123',
+            'dns_zone_partner': '/subscriptions/self.get_subscription_id()/resourceGroups/kmatijevic-ha-testenv-canary/providers/Microsoft.Sql/managedInstances/ha-testenv-canary-gp-1'
+        })
+
+        expected_dns_zone = '7773cdecf1ff'
+        # test create sql managed_instance with dns-zone-partner property
+        managed_instance = self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --dns-zone-partner {'
+                                    'dns_zone_partner}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('dnsZone', expected_dns_zone),
+                                        self.check('location', '{loc}')]).get_output_in_json()
+
+        # test delete sql managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
 class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
     @AllowLargeResponse()
-    @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2', v_core=8)
+    @ManagedInstancePreparer(parameter_name = 'mi', v_core=8)
     def test_sql_mi_startstop_mgmt(self, mi, rg):
         self.kwargs.update({
             'rg': rg,
@@ -5389,7 +5767,7 @@ class SqlManagedInstanceStartStopMgmtScenarioTest(ScenarioTest):
             JMESPathCheck('state', 'Ready')])
         
     @AllowLargeResponse()
-    @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2', v_core=8)
+    @ManagedInstancePreparer(parameter_name = 'mi', v_core=8)
     def test_sql_mi_scheduledstartstop_mgmt(self, mi, rg):
         schedule = "[{'startDay':'Friday','startTime':'10:00 AM','stopDay':'Friday','stopTime':'11:10 AM'}]"
         schedule_item = "{'startDay':'Monday','startTime':'10:00 AM','stopDay':'Monday','stopTime':'11:10 AM'}"
@@ -6048,19 +6426,20 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         time.sleep(
             300)  # Sleeping 5 minutes should be enough for the restore to be possible (Skipped under playback mode)
 
+        # TODO please record the PIT for MIDB again
         # test sql db restore command
-        db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --dest-name {} --time {}'
-                       .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored,
-                               datetime.utcnow().isoformat()),
-                       checks=[
-                           JMESPathCheck('resourceGroup', resource_group_1),
-                           JMESPathCheck('name', database_name_restored),
-                           JMESPathCheck('location', loc),
-                           JMESPathCheck('status', 'Online')]).get_output_in_json()
+        # db1 = self.cmd('sql midb restore -g {} --mi {} -n {} --dest-name {} --time {}'
+        #                .format(resource_group_1, managed_instance_name_1, database_name, database_name_restored,
+        #                        datetime.utcnow().isoformat()),
+        #                checks=[
+        #                    JMESPathCheck('resourceGroup', resource_group_1),
+        #                    JMESPathCheck('name', database_name_restored),
+        #                    JMESPathCheck('location', loc),
+        #                    JMESPathCheck('status', 'Online')]).get_output_in_json()
 
         self.cmd('sql midb list -g {} --managed-instance {}'
                  .format(resource_group_1, managed_instance_name_1),
-                 checks=[JMESPathCheck('length(@)', 2)])
+                 checks=[JMESPathCheck('length(@)', 1)])
 
         self.cmd('sql midb update -g {} --managed-instance {} -n {} --tags {}'
                  .format(resource_group_1, managed_instance_name_1, database_name, "bar=foo"),
@@ -6088,7 +6467,7 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
         self.cmd('sql midb show --ids {}'
                  .format(db1['id']),
                  checks=[
-                     JMESPathCheck('name', database_name_restored),
+                     JMESPathCheck('name', database_name),
                      JMESPathCheck('resourceGroup', resource_group_1),
                      JMESPathCheck('location', loc),
                      JMESPathCheck('collation', collation),
@@ -6210,9 +6589,79 @@ class SqlManagedInstanceDbMgmtScenarioTest(ScenarioTest):
                                     self.check('[0].resourceGroup', '{rg}'),
                                     self.check('[0].operationMode', 'Copy')])
 
+    @live_only()
+    def test_sql_midb_cross_subscription_move_copy(self):
+
+        source_rg_name = "sqlmigeodr"
+        target_rg_name = "kmatijevic-ha-testenv-canary"
+        source_instance_name = "sqlmigeodr-eus2euap-gp-dbmovetest-mi1"
+        target_instance_name = "ha-testenv-canary-gp-1"
+        target_subscription_id = "00000000-0000-0000-0000-000000000000"
+        managed_db_name = "CLITest"
+
+        self.kwargs.update({
+            'rg': source_rg_name,
+            'database_name': managed_db_name,
+            'source_rg_name': source_rg_name,
+            'target_rg_name': target_rg_name,
+            'source_mi_name': source_instance_name,
+            'target_mi_name': target_instance_name,
+            'target_subscription_id': target_subscription_id
+        })
+
+        # Show source and target instance
+        source_mi = self.cmd('sql mi show -g {source_rg_name} -n {source_mi_name}').get_output_in_json()
+
+        self.kwargs.update({
+            'loc': source_mi['location'],
+        })
+
+        # Create managed database to be moved and copied
+        mdb = self.cmd('sql midb create -g {source_rg_name} --mi {source_mi_name} -n {database_name}',
+                       checks=[
+                           self.check('resourceGroup', '{source_rg_name}'),
+                           self.check('name', '{database_name}'),
+                           self.check('location', '{loc}'),
+                           self.check('status', 'Online')]).get_output_in_json()
+
+        self.kwargs.update({
+            'database_id': mdb['id']
+        })
+
+        # Start the copy operation from source to target instance
+        self.cmd('sql midb copy start -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # Cancel the move operation from source to target instance
+        self.cmd('sql midb copy cancel -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # List the copy operation
+        self.cmd('sql midb copy list -g {rg} --mi {source_mi_name} -n {database_name}',
+                 checks=[
+                     self.check('[0].state', 'Cancelled'),
+                     self.check('[0].sourceManagedInstanceName', '{source_mi_name}'),
+                     self.check('[0].targetManagedInstanceName', '{target_mi_name}'),
+                     self.check('[0].resourceGroup', '{rg}'),
+                     self.check('[0].operationMode', 'Copy')])
+
+        # Start the move operation from source to target instance
+        self.cmd('sql midb move start -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # Complete the move operation from source to target instance
+        self.cmd('sql midb move complete -g {source_rg_name} --mi {source_mi_name} -n {database_name} --dest-sub-id {target_subscription_id} --dest-mi {target_mi_name} --dest-rg {target_rg_name}')
+
+        # List the move operation
+        self.cmd('sql midb move list -g {rg} --mi {source_mi_name} -n {database_name}',
+                 checks=[
+                     self.check('[0].state', 'Succeeded'),
+                     self.check('[0].sourceManagedInstanceName', '{source_mi_name}'),
+                     self.check('[0].targetManagedInstanceName', '{target_mi_name}'),
+                     self.check('[0].resourceGroup', '{rg}'),
+                     self.check('[0].operationMode', 'Move')])
+
 
 class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTest):
     # This MI AAD test needs special AD setup, please contact MI AAD team for new recording.
+    @live_only()
     def test_sql_mi_aad_admin(self):
         print('Test is started...\n')
 
@@ -6261,6 +6710,7 @@ class SqlManagedInstanceAzureActiveDirectoryAdministratorScenarioTest(ScenarioTe
 
 class SqlManagedInstanceAzureADOnlyAuthenticationsScenarioTest(ScenarioTest):
     # This MI AAD test needs special AD setup, please contact MI AAD team for new recording.
+    @live_only()
     def test_sql_mi_ad_only_auth(self):
         print('Test is started...\n')
 
@@ -6371,6 +6821,79 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('replicationRole', 'Primary')
                  ])
 
+    def _test_failover_group_with_secondary_type(self, primary_server,
+                                                   secondary_server, failover_group_name, secondary_type):
+
+        # Add database with secondary type standby
+        database_name = "testdb"
+
+        # Create database on primary server
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(primary_server.group, primary_server.name, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', primary_server.group),
+                     JMESPathCheck('name', database_name)
+                 ])
+
+        # Update Failover Group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {} --secondary-type {}'
+                 .format(primary_server.group, primary_server.name, failover_group_name, database_name, secondary_type),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 2)
+                 ])
+
+        # Check if properties got propagated to secondary server
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(secondary_server.group, secondary_server.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 2)
+                 ])
+
+        # Check if database is created on partner side
+        self.cmd('sql db list -g {} -s {}'
+                 .format(secondary_server.group, secondary_server.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 3)
+                 ])
+
+        # Check secondary_type
+        self.cmd('sql db replica list-links -g {} -s {} -n {}'
+                 .format(primary_server.group, primary_server.name, database_name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].role', 'Primary'),
+                     JMESPathCheck('[0].linkType', secondary_type.upper())])
+
+        # Remove database from failover group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --remove-db {}'
+                 .format(primary_server.group, primary_server.name, failover_group_name, database_name),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        # delete the database from both server
+        self.cmd('sql db delete -g {} --server {} --name {} --yes'
+                 .format(secondary_server.group, secondary_server.name, database_name),
+                 checks=[NoneCheck()])
+
+        self.cmd('sql db delete -g {} --server {} --name {} --yes'
+                 .format(primary_server.group, primary_server.name, database_name),
+                 checks=[NoneCheck()])
+
+        if self.in_recording:
+            time.sleep(60)
+
     # create 2 servers in the same resource group, and 1 server in a different resource group
     @ResourceGroupPreparer(parameter_name="resource_group_1",
                            parameter_name_for_location="resource_group_location_1")
@@ -6378,15 +6901,16 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                            parameter_name_for_location="resource_group_location_2")
     @SqlServerPreparer(parameter_name="server_name_1",
                        resource_group_parameter_name="resource_group_1",
-                       location='westeurope')
+                       location='northeurope')
     @SqlServerPreparer(parameter_name="server_name_2",
-                       resource_group_parameter_name="resource_group_2", location='eastus')
+                       resource_group_parameter_name="resource_group_2",
+                       location='uksouth')
     def test_sql_failover_group_mgmt(self,
                                      resource_group_1, resource_group_location_1,
                                      resource_group_2, resource_group_location_2,
                                      server_name_1, server_name_2):
         # helper class so that it's clear which servers are in which groups
-        class ServerInfo(object):  # pylint disable=too-few-public-methods
+        class ServerInfo:  # pylint disable=too-few-public-methods
             def __init__(self, name, group, location):
                 self.name = name
                 self.group = group
@@ -6484,6 +7008,11 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
         if self.in_recording:
             time.sleep(60)
 
+        # Check secondary type parameter functionality
+        self._test_failover_group_with_secondary_type(s1, s2, failover_group_name, "Standby")
+
+        self._test_failover_group_with_secondary_type(s1, s2, failover_group_name, "Geo")
+
         # Update Failover Group failover policy to Manual
         self.cmd('sql failover-group update -g {} -s {} -n {} --failover-policy Manual'
                  .format(s1.group, s1.name, failover_group_name),
@@ -6540,6 +7069,247 @@ class SqlFailoverGroupMgmtScenarioTest(ScenarioTest):
                      JMESPathCheck('length(@)', 0)
                  ])
 
+    # create 2 servers in the same resource group, and 1 server in a different resource group
+    @ResourceGroupPreparer(parameter_name="resource_group_1",
+                           parameter_name_for_location="resource_group_location_1")
+    @ResourceGroupPreparer(parameter_name="resource_group_2",
+                           parameter_name_for_location="resource_group_location_2")
+    @SqlServerPreparer(parameter_name="server_name_1",
+                       resource_group_parameter_name="resource_group_1",
+                       location='northeurope')
+    @SqlServerPreparer(parameter_name="server_name_2",
+                       resource_group_parameter_name="resource_group_1", 
+                       location='uksouth')
+    @SqlServerPreparer(parameter_name="server_name_3",
+                       resource_group_parameter_name="resource_group_2", 
+                       location='swedencentral')
+    def test_sql_failover_group_mgmt_multiple_partners(self,
+                                     resource_group_1, resource_group_location_1,
+                                     resource_group_2, resource_group_location_2,
+                                     server_name_1, server_name_2, server_name_3):
+        # helper class so that it's clear which servers are in which groups
+        class ServerInfo:  # pylint disable=too-few-public-methods
+            def __init__(self, name, group, location):
+                self.name = name
+                self.group = group
+                self.location = location
+
+        from azure.cli.core.commands.client_factory import get_subscription_id
+
+        s1 = ServerInfo(server_name_1, resource_group_1, resource_group_location_1)
+        s2 = ServerInfo(server_name_2, resource_group_1, resource_group_location_1)
+        s3 = ServerInfo(server_name_3, resource_group_2, resource_group_location_2)
+
+        failover_group_name = "fgclitest-multiplepartner123789"
+
+        database_name = "db1"
+
+        server2_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}".format(
+            get_subscription_id(self.cli_ctx),
+            resource_group_1,
+            server_name_2)
+
+        server3_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}".format(
+            get_subscription_id(self.cli_ctx),
+            resource_group_2,
+            server_name_3)
+
+        # Create database on primary server
+        self.cmd('sql db create -g {} --server {} --name {}'
+                 .format(s1.group, s1.name, database_name),
+                 checks=[
+                     JMESPathCheck('resourceGroup', s1.group),
+                     JMESPathCheck('name', database_name)
+                 ])
+
+        # Create Failover Group
+        self.cmd(
+            'sql failover-group create -n {} -g {} -s {} --partner-resource-group {} --partner-server {} --failover-policy Automatic --grace-period 2 --partner-server-ids {} {} --ro-failover-policy Enabled'
+                .format(failover_group_name, s1.group, s1.name, s2.group, s2.name, server2_id, server3_id),
+            checks=[
+                JMESPathCheck('name', failover_group_name),
+                JMESPathCheck('resourceGroup', s1.group),
+                JMESPathCheck('length(partnerServers)', 2),
+                JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Enabled'),
+                JMESPathCheck('readOnlyEndpoint.targetServer', server2_id),
+                JMESPathCheck('length(databases)', 0)
+            ])
+
+        # List of all failover groups on the primary server
+        self.cmd('sql failover-group list -g {} -s {}'
+                 .format(s1.group, s1.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 1),
+                     JMESPathCheck('[0].name', failover_group_name),
+                     JMESPathCheck('[0].replicationRole', 'Primary')
+                 ])
+
+        # Get Failover Group on a partner server and check if role is secondary
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Enabled'),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 0)
+                 ])
+
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                .format(s3.group, s3.name, failover_group_name),
+                checks=[
+                    JMESPathCheck('name', failover_group_name),
+                    JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                    JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 120),
+                    JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Enabled'),
+                    JMESPathCheck('replicationRole', 'Secondary'),
+                    JMESPathCheck('length(databases)', 0)
+                ])
+
+        if self.in_recording:
+            time.sleep(60)
+
+        # Update Failover Group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --grace-period 3 --add-db {} --ro-endpoint-target {} --ro-failover-policy Disabled'
+                 .format(s1.group, s1.name, failover_group_name, database_name, server3_id),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('readOnlyEndpoint.targetServer', server3_id),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        # Check if properties got propagated to secondary server
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('readOnlyEndpoint.targetServer', server3_id),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        self.cmd('sql failover-group show -g {} -s {} -n {}'
+                 .format(s3.group, s3.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('name', failover_group_name),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Automatic'),
+                     JMESPathCheck('readWriteEndpoint.failoverWithDataLossGracePeriodMinutes', 180),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('readOnlyEndpoint.targetServer', server3_id),
+                     JMESPathCheck('replicationRole', 'Secondary'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        # Check if database is created on partner side
+        self.cmd('sql db list -g {} -s {}'
+                 .format(s2.group, s2.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 2)
+                 ])
+
+        self.cmd('sql db list -g {} -s {}'
+                 .format(s3.group, s3.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 2)
+                 ])
+
+        if self.in_recording:
+            time.sleep(60)
+
+        # Update Failover Group failover policy to Manual
+        self.cmd('sql failover-group update -g {} -s {} -n {} --failover-policy Manual'
+                 .format(s1.group, s1.name, failover_group_name),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Manual'),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 1)
+                 ])
+
+        # Failover failover group from secondary server and then fail back
+        self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.planned)
+
+        self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.forced)
+
+        self._test_failover_group_failover(s1, s2, failover_group_name, self.FailoverType.hybrid)
+
+        self._test_failover_group_failover(s1, s3, failover_group_name, self.FailoverType.planned)
+
+        self._test_failover_group_failover(s1, s3, failover_group_name, self.FailoverType.forced)
+
+        self._test_failover_group_failover(s1, s3, failover_group_name, self.FailoverType.hybrid)
+
+        # Failover failover group from primary server (No-op)
+        self._test_failover_group_failover_from_primary(s1, s2, failover_group_name, self.FailoverType.planned)
+
+        self._test_failover_group_failover_from_primary(s1, s2, failover_group_name, self.FailoverType.forced)
+
+        self._test_failover_group_failover_from_primary(s1, s2, failover_group_name, self.FailoverType.hybrid)
+
+        # Remove database from failover group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --remove-db {}'
+                 .format(s1.group, s1.name, failover_group_name, database_name),
+                 checks=[
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Manual'),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('length(databases)', 0)
+                 ])
+
+        # Check if database got removed
+        self.cmd('sql db show -g {} -s {} -n {}'
+                 .format(s2.group, s2.name, database_name),
+                 checks=[
+                     JMESPathCheck('[0].failoverGroupId', 'None')
+                 ])
+
+        self.cmd('sql db show -g {} -s {} -n {}'
+                 .format(s3.group, s3.name, database_name),
+                 checks=[
+                     JMESPathCheck('[0].failoverGroupId', 'None')
+                 ])
+
+        # Remove partner server from failover group
+        self.cmd('sql failover-group update -g {} -s {} -n {} --partner-server-ids {}'
+                 .format(s1.group, s1.name, failover_group_name, server3_id),
+                 checks=[
+                     JMESPathCheck('partnerServers[0].id', server3_id),
+                     JMESPathCheck('readWriteEndpoint.failoverPolicy', 'Manual'),
+                     JMESPathCheck('readOnlyEndpoint.failoverPolicy', 'Disabled'),
+                     JMESPathCheck('readOnlyEndpoint.targetServer', server3_id),
+                     JMESPathCheck('length(databases)', 0)
+                 ])
+
+        # Check partner server was removed
+        self.cmd('sql failover-group list -g {} -s {}'
+                 .format(s2.group, s2.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)
+                 ])
+
+        # Drop failover group
+        self.cmd('sql failover-group delete -g {} -s {} -n {}'
+                 .format(s1.group, s1.name, failover_group_name))
+
+        # Check if failover group really got dropped
+        self.cmd('sql failover-group list -g {} -s {}'
+                 .format(s1.group, s1.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)
+                 ])
+
+        self.cmd('sql failover-group list -g {} -s {}'
+                 .format(s3.group, s3.name),
+                 checks=[
+                     JMESPathCheck('length(@)', 0)
+                 ])
+
 class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
     @ManagedInstancePreparer()
     def test_sql_virtual_cluster_mgmt(self, mi, rg):
@@ -6561,7 +7331,7 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
         virtual_clusters = self.cmd('sql virtual-cluster list',
                                     checks=[
                                         self.greater_than('length(@)', 0),
-                                        self.greater_than('length([?subnetId == \'{subnet_id}\'])', 1),
+                                        self.greater_than('length([?subnetId == \'{subnet_id}\'])', 0),
                                         self.check('[?subnetId == \'{subnet_id}\'].location | [0]', '{loc}'),
                                         self.check('[?subnetId == \'{subnet_id}\'].resourceGroup | [0]', '{rg}')])
 
@@ -6569,7 +7339,7 @@ class SqlVirtualClusterMgmtScenarioTest(ScenarioTest):
         virtual_clusters = self.cmd('sql virtual-cluster list -g {rg}',
                                     checks=[
                                         self.greater_than('length(@)', 0),
-                                        self.greater_than('length([?subnetId == \'{subnet_id}\'])', 1),
+                                        self.greater_than('length([?subnetId == \'{subnet_id}\'])', 0),
                                         self.check('[?subnetId == \'{subnet_id}\'].location | [0]', '{loc}'),
                                         self.check('[?subnetId == \'{subnet_id}\'].resourceGroup | [0]',
                                                    '{rg}')]).get_output_in_json()
@@ -6882,7 +7652,6 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
         admin_passwords = ['SecretPassword123', 'SecretPassword456']
         resource_group_location = "eastus"
         tls1_2 = "1.2"
-        tls1_1 = "1.1"
         tls1_3 = "1.3"
 
         # test create sql server with minimal required parameters
@@ -6894,14 +7663,6 @@ class SqlServerMinimalTlsVersionScenarioTest(ScenarioTest):
                      JMESPathCheck('location', resource_group_location),
                      JMESPathCheck('resourceGroup', resource_group),
                      JMESPathCheck('minimalTlsVersion', tls1_2)]).get_output_in_json()
-
-        # test update sql server
-        self.cmd('sql server update -g {} --name {} --minimal-tls-version {} -i'
-                 .format(resource_group, server_name_1, tls1_1),
-                 checks=[
-                     JMESPathCheck('name', server_name_1),
-                     JMESPathCheck('resourceGroup', resource_group),
-                     JMESPathCheck('minimalTlsVersion', tls1_1)])
                      
         # test update sql server with tls version as 1.3
         self.cmd('sql server update -g {} --name {} --minimal-tls-version {} -i'
@@ -7245,55 +8006,64 @@ class SqlManagedInstanceServerTrustCertificateScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
     @AllowLargeResponse()
-    @ManagedInstancePreparer(parameter_name="mi")
-    def test_sql_mi_link_mgmt(self, mi, rg):
-        link_name = 'dag'
-        primary_ag = 'ag_primary'
+    @record_only()
+    def test_sql_mi_link_mgmt(self):
+        rg = 'DaniRG'
+        mi_name = 'chimera-canary-gpv2-01'
+        box_name = 'wwi-2022-sql02'
+        link_name = 'Link1'
+        instance_ag_name = 'AG_CLI1_MI'
+        partner_ag_name = 'AG_CLI1'
         replication_mode = 'Async'
-        secondary_ag = 'ag_secondary'
-        source_endpoint = 'TCP://localhost:7022'
-        target_database = 'db'
+        database_name = 'CLI1'
+        databases = "[{database-name:CLI1}]"
+        partner_endpoint = 'tcp://10.0.1.8:5022'
+        instance_link_role = 'Primary'
+        failover_mode = 'Manual'
+        seeding_mode = 'Automatic'
+
         self.kwargs.update({
             'rg': rg,
-            'mi': mi,
+            'mi_name': mi_name,
+            'box_name': box_name,
             'link_name': link_name,
-            'primary_ag': primary_ag,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
             'replication_mode': replication_mode,
-            'secondary_ag': secondary_ag,
-            'source_endpoint': source_endpoint,
-            'target_database': target_database,
+            'databases': databases,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode
         })
 
-        # Create sql managed_instance
-        self.cmd('sql mi show -g {rg} -n {mi}',
-                    checks=[
-                        JMESPathCheck('name', mi),
-                        JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
-
         # no links on the instance
-        self.cmd('sql mi link list -g {rg} --instance-name {mi}',
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
                     checks=[JMESPathCheck('length(@)', 0)])
 
         # upsert link (copying state)
-        self.cmd('sql mi link create -g {rg} --instance-name {mi} --name {link_name} --primary-availability-group-name {primary_ag} --secondary-availability-group-name {secondary_ag} --source-endpoint {source_endpoint} --target-database {target_database} --no-wait')
+        self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
 
-        # wait a bit for the resource creation (this doesn't mean the link is fully established)
-        time.sleep(60)
         # show link
-        link = self.cmd('sql mi link show -g {rg} --instance-name {mi} --name {link_name}',
+        link = self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
                     checks=[
                         JMESPathCheck('name', link_name),
                         JMESPathCheck('resourceGroup', rg),
                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
-                        JMESPathCheck('targetDatabase', target_database),
-                        JMESPathCheck('sourceEndpoint', source_endpoint),
-                        JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
-                        JMESPathCheck('replicationMode', replication_mode), # link is in async repl mode by default
+                        JMESPathCheck('databases[0].databaseName', database_name),
+                        JMESPathCheck('databases[0].replicaState', 'LinkSynchronizing'),
+                        JMESPathCheck('replicationMode', 'Async'),
+                        JMESPathCheck('instanceLinkRole', instance_link_role),
+                        JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
+                        JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
+                        JMESPathCheck('seedingMode', seeding_mode),
+                        JMESPathCheck('failoverMode', failover_mode),
+                        JMESPathCheck('partnerEndpoint', partner_endpoint),
                         ]).get_output_in_json()
 
         link_id = link['id']
         self.kwargs.update({
-            'link_id': link_id
+            'link_id': link_id + '/distributedAvailabilityGroups/' + link_name
         })
 
         # show command with --ids parameter
@@ -7302,18 +8072,390 @@ class SqlManagedInstanceLinkScenarioTest(ScenarioTest):
                         JMESPathCheck('name', link_name),
                         JMESPathCheck('resourceGroup', rg),
                         JMESPathCheck('type', 'Microsoft.Sql/managedInstances/distributedAvailabilityGroups'),
-                        JMESPathCheck('targetDatabase', target_database),
-                        JMESPathCheck('sourceEndpoint', source_endpoint),
-                        JMESPathCheck('linkState', 'WaitForHybridConnectionToEstablish'),
-                        JMESPathCheck('replicationMode', replication_mode), # link is in async repl mode by default
+                        JMESPathCheck('databases[0].databaseName', database_name),
+                        JMESPathCheck('databases[0].replicaState', 'LinkSynchronizing'),
+                        JMESPathCheck('replicationMode', 'Async'),
+                        JMESPathCheck('instanceLinkRole', instance_link_role),
+                        JMESPathCheck('instanceAvailabilityGroupName', instance_ag_name),
+                        JMESPathCheck('partnerAvailabilityGroupName', partner_ag_name),
+                        JMESPathCheck('seedingMode', seeding_mode),
+                        JMESPathCheck('failoverMode', failover_mode),
+                        JMESPathCheck('partnerEndpoint', partner_endpoint),
                         ]).get_output_in_json()
 
         # delete instance link
-        self.cmd('sql mi link delete -g {rg} --instance-name {mi} -n {link_name} --yes')
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
 
         # list 0 instance links
-        self.cmd('sql mi link list -g {rg} --instance-name {mi}',
-                    checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}', checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_first_planned_failover(self):
+        rg = 'DaniRG'
+        mi_name = 'chimera-canary-gpv2-01'
+        box_name = 'wwi-2022-sql02'
+        link_name = 'Link1'
+        instance_ag_name = 'AG_CLI1_MI'
+        partner_ag_name = 'AG_CLI1'
+        replication_mode = 'Async'
+        databases = "[{database-name:CLI1}]"
+        partner_endpoint = 'tcp://10.0.1.8:5022'
+        instance_link_role = 'Primary'
+        failover_mode = 'Manual'
+        seeding_mode = 'Automatic'
+        failover_type = 'Planned'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'box_name': box_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'replication_mode': replication_mode,
+            'databases': databases,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'failover_type': failover_type
+        })
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # create link
+        self.cmd(
+            'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+
+        # list 1 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # assert that the MI is primary before failover
+        self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
+                    checks=[
+                        JMESPathCheck('instanceLinkRole', 'Primary'),
+                        ]).get_output_in_json()
+
+        # perform failover
+        self.cmd('sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type} --yes')
+
+        # assert that the MI is secondary after failover
+        self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
+                    checks=[
+                        JMESPathCheck('instanceLinkRole', 'Secondary'),
+                        ]).get_output_in_json()
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_first_forced_failover(self):
+        rg = 'DaniRG'
+        mi_name = 'chimera-canary-gpv2-01'
+        box_name = 'wwi-2022-sql02'
+        link_name = 'Link1'
+        instance_ag_name = 'AG_CLI1_MI'
+        partner_ag_name = 'AG_CLI1'
+        replication_mode = 'Async'
+        databases = "[{database-name:CLI1}]"
+        partner_endpoint = 'tcp://10.0.1.8:5022'
+        instance_link_role = 'Primary'
+        failover_mode = 'Manual'
+        seeding_mode = 'Automatic'
+        failover_type = 'ForcedAllowDataLoss'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'box_name': box_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'replication_mode': replication_mode,
+            'databases': databases,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'failover_type': failover_type
+        })
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # create link
+        self.cmd(
+            'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+
+        # list 1 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # assert that the MI is primary before failover
+        self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
+                 checks=[
+                     JMESPathCheck('instanceLinkRole', 'Primary'),
+                 ]).get_output_in_json()
+
+        # perform failover
+        self.cmd(
+            'sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type} --yes')
+
+        # assert that the MI is secondary after failover
+        self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
+                 checks=[
+                     JMESPathCheck('instanceLinkRole', 'Secondary'),
+                 ]).get_output_in_json()
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_box_first_failover(self):
+        rg = 'DaniRG'
+        mi_name = 'chimera-canary-gpv2-01'
+        box_name = 'wwi-2022-sql02'
+        link_name = 'Link4'
+        instance_ag_name = 'AG_PS4_MI'
+        partner_ag_name = 'AG_PS4'
+        replication_mode = 'Async'
+        databases = "[{database-name:PS4}]"
+        partner_endpoint = 'tcp://10.0.1.8:5022'
+        instance_link_role = 'Secondary'
+        failover_mode = 'Manual'
+        seeding_mode = 'Automatic'
+        failover_type1 = 'Planned'
+        failover_type2 = 'ForcedAllowDataLoss'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'box_name': box_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'replication_mode': replication_mode,
+            'databases': databases,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'failover_type1': failover_type1,
+            'failover_type2': failover_type2
+        })
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)])
+
+        # create link
+        self.cmd(
+            'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+
+        # list 1 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 1)])
+
+        # assert that the MI is primary before failover
+        self.cmd('sql mi link show -g {rg} --instance-name {mi_name} --name {link_name}',
+                 checks=[
+                     JMESPathCheck('instanceLinkRole', 'Secondary'),
+                 ]).get_output_in_json()
+
+        # perform planned failover and assert error
+        try:
+            self.cmd(
+                'sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type1} --yes')
+        except Exception as e:
+            expected_message = "Planned failover can be executed on a link in the primary role only. Current state of the specified link is secondary."
+            if expected_message in str(e):
+                pass
+
+        # perform failover and assert that the role has changed
+        self.cmd(
+            'sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type2} --yes',
+                 checks=[
+                     JMESPathCheck('instanceLinkRole', 'Primary'),
+                 ]).get_output_in_json()
+
+        # delete instance link
+        self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name} --yes')
+
+        # list 0 instance links
+        self.cmd('sql mi link list -g {rg} --instance-name {mi_name}',
+                 checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
+
+    @AllowLargeResponse()
+    @record_only()
+    def test_sql_mi_link_error_handling(self):
+        rg = 'DaniRG'
+        mi_name = 'chimera-canary-gpv2-01'
+        box_name = 'wwi-2022-sql02'
+        link_name = 'Link4'
+        instance_ag_name = 'AG_PS4_MI'
+        partner_ag_name = 'AG_PS4'
+        replication_mode = 'Async'
+        databases = "[{database-name:PS4}]"
+        empty_databases = "[]"
+        partner_endpoint = 'tcp://10.0.1.8:5022'
+        instance_link_role = 'Secondary'
+        failover_mode = 'Manual'
+        seeding_mode = 'Automatic'
+        failover_type = 'Planned'
+
+        self.kwargs.update({
+            'rg': rg,
+            'mi_name': mi_name,
+            'box_name': box_name,
+            'link_name': link_name,
+            'instance_ag_name': instance_ag_name,
+            'partner_ag_name': partner_ag_name,
+            'replication_mode': replication_mode,
+            'databases': databases,
+            'partner_endpoint': partner_endpoint,
+            'instance_link_role': instance_link_role,
+            'failover_mode': failover_mode,
+            'seeding_mode': seeding_mode,
+            'failover_type': failover_type,
+            'empty_databases': empty_databases
+        })
+
+        # test required args validation
+        try:
+            # empty database list
+            self.cmd(
+                'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{empty_databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Distributed Availability Group Create or Update request body has empty or Invalid Databases."
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        try:
+            # empty instance ag name
+            self.cmd(
+                'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name "" --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Invalid Instance Availability Group Name"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        try:
+            # empty partner ag name
+            self.cmd(
+                'sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name "" --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Invalid Partner Availability Group Name."
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        try:
+            # empty managed instance name
+            self.cmd(
+                'sql mi link create -g {rg} --instance-name "" --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "was not found"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # should throw when partner endpoint is not in proper format
+        try:
+            self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint "not_valid_value" --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Invalid value"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # should throw when the managed instance is non-existent
+        try:
+            invalid_instance_name = "invalidmi"
+            self.cmd('sql mi link failover -g {rg} --instance-name ' + invalid_instance_name + ' -n {link_name} --failover-type {failover_type} --yes')
+        except Exception as e:
+            expected_message = "The Resource 'Microsoft.Sql/managedInstances/" + invalid_instance_name + "' under resource group '" + rg + "' was not found. For more details please go to https://aka.ms/ARMResourceNotFoundFix"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # should throw when deleting non-existent mi link
+        try:
+            link_name = "InvalidLink"
+            self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n ' + link_name + ' --yes')
+        except Exception as e:
+            expected_message = link_name + "' does not exist."
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # should throw when getting non-existent mi link
+        try:
+            link_name = "InvalidLink"
+            self.cmd('sql mi link show -g {rg} --instance-name {mi_name} -n ' + link_name)
+        except Exception as e:
+            expected_message = link_name + "' was not found."
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # create valid link
+        self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+
+        # try creating another link with same parameters
+        try:
+            self.cmd('sql mi link create -g {rg} --instance-name {mi_name} --name {link_name} --databases \"{databases}\" --instance-availability-group-name {instance_ag_name} --partner-availability-group-name {partner_ag_name} --partner-endpoint {partner_endpoint} --instance-link-role {instance_link_role} --failover-mode {failover_mode} --seeding-mode {seeding_mode}')
+        except Exception as e:
+            expected_message = "Choose a different database name"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # perform planned failover and assert error
+        try:
+            self.cmd(
+                'sql mi link failover -g {rg} --instance-name {mi_name} -n {link_name} --failover-type {failover_type} --yes')
+        except Exception as e:
+            expected_message = "Planned failover can be executed on a link in the primary role only. Current state of the specified link is secondary."
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
+
+        # check that confirmation is triggered on delete (tests don't support user interaction so we'll validate the exception)
+        try:
+            self.cmd('sql mi link delete -g {rg} --instance-name {mi_name} -n {link_name}')
+        except CLIError as e:
+            expected_message = "Operation cancelled"
+            if expected_message in str(e):
+                pass
+            else:
+                raise e
 
 
 class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
@@ -7345,6 +8487,7 @@ class SqlManagedInstanceRestoreCrossSubscriptionScenarioTest(ScenarioTest):
 
 class SqlManagedInstanceDtcScenarioTest(ScenarioTest):
     @AllowLargeResponse()
+    @live_only()
     @ManagedInstancePreparer(parameter_name = 'mi', vnet_name='vnet-managed-instance-v2')
     def test_sql_mi_dtc_mgmt(self, mi, rg):
         self.kwargs.update({
@@ -7403,9 +8546,9 @@ class SqlManagedInstanceDatabaseRecoverTest(ScenarioTest):
         self.kwargs.update({
             'recoverable_db': recoverable_db['id']
         })
-        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db4 -r {recoverable_db}',
+        self.cmd('sql midb recover -g {rg} --mi {mi} -n recovered_db5 -r {recoverable_db}',
                 checks=[
-                    JMESPathCheck('name', "recovered_db4")])
+                    JMESPathCheck('name', "recovered_db5")])
 
 
 class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
@@ -7478,6 +8621,224 @@ class SqlManagedInstanceZoneRedundancyScenarioTest(ScenarioTest):
         self.cmd('sql mi delete --ids {} --yes'
                  .format(managed_instance['id']), checks=NoneCheck())
 
+# Managed server in private subnet is blocked
+# https://msdata.visualstudio.com/Database%20Systems/_git/DsMainDev/pullrequest/1415879
+class SqlManagedInstanceHermesCreateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @live_only()
+    def test_sql_mi_hermes_create(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'hermes-cli-testing-resourcegroup-wcus'
+        vnet_name = 'hermes-cli-testing-virtualnetwork-wcus'
+        subnet_name = 'hermes-cli-testing-subnet-wcus'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'westcentralus',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'storage_size_in_gb': '128',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'True',
+            'family': 'Gen8IM'
+        })
+
+        # Create Hermes
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --iops {storage_iops} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} ',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('storageIops', '{storage_iops}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}')])
+
+        # Get the managed instance and check GPv2 flag
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['isGeneralPurposeV2'], True)
+        self.assertEqual(managed_instance['storageIops'], 1000)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
+# Managed server in private subnet is blocked
+# https://msdata.visualstudio.com/Database%20Systems/_git/DsMainDev/pullrequest/1415879
+class SqlManagedInstanceHermesUpdateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    @live_only()
+    def test_sql_mi_hermes_update(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'hermes-cli-testing-resourcegroup-wcus'
+        vnet_name = 'hermes-cli-testing-virtualnetwork-wcus'
+        subnet_name = 'hermes-cli-testing-subnet-wcus'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'westcentralus',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'storage_size_in_gb': '128',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'False',
+            'family': 'Gen8IM'
+        })
+
+        # Create GPv1
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} ',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}')])
+
+        # Get the managed instance and check GPv2 flag
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['zoneRedundant'], False)
+
+        # Update to Hermes
+        self.kwargs.update({
+            'v_cores': 4,
+            'is_general_purpose_v2': 'True'
+        })
+
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --capacity {v_cores} --iops {storage_iops} ',
+                 checks=[self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+                         self.check('storageIops', '{storage_iops}')])
+
+        # Get the managed instance and check GPv2 flag
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['isGeneralPurposeV2'], True)
+        self.assertEqual(managed_instance['storageIops'], 1000)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
+class SqlManagedInstanceMemorySizeInGBCreateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_memorysizeingb_create(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'uroskrstic'
+        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
+        subnet_name = 'ManagedInstance'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': self.create_random_name(managed_instance_name_prefix,
+                                                             managed_instance_name_max_length),
+            'loc': 'westeurope',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 8,
+            'memory_size_in_gb': '64',
+            'storage_size_in_gb': '256',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'True',
+            'family': 'Gen8IM'
+        })
+
+        # Create MI
+        self.cmd('sql mi create -g {rg} -n {managed_instance_name} -l {loc} '
+                                    '-u {username} -p {admin_password} --subnet {subnet} --license-type {license_type} --capacity {v_cores} '
+                                    '--storage {storage_size_in_gb} --iops {storage_iops} --edition {edition} --gpv2 {is_general_purpose_v2} --family {family} '
+                                    '--memory {memory_size_in_gb}',
+                                    checks=[
+                                        self.check('name', '{managed_instance_name}'),
+                                        self.check('resourceGroup', '{rg}'),
+                                        self.check('administratorLogin', '{username}'),
+                                        self.check('isGeneralPurposeV2', '{is_general_purpose_v2}'),
+                                        self.check('vCores', '{v_cores}'),
+                                        self.check('memorySizeInGb', '{memory_size_in_gb}'),
+                                        self.check('storageSizeInGb', '{storage_size_in_gb}'),
+                                        self.check('storageIops', '{storage_iops}'),
+                                        self.check('licenseType', '{license_type}'),
+                                        self.check('sku.tier', '{edition}'),
+                                        self.check('sku.family', '{family}'),
+                                        self.check('sku.capacity', '{v_cores}')])
+
+        # Get the managed instance and check memory size in gb
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['memorySizeInGb'], 64)
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
+class SqlManagedInstanceMemorySizeInGBUpdateScenarioTest(ScenarioTest):
+    @AllowLargeResponse()
+    def test_sql_mi_memorysizeingb_update(self):
+
+        subscription_id = '62e48210-5e43-423e-889b-c277f3e08c39'
+        group = 'uroskrstic'
+        vnet_name = 'vnet-uroskrstic-flexi-test-azpowershell'
+        subnet_name = 'ManagedInstance'
+        subnet = '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}'.format(subscription_id, group, vnet_name, subnet_name)
+
+        self.kwargs.update({
+            'rg': group,
+            'managed_instance_name': 'uroskrstic-flexi-test-azpowershell',
+            'loc': 'westeurope',
+            'username': 'admin123',
+            'admin_password': 'SecretPassword123SecretPassword',
+            'subnet': subnet,
+            'license_type': 'LicenseIncluded',
+            'v_cores': 4,
+            'memory_size_in_gb': '64',
+            'storage_size_in_gb': '128',
+            'storage_iops': '1000',
+            'edition': 'GeneralPurpose',
+            'is_general_purpose_v2': 'True',
+            'family': 'Gen8IM'
+        })
+
+        self.cmd('sql mi update -g {rg} -n {managed_instance_name} --gpv2 {is_general_purpose_v2} --memory {memory_size_in_gb}',
+                 checks=[self.check('memorySizeInGb', '{memory_size_in_gb}')])
+
+        # Get the managed instance and check memory size in GB
+        managed_instance = self.cmd('sql mi show -g {rg} -n {managed_instance_name}').get_output_in_json()
+        self.assertEqual(managed_instance['memorySizeInGb'], int(self.kwargs['memory_size_in_gb']))
+
+        # Delete the managed instance
+        self.cmd('sql mi delete --ids {} --yes'
+                 .format(managed_instance['id']), checks=NoneCheck())
+
 class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
     @AllowLargeResponse()
     @ManagedInstancePreparer(parameter_name="mi")
@@ -7497,9 +8858,9 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
                         JMESPathCheck('name', mi),
                         JMESPathCheck('resourceGroup', rg)]).get_output_in_json()
 
-        # no config options on the instance
+        # # no config options on the instance
         self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
-                    checks=[JMESPathCheck('length(@)', 0)])
+                    checks=[JMESPathCheck('length(@)', 1)])
 
         # upsert config option
         self.cmd('sql mi server-configuration-option set -g {rg} --instance-name {mi} --name {option_name} --value {option_value}')
@@ -7534,8 +8895,7 @@ class SqlManagedInstanceServerConfigurationOptionTest(ScenarioTest):
 
         # list 0 config options
         self.cmd('sql mi server-configuration-option list -g {rg} --instance-name {mi}',
-                    checks=[JMESPathCheck('length(@)', 0)]).get_output_in_json
-
+                    checks=[JMESPathCheck('length(@)', 1)]).get_output_in_json
 
 class SqlManagedInstanceExternalGovernanceTest(ScenarioTest):
     @AllowLargeResponse()

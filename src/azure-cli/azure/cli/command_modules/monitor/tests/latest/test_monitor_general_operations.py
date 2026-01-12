@@ -8,7 +8,7 @@ from azure.cli.testsdk.constants import AUX_SUBSCRIPTION
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from unittest import mock
 import unittest
-from msrestazure.tools import resource_id
+from azure.mgmt.core.tools import resource_id
 
 
 class MonitorCloneVMScenarios(ScenarioTest):

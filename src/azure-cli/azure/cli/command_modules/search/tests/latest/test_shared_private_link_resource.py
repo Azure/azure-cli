@@ -12,10 +12,10 @@ class AzureSearchServicesTests(ScenarioTest):
     # https://vcrpy.readthedocs.io/en/latest/configuration.html#request-matching
     def setUp(self):
         self.vcr.match_on = ['scheme', 'method', 'path', 'query'] # not 'host', 'port'
-        super(AzureSearchServicesTests, self).setUp()
+        super().setUp()
 
     @ResourceGroupPreparer(name_prefix='azure_search_cli_test', location='westcentralus')
-    @StorageAccountPreparer(name_prefix='satest', kind='StorageV2')
+    @StorageAccountPreparer(name_prefix='satest', kind='StorageV2', allow_shared_key_access=False)
     def test_shared_private_link_resource_crud(self, resource_group, storage_account):
         self.kwargs.update({
             'sku_name': 'basic',

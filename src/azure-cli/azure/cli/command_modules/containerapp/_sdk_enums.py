@@ -69,6 +69,7 @@ class BindingType(str, Enum, metaclass=CaseInsensitiveEnumMeta):
 
     DISABLED = "Disabled"
     SNI_ENABLED = "SniEnabled"
+    AUTO = "Auto"
 
 
 class CertificateProvisioningState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
@@ -79,6 +80,7 @@ class CertificateProvisioningState(str, Enum, metaclass=CaseInsensitiveEnumMeta)
     CANCELED = "Canceled"
     DELETE_FAILED = "DeleteFailed"
     PENDING = "Pending"
+    DELETING = "Deleting"
 
 
 class CheckNameAvailabilityReason(str, Enum, metaclass=CaseInsensitiveEnumMeta):
@@ -99,6 +101,16 @@ class ConnectedEnvironmentProvisioningState(str, Enum, metaclass=CaseInsensitive
     INFRASTRUCTURE_SETUP_IN_PROGRESS = "InfrastructureSetupInProgress"
     INFRASTRUCTURE_SETUP_COMPLETE = "InfrastructureSetupComplete"
     SCHEDULED_FOR_DELETE = "ScheduledForDelete"
+
+
+class ConnectedEnvironmentStorageProvisioningState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Provisioning state of the storage."""
+
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELED = "Canceled"
+    IN_PROGRESS = "InProgress"
+    DELETING = "Deleting"
 
 
 class ContainerAppContainerRunningState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
@@ -127,6 +139,28 @@ class ContainerAppReplicaRunningState(str, Enum, metaclass=CaseInsensitiveEnumMe
     UNKNOWN = "Unknown"
 
 
+class ContainerAppRunningStatus(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Running status of the Container App."""
+
+    PROGRESSING = "Progressing"
+    """Container App is transitioning between Stopped and Running states."""
+    RUNNING = "Running"
+    """Container App is in Running state."""
+    STOPPED = "Stopped"
+    """Container App is in Stopped state."""
+    SUSPENDED = "Suspended"
+    """Container App Job is in Suspended state."""
+    READY = "Ready"
+    """Container App Job is in Ready state."""
+
+
+class ContainerType(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """The container type of the sessions."""
+
+    CUSTOM_CONTAINER = "CustomContainer"
+    PYTHON_LTS = "PythonLTS"
+
+
 class CookieExpirationConvention(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     """The convention used when determining the session cookie's expiration."""
 
@@ -141,6 +175,16 @@ class CreatedByType(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     APPLICATION = "Application"
     MANAGED_IDENTITY = "ManagedIdentity"
     KEY = "Key"
+
+
+class DaprComponentProvisioningState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Provisioning state of the Dapr Component."""
+
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELED = "Canceled"
+    IN_PROGRESS = "InProgress"
+    DELETING = "Deleting"
 
 
 class DnsVerificationTestResult(str, Enum, metaclass=CaseInsensitiveEnumMeta):
@@ -180,6 +224,29 @@ class ForwardProxyConvention(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     CUSTOM = "Custom"
 
 
+class HttpRouteProvisioningState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """The current provisioning state."""
+
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELED = "Canceled"
+    WAITING = "Waiting"
+    UPDATING = "Updating"
+    DELETING = "Deleting"
+    PENDING = "Pending"
+
+
+class IdentitySettingsLifeCycle(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Use to select the lifecycle stages of a Container App during which the Managed Identity should
+    be available.
+    """
+
+    INIT = "Init"
+    MAIN = "Main"
+    NONE = "None"
+    ALL = "All"
+
+
 class IngressClientCertificateMode(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     """Client certificate mode for mTLS authentication. Ignore indicates server drops client
     certificate on forwarding. Accept indicates server forwards client certificate but does not
@@ -198,6 +265,24 @@ class IngressTransportMethod(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     HTTP = "http"
     HTTP2 = "http2"
     TCP = "tcp"
+
+
+class JavaComponentProvisioningState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Provisioning state of the Java Component."""
+
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELED = "Canceled"
+    DELETING = "Deleting"
+    IN_PROGRESS = "InProgress"
+
+
+class JavaComponentType(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Type of the Java Component."""
+
+    SPRING_BOOT_ADMIN = "SpringBootAdmin"
+    SPRING_CLOUD_EUREKA = "SpringCloudEureka"
+    SPRING_CLOUD_CONFIG = "SpringCloudConfig"
 
 
 class JobExecutionRunningState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
@@ -220,6 +305,22 @@ class JobProvisioningState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     FAILED = "Failed"
     CANCELED = "Canceled"
     DELETING = "Deleting"
+
+
+class Kind(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Metadata to represent the container app kind, representing if a container app is workflowapp or
+    functionapp.
+    """
+
+    WORKFLOWAPP = "workflowapp"
+    FUNCTIONAPP = "functionapp"
+
+
+class LifecycleType(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """The lifecycle type of the session pool."""
+
+    TIMED = "Timed"
+    ON_CONTAINER_EXIT = "OnContainerExit"
 
 
 class LogLevel(str, Enum, metaclass=CaseInsensitiveEnumMeta):
@@ -250,6 +351,41 @@ class ManagedServiceIdentityType(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     SYSTEM_ASSIGNED = "SystemAssigned"
     USER_ASSIGNED = "UserAssigned"
     SYSTEM_ASSIGNED_USER_ASSIGNED = "SystemAssigned,UserAssigned"
+
+
+class PoolManagementType(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """The pool management type of the session pool."""
+
+    MANUAL = "Manual"
+    DYNAMIC = "Dynamic"
+
+
+class PrivateEndpointConnectionProvisioningState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """The current provisioning state."""
+
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELED = "Canceled"
+    WAITING = "Waiting"
+    UPDATING = "Updating"
+    DELETING = "Deleting"
+    PENDING = "Pending"
+
+
+class PrivateEndpointServiceConnectionStatus(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """The private endpoint connection status."""
+
+    PENDING = "Pending"
+    APPROVED = "Approved"
+    REJECTED = "Rejected"
+    DISCONNECTED = "Disconnected"
+
+
+class PublicNetworkAccess(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Property to allow or block all public traffic. Allowed Values: 'Enabled', 'Disabled'."""
+
+    ENABLED = "Enabled"
+    DISABLED = "Disabled"
 
 
 class RevisionHealthState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
@@ -288,6 +424,23 @@ class Scheme(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     HTTPS = "HTTPS"
 
 
+class SessionNetworkStatus(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Network status for the sessions."""
+
+    EGRESS_ENABLED = "EgressEnabled"
+    EGRESS_DISABLED = "EgressDisabled"
+
+
+class SessionPoolProvisioningState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Provisioning state of the session pool."""
+
+    IN_PROGRESS = "InProgress"
+    SUCCEEDED = "Succeeded"
+    FAILED = "Failed"
+    CANCELED = "Canceled"
+    DELETING = "Deleting"
+
+
 class SourceControlOperationState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     """Current provisioning State of the operation."""
 
@@ -303,6 +456,7 @@ class StorageType(str, Enum, metaclass=CaseInsensitiveEnumMeta):
     AZURE_FILE = "AzureFile"
     EMPTY_DIR = "EmptyDir"
     SECRET = "Secret"
+    NFS_AZURE_FILE = "NfsAzureFile"
 
 
 class TriggerType(str, Enum, metaclass=CaseInsensitiveEnumMeta):
@@ -328,3 +482,43 @@ class UnauthenticatedClientActionV2(str, Enum, metaclass=CaseInsensitiveEnumMeta
     ALLOW_ANONYMOUS = "AllowAnonymous"
     RETURN401 = "Return401"
     RETURN403 = "Return403"
+
+
+class WeekDay(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Day of the week when a managed environment can be patched."""
+
+    MONDAY = "Monday"
+    TUESDAY = "Tuesday"
+    WEDNESDAY = "Wednesday"
+    THURSDAY = "Thursday"
+    FRIDAY = "Friday"
+    SATURDAY = "Saturday"
+    SUNDAY = "Sunday"
+
+
+class WorkflowHealthState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Gets or sets the workflow health state."""
+
+    NOT_SPECIFIED = "NotSpecified"
+    HEALTHY = "Healthy"
+    UNHEALTHY = "Unhealthy"
+    UNKNOWN = "Unknown"
+
+
+class WorkflowKind(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """Gets the logic app hybrid workflow kind."""
+
+    STATEFUL = "Stateful"
+    STATELESS = "Stateless"
+    AGENTIC = "Agentic"
+
+
+class WorkflowState(str, Enum, metaclass=CaseInsensitiveEnumMeta):
+    """The workflow state."""
+
+    NOT_SPECIFIED = "NotSpecified"
+    COMPLETED = "Completed"
+    ENABLED = "Enabled"
+    DISABLED = "Disabled"
+    DELETED = "Deleted"
+    SUSPENDED = "Suspended"

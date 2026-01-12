@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "network vnet peering update",
 )
 class Update(AAZCommand):
-    """Update a peering.
+    """Update a peering in the specified virtual network.
 
     :example: Change forwarded traffic configuration of a virtual network peering.
         az network vnet peering update -g MyResourceGroup -n MyVnet1ToMyVnet2 --vnet-name MyVnet1 --set allowForwardedTraffic=true
@@ -31,9 +31,9 @@ class Update(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2022-01-01",
+        "version": "2023-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/virtualnetworkpeerings/{}", "2022-01-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/virtualnetworks/{}/virtualnetworkpeerings/{}", "2023-11-01"],
         ]
     }
 
@@ -70,6 +70,66 @@ class Update(AAZCommand):
             help="The name of the VNet peering.",
             required=True,
             id_part="child_name_1",
+        )
+        _args_schema.sync_remote = AAZStrArg(
+            options=["--sync-remote"],
+            help="Parameter indicates the intention to sync the peering with the current address space on the remote vNet after it's updated.",
+            enum={"true": "true"},
+        )
+        _args_schema.allow_forwarded_traffic = AAZBoolArg(
+            options=["--allow-forwarded-traffic"],
+            help="Allows forwarded traffic from the local VNet to the remote VNet.",
+            nullable=True,
+        )
+        _args_schema.allow_gateway_transit = AAZBoolArg(
+            options=["--allow-gateway-transit"],
+            help="Allows gateway link to be used in the remote VNet.",
+            nullable=True,
+        )
+        _args_schema.allow_vnet_access = AAZBoolArg(
+            options=["--allow-vnet-access"],
+            help="Allows access from the local VNet to the remote VNet.",
+            nullable=True,
+        )
+        _args_schema.enable_only_ipv6 = AAZBoolArg(
+            options=["--enable-only-ipv6"],
+            help="Whether only Ipv6 address space is peered for subnet peering.",
+            nullable=True,
+        )
+        _args_schema.local_subnet_names = AAZListArg(
+            options=["--local-subnet-names"],
+            help="List of local subnet names that are subnet peered with remote virtual network.",
+            nullable=True,
+        )
+        _args_schema.peer_complete_vnets = AAZBoolArg(
+            options=["--peer-complete-vnets"],
+            help="Whether complete virtual network address space is peered.",
+            nullable=True,
+        )
+        _args_schema.remote_subnet_names = AAZListArg(
+            options=["--remote-subnet-names"],
+            help="List of remote subnet names from remote virtual network that are subnet peered.",
+            nullable=True,
+        )
+        _args_schema.remote_vnet = AAZStrArg(
+            options=["--remote-vnet"],
+            help="Name or ID of the remote VNet.",
+            nullable=True,
+        )
+        _args_schema.use_remote_gateways = AAZBoolArg(
+            options=["--use-remote-gateways"],
+            help="Allows VNet to use the remote VNet's gateway. Remote VNet gateway must have --allow-gateway-transit enabled for remote peering. Only 1 peering can have this flag enabled. Cannot be set if the VNet already has a gateway.",
+            nullable=True,
+        )
+
+        local_subnet_names = cls._args_schema.local_subnet_names
+        local_subnet_names.Element = AAZStrArg(
+            nullable=True,
+        )
+
+        remote_subnet_names = cls._args_schema.remote_subnet_names
+        remote_subnet_names.Element = AAZStrArg(
+            nullable=True,
         )
 
         # define Arg Group "Properties"
@@ -185,7 +245,7 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -288,7 +348,10 @@ class Update(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2022-01-01",
+                    "syncRemoteAddressSpace", self.ctx.args.sync_remote,
+                ),
+                **self.serialize_query_param(
+                    "api-version", "2023-11-01",
                     required=True,
                 ),
             }
@@ -351,7 +414,27 @@ class Update(AAZCommand):
 
             properties = _builder.get(".properties")
             if properties is not None:
+                properties.set_prop("allowForwardedTraffic", AAZBoolType, ".allow_forwarded_traffic")
+                properties.set_prop("allowGatewayTransit", AAZBoolType, ".allow_gateway_transit")
+                properties.set_prop("allowVirtualNetworkAccess", AAZBoolType, ".allow_vnet_access")
+                properties.set_prop("enableOnlyIPv6Peering", AAZBoolType, ".enable_only_ipv6")
+                properties.set_prop("localSubnetNames", AAZListType, ".local_subnet_names")
+                properties.set_prop("peerCompleteVnets", AAZBoolType, ".peer_complete_vnets")
+                properties.set_prop("remoteSubnetNames", AAZListType, ".remote_subnet_names")
                 properties.set_prop("remoteVirtualNetwork", AAZObjectType)
+                properties.set_prop("useRemoteGateways", AAZBoolType, ".use_remote_gateways")
+
+            local_subnet_names = _builder.get(".properties.localSubnetNames")
+            if local_subnet_names is not None:
+                local_subnet_names.set_elements(AAZStrType, ".")
+
+            remote_subnet_names = _builder.get(".properties.remoteSubnetNames")
+            if remote_subnet_names is not None:
+                remote_subnet_names.set_elements(AAZStrType, ".")
+
+            remote_virtual_network = _builder.get(".properties.remoteVirtualNetwork")
+            if remote_virtual_network is not None:
+                remote_virtual_network.set_prop("id", AAZStrType, ".remote_vnet")
 
             return _instance_value
 
@@ -435,6 +518,23 @@ class _UpdateHelper:
         properties.do_not_verify_remote_gateways = AAZBoolType(
             serialized_name="doNotVerifyRemoteGateways",
         )
+        properties.enable_only_i_pv6_peering = AAZBoolType(
+            serialized_name="enableOnlyIPv6Peering",
+        )
+        properties.local_address_space = AAZObjectType(
+            serialized_name="localAddressSpace",
+        )
+        cls._build_schema_address_space_read(properties.local_address_space)
+        properties.local_subnet_names = AAZListType(
+            serialized_name="localSubnetNames",
+        )
+        properties.local_virtual_network_address_space = AAZObjectType(
+            serialized_name="localVirtualNetworkAddressSpace",
+        )
+        cls._build_schema_address_space_read(properties.local_virtual_network_address_space)
+        properties.peer_complete_vnets = AAZBoolType(
+            serialized_name="peerCompleteVnets",
+        )
         properties.peering_state = AAZStrType(
             serialized_name="peeringState",
         )
@@ -451,6 +551,9 @@ class _UpdateHelper:
         cls._build_schema_address_space_read(properties.remote_address_space)
         properties.remote_bgp_communities = AAZObjectType(
             serialized_name="remoteBgpCommunities",
+        )
+        properties.remote_subnet_names = AAZListType(
+            serialized_name="remoteSubnetNames",
         )
         properties.remote_virtual_network = AAZObjectType(
             serialized_name="remoteVirtualNetwork",
@@ -470,6 +573,9 @@ class _UpdateHelper:
             serialized_name="useRemoteGateways",
         )
 
+        local_subnet_names = _schema_virtual_network_peering_read.properties.local_subnet_names
+        local_subnet_names.Element = AAZStrType()
+
         remote_bgp_communities = _schema_virtual_network_peering_read.properties.remote_bgp_communities
         remote_bgp_communities.regional_community = AAZStrType(
             serialized_name="regionalCommunity",
@@ -479,6 +585,9 @@ class _UpdateHelper:
             serialized_name="virtualNetworkCommunity",
             flags={"required": True},
         )
+
+        remote_subnet_names = _schema_virtual_network_peering_read.properties.remote_subnet_names
+        remote_subnet_names.Element = AAZStrType()
 
         remote_virtual_network = _schema_virtual_network_peering_read.properties.remote_virtual_network
         remote_virtual_network.id = AAZStrType()

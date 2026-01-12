@@ -16,6 +16,7 @@ short-summary: Manage HDInsight resources.
 helps['hdinsight application'] = """
 type: group
 short-summary: Manage HDInsight applications.
+long-summary: We no longer maintain module before version 2.30.0. It is recommended to upgrade to at least version 2.30.0.
 """
 
 helps['hdinsight application create'] = """
@@ -97,7 +98,7 @@ examples:
         --assign-identity "/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/MyMsiRG/providers/Microsoft.ManagedIdentity/userAssignedIdentities/MyMSI" \\
         --cluster-admin-account MyAdminAccount@MyDomain.onmicrosoft.com \\
         --cluster-users-group-dns MyGroup
-  - name: Create a Kafka cluster with disk encryption. See https://docs.microsoft.com/azure/hdinsight/kafka/apache-kafka-byok.
+  - name: Create a Kafka cluster with disk encryption. See https://learn.microsoft.com/azure/hdinsight/kafka/apache-kafka-byok.
     text: |-
         az hdinsight create -t kafka -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" --workernode-data-disks-per-node 2 \\
@@ -155,6 +156,48 @@ examples:
         az hdinsight create -t spark --version 3.6 -g MyResourceGroup -n MyCluster \\
         -p "HttpPassword1234!" --storage-account MyStorageAccount \\
         --enable-compute-isolation --workernode-size "Standard_E8S_V3" --headnode-size "Standard_E8S_V3"
+  - name: Create a cluster with WASB + MSI.
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        -p "HttpPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --storage-account-managed-identity MyMSI
+  - name: Create a entra user cluster with Entra User By objectId or upn (comma-separated)
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        --ssh-password "sshPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --entra-user-identity "00000000-0000-0000-0000-000000000000","00000000-0000-0000-0000-000000000000","user@contoso.com"
+  - name: Create a entra user cluster with Entra User By objectId or upn (comma-separated, use short name)
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        --ssh-password "sshPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --entra-uid "00000000-0000-0000-0000-000000000000","00000000-0000-0000-0000-000000000000","user@contoso.com"
+  - name: Create a entra user cluster with Entra User By objectId or upn (space-separated)
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        --ssh-password "sshPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --entra-user-identity "00000000-0000-0000-0000-000000000000" "00000000-0000-0000-0000-000000000000" "user@contoso.com"
+  - name: Create a entra user cluster with Entra User By a JSON string
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        --ssh-password "sshPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --entra-user-full-info '[{\"objectId\": \"00000000-0000-0000-0000-000000000000\",\"displayName\": \"name\",\"upn\": \"user@contoso.com\"}]'
+  - name: Create a entra user cluster with Entra User By a JSON string (use short name)
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        --ssh-password "sshPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --entra-uinfo '[{\"objectId\": \"00000000-0000-0000-0000-000000000000\",\"displayName\": \"name\",\"upn\": \"user@contoso.com\"}]'
+  - name: Create a entra user cluster with Entra User By a JSON file
+    text: |-
+        az hdinsight create -t spark -g MyResourceGroup -n MyCluster \\
+        --ssh-password "sshPassword1234!" \\
+        --storage-account MyStorageAccount \\
+        --entra-user-full-info @config.json
 """
 
 helps['hdinsight resize'] = """
@@ -168,11 +211,23 @@ examples:
 
 helps['hdinsight update'] = """
 type: command
-short-summary: Update the tags of the specified HDInsight cluster.
+short-summary: Update the tags or identity of the specified HDInsight cluster. Setting the identity property will override the existing identity configuration of the cluster.
 examples:
   - name: Update the tags.
     text: |-
         az hdinsight update --name MyCluster --resource-group rg --tags key=value
+  - name: Update manage identity with single UserAssigned msi.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type UserAssigned --assign-identity MyMsi
+  - name: Update manage identity with multiple UserAssigned msi.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type UserAssigned --assign-identity MyMsi1 MyMsi2
+  - name: Update SystemAssigned manage identity.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type SystemAssigned
+  - name: Update manage identity with SystemAssigned,UserAssigned msi.
+    text: |-
+        az hdinsight update --name MyCluster --resource-group rg --assign-identity-type "SystemAssigned,UserAssigned" --assign-identity MyMsi1
 """
 
 helps['hdinsight list'] = """
@@ -218,6 +273,38 @@ short-summary: Enable the Azure Monitor logs integration on an HDInsight cluster
 helps['hdinsight azure-monitor show'] = """
 type: command
 short-summary: Get the status of Azure Monitor logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor-agent'] = """
+type: group
+short-summary: Manage Azure Monitor Agent logs integration on an HDInsight cluster.
+"""
+
+helps['hdinsight azure-monitor-agent disable'] = """
+type: command
+short-summary: Disable the Azure Monitor Agent logs integration on an HDInsight cluster.
+examples:
+  - name: Disable the Azure Monitor Agent logs integration on an HDInsight cluster.
+    text: |-
+        az hdinsight azure-monitor-agent disable --name MyCluster --resource-group rg
+"""
+
+helps['hdinsight azure-monitor-agent enable'] = """
+type: command
+short-summary: Enable the Azure Monitor Agent logs integration on an HDInsight cluster.
+examples:
+  - name: Enable the Azure Monitor Agent logs integration on an HDInsight cluster.
+    text: |-
+        az hdinsight azure-monitor-agent enable --name MyCluster --resource-group rg --workspace WorkspaceId --primary-key WorkspaceKey
+"""
+
+helps['hdinsight azure-monitor-agent show'] = """
+type: command
+short-summary: Get the status of Azure Monitor Agent logs integration on an HDInsight cluster.
+examples:
+  - name: Get the status of Azure Monitor Agent logs integration on an HDInsight cluster.
+    text: |-
+        az hdinsight azure-monitor-agent show --name MyCluster --resource-group rg
 """
 
 helps['hdinsight rotate-disk-encryption-key'] = """
@@ -386,6 +473,55 @@ short-summary: Place the CLI in a waiting state until an operation is complete.
 """
 
 helps['hdinsight autoscale wait'] = """
+type: command
+short-summary: Place the CLI in a waiting state until an operation is complete.
+"""
+
+helps['hdinsight credentials'] = """
+type: group
+short-summary: Manage credentials for an existing HDInsight cluster, including Entra ID users and HTTP password.
+"""
+
+helps['hdinsight credentials update'] = """
+type: command
+short-summary: Update credentials for an existing HDInsight cluster, including Entra ID users and HTTP password.
+examples:
+  - name: Update Entra ID users by objectId or upn (comma-separated)
+    text: |-
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-user-identity "00000000-0000-0000-0000-000000000000","00000000-0000-0000-0000-000000000000","user@contoso.com"
+  - name: Update Entra ID users by objectId or upn (comma-separated, use short name)
+    text: |-
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-uid "00000000-0000-0000-0000-000000000000","00000000-0000-0000-0000-000000000000","user@contoso.com"
+  - name: Update Entra ID users by objectId or upn (space-separated)
+    text: |-
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-user-identity "00000000-0000-0000-0000-000000000000","00000000-0000-0000-0000-000000000000","user@contoso.com"
+  - name: Update Entra ID users using a JSON string
+    text: |-
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-user-full-info '[{\"objectId\": \"00000000-0000-0000-0000-000000000000\",\"displayName\": \"name\",\"upn\": \"user@contoso.com\"}]'
+  - name: Update Entra ID users using a JSON string (use short name)
+    text: |-
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-uinfo '[{\"objectId\": \"00000000-0000-0000-0000-000000000000\",\"displayName\": \"name\",\"upn\": \"user@contoso.com\"}]'
+  - name: Update Entra ID users using a JSON file
+    text: |-
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --entra-user-full-info @config.json
+  - name: Update the HTTP password for the cluster
+    text: |-
+        az hdinsight credentials update --name MyCluster --resource-group rg \\
+        --http-password "HttpPassword1234!"
+"""
+
+helps['hdinsight credentials show'] = """
+type: command
+short-summary: Show credential configuration of an existing HDInsight cluster, including HTTP username, password, and Entra ID user settings
+"""
+
+helps['hdinsight credentials wait'] = """
 type: command
 short-summary: Place the CLI in a waiting state until an operation is complete.
 """

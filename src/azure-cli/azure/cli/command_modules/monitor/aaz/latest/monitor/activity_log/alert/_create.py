@@ -23,10 +23,10 @@ class Create(AAZCommand):
         az monitor activity-log alert create -n AlertName -g ResourceGroup
 
     :example: Create an alert rule with condition about error level service health log.
-        az monitor activity-log alert create -n AlertName -g ResourceGroup \ --condition category=ServiceHealth and level=Error
+        az monitor activity-log alert create -n AlertName -g ResourceGroup --condition category=ServiceHealth and level=Error
 
     :example: Create an alert rule with an action group and specify webhook properties.
-        az monitor activity-log alert create -n AlertName -g ResourceGroup \ -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/acti onGroups/{ActionGroup} \ -w usage=test owner=jane
+        az monitor activity-log alert create -n AlertName -g ResourceGroup -a /subscriptions/{SubID}/resourceGroups/{ResourceGroup}/providers/microsoft.insights/actionGroups/{ActionGroup} -w usage=test owner=jane
 
     :example: Create an alert rule which is initially disabled.
         az monitor activity-log alert create -n AlertName -g ResourceGroup --disable

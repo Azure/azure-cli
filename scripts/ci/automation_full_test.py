@@ -496,7 +496,7 @@ def save_pipeline_result(pipeline_result):
     logger.info(f"save pipeline result to file: {filename}")
 
 
-class AutomaticScheduling(object):
+class AutomaticScheduling:
 
     def __init__(self):
         """

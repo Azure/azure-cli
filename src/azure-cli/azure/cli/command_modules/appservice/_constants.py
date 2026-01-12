@@ -37,7 +37,7 @@ LINUXAPP_KIND = "linux"
 DOTNET_REFERENCES_DIR_IN_ZIP = ".az-references"
 
 
-class FUNCTIONS_STACKS_API_KEYS():
+class FUNCTIONS_STACKS_API_KEYS:
     # pylint:disable=too-few-public-methods,too-many-instance-attributes
     def __init__(self):
         self.NAME = 'name'
@@ -59,6 +59,7 @@ class FUNCTIONS_STACKS_API_KEYS():
         self.USE_32_BIT_WORKER_PROC = 'use32BitWorkerProcess'
         self.FUNCTIONS_WORKER_RUNTIME = 'FUNCTIONS_WORKER_RUNTIME'
         self.GIT_HUB_ACTION_SETTINGS = 'git_hub_action_settings'
+        self.END_OF_LIFE_DATE = 'endOfLifeDate'
 
 
 GENERATE_RANDOM_APP_NAMES = os.path.abspath(os.path.join(os.path.abspath(__file__),

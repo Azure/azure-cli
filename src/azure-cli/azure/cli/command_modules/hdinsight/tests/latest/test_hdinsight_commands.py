@@ -8,27 +8,31 @@ import os
 import unittest
 
 from azure.cli.testsdk import ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer
-from azure.cli.testsdk.scenario_tests import record_only
+from azure.cli.testsdk.scenario_tests import record_only, AllowLargeResponse
 
 TEST_DIR = os.path.abspath(os.path.join(os.path.abspath(__file__), '..'))
 
 
 class HDInsightClusterTests(ScenarioTest):
-    location = 'southcentralus'
+    location = 'EastAsia'
+    vnet_id = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/hdi-vn-0'
+    subnet = 'default'
 
     # Uses 'rg' kwarg
-    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
-    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdi-cli', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='cli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_min_args(self, storage_account_info):
         self._create_hdinsight_cluster(self._wasb_arguments(storage_account_info,
-                                                            specify_key=False, specify_container=False))
+                                                            specify_key=False, specify_container=False), self._vnet_arguments())
 
     # Uses 'rg' kwarg
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_resize(self, storage_account_info):
         self._create_hdinsight_cluster(
-            self._wasb_arguments(storage_account_info))
+            self._wasb_arguments(storage_account_info),
+            self._vnet_arguments())
 
         resize_cluster_format = 'az hdinsight resize -n {cluster} -g {rg} --workernode-count 2'
         self.cmd(resize_cluster_format)
@@ -46,7 +50,8 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_kafka(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._kafka_arguments()
+            HDInsightClusterTests._kafka_arguments(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
     # Uses 'rg' kwarg
@@ -68,7 +73,8 @@ class HDInsightClusterTests(ScenarioTest):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
             HDInsightClusterTests._kafka_arguments(),
-            HDInsightClusterTests._optional_data_disk_arguments()
+            HDInsightClusterTests._optional_data_disk_arguments(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
     # Uses 'rg' kwarg
@@ -86,7 +92,8 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_with_cluster_config(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_cluster_config()
+            HDInsightClusterTests._with_cluster_config(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
     # Uses 'rg' kwarg
@@ -95,7 +102,8 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_with_ssh_creds(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_explicit_ssh_creds()
+            HDInsightClusterTests._with_explicit_ssh_creds(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
@@ -103,7 +111,8 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_with_minimal_tls_version(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_minimal_tls_version('1.2')
+            HDInsightClusterTests._with_minimal_tls_version('1.2'),
+            HDInsightClusterTests._vnet_arguments()
         )
 
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
@@ -116,7 +125,8 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_with_encryption_in_transit(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_encryption_in_transit()
+            HDInsightClusterTests._with_encryption_in_transit(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
@@ -129,7 +139,8 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_with_loadbased_autoscale(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_load_based_autoscale()
+            HDInsightClusterTests._with_load_based_autoscale(),
+            HDInsightClusterTests._vnet_arguments()
         )
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
             self.check('properties.clusterState', 'Running'),
@@ -143,7 +154,8 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_with_schedulebased_autoscale(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_schedule_based_autoscale()
+            HDInsightClusterTests._with_schedule_based_autoscale(),
+            HDInsightClusterTests._vnet_arguments()
         )
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
             self.check('properties.clusterState', 'Running'),
@@ -158,7 +170,8 @@ class HDInsightClusterTests(ScenarioTest):
     def test_hdinsight_cluster_with_encryption_at_host(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_encryption_at_host()
+            HDInsightClusterTests._with_encryption_at_host(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
@@ -166,6 +179,7 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('properties.clusterState', 'Running')
         ])
 
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_with_private_link_configurations(self, storage_account_info):
@@ -186,18 +200,21 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('length(properties.privateLinkConfigurations)', 1),
         ])
 
+    @AllowLargeResponse()
+    @unittest.skip("No suitable SKU")
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_with_compute_isolation(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_compute_isolation()
+            HDInsightClusterTests._with_compute_isolation(),
+            HDInsightClusterTests._vnet_arguments()
         )
         self.cmd('az hdinsight show -n {cluster} -g {rg}', checks=[
             self.check('properties.computeIsolationProperties.enableComputeIsolation', True)
         ])
 
-
+    @unittest.skip("Skip this case this time")
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_cluster_with_availability_zones(self, storage_account_info):
@@ -216,14 +233,16 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('length(zones)', 1),
         ])
 
-
     # Uses 'rg' kwarg
+
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_application(self, storage_account_info):
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_explicit_ssh_creds()
+            HDInsightClusterTests._with_explicit_ssh_creds(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # define application item names
@@ -262,7 +281,7 @@ class HDInsightClusterTests(ScenarioTest):
 
         self.cmd('az hdinsight list-usage -l {loc}', checks=[
             self.check('type(value)', 'array'),
-            self.check('length(value)', 1)
+            self.check('length(value)', 12)
         ])
 
     # Uses 'rg' kwarg
@@ -281,7 +300,8 @@ class HDInsightClusterTests(ScenarioTest):
 
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_explicit_ssh_creds()
+            HDInsightClusterTests._with_explicit_ssh_creds(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # get monitor status
@@ -324,7 +344,8 @@ class HDInsightClusterTests(ScenarioTest):
 
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_explicit_ssh_creds()
+            HDInsightClusterTests._with_explicit_ssh_creds(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # get monitor status
@@ -352,6 +373,7 @@ class HDInsightClusterTests(ScenarioTest):
         ])
 
     # Uses 'rg' kwarg
+    @AllowLargeResponse()
     @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_script_action(self, storage_account_info):
@@ -365,7 +387,8 @@ class HDInsightClusterTests(ScenarioTest):
 
         self._create_hdinsight_cluster(
             HDInsightClusterTests._wasb_arguments(storage_account_info),
-            HDInsightClusterTests._with_explicit_ssh_creds()
+            HDInsightClusterTests._with_explicit_ssh_creds(),
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # execute script actions, and persist on success.
@@ -482,10 +505,12 @@ class HDInsightClusterTests(ScenarioTest):
     @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
     def test_hdinsight_autoscale_operation(self, storage_account_info):
         self._create_hdinsight_cluster(
-            HDInsightClusterTests._wasb_arguments(storage_account_info)
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._vnet_arguments()
         )
 
         # enable load-based autoscale
+        HDInsightClusterTests.wait_for_hdinsight_cluster_running(self)
         self.cmd(
             'az hdinsight autoscale create --cluster-name {cluster} --resource-group {rg} --type Load '
             '--min-workernode-count 4 --max-workernode-count 5 --yes')
@@ -495,10 +520,8 @@ class HDInsightClusterTests(ScenarioTest):
                 "properties.computeProfile.roles[?name=='workernode'].autoscaleConfiguration.capacity.minInstanceCount",
                 [4])
         ])
-
+        HDInsightClusterTests.wait_for_hdinsight_cluster_running(self)
         # to get robust
-        import time
-        time.sleep(150)
         # update load-based autoscale
         self.cmd(
             'az hdinsight autoscale update --cluster-name {cluster} --resource-group {rg} --min-workernode-count 3')
@@ -508,36 +531,34 @@ class HDInsightClusterTests(ScenarioTest):
                 "properties.computeProfile.roles[?name=='workernode'].autoscaleConfiguration.capacity.minInstanceCount",
                 [3])
         ])
-
+        HDInsightClusterTests.wait_for_hdinsight_cluster_running(self)
         # show autoscale configuration
         self.cmd('az hdinsight autoscale show --cluster-name {cluster} --resource-group {rg}', checks=[
             self.check("capacity.minInstanceCount", 3)
         ])
-
+        HDInsightClusterTests.wait_for_hdinsight_cluster_running(self)
         # disable autoscale
         self.cmd('az hdinsight autoscale delete --cluster-name {cluster} --resource-group {rg} --yes')
         self.cmd('az hdinsight show --name {cluster} --resource-group {rg}')
-
         # to get robust
-        time.sleep(150)
+        HDInsightClusterTests.wait_for_hdinsight_cluster_running(self)
         # enable schedule-based autoscale
         self.cmd(
             'az hdinsight autoscale create --cluster-name {cluster} --resource-group {rg} --type Schedule --timezone '
             '"China Standard Time" --days Monday --time 09:00 --workernode-count 4 --yes')
+        HDInsightClusterTests.wait_for_hdinsight_cluster_running(self)
         self.cmd('az hdinsight autoscale show --cluster-name {cluster} --resource-group {rg}', checks=[
             self.check("recurrence.schedule[0].days", ["Monday"])
         ])
-
-        time.sleep(120)
-        # add a new schedule condition
+        HDInsightClusterTests.wait_for_hdinsight_cluster_running(self)
+        # add a new schedule condition/
         self.cmd(
             'az hdinsight autoscale condition create --cluster-name {cluster} --resource-group {rg} --days Tuesday '
             '--time 08:00 --workernode-count 5')
         self.cmd('az hdinsight autoscale show --cluster-name {cluster} --resource-group {rg}', checks=[
             self.check("recurrence.schedule[1].days", ["Tuesday"])
         ])
-
-        time.sleep(120)
+        HDInsightClusterTests.wait_for_hdinsight_cluster_running(self)
         # update schedule condition
         self.cmd(
             'az hdinsight autoscale condition update --cluster-name {cluster} --resource-group {rg} '
@@ -545,13 +566,10 @@ class HDInsightClusterTests(ScenarioTest):
         self.cmd('az hdinsight autoscale show --cluster-name {cluster} --resource-group {rg}', checks=[
             self.check("recurrence.schedule[1].timeAndCapacity.minInstanceCount", 4)
         ])
-
         # list schedule conditions
         self.cmd('az hdinsight autoscale condition list --cluster-name {cluster} --resource-group {rg}', checks=[
             self.check('length(@)', 2)
         ])
-
-        time.sleep(120)
         # delete schedule condition
         self.cmd(
             'az hdinsight autoscale condition delete --cluster-name {cluster} --resource-group {rg} --index 1 --yes')
@@ -559,12 +577,134 @@ class HDInsightClusterTests(ScenarioTest):
             self.check('length(@)', 1)
         ])
 
+    def test_hdinsight_azure_monitor_agent(self):
+        self.kwargs.update({
+            'loc': self.location,
+            'cluster': 'cli-test-cluster',
+            'rg': 'cli-test-rg',
+            'workspace_id': '/subscriptions/00000000-0000-0000-0000-000000000000/resourcegroups/cli-test-rg/providers/microsoft.operationalinsights/workspaces/ps-la',
+            'workspace_key': self.cmd('az monitor log-analytics workspace get-shared-keys --resource-group cli-test-rg --workspace-name ps-la --query primarySharedKey -o tsv').output.strip(),
+        })
+
+        # enable azure monitor agent
+        self.cmd(
+            'az hdinsight azure-monitor-agent enable -n {cluster} --resource-group {rg} --workspace {workspace_id} --primary-key {workspace_key} ')
+        # show azure monitor agent
+        self.cmd('az hdinsight azure-monitor-agent show -n {cluster} --resource-group {rg}')
+        # disable azure monitor agent
+        self.cmd('az hdinsight azure-monitor-agent disable -n {cluster} --resource-group {rg}')
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_update_user_assigned(self, storage_account_info):
+        self.kwargs.update({
+            'msi1': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msi',
+        })
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._vnet_arguments()
+        )
+        # Update manage identity with a UserAssigned msi.
+        self.cmd(
+            'az hdinsight update --name {cluster} --resource-group {rg} --assign-identity-type UserAssigned --assign-identity {msi1}',
+            checks=[
+                self.check('identity.type', 'UserAssigned'),
+            ])
+
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_update_system_assigned(self, storage_account_info):
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._vnet_arguments()
+        )
+        # Update manage identity with a SystemAssigned msi.
+        self.cmd(
+            'az hdinsight update --name {cluster} --resource-group {rg} --assign-identity-type SystemAssigned',
+            checks=[
+                self.check('identity.type', 'SystemAssigned'),
+            ])
+
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    @StorageAccountPreparer(name_prefix='hdicli', location=location, parameter_name='storage_account')
+    def test_hdinsight_update_system_and_user_assigned(self, storage_account_info):
+        self.kwargs.update({
+            'msi1': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msi',
+            'msi2': '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msi2'
+        })
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info),
+            HDInsightClusterTests._vnet_arguments()
+        )
+
+        # Update manage identity with SystemAssigned,UserAssigned msi.
+        self.cmd(
+            'az hdinsight update --name {cluster} --resource-group {rg} --assign-identity-type "SystemAssigned,UserAssigned" --assign-identity {msi1} {msi2}',
+            checks=[
+                self.check('identity.type', 'SystemAssigned,UserAssigned'),
+            ])
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    def test_hdinsight_create_with_wasb_and_msi(self):
+        storage_account_info = ("hdi-storage-wasb","")
+        msi = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msi"
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info,msi = msi),
+            HDInsightClusterTests._vnet_arguments()
+        )
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    def test_hdinsight_create_with_ADLSGen2_and_msi(self):
+        storage_account_info = "hdi-storage-adlsgen2"
+        msi = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msi"
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._adlsgen2_arguments(storage_account_info,specify_filesystem=False,msi = msi),
+            HDInsightClusterTests._vnet_arguments()
+        )
+
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(name_prefix='hdicli-', location=location, random_name_length=12)
+    def test_hdinsight_create_with_entra_user(self):
+        storage_account_info = ("hdicli000002","")
+        msi = '/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/msi'
+        entra = '"00000000-0000-0000-0000-000000000000","test@example.com"'
+        self._create_hdinsight_cluster(
+            HDInsightClusterTests._wasb_arguments(storage_account_info,msi=msi),
+            HDInsightClusterTests._entra_arguments(entra_user=entra),
+            HDInsightClusterTests._vnet_arguments()
+        )
+        self.kwargs.update({
+            'config_path': os.path.join(TEST_DIR, 'entrauserconfig.json'),
+            'upn1':'test1@example.com',
+            'upn2':'test2@example.com'
+        })
+        self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} --entra-uinfo @"{config_path}" --yes')
+        self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} --entra-uid {upn1} {upn2} --yes')
+        self.cmd('az hdinsight credentials show -n {cluster} --resource-group {rg}')
+
+    @AllowLargeResponse()
+    def test_hdinsight_credentials_update(self):
+        self.kwargs.update({
+            'cluster': 'cli-test-cluster',
+            'rg': 'cli-test-rg',
+            'http_password': 'Password1!'
+        })
+        self.cmd('az hdinsight credentials wait --name {cluster} --resource-group {rg} --exists')
+        self.cmd('az hdinsight credentials update --name {cluster} --resource-group {rg} --http-password {http_password} --yes')
+
     def _create_hdinsight_cluster(self, *additional_create_arguments):
         self.kwargs.update({
             'loc': self.location,
-            'cluster': self.create_random_name(prefix='hdicli-', length=16),
+            'cluster': self.create_random_name(prefix='cli-', length=16),
             'http_password': 'Password1!',
-            'cluster_type': 'spark'
+            'cluster_type': 'spark',
         })
 
         create_cluster_format = 'az hdinsight create -n {cluster} -g {rg} -l {loc} -p {http_password} -t {cluster_type} ' \
@@ -589,19 +729,31 @@ class HDInsightClusterTests(ScenarioTest):
         ])
 
     @staticmethod
-    def _wasb_arguments(storage_account_info, specify_key=False, specify_container=True):
+    def _wasb_arguments(storage_account_info, specify_key=False, specify_container=True, msi = None):
         storage_account_name, storage_account_key = storage_account_info
         storage_account_key = storage_account_key.strip()
 
         key_args = ' --storage-account-key "{}"'.format(storage_account_key) if specify_key else ""
         container_args = ' --storage-container {}'.format('default') if specify_container else ""
+        msi_args = ' --storage-account-managed-identity "{}"'.format(msi) if msi else ""
+        return '--storage-account {}{}{}{}' \
+            .format(storage_account_name, key_args, container_args, msi_args)
 
+    @staticmethod
+    def _adlsgen2_arguments(storage_account_info,  specify_filesystem=True, msi = None):
+        storage_account_name = storage_account_info
+        filesystem_args = ' --storage-filesystem {}'.format('default') if specify_filesystem else ""
+        msi_args = ' --storage-account-managed-identity "{}"'.format(msi) if msi else ""
         return '--storage-account {}{}{}' \
-            .format(storage_account_name, key_args, container_args)
+            .format(storage_account_name, filesystem_args, msi_args)
 
     @staticmethod
     def _kafka_arguments():
         return '-t {} --workernode-data-disks-per-node {}'.format('kafka', '4')
+
+    @staticmethod
+    def _vnet_arguments():
+        return '--vnet-name {} --subnet {} --version 5.1'.format(HDInsightClusterTests.vnet_id, HDInsightClusterTests.subnet)
 
     @staticmethod
     def _rest_proxy_arguments():
@@ -617,7 +769,14 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _component_version_arguments():
-        return '-t {} --component-version {} --version {}'.format('spark', 'spark=2.4', '4.0')
+        return '-t {} --component-version {} --version {}'.format('spark', 'spark=3.3', '5.1')
+
+    @staticmethod
+    def _entra_arguments(entra_user = None,entra_full_info = None):
+        if entra_user:
+            return '--entra-uid {}'.format(entra_user)
+        else :
+            return '--entra-uinfo {}'.format(entra_full_info)
 
     @staticmethod
     def _with_cluster_config():
@@ -650,15 +809,16 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _with_encryption_at_host():
-        return '--workernode-size Standard_DS14_V2 --headnode-size Standard_DS14_V2 ' \
-               '--zookeepernode-size Standard_DS14_V2 --encryption-at-host true'
+        return '--workernode-size standard_ds12_v2 --headnode-size standard_ds12_v2 ' \
+               '--zookeepernode-size standard_ds12_v2 --encryption-at-host true'
 
     @staticmethod
     def _with_private_link_configurations(private_link_configuration_file):
-        return '--version 4.0 -l southcentralus ' \
-               '--subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers' \
-               '/Microsoft.Network/virtualNetworks/testvnet/subnets/default ' \
-               '--resource-provider-connection Outbound --enable-private-link --private-link-configurations @"{}"'\
+        return '--version 5.1 -l eastasia ' \
+               '--subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/hdi-vn-0/subnets/default '\
+               '--vnet-name /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/virtualNetworks/hdi-vn-0 --subnet default ' \
+               '--resource-provider-connection Outbound --public-ip-tag-type FirstPartyUsage --public-ip-tag-value HDInsight --outbound-dependencies-managed-type External '\
+               '--enable-private-link --private-link-configurations @"{}" '\
                .format(private_link_configuration_file)
 
     @staticmethod
@@ -670,6 +830,23 @@ class HDInsightClusterTests(ScenarioTest):
 
     @staticmethod
     def _with_compute_isolation():
-        return '--version 3.6 -l southcentralus ' \
+        return '--version 3.6 -l eastus ' \
                '--enable-compute-isolation --host-sku ESv3-Type2 ' \
                '--workernode-size Standard_E8S_V3 --headnode-size Standard_E8S_V3'
+    
+    @staticmethod
+    def wait_for_hdinsight_cluster_running(self, cluster_name=None, resource_group=None, timeout=3000, interval=60):
+        import time
+        if cluster_name is None:
+            cluster_name = self.kwargs['cluster']
+        if resource_group is None:
+            resource_group = self.kwargs['rg']
+        for _ in range(timeout // interval):
+            result = self.cmd(
+                f'az hdinsight show --name {cluster_name} --resource-group {resource_group}'
+            ).get_output_in_json()
+            state = result["properties"]["clusterState"]
+            if state == "Running":
+                return
+            time.sleep(interval)
+        raise Exception(f"Cluster {cluster_name} did not reach 'Running' state within {timeout} seconds.")

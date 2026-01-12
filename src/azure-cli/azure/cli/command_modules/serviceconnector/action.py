@@ -24,6 +24,22 @@ class AddCustomizedKeys(argparse.Action):
             raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
 
 
+class AddAdditionalConnectionStringProperties(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        action = self.get_action(values, option_string)
+        namespace.connstr_props = action
+
+    def get_action(self, values, option_string):  # pylint: disable=no-self-use
+        try:
+            properties = defaultdict(list)
+            for (k, v) in (x.split('=', 1) for x in values):
+                properties[k] = v
+            properties = dict(properties)
+            return properties
+        except ValueError:
+            raise ValidationError('Usage error: {} [KEY=VALUE ...]'.format(option_string))
+
+
 def is_k8s_source(command_name):
     source_name = command_name.split(' ')[0]
     return source_name.lower() == "aks"
@@ -72,6 +88,8 @@ class AddSecretAuthInfo(argparse.Action):
             else:
                 raise ValidationError('Unsupported Key {} is provided for parameter secret_auth_info. All possible '
                                       'keys are: name, secret/secret-uri/secret-name'.format(k))
+        if is_mongodb_atlas_target(command_name):
+            d['name'] = 'NA'
         if len(d) != 2:
             raise ValidationError('Required keys missing for parameter --secret.'
                                   ' All possible keys are: name, secret/secret-uri/secret-name')
@@ -102,6 +120,11 @@ class AddSecretAuthInfoAuto(argparse.Action):
 def is_mysql_target(command_name):
     target_name = command_name.split(' ')[-1]
     return target_name.lower() == "mysql-flexible"
+
+
+def is_mongodb_atlas_target(command_name):
+    target_name = command_name.split(' ')[-1]
+    return target_name.lower() == "mongodb-atlas"
 
 
 class AddUserAssignedIdentityAuthInfo(argparse.Action):
@@ -225,7 +248,7 @@ class AddServicePrincipalAuthInfo(argparse.Action):
                                   'Required keys are: client-id, secret')
         if 'principal_id' not in d:
             from ._utils import run_cli_cmd
-            output = run_cli_cmd('az ad sp show --id {}'.format(d['client_id']))
+            output = run_cli_cmd('az ad sp show --id "{}"'.format(d['client_id']))
             if output:
                 d['principal_id'] = output.get('id')
             else:
@@ -250,7 +273,7 @@ class AddWorkloadIdentityAuthInfo(argparse.Action):
             properties = defaultdict(list)
             if len(values) != 1:
                 raise ValidationError(
-                    'Invalid number of values for --workload-identity <USER-IDENTITY-RESOURCE-ID>')
+                    'Invalid number of values for --workload-identity `<USER-IDENTITY-RESOURCE-ID>`')
             properties['user-identity-resource-id'] = values[0]
         except ValueError:
             raise ValidationError('Usage error: {} [VALUE]'.format(option_string))
@@ -258,7 +281,7 @@ class AddWorkloadIdentityAuthInfo(argparse.Action):
         d = {}
         if 'user-identity-resource-id' in properties:
             from ._utils import run_cli_cmd
-            output = run_cli_cmd('az identity show --ids {}'.format(properties['user-identity-resource-id']))
+            output = run_cli_cmd('az identity show --ids "{}"'.format(properties['user-identity-resource-id']))
             if output:
                 d['client_id'] = output.get('clientId')
                 d['subscription_id'] = properties['user-identity-resource-id'].split('/')[2]

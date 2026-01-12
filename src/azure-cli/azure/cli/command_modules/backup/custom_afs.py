@@ -4,6 +4,7 @@
 # --------------------------------------------------------------------------------------------
 from datetime import datetime, timedelta, timezone
 import azure.cli.command_modules.backup.custom_help as helper
+# pylint: disable=too-many-locals
 # pylint: disable=import-error
 # pylint: disable=unused-argument
 
@@ -17,15 +18,67 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import ProtectedItemRe
 from azure.cli.core.util import CLIError
 from azure.cli.command_modules.backup._client_factory import protection_containers_cf, protectable_containers_cf, \
     protection_policies_cf, backup_protection_containers_cf, backup_protectable_items_cf, \
-    resources_cf, backup_protected_items_cf
-from azure.cli.core.azclierror import ArgumentUsageError
+    resources_cf, backup_protected_items_cf, protected_items_cf
+from azure.cli.core.azclierror import ArgumentUsageError, ValidationError
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
 
+from knack.log import get_logger
+logger = get_logger(__name__)
+
 fabric_name = "Azure"
 backup_management_type = "AzureStorage"
 workload_type = "AzureFileShare"
+
+
+def reconfigure_afs_protection(cmd, item, source_vault_name, source_vault_rg,
+                               new_vault_name, new_vault_rg,
+                               new_policy_name, retain_as_per_policy, tenant_id):
+    """Reconfigure Azure File Share protection to a new vault and policy.
+
+    Steps:
+    1. Disable protection (retain or stop based on flag) in source vault.
+    2. Unregister storage account container (if no remaining protected items) from source vault.
+    3. Ensure storage account is registered / refreshed in destination vault.
+    4. Enable protection for the same file share name in destination vault with new policy.
+    5. Return the newly protected item from destination vault.
+    """
+    logger.warning("For Storage reconfigure protection, all backup items within the "
+                   "container must have protection disabled first.")
+
+    # 1. Disable in old vault (retain as per policy if requested)
+    items_client = protected_items_cf(cmd.cli_ctx)
+    disable_protection(cmd, items_client, source_vault_rg, source_vault_name, item,
+                       retain_as_per_policy, tenant_id)
+
+    # 2. Unregister container in old vault only if this was the last protected item for that storage account
+    _maybe_unregister_storage_account(cmd, backup_protected_items_cf(cmd.cli_ctx), source_vault_rg, source_vault_name,
+                                      item.properties.container_name)
+
+    # 3. Enable protection in destination vault - also registers storage account in destination vault
+    new_item = enable_for_AzureFileShare(cmd, items_client, new_vault_rg, new_vault_name, item.name,
+                                         item.properties.container_name, new_policy_name)
+    return new_item
+
+
+def _maybe_unregister_storage_account(cmd, client, resource_group_name, vault_name, container_name):
+    """Unregister the storage account container if no more protected items exist in the source vault."""
+    items = common.list_items(cmd, client, resource_group_name, vault_name,
+                              workload_type=workload_type, container_name=container_name,
+                              container_type=backup_management_type)
+    remaining = [pi for pi in items if pi.properties.protection_state.lower() == 'protected']
+    if remaining:
+        raise ValidationError('Cannot unregister container as other items are still protected.')
+
+    # Attempt unregister
+    try:
+        containers_client = protection_containers_cf(cmd.cli_ctx)
+        unregister_afs_container(cmd, containers_client, vault_name, resource_group_name, container_name)
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning('Skipping unregister workload container of container %s due to a failure: %s.'
+                       ' Continuing the operation, but if the container is still registered, it may need to be '
+                       'unregistered manually for the operation to succeed.', container_name, str(ex))
 
 
 def enable_for_AzureFileShare(cmd, client, resource_group_name, vault_name, afs_name,
@@ -173,7 +226,7 @@ def _try_get_protectable_item_for_afs(cli_ctx, vault_name, resource_group_name, 
 def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name, item, restore_mode,
                            resolve_conflict, restore_request_type, source_file_type=None, source_file_path=None,
                            target_storage_account_name=None, target_file_share_name=None, target_folder=None,
-                           target_resource_group_name=None):
+                           target_resource_group_name=None, tenant_id=None):
 
     container_uri = helper.get_protection_container_uri_from_id(item.id)
     item_uri = helper.get_protected_item_uri_from_id(item.id)
@@ -185,9 +238,27 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
 
     afs_restore_request.copy_options = resolve_conflict
     afs_restore_request.recovery_type = restore_mode
-    afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx,
-                                                                     item.properties.container_name.split(';')[-1],
-                                                                     item.properties.container_name.split(';')[-2])
+
+    # Try to get source resource ID from storage account first, fallback to item's source resource ID
+    try:
+        afs_restore_request.source_resource_id = _get_storage_account_id(cmd.cli_ctx,
+                                                                         item.properties.container_name.split(';')[-1],
+                                                                         item.properties.container_name.split(';')[-2])
+        # Check if source_resource_id is null or empty after assignment
+        if not afs_restore_request.source_resource_id:
+            raise CLIError("Source resource ID is null or empty after retrieval from storage account.")
+    except (CLIError) as e:
+        logger.warning(
+            "Failed to get storage account ID: %s. Falling back to source resource ID from protected item.",
+            str(e))
+        source_resource_id = _get_source_resource_id_from_item(item)
+        if source_resource_id:
+            afs_restore_request.source_resource_id = source_resource_id
+        else:
+            raise CLIError(
+                "Unable to retrieve source resource ID. The storage account might have been deleted "
+                "and no fallback source resource ID is available.") from e
+
     afs_restore_request.restore_request_type = restore_request_type
 
     restore_file_specs = None
@@ -218,6 +289,16 @@ def restore_AzureFileShare(cmd, client, resource_group_name, vault_name, rp_name
 
     trigger_restore_request = RestoreRequestResource(properties=afs_restore_request)
 
+    if helper.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore"):
+        # Cross Tenant scenario
+        if tenant_id is not None:
+            client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                             aux_tenants=[tenant_id]).restores
+        trigger_restore_request.properties.resource_guard_operation_requests = [
+            helper.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore")]
+
+    # Trigger restore
     result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri, rp_name,
                                   trigger_restore_request, cls=helper.get_pipeline_response, polling=False).result()
 
@@ -234,9 +315,9 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
             Please either remove the flag or query for any other backup-management-type.
             """)
 
-    if is_ready_for_move is not None or target_tier is not None or tier is not None:
+    if is_ready_for_move is not None or target_tier is not None:
         raise ArgumentUsageError("""Invalid argument has been passed. --is-ready-for-move true, --target-tier
-        and --tier flags are not supported for --backup-management-type AzureStorage.""")
+        are not supported for --backup-management-type AzureStorage.""")
 
     if recommended_for_archive is not None:
         raise ArgumentUsageError("""--recommended-for-archive is supported by AzureIaasVM backup management
@@ -259,11 +340,57 @@ def list_recovery_points(cmd, client, resource_group_name, vault_name, item, sta
     recovery_points = client.list(vault_name, resource_group_name, fabric_name, container_uri, item_uri, filter_string)
     paged_recovery_points = helper.get_list_from_paged_response(recovery_points)
 
+    if tier:
+        filtered_recovery_points = []
+
+        for rp in paged_recovery_points:
+            # Prepare to collect tier types
+            rp_tier_types = []
+
+            # Safely grab additional_properties
+            additional_props = getattr(rp.properties, 'additional_properties', {})
+            if not isinstance(additional_props, dict):
+                continue
+
+            # Get details list
+            tier_details_list = additional_props.get("recoveryPointTierDetails", [])
+            if not isinstance(tier_details_list, list):
+                continue
+
+            for detail in tier_details_list:
+                if not isinstance(detail, dict):
+                    continue
+                rp_type = detail.get("type")
+                if rp_type:
+                    rp_tier_types.append(rp_type)
+
+            # Map types to a tier
+            if 'InstantRP' in rp_tier_types and 'HardenedRP' in rp_tier_types:
+                rp_tier = 'SnapshotAndVaultStandard'
+            elif 'InstantRP' in rp_tier_types:
+                rp_tier = 'Snapshot'
+            elif 'HardenedRP' in rp_tier_types:
+                rp_tier = 'VaultStandard'
+            else:
+                logger.warning(
+                    "Warning: Unrecognized Recovery Point tier received."
+                    "If you see this message, please contact Microsoft Support."
+                    "The recognized tiers for AzureFileShare are: 'Snapshot', 'VaultStandard', or "
+                    "'SnapshotAndVaultStandard'."
+                )
+                rp_tier = None
+
+            # Filter by matching tier
+            if rp_tier == tier:
+                filtered_recovery_points.append(rp)
+
+        return filtered_recovery_points
+
     return paged_recovery_points
 
 
 def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, policy, tenant_id=None,
-                           is_critical_operation=False):
+                           is_critical_operation=False, yes=False):
     if item.properties.backup_management_type != policy.properties.backup_management_type:
         raise CLIError(
             """
@@ -291,6 +418,13 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
                                                  aux_tenants=[tenant_id]).protected_items
             afs_item.properties.resource_guard_operation_requests = [helper.get_resource_guard_operation_request(
                 cmd.cli_ctx, resource_group_name, vault_name, "updateProtection")]
+
+    # Validate existing & new policy
+    existing_policy_name = item.properties.policy_id.split('/')[-1]
+    existing_policy = common.show_policy(protection_policies_cf(cmd.cli_ctx), resource_group_name, vault_name,
+                                         existing_policy_name)
+    helper.validate_update_policy_request(existing_policy, policy, yes)
+
     # Update policy
     result = client.create_or_update(vault_name, resource_group_name, fabric_name,
                                      container_uri, item_uri, afs_item, cls=helper.get_pipeline_response)
@@ -353,8 +487,18 @@ def _get_storage_account_id(cli_ctx, storage_account_name, storage_account_rg):
     return storage_account.id
 
 
+def _get_source_resource_id_from_item(item):
+    """
+    Helper function to retrieve source resource ID from a protected item.
+    This is used as a fallback when the storage account is deleted.
+    """
+    if item and hasattr(item, 'properties') and hasattr(item.properties, 'source_resource_id'):
+        return item.properties.source_resource_id
+    return None
+
+
 def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name, tenant_id=None,
-               is_critical_operation=False):
+               is_critical_operation=False, yes=False):
     if policy_name is None:
         raise CLIError(
             """
@@ -364,7 +508,8 @@ def set_policy(cmd, client, resource_group_name, vault_name, policy, policy_name
     policy_object = helper.get_policy_from_json(client, policy)
     policy_object.properties.work_load_type = workload_type
     existing_policy = common.show_policy(client, resource_group_name, vault_name, policy_name)
-    helper.validate_update_policy_request(existing_policy, policy_object)
+
+    helper.validate_update_policy_request(existing_policy, policy_object, yes)
     if is_critical_operation:
         if helper.is_retention_duration_decreased(existing_policy, policy_object, "AzureStorage"):
             # update the payload with critical operation and add auxiliary header for cross tenant case

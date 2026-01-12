@@ -12,6 +12,15 @@ containerapp env create:
     platform_reserved_dns_ip:
       rule_exclusions:
       - option_length_too_long
+    p2p_encryption_enabled:
+      rule_exclusions:
+      - option_length_too_long
+
+containerapp env update:
+  parameters:
+    p2p_encryption_enabled:
+      rule_exclusions:
+      - option_length_too_long
 
 containerapp exec:
   rule_exclusions:

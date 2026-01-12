@@ -11,12 +11,7 @@ import zipfile
 import requests
 import urllib3
 
-try:
-    # Try importing Python 3 urllib.parse
-    from urllib.parse import quote
-except ImportError:
-    # If urllib.parse was not imported, use Python 2 module urlparse
-    from urllib import quote  # pylint: disable=import-error
+from urllib.parse import quote
 
 from knack.util import CLIError
 from azure.cli.command_modules.botservice.http_response_validator import HttpResponseValidator
@@ -28,7 +23,7 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
     def __init__(self, cmd, resource_group_name, name, bot, logger):
         self.__cmd = cmd
         self.__resource_group_name = resource_group_name
-        self.__name = name
+        self.__name = name  # pylint: disable=unused-private-member
         self.__bot = bot
         self.__logger = logger
 
@@ -224,7 +219,7 @@ class KuduClient:  # pylint:disable=too-many-instance-attributes
         HttpResponseValidator.check_response_status(response)
         self.__logger.info('All files and folders successfully removed from "site/wwwroot/" except for node_modules.')
 
-    def __empty_wwwroot_folder(self):
+    def __empty_wwwroot_folder(self):  # pylint: disable=unused-private-member
         """Empty the site/wwwroot/ folder from Kudu.
 
         Empties the site/wwwroot/ folder by removing the entire directory, and then recreating it. Called when

@@ -63,7 +63,6 @@ from azure.mgmt.sql.models import (
     ServerKey,
     ServerKeyType,
     ServerNetworkAccessFlag,
-    ServiceObjectiveName,
     ServerTrustGroup,
     ServicePrincipal,
     ShortTermRetentionPolicyName,
@@ -90,25 +89,25 @@ from ._util import (
     get_sql_managed_instances_operations,
     get_sql_restorable_dropped_database_managed_backup_short_term_retention_policies_operations,
     get_sql_managed_database_restore_details_operations,
+    get_sql_replication_links_operations,
+    get_sql_elastic_pools_operations,
+    get_sql_databases_operations,
 )
 
 
 logger = get_logger(__name__)
-
-BACKUP_STORAGE_ACCESS_TIERS = ["hot",
-                               "archive"]
 
 ###############################################
 #                Common funcs                 #
 ###############################################
 
 
-def _get_server_location(cli_ctx, server_name, resource_group_name):
+def _get_server_location(cli_ctx, server_name, resource_group_name, subscription_id=None):
     '''
     Returns the location (i.e. Azure region) that the specified server is in.
     '''
 
-    server_client = get_sql_servers_operations(cli_ctx, None)
+    server_client = get_sql_servers_operations(cli_ctx, None, subscription_id)
     # pylint: disable=no-member
     return server_client.get(
         server_name=server_name,
@@ -177,7 +176,7 @@ def _is_serverless_slo(sku_name):
     Returns True if the sku name is a serverless sku.
     '''
 
-    return "_S_" in sku_name
+    return "_S_" in sku_name if sku_name else False
 
 
 def _get_default_server_version(location_capabilities):
@@ -281,7 +280,7 @@ def _find_edition_capability(sku, supported_editions):
             return next(e for e in supported_editions if e.name == sku.tier)
         except StopIteration:
             candidate_editions = [e.name for e in supported_editions]
-            raise CLIError('Could not find tier ''{}''. Supported tiers are: {}'.format(
+            raise CLIError('Could not find tier {}. Supported tiers are: {}'.format(
                 sku.tier, candidate_editions
             ))
     else:
@@ -304,7 +303,7 @@ def _find_family_capability(sku, supported_families):
             return next(f for f in supported_families if f.name == sku.family)
         except StopIteration:
             candidate_families = [e.name for e in supported_families]
-            raise CLIError('Could not find family ''{}''. Supported families are: {}'.format(
+            raise CLIError('Could not find family {}. Supported families are: {}'.format(
                 sku.family, candidate_families
             ))
     else:
@@ -574,7 +573,7 @@ _DEFAULT_SERVER_VERSION = "12.0"
 def _failover_group_update_common(
         instance,
         failover_policy=None,
-        grace_period=None,):
+        grace_period=None):
     '''
     Updates the failover group grace period and failover policy. Common logic for both Sterling and Managed Instance
     '''
@@ -596,7 +595,7 @@ def _complete_maintenance_configuration_id(cli_ctx, argument_value=None):
     Completes maintenance configuration id from short to full type if needed
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
 
     if argument_value and not is_valid_resource_id(argument_value):
@@ -641,6 +640,16 @@ class ClientAuthenticationType(Enum):
 class FailoverPolicyType(Enum):
     automatic = 'Automatic'
     manual = 'Manual'
+
+
+class FailoverReadOnlyEndpointPolicy(Enum):
+    enabled = 'Enabled'
+    disabled = 'Disabled'
+
+
+class FailoverGroupDatabasesSecondaryType(Enum):
+    geo = 'Geo'
+    standby = 'Standby'
 
 
 class SqlServerMinimalTlsVersionType(Enum):
@@ -714,6 +723,13 @@ class AuthenticationType(str, Enum):
 
     sql = "SQL"
     ad_password = "ADPassword"
+    managed_identity = "ManagedIdentity"
+
+
+class FreemiumType(str, Enum):
+
+    Regular = "Regular"
+    Freemium = "Freemium"
 
 
 def _get_server_dns_suffx(cli_ctx):
@@ -736,7 +752,7 @@ def _get_managed_db_resource_id(
     Gets the Managed db resource id in this Azure environment.
     '''
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -755,7 +771,7 @@ def _to_filetimeutc(dateTime):
     NET_epoch = datetime(1601, 1, 1)
     UNIX_epoch = datetime(1970, 1, 1)
 
-    epoch_delta = (UNIX_epoch - NET_epoch)
+    epoch_delta = UNIX_epoch - NET_epoch
 
     log_time = parse(dateTime)
 
@@ -780,7 +796,7 @@ def _get_managed_dropped_db_resource_id(
 
     from urllib.parse import quote
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -803,7 +819,7 @@ def _get_managed_instance_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     return (resource_id(
         subscription=subscription_id if subscription_id else get_subscription_id(cli_ctx),
@@ -822,7 +838,7 @@ def _get_managed_instance_pool_resource_id(
     '''
 
     from azure.cli.core.commands.client_factory import get_subscription_id
-    from msrestazure.tools import resource_id
+    from azure.mgmt.core.tools import resource_id
 
     if instance_pool_name:
         return (resource_id(
@@ -936,25 +952,28 @@ def db_show_conn_str(
     return f.format(**conn_str_props)
 
 
-class DatabaseIdentity():  # pylint: disable=too-few-public-methods
+class DatabaseIdentity:  # pylint: disable=too-few-public-methods
     '''
     Helper class to bundle up database identity properties and generate
     database resource id.
     '''
 
-    def __init__(self, cli_ctx, database_name, server_name, resource_group_name):
-
+    def __init__(self, cli_ctx, database_name, server_name, resource_group_name, subscription_id=None):
+        from azure.cli.core.commands.client_factory import get_subscription_id
         self.database_name = database_name
         self.server_name = server_name
         self.resource_group_name = resource_group_name
         self.cli_ctx = cli_ctx
+        if subscription_id is not None:
+            self.subscription_id = subscription_id
+        else:
+            self.subscription_id = get_subscription_id(self.cli_ctx)
 
     def id(self):
         from urllib.parse import quote
-        from azure.cli.core.commands.client_factory import get_subscription_id
 
         return '/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Sql/servers/{}/databases/{}'.format(
-            quote(get_subscription_id(self.cli_ctx)),
+            quote(self.subscription_id),
             quote(self.resource_group_name),
             quote(self.server_name),
             quote(self.database_name))
@@ -1011,7 +1030,8 @@ def _validate_elastic_pool_id(
         cli_ctx,
         elastic_pool_id,
         server_name,
-        resource_group_name):
+        resource_group_name,
+        subscription_id=None):
     '''
     Validates elastic_pool_id is either None or a valid resource id.
 
@@ -1023,12 +1043,15 @@ def _validate_elastic_pool_id(
     Returns the elastic_pool_id, which may have been updated and may be None.
     '''
 
-    from msrestazure.tools import resource_id, is_valid_resource_id
+    from azure.mgmt.core.tools import resource_id, is_valid_resource_id
     from azure.cli.core.commands.client_factory import get_subscription_id
+
+    if subscription_id is None:
+        subscription_id = get_subscription_id(cli_ctx)
 
     if elastic_pool_id and not is_valid_resource_id(elastic_pool_id):
         return resource_id(
-            subscription=get_subscription_id(cli_ctx),
+            subscription=subscription_id,
             resource_group=resource_group_name,
             namespace='Microsoft.Sql',
             type='servers',
@@ -1133,7 +1156,8 @@ def _db_dw_create(
     kwargs['location'] = _get_server_location(
         cli_ctx,
         server_name=dest_db.server_name,
-        resource_group_name=dest_db.resource_group_name)
+        resource_group_name=dest_db.resource_group_name,
+        subscription_id=dest_db.subscription_id)
 
     # Set create mode properties
     if source_db:
@@ -1155,7 +1179,8 @@ def _db_dw_create(
         cli_ctx,
         kwargs['elastic_pool_id'],
         dest_db.server_name,
-        dest_db.resource_group_name)
+        dest_db.resource_group_name,
+        dest_db.subscription_id)
 
     # Expand maintenance configuration id if needed
     kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
@@ -1206,6 +1231,56 @@ def _backup_storage_redundancy_take_source_warning():
     print("""You have not specified the value for backup storage redundancy
     which will default to source's backup storage redundancy.
     To learn more about Azure Paired Regions visit https://aka.ms/azure-ragrs-regions.""")
+
+
+def _should_show_forward_migration_with_links_warnings(
+        cli_ctx,
+        instance,
+        server_name,
+        resource_group_name):
+    '''
+    Checks if the database update operation is a forward migration to Hyperscale and if geo-replication links exist.
+
+    :param cli_ctx: The CLI context object to interact with Azure SQL.
+    :param instance: The database instance object.
+    :param server_name: The name of the server.
+    :param resource_group_name: The name of the resource group.
+    :return: A boolean indicating if it is forward migration of database with geo-replication links.
+    '''
+
+    # Find the replication links for the database
+    replication_links_client = get_sql_replication_links_operations(cli_ctx, None)
+    links = list(replication_links_client.list_by_database(
+        database_name=instance.name,
+        server_name=server_name,
+        resource_group_name=resource_group_name))
+
+    elastic_pools_client = get_sql_elastic_pools_operations(cli_ctx, None)
+    elastic_pool = None
+    if instance.elastic_pool_id:
+        elastic_pool = elastic_pools_client.get(
+            elastic_pool_name=instance.elastic_pool_id.split('/')[-1],
+            server_name=server_name,
+            resource_group_name=resource_group_name)
+
+    # Check if the current SKU is not Hyperscale and the target SKU is Hyperscale
+    # This is to verify forward migration to Hyperscale
+    current_sku = instance.current_sku.name if instance.current_sku else None
+    target_sku = instance.sku.name if instance.sku else None
+    is_target_hyperscale_pool = elastic_pool is not None and elastic_pool.sku.tier == "Hyperscale"
+
+    is_forward_migration = (
+        current_sku is not None and "HS" not in current_sku and
+        ((target_sku is not None and "HS" in target_sku) or is_target_hyperscale_pool)
+    )
+    links_exist = links is not None and len(links) > 0
+
+    return is_forward_migration and links_exist
+
+
+def _forward_migration_with_geodr_links_warning():
+    print("""Changing the service tier to Hyperscale also converts the geo-secondary replica to Hyperscale.
+    For more information, see https://go.microsoft.com/fwlink/?linkid=2314103""")
 
 
 def db_create(
@@ -1338,6 +1413,7 @@ def db_create_replica(
         partner_server_name,
         partner_database_name=None,
         partner_resource_group_name=None,
+        partner_sub_id=None,
         secondary_type=None,
         no_wait=False,
         assign_identity=False,
@@ -1355,6 +1431,10 @@ def db_create_replica(
     # Determine optional values
     partner_resource_group_name = partner_resource_group_name or resource_group_name
     partner_database_name = partner_database_name or database_name
+    if partner_sub_id is not None:
+        partner_client = get_sql_databases_operations(cmd.cli_ctx, None, partner_sub_id)
+    else:
+        partner_client = client
 
     # Set create mode
     kwargs['create_mode'] = CreateMode.SECONDARY
@@ -1372,18 +1452,26 @@ def db_create_replica(
     # Check backup storage redundancy configurations
     location = _get_server_location(cmd.cli_ctx,
                                     server_name=partner_server_name,
-                                    resource_group_name=partner_resource_group_name)
+                                    resource_group_name=partner_resource_group_name,
+                                    subscription_id=partner_sub_id)
     if _should_show_backup_storage_redundancy_warnings(location):
         if not kwargs['requested_backup_storage_redundancy']:
             _backup_storage_redundancy_take_source_warning()
         if kwargs['requested_backup_storage_redundancy'] == 'Geo':
             _backup_storage_redundancy_specify_geo_warning()
 
+    primary_database = DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name)
+    secondary_database = DatabaseIdentity(cmd.cli_ctx,
+                                          partner_database_name,
+                                          partner_server_name,
+                                          partner_resource_group_name,
+                                          partner_sub_id)
+
     return _db_dw_create(
         cmd.cli_ctx,
-        client,
-        DatabaseIdentity(cmd.cli_ctx, database_name, server_name, resource_group_name),
-        DatabaseIdentity(cmd.cli_ctx, partner_database_name, partner_server_name, partner_resource_group_name),
+        partner_client,
+        primary_database,
+        secondary_database,
         no_wait,
         secondary_type=secondary_type,
         assign_identity=assign_identity,
@@ -1790,10 +1878,10 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
     # actually ignores the value of service objective name (!!). We are trying to protect the CLI
     # user from this unintuitive behavior.
     if (elastic_pool_id and service_objective and
-            service_objective != ServiceObjectiveName.ELASTIC_POOL):
+            service_objective != "ELASTIC_POOL"):
         raise CLIError('If elastic pool is specified, service objective must be'
                        ' unspecified or equal \'{}\'.'.format(
-                           ServiceObjectiveName.ELASTIC_POOL))
+                           "ELASTIC_POOL"))
 
     # Update both elastic pool and sku. The service treats elastic pool and sku properties like PATCH,
     # so if either of these properties is null then the service will keep the property unchanged -
@@ -1810,8 +1898,11 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
 
     # Finding out requesting compute_model
     if not compute_model:
+        # Determine compute model from the requested service objective if provided,
+        # otherwise infer from the current database SKU
+        sku_name_for_compute_model = service_objective if service_objective else instance.sku.name
         compute_model = (
-            ComputeModelType.serverless if _is_serverless_slo(instance.sku.name)
+            ComputeModelType.serverless if _is_serverless_slo(sku_name_for_compute_model)
             else ComputeModelType.provisioned)
 
     # Update sku
@@ -1828,6 +1919,10 @@ def db_update(  # pylint: disable=too-many-locals, too-many-branches
     # TODO Temporary workaround for elastic pool sku name issue
     if instance.elastic_pool_id:
         instance.sku = None
+
+    # Display warning if database is being updated to Hyperscale and if geo-replication links exist
+    if _should_show_forward_migration_with_links_warnings(cmd.cli_ctx, instance, server_name, resource_group_name):
+        _forward_migration_with_geodr_links_warning()
 
     #####
     # Set other (non-sku related) properties
@@ -3012,8 +3107,9 @@ def update_long_term_retention(
         monthly_retention=None,
         yearly_retention=None,
         week_of_year=None,
-        make_backups_immutable=None,
-        backup_storage_access_tier=None,
+        time_based_immutability=None,
+        time_based_immutability_mode=None,
+        yes=None,
         **kwargs):
     '''
     Updates long term retention for managed database
@@ -3024,16 +3120,26 @@ def update_long_term_retention(
     if yearly_retention and not week_of_year:
         raise CLIError('Please specify week of year for yearly retention.')
 
-    if make_backups_immutable:
-        confirmation = prompt_y_n("""Immutable LTR backups can't be changed or deleted.
-         You'll be charged for LTR backups for the full retention period.
-         Do you want to proceed?""")
-        if not confirmation:
-            return
+    if time_based_immutability and time_based_immutability.lower() == "true":
+        time_based_immutability = "Enabled"
 
-    if backup_storage_access_tier and backup_storage_access_tier.lower() not in BACKUP_STORAGE_ACCESS_TIERS:
-        raise CLIError('Please specify a valid backup storage access tier type for backup storage access tier.'
-                       'See \'--help\' for more details.')
+    if time_based_immutability and time_based_immutability.lower() == "false":
+        time_based_immutability = "Disabled"
+
+    if time_based_immutability and time_based_immutability.lower() == "enabled":
+        if not yes:
+            confirmation = prompt_y_n("""Immutable LTR backups can't be changed or deleted.
+            You'll be charged for LTR backups for the full retention period.
+            Do you want to proceed?""")
+            if not confirmation:
+                return
+
+    if time_based_immutability_mode:
+        if not time_based_immutability or time_based_immutability.lower() != "enabled":
+            raise CLIError('Time-based immutability mode can only be set if time-based immutability is enabled.')
+        if time_based_immutability_mode.lower() not in ['unlocked', 'locked']:
+            raise CLIError('Invalid value for time-based immutability mode. '
+                           'Valid values are "unlocked" or "locked".')
 
     kwargs['weekly_retention'] = weekly_retention
 
@@ -3043,9 +3149,8 @@ def update_long_term_retention(
 
     kwargs['week_of_year'] = week_of_year
 
-    kwargs['make_backups_immutable'] = make_backups_immutable
-
-    kwargs['backup_storage_access_tier'] = backup_storage_access_tier
+    kwargs['time_based_immutability'] = time_based_immutability
+    kwargs['time_based_immutability_mode'] = time_based_immutability_mode
 
     policy = client.begin_create_or_update(
         database_name=database_name,
@@ -3239,6 +3344,196 @@ def list_long_term_retention_backups(
             database_state)
 
     return backups
+
+
+def remove_time_based_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        resource_group_name=None,
+        **kwargs):
+    '''
+    Removes time-based immutability for long term retention backups.
+    '''
+
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+    if resource_group_name:
+        client.begin_remove_time_based_immutability_by_resource_group(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs).wait()
+        return client.list_by_resource_group_database(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+
+    client.begin_remove_time_based_immutability(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs).wait()
+
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
+
+
+def lock_time_based_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        resource_group_name=None,
+        **kwargs):
+    '''
+    Locks time-based immutability for long term retention backups.
+    '''
+
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+
+    if resource_group_name:
+        client.begin_lock_time_based_immutability_by_resource_group(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs).wait()
+
+        return client.list_by_resource_group_database(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+
+    client.begin_lock_time_based_immutability(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs).wait()
+
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
+
+
+def set_legal_hold_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        resource_group_name=None,
+        **kwargs):
+    '''
+    Sets legal hold immutability for long term retention backups.
+    '''
+
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+    if resource_group_name:
+        client.begin_set_legal_hold_immutability_by_resource_group(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs).wait()
+
+        return client.list_by_resource_group_database(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+
+    client.begin_set_legal_hold_immutability(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs).wait()
+
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
+
+
+def remove_legal_hold_immutability(
+        client,
+        location_name: str,
+        long_term_retention_server_name: str,
+        long_term_retention_database_name: str,
+        backup_name: str,
+        resource_group_name=None,
+        **kwargs):
+    '''
+    Removes legal hold immutability for long term retention backups.
+    '''
+
+    if not long_term_retention_server_name or not long_term_retention_database_name or not backup_name:
+        raise CLIError('Please specify all required parameters: '
+                       'location_name, long_term_retention_server_name, '
+                       'long_term_retention_database_name, and backup_name.')
+    if resource_group_name:
+        client.begin_remove_legal_hold_immutability_by_resource_group(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs).wait()
+        return client.list_by_resource_group_database(
+            resource_group_name,
+            location_name,
+            long_term_retention_server_name,
+            long_term_retention_database_name,
+            backup_name,
+            **kwargs)
+
+    client.begin_remove_legal_hold_immutability(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs).wait()
+    return client.get(
+        location_name,
+        long_term_retention_server_name,
+        long_term_retention_database_name,
+        backup_name,
+        **kwargs)
 
 
 def restore_long_term_retention_backup(
@@ -3774,6 +4069,11 @@ def elastic_pool_create(
     # If sku.name is not specified, resolve the requested sku name
     # using capabilities.
     kwargs['sku'] = _find_elastic_pool_sku_from_capabilities(cmd.cli_ctx, kwargs['location'], sku)
+
+    # The min_capacity property is only applicable to serverless SKUs.
+    #
+    if kwargs['sku'] is not None and not _is_serverless_slo(kwargs['sku'].name):
+        kwargs['min_capacity'] = None
 
     # Expand maintenance configuration id if needed
     kwargs['maintenance_configuration_id'] = _complete_maintenance_configuration_id(
@@ -4956,6 +5256,8 @@ def managed_instance_create(
         service_principal_type=None,
         zone_redundant=None,
         instance_pool_name=None,
+        dns_zone_partner=None,
+        authentication_metadata=None,
         **kwargs):
     '''
     Creates a managed instance.
@@ -4994,6 +5296,9 @@ def managed_instance_create(
     kwargs['primary_user_assigned_identity_id'] = primary_user_assigned_identity_id
 
     kwargs['zone_redundant'] = zone_redundant
+    kwargs['authentication_metadata'] = authentication_metadata
+
+    kwargs['dns_zone_partner'] = dns_zone_partner
 
     ad_only = None
     if enable_ad_only_auth:
@@ -5060,10 +5365,13 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         cmd,
         instance,
         resource_group_name,
+        is_general_purpose_v2=None,
         administrator_login_password=None,
         license_type=None,
         vcores=None,
+        memory_size_in_gb=None,
         storage_size_in_gb=None,
+        storage_iops=None,
         assign_identity=False,
         proxy_override=None,
         public_data_endpoint_enabled=None,
@@ -5083,7 +5391,8 @@ def managed_instance_update(  # pylint: disable=too-many-locals
         zone_redundant=None,
         instance_pool_name=None,
         database_format=None,
-        pricing_model=None):
+        pricing_model=None,
+        authentication_metadata=None):
     '''
     Updates a managed instance. Custom update function to apply parameters to instance.
     '''
@@ -5099,14 +5408,30 @@ def managed_instance_update(  # pylint: disable=too-many-locals
     instance.service_principal = _get_service_principal_object_from_type(service_principal_type)
 
     # Apply params to instance
+    #   Note on is_general_purpose_v2
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #   Note on storage_iops
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #     If the target edition uses the parameter, the current value will get picked up later in the update process.
+    #   Note on storage_throughput_mbps
+    #     If this parameter was not set by the user, we do not want to pick up its current value.
+    #     This is due to the fact that this update might have a target edition that does not use this parameter.
+    #     If the target edition uses the parameter, the current value will get picked up later in the update process.
+    instance.is_general_purpose_v2 = is_general_purpose_v2
     instance.administrator_login_password = (
         administrator_login_password or instance.administrator_login_password)
     instance.license_type = (
         license_type or instance.license_type)
     instance.v_cores = (
         vcores or instance.v_cores)
+    instance.memory_size_in_gb = (
+        memory_size_in_gb or instance.memory_size_in_gb)
     instance.storage_size_in_gb = (
         storage_size_in_gb or instance.storage_size_in_gb)
+    instance.storage_iops = storage_iops
+    instance.storage_throughput_mbps = None
     instance.proxy_override = (
         proxy_override or instance.proxy_override)
     instance.minimal_tls_version = (
@@ -5133,6 +5458,10 @@ def managed_instance_update(  # pylint: disable=too-many-locals
     if requested_backup_storage_redundancy is not None:
         instance.requested_backup_storage_redundancy = requested_backup_storage_redundancy
         instance.zone_redundant = None
+
+    # Have to set requested logical avail zone to none explicitly otherwise requests will fail
+    # as the default value is string 'NoPreference' which is invalid for update requests currently
+    instance.requested_logical_availability_zone = None
 
     if public_data_endpoint_enabled is not None:
         instance.public_data_endpoint_enabled = public_data_endpoint_enabled
@@ -5161,6 +5490,9 @@ def managed_instance_update(  # pylint: disable=too-many-locals
 
     if pricing_model is not None:
         instance.pricing_model = pricing_model
+
+    if authentication_metadata is not None:
+        instance.authentication_metadata = authentication_metadata
 
     return instance
 
@@ -6158,6 +6490,7 @@ def managed_db_move_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         **kwargs):
@@ -6171,6 +6504,7 @@ def managed_db_move_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         'Move',
@@ -6183,6 +6517,7 @@ def managed_db_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         **kwargs):
@@ -6196,6 +6531,7 @@ def managed_db_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        dest_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         'Copy',
@@ -6208,6 +6544,7 @@ def managed_db_move_copy_start(
         resource_group_name,
         managed_instance_name,
         database_name,
+        destination_subscription_id,
         dest_resource_group_name,
         dest_instance_name,
         operation_mode,
@@ -6221,7 +6558,8 @@ def managed_db_move_copy_start(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        destination_subscription_id)
 
     return client.begin_start_move(
         resource_group_name=resource_group_name,
@@ -6238,6 +6576,7 @@ def managed_db_move_copy_complete(
         database_name,
         dest_resource_group_name,
         dest_instance_name,
+        dest_subscription_id,
         **kwargs):
     '''
     Completes managed database move/copy operation
@@ -6247,7 +6586,8 @@ def managed_db_move_copy_complete(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        dest_subscription_id)
 
     return client.begin_complete_move(
         resource_group_name=resource_group_name,
@@ -6264,6 +6604,7 @@ def managed_db_move_copy_cancel(
         database_name,
         dest_resource_group_name,
         dest_instance_name,
+        dest_subscription_id,
         **kwargs):
     '''
     Cancels managed database move/copy operation
@@ -6273,7 +6614,8 @@ def managed_db_move_copy_cancel(
         cmd.cli_ctx,
         dest_resource_group_name or resource_group_name,
         dest_instance_name,
-        database_name)
+        database_name,
+        dest_subscription_id)
 
     return client.begin_cancel_move(
         resource_group_name=resource_group_name,
@@ -6385,10 +6727,14 @@ def failover_group_create(
         server_name,
         failover_group_name,
         partner_server,
+        secondary_type=None,
         partner_resource_group=None,
-        failover_policy=FailoverPolicyType.automatic.value,
+        failover_policy=FailoverPolicyType.manual.value,
         grace_period=1,
-        add_db=None):
+        add_db=None,
+        partner_server_ids=None,
+        ro_failover_policy=FailoverReadOnlyEndpointPolicy.disabled.value,
+        ro_endpoint_target=None):
     '''
     Creates a failover group.
     '''
@@ -6421,18 +6767,34 @@ def failover_group_create(
         add_db,
         [])
 
+    if partner_server_ids is not None:
+        print(partner_server_ids)
+        partner_servers = [PartnerInfo(id=p) for p in partner_server_ids]
+    else:
+        partner_servers = [partner_server]
+
+    if ro_endpoint_target is None:
+        ro_endpoint_target = partner_server_id
+
+    failover_group_params = FailoverGroup(
+        partner_servers=partner_servers,
+        databases=databases,
+        read_write_endpoint=FailoverGroupReadWriteEndpoint(
+            failover_policy=failover_policy,
+            failover_with_data_loss_grace_period_minutes=grace_period),
+        read_only_endpoint=FailoverGroupReadOnlyEndpoint(
+            failover_policy=ro_failover_policy,
+            target_server=ro_endpoint_target)
+    )
+
+    if secondary_type is not None:
+        failover_group_params.secondary_type = secondary_type
+
     return client.begin_create_or_update(
         resource_group_name=resource_group_name,
         server_name=server_name,
         failover_group_name=failover_group_name,
-        parameters=FailoverGroup(
-            partner_servers=[partner_server],
-            databases=databases,
-            read_write_endpoint=FailoverGroupReadWriteEndpoint(
-                failover_policy=failover_policy,
-                failover_with_data_loss_grace_period_minutes=grace_period),
-            read_only_endpoint=FailoverGroupReadOnlyEndpoint(
-                failover_policy="Disabled")))
+        parameters=failover_group_params)
 
 
 def failover_group_update(
@@ -6440,10 +6802,14 @@ def failover_group_update(
         instance,
         resource_group_name,
         server_name,
+        secondary_type=None,
         failover_policy=None,
         grace_period=None,
         add_db=None,
-        remove_db=None):
+        remove_db=None,
+        ro_endpoint_target=None,
+        ro_failover_policy=None,
+        partner_server_ids=None):
     '''
     Updates the failover group.
     '''
@@ -6468,6 +6834,15 @@ def failover_group_update(
         remove_db)
 
     instance.databases = databases
+    if secondary_type is not None:
+        instance.secondary_type = secondary_type
+
+    if partner_server_ids is not None:
+        instance.partner_servers = [PartnerInfo(id=p) for p in partner_server_ids]
+
+    instance.read_only_endpoint = FailoverGroupReadOnlyEndpoint(
+        failover_policy=ro_failover_policy if ro_failover_policy is not None else instance.read_only_endpoint.failover_policy,
+        target_server=ro_endpoint_target if ro_endpoint_target is not None else instance.read_only_endpoint.target_server)
 
     return instance
 

@@ -3,6 +3,8 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 
+from knack.util import CLIError
+
 from azure.cli.testsdk import (ScenarioTest, ResourceGroupPreparer, StorageAccountPreparer, JMESPathCheck, NoneCheck)
 from azure.cli.command_modules.storage.tests.storage_test_util import StorageScenarioMixin
 
@@ -25,7 +27,7 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
 
         # Test create with fail-on-exist
         from azure.core.exceptions import ResourceExistsError
-        with self.assertRaisesRegexp(ResourceExistsError, 'The specified share already exists.'):
+        with self.assertRaisesRegex(ResourceExistsError, 'The specified share already exists.'):
             self.cmd(
                 'storage share create -n {} --fail-on-exist --connection-string {} --quota 3'
                 .format(share_name, connection_string))
@@ -51,8 +53,8 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
                                account_info, share_name, start, expiry).output
         self.assertIn('sig', sas, 'The sig segment is not in the sas {}'.format(sas))
         # Test generate-sas with ip and https-only
-        sas2 = self.cmd('storage share generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r '
-                        '--https-only --connection-string {}'.format(share_name, connection_string)).output
+        sas2 = self.cmd('storage share generate-sas -n {} --ip 172.20.34.0-172.20.34.255 --permissions r --expiry {} '
+                        '--https-only --connection-string {}'.format(share_name, expiry, connection_string)).output
         self.assertIn('sig', sas2, 'The sig segment is not in the sas {}'.format(sas2))
 
         # Test delete
@@ -66,12 +68,28 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         # Test delete with fail-not-exist
         share_not_exist = self.create_random_name('share', 24)
         from azure.core.exceptions import ResourceNotFoundError
-        with self.assertRaisesRegexp(ResourceNotFoundError, 'The specified share does not exist.'):
+        with self.assertRaisesRegex(ResourceNotFoundError, 'The specified share does not exist.'):
             self.storage_cmd('storage share delete -n {} --fail-not-exist', account_info, share_not_exist)
 
         self.storage_cmd('storage share update --name {} --quota 3', account_info, share)
         self.storage_cmd('storage share show --name {}', account_info, share) \
             .assert_with_checks(JMESPathCheck('properties.quota', 3))
+
+    @ResourceGroupPreparer(name_prefix='clitest')
+    @StorageAccountPreparer(name_prefix='share', kind='FileStorage', location='eastus2', sku='Premium_LRS')
+    def test_storage_file_share_premium_scenario(self, resource_group, storage_account):
+
+        account_info = self.get_account_info(resource_group, storage_account)
+        share_name = self.create_random_name('share', 24)
+
+        self.storage_cmd('storage share create -n {} --fail-on-exist --metadata foo=bar cat=hat '
+                         '--enable-snapshot-virtual-directory-access false --protocol nfs',
+                         account_info, share_name) \
+            .assert_with_checks(JMESPathCheck('created', True))
+
+        self.storage_cmd('storage share show -n {}', account_info, share_name) \
+            .assert_with_checks(JMESPathCheck('enableSnapshotVirtualDirectoryAccess', False),
+                                JMESPathCheck('protocols', ['NFS']))
 
     @ResourceGroupPreparer(name_prefix='clitest')
     @StorageAccountPreparer(name_prefix='share', kind='StorageV2', location='eastus2', sku='Standard_RAGRS')
@@ -137,3 +155,61 @@ class StorageShareScenarioTests(StorageScenarioMixin, ScenarioTest):
         acl = self.cmd('storage share policy list -s {} --connection-string {}'.format(share, connection_string)) \
             .get_output_in_json().keys()
         self.assertSetEqual(set(acl), {'test1', 'test2'})
+
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
+    def test_storage_share_generate_sas_as_user(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        share = self.create_share(account_info)
+        local_file = self.create_temp_file(1024)
+
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        with self.assertRaisesRegex(CLIError, "incorrect usage: specify --as-user when --auth-mode login"):
+            self.cmd('storage share generate-sas --account-name {} -n {} --expiry {} --permissions r --https-only '
+                     '--auth-mode login'.format(storage_account, share, expiry))
+
+        share_sas = self.cmd('storage share generate-sas --account-name {} -n {} --expiry {} --permissions crwld '
+                             '--https-only --as-user --auth-mode login '
+                             '--backup-intent'.format(storage_account, share, expiry)).output
+        self.assertIn('&sig=', share_sas)
+        self.assertIn('skoid=', share_sas)
+        self.assertIn('sktid=', share_sas)
+        self.assertIn('skt=', share_sas)
+        self.assertIn('ske=', share_sas)
+        self.assertIn('sks=', share_sas)
+        self.assertIn('skv=', share_sas)
+
+        if self.is_live:
+            self.cmd('storage file upload --account-name {} --source "{}" -s {} '
+                     '--sas-token {} --backup-intent'.format(storage_account, local_file, share, share_sas))
+
+    @ResourceGroupPreparer()
+    @StorageAccountPreparer(kind="StorageV2")
+    def test_storage_share_generate_sas_with_user_delegation_oid(self, resource_group, storage_account):
+        account_info = self.get_account_info(resource_group, storage_account)
+        share = self.create_share(account_info)
+        local_file = self.create_temp_file(1024)
+        logged_in_user = self.cmd('ad signed-in-user show').get_output_in_json()
+        logged_in_user = logged_in_user["id"] if logged_in_user is not None else "2146abed-b993-4a81-a6af-eda7b4524c5e"
+
+        from datetime import datetime, timedelta
+        expiry = (datetime.utcnow() + timedelta(hours=1)).strftime('%Y-%m-%dT%H:%MZ')
+
+        share_sas = self.cmd('storage share generate-sas --account-name {} -n {} --expiry {} --permissions crwld '
+                             '--https-only --as-user --auth-mode login --backup-intent --user-delegation-oid '
+                             '{}'.format(storage_account, share, expiry, logged_in_user)).output
+        self.assertIn('&sig=', share_sas)
+        self.assertIn('skoid=', share_sas)
+        self.assertIn('sktid=', share_sas)
+        self.assertIn('skt=', share_sas)
+        self.assertIn('ske=', share_sas)
+        self.assertIn('sks=', share_sas)
+        self.assertIn('skv=', share_sas)
+        self.assertIn('sduoid=', share_sas)
+
+        if self.is_live:
+            self.cmd('storage file upload --account-name {} --source "{}" -s {} --sas-token {} '
+                     '--backup-intent --auth-mode login'.format(storage_account, local_file, share, share_sas))

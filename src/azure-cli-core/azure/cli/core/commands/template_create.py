@@ -59,22 +59,22 @@ def _validate_name_or_id(
         resource_id_parts = parse_resource_id(property_value)
         value_supplied_was_id = True
     elif has_parent:
-        resource_id_parts = dict(
-            name=parent_value,
-            resource_group=resource_group_name,
-            namespace=parent_type.split('/')[0],
-            type=parent_type.split('/')[1],
-            subscription=get_subscription_id(cli_ctx),
-            child_name_1=property_value,
-            child_type_1=property_type)
+        resource_id_parts = {
+            "name": parent_value,
+            "resource_group": resource_group_name,
+            "namespace": parent_type.split('/')[0],
+            "type": parent_type.split('/')[1],
+            "subscription": get_subscription_id(cli_ctx),
+            "child_name_1": property_value,
+            "child_type_1": property_type}
         value_supplied_was_id = False
     else:
-        resource_id_parts = dict(
-            name=property_value,
-            resource_group=resource_group_name,
-            namespace=property_type.split('/')[0],
-            type=property_type.split('/')[1],
-            subscription=get_subscription_id(cli_ctx))
+        resource_id_parts = {
+            "name": property_value,
+            "resource_group": resource_group_name,
+            "namespace": property_type.split('/')[0],
+            "type": property_type.split('/')[1],
+            "subscription": get_subscription_id(cli_ctx)}
         value_supplied_was_id = False
     return (resource_id_parts, value_supplied_was_id)
 

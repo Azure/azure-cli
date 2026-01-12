@@ -7,6 +7,8 @@ from knack.util import CLIError
 from azure.cli.core.azclierror import (
     UnknownError
 )
+from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
 from azure.cli.command_modules.acs.azuremonitormetrics.constants import (
     RP_API,
     AKS_CLUSTER_API
@@ -22,18 +24,11 @@ def sanitize_resource_id(resource_id):
     return resource_id.lower()
 
 
-def post_request(cmd, subscription_id, rp_name, headers):
-    from azure.cli.core.util import send_raw_request
-    armendpoint = cmd.cli_ctx.cloud.endpoints.resource_manager
-    customUrl = "{0}/subscriptions/{1}/providers/{2}/register?api-version={3}".format(
-        armendpoint,
-        subscription_id,
-        rp_name,
-        RP_API,
-    )
+def post_request(cmd, rp_name):
+    resource_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_RESOURCE_RESOURCES)
     try:
-        send_raw_request(cmd.cli_ctx, "POST", customUrl, headers=headers)
-    except CLIError as e:
+        resource_client.providers.register(rp_name)
+    except Exception as e:
         raise CLIError(e)
 
 
@@ -59,13 +54,13 @@ def register_rps(cmd, subscription_id, rp_namespaces, user_agent):
         for namespace, registered in rp_namespaces.items():
             if not registered:
                 headers = ['User-Agent=azuremonitormetrics.register_{}_rp'.format(namespace.split('.')[1].lower())]
-                post_request(cmd, subscription_id, namespace, headers)
+                post_request(cmd, namespace)
     except CLIError as e:
         raise CLIError(e)
 
 
 def rp_registrations(cmd, cluster_subscription_id, raw_parameters):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     cluster_rp_namespaces = {
         "microsoft.insights": False,
         "microsoft.alertsmanagement": False
@@ -112,4 +107,5 @@ def check_azuremonitormetrics_profile(cmd, cluster_subscription, cluster_resourc
     if "azureMonitorProfile" in values_array:
         if "metrics" in values_array["azureMonitorProfile"]:
             if values_array["azureMonitorProfile"]["metrics"]["enabled"] is True:
-                raise CLIError(f"Azure Monitor Metrics is already enabled for this cluster. Please use `az aks update --disable-azure-monitor-metrics -g {cluster_resource_group_name} -n {cluster_name}` and then try enabling.")
+                return True
+    return False

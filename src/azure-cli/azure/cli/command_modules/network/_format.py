@@ -8,19 +8,9 @@ from collections import OrderedDict
 
 
 def transform_dns_record_set_output(result):
-    from azure.mgmt.dns.models import RecordSetListResult
-
-    def _strip_null_records(item):
-        for prop in [x for x in dir(item) if 'record' in x]:
-            if not getattr(item, prop):
-                delattr(item, prop)
-
-    if isinstance(result, RecordSetListResult):
-        result = list(result)
-        for item in result:
-            _strip_null_records(item)
-    else:
-        _strip_null_records(result)
+    for prop in [x for x in dir(result) if 'record' in x]:
+        if not getattr(result, prop):
+            delattr(result, prop)
 
     return result
 
@@ -200,7 +190,7 @@ def transform_effective_route_table(result):
 
 
 def transform_effective_nsg(result):
-    from msrestazure.tools import parse_resource_id
+    from azure.mgmt.core.tools import parse_resource_id
     transformed = []
     for item in result['value']:
         association = item['association']

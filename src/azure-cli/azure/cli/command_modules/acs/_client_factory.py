@@ -27,8 +27,16 @@ def cf_managed_clusters(cli_ctx, *_):
     return get_container_service_client(cli_ctx).managed_clusters
 
 
+def cf_machines(cli_ctx, *_):
+    return get_container_service_client(cli_ctx).machines
+
+
 def cf_maintenance_configurations(cli_ctx, *_):
     return get_container_service_client(cli_ctx).maintenance_configurations
+
+
+def cf_managed_namespaces(cli_ctx, *_):
+    return get_container_service_client(cli_ctx).managed_namespaces
 
 
 def cf_agent_pools(cli_ctx, *_):

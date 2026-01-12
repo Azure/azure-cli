@@ -50,8 +50,11 @@ class RESOURCE(Enum):
     SignalR = 'signalr'
     WebPubSub = 'webpubsub'
     ConfluentKafka = 'confluent-cloud'
+    FabricSql = 'fabric-sql'
     AppInsights = 'app-insights'
     CognitiveServices = 'cognitiveservices'
+    NeonPostgres = 'neon-postgres'
+    MongoDbAtlas = 'mongodb-atlas'
 
     @classmethod
     def value_of(cls, value):
@@ -71,6 +74,7 @@ class AUTH_TYPE(Enum):
     WorkloadIdentity = 'workload-identity'
     ServicePrincipalSecret = 'service-principal'
     UserAccount = 'user-account'
+    Null = 'null'
 
 
 # The dict defines the client types
@@ -149,7 +153,14 @@ TARGET_RESOURCES = {
     RESOURCE.ConfluentKafka: '#',  # special target resource, no arm resource id
     RESOURCE.AppInsights: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/microsoft.insights/components/{appinsights}',
 
-    RESOURCE.CognitiveServices: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.CognitiveServices/accounts/{account}'
+    RESOURCE.CognitiveServices: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.CognitiveServices/accounts/{account}',
+
+    RESOURCE.ContainerApp: '/subscriptions/{subscription}/resourceGroups/{target_resource_group}/providers/Microsoft.App/containerApps/{target_app_name}',
+
+    RESOURCE.FabricSql: 'https://api.fabric.microsoft.com/v1/workspaces/{fabric_workspace_uuid}/SqlDatabases/{fabric_sql_db_uuid}',
+    RESOURCE.NeonPostgres: '/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/testrg/providers/Neon.Postgres/organizations/neontest',
+    RESOURCE.MongoDbAtlas: '/subscriptions/aaaabbbb-0000-cccc-1111-dddd2222eeee/resourceGroups/{target_resource_group}/providers/MongoDB.Atlas/organizations/{server}'
+
 }
 
 
@@ -650,6 +661,55 @@ TARGET_RESOURCES_PARAMS = {
             'help': 'Name of the cognitive services account',
             'placeholder': 'MyAccount'
         }
+    },
+    RESOURCE.ContainerApp: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the target container app',
+            'placeholder': 'TargetContainerAppRG'
+        },
+        'target_app_name': {
+            'options': ['--target-app-name'],
+            'help': 'Name of the target container app',
+            'placeholder': 'MyTargetContainerApp'
+        }
+    },
+    RESOURCE.FabricSql: {
+        'fabric_workspace_uuid': {
+            'options': ['--fabric-workspace-uuid'],
+            'help': 'UUID of Fabric workspace which contains the target SQL database',
+            'placeholder': 'TargetFabricWorkspaceUUID'
+        },
+        'fabric_sql_db_uuid': {
+            'options': ['--fabric-sql-db-uuid'],
+            'help': 'UUID of the target Fabric SQL database',
+            'placeholder': 'TargetFabricSQLDatabaseUUID'
+        },
+    },
+    RESOURCE.NeonPostgres: {
+        'server': {
+            'configured_default': 'sql-server',
+            'options': ['--server'],
+            'help': 'Name of the sql server',
+            'placeholder': 'MyServer'
+        },
+        'database': {
+            'options': ['--database'],
+            'help': 'Name of the sql database',
+            'placeholder': 'MyDB'
+        }
+    },
+    RESOURCE.MongoDbAtlas: {
+        'target_resource_group': {
+            'options': ['--target-resource-group', '--tg'],
+            'help': 'The resource group which contains the MongoDB Atlas',
+            'placeholder': 'MongoDBAtlasRG'
+        },
+        'server': {
+            'options': ['--server'],
+            'help': 'Name of the MongoDB Atlas server',
+            'placeholder': 'MongoDBAtlasServer'
+        }
     }
 }
 
@@ -684,6 +744,7 @@ TARGET_SUPPORT_PRIVATE_ENDPOINT = [
     RESOURCE.Redis,
     RESOURCE.Postgres,
     RESOURCE.Mysql,
+    RESOURCE.MysqlFlexible,
     RESOURCE.EventHub,
     RESOURCE.KeyVault,
     RESOURCE.SignalR,
@@ -761,7 +822,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.UserAccount],
         RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.UserAccount],
-        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SecretAuto, AUTH_TYPE.UserAccount, AUTH_TYPE.ServicePrincipalSecret],
@@ -790,7 +851,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -811,9 +872,12 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
+        RESOURCE.FabricSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
-        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
+        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.NeonPostgres: [AUTH_TYPE.Secret],
+        RESOURCE.MongoDbAtlas: [AUTH_TYPE.Secret]
     },
     RESOURCE.SpringCloud: {
         RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -821,7 +885,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -842,9 +906,12 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
+        RESOURCE.FabricSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
-        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
+        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.NeonPostgres: [AUTH_TYPE.Secret],
+        RESOURCE.MongoDbAtlas: [AUTH_TYPE.Secret]
     },
     RESOURCE.KubernetesCluster: {
         RESOURCE.Postgres: [AUTH_TYPE.Secret],
@@ -852,7 +919,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret],
         RESOURCE.Sql: [AUTH_TYPE.Secret],
-        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
@@ -875,7 +942,9 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
-        RESOURCE.CognitiveServices: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret]
+        RESOURCE.CognitiveServices: [AUTH_TYPE.WorkloadIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.NeonPostgres: [AUTH_TYPE.Secret],
+        RESOURCE.MongoDbAtlas: [AUTH_TYPE.Secret]
     },
     RESOURCE.ContainerApp: {
         RESOURCE.Postgres: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -883,7 +952,7 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.Mysql: [AUTH_TYPE.Secret],
         RESOURCE.MysqlFlexible: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.Sql: [AUTH_TYPE.Secret, AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
-        RESOURCE.Redis: [AUTH_TYPE.SecretAuto],
+        RESOURCE.Redis: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.RedisEnterprise: [AUTH_TYPE.SecretAuto],
 
         RESOURCE.CosmosCassandra: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
@@ -904,9 +973,13 @@ SUPPORTED_AUTH_TYPE = {
         RESOURCE.SignalR: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.WebPubSub: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
         RESOURCE.ConfluentKafka: [AUTH_TYPE.Secret],
+        RESOURCE.FabricSql: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.UserIdentity],
         RESOURCE.AppInsights: [AUTH_TYPE.SecretAuto],
 
-        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret]
+        RESOURCE.CognitiveServices: [AUTH_TYPE.SystemIdentity, AUTH_TYPE.SecretAuto, AUTH_TYPE.UserIdentity, AUTH_TYPE.ServicePrincipalSecret],
+        RESOURCE.NeonPostgres: [AUTH_TYPE.Secret],
+        RESOURCE.MongoDbAtlas: [AUTH_TYPE.Secret],
+        RESOURCE.ContainerApp: [AUTH_TYPE.Null]
     },
 }
 SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloudDeprecated] = SUPPORTED_AUTH_TYPE[RESOURCE.SpringCloud]
@@ -931,6 +1004,32 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.Blank
         ],
         RESOURCE.PostgresFlexible: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.Php,
+            CLIENT_TYPE.Ruby,
+            CLIENT_TYPE.Django,
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.NeonPostgres: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.Php,
+            CLIENT_TYPE.Ruby,
+            CLIENT_TYPE.Django,
+            CLIENT_TYPE.SpringBoot,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.MongoDbAtlas: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.DotnetInternal,
             CLIENT_TYPE.Java,
@@ -1145,6 +1244,14 @@ SUPPORTED_CLIENT_TYPE = {
             CLIENT_TYPE.SpringBoot,
             CLIENT_TYPE.Blank
         ],
+        RESOURCE.FabricSql: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.Php,
+            CLIENT_TYPE.Blank
+        ],
         RESOURCE.AppInsights: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.DotnetInternal,
@@ -1157,6 +1264,19 @@ SUPPORTED_CLIENT_TYPE = {
         RESOURCE.CognitiveServices: [
             CLIENT_TYPE.Dotnet,
             CLIENT_TYPE.Python,
+            CLIENT_TYPE.Blank
+        ],
+        RESOURCE.ContainerApp: [
+            CLIENT_TYPE.Dotnet,
+            CLIENT_TYPE.DotnetInternal,
+            CLIENT_TYPE.Java,
+            CLIENT_TYPE.Python,
+            CLIENT_TYPE.Nodejs,
+            CLIENT_TYPE.Go,
+            CLIENT_TYPE.Php,
+            CLIENT_TYPE.Ruby,
+            CLIENT_TYPE.Django,
+            CLIENT_TYPE.SpringBoot,
             CLIENT_TYPE.Blank
         ]
     }

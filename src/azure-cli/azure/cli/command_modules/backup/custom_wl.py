@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 # pylint: disable=broad-except
 # pylint: disable=too-many-locals
 # pylint: disable=too-many-statements
+# pylint: disable=too-many-branches
 
 from knack.log import get_logger
 
@@ -17,10 +18,13 @@ from azure.mgmt.recoveryservicesbackup.activestamp.models import AzureVMAppConta
     AzureWorkloadBackupRequest, ProtectedItemResource, AzureRecoveryServiceVaultProtectionIntent, TargetRestoreInfo, \
     RestoreRequestResource, BackupRequestResource, ProtectionIntentResource, SQLDataDirectoryMapping, \
     ProtectionContainerResource, AzureWorkloadSAPHanaRestoreRequest, AzureWorkloadSQLRestoreRequest, \
-    AzureWorkloadSAPHanaPointInTimeRestoreRequest, AzureWorkloadSQLPointInTimeRestoreRequest, \
-    AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, MoveRPAcrossTiersRequest, \
+    AzureWorkloadSAPAseRestoreRequest, AzureWorkloadSAPHanaPointInTimeRestoreRequest, \
+    AzureWorkloadSQLPointInTimeRestoreRequest, AzureWorkloadSAPAsePointInTimeRestoreRequest, \
+    AzureVmWorkloadSAPHanaDatabaseProtectedItem, AzureVmWorkloadSQLDatabaseProtectedItem, \
     RecoveryPointRehydrationInfo, AzureWorkloadSAPHanaRestoreWithRehydrateRequest, \
-    AzureWorkloadSQLRestoreWithRehydrateRequest, ProtectionState
+    AzureWorkloadSQLRestoreWithRehydrateRequest, ProtectionState, SnapshotRestoreParameters, \
+    UserAssignedManagedIdentityDetails, UserAssignedIdentityProperties, \
+    AzureVmWorkloadSAPAseDatabaseProtectedItem, MoveRPAcrossTiersRequest
 
 from azure.mgmt.recoveryservicesbackup.passivestamp.models import CrossRegionRestoreRequest
 
@@ -29,27 +33,105 @@ from azure.cli.command_modules.backup._validators import datetime_type, validate
 from azure.cli.command_modules.backup._client_factory import protectable_containers_cf, \
     backup_protection_containers_cf, backup_protected_items_cf, recovery_points_crr_cf, \
     _backup_client_factory, recovery_points_cf, vaults_cf, aad_properties_cf, cross_region_restore_cf, \
-    backup_protection_intent_cf, recovery_points_passive_cf, protection_containers_cf, protection_policies_cf
+    backup_protection_intent_cf, recovery_points_passive_cf, protection_containers_cf, protection_policies_cf, \
+    protected_items_cf
 
 import azure.cli.command_modules.backup.custom_help as cust_help
 import azure.cli.command_modules.backup.custom_common as common
-from azure.cli.command_modules.backup import custom
+from azure.cli.command_modules.backup import custom, custom_base
 from azure.cli.core.azclierror import InvalidArgumentValueError, RequiredArgumentMissingError, ValidationError, \
     ResourceNotFoundError, ArgumentUsageError, MutuallyExclusiveArgumentError
 
 from azure.mgmt.recoveryservicesbackup.activestamp import RecoveryServicesBackupClient
 from azure.cli.core.commands.client_factory import get_mgmt_service_client
+from azure.cli.core.profiles import ResourceType
 
 
 fabric_name = "Azure"
 logger = get_logger(__name__)
+
+
+def reconfigure_wl_protection(cmd, item, source_vault_name, source_vault_rg,
+                              new_vault_name, new_vault_rg,
+                              new_policy_name, workload_type, retain_as_per_policy, tenant_id):
+    """Reconfigure Azure Workload (SQL/HANA/ASE) protection to a new vault.
+
+    Steps:
+    1. Disable protection for the specific protected item (retain as per flag) in source vault.
+    2. If container has no remaining protected items, unregister it from source vault.
+    3. Register or re-register corresponding workload container in destination vault.
+    4. Discover protectable item in destination vault and enable protection with new policy.
+    5. Return newly protected item.
+    """
+    logger.warning("For Workload reconfigure protection, all backup items within the "
+                   "container must have protection disabled first.")
+
+    # 1. Disable in source vault
+    items_client = protected_items_cf(cmd.cli_ctx)
+    disable_protection(cmd, items_client, source_vault_rg, source_vault_name, item,
+                       retain_as_per_policy, tenant_id)
+
+    # 2. Unregister container if last item
+    _maybe_unregister_wl_container(cmd, backup_protected_items_cf(cmd.cli_ctx), source_vault_rg, source_vault_name,
+                                   item.properties.container_name, workload_type)
+
+    # 3. Register workload container in destination vault.
+    _register_wl_container_in_new_vault(cmd, item, new_vault_rg, new_vault_name, workload_type)
+
+    # 4. Discover protectable item in destination vault and enable
+    new_item = custom_base.enable_protection_for_azure_wl(cmd, items_client, new_vault_rg,
+                                                          new_vault_name, new_policy_name,
+                                                          protectable_item_type="SQLDatabase",
+                                                          protectable_item_name=item.properties.friendly_name,
+                                                          server_name=item.properties.server_name,
+                                                          workload_type=workload_type)
+    return new_item
+
+
+def _register_wl_container_in_new_vault(cmd, item, resource_group_name, vault_name, workload_type):
+    # For workload items, container_name is something like: IaasVMContainer;iaasvmcontainerv2;rg;vmname or similar.
+    # We'll need the underlying resource id if present on item.properties.source_resource_id.
+    resource_id = getattr(item.properties, 'source_resource_id', None)
+    if resource_id is None:
+        raise CLIError('Cannot derive source resource id from workload item for reconfiguration.')
+
+    containers_client = protection_containers_cf(cmd.cli_ctx)
+    # Attempt register (if already registered enable step will proceed)
+    try:
+        register_wl_container(cmd, containers_client, vault_name, resource_group_name,
+                              workload_type, resource_id, "AzureWorkload")
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning('Skipping container registration in new vault (may already exist): %s', str(ex))
+
+
+def _maybe_unregister_wl_container(cmd, items_client, resource_group_name, vault_name, container_name, workload_type):
+    """Unregister workload container if no protected items remain."""
+
+    items = common.list_items(cmd, items_client, resource_group_name, vault_name,
+                              workload_type=workload_type, container_name=container_name,
+                              container_type="AzureWorkload")
+    remaining = [pi for pi in items if pi.properties.protection_state.lower() == 'protected']
+    if remaining:
+        raise ValidationError('Cannot unregister container as other items are still protected.')
+
+    try:
+        containers_client = protection_containers_cf(cmd.cli_ctx)
+        return custom_base.unregister_container(cmd, containers_client, vault_name, resource_group_name,
+                                                container_name, "AzureWorkload")
+    except Exception as ex:  # pylint: disable=broad-except
+        logger.warning('Skipping unregister workload container of container %s due to a failure: %s.'
+                       ' Continuing the operation, but if the container is still registered, it may need to be '
+                       'unregistered manually for the operation to succeed.', container_name, str(ex))
+
 
 # Mapping of workload type
 workload_type_map = {'MSSQL': 'SQLDataBase',
                      'SAPHANA': 'SAPHanaDatabase',
                      'SQLDataBase': 'SQLDataBase',
                      'SAPHanaDatabase': 'SAPHanaDatabase',
-                     'SAPASE': 'SAPAseDatabase'}
+                     'SAPHanaDBInstance': 'SAPHanaDBInstance',
+                     'SAPASE': 'SAPAseDatabase',
+                     'SAPAseDatabase': 'SAPAseDatabase'}
 
 # Mapping of module name
 module_map = {'sqldatabase': 'sql_database',
@@ -67,7 +149,10 @@ protectable_item_type_map = {'SQLDatabase': 'SQLDataBase',
                              'HANAInstance': 'SAPHanaSystem',
                              'SAPHanaSystem': 'SAPHanaSystem',
                              'SQLInstance': 'SQLInstance',
-                             'SQLAG': 'SQLAvailabilityGroupContainer'}
+                             'SAPHanaDBInstance': 'SAPHanaDBInstance',
+                             'SQLAG': 'SQLAvailabilityGroupContainer',
+                             'SAPASE': 'SAPAseDatabase',
+                             'SAPAseDatabase': 'SAPAseDatabase'}
 
 
 def show_wl_policy(client, resource_group_name, vault_name, name):
@@ -203,8 +288,10 @@ def update_policy_for_item(cmd, client, resource_group_name, vault_name, item, p
     item_uri = cust_help.get_protected_item_uri_from_id(item.id)
 
     backup_item_type = item_uri.split(';')[0]
-    if not cust_help.is_sql(backup_item_type) and not cust_help.is_hana(backup_item_type):
-        raise InvalidArgumentValueError("Item must be either of type SQLDataBase or SAPHanaDatabase.")
+    if (not cust_help.is_sql(backup_item_type) and not
+        cust_help.is_hana(backup_item_type) and not
+            cust_help.is_sapase(backup_item_type)):
+        raise InvalidArgumentValueError("Item must be of type SQLDataBase, SAPHanaDatabase, or SAPAseDatabase")
 
     item_properties = _get_protected_item_instance(backup_item_type)
     item_properties.policy_id = policy.id
@@ -434,10 +521,12 @@ def enable_protection_for_azure_wl(cmd, client, resource_group_name, vault_name,
     # Get protectable item.
     protectable_item_object = protectable_item
     protectable_item_type = protectable_item_object.properties.protectable_item_type
-    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "saphanadatabase", "saphanasystem"]:
+    if protectable_item_type.lower() not in ["sqldatabase", "sqlinstance", "saphanadatabase",
+                                             "saphanasystem", "saphanadbinstance", "sapasedatabase"]:
         raise CLIError(
             """
-            Protectable Item must be either of type SQLDataBase, HANADatabase, HANAInstance or SQLInstance.
+            Protectable Item must be of type SQLDataBase, HANADatabase, HANAInstance,
+            SAPAseDatabase, SAPHanaDBInstance, or SQLInstance.
             """)
 
     item_name = protectable_item_object.name
@@ -634,7 +723,7 @@ def list_workload_items(cmd, vault_name, resource_group_name, target_subscriptio
 
 
 def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_config, rehydration_duration=15,
-                     rehydration_priority=None, use_secondary_region=None):
+                     rehydration_priority=None, use_secondary_region=None, tenant_id=None):
 
     recovery_config_object = cust_help.get_or_read_json(recovery_config)
     restore_mode = recovery_config_object['restore_mode']
@@ -650,6 +739,9 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
     alternate_directory_paths = recovery_config_object['alternate_directory_paths']
     recovery_mode = recovery_config_object['recovery_mode']
     filepath = recovery_config_object['filepath']
+    attach_and_mount = recovery_config_object['attach_and_mount']
+    identity_arm_id = recovery_config_object['identity_arm_id']
+    snapshot_instance_resource_group = recovery_config_object['snapshot_instance_resource_group']
 
     item = common.show_item(cmd, backup_protected_items_cf(cmd.cli_ctx), resource_group_name, vault_name,
                             container_uri, item_uri, "AzureWorkload")
@@ -725,6 +817,42 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
         setattr(trigger_restore_properties, 'should_use_alternate_target_location', True)
         setattr(trigger_restore_properties, 'is_non_recoverable', False)
 
+    if recovery_mode == 'SnapshotAttachAndRecover' or recovery_mode == 'SnapshotAttach':
+        trigger_restore_properties.recovery_mode = recovery_mode
+        if snapshot_instance_resource_group is None:
+            target_resource_group_name = container_id.split('/')[4]
+        else:
+            target_resource_group_name = snapshot_instance_resource_group
+
+        # For SnapshotAttach (--attach-and-mount was not provided), skip_attach_and_mount should be False
+        skip_attach_and_mount = False
+        if recovery_mode == 'SnapshotAttachAndMount':
+            skip_attach_and_mount = not attach_and_mount
+
+        snapshot_restore_parameters = SnapshotRestoreParameters(skip_attach_and_mount=skip_attach_and_mount,
+                                                                log_point_in_time_for_db_recovery='')
+
+        # Fetching UAMI details
+        rg_name = identity_arm_id.split('/')[-5]
+        id_name = identity_arm_id.split('/')[-1]
+        sub_name = identity_arm_id.split('/')[-7]
+        identity_client = get_mgmt_service_client(cmd.cli_ctx, ResourceType.MGMT_MSI,
+                                                  subscription_id=sub_name).user_assigned_identities
+        identity_details = identity_client.get(resource_group_name=rg_name, resource_name=id_name)
+        user_assigned_identity_properties = UserAssignedIdentityProperties(
+            client_id=identity_details.client_id,
+            principal_id=identity_details.principal_id
+        )
+        user_assigned_managed_identity_details = UserAssignedManagedIdentityDetails(
+            identity_arm_id=identity_arm_id,
+            user_assigned_identity_properties=user_assigned_identity_properties
+        )
+
+        setattr(trigger_restore_properties, 'snapshot_restore_parameters', snapshot_restore_parameters)
+        setattr(trigger_restore_properties, 'target_resource_group_name', target_resource_group_name)
+        setattr(trigger_restore_properties, 'user_assigned_managed_identity_details',
+                user_assigned_managed_identity_details)
+
     trigger_restore_request = RestoreRequestResource(properties=trigger_restore_properties)
 
     if use_secondary_region:
@@ -747,6 +875,15 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
                                           polling=False).result()
         return cust_help.track_backup_crr_job(cmd.cli_ctx, result, azure_region, vault.id)
 
+    if cust_help.has_resource_guard_mapping(cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore"):
+        # Cross Tenant scenario
+        if tenant_id is not None:
+            client = get_mgmt_service_client(cmd.cli_ctx, RecoveryServicesBackupClient,
+                                             aux_tenants=[tenant_id]).restores
+        trigger_restore_request.properties.resource_guard_operation_requests = [
+            cust_help.get_resource_guard_operation_request(
+                cmd.cli_ctx, resource_group_name, vault_name, "RecoveryServicesRestore")]
+
     # Trigger restore and wait for completion
     result = client.begin_trigger(vault_name, resource_group_name, fabric_name, container_uri, item_uri,
                                   recovery_point_id, trigger_restore_request, cls=cust_help.get_pipeline_response,
@@ -756,7 +893,8 @@ def restore_azure_wl(cmd, client, resource_group_name, vault_name, recovery_conf
 
 def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_mode, container_name, item_name,
                          rp_name, target_item, target_item_name, log_point_in_time, from_full_rp_name,
-                         filepath, target_container, target_resource_group, target_vault_name, target_subscription):
+                         filepath, target_container, target_resource_group, target_vault_name, target_subscription,
+                         workload_type, attach_and_mount, identity_arm_id, snapshot_instance_resource_group):
     if log_point_in_time is not None:
         datetime_type(log_point_in_time)
 
@@ -764,10 +902,10 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         _check_none_and_many(target_item, "Target Item")
 
         protectable_item_type = target_item.properties.protectable_item_type
-        if protectable_item_type.lower() not in ["sqlinstance", "saphanasystem"]:
+        if protectable_item_type.lower() not in ["sqlinstance", "saphanasystem", "saphanadbinstance"]:
             raise CLIError(
                 """
-                Target Item must be either of type HANAInstance or SQLInstance.
+                Target Item must be of type HANAInstance, SQLInstance, or SAPHanaDBInstance.
                 """)
 
     if restore_mode == 'RestoreAsFiles' and target_container is None:
@@ -785,7 +923,7 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     item_type = item.properties.workload_type
     item_name = item.name
 
-    if not cust_help.is_sql(item_type) and not cust_help.is_hana(item_type):
+    if not cust_help.is_sql(item_type) and not cust_help.is_hana(item_type) and not cust_help.is_sapase(item_type):
         raise CLIError(
             """
             Item must be either of type SQLDataBase or SAPHanaDatabase.
@@ -844,6 +982,11 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
     if restore_mode == 'RestoreAsFiles':
         recovery_mode = 'FileRecovery'
         container_id = target_container.id
+    if workload_type == 'SAPHanaDBInstance':
+        if attach_and_mount is not None:
+            recovery_mode = 'SnapshotAttachAndRecover'
+        else:
+            recovery_mode = 'SnapshotAttach'
 
     return {
         'restore_mode': restore_mode_map[restore_mode],
@@ -851,14 +994,17 @@ def show_recovery_config(cmd, client, resource_group_name, vault_name, restore_m
         'item_uri': item_name,
         'recovery_point_id': recovery_point.name,
         'log_point_in_time': log_point_in_time,
-        'item_type': 'SQL' if 'sql' in item_type.lower() else 'SAPHana',
+        'item_type': 'SQL' if 'sql' in item_type.lower() else 'SAPASE' if 'sapase' in item_type.lower() else 'SAPHana',
         'workload_type': item_type,
         'source_resource_id': item.properties.source_resource_id,
         'database_name': db_name,
         'container_id': container_id,
         'recovery_mode': recovery_mode,
         'filepath': filepath,
-        'alternate_directory_paths': alternate_directory_paths}
+        'alternate_directory_paths': alternate_directory_paths,
+        'attach_and_mount': attach_and_mount,
+        'identity_arm_id': identity_arm_id,
+        'snapshot_instance_resource_group': snapshot_instance_resource_group}
 
 
 def _fetch_nodes_list_and_auto_protection_policy(cmd, paged_items, resource_group_name, vault_name,
@@ -922,16 +1068,22 @@ def _get_log_time_range(cmd, resource_group_name, vault_name, item, use_secondar
 
 
 def _get_restore_request_instance(item_type, log_point_in_time, rehydration_priority):
-    if rehydration_priority is None:
-        if item_type.lower() == "saphana":
-            if log_point_in_time is not None:
-                return AzureWorkloadSAPHanaPointInTimeRestoreRequest()
-            return AzureWorkloadSAPHanaRestoreRequest()
+    workload_restore_request_map = {
+        "saphana": AzureWorkloadSAPHanaRestoreRequest,
+        "sql": AzureWorkloadSQLRestoreRequest,
+        "sapase": AzureWorkloadSAPAseRestoreRequest
+    }
 
-        if item_type.lower() == "sql":
-            if log_point_in_time is not None:
-                return AzureWorkloadSQLPointInTimeRestoreRequest()
-            return AzureWorkloadSQLRestoreRequest()
+    workload_pit_restore_request_map = {
+        "saphana": AzureWorkloadSAPHanaPointInTimeRestoreRequest,
+        "sql": AzureWorkloadSQLPointInTimeRestoreRequest,
+        "sapase": AzureWorkloadSAPAsePointInTimeRestoreRequest
+    }
+
+    if rehydration_priority is None:
+        if log_point_in_time is not None:
+            return workload_pit_restore_request_map[item_type.lower()]()
+        return workload_restore_request_map[item_type.lower()]()
 
     if item_type.lower() == "saphana":
         if log_point_in_time is not None:
@@ -947,6 +1099,8 @@ def _get_restore_request_instance(item_type, log_point_in_time, rehydration_prio
 def _get_protected_item_instance(item_type):
     if item_type.lower() == "saphanadatabase":
         return AzureVmWorkloadSAPHanaDatabaseProtectedItem()
+    if item_type.lower() == "sapasedatabase":
+        return AzureVmWorkloadSAPAseDatabaseProtectedItem()
     return AzureVmWorkloadSQLDatabaseProtectedItem()
 
 

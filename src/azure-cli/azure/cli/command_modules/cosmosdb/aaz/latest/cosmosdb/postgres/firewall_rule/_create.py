@@ -60,7 +60,7 @@ class Create(AAZCommand):
             help="The name of the cluster firewall rule.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^[-\w\._]+$",
+                pattern=r"^[-\w\._]+$",
             ),
         )
         _args_schema.resource_group = AAZResourceGroupNameArg(
@@ -76,7 +76,7 @@ class Create(AAZCommand):
             help="The end IP address of the cluster firewall rule. Must be IPv4 format.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
+                pattern=r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
             ),
         )
         _args_schema.start_ip_address = AAZStrArg(
@@ -85,7 +85,7 @@ class Create(AAZCommand):
             help="The start IP address of the cluster firewall rule. Must be IPv4 format.",
             required=True,
             fmt=AAZStrArgFormat(
-                pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
+                pattern=r"^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$",
             ),
         )
         return cls._args_schema

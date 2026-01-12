@@ -38,7 +38,8 @@ def generate_sas_fs_uri(client, cmd, file_system, permission=None,
                         expiry=None, start=None, id=None, ip=None,  # pylint: disable=redefined-builtin
                         protocol=None, cache_control=None, content_disposition=None,
                         content_encoding=None, content_language=None,
-                        content_type=None, full_uri=False, as_user=False, encryption_scope=None):
+                        content_type=None, full_uri=False, as_user=False, encryption_scope=None,
+                        user_delegation_oid=None):
     generate_file_system_sas = cmd.get_models('_shared_access_signature#generate_file_system_sas')
 
     sas_kwargs = {}
@@ -53,7 +54,8 @@ def generate_sas_fs_uri(client, cmd, file_system, permission=None,
                                          ip=ip, protocol=protocol,
                                          cache_control=cache_control, content_disposition=content_disposition,
                                          content_encoding=content_encoding, content_language=content_language,
-                                         content_type=content_type, encryption_scope=encryption_scope, **sas_kwargs)
+                                         content_type=content_type, encryption_scope=encryption_scope,
+                                         user_delegation_oid=user_delegation_oid, **sas_kwargs)
 
     if full_uri:
         t_file_system_client = cmd.get_models('_file_system_client#FileSystemClient')

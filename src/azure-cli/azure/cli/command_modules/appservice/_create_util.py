@@ -77,7 +77,7 @@ def zip_contents_from_dir(dirPath, lang):
                 zip_dotnet_project_references(abs_src, "{}".format(zip_file_path))
             except (OSError, ValueError, TypeError, ParseError, BadZipFile, LargeZipFile):
                 logger.warning("Analysing and bundling dotnet project references have failed.")
-    except IOError as e:
+    except OSError as e:
         if e.errno == 13:
             raise CLIError('Insufficient permissions to create a zip in current directory. '
                            'Please re-run the command with administrator privileges')
@@ -305,8 +305,7 @@ def find_key_in_json(json_data, key):
         if key in k:
             yield v
         elif isinstance(v, dict):
-            for id_val in find_key_in_json(v, key):
-                yield id_val
+            yield from find_key_in_json(v, key)
 
 
 def set_location(cmd, sku, location):
@@ -326,6 +325,25 @@ def get_site_availability(cmd, name):
     """ This is used by az webapp up to verify if a site needs to be created or should just be deployed"""
     client = web_client_factory(cmd.cli_ctx)
     availability = client.check_name_availability(name, 'Site')
+
+    # check for "." in app name. it is valid for hostnames to contain it, but not allowed for webapp names
+    if "." in name:
+        availability.name_available = False
+        availability.reason = "Invalid"
+        availability.message = ("Site names only allow alphanumeric characters and hyphens, "
+                                "cannot start or end in a hyphen, and must be less than 64 chars.")
+    return availability
+
+
+def get_regional_site_availability(cmd, location, name, resource_group_name, auto_generated_domain_name_label_scope):
+    """ This is used by az webapp up to verify if a site needs to be created or should just be deployed
+      (regional check)"""
+    client = web_client_factory(cmd.cli_ctx)
+    availability = client.regional_check_name_availability(location,
+                                                           name,
+                                                           "Site",
+                                                           resource_group_name,
+                                                           auto_generated_domain_name_label_scope)
 
     # check for "." in app name. it is valid for hostnames to contain it, but not allowed for webapp names
     if "." in name:
@@ -633,8 +651,8 @@ def zip_dotnet_project_references(dirPath, zip_file_path):
             csproj_content = csproj_file.read()
             new_csproj_content = str(csproj_content)
 
-            for include in replace_dict:
-                new_csproj_content = str(new_csproj_content).replace(include, replace_dict[include])
+            for k, v in replace_dict.items():
+                new_csproj_content = str(new_csproj_content).replace(k, v)
 
         # Step 3: append transitive project references to .zip.tmp
         transitives_references = _get_dotnet_transitive_missing_references(abs_references)
