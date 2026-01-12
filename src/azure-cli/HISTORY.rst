@@ -3,6 +3,99 @@
 Release History
 ===============
 
+2.82.0
+++++++
+
+**ACR**
+
+* `az acr login`: Enforce using acr audience in aad token acquisition (#31798)
+
+**AKS**
+
+* Fix #15932: `az aks install-cli`: Add `--gh-token` parameter to allow authentication when downloading kubelogin (#32536)
+* `az aks nodepool update`: Add GPU driver install options `install` and `none` for `--gpu-driver` parameter (#32531)
+* `az aks nodepool add/update`: Add option `Ubuntu2404` to `--os-sku` parameter (#32509)
+
+**App Service**
+
+* `az appservice list-locations`: Add `--managed-instance-enabled` parameter for managed instances (#32444)
+
+**Cognitive Services**
+
+* `az cognitiveservices agent create`: Add ability to create and deploy hosted agent in AI Foundry (#32430)
+
+**Compute**
+
+* `az vmss list-instances`: Add new argument `--resiliency-view` to show resiliency status of each instance (#32496)
+* `az vmss get-resiliency-view`: Add new command to show resiliency status of each instance (#32496)
+* `az sig image-version create/update`: Add warning message for Azure Compute Gallery resources from api-version `2026-03-03` (#32494)
+
+**Container app**
+
+* `az containerapp env create`: Add parameter `--infrastructure-resource-group` to support specifying name for resource group that will contain infrastructure resources (#32457)
+* Fix #32594: `az containerapp compose create`: Fix `TypeError` when docker-compose file include `env_file` without `environment` (#32601)
+
+**Cosmos DB**
+
+* `az cosmosdb fleet`: Add new fleet feature (#32390)
+* `az cosmosdb create/update`: Add support for `--disable-local-auth` (#32530)
+* `az cosmosdb restore`: Fix for cross region restore for cosmosdb (#32589)
+
+**Identity**
+
+* `az identity create`: Add new `--isolation-scope` parameter to support identity isolation scope (#31938)
+* `az identity update`: Add new command to support updating an identity (#31938)
+
+**Key Vault**
+
+* `az keyvault key create/import`: Add `--default-data-disk-policy` to support new default SKR policy (#32538)
+
+**Monitor**
+
+* `az monitor dashboard`: Support dashboard with Grafana (#32414)
+
+**MySQL**
+
+* `az mysql flexible-server backup delete`: Support deletion of on-demand backup (#32547)
+
+**Network**
+
+* `az network application-gateway settings`: Support `enableL4ClientIpPreservation` property via `--enable-l4-client-ip` (#32442)
+* `az network application-gateway probe`: Support `enableProbeProxyProtocolHeader` property via `--enable-proxy-header` (#32442)
+* `az network application-gateway waf-policy managed-rule rule-set`: Support disabled rules by default (#32488)
+* `az network virtual-appliance`: Add `--nva-interface-configurations` parameter (#32470)
+* `az network watcher flow-log`: Add `--record-types` parameter (#32490)
+* `az network private-endpoint-connection`: Add provider `Microsoft.Maps/accounts` (#32421)
+
+**Packaging**
+
+* Pin pywin32 to version 310 to resolve the MSI upgrade issue (#32557)
+
+**RDBMS**
+
+* `az postgres flexible-server update/fabric-mirroring`: Allow high availability enabled servers to start fabric mirroring if PG version 17+ (#32468)
+* `az postgres flexible-server create/update`: Show high availability feature with zonal resiliency argument (#32482)
+* `az postgres flexible-server create/update`: Enable support for High Availability on servers with PremiumV2_LRS storage type (#32542)
+* `az postgres flexible-server index-tuning`: Deprecate and redirect to `az postgres flexible-server autonomous-tuning` command group (#32546)
+* `az postgres flexible-server autonomous-tuning list-index-recommendations/list-table-recommendations`: Support listing index recommendations and table recommendations (#32546)
+* `az postgres flexible-server update`: Fix bug for using argument `--standby-zone` when enabling high availability (#32559)
+* `az postgres flexible-server upgrade`: Allow major version upgrade to PostgreSQL Version 18 (#32565)
+* `az postgres flexible-server create`: Add database name field for create with cluster (#32570)
+* `az postgres flexible-server backup/db/firewall-rule/identity/long-term-retention/microsoft-entra-admin/migration/parameter/replica list`: Allow `--ids` use for list commands (#32561)
+* `az postgres flexible-server create`: Change database name field to default to None (#32587)
+* `az postgres flexible-server replica create`: Add `--name` argument to specify read replica name (#32560)
+
+**SQL**
+
+* `az sql mi create/update`: Add memory size in gb parameter (#32466)
+
+**Storage**
+
+* `az storage blob/container/fs generate-sas`: Add `--user-delegation-oid` (#32508)
+* `az storage fs file generate-sas`: Add command and support `--user-delegation-oid` (#32508)
+* `az storage fs directory generate-sas`: Add `--user-delegation-oid` (#32508)
+* `az storage share/file/queue generate-sas`: Add `--as-user` and `--user-delegation-oid` (#32508)
+
 2.81.0
 ++++++
 

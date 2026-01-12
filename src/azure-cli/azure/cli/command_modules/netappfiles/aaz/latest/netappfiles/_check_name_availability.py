@@ -18,6 +18,9 @@ class CheckNameAvailability(AAZCommand):
     """Check if a resource name is available.
 
     Check if a resource name is available
+
+    :example: CheckNameAvailability
+        az netappfiles check-name-availability --location eastus --name accName --type Microsoft.NetApp/netAppAccounts --resource-group myRG
     """
 
     _aaz_info = {

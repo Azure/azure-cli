@@ -3,7 +3,7 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 from azure.cli.testsdk import (ScenarioTest, JMESPathCheck, ResourceGroupPreparer, KeyVaultPreparer,
-                               StorageAccountPreparer, api_version_constraint, live_only)
+                               StorageAccountPreparer, live_only)
 from azure.cli.testsdk.scenario_tests import AllowLargeResponse
 from azure.cli.core.profiles import ResourceType
 from knack.util import CLIError

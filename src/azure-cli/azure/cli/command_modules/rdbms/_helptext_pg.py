@@ -40,7 +40,7 @@ examples:
         az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
           --sku-name Standard_D2s_v3 --tier GeneralPurpose --public-access 153.24.26.117 --storage-size 128 \\
-          --tags "key=value" --version 17 --zonal-resiliency Enabled --zone 1 \\
+          --tags "key=value" --version 18 --zonal-resiliency Enabled --zone 1 \\
           --standby-zone 3
   - name: >
       Create server with high availability feature enabled that allows primary and standby in the same zone when multi-zone capacity is unavailable.
@@ -822,10 +822,10 @@ type: command
 short-summary: Create a read replica for a server.
 examples:
   - name: Create a read replica 'testreplicaserver' for 'testserver' with public or private access in the specified zone and location if available.
-    text: az postgres flexible-server replica create --replica-name testreplicaserver -g testGroup --source-server testserver --zone 3 --location testLocation
+    text: az postgres flexible-server replica create --name testreplicaserver -g testGroup --source-server testserver --zone 3 --location testLocation
   - name: Create a read replica 'testreplicaserver' with new subnet for 'testserver' with private access.
     text: >
-      az postgres flexible-server replica create --replica-name testreplicaserver -g testGroup \\
+      az postgres flexible-server replica create --name testreplicaserver -g testGroup \\
         --source-server testserver --zone 3 --location testLocation \\
         --vnet newVnet --subnet newSubnet \\
         --address-prefixes 172.0.0.0/16 --subnet-prefixes 172.0.0.0/24 \\
@@ -836,13 +836,13 @@ examples:
       in the specified location if available. Since zone is not passed, it will automatically pick up zone in the \
       replica location which is different from source server, if available, else will pick up zone same as source server \
       in the replica location if available, else will set the zone as None, i.e. No preference
-    text: az postgres flexible-server replica create --replica-name testreplicaserver -g testGroup --source-server testserver --location testLocation
+    text: az postgres flexible-server replica create --name testreplicaserver -g testGroup --source-server testserver --location testLocation
   - name: Create a read replica 'testreplicaserver' for 'testserver' with custom --storage-size and --sku.
-    text: az postgres flexible-server replica create --replica-name testreplicaserver -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
+    text: az postgres flexible-server replica create --name testreplicaserver -g testGroup --source-server testserver --sku-name Standard_D4ds_v5 --storage-size 256
   - name: Create a read replica 'testreplicaserver' for 'testserver', where 'testreplicaserver' is in a different resource group 'newTestGroup'. \
       Here --resource-group is for the read replica's resource group, and --source-server must be passed as resource ID.
     text: >
-      az postgres flexible-server replica create --replica-name testreplicaserver -g newTestGroup \
+      az postgres flexible-server replica create --name testreplicaserver -g newTestGroup \
         --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{sourceServerName} --location testLocation
 """
 
@@ -910,8 +910,8 @@ helps['postgres flexible-server upgrade'] = """
 type: command
 short-summary: Upgrade the major version of a flexible server.
 examples:
-  - name: Upgrade server 'testsvr' to PostgreSQL major version 17.
-    text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 17
+  - name: Upgrade server 'testsvr' to PostgreSQL major version 18.
+    text: az postgres flexible-server upgrade -g testgroup -n testsvr -v 18
 """
 
 helps['postgres flexible-server identity'] = """
