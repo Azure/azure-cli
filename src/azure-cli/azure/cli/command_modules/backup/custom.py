@@ -56,6 +56,8 @@ secondary_region_map = {
     "australiacentral2": "australiacentral",
     "australiaeast": "australiasoutheast",
     "australiasoutheast": "australiaeast",
+    "bleufrancecentral": "bleufrancesouth",
+    "bleufrancesouth": "bleufrancecentral",
     "brazilsouth": "southcentralus",
     "brazilsoutheast": "brazilsouth",
     "canadacentral": "canadaeast",

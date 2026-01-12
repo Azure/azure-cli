@@ -6005,8 +6005,6 @@ class VnetGatewayCreate(_VnetGatewayCreate):
         args_schema.enable_bgp._registered = False
         args_schema.nat_rules.Element.external_mappings_ip._registered = False
         args_schema.nat_rules.Element.internal_mappings_ip._registered = False
-        args_schema.mi_system_assigned._registered = False
-        args_schema.mi_user_assigned._registered = False
         return args_schema
 
     def pre_operations(self):
@@ -6249,7 +6247,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
                           authorization_key=None, enable_bgp=False, routing_weight=10,
                           connection_type=None, shared_key=None,
                           use_policy_based_traffic_selectors=False,
-                          express_route_gateway_bypass=None, ingress_nat_rule=None, egress_nat_rule=None):
+                          express_route_gateway_bypass=None, ingress_nat_rule=None, egress_nat_rule=None, auth_type=None, cert_auth=None):
     from azure.cli.core.util import random_string
     from azure.cli.core.commands.arm import ArmTemplateBuilder
     from azure.cli.command_modules.network._template_builder import build_vpn_connection_resource
@@ -6263,7 +6261,7 @@ def create_vpn_connection(cmd, resource_group_name, connection_name, vnet_gatewa
         cmd, connection_name, location, tags, vnet_gateway1,
         vnet_gateway2 or local_gateway2 or express_route_circuit2,
         connection_type, authorization_key, enable_bgp, routing_weight, shared_key,
-        use_policy_based_traffic_selectors, express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule)
+        use_policy_based_traffic_selectors, express_route_gateway_bypass, ingress_nat_rule, egress_nat_rule, auth_type, cert_auth)
     master_template.add_resource(vpn_connection_resource)
     master_template.add_output('resource', connection_name, output_type='object')
     if shared_key:

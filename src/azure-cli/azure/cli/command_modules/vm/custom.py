@@ -23,7 +23,6 @@ from urllib.request import urlopen  # noqa, pylint: disable=import-error,unused-
 from knack.log import get_logger
 from knack.util import CLIError
 from azure.cli.core.azclierror import (
-    CLIInternalError,
     ResourceNotFoundError,
     ValidationError,
     RequiredArgumentMissingError,
@@ -38,7 +37,7 @@ from azure.cli.core.commands.client_factory import get_mgmt_service_client
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.util import sdk_no_wait
 
-from ._vm_utils import read_content_if_is_file, import_aaz_by_profile
+from ._vm_utils import read_content_if_is_file, import_aaz_by_profile, IdentityType
 from ._vm_diagnostics_templates import get_default_diag_config
 
 from ._actions import (load_images_from_aliases_doc, load_extension_images_thru_services,
@@ -826,8 +825,14 @@ def create_snapshot(cmd, resource_group_name, snapshot_name, location=None, size
 
 # region VirtualMachines Identity
 def show_vm_identity(cmd, resource_group_name, vm_name):
-    client = _compute_client_factory(cmd.cli_ctx)
-    return client.virtual_machines.get(resource_group_name, vm_name).identity
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+
+    identity = vm.get("identity", {}) if vm else None
+
+    if identity and not identity.get('userAssignedIdentities'):
+        identity['userAssignedIdentities'] = None
+
+    return identity or None
 
 
 def show_vmss_identity(cmd, resource_group_name, vm_name):
@@ -837,49 +842,60 @@ def show_vmss_identity(cmd, resource_group_name, vm_name):
 
 def assign_vm_identity(cmd, resource_group_name, vm_name, assign_identity=None, identity_role=None,
                        identity_role_id=None, identity_scope=None):
-    VirtualMachineIdentity, ResourceIdentityType, VirtualMachineUpdate = cmd.get_models('VirtualMachineIdentity',
-                                                                                        'ResourceIdentityType',
-                                                                                        'VirtualMachineUpdate')
-    UserAssignedIdentitiesValue = cmd.get_models('UserAssignedIdentitiesValue')
-    from azure.cli.core.commands.arm import assign_identity as assign_identity_helper
-    client = _compute_client_factory(cmd.cli_ctx)
-    _, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
+    identity, _, external_identities, enable_local_identity = _build_identities_info(assign_identity)
+
+    command_args = {'resource_group': resource_group_name, 'vm_name': vm_name}
 
     def getter():
-        return client.virtual_machines.get(resource_group_name, vm_name)
+        return get_vm_by_aaz(cmd, resource_group_name, vm_name)
 
     def setter(vm, external_identities=external_identities):
-        if vm.identity and vm.identity.type == ResourceIdentityType.system_assigned_user_assigned:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
-        elif vm.identity and vm.identity.type == ResourceIdentityType.system_assigned and external_identities:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
-        elif vm.identity and vm.identity.type == ResourceIdentityType.user_assigned and enable_local_identity:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
+        if vm.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+        elif vm.get('identity', {}).get('type', None) == IdentityType.SYSTEM_ASSIGNED.value and external_identities:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
+        elif vm.get('identity', {}).get('type', None) == IdentityType.USER_ASSIGNED.value and enable_local_identity:
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
         elif external_identities and enable_local_identity:
-            identity_types = ResourceIdentityType.system_assigned_user_assigned
+            identity_types = IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value
         elif external_identities:
-            identity_types = ResourceIdentityType.user_assigned
+            identity_types = IdentityType.USER_ASSIGNED.value
         else:
-            identity_types = ResourceIdentityType.system_assigned
+            identity_types = IdentityType.SYSTEM_ASSIGNED.value
 
-        vm.identity = VirtualMachineIdentity(type=identity_types)
-        if external_identities:
-            vm.identity.user_assigned_identities = {}
-            if not cmd.supported_api_version(min_api='2018-06-01', resource_type=ResourceType.MGMT_COMPUTE):
-                raise CLIInternalError("Usage error: user assigned identity is not available under current profile.",
-                                       "You can set the cloud's profile to latest with 'az cloud set --profile latest"
-                                       " --name <cloud name>'")
-            for identity in external_identities:
-                vm.identity.user_assigned_identities[identity] = UserAssignedIdentitiesValue()
+        if identity_types == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+            command_args['mi_system_assigned'] = "True"
+            command_args['mi_user_assigned'] = []
+        elif identity_types == IdentityType.USER_ASSIGNED.value:
+            command_args['mi_user_assigned'] = []
+        else:
+            command_args['mi_system_assigned'] = "True"
+            command_args['mi_user_assigned'] = []
 
-        vm_patch = VirtualMachineUpdate()
-        vm_patch.identity = vm.identity
-        return patch_vm(cmd, resource_group_name, vm_name, vm_patch)
+        if vm.get('identity', {}).get('userAssignedIdentities', None):
+            for key in vm.get('identity').get('userAssignedIdentities').keys():
+                command_args['mi_user_assigned'].append(key)
 
+        if identity.get('userAssignedIdentities'):
+            for key in identity.get('userAssignedIdentities', {}).keys():
+                if key not in command_args['mi_user_assigned']:
+                    command_args['mi_user_assigned'].append(key)
+
+        from .operations.vm import VMPatch
+        update_vm_identity = VMPatch(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+        LongRunningOperation(cmd.cli_ctx)(update_vm_identity)
+        result = update_vm_identity.result()
+        return result
+
+    from ._vm_utils import assign_identity as assign_identity_helper
     assign_identity_helper(cmd.cli_ctx, getter, setter, identity_role=identity_role_id, identity_scope=identity_scope)
-    vm = client.virtual_machines.get(resource_group_name, vm_name)
-    return _construct_identity_info(identity_scope, identity_role, vm.identity.principal_id,
-                                    vm.identity.user_assigned_identities)
+
+    vm = getter()
+    return _construct_identity_info(
+        identity_scope,
+        identity_role,
+        vm.get('identity').get('principalId') if vm.get('identity') else None,
+        vm.get('identity').get('userAssignedIdentities') if vm.get('identity') else None)
 # endregion
 
 
@@ -1365,6 +1381,19 @@ def get_instance_view(cmd, resource_group_name, vm_name, include_user_data=False
         "expand": expand,
     })
     return result
+
+
+def get_vm_by_aaz(cmd, resource_group_name, vm_name, expand=None):
+    from .operations.vm import VMShow
+    command_args = {
+        'resource_group': resource_group_name,
+        'vm_name': vm_name,
+    }
+
+    if expand:
+        command_args['expand'] = expand
+
+    return VMShow(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
 
 def get_vm(cmd, resource_group_name, vm_name, expand=None):
@@ -2493,7 +2522,7 @@ def _remove_identities(cmd, resource_group_name, name, identities, getter, sette
         return None
     emsis_to_remove = []
     if identities:
-        existing_emsis = {x.lower() for x in list((resource.identity.user_assigned_identities or {}).keys())}
+        existing_emsis = {x.lower() for x in (resource.identity.user_assigned_identities or {}).keys()}
         emsis_to_remove = {x.lower() for x in identities}
         non_existing = emsis_to_remove.difference(existing_emsis)
         if non_existing:
@@ -2520,18 +2549,83 @@ def _remove_identities(cmd, resource_group_name, name, identities, getter, sette
     return result.identity
 
 
+def _remove_identities_by_aaz(cmd, resource_group_name, name, identities, getter, setter):
+    from ._vm_utils import MSI_LOCAL_ID
+
+    remove_system_assigned_identity = False
+
+    if MSI_LOCAL_ID in identities:
+        remove_system_assigned_identity = True
+        identities.remove(MSI_LOCAL_ID)
+
+    resource = getter(cmd, resource_group_name, name)
+    existing_identity = resource.get('identity')
+
+    if existing_identity is None:
+        return None
+
+    existing_emsis = [x.lower() for x in (existing_identity.get('userAssignedIdentities') or {}).keys()]
+    existing_identity['userAssignedIdentities'] = {}
+
+    if identities:
+        emsis_to_remove = [x.lower() for x in identities]
+
+        non_existing = [emsis for emsis in emsis_to_remove if emsis not in existing_emsis]
+        if non_existing:
+            raise CLIError("'{}' are not associated with '{}'".format(','.join(non_existing), name))
+
+        emsis_to_retain = [emsis for emsis in existing_emsis if emsis not in emsis_to_remove]
+
+        if not emsis_to_retain:  # if all emsis are gone, we need to update the type
+            if existing_identity['type'] == IdentityType.USER_ASSIGNED.value:
+                existing_identity['type'] = IdentityType.NONE.value
+            elif existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+                existing_identity['type'] = IdentityType.SYSTEM_ASSIGNED.value
+
+        for emsis in identities:
+            existing_identity['userAssignedIdentities'][emsis] = {}
+
+    if remove_system_assigned_identity:
+        if existing_identity['type'] == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value \
+                or existing_identity['type'] == IdentityType.USER_ASSIGNED.value:
+            existing_identity['type'] = IdentityType.USER_ASSIGNED.value
+        else:
+            existing_identity['type'] = IdentityType.NONE.value
+
+    result = LongRunningOperation(cmd.cli_ctx)(setter(resource_group_name, name, resource))
+    return result.get('identity') or None
+
+
 def remove_vm_identity(cmd, resource_group_name, vm_name, identities=None):
     def setter(resource_group_name, vm_name, vm):
-        client = _compute_client_factory(cmd.cli_ctx)
-        VirtualMachineUpdate = cmd.get_models('VirtualMachineUpdate', operation_group='virtual_machines')
-        vm_update = VirtualMachineUpdate(identity=vm.identity)
-        return client.virtual_machines.begin_update(resource_group_name, vm_name, vm_update)
+        command_args = {
+            'resource_group': resource_group_name,
+            'vm_name': vm_name
+        }
+
+        if vm.get('identity') and vm.get('identity').get('type') == IdentityType.USER_ASSIGNED.value:
+            # NOTE: The literal 'UserAssigned' is intentionally appended as a marker for
+            # VMIdentityRemove._format_content, which uses it to apply special handling
+            # for purely user-assigned identities. It is not a real identity resource ID.
+            command_args['mi_user_assigned'] = \
+                list(vm.get('identity', {}).get('userAssignedIdentities', {}).keys()) + ['UserAssigned']
+        elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED.value:
+            command_args['mi_user_assigned'] = []
+            command_args['mi_system_assigned'] = 'True'
+        elif vm.get('identity') and vm.get('identity').get('type') == IdentityType.SYSTEM_ASSIGNED_USER_ASSIGNED.value:
+            command_args['mi_user_assigned'] = list(vm.get('identity', {}).get('userAssignedIdentities', {}).keys())
+            command_args['mi_system_assigned'] = 'True'
+        else:
+            command_args['mi_user_assigned'] = []
+
+        from .operations.vm import VMIdentityRemove
+        return VMIdentityRemove(cli_ctx=cmd.cli_ctx)(command_args=command_args)
 
     if identities is None:
         from ._vm_utils import MSI_LOCAL_ID
         identities = [MSI_LOCAL_ID]
 
-    return _remove_identities(cmd, resource_group_name, vm_name, identities, get_vm, setter)
+    return _remove_identities_by_aaz(cmd, resource_group_name, vm_name, identities, get_vm_by_aaz, setter)
 
 
 # region VirtualMachines Images

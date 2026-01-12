@@ -3,11 +3,14 @@
 # Licensed under the MIT License. See License.txt in the project root for license information.
 # --------------------------------------------------------------------------------------------
 # pylint: disable=no-self-use, line-too-long, protected-access, too-few-public-methods, unused-argument, too-many-statements, too-many-branches, too-many-locals
+import json
+
 from knack.log import get_logger
 
 from azure.cli.core.aaz import AAZStrType
-from ..aaz.latest.vm import (Show as _VMShow, ListSizes as _VMListSizes,
+from ..aaz.latest.vm import (Show as _VMShow, ListSizes as _VMListSizes, Patch as _VMPatch,
                              Update as _VMUpdate, Capture as _VMCapture, Create as _VMCreate)
+from .._vm_utils import IdentityType
 
 logger = get_logger(__name__)
 
@@ -153,6 +156,108 @@ class VMCreate(_VMCreate):
 
         result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
         return result
+
+
+class VMPatch(_VMPatch):
+    class VirtualMachinesUpdate(_VMPatch.VirtualMachinesUpdate):
+        # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing
+        @classmethod
+        def _build_schema_on_200(cls):
+            schema = super()._build_schema_on_200()
+
+            del schema.resources.Element.properties._fields['type']
+            schema.resources.Element.properties.type = AAZStrType(
+                serialized_name="typePropertiesType",
+            )
+            return schema
+
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.resources):
+            for resource in self.ctx.vars.instance.resources:
+                if has_value(resource.type):
+                    resource.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+        return result
+
+
+class VMIdentityRemove(_VMPatch):
+    def _output(self, *args, **kwargs):
+        from azure.cli.core.aaz import AAZUndefined, has_value
+
+        # Resolve flatten conflict
+        # When the type field conflicts, the type in inner layer is ignored and the outer layer is applied
+        if has_value(self.ctx.vars.instance.resources):
+            for resource in self.ctx.vars.instance.resources:
+                if has_value(resource.type):
+                    resource.type = AAZUndefined
+
+        result = self.deserialize_output(self.ctx.vars.instance, client_flatten=True)
+
+        identity = result.get('identity')
+        if not identity:
+            return result
+
+        if not identity.get('userAssignedIdentities'):
+            identity['userAssignedIdentities'] = None
+
+        return result
+
+    class VirtualMachinesUpdate(_VMPatch.VirtualMachinesUpdate):
+        # Override to solve key conflict of _schema_on_200.resources.Element.properties.type when deserializing
+        @classmethod
+        def _build_schema_on_200(cls):
+            schema = super()._build_schema_on_200()
+
+            del schema.resources.Element.properties._fields['type']
+            schema.resources.Element.properties.type = AAZStrType(
+                serialized_name="typePropertiesType",
+            )
+            return schema
+
+        def _format_content(self, content):
+            if isinstance(content, str):
+                content = json.loads(content)
+
+            if not content.get('identity'):
+                content['identity'] = {
+                    'userAssignedIdentities': None,
+                    'type': IdentityType.NONE.value
+                }
+                return json.dumps(content)
+
+            identities = content.get('identity', {}).get('userAssignedIdentities')
+            if identities:
+                if 'UserAssigned' in identities.keys():
+                    identities.pop('UserAssigned')
+
+                for key in list(identities.keys()):
+                    identities[key] = None
+
+            if not content.get('identity', {}).get('userAssignedIdentities', {}):
+                content['identity']['userAssignedIdentities'] = None
+
+            return json.dumps(content)
+
+        def __call__(self, *args, **kwargs):
+            request = self.make_request()
+            request.data = self._format_content(request.data)
+            session = self.client.send_request(request=request, stream=False, **kwargs)
+            if session.http_response.status_code in [200, 202]:
+                return self.client.build_lro_polling(
+                    self.ctx.args.no_wait,
+                    session,
+                    self.on_200,
+                    self.on_error,
+                    lro_options={"final-state-via": "azure-async-operation"},
+                    path_format_arguments=self.url_parameters,
+                )
+
+            return self.on_error(session.http_response)
 
 
 def convert_show_result_to_snake_case(result):
