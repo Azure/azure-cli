@@ -2164,6 +2164,28 @@ class WebappUpdateTest(ScenarioTest):
             self.check('clientAffinityEnabled', True)
         ])
 
+    @AllowLargeResponse()
+    @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
+    def test_webapp_update_e2e_encryption(self, resource_group):
+        webapp_name = self.create_random_name('webapp-e2e-test', 40)
+        plan_name = self.create_random_name('webapp-e2e-plan', 40)
+        self.cmd('appservice plan create -g {} -n {} --sku S1'
+                 .format(resource_group, plan_name))
+
+        self.cmd('webapp create -g {} -n {} --plan {}'
+                 .format(resource_group, webapp_name, plan_name))
+
+        # Enable end-to-end encryption
+        self.cmd('webapp update -g {} -n {} --end-to-end-encryption-enabled true'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('name', webapp_name),
+                     JMESPathCheck('endToEndEncryptionEnabled', True)])
+
+        # Disable end-to-end encryption
+        self.cmd('webapp update -g {} -n {} -e false'
+                 .format(resource_group, webapp_name)).assert_with_checks([
+                     JMESPathCheck('endToEndEncryptionEnabled', False)])
+
 
 class BasicAuthScenarioTest(LiveScenarioTest):
     @ResourceGroupPreparer(location=WINDOWS_ASP_LOCATION_WEBAPP)
