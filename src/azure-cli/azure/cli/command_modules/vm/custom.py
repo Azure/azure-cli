@@ -1407,6 +1407,17 @@ def get_vm(cmd, resource_group_name, vm_name, expand=None):
     return client.virtual_machines.get(resource_group_name, vm_name, expand=expand)
 
 
+def get_vm_by_aaz(cmd, resource_group_name, vm_name, expand=None):
+    from .operations.vm import VMShow
+
+    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
+        "resource_group": resource_group_name,
+        "vm_name": vm_name,
+        "expand": expand
+    })
+    return vm
+
+
 def get_vm_to_update(cmd, resource_group_name, vm_name):
     client = _compute_client_factory(cmd.cli_ctx)
     vm = client.virtual_machines.get(resource_group_name, vm_name)
@@ -1419,12 +1430,12 @@ def get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name):
     from .operations.vm import VMShow
 
     vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
-        'resource_group': resource_group_name,
+        "resource_group": resource_group_name,
         "vm_name": vm_name
     })
 
     # To avoid unnecessary permission check of image
-    storage_profile = vm.get('storageProfile', {})
+    storage_profile = vm.get("storageProfile", {})
     storage_profile["imageReference"] = None
 
     return vm
@@ -3362,10 +3373,15 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
 
 
 def list_vm_secrets(cmd, resource_group_name, vm_name):
-    vm = get_vm(cmd, resource_group_name, vm_name)
-    if vm.os_profile:
-        return vm.os_profile.secrets
-    return []
+    vm = get_vm_by_aaz(cmd, resource_group_name, vm_name)
+
+    if vm.get('osProfile', {}).get('secrets', []):
+        for secret in vm['osProfile']['secrets']:
+            for cert in secret.get('vaultCertificates', []):
+                if not cert.get('certificateStore'):
+                    cert['certificateStore'] = None
+
+    return vm.get('osProfile', {}).get('secrets', [])
 
 
 def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=None):
