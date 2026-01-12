@@ -54,7 +54,7 @@ examples:
 
       az postgres flexible-server create --location northeurope --resource-group testGroup \\
           --name testserver --admin-user username --admin-password password \\
-          --sku-name Standard_B1ms --tier Burstable --storage-type PremiumV2_LRS --storage-size 128 --iops 3000 --throughput 125
+          --sku-name Standard_B1ms --tier GeneralPurpose --storage-type PremiumV2_LRS --storage-size 128 --iops 3000 --throughput 125
   - name: >
       Create a PostgreSQL flexible server with default parameters and public access enabled by default. \
       Resource group, server name, username, password, and default database will be created by CLI
