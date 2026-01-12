@@ -163,14 +163,14 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('storage account create -g {rg} -n {sa} --publish-ipv6-endpoint true',
                  checks=[
                      JMESPathCheck('dualStackEndpointPreference.publishIpv6Endpoint', True),
-                     JMESPathCheckExists('primaryEndpoints.ipEndpoints'),
+                     JMESPathCheckExists('primaryEndpoints.blob'),
                      JMESPathCheckExists('primaryEndpoints.ipv6Endpoints')
                  ])
 
         self.cmd('storage account update -g {rg} -n {sa} --publish-ipv6-endpoint false',
                  checks=[
                      JMESPathCheck('dualStackEndpointPreference.publishIpv6Endpoint', False),
-                     JMESPathCheckExists('primaryEndpoints.ipEndpoints'),
+                     JMESPathCheckExists('primaryEndpoints.blob'),
                      JMESPathCheckNotExists('primaryEndpoints.ipv6Endpoints')
         ])
 

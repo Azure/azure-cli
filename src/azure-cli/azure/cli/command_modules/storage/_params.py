@@ -446,7 +446,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_blob_geo_priority_replication', arg_type=get_three_state_flag(),
                    options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
                    help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
-        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(), min_api='2023-01-01',
+        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(),
                    arg_group='IPv6 Endpoint',
                    help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
 
@@ -550,7 +550,7 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_blob_geo_priority_replication', arg_type=get_three_state_flag(),
                    options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
                    help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
-        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(), min_api='2023-01-01',
+        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(),
                    arg_group='IPv6 Endpoint',
                    help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
 
