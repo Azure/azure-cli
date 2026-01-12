@@ -444,6 +444,9 @@ subscription than the app service environment, please use the resource ID for --
         c.argument('minimum_elastic_instance_count', options_list=["--minimum-elastic-instance-count", "-i"], type=int, is_preview=True, help="Minimum number of instances. App must be in an elastic scale App Service Plan.")
         c.argument('prewarmed_instance_count', options_list=["--prewarmed-instance-count", "-w"], type=int, is_preview=True, help="Number of preWarmed instances. App must be in an elastic scale App Service Plan.")
         c.argument('basic_auth', help='Enable or disable basic auth.', arg_type=get_enum_type(BASIC_AUTH_TYPES))
+        c.argument('end_to_end_encryption_enabled', options_list=['--end-to-end-encryption-enabled', '-e'],
+                   help='Enable or disable end-to-end encryption between the Front End and the Workers.',
+                   arg_type=get_three_state_flag(return_label=True))
 
     with self.argument_context('webapp browse') as c:
         c.argument('logs', options_list=['--logs', '-l'], action='store_true',
