@@ -1627,20 +1627,28 @@ helps['sql server restore'] = """
 type: command
 short-summary: Restore a deleted SQL server.
 long-summary: >
-    Restores a soft-deleted SQL server.
+    Restores a soft-deleted SQL server to the resource group where it was originally located.
+    The server must have been deleted with soft delete enabled and within the retention period.
+parameters:
+  - name: --name -n
+    short-summary: Name of the deleted server to restore.
+  - name: --resource-group -g
+    short-summary: Name of the resource group where the server was originally located.
+  - name: --location -l
+    short-summary: Location where the deleted server was originally located.
 examples:
-  - name: Restore a deleted server.
-    text: az sql server restore -n myserver -l westus2
+  - name: Restore a deleted server to its original resource group.
+    text: az sql server restore -g myresourcegroup -n myserver -l westus2
 """
 
 helps['sql server deleted-server'] = """
 type: group
-short-summary: Manage deleted SQL servers that can be restored.
+short-summary: Gets details of deleted SQL servers.
 """
 
 helps['sql server deleted-server show'] = """
 type: command
-short-summary: Get the details of a deleted SQL servers in a specific location.
+short-summary: Get the details of a deleted SQL server in a specific location.
 examples:
   - name: Get details of a deleted server by name and location.
     text: az sql server deleted-server show --name myserver --location westus2

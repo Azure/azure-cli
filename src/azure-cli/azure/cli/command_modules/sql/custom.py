@@ -8,6 +8,7 @@ from enum import Enum
 import calendar
 from datetime import datetime
 from dateutil.parser import parse
+from azure.core.exceptions import HttpResponseError
 
 from azure.cli.core.util import (
     CLIError,
@@ -104,12 +105,6 @@ from ._util import (
 
 
 logger = get_logger(__name__)
-
-
-###############################################
-#                Constants                    #
-###############################################
-
 
 ###############################################
 #                Common funcs                 #
@@ -228,7 +223,6 @@ def _validate_deleted_server_exists(cmd, location, server_name):
     Validates that a deleted server exists and can be restored.
     Returns the deleted server object if found.
     '''
-    from azure.core.exceptions import HttpResponseError
 
     try:
         deleted_servers_client = get_sql_deleted_servers_operations(cmd.cli_ctx, None)
@@ -242,16 +236,37 @@ def _validate_deleted_server_exists(cmd, location, server_name):
         # Handle 404 - deleted server not found
         if ex.status_code == 404:
             raise ResourceNotFoundError(
-                f'No deleted server found with name "{server_name}" in location "{location}". '
-                'The server may not have been deleted with soft delete enabled,'
-                ' or the retention period has expired.') from ex
+                f'Deleted server "{server_name}" not found in location "{location}". '
+                'The server may not have been deleted with soft delete enabled, or the retention period has expired.',
+                ['Use "az sql server deleted-server list" to view all available deleted servers.',
+                 'Verify the server name and location are correct.']) from ex
         # Handle other HTTP errors
         raise AzCLIError(
             f'Failed to retrieve deleted server "{server_name}" in location "{location}". {ex.message}') from ex
     except Exception as ex:
         # Handle unexpected errors
-        raise AzCLIError(
-            f'Unexpected error while validating deleted server "{server_name}". {str(ex)}') from ex
+        raise AzCLIError('Unexpected error while validating deleted server') from ex
+
+
+def _validate_resource_group_match(deleted_server, user_provided_rg, server_name):
+    '''
+    Validates that the user-provided resource group matches the original resource group
+    from which the server was deleted.
+    Raises ValidationError if they don't match.
+    '''
+    # Parse resource group from original_id
+    # Format: /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/servers/{name}
+    parts = deleted_server.original_id.split('/')
+    original_resource_group = parts[4]
+
+    # Compare resource groups (case-insensitive)
+    if user_provided_rg.lower() != original_resource_group.lower():
+        raise ValidationError(
+            f'The resource group "{user_provided_rg}" does not match the deleted server\'s original '
+            f'resource group "{original_resource_group}". Server "{server_name}" must be restored to '
+            f'its original resource group. ')
+
+    return original_resource_group
 
 
 def _get_default_server_version(location_capabilities):
@@ -4535,6 +4550,7 @@ def server_create(
 def server_restore(
         cmd,
         client,
+        resource_group_name,
         server_name,
         location,
         no_wait=False,
@@ -4543,10 +4559,10 @@ def server_restore(
     Restores a deleted server.
     '''
     # Validate that we have enough information to perform the restore
-    if not server_name or not location:
+    if not server_name or not location or not resource_group_name:
         raise RequiredArgumentMissingError(
-            'Server name and location are required for server restore.',
-            'Please specify all required parameters: --name and --location.')
+            'Server name, location, and resource group are required for server restore.',
+            'Specify all required parameters: --name, --location, and --resource-group.')
 
     # Validate location is valid and supported
     # This will raise an error if location is invalid or not available
@@ -4558,24 +4574,9 @@ def server_restore(
     # Validate deleted server exists and get the deleted server object
     deleted_server = _validate_deleted_server_exists(cmd, location, server_name)
 
-    # Derive resource group from deleted server's original_id
-    if not deleted_server.original_id:
-        raise AzCLIError(
-            f'Unable to determine resource group for server "{server_name}". '
-            'The deleted server does not have original resource information.')
-
-    # Parse resource group from original_id
-    # Format: /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/servers/{name}
-    try:
-        parts = deleted_server.original_id.split('/')
-        if len(parts) >= 5 and parts[3].lower() == 'resourcegroups':
-            resource_group_name = parts[4]
-            logger.info('Derived resource group "%s" from deleted server original_id', resource_group_name)
-        else:
-            raise ValueError('Invalid resource ID format')
-    except (ValueError, IndexError) as ex:
-        raise AzCLIError(
-            f'Unable to parse resource group from deleted server resource ID: {deleted_server.original_id}.') from ex
+    # Validate that the provided resource group matches the original resource group
+    if deleted_server is not None and deleted_server.original_id is not None:
+        _validate_resource_group_match(deleted_server, resource_group_name, server_name)
 
     # Set required parameters for restore
     kwargs['location'] = location
@@ -4585,10 +4586,18 @@ def server_restore(
                 server_name, resource_group_name, location)
 
     # Create/restore the server
-    return sdk_no_wait(no_wait, client.begin_create_or_update,
-                       server_name=server_name,
-                       resource_group_name=resource_group_name,
-                       parameters=kwargs)
+    try:
+        return sdk_no_wait(no_wait, client.begin_create_or_update,
+                           server_name=server_name,
+                           resource_group_name=resource_group_name,
+                           parameters=kwargs)
+    except HttpResponseError as ex:
+        # Handle resource group not found error specifically
+        if ex.status_code == 404 and 'ResourceGroupNotFound' in str(ex):
+            raise ResourceNotFoundError(
+                f'Resource group "{resource_group_name}" not found.') from ex
+        # Re-raise other HTTP errors
+        raise
 
 
 def server_list(
@@ -4680,8 +4689,11 @@ def server_update(
 
     # Handle soft delete retention days
     # 0 = disable soft delete, 1-7 = enable with specified retention days
+    # If not specified, set to None to avoid sending existing value to API
     if soft_delete_retention_days is not None:
         instance.retention_days = soft_delete_retention_days
+    else:
+        instance.retention_days = None
 
     return instance
 

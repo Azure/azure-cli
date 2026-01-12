@@ -577,7 +577,8 @@ def load_command_table(self, _):
                          supports_no_wait=True)
         g.custom_command('restore', 'server_restore',
                          table_transformer=server_table_format,
-                         supports_no_wait=True)
+                         supports_no_wait=True,
+                         is_preview=True)
         g.command('delete', 'begin_delete',
                   confirmation=True)
         g.custom_show_command('show', 'server_get',
@@ -793,9 +794,11 @@ def load_command_table(self, _):
     with self.command_group('sql server deleted-server', deleted_servers_operations,
                             client_factory=get_sql_deleted_servers_operations) as g:
         g.custom_show_command('show', 'deleted_server_show',
-                              transform=deleted_server_transform)
+                              transform=deleted_server_transform,
+                              is_preview=True)
         g.custom_command('list', 'deleted_server_list',
-                         transform=deleted_server_list_transform)
+                         transform=deleted_server_list_transform,
+                         is_preview=True)
 
     ###############################################
     #                sql managed instance         #

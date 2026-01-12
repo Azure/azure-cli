@@ -73,7 +73,8 @@ from ._validators import (
     create_args_for_complex_type,
     validate_managed_instance_storage_size,
     validate_backup_storage_redundancy,
-    validate_subnet
+    validate_subnet,
+    validate_soft_delete_retention_days
 )
 
 #####
@@ -1917,7 +1918,8 @@ def load_arguments(self, _):
         c.argument('soft_delete_retention_days',
                    options_list=['--soft-delete-retention-days', '--sdrd'],
                    type=int,
-                   choices=range(0, 8),
+                   validator=validate_soft_delete_retention_days,
+                   is_preview=True,
                    help='Specify the number of days to retain soft deleted server (0-7). '
                    'Set to 0 to disable soft delete. '
                    'Set to 1-7 days to enable soft delete with the specified retention period. '
@@ -1973,7 +1975,8 @@ def load_arguments(self, _):
         c.argument('soft_delete_retention_days',
                    options_list=['--soft-delete-retention-days', '--sdrd'],
                    type=int,
-                   choices=range(0, 8),
+                   validator=validate_soft_delete_retention_days,
+                   is_preview=True,
                    help='Specify the number of days to retain soft deleted server (0-7). '
                    'Set to 0 to disable soft delete. '
                    'Set to 1-7 days to enable soft delete with the specified retention period.')
