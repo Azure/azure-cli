@@ -986,9 +986,7 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
         instance.protocol_settings.nfs.encryption_in_transit = (
             cmd.get_models('EncryptionInTransit')(required=require_nfs_encryption_in_transit))
 
-    if (instance.protocol_settings and
-            (instance.protocol_settings.smb and any(instance.protocol_settings.smb.__dict__.values()) or
-             instance.protocol_settings.nfs and any(instance.protocol_settings.nfs.__dict__.values()))):
+    if any(instance.protocol_settings.smb.__dict__.values()) or any(instance.protocol_settings.nfs.__dict__.values()):
         params['protocol_settings'] = instance.protocol_settings
 
     return params
