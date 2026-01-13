@@ -322,13 +322,13 @@ def _is_linux_os(vm):
 
 def _is_linux_os_by_aaz(vm):
     os_type = None
-    if vm.get("storageProfile", {}).get("osDisk", {}).get("osType", None) is not None:
-        os_type = vm["storageProfile"]["osDisk"]["osType"]
+    if vm.get("storage_profile", {}).get("os_disk", {}).get("os_type", None) is not None:
+        os_type = vm["storage_profile"]["os_disk"]["os_type"]
     if os_type:
         return os_type.lower() == 'linux'
     # the os_type could be None for VM scaleset, let us check out os configurations
-    if vm.get("osProfile", {}).get("linuxConfiguration", None) is not None:
-        return bool(vm["osProfile"]["linuxConfiguration"])
+    if vm.get("os_profile", {}).get("linux_configuration", None) is not None:
+        return bool(vm["os_profile"]["linux_configuration"])
     return False
 
 
@@ -1740,17 +1740,15 @@ def set_vm(cmd, instance, lro_operation=None, no_wait=False):
 
 
 def set_vm_by_aaz(cmd, vm, no_wait=False):
-    from .aaz.latest.vm import Update as _VMUpdate
+    from .aaz.latest.vm import Create as _VMCreate
 
     parsed_id = _parse_rg_name(vm['id'])
 
-    class SetVM(_VMUpdate):
+    class SetVM(_VMCreate):
         def pre_operations(self):
             args = self.ctx.args
             args.no_wait = no_wait
-
-        def pre_instance_update(self, instance):
-            instance.properties.os_profile.secrets = vm.get('osProfile', {}).get('secrets', [])
+            args.os_profile.secrets = vm.get('os_profile', {}).get('secrets', [])
 
         def _output(self, *args, **kwargs):
             from azure.cli.core.aaz import AAZUndefined, has_value
@@ -3328,7 +3326,9 @@ def get_vm_format_secret(cmd, secrets, certificate_store=None, keyvault=None, re
 def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, certificate_store=None):
     from azure.mgmt.core.tools import parse_resource_id
     from ._vm_utils import create_data_plane_keyvault_certificate_client, get_key_vault_base_url
+    from .operations.vm import convert_show_result_to_snake_case
     vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
+    vm = convert_show_result_to_snake_case(vm)
 
     if '://' not in certificate:  # has a cert name rather a full url?
         keyvault_client = create_data_plane_keyvault_certificate_client(
@@ -3341,28 +3341,28 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
     elif certificate_store:
         raise CLIError('Usage error: --certificate-store is only applicable on Windows VM')
     vault_cert = {
-        'certificateStore': certificate_store,
-        'certificateUrl': certificate
+        'certificate_store': certificate_store,
+        'certificate_url': certificate
     }
-    vault_secret_group = next((x for x in vm.get('osProfile', {}).get('secrets', [])
-                               if x.get('sourceVault', {}).get('id', '').lower() == keyvault.lower()), None)
+    vault_secret_group = next((x for x in vm.get('os_profile', {}).get('secrets', [])
+                               if x.get('source_vault', {}).get('id', '').lower() == keyvault.lower()), None)
     if vault_secret_group:
-        vault_secret_group.get('vaultCertificates', []).append(vault_cert)
+        vault_secret_group.get('vault_certificates', []).append(vault_cert)
     else:
         vault_secret_group = {
-            'sourceVault': {
+            'source_vault': {
                 'id': keyvault
             },
-            'vaultCertificates': [vault_cert]
+            'vault_certificates': [vault_cert]
         }
 
-        if not vm.get('osProfile'):
-            vm['osProfile'] = {'secret': []}
+        if not vm.get('os_profile'):
+            vm['os_profile'] = {'secret': []}
 
-        if not vm.get('osProfile').get('secrets'):
-            vm['osProfile']['secrets'] = []
+        if not vm.get('os_profile').get('secrets'):
+            vm['os_profile']['secrets'] = []
 
-        vm['osProfile']['secrets'].append(vault_secret_group)
+        vm['os_profile']['secrets'].append(vault_secret_group)
 
     vm = set_vm_by_aaz(cmd, vm)
     return vm.get('osProfile', {}).get('secrets', [])
@@ -3381,6 +3381,7 @@ def list_vm_secrets(cmd, resource_group_name, vm_name):
 
 
 def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=None):
+    from .operations.vm import convert_show_result_to_snake_case
     vm = get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name)
 
     # support 2 kinds of filter:
@@ -3407,6 +3408,7 @@ def remove_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate=No
         to_keep = [x for x in to_keep if x.get('vaultCertificates')]  # purge all groups w/o any cert entries
 
     vm['osProfile']['secrets'] = to_keep
+    vm = convert_show_result_to_snake_case(vm)
     vm = set_vm_by_aaz(cmd, vm)
     return vm.get('osProfile', {}).get('secrets', [])
 # endregion
