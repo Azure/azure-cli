@@ -1407,17 +1407,6 @@ def get_vm(cmd, resource_group_name, vm_name, expand=None):
     return client.virtual_machines.get(resource_group_name, vm_name, expand=expand)
 
 
-def get_vm_by_aaz(cmd, resource_group_name, vm_name, expand=None):
-    from .operations.vm import VMShow
-
-    vm = VMShow(cli_ctx=cmd.cli_ctx)(command_args={
-        "resource_group": resource_group_name,
-        "vm_name": vm_name,
-        "expand": expand
-    })
-    return vm
-
-
 def get_vm_to_update(cmd, resource_group_name, vm_name):
     client = _compute_client_factory(cmd.cli_ctx)
     vm = client.virtual_machines.get(resource_group_name, vm_name)
