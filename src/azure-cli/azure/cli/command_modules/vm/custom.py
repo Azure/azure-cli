@@ -3347,7 +3347,9 @@ def add_vm_secret(cmd, resource_group_name, vm_name, keyvault, certificate, cert
     vault_secret_group = next((x for x in vm.get('os_profile', {}).get('secrets', [])
                                if x.get('source_vault', {}).get('id', '').lower() == keyvault.lower()), None)
     if vault_secret_group:
-        vault_secret_group.get('vault_certificates', []).append(vault_cert)
+        certs = vault_secret_group.get('vault_certificates', [])
+        certs.append(vault_cert)
+        vault_secret_group['vault_certificates'] = certs
     else:
         vault_secret_group = {
             'source_vault': {
