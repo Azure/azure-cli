@@ -452,6 +452,20 @@ class MainCommandsLoader(CLICommandsLoader):
         command_index = None
         # Set fallback=False to turn off command index in case of regression
         use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
+        
+        # Fast path for top-level help (az --help or az with no args)
+        # Check if we can use cached help index to skip module loading
+        if use_command_index and (not args or args[0] in ('--help', '-h', 'help')):
+            command_index = CommandIndex(self.cli_ctx)
+            help_index = command_index.get_help_index()
+            if help_index:
+                logger.debug("Using cached help index, skipping module loading")
+                # Display help directly from cached data without loading modules
+                self._display_cached_help(help_index)
+                # Raise SystemExit to stop execution (similar to how --help normally works)
+                import sys
+                sys.exit(0)
+        
         if use_command_index:
             command_index = CommandIndex(self.cli_ctx)
             index_result = command_index.get(args)
@@ -525,8 +539,72 @@ class MainCommandsLoader(CLICommandsLoader):
 
         if use_command_index:
             command_index.update(self.command_table)
+            
+            # Also cache help data for fast az --help in future
+            # This is done after loading all modules when help data is available
+            self._cache_help_index(command_index)
 
         return self.command_table
+    
+    def _display_cached_help(self, help_index):
+        """Display help from cached help index without loading modules."""
+        from azure.cli.core._help import WELCOME_MESSAGE, PRIVACY_STATEMENT
+        
+        # Show privacy statement if first run
+        ran_before = self.cli_ctx.config.getboolean('core', 'first_run', fallback=False)
+        if not ran_before:
+            print(PRIVACY_STATEMENT)
+            self.cli_ctx.config.set_value('core', 'first_run', 'yes')
+        
+        # Show welcome message
+        print(WELCOME_MESSAGE)
+        
+        # Display subgroups from cached data
+        if help_index:
+            print("Subgroups:")
+            # Sort and display in the same format as normal help
+            max_name_len = max(len(name) for name in help_index.keys())
+            for name in sorted(help_index.keys()):
+                summary = help_index[name]
+                padding = ' ' * (max_name_len - len(name))
+                print(f"    {name}{padding} : {summary}")
+        
+        print("\nTo search AI knowledge base for examples, use: az find \"az \"")
+        print("\nFor more specific examples, use: az find \"az <command>\"")
+        
+        # Show update notification
+        from azure.cli.core.util import show_updates_available
+        show_updates_available(new_line_after=True)
+    
+    def _cache_help_index(self, command_index):
+        """Cache help summaries for top-level commands to speed up `az --help`."""
+        try:
+            # Create a temporary parser to extract help information
+            from azure.cli.core.parser import AzCliCommandParser
+            parser = AzCliCommandParser(self.cli_ctx)
+            parser.load_command_table(self)
+            
+            # Get the help file for the root level
+            from azure.cli.core._help import CliGroupHelpFile
+            subparser = parser.subparsers.get(tuple())
+            if subparser:
+                # Use cli_ctx.help which is the AzCliHelp instance
+                help_file = CliGroupHelpFile(self.cli_ctx.invocation.help, '', subparser)
+                help_file.load(subparser)
+                
+                # Extract summaries from help file's children
+                help_index_data = {}
+                for child in help_file.children:
+                    if hasattr(child, 'name') and hasattr(child, 'short_summary'):
+                        if ' ' not in child.name:  # Only top-level commands
+                            help_index_data[child.name] = child.short_summary
+                
+                # Store in the command index
+                if help_index_data:
+                    command_index.INDEX[command_index._HELP_INDEX] = help_index_data
+                    logger.debug("Cached %d help entries", len(help_index_data))
+        except Exception as ex:  # pylint: disable=broad-except
+            logger.debug("Failed to cache help data: %s", ex)
 
     @staticmethod
     def _sort_command_loaders(command_loaders):
@@ -698,6 +776,7 @@ class CommandIndex:
     _COMMAND_INDEX = 'commandIndex'
     _COMMAND_INDEX_VERSION = 'version'
     _COMMAND_INDEX_CLOUD_PROFILE = 'cloudProfile'
+    _HELP_INDEX = 'helpIndex'
 
     def __init__(self, cli_ctx=None):
         """Class to manage command index.
@@ -786,6 +865,25 @@ class CommandIndex:
 
         return None
 
+    def get_help_index(self):
+        """Get the help index for top-level help display.
+        
+        :return: Dictionary mapping top-level commands to their short summaries, or None if not available
+        """
+        # Check if index is valid
+        index_version = self.INDEX[self._COMMAND_INDEX_VERSION]
+        cloud_profile = self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE]
+        if not (index_version and index_version == self.version and
+                cloud_profile and cloud_profile == self.cloud_profile):
+            return None
+        
+        help_index = self.INDEX.get(self._HELP_INDEX, {})
+        if help_index:
+            logger.debug("Using cached help index with %d entries", len(help_index))
+            return help_index
+        
+        return None
+
     def update(self, command_table):
         """Update the command index according to the given command table.
 
@@ -796,6 +894,7 @@ class CommandIndex:
         self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = self.cloud_profile
         from collections import defaultdict
         index = defaultdict(list)
+        help_index = {}  # Maps top-level command to short summary
 
         # self.cli_ctx.invocation.commands_loader.command_table doesn't exist in DummyCli due to the lack of invocation
         for command_name, command in command_table.items():
@@ -805,8 +904,11 @@ class CommandIndex:
             module_name = command.loader.__module__
             if module_name not in index[top_command]:
                 index[top_command].append(module_name)
+        
         elapsed_time = timeit.default_timer() - start_time
         self.INDEX[self._COMMAND_INDEX] = index
+        # Note: helpIndex is populated separately when az --help is displayed
+        # We don't populate it here because the help data isn't available yet
         logger.debug("Updated command index in %.3f seconds.", elapsed_time)
 
     def invalidate(self):
@@ -823,6 +925,7 @@ class CommandIndex:
         self.INDEX[self._COMMAND_INDEX_VERSION] = ""
         self.INDEX[self._COMMAND_INDEX_CLOUD_PROFILE] = ""
         self.INDEX[self._COMMAND_INDEX] = {}
+        self.INDEX[self._HELP_INDEX] = {}
         logger.debug("Command index has been invalidated.")
 
 

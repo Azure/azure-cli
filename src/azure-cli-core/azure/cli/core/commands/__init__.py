@@ -578,6 +578,35 @@ class AzCliCommandInvoker(CommandInvoker):
             self.parser.enable_autocomplete()
             subparser = self.parser.subparsers[tuple()]
             self.help.show_welcome(subparser)
+            
+            # After showing help, cache the help summaries for future fast access
+            # This allows subsequent `az --help` calls to skip module loading
+            use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
+            logger.debug("About to cache help data, use_command_index=%s", use_command_index)
+            if use_command_index:
+                try:
+                    from azure.cli.core import CommandIndex
+                    command_index = CommandIndex(self.cli_ctx)
+                    # Extract help data from the parser that was just used
+                    from azure.cli.core._help import CliGroupHelpFile
+                    help_file = CliGroupHelpFile(self.cli_ctx.help, '', subparser)
+                    help_file.load(subparser)
+                    
+                    # Build help index from the help file's children
+                    help_index_data = {}
+                    for child in help_file.children:
+                        if hasattr(child, 'name') and hasattr(child, 'short_summary'):
+                            if ' ' not in child.name:  # Only top-level commands
+                                help_index_data[child.name] = child.short_summary
+                    
+                    # Store in the command index
+                    if help_index_data:
+                        from azure.cli.core._session import INDEX
+                        from azure.cli.core import __version__
+                        INDEX['helpIndex'] = help_index_data
+                        logger.debug("Cached %d help entries for fast access", len(help_index_data))
+                except Exception as ex:  # pylint: disable=broad-except
+                    logger.debug("Failed to cache help data: %s", ex)
 
             # TODO: No event in base with which to target
             telemetry.set_command_details('az', command_preserve_casing=command_preserve_casing)
