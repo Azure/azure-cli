@@ -61,6 +61,20 @@ class Create(AAZCommand):
             help="The virtual network (VNet) name.",
             required=True,
         )
+        _args_schema.what_if = AAZBoolArg(
+            options=["--what-if"],
+            help="Preview the changes that will be made without actually executing the command. "
+                 "This will call the what-if service to compare the current state with the expected state after execution.",
+            default=False,
+            is_preview=True,
+        )
+        _args_schema.export_bicep = AAZBoolArg(
+            options=["--export-bicep"],
+            help="Export the Bicep template corresponding to the what-if analysis. "
+                 "This parameter must be used together with --what-if.",
+            default=False,
+            is_preview=True,
+        )
         _args_schema.extended_location = AAZObjectArg(
             options=["--extended-location"],
             help="The extended location of the virtual network.",

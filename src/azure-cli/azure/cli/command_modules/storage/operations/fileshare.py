@@ -29,7 +29,8 @@ def list_shares(client, prefix=None, marker=None, num_results=None,
     return result
 
 
-def create_share(cmd, client, metadata=None, quota=None, fail_on_exist=False, timeout=None, **kwargs):
+def create_share(cmd, client, metadata=None, quota=None, fail_on_exist=False, timeout=None, 
+                 what_if=False, export_bicep=False, **kwargs):
     from azure.core.exceptions import HttpResponseError
     try:
         client.create_share(metadata=metadata, quota=quota, timeout=timeout, **kwargs)

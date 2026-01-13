@@ -6,7 +6,8 @@
 from azure.cli.core.profiles import ResourceType
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.parameters import (tags_type, file_type, get_location_type,
-                                                get_enum_type, get_three_state_flag, edge_zone_type)
+                                                get_enum_type, get_three_state_flag, edge_zone_type,
+                                                get_what_if_type, get_export_bicep_type)
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
 
 from ._validators import (get_datetime_type, validate_metadata, get_permission_validator, get_permission_help_string,
@@ -338,6 +339,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('kind', help='Indicate the type of storage account.',
                    arg_type=get_enum_type(t_kind),
                    default='StorageV2' if self.cli_ctx.cloud.profile == 'latest' else 'Storage')
+        c.argument('what_if', arg_type=get_what_if_type())
+        c.argument('export_bicep', arg_type=get_export_bicep_type())
         c.argument('https_only', arg_type=get_three_state_flag(),
                    help='Allow https traffic only to storage service if set to true. The default value is true.')
         c.argument('tags', tags_type)
@@ -668,6 +671,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('action', action_type)
         c.argument('resource_id', help='The resource id to add in network rule.', arg_group='Resource Access Rule')
         c.argument('tenant_id', help='The tenant id to add in network rule.', arg_group='Resource Access Rule')
+        c.argument('what_if', arg_type=get_what_if_type())
+        c.argument('export_bicep', arg_type=get_export_bicep_type())
 
     with self.argument_context('storage account blob-service-properties',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -1554,6 +1559,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('prevent_encryption_scope_override', options_list=['--prevent-encryption-scope-override', '-p'],
                    arg_type=get_three_state_flag(), arg_group='Encryption Policy', is_preview=True,
                    help='Block override of encryption scope from the container default.')
+        c.argument('what_if', arg_type=get_what_if_type())
+        c.argument('export_bicep', arg_type=get_export_bicep_type())
 
     with self.argument_context('storage container delete') as c:
         c.argument('fail_not_exist', help='Throw an exception if the container does not exist.')
@@ -1849,6 +1856,8 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
                 arg_type=get_three_state_flag(),
                 help='Specifies whether the snapshot virtual directory should be accessible at the root of the '
                      'share mount point when NFS is enabled. If not specified, it will be accessible.')
+        c.argument('what_if', arg_type=get_what_if_type())
+        c.argument('export_bicep', arg_type=get_export_bicep_type())
 
     with self.argument_context('storage share url') as c:
         c.extra('unc', action='store_true', help='Output UNC network path.')
