@@ -400,7 +400,7 @@ examples:
       Here --resource-group is for the target server's resource group, and --source-server must be passed as resource ID.
     text: >
       az mysql flexible-server restore --resource-group testGroup --name testserverNew \\
-        --source-server /subscriptions/{testSubscription}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforMySQL/flexibleServers/{sourceServerName}
+        --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforMySQL/flexibleServers/{sourceServerName}
   - name: >
       Restore 'testserver' to current point-in-time as a new server 'testserverNew' in a different subscription.
       Here --resource-group is for the target server's resource group, and --source-server must be passed as resource ID.
