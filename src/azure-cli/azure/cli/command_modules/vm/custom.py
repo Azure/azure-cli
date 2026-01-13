@@ -955,7 +955,7 @@ def create_vm(cmd, vm_name, resource_group_name, image=None, size='Standard_DS1_
               enable_user_redeploy_scheduled_events=None, zone_placement_policy=None, include_zones=None,
               exclude_zones=None, align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None, add_proxy_agent_extension=None):
+              key_incarnation_id=None, add_proxy_agent_extension=None, what_if=False, export_bicep=False):
 
     from azure.cli.core.commands.client_factory import get_subscription_id
     from azure.cli.core.util import random_string, hash_string
@@ -1761,7 +1761,7 @@ def update_vm(cmd, resource_group_name, vm_name, os_disk=None, disk_caching=None
               align_regional_disks_to_vm_zone=None, wire_server_mode=None, imds_mode=None,
               add_proxy_agent_extension=None,
               wire_server_access_control_profile_reference_id=None, imds_access_control_profile_reference_id=None,
-              key_incarnation_id=None, **kwargs):
+              key_incarnation_id=None, what_if=False, export_bicep=False, **kwargs):
     from azure.mgmt.core.tools import parse_resource_id, resource_id, is_valid_resource_id
     from ._vm_utils import update_write_accelerator_settings, update_disk_caching_by_aaz
     from .operations.vm import convert_show_result_to_snake_case as vm_convert_show_result_to_snake_case
@@ -2271,7 +2271,8 @@ def show_default_diagnostics_configuration(is_windows_os=False):
 def attach_managed_data_disk(cmd, resource_group_name, vm_name, disk=None, ids=None, disks=None, new=False, sku=None,
                              size_gb=None, lun=None, caching=None, enable_write_accelerator=False, disk_ids=None,
                              source_snapshots_or_disks=None, source_disk_restore_point=None,
-                             new_names_of_source_snapshots_or_disks=None, new_names_of_source_disk_restore_point=None):
+                             new_names_of_source_snapshots_or_disks=None, new_names_of_source_disk_restore_point=None,
+                             what_if=False, export_bicep=False):
     # attach multiple managed disks using disk attach API
     vm = get_vm_to_update(cmd, resource_group_name, vm_name)
     if not new and not sku and not size_gb and disk_ids is not None:
@@ -2396,7 +2397,8 @@ def detach_unmanaged_data_disk(cmd, resource_group_name, vm_name, disk_name):
 # endregion
 
 
-def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, force_detach=None, disk_ids=None):
+def detach_managed_data_disk(cmd, resource_group_name, vm_name, disk_name=None, force_detach=None, disk_ids=None,
+                             what_if=False, export_bicep=False):
     if disk_ids is not None:
         data_disks = []
         for disk_item in disk_ids:
@@ -2904,7 +2906,8 @@ def add_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
     return _update_vm_nics(cmd, vm, existing_nics + new_nics, primary_nic)
 
 
-def remove_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None):
+def remove_vm_nic(cmd, resource_group_name, vm_name, nics, primary_nic=None,
+                  what_if=False, export_bicep=False):
 
     def to_delete(nic_id):
         return [n for n in nics_to_delete if n.id.lower() == nic_id.lower()]

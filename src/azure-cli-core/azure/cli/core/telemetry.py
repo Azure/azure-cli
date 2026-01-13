@@ -80,6 +80,9 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         self.enable_broker_on_windows = None
         self.msal_telemetry = None
         self.login_experience_v2 = None
+        # what-if specific telemetry
+        self.what_if_summary = None
+        self.what_if_exception = None
 
     def add_event(self, name, properties):
         for key in self.instrumentation_key:
@@ -239,6 +242,9 @@ class TelemetrySession:  # pylint: disable=too-many-instance-attributes
         set_custom_properties(result, 'EnableBrokerOnWindows', str(self.enable_broker_on_windows))
         set_custom_properties(result, 'MsalTelemetry', self.msal_telemetry)
         set_custom_properties(result, 'LoginExperienceV2', str(self.login_experience_v2))
+        # what-if related
+        set_custom_properties(result, 'WhatIfSummary', self.what_if_summary)
+        set_custom_properties(result, 'WhatIfException', self.what_if_exception)
 
         return result
 
@@ -498,6 +504,18 @@ def set_msal_telemetry(msal_telemetry):
 @decorators.suppress_all_exceptions()
 def set_login_experience_v2(login_experience_v2):
     _session.login_experience_v2 = login_experience_v2
+
+
+@decorators.suppress_all_exceptions()
+def set_what_if_summary(summary):
+    _session.what_if_summary = summary
+
+
+@decorators.suppress_all_exceptions()
+def set_what_if_exception(exception):
+    # Store exception type and message, limit length to avoid huge payloads
+    exception_info = f"{exception.__class__.__name__}: {str(exception)[:512]}"
+    _session.what_if_exception = exception_info
 # endregion
 
 

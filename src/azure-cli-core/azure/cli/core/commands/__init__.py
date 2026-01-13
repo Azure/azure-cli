@@ -506,6 +506,7 @@ class AzCliCommandInvoker(CommandInvoker):
 
     # pylint: disable=too-many-statements,too-many-locals,too-many-branches
     def execute(self, args):
+        args_copy = args[:]
         from knack.events import (EVENT_INVOKER_PRE_CMD_TBL_CREATE, EVENT_INVOKER_POST_CMD_TBL_CREATE,
                                   EVENT_INVOKER_CMD_TBL_LOADED, EVENT_INVOKER_PRE_PARSE_ARGS,
                                   EVENT_INVOKER_POST_PARSE_ARGS,
@@ -588,7 +589,12 @@ class AzCliCommandInvoker(CommandInvoker):
             args[0] = '--help'
 
         self.parser.enable_autocomplete()
-
+        if '--what-if' in (args_copy):
+            return self._what_if(args_copy)
+        elif '--export-bicep' in (args_copy):
+            # --export-bicep must be used with --what-if
+            logger.error("The --export-bicep parameter must be used together with --what-if")
+            return CommandResultItem(None, exit_code=1, error=CLIError('The --export-bicep parameter must be used together with --what-if'))
         self.cli_ctx.raise_event(EVENT_INVOKER_PRE_PARSE_ARGS, args=args)
         parsed_args = self.parser.parse_args(args)
         self.cli_ctx.raise_event(EVENT_INVOKER_POST_PARSE_ARGS, command=parsed_args.command, args=parsed_args)
@@ -693,6 +699,198 @@ class AzCliCommandInvoker(CommandInvoker):
             event_data['result'],
             table_transformer=self.commands_loader.command_table[parsed_args.command].table_transformer,
             is_query_active=self.data['query_active'])
+
+    def _what_if(self, args):
+        logger.debug("_what_if called with command: %s", args)
+        if '--what-if' in args:
+            logger.debug("Entering what-if mode")
+            
+            # Remove both --what-if and --export-bicep from args for processing
+            clean_args = [arg for arg in args if arg not in ['--what-if', '--export-bicep']]
+            command_parts = [arg for arg in clean_args if not arg.startswith('-') and arg != 'az']
+            command_name = ' '.join(command_parts) if command_parts else 'unknown'
+            safe_params = AzCliCommandInvoker._extract_parameter_names(args)
+            
+            # Set command details first so telemetry knows which command was attempted
+            telemetry.set_command_details(
+                command_name + ' --what-if',
+                self.data.get('output', 'json'),
+                safe_params
+            )
+            
+            # Check if command is in whitelist
+            if not self._is_command_supported_for_what_if(args):
+                error_msg = ("\"--what-if\" argument is not supported for this command.")
+                logger.error(error_msg)
+                telemetry.set_what_if_summary('what-if-unsupported-command')
+                telemetry.set_user_fault(summary='what-if-unsupported-command')
+                return CommandResultItem(None, exit_code=1, error=CLIError(error_msg))
+            
+            from azure.cli.core.what_if import show_what_if
+
+            # Check if --export-bicep is present
+            export_bicep = '--export-bicep' in args
+
+            try:
+                if export_bicep:
+                    logger.debug("Export bicep mode enabled")
+                
+                # Get subscription ID with priority: --subscription parameter > current login subscription
+                if '--subscription' in clean_args:
+                    index = clean_args.index('--subscription')
+                    if index + 1 < len(clean_args):
+                        subscription_value = clean_args[index + 1]
+                        subscription_id = subscription_value
+                else:
+                    from azure.cli.core.commands.client_factory import get_subscription_id
+                    subscription_id = get_subscription_id(self.cli_ctx)
+                    logger.debug("Using current login subscription ID: %s", subscription_id)
+
+                clean_args = ["az"] + clean_args if clean_args[0] != 'az' else clean_args
+                command = " ".join(clean_args)
+                what_if_result = show_what_if(self.cli_ctx, command, subscription_id=subscription_id, export_bicep=export_bicep)
+                
+                # Save bicep templates if export_bicep is enabled and bicep_template exists
+                bicep_files = []
+                if export_bicep and isinstance(what_if_result, dict) and 'bicep_template' in what_if_result:
+                    bicep_files = self._save_bicep_templates(clean_args, what_if_result['bicep_template'])
+                    what_if_result.pop('bicep_template', None)
+
+                # Print bicep file locations if any were saved
+                if bicep_files:
+                    from azure.cli.core.style import Style, print_styled_text
+                    print_styled_text((Style.WARNING, "\nBicep templates saved to:"))
+                    for file_path in bicep_files:
+                        print_styled_text((Style.WARNING, f"  {file_path}"))
+                    print("")
+                
+                # Ensure output format is set for proper formatting
+                # Default to 'json' if not already set
+                if 'output' not in self.cli_ctx.invocation.data or self.cli_ctx.invocation.data['output'] is None:
+                    self.cli_ctx.invocation.data['output'] = 'json'
+                
+                telemetry.set_what_if_summary('what-if-completed')
+                telemetry.set_success(summary='what-if-completed')
+
+                # Return the formatted what-if output as the result
+                # Similar to the normal flow in execute() method
+                return CommandResultItem(
+                    what_if_result,
+                    table_transformer=None,
+                    is_query_active=self.data.get('query_active', False),
+                    exit_code=0
+                )
+            except (CLIError, ValueError, KeyError) as ex:
+                # If what-if service fails, still show an informative message
+                logger.error("What-if preview failed: %s", str(ex))
+                telemetry.set_what_if_summary('what-if-failed')
+                telemetry.set_what_if_exception(ex)
+                telemetry.set_exception(ex, fault_type='what-if-error')
+                telemetry.set_failure(summary='what-if-failed')
+                return CommandResultItem(None, exit_code=1,
+                                         error=CLIError(f'What-if preview failed: {str(ex)}'))
+
+    def _is_command_supported_for_what_if(self, args):
+        """Check if the command is in the what-if whitelist
+        
+        Args:
+            args: List of command arguments
+            
+        Returns:
+            bool: True if command is supported, False otherwise
+        """
+        # Define supported commands for what-if functionality
+        WHAT_IF_SUPPORTED_COMMANDS = {
+            'vm create',
+            'vm update', 
+            'storage account create',
+            'storage container create',
+            'storage share create',
+            'network vnet create',
+            'network vnet update',
+            'storage account network-rule add',
+            'vm disk attach',
+            'vm disk detach',
+            'vm nic remove',
+            'sql server create',
+            'sql server update',
+        }
+        
+        # Extract command parts (skip 'az' and flags)
+        command_parts = []
+        for arg in args:
+            if arg == 'az':
+                continue
+            if arg.startswith('-'):
+                break
+            command_parts.append(arg)
+        
+        # Join command parts to form the command string
+        if command_parts:
+            command = ' '.join(command_parts)
+            logger.debug("Checking what-if support for command: %s", command)
+            return command in WHAT_IF_SUPPORTED_COMMANDS
+        
+        return False
+
+    def _save_bicep_templates(self, args, bicep_template):
+        """Save bicep templates to user's .azure directory
+        Returns a list of saved file paths
+        """
+        saved_files = []
+        try:
+            import os
+            from datetime import datetime
+            from azure.cli.core._environment import get_config_dir
+            
+            # Extract command name (first argument after 'az')
+            command_parts = [arg for arg in args if not arg.startswith('-') and arg != 'az']
+            if not command_parts:
+                logger.warning("Could not determine command name for bicep file naming")
+                return saved_files
+            
+            first_command = command_parts[0]
+            az_command = f"az_{first_command}"
+            
+            # Get full command for file naming (e.g., az_vm_create)
+            if len(command_parts) > 1:
+                full_command = f"az_{command_parts[0]}_{command_parts[1]}"
+            else:
+                full_command = az_command + "_command"
+            
+            # Create timestamp in yyyymmddhhMMss format
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            
+            # Get .azure config directory
+            config_dir = get_config_dir()
+            whatif_dir = os.path.join(config_dir, 'whatif', az_command)
+            
+            # Create directories if they don't exist
+            os.makedirs(whatif_dir, exist_ok=True)
+            logger.debug("Created bicep template directory: %s", whatif_dir)
+            
+            # Save main template
+            if 'main_template' in bicep_template:
+                main_file = os.path.join(whatif_dir, f"{full_command}_main_{timestamp}.bicep")
+                with open(main_file, 'w', encoding='utf-8') as f:
+                    f.write(bicep_template['main_template'])
+                logger.debug("Bicep main template saved to: %s", main_file)
+                saved_files.append(main_file)
+            
+            # Save module templates if they exist
+            if 'module_templates' in bicep_template and bicep_template['module_templates']:
+                for i, module_template in enumerate(bicep_template['module_templates'], 1):
+                    module_suffix = f"module{i}" if i > 1 else "module"
+                    module_file = os.path.join(whatif_dir, f"{full_command}_{module_suffix}_{timestamp}.bicep")
+                    with open(module_file, 'w', encoding='utf-8') as f:
+                        f.write(module_template)
+                    logger.debug("Bicep module template saved to: %s", module_file)
+                    saved_files.append(module_file)
+                    
+        except Exception as ex:
+            logger.warning("Failed to save bicep templates: %s", str(ex))
+        
+        return saved_files
 
     @staticmethod
     def _extract_parameter_names(args):

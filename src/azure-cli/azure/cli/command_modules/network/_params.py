@@ -10,7 +10,8 @@ from knack.arguments import CLIArgumentType, ignore_type
 
 from azure.cli.core.commands.parameters import (get_location_type, get_resource_name_completion_list,
                                                 tags_type, zone_type, zones_type,
-                                                file_type, get_three_state_flag, get_enum_type)
+                                                file_type, get_three_state_flag, get_enum_type,
+                                                get_what_if_type, get_export_bicep_type)
 from azure.cli.core.commands.validators import get_default_location_from_resource_group
 from azure.cli.core.commands.template_create import get_folded_parameter_help_string
 from azure.cli.core.local_context import LocalContextAttribute, LocalContextAction, ALL
@@ -694,6 +695,8 @@ def load_arguments(self, _):
         c.argument('vnet_name', virtual_network_name_type, options_list=['--name', '-n'], completer=None,
                    local_context_attribute=LocalContextAttribute(name='vnet_name', actions=[LocalContextAction.SET], scopes=[ALL]))
         c.argument('edge_zone', edge_zone)
+        c.argument('what_if', arg_type=get_what_if_type())
+        c.argument('export_bicep', arg_type=get_export_bicep_type())
 
     with self.argument_context('network vnet create', arg_group='Subnet') as c:
         c.argument('subnet_name', help='Name of a new subnet to create within the VNet.',
@@ -704,6 +707,8 @@ def load_arguments(self, _):
 
     with self.argument_context('network vnet update') as c:
         c.argument('address_prefixes', nargs='+')
+        c.argument('what_if', arg_type=get_what_if_type())
+        c.argument('export_bicep', arg_type=get_export_bicep_type())
 
     with self.argument_context('network vnet delete') as c:
         c.argument('virtual_network_name', local_context_attribute=None)

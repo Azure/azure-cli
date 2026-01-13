@@ -268,6 +268,26 @@ def get_location_type(cli_ctx):
     return location_type
 
 
+def get_what_if_type():
+    what_if_type = CLIArgumentType(
+        options_list=['--what-if'],
+        help="Preview the changes that will be made without actually executing the command. "
+             "This will call the what-if service to compare the current state with the expected state after execution.",
+        is_preview=True
+    )
+    return what_if_type
+
+
+def get_export_bicep_type():
+    export_bicep_type = CLIArgumentType(
+        options_list=['--export-bicep'],
+        help="Export the Bicep template corresponding to the what-if analysis. "
+             "This parameter must be used together with --what-if.",
+        is_preview=True
+    )
+    return export_bicep_type
+
+
 deployment_name_type = CLIArgumentType(
     help=argparse.SUPPRESS,
     required=False,

@@ -13,7 +13,7 @@ from azure.cli.core.commands.parameters import get_datetime_type
 from azure.cli.core.commands.validators import (
     get_default_location_from_resource_group, validate_file_or_dict)
 from azure.cli.core.commands.parameters import (
-    get_location_type, get_resource_name_completion_list, tags_type, get_three_state_flag,
+    get_location_type, get_what_if_type, get_export_bicep_type, get_resource_name_completion_list, tags_type, get_three_state_flag,
     file_type, get_enum_type, zone_type, zones_type)
 from azure.cli.command_modules.vm._actions import _resource_not_exists
 from azure.cli.command_modules.vm._completers import (
@@ -415,6 +415,8 @@ def load_arguments(self, _):
         c.argument('workspace', is_preview=True, arg_group='Monitor', help='Name or ID of Log Analytics Workspace. If you specify the workspace through its name, the workspace should be in the same resource group with the vm, otherwise a new workspace will be created.')
 
     with self.argument_context('vm update') as c:
+        c.argument('what_if', get_what_if_type())
+        c.argument('export_bicep', get_export_bicep_type())
         c.argument('os_disk', min_api='2017-12-01', help="Managed OS disk ID or name to swap to")
         c.argument('write_accelerator', nargs='*', min_api='2017-12-01',
                    help="enable/disable disk write accelerator. Use singular value 'true/false' to apply across, or specify individual disks, e.g.'os=true 1=true 2=true' for os disk and data disks with lun of 1 & 2")
@@ -464,6 +466,8 @@ def load_arguments(self, _):
         c.argument('zone_placement_policy', arg_type=get_enum_type(self.get_models('ZonePlacementPolicyType')), min_api='2024-11-01', help="Specify the policy for virtual machine's placement in availability zone")
         c.argument('include_zones', nargs='+', min_api='2024-11-01', help='If "--zone-placement-policy" is set to "Any", availability zone selected by the system must be present in the list of availability zones passed with "--include-zones". If "--include-zones" is not provided, all availability zones in region will be considered for selection.')
         c.argument('exclude_zones', nargs='+', min_api='2024-11-01', help='If "--zone-placement-policy" is set to "Any", availability zone selected by the system must not be present in the list of availability zones passed with "excludeZones". If "--exclude-zones" is not provided, all availability zones in region will be considered for selection.')
+        c.argument('what_if', get_what_if_type())
+        c.argument('export_bicep', get_export_bicep_type())
 
     for scope in ['vm create', 'vm update']:
         with self.argument_context(scope) as c:
@@ -552,11 +556,15 @@ def load_arguments(self, _):
         c.argument('source_disk_restore_point', options_list=['--source-disk-restore-point', '--source-disk-rp'], nargs='+', min_api='2024-11-01', help='create a data disk from a disk restore point. Can use the ID of a disk restore point.')
         c.argument('new_names_of_source_snapshots_or_disks', options_list=['--new-names-of-source-snapshots-or-disks', '--new-names-of-sr'], nargs='+', min_api='2024-11-01', help='The name of create new data disk from a snapshot or another disk.')
         c.argument('new_names_of_source_disk_restore_point', options_list=['--new-names-of-source-disk-restore-point', '--new-names-of-rp'], nargs='+', min_api='2024-11-01', help='The name of create new data disk from a disk restore point.')
+        c.argument('what_if', arg_type=get_what_if_type())
+        c.argument('export_bicep', arg_type=get_export_bicep_type())
 
     with self.argument_context('vm disk detach') as c:
         c.argument('disk_name', arg_type=name_arg_type, help='The data disk name.')
         c.argument('force_detach', action='store_true', min_api='2020-12-01', help='Force detach managed data disks from a VM.')
         c.argument('disk_ids', nargs='+', min_api='2024-03-01', help='The disk IDs of the managed disk (space-delimited).')
+        c.argument('what_if', arg_type=get_what_if_type())
+        c.argument('export_bicep', arg_type=get_export_bicep_type())
 
     with self.argument_context('vm encryption enable') as c:
         c.argument('encrypt_format_all', action='store_true', help='Encrypts-formats data disks instead of encrypting them. Encrypt-formatting is a lot faster than in-place encryption but wipes out the partition getting encrypt-formatted. (Only supported for Linux virtual machines.)')
@@ -626,6 +634,10 @@ def load_arguments(self, _):
 
     with self.argument_context('vm nic show') as c:
         c.argument('nic', help='NIC name or ID.', validator=validate_vm_nic)
+    
+    with self.argument_context('vm nic remove') as c:
+        c.argument('what_if', arg_type=get_what_if_type())
+        c.argument('export_bicep', arg_type=get_export_bicep_type())
 
     with self.argument_context('vm unmanaged-disk') as c:
         c.argument('new', action='store_true', help='Create a new disk.')
