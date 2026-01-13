@@ -3444,7 +3444,7 @@ class FunctionappNetworkConnectionTests(ScenarioTest):
 
         self.cmd('functionapp create -g {} -n {} -s {} -p {} --functions-version 4 --vnet {} --subnet {}'.format(resource_group, functionapp_name, storage_account, ep_plan_name, vnet_name, subnet_name)).assert_with_checks([
             JMESPathCheck('vnetContentShareEnabled', True),
-            JMESPathCheck('vnetRouteAllEnabled', True),
+            JMESPathCheck('outboundVnetRouting.applicationTraffic', True),
             JMESPathCheck('virtualNetworkSubnetId', subnet_id)
         ])
 

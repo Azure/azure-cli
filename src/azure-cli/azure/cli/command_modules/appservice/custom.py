@@ -3199,16 +3199,20 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
             setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
 
+    # Update SiteConfig first
+    result = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+
     # Handle vnet_route_all_enabled separately using Site-level outbound_vnet_routing property
+    # This is done after SiteConfig update to ensure the Site-level property is not overwritten
     if vnet_route_all_enabled is not None:
         from azure.mgmt.web.models import OutboundVnetRouting
         client = web_client_factory(cmd.cli_ctx)
         app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot, client=client)
-        app.outbound_vnet_routing = OutboundVnetRouting(application_traffic=(vnet_route_all_enabled == 'true'))
+        app.outbound_vnet_routing = OutboundVnetRouting(application_traffic=vnet_route_all_enabled == 'true')
         _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
                                 client=client, extra_parameter=app)
 
-    return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
+    return result
 
 
 def update_configuration_polling(cmd, resource_group_name, name, slot, configs):
