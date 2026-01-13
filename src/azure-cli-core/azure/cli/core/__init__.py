@@ -463,7 +463,6 @@ class MainCommandsLoader(CLICommandsLoader):
                 # Display help directly from cached data without loading modules
                 self._display_cached_help(help_index)
                 # Raise SystemExit to stop execution (similar to how --help normally works)
-                import sys
                 sys.exit(0)
         
         if use_command_index:
@@ -559,18 +558,48 @@ class MainCommandsLoader(CLICommandsLoader):
         # Show welcome message
         print(WELCOME_MESSAGE)
         
-        # Display subgroups from cached data
-        if help_index:
-            print("Subgroups:")
-            # Sort and display in the same format as normal help
-            max_name_len = max(len(name) for name in help_index.keys())
-            for name in sorted(help_index.keys()):
-                summary = help_index[name]
-                padding = ' ' * (max_name_len - len(name))
-                print(f"    {name}{padding} : {summary}")
+        # Show Group header (to match normal help output)
+        print("\nGroup")
+        print("    az")
+        
+        # Separate groups and commands
+        groups = help_index.get('groups', {})
+        commands = help_index.get('commands', {})
+        
+        # Calculate max name length including tags for proper alignment
+        def _get_display_len(name, tags):
+            tag_len = len(tags) + 1 if tags else 0  # +1 for space before tags
+            return len(name) + tag_len
+        
+        max_len = 0
+        if groups:
+            max_len = max(max_len, max(_get_display_len(name, item.get('tags', '')) for name, item in groups.items()))
+        if commands:
+            max_len = max(max_len, max(_get_display_len(name, item.get('tags', '')) for name, item in commands.items()))
+        
+        # Display subgroups
+        if groups:
+            print("\nSubgroups:")
+            for name in sorted(groups.keys()):
+                item = groups[name]
+                tags = item.get('tags', '')
+                summary = item.get('summary', '')
+                name_with_tags = f"{name} {tags}" if tags else name
+                padding = ' ' * (max_len - _get_display_len(name, tags))
+                print(f"    {name_with_tags}{padding} : {summary}")
+        
+        # Display commands
+        if commands:
+            print("\nCommands:")
+            for name in sorted(commands.keys()):
+                item = commands[name]
+                tags = item.get('tags', '')
+                summary = item.get('summary', '')
+                name_with_tags = f"{name} {tags}" if tags else name
+                padding = ' ' * (max_len - _get_display_len(name, tags))
+                print(f"    {name_with_tags}{padding} : {summary}")
         
         print("\nTo search AI knowledge base for examples, use: az find \"az \"")
-        print("\nFor more specific examples, use: az find \"az <command>\"")
         
         # Show update notification
         from azure.cli.core.util import show_updates_available
@@ -592,17 +621,40 @@ class MainCommandsLoader(CLICommandsLoader):
                 help_file = CliGroupHelpFile(self.cli_ctx.invocation.help, '', subparser)
                 help_file.load(subparser)
                 
-                # Extract summaries from help file's children
-                help_index_data = {}
+                # Helper to build tag string for an item
+                def _get_tags(item):
+                    tags = []
+                    if hasattr(item, 'deprecate_info') and item.deprecate_info:
+                        tags.append(str(item.deprecate_info.tag))
+                    if hasattr(item, 'preview_info') and item.preview_info:
+                        tags.append(str(item.preview_info.tag))
+                    if hasattr(item, 'experimental_info') and item.experimental_info:
+                        tags.append(str(item.experimental_info.tag))
+                    return ' '.join(tags)
+                
+                # Separate groups and commands
+                groups = {}
+                commands = {}
+                
                 for child in help_file.children:
                     if hasattr(child, 'name') and hasattr(child, 'short_summary'):
-                        if ' ' not in child.name:  # Only top-level commands
-                            help_index_data[child.name] = child.short_summary
+                        if ' ' not in child.name:  # Only top-level items
+                            tags = _get_tags(child)
+                            item_data = {
+                                'summary': child.short_summary,
+                                'tags': tags
+                            }
+                            # Check if it's a group or command
+                            if child.type == 'group':
+                                groups[child.name] = item_data
+                            else:
+                                commands[child.name] = item_data
                 
                 # Store in the command index
-                if help_index_data:
+                help_index_data = {'groups': groups, 'commands': commands}
+                if groups or commands:
                     command_index.INDEX[command_index._HELP_INDEX] = help_index_data
-                    logger.debug("Cached %d help entries", len(help_index_data))
+                    logger.debug("Cached %d groups and %d commands", len(groups), len(commands))
         except Exception as ex:  # pylint: disable=broad-except
             logger.debug("Failed to cache help data: %s", ex)
 

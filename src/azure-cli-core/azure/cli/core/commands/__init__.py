@@ -592,19 +592,42 @@ class AzCliCommandInvoker(CommandInvoker):
                     help_file = CliGroupHelpFile(self.cli_ctx.help, '', subparser)
                     help_file.load(subparser)
                     
-                    # Build help index from the help file's children
-                    help_index_data = {}
+                    # Helper to build tag string for an item
+                    def _get_tags(item):
+                        tags = []
+                        if hasattr(item, 'deprecate_info') and item.deprecate_info:
+                            tags.append(str(item.deprecate_info.tag))
+                        if hasattr(item, 'preview_info') and item.preview_info:
+                            tags.append(str(item.preview_info.tag))
+                        if hasattr(item, 'experimental_info') and item.experimental_info:
+                            tags.append(str(item.experimental_info.tag))
+                        return ' '.join(tags)
+                    
+                    # Separate groups and commands
+                    groups = {}
+                    commands = {}
+                    
                     for child in help_file.children:
                         if hasattr(child, 'name') and hasattr(child, 'short_summary'):
-                            if ' ' not in child.name:  # Only top-level commands
-                                help_index_data[child.name] = child.short_summary
+                            if ' ' not in child.name:  # Only top-level items
+                                tags = _get_tags(child)
+                                item_data = {
+                                    'summary': child.short_summary,
+                                    'tags': tags
+                                }
+                                # Check if it's a group or command
+                                if child.type == 'group':
+                                    groups[child.name] = item_data
+                                else:
+                                    commands[child.name] = item_data
                     
                     # Store in the command index
-                    if help_index_data:
+                    help_index_data = {'groups': groups, 'commands': commands}
+                    if groups or commands:
                         from azure.cli.core._session import INDEX
                         from azure.cli.core import __version__
                         INDEX['helpIndex'] = help_index_data
-                        logger.debug("Cached %d help entries for fast access", len(help_index_data))
+                        logger.debug("Cached %d groups and %d commands for fast access", len(groups), len(commands))
                 except Exception as ex:  # pylint: disable=broad-except
                     logger.debug("Failed to cache help data: %s", ex)
 
