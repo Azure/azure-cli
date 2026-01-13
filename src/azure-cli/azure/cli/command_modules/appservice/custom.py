@@ -3125,7 +3125,7 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
     import inspect
     frame = inspect.currentframe()
     bool_flags = ['remote_debugging_enabled', 'web_sockets_enabled', 'always_on',
-                  'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled', 'vnet_route_all_enabled']
+                  'auto_heal_enabled', 'use32_bit_worker_process', 'http20_enabled']
     int_flags = ['pre_warmed_instance_count', 'number_of_workers']
     # note: getargvalues is used already in azure.cli.core.commands.
     # and no simple functional replacement for this deprecating method for 3.5
@@ -3198,6 +3198,16 @@ def update_site_configs(cmd, resource_group_name, name, slot=None, number_of_wor
         if max_replicas is not None:
             setattr(configs, 'function_app_scale_limit', max_replicas)
         return update_configuration_polling(cmd, resource_group_name, name, slot, configs)
+
+    # Handle vnet_route_all_enabled separately using Site-level outbound_vnet_routing property
+    if vnet_route_all_enabled is not None:
+        from azure.mgmt.web.models import OutboundVnetRouting
+        client = web_client_factory(cmd.cli_ctx)
+        app = _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'get', slot, client=client)
+        app.outbound_vnet_routing = OutboundVnetRouting(application_traffic=(vnet_route_all_enabled == 'true'))
+        _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'begin_create_or_update', slot,
+                                client=client, extra_parameter=app)
+
     return _generic_site_operation(cmd.cli_ctx, resource_group_name, name, 'update_configuration', slot, configs)
 
 
