@@ -126,7 +126,8 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
                   using_webapp_up=False, language=None, assign_identities=None,
                   role='Contributor', scope=None, vnet=None, subnet=None, https_only=False,
                   public_network_access=None, acr_use_identity=False, acr_identity=None, basic_auth="",
-                  auto_generated_domain_name_label_scope=None):
+                  auto_generated_domain_name_label_scope=None, end_to_end_encryption_enabled=None,
+                  min_tls_version=None, min_tls_cipher_suite=None):
     from azure.mgmt.web.models import Site
     from azure.core.exceptions import ResourceNotFoundError as _ResourceNotFoundError
     SiteConfig, SkuDescription, NameValuePair = cmd.get_models(
@@ -238,10 +239,17 @@ def create_webapp(cmd, resource_group_name, name, plan, runtime=None, startup_fi
     if acr_use_identity:
         site_config.acr_use_managed_identity_creds = acr_use_identity
 
+    if min_tls_version:
+        site_config.min_tls_version = min_tls_version
+
+    if min_tls_cipher_suite:
+        site_config.min_tls_cipher_suite = min_tls_cipher_suite
+
     webapp_def = Site(location=location, site_config=site_config, server_farm_id=plan_info.id, tags=tags,
                       https_only=https_only, virtual_network_subnet_id=subnet_resource_id,
                       public_network_access=public_network_access, vnet_route_all_enabled=vnet_route_all_enabled,
-                      auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope)
+                      auto_generated_domain_name_label_scope=auto_generated_domain_name_label_scope,
+                      end_to_end_encryption_enabled=end_to_end_encryption_enabled)
     if runtime:
         runtime = _StackRuntimeHelper.remove_delimiters(runtime)
 
