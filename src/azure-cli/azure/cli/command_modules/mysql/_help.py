@@ -681,7 +681,7 @@ examples:
       Here --resource-group is for the read replica's resource group, and --source-server must be passed as resource ID.
       This resource ID can be in a subscription different than the subscription used for az account set.
     text: >
-      az mysql flexible-server replica create --replica-name testReplicaServer -g newTestGroup \
+      az mysql flexible-server replica create --replica-name testReplicaServer -g newTestGroup \\
         --source-server /subscriptions/{sourceSubscriptionId}/resourceGroups/{sourceResourceGroup}/providers/Microsoft.DBforMySQL/flexibleServers/{sourceServerName}
 """
 
