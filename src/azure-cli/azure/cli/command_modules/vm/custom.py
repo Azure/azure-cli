@@ -1697,22 +1697,25 @@ def open_vm_port(cmd, resource_group_name, vm_name, port, priority=900, network_
 
 
 def resize_vm(cmd, resource_group_name, vm_name, size, no_wait=False):
-    from .operations.vm import VMUpdate, convert_show_result_to_snake_case as to_snake_case
+    from .operations.vm import VMCreate, convert_show_result_to_snake_case as to_snake_case
 
     vm = to_snake_case(get_vm_to_update_by_aaz(cmd, resource_group_name, vm_name) or {}) or {}
-    current_size = (vm.get('hardware_profile') or {}).get('vm_size')
-
+    current_size = (vm.get("hardware_profile") or {}).get("vm_size")
     if current_size == size:
         logger.warning("VM is already %s", size)
         return None
 
-    command_args = {
-        'resource_group': resource_group_name,
-        'vm_name': vm_name,
-        'no_wait': no_wait,
-        'hardware_profile': {'vm_size': size},
-    }
-    return VMUpdate(cli_ctx=cmd.cli_ctx)(command_args=command_args)
+    vm.pop("resources", None)
+
+    if vm.get("hardware_profile") is None:
+        vm["hardware_profile"] = {}
+    vm["hardware_profile"]["vm_size"] = size
+
+    vm["resource_group"] = resource_group_name
+    vm["vm_name"] = vm_name
+    vm["no_wait"] = no_wait
+
+    return VMCreate(cli_ctx=cmd.cli_ctx)(command_args=vm)
 
 
 def restart_vm(cmd, resource_group_name, vm_name, no_wait=False, force=False):
