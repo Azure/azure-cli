@@ -548,6 +548,12 @@ class MainCommandsLoader(CLICommandsLoader):
     def _display_cached_help(self, help_index):
         """Display help from cached help index without loading modules."""
         from azure.cli.core._help import WELCOME_MESSAGE, PRIVACY_STATEMENT
+        import re
+        
+        def _strip_ansi(text):
+            """Remove ANSI color codes from text for length calculation."""
+            ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
+            return ansi_escape.sub('', text)
         
         # Show privacy statement if first run
         ran_before = self.cli_ctx.config.getboolean('core', 'first_run', fallback=False)
@@ -566,38 +572,49 @@ class MainCommandsLoader(CLICommandsLoader):
         groups = help_index.get('groups', {})
         commands = help_index.get('commands', {})
         
-        # Calculate max name length including tags for proper alignment
-        def _get_display_len(name, tags):
-            tag_len = len(tags) + 1 if tags else 0  # +1 for space before tags
-            return len(name) + tag_len
-        
-        max_len = 0
-        if groups:
-            max_len = max(max_len, max(_get_display_len(name, item.get('tags', '')) for name, item in groups.items()))
-        if commands:
-            max_len = max(max_len, max(_get_display_len(name, item.get('tags', '')) for name, item in commands.items()))
-        
         # Display subgroups
         if groups:
             print("\nSubgroups:")
+            # Calculate max line length for groups only (matching knack's logic)
+            max_len = 0
+            for name, item in groups.items():
+                tags = item.get('tags', '')
+                tags_len = len(_strip_ansi(tags))
+                line_len = len(name) + tags_len + (2 if tags_len else 1)
+                max_len = max(max_len, line_len)
+            
             for name in sorted(groups.keys()):
                 item = groups[name]
                 tags = item.get('tags', '')
                 summary = item.get('summary', '')
-                name_with_tags = f"{name} {tags}" if tags else name
-                padding = ' ' * (max_len - _get_display_len(name, tags))
-                print(f"    {name_with_tags}{padding} : {summary}")
+                # Calculate padding (matching knack's _get_padding_len logic)
+                tags_len = len(_strip_ansi(tags))
+                line_len = len(name) + tags_len + (2 if tags_len else 1)
+                pad_len = max_len - line_len + (1 if tags else 0)
+                padding = ' ' * pad_len
+                # Format matches knack: name + padding + tags + " : " + summary
+                print(f"    {name}{padding}{tags} : {summary}")
         
         # Display commands
         if commands:
             print("\nCommands:")
+            # Calculate max line length for commands only
+            max_len = 0
+            for name, item in commands.items():
+                tags = item.get('tags', '')
+                tags_len = len(_strip_ansi(tags))
+                line_len = len(name) + tags_len + (2 if tags_len else 1)
+                max_len = max(max_len, line_len)
+            
             for name in sorted(commands.keys()):
                 item = commands[name]
                 tags = item.get('tags', '')
                 summary = item.get('summary', '')
-                name_with_tags = f"{name} {tags}" if tags else name
-                padding = ' ' * (max_len - _get_display_len(name, tags))
-                print(f"    {name_with_tags}{padding} : {summary}")
+                tags_len = len(_strip_ansi(tags))
+                line_len = len(name) + tags_len + (2 if tags_len else 1)
+                pad_len = max_len - line_len + (1 if tags else 0)
+                padding = ' ' * pad_len
+                print(f"    {name}{padding}{tags} : {summary}")
         
         print("\nTo search AI knowledge base for examples, use: az find \"az \"")
         
