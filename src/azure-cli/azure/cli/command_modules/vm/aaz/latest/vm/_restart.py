@@ -12,16 +12,22 @@ from azure.cli.core.aaz import *
 
 
 @register_command(
-    "compute virtual-machine restart",
+    "vm restart",
 )
 class Restart(AAZCommand):
-    """The operation to restart a virtual machine.
+    """Restart an existing VM.
+
+    :example: Restart a VM.
+        az vm restart -g MyResourceGroup -n MyVm
+
+    :example: Force restart a VM.
+        az vm restart -g MyResourceGroup -n MyVm --force
     """
 
     _aaz_info = {
-        "version": "2016-03-30",
+        "version": "2022-11-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}/restart", "2016-03-30"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.compute/virtualmachines/{}/restart", "2022-11-01"],
         ]
     }
 
@@ -46,10 +52,11 @@ class Restart(AAZCommand):
             required=True,
         )
         _args_schema.vm_name = AAZStrArg(
-            options=["--vm-name"],
-            help="The name of the virtual machine.",
+            options=["-n", "--name", "--vm-name"],
+            help="The name of the Virtual Machine. You can configure the default using `az configure --defaults vm=<name>`",
             required=True,
             id_part="name",
+            configured_default="vm",
         )
         return cls._args_schema
 
@@ -134,7 +141,7 @@ class Restart(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2016-03-30",
+                    "api-version", "2022-11-01",
                     required=True,
                 ),
             }
