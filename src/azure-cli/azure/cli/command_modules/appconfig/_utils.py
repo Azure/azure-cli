@@ -285,7 +285,4 @@ def is_http_endpoint(endpoint):
     if not endpoint:
         return False
 
-    try:
-        return urlparse(endpoint).scheme.lower() == 'http'
-    except Exception:  # pylint: disable=broad-except
-        return str(endpoint).lower().startswith('http://')
+    return str(endpoint).lower().startswith('http://')
