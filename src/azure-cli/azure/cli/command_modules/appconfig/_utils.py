@@ -6,7 +6,6 @@
 # pylint: disable=line-too-long
 from knack.log import get_logger
 from knack.util import CLIError
-from urllib.parse import urlparse
 from azure.appconfiguration import AzureAppConfigurationClient
 from azure.core.exceptions import HttpResponseError
 from azure.cli.core.azclierror import (ValidationError,
