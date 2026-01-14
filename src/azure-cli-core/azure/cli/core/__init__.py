@@ -564,57 +564,78 @@ class MainCommandsLoader(CLICommandsLoader):
         # Show welcome message
         print(WELCOME_MESSAGE)
         
-        # Show Group header (to match normal help output)
         print("\nGroup")
         print("    az")
         
-        # Separate groups and commands
-        groups = help_index.get('groups', {})
-        commands = help_index.get('commands', {})
+        # Import knack's formatting functions
+        from knack.help import _print_indent, FIRST_LINE_PREFIX, _get_hanging_indent
         
-        # Display subgroups
-        if groups:
+        # Separate groups and commands
+        groups_data = help_index.get('groups', {})
+        commands_data = help_index.get('commands', {})
+        
+        # Helper function matching knack's _get_line_len
+        def _get_line_len(name, tags):
+            tags_len = len(_strip_ansi(tags))
+            return len(name) + tags_len + (2 if tags_len else 1)
+        
+        # Helper function matching knack's _get_padding_len
+        def _get_padding_len(max_len, name, tags):
+            line_len = _get_line_len(name, tags)
+            if tags:
+                pad_len = max_len - line_len + 1
+            else:
+                pad_len = max_len - line_len
+            return pad_len
+        
+        # Build items lists and calculate max_line_len across ALL items (groups + commands)
+        # This ensures colons align across both sections
+        max_line_len = 0
+        groups_items = []
+        for name in sorted(groups_data.keys()):
+            item = groups_data[name]
+            tags = item.get('tags', '')
+            groups_items.append((name, tags, item.get('summary', '')))
+            max_line_len = max(max_line_len, _get_line_len(name, tags))
+        
+        commands_items = []
+        for name in sorted(commands_data.keys()):
+            item = commands_data[name]
+            tags = item.get('tags', '')
+            commands_items.append((name, tags, item.get('summary', '')))
+            max_line_len = max(max_line_len, _get_line_len(name, tags))
+        
+        # Display groups
+        if groups_items:
             print("\nSubgroups:")
-            # Calculate max line length for groups only (matching knack's logic)
-            max_len = 0
-            for name, item in groups.items():
-                tags = item.get('tags', '')
-                tags_len = len(_strip_ansi(tags))
-                line_len = len(name) + tags_len + (2 if tags_len else 1)
-                max_len = max(max_len, line_len)
-            
-            for name in sorted(groups.keys()):
-                item = groups[name]
-                tags = item.get('tags', '')
-                summary = item.get('summary', '')
-                # Calculate padding (matching knack's _get_padding_len logic)
-                tags_len = len(_strip_ansi(tags))
-                line_len = len(name) + tags_len + (2 if tags_len else 1)
-                pad_len = max_len - line_len + (1 if tags else 0)
-                padding = ' ' * pad_len
-                # Format matches knack: name + padding + tags + " : " + summary
-                print(f"    {name}{padding}{tags} : {summary}")
+            indent = 1
+            LINE_FORMAT = '{name}{padding}{tags}{separator}{summary}'
+            for name, tags, summary in groups_items:
+                padding = ' ' * _get_padding_len(max_line_len, name, tags)
+                line = LINE_FORMAT.format(
+                    name=name,
+                    padding=padding,
+                    tags=tags,
+                    separator=FIRST_LINE_PREFIX if summary else '',
+                    summary=summary
+                )
+                _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
         
         # Display commands
-        if commands:
+        if commands_items:
             print("\nCommands:")
-            # Calculate max line length for commands only
-            max_len = 0
-            for name, item in commands.items():
-                tags = item.get('tags', '')
-                tags_len = len(_strip_ansi(tags))
-                line_len = len(name) + tags_len + (2 if tags_len else 1)
-                max_len = max(max_len, line_len)
-            
-            for name in sorted(commands.keys()):
-                item = commands[name]
-                tags = item.get('tags', '')
-                summary = item.get('summary', '')
-                tags_len = len(_strip_ansi(tags))
-                line_len = len(name) + tags_len + (2 if tags_len else 1)
-                pad_len = max_len - line_len + (1 if tags else 0)
-                padding = ' ' * pad_len
-                print(f"    {name}{padding}{tags} : {summary}")
+            indent = 1
+            LINE_FORMAT = '{name}{padding}{tags}{separator}{summary}'
+            for name, tags, summary in commands_items:
+                padding = ' ' * _get_padding_len(max_line_len, name, tags)
+                line = LINE_FORMAT.format(
+                    name=name,
+                    padding=padding,
+                    tags=tags,
+                    separator=FIRST_LINE_PREFIX if summary else '',
+                    summary=summary
+                )
+                _print_indent(line, indent, _get_hanging_indent(max_line_len, indent))
         
         print("\nTo search AI knowledge base for examples, use: az find \"az \"")
         
