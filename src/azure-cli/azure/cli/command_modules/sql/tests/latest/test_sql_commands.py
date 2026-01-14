@@ -9488,6 +9488,48 @@ class SqlServerDeletedServerScenarioTest(ScenarioTest):
                 expect_failure=True)
 
     @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
+    @AllowLargeResponse(size_kb=9999)
+    def test_sql_server_restore_to_existing_live_server_name(self, resource_group, resource_group_location):
+        '''
+        Test attempting to restore a deleted server when a live server with the same name already exists.
+        This validates that the _check_live_server_not_exists validation works correctly.
+        '''
+        server_name = self.create_random_name(server_name_prefix, server_name_max_length)
+        admin_login = 'admin123'
+        admin_password = 'SecretPassword123'
+        location = resource_group_location
+        soft_delete_retention_days = 7
+
+        # Create server with soft delete enabled
+        self.cmd('sql server create -g {} --name {} -l {} '
+                 '--admin-user {} --admin-password {} '
+                 '--soft-delete-retention-days {}'
+                 .format(resource_group, server_name, location,
+                         admin_login, admin_password, soft_delete_retention_days),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('location', location),
+                     JMESPathCheck('resourceGroup', resource_group),
+                     JMESPathCheck('retentionDays', soft_delete_retention_days)])
+
+        # Attempt to restore while the live server still exists with same name
+        # Should fail with ValidationError: "Live server exists in the subscription"
+        self.cmd('sql server restore -g {} --name {} -l {}'
+                 .format(resource_group, server_name, location),
+                 expect_failure=True)
+
+        # Verify the live server still exists (restore didn't affect it)
+        self.cmd('sql server show -g {} --name {}'
+                 .format(resource_group, server_name),
+                 checks=[
+                     JMESPathCheck('name', server_name),
+                     JMESPathCheck('resourceGroup', resource_group)])
+
+        # Clean up - disable soft delete before deletion
+        self.cmd('sql server update -g {} --name {} --soft-delete-retention-days 0'
+                 .format(resource_group, server_name))
+
+    @ResourceGroupPreparer(parameter_name='resource_group', location='centralus')
     @ResourceGroupPreparer(parameter_name='resource_group_2', location='centralus')
     @AllowLargeResponse(size_kb=9999)
     def test_sql_server_restore_deleted_with_invalid_resource_group(self, resource_group, resource_group_2, resource_group_location):

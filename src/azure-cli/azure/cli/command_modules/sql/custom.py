@@ -188,85 +188,75 @@ def _is_serverless_slo(sku_name):
     return "_S_" in sku_name if sku_name else False
 
 
-def _check_server_exists(client, server_name):
+def _check_live_server_not_exists(client, server_name):
     '''
-    Checks if a server already exists in the subscription and raises ValidationError if it does.
+    Checks if a live server exists in the subscription and raises ValidationError if it does.
     Searches across all servers in the subscription to find any server with the given name.
-    Returns False if server doesn't exist, raises ValidationError if it exists.
+    Raises ValidationError if server exists, returns if server doesn't exist.
     '''
     try:
         # List all servers in the subscription
         all_servers = list(client.list())
-
-        # Check if any server matches the given server name (case-insensitive)
-        if any(server.name.lower() == server_name.lower() for server in all_servers):
-            raise ValidationError(
-                f'Server "{server_name}" already exists in the subscription. '
-                'Cannot restore to an existing server name.')
-
-        # No matching server found - this is what we want for restore
-        return False
-
-    except ValidationError:
-        # Re-raise ValidationError as-is
+    except HttpResponseError as ex:
+        # Handle 404 - treat as no servers exist
+        if ex.status_code == 404:
+            return
+        # Re-raise other HTTP errors
         raise
-    except (ResourceNotFoundError, AzCLIError) as ex:
-        # If server doesn't exist, that's what we want - continue with restore
-        if 'ResourceNotFound' not in str(ex) and 'NotFound' not in str(ex):
-            # Re-raise if it's not a "not found" error
-            raise
-    return False
+
+    # Check if any server matches the given server name (case-insensitive)
+    if any(server.name.lower() == server_name.lower() for server in all_servers):
+        raise ValidationError(
+            f'Live server "{server_name}" exists in the subscription. '
+            'Cannot restore to an existing server name.')
 
 
-def _validate_deleted_server_exists(cmd, location, server_name):
+def _validate_deleted_server_resource_group(cmd, location, server_name, resource_group_name):
     '''
-    Validates that a deleted server exists and can be restored.
-    Returns the deleted server object if found.
+    Validates that a deleted server exists and can be restored, and that the resource group
+    matches the original resource group from which the server was deleted.
     '''
+    deleted_servers_client = get_sql_deleted_servers_operations(cmd.cli_ctx, None)
 
     try:
-        deleted_servers_client = get_sql_deleted_servers_operations(cmd.cli_ctx, None)
         deleted_server = deleted_servers_client.get(location, server_name)
-
-        if deleted_server:
-            logger.info('Found deleted server: %s', deleted_server.name)
-            return deleted_server
-
     except HttpResponseError as ex:
         # Handle 404 - deleted server not found
         if ex.status_code == 404:
             raise ResourceNotFoundError(
                 f'Deleted server "{server_name}" not found in location "{location}". '
-                'The server may not have been deleted with soft delete enabled, or the retention period has expired.',
-                ['Use "az sql server deleted-server list" to view all available deleted servers.',
+                'The server may not have been deleted with soft delete enabled, or the retention period '
+                'has expired.',
+                [f'Use "az sql server deleted-server list --location {location}" to view all available '
+                 'deleted servers.',
                  'Verify the server name and location are correct.']) from ex
         # Handle other HTTP errors
         raise AzCLIError(
             f'Failed to retrieve deleted server "{server_name}" in location "{location}". {ex.message}') from ex
     except Exception as ex:
-        # Handle unexpected errors
-        raise AzCLIError('Unexpected error while validating deleted server') from ex
+        raise ex
 
+    # Validate deleted server data
+    if not deleted_server or not deleted_server.original_id:
+        raise ResourceNotFoundError(
+            f'Deleted server "{server_name}" not found in location "{location}". '
+            'The server may not have been deleted with soft delete enabled, or the retention period '
+            'has expired.',
+            [f'Use "az sql server deleted-server list --location {location}" to view all available '
+             'deleted servers.',
+             'Verify the server name and location are correct.'])
 
-def _validate_resource_group_match(deleted_server, user_provided_rg, server_name):
-    '''
-    Validates that the user-provided resource group matches the original resource group
-    from which the server was deleted.
-    Raises ValidationError if they don't match.
-    '''
     # Parse resource group from original_id
     # Format: /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Sql/servers/{name}
     parts = deleted_server.original_id.split('/')
     original_resource_group = parts[4]
 
     # Compare resource groups (case-insensitive)
-    if user_provided_rg.lower() != original_resource_group.lower():
+    if resource_group_name.lower() != original_resource_group.lower():
         raise ValidationError(
-            f'The resource group "{user_provided_rg}" does not match the deleted server\'s original '
+            f'The resource group "{resource_group_name}" does not match the deleted server\'s original '
             f'resource group "{original_resource_group}". Server "{server_name}" must be restored to '
-            f'its original resource group. ')
-
-    return original_resource_group
+            f'its original resource group.')
 
 
 def _get_default_server_version(location_capabilities):
@@ -4568,22 +4558,15 @@ def server_restore(
     # This will raise an error if location is invalid or not available
     _get_location_capability(cmd.cli_ctx, location, CapabilityGroup.SUPPORTED_EDITIONS)
 
-    # Check if server already exists
-    _check_server_exists(client, server_name)
+    # Check if live server already exists
+    _check_live_server_not_exists(client, server_name)
 
-    # Validate deleted server exists and get the deleted server object
-    deleted_server = _validate_deleted_server_exists(cmd, location, server_name)
-
-    # Validate that the provided resource group matches the original resource group
-    if deleted_server is not None and deleted_server.original_id is not None:
-        _validate_resource_group_match(deleted_server, resource_group_name, server_name)
+    # Validate deleted server exists in user provided location and resource group
+    _validate_deleted_server_resource_group(cmd, location, server_name, resource_group_name)
 
     # Set required parameters for restore
     kwargs['location'] = location
     kwargs['create_mode'] = ServerCreateMode.RESTORE
-
-    logger.info('Attempting to restore server "%s" to resource group "%s" in location "%s"',
-                server_name, resource_group_name, location)
 
     # Create/restore the server
     try:
