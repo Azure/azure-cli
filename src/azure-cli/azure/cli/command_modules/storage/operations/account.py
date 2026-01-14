@@ -776,38 +776,10 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
         rules.virtual_network_rules.append(VirtualNetworkRule(virtual_network_resource_id=subnet, action=action))
 
     if ip_address:
-        IpRule = cmd.get_models('IPRule')
-        if not rules.ip_rules:
-            rules.ip_rules = []
-        for ip in ip_address:
-            to_modify = True
-            for x in rules.ip_rules:
-                existing_ip_network = ip_network(x.ip_address_or_range)
-                new_ip_network = ip_network(ip)
-                if new_ip_network.overlaps(existing_ip_network):
-                    logger.warning("IPv4/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
-                                   ip, x.ip_address_or_range)
-                    to_modify = False
-                    break
-            if to_modify:
-                rules.ip_rules.append(IpRule(ip_address_or_range=ip, action=action))
+        rules.ip_rules = _process_add_ip(cmd, ip_address, rules.ip_rules, action=action, ipv6=False)
 
     if ipv6_address:
-        IpRule = cmd.get_models('IPRule')
-        if not rules.ipv6_rules:
-            rules.ipv6_rules = []
-        for ip in ipv6_address:
-            to_modify = True
-            for x in rules.ipv6_rules:
-                existing_ip_network = ip_network(x.ip_address_or_range)
-                new_ip_network = ip_network(ip)
-                if new_ip_network.overlaps(existing_ip_network):
-                    logger.warning("IPv6/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
-                                   ip, x.ip_address_or_range)
-                    to_modify = False
-                    break
-            if to_modify:
-                rules.ipv6_rules.append(IpRule(ip_address_or_range=ip, action=action))
+        rules.ipv6_rules = _process_add_ip(cmd, ipv6_address, rules.ipv6_rules, action=action, ipv6=True)
 
     if resource_id:
         ResourceAccessRule = cmd.get_models('ResourceAccessRule')
@@ -820,6 +792,25 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
     StorageAccountUpdateParameters = cmd.get_models('StorageAccountUpdateParameters')
     params = StorageAccountUpdateParameters(network_rule_set=rules)
     return client.update(resource_group_name, account_name, params)
+
+
+def _process_add_ip(cmd, ip_address, ip_rules, action, ipv6=False):
+    IpRule = cmd.get_models('IPRule')
+    if not ip_rules:
+        ip_rules = []
+    for ip in ip_address:
+        to_modify = True
+        for x in ip_rules:
+            existing_ip_network = ip_network(x.ip_address_or_range)
+            new_ip_network = ip_network(ip)
+            if new_ip_network.overlaps(existing_ip_network):
+                logger.warning("IP%s/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                               "v6" if ipv6 else "v4", ip, x.ip_address_or_range)
+                to_modify = False
+                break
+        if to_modify:
+            ip_rules.append(IpRule(ip_address_or_range=ip, action=action))
+    return ip_rules
 
 
 def remove_network_rule(cmd, client, resource_group_name, account_name, ip_address=None, ipv6_address=None, subnet=None,

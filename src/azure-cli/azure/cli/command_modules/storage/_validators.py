@@ -2127,8 +2127,8 @@ def _find_ip_address_overlap(ip_address, ipv6=False):
         return
 
     ip_address_networks = [ip_network(ip) for ip in ip_address]
-    error_str = "ipv6 addresses {} and {} provided are overlapping: --ipv6_address ip1 [ip2]..." if ipv6 else \
-        "ip addresses {} and {} provided are overlapping: --ip_address ip1 [ip2]..."
+    error_str = "ipv6 addresses {} and {} provided are overlapping: --ipv6-address ip1 [ip2]..." if ipv6 else \
+        "ip addresses {} and {} provided are overlapping: --ip-address ip1 [ip2]..."
     for idx, ip_address_network in enumerate(ip_address_networks):
         for idx2, ip_address_network2 in enumerate(ip_address_networks):
             if idx == idx2:
