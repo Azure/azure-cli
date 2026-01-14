@@ -157,7 +157,7 @@ def prep_filter_for_url_encoding(filter_value=None):
     return filter_value
 
 
-class AuthHeaderRequestsTransport(RequestsTransport): # pylint: disable=too-few-public-methods
+class AuthHeaderRequestsTransport(RequestsTransport):  # pylint: disable=too-few-public-methods
     def send(self, request, **kwargs):  # pylint: disable=arguments-differ
         # Strip any auth/signature headers to allow anonymous access
         if 'Authorization' in request.headers:
