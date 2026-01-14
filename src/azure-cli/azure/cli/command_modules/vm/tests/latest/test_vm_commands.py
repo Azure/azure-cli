@@ -2865,6 +2865,91 @@ class VMMultiNicScenarioTest(ScenarioTest):  # pylint: disable=too-many-instance
         ])
 
 
+class VMMultiNicAAZScenarioTest(ScenarioTest):
+    @AllowLargeResponse(size_kb=99999)
+    @ResourceGroupPreparer(name_prefix='cli_test_vm_nic_aaz')
+    def test_vm_nic_add_remove_set_aaz(self, resource_group):
+
+        self.kwargs.update({
+            'vnet': 'vnet1',
+            'subnet': 'subnet1',
+            'vm': 'vmnic1',
+            'size': 'Standard_D2s_v3',
+            'username': 'azureuser',
+            'ssh_key': TEST_SSH_KEY_PUB
+        })
+
+        # create vnet + subnet
+        self.cmd(
+            'network vnet create -g {rg} -n {vnet} --subnet-name {subnet}'
+        )
+
+        # disable default outbound access
+        self.cmd(
+            'network vnet subnet update -g {rg} '
+            '--vnet-name {vnet} -n {subnet} '
+            '--default-outbound-access false'
+        )
+
+        # create 3 nics
+        for i in range(1, 4):
+            self.kwargs['nic'] = f'nic{i}'
+            self.cmd(
+                'network nic create -g {rg} -n {nic} '
+                '--subnet {subnet} --vnet-name {vnet}'
+            )
+
+        # create vm with 2 nics
+        self.cmd('vm create -g {rg} -n {vm} --admin-username admin123 --size {size} '
+                 '--admin-password testPassword0 --image Debian:debian-10:10:latest --nics nic1 nic2')
+
+        # cannot alter nics on a running (or even stopped) vm
+        self.cmd('vm deallocate -g {rg} -n {vm}')
+
+        self.cmd(
+            'vm nic list -g {rg} --vm-name {vm}',
+            checks=[
+                self.check('length(@)', 2),
+                self.check('[0].primary', True)
+            ]
+        )
+
+        self.cmd(
+            'vm nic show -g {rg} --vm-name {vm} --nic nic1',
+            checks=[
+                self.check("id.contains(@, 'nic1')", True)
+            ]
+        )
+
+        self.cmd(
+            'vm nic remove -g {rg} --vm-name {vm} '
+            '--nics nic2 --primary-nic nic1',
+            checks=[
+                self.check('length(@)', 1),
+                self.check('[0].primary', True),
+                self.check("[0].id.contains(@, 'nic1')", True)
+            ]
+        )
+
+        self.cmd(
+            'vm nic add -g {rg} --vm-name {vm} --nics nic2',
+            checks=[
+                self.check('length(@)', 2),
+                self.check('[0].primary', True)
+            ]
+        )
+
+        self.cmd(
+            'vm nic set -g {rg} --vm-name {vm} '
+            '--nics nic2 --primary-nic nic2',
+            checks=[
+                self.check('length(@)', 1),
+                self.check('[0].primary', True),
+                self.check("[0].id.contains(@, 'nic2')", True)
+            ]
+        )
+
+
 class VMCreateNoneOptionsTest(ScenarioTest):  # pylint: disable=too-many-instance-attributes
 
     @AllowLargeResponse(size_kb=99999)
