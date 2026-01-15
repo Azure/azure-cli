@@ -510,7 +510,7 @@ def load_arguments(self, _):
         c.argument('service_name', options_list=['--service-name', '-n'],
                    help='The name of the API Management service instance.')
         c.argument('backend_id', arg_type=backend_id, help='Identifier of the Backend.')
-        c.argument('url', help='Required. Backend service URL.')
+        c.argument('url', required=True, help='Required. Backend service URL.')
         c.argument('protocol', arg_type=get_enum_type(BACKEND_PROTOCOLS),
                    help='Protocol used to communicate with the backend service. Possible values include: `http`, `soap`.')
         c.argument('description', help='Description of the Backend. May include HTML formatting tags.')
