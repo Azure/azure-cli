@@ -5927,11 +5927,294 @@ class VNetGatewayManagedIdentityScenarioTest(ScenarioTest):
 
 
 class VpnConnectionAuthenticationScenarioTest(ScenarioTest):
+
+    @staticmethod
+    def _get_now_utc():
+        import datetime
+        try:
+            from datetime import timezone
+            return datetime.datetime.now(timezone.utc)
+        except ImportError:
+            return datetime.datetime.utcnow()
+
+    @staticmethod
+    def _format_subject_dn(common_name: str):
+        return "CN={}, OU=IT, O=Test Organization, L=Redmond, S=Washington, C=US".format(common_name)
+
+    @staticmethod
+    def generate_ca_chain(root_cert_path, intermediate_cert_path):
+        """
+        Generate a valid certificate chain:
+          Root CA -> Intermediate CA
+        Return: (root_key, root_cert, inter_key, inter_cert)
+        """
+        try:
+            from cryptography import x509
+            from cryptography.x509.oid import NameOID
+            from cryptography.hazmat.primitives import hashes, serialization
+            from cryptography.hazmat.primitives.asymmetric import rsa
+            from cryptography.hazmat.backends import default_backend
+            import datetime
+
+            now = VpnConnectionAuthenticationScenarioTest._get_now_utc()
+
+            os.makedirs(os.path.dirname(root_cert_path), exist_ok=True)
+
+            # ===== Root CA =====
+            root_key = rsa.generate_private_key(
+                public_exponent=65537,
+                key_size=2048,
+                backend=default_backend()
+            )
+
+            root_subject = x509.Name([
+                x509.NameAttribute(NameOID.COUNTRY_NAME, u"US"),
+                x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"Washington"),
+                x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"Test Root CA Org"),
+                x509.NameAttribute(NameOID.COMMON_NAME, u"Test Root CA"),
+            ])
+
+            root_public_key = root_key.public_key()
+            root_ski = x509.SubjectKeyIdentifier.from_public_key(root_public_key)
+
+            root_cert = x509.CertificateBuilder().subject_name(
+                root_subject
+            ).issuer_name(
+                root_subject
+            ).public_key(
+                root_public_key
+            ).serial_number(
+                x509.random_serial_number()
+            ).not_valid_before(
+                now - datetime.timedelta(minutes=5)
+            ).not_valid_after(
+                now + datetime.timedelta(days=3650)
+            ).add_extension(
+                x509.BasicConstraints(ca=True, path_length=1),
+                critical=True,
+            ).add_extension(
+                x509.KeyUsage(
+                    digital_signature=True,
+                    key_cert_sign=True,
+                    crl_sign=True,
+                    key_encipherment=False,
+                    content_commitment=False,
+                    data_encipherment=False,
+                    key_agreement=False,
+                    encipher_only=False,
+                    decipher_only=False,
+                ),
+                critical=True,
+            ).add_extension(
+                root_ski,
+                critical=False,
+            ).sign(root_key, hashes.SHA256(), default_backend())
+
+            # Write Root cert (public only)
+            with open(root_cert_path, 'wb') as f:
+                f.write(root_cert.public_bytes(serialization.Encoding.PEM))
+
+            # ===== Intermediate CA (signed by Root) =====
+            intermediate_key = rsa.generate_private_key(
+                public_exponent=65537,
+                key_size=2048,
+                backend=default_backend()
+            )
+
+            intermediate_subject = x509.Name([
+                x509.NameAttribute(NameOID.COUNTRY_NAME, u"US"),
+                x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"Washington"),
+                x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"Test Intermediate CA Org"),
+                x509.NameAttribute(NameOID.COMMON_NAME, u"Test Intermediate CA"),
+            ])
+
+            intermediate_public_key = intermediate_key.public_key()
+            intermediate_ski = x509.SubjectKeyIdentifier.from_public_key(intermediate_public_key)
+            intermediate_aki = x509.AuthorityKeyIdentifier.from_issuer_public_key(root_public_key)
+
+            intermediate_cert = x509.CertificateBuilder().subject_name(
+                intermediate_subject
+            ).issuer_name(
+                root_subject
+            ).public_key(
+                intermediate_public_key
+            ).serial_number(
+                x509.random_serial_number()
+            ).not_valid_before(
+                now - datetime.timedelta(minutes=5)
+            ).not_valid_after(
+                now + datetime.timedelta(days=1825)
+            ).add_extension(
+                x509.BasicConstraints(ca=True, path_length=0),
+                critical=True,
+            ).add_extension(
+                x509.KeyUsage(
+                    digital_signature=True,
+                    key_cert_sign=True,
+                    crl_sign=True,
+                    key_encipherment=False,
+                    content_commitment=False,
+                    data_encipherment=False,
+                    key_agreement=False,
+                    encipher_only=False,
+                    decipher_only=False,
+                ),
+                critical=True,
+            ).add_extension(
+                intermediate_ski,
+                critical=False,
+            ).add_extension(
+                intermediate_aki,
+                critical=False,
+            ).sign(root_key, hashes.SHA256(), default_backend())
+
+            # Write Intermediate cert (public only)
+            with open(intermediate_cert_path, 'wb') as f:
+                f.write(intermediate_cert.public_bytes(serialization.Encoding.PEM))
+
+            return root_key, root_cert, intermediate_key, intermediate_cert
+
+        except ImportError as e:
+            raise Exception(f"cryptography package is required. Error: {e}")
+
+    @staticmethod
+    def generate_leaf_certificate(common_name, signer_key, signer_cert, is_ca=False, days=365):
+        """
+        Generate a leaf certificate signed by signer_cert.
+        Return: (leaf_private_key, leaf_cert)
+        """
+        try:
+            from cryptography import x509
+            from cryptography.x509.oid import NameOID, ExtendedKeyUsageOID
+            from cryptography.hazmat.primitives import hashes
+            from cryptography.hazmat.primitives.asymmetric import rsa
+            from cryptography.hazmat.backends import default_backend
+            import datetime
+
+            now = VpnConnectionAuthenticationScenarioTest._get_now_utc()
+
+            private_key = rsa.generate_private_key(
+                public_exponent=65537,
+                key_size=2048,
+                backend=default_backend()
+            )
+
+            subject = x509.Name([
+                x509.NameAttribute(NameOID.COUNTRY_NAME, u"US"),
+                x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"Washington"),
+                x509.NameAttribute(NameOID.LOCALITY_NAME, u"Redmond"),
+                x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"Test Organization"),
+                x509.NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, u"IT"),
+                x509.NameAttribute(NameOID.COMMON_NAME, common_name),
+            ])
+
+            public_key = private_key.public_key()
+            ski = x509.SubjectKeyIdentifier.from_public_key(public_key)
+            aki = x509.AuthorityKeyIdentifier.from_issuer_public_key(signer_key.public_key())
+
+            builder = x509.CertificateBuilder().subject_name(
+                subject
+            ).issuer_name(
+                signer_cert.subject
+            ).public_key(
+                public_key
+            ).serial_number(
+                x509.random_serial_number()
+            ).not_valid_before(
+                now - datetime.timedelta(minutes=5)
+            ).not_valid_after(
+                now + datetime.timedelta(days=days)
+            )
+
+            # Leaf cert constraints
+            builder = builder.add_extension(
+                x509.BasicConstraints(ca=is_ca, path_length=None if not is_ca else 0),
+                critical=True,
+            )
+
+            # EKU: Both client & server auth are required for certificate auth
+            builder = builder.add_extension(
+                x509.ExtendedKeyUsage([
+                    ExtendedKeyUsageOID.SERVER_AUTH,
+                    ExtendedKeyUsageOID.CLIENT_AUTH,
+                ]),
+                critical=False,
+            )
+
+            # Key usage for leaf
+            builder = builder.add_extension(
+                x509.KeyUsage(
+                    digital_signature=True,
+                    key_encipherment=True,
+                    key_cert_sign=False,
+                    crl_sign=False,
+                    content_commitment=False,
+                    data_encipherment=False,
+                    key_agreement=False,
+                    encipher_only=False,
+                    decipher_only=False,
+                ),
+                critical=True,
+            )
+
+            builder = builder.add_extension(ski, critical=False)
+            builder = builder.add_extension(aki, critical=False)
+
+            cert = builder.sign(signer_key, hashes.SHA256(), default_backend())
+            return private_key, cert
+
+        except ImportError as e:
+            raise Exception(f"cryptography package (>= 3.0) is required for certificate generation. "
+                            f"Install it with: pip install 'cryptography>=3.0'. Error: {e}")
+
+    @staticmethod
+    def write_pem_cert(cert, cert_path):
+        try:
+            from cryptography.hazmat.primitives import serialization
+            os.makedirs(os.path.dirname(cert_path), exist_ok=True)
+            with open(cert_path, 'wb') as f:
+                f.write(cert.public_bytes(serialization.Encoding.PEM))
+        except ImportError as e:
+            raise Exception(f"cryptography package is required. Error: {e}")
+
+    @staticmethod
+    def generate_outbound_pfx_with_chain(pfx_path, password, leaf_private_key, leaf_cert, chain_certs):
+        """
+        Generate outbound PFX that includes:
+          - leaf cert + private key
+          - CA chain (intermediate + root) via 'cas'
+        """
+        try:
+            from cryptography.hazmat.primitives import serialization
+            from cryptography.hazmat.primitives.serialization.pkcs12 import serialize_key_and_certificates, load_key_and_certificates
+
+            os.makedirs(os.path.dirname(pfx_path), exist_ok=True)
+
+            pfx_data = serialize_key_and_certificates(
+                name=b"test-vpn-outbound",
+                key=leaf_private_key,
+                cert=leaf_cert,
+                cas=chain_certs,  # IMPORTANT: include CA chain
+                encryption_algorithm=serialization.BestAvailableEncryption(password.encode())
+            )
+
+            with open(pfx_path, 'wb') as f:
+                f.write(pfx_data)
+
+            _k, _c, _addl = load_key_and_certificates(pfx_data, password.encode())
+
+        except ImportError as e:
+            raise Exception(f"cryptography package is required for PFX generation. Error: {e}")
+
+    @live_only()
     @ResourceGroupPreparer(location='eastus', name_prefix='test_vpn_connection_auth')
-    @KeyVaultPreparer(name_prefix='cli-mi-vpn-cert-kv-', sku='premium', additional_params='--enable-rbac-authorization false')
+    @KeyVaultPreparer(name_prefix='cli-mi-vpn-cert-kv-', sku='premium',
+                      additional_params='--enable-rbac-authorization false')
     @AllowLargeResponse(size_kb=9999)
     def test_vpn_connection_authentication(self, resource_group):
         import json
+        import tempfile
+        import shutil
 
         subscription_id = self.get_subscription_id()
         self.kwargs.update({
@@ -5948,138 +6231,177 @@ class VpnConnectionAuthenticationScenarioTest(ScenarioTest):
             'subscription': subscription_id
         })
 
-        outbound_cert_path = os.path.join(CERTS_DIR, 'VpnGatewayoutboundcert.pfx')
-        inbound_cert1_path = os.path.join(CERTS_DIR, 'VpnGatewayInboundCert.cer')
-        inbound_cert2_path = os.path.join(CERTS_DIR, 'VpnGatewayAuthCert.cer')
+        # create temporary directory for test certificates
+        temp_dir = tempfile.mkdtemp()
+        outbound_cert_path = os.path.join(temp_dir, 'VpnGatewayoutboundcert.pfx')
 
-        # create managed identity
-        identity_result = self.cmd('identity create -g {rg} -n {identity_name}', checks=[
-            self.check('name', '{identity_name}'),
-            self.exists('principalId')
-        ]).get_output_in_json()
-        self.kwargs['identity_id'] = identity_result['id']
-        self.kwargs['principal_id'] = identity_result['principalId']
+        # public cert files for inbound chain (PEM with BEGIN/END CERT)
+        inbound_cert1_path = os.path.join(temp_dir, 'VpnGatewayInboundCert.cer')  # Intermediate CA (public)
+        inbound_cert2_path = os.path.join(temp_dir, 'VpnGatewayAuthCert.cer')    # Root CA (public)
 
-        # grant managed identity access to KV
-        self.cmd('keyvault set-policy -n {kv} '
-                '--object-id {principal_id} '
-                '--certificate-permissions get list '
-                '--secret-permissions get list')
+        try:
+            root_key, root_cert, inter_key, inter_cert = self.generate_ca_chain(
+                root_cert_path=inbound_cert2_path,          # Root CA public
+                intermediate_cert_path=inbound_cert1_path    # Intermediate CA public
+            )
 
-        # import certificate to KV
-        self.cmd(f'keyvault certificate import -n {{cert_name}} --vault-name {{kv}} '
-                f'--file "{outbound_cert_path}" --password "12345"', checks=[
-            self.check('name', '{cert_name}')
-        ])
+            outbound_cn = "test-vpn-outbound.local"
+            outbound_key, outbound_leaf_cert = self.generate_leaf_certificate(
+                common_name=outbound_cn,
+                signer_key=inter_key,
+                signer_cert=inter_cert
+            )
+            self.generate_outbound_pfx_with_chain(
+                pfx_path=outbound_cert_path,
+                password="Test-Pfx-Password-123!",
+                leaf_private_key=outbound_key,
+                leaf_cert=outbound_leaf_cert,
+                chain_certs=[inter_cert, root_cert]  # include chain
+            )
 
-        # get certificate url
-        cert_info = self.cmd('keyvault certificate show -n {cert_name} --vault-name {kv}').get_output_in_json()
-        self.kwargs['cert_url'] = cert_info['id']
-        self.kwargs['subject_name'] = cert_info['policy']['x509CertificateProperties']['subject']
+            # generate inbound leaf cert (signed by Intermediate)
+            inbound_cn = "test-vpn-inbound.local"
+            _in_key, inbound_leaf_cert = self.generate_leaf_certificate(
+                common_name=inbound_cn,
+                signer_key=inter_key,
+                signer_cert=inter_cert
+            )
+            self.kwargs['subject_name'] = self._format_subject_dn(inbound_cn)
 
-        # read inbound certificate chain
-        def read_cert_base64(file_path):
-            with open(file_path, 'r') as f:
-                content = f.read()
-            cert_data = content.replace('-----BEGIN CERTIFICATE-----', '')
-            cert_data = cert_data.replace('-----END CERTIFICATE-----', '')
-            cert_data = cert_data.replace('\n', '').replace('\r', '').strip()
-            return cert_data
-        inbound_cert1_base64 = read_cert_base64(inbound_cert1_path)
-        inbound_cert2_base64 = read_cert_base64(inbound_cert2_path)
+            # create managed identity
+            identity_result = self.cmd('identity create -g {rg} -n {identity_name}', checks=[
+                self.check('name', '{identity_name}'),
+                self.exists('principalId')
+            ]).get_output_in_json()
+            self.kwargs['identity_id'] = identity_result['id']
+            self.kwargs['principal_id'] = identity_result['principalId']
 
-        # create virtual network with gateway subnet
-        self.cmd('network vnet create -g {rg} -n {vnet_name} '
-                '--address-prefix 10.0.0.0/16 '
-                '--subnet-name GatewaySubnet '
-                '--subnet-prefix 10.0.255.0/24', checks=[
-            self.check('newVNet.name', '{vnet_name}'),
-            self.check('newVNet.subnets[0].name', 'GatewaySubnet')
-        ])
+            # grant managed identity access to KV
+            self.cmd('keyvault set-policy -n {kv} '
+                     '--object-id {principal_id} '
+                     '--certificate-permissions get list '
+                     '--secret-permissions get list')
 
-        # create public ip
-        self.cmd('network public-ip create -g {rg} -n {pip_name} '
-                '--allocation-method Static '
-                '--ip-tags FirstPartyUsage=/NonProd '
-                '--sku Standard', checks=[
-            self.check('publicIp.name', '{pip_name}')
-        ])
+            # import outbound certificate to KV
+            self.cmd(f'keyvault certificate import -n {{cert_name}} --vault-name {{kv}} '
+                     f'--file "{outbound_cert_path}" --password "Test-Pfx-Password-123!"', checks=[
+                self.check('name', '{cert_name}')
+            ])
 
-        # create vnet gateway with managed identity
-        self.cmd('network vnet-gateway create -g {rg} -n {vnet_gateway_name} '
-                '--public-ip-address {pip_name} '
-                '--vnet {vnet_name} '
-                '--gateway-type Vpn '
-                '--vpn-type RouteBased '
-                '--sku VpnGw1 '
-                '--mi-user-assigned {identity_id}', checks=[
-            self.check('vnetGateway.name', '{vnet_gateway_name}'),
-            self.check('vnetGateway.gatewayType', 'Vpn'),
-            self.exists('vnetGateway.identity')
-        ])
+            # get certificate url (OutboundAuthCertificate)
+            cert_info = self.cmd('keyvault certificate show -n {cert_name} --vault-name {kv}').get_output_in_json()
+            self.kwargs['cert_url'] = cert_info['id']
 
-        # create local gateway
-        self.cmd('network local-gateway create -g {rg} -n {local_gateway_name} '
-                '--gateway-ip-address 192.168.4.5 '
-                '--local-address-prefixes 192.168.0.0/16', checks=[
-            self.check('name', '{local_gateway_name}')
-        ])
+            # read inbound certificate chain (public keys only)
+            # Azure docs recommend at least two certs (Root + Intermediate)
+            def read_cert_base64(file_path):
+                with open(file_path, 'r') as f:
+                    content = f.read()
+                cert_data = content.replace('-----BEGIN CERTIFICATE-----', '')
+                cert_data = cert_data.replace('-----END CERTIFICATE-----', '')
+                cert_data = cert_data.replace('\n', '').replace('\r', '').strip()
+                return cert_data
 
-        # create vpn connection with certificate authentication
-        cert_auth_config = {
-            "outboundAuthCertificate": self.kwargs['cert_url'],
-            "inboundAuthCertificateChain": [inbound_cert1_base64, inbound_cert2_base64],
-            "inboundAuthCertificateSubjectName": self.kwargs['subject_name']
-        }
-        self.kwargs['cert_auth'] = json.dumps(cert_auth_config)
-        self.cmd('network vpn-connection create -g {rg} -n {connection_name} '
-                '--vnet-gateway1 {vnet_gateway_name} '
-                '--local-gateway2 {local_gateway_name} '
-                '--shared-key {shared_key} '
-                '--auth-type Certificate '
-                '--cert-auth \'{cert_auth}\'', checks=[
-            self.check('resource.connectionType', 'IPsec')
-        ])
+            inbound_root_base64 = read_cert_base64(inbound_cert2_path)
+            inbound_intermediate_base64 = read_cert_base64(inbound_cert1_path)
 
-        # verify connection with certificate authentication
-        connection = self.cmd('network vpn-connection show -g {rg} -n {connection_name}', checks=[
-            self.check('name', '{connection_name}'),
-            self.check('authenticationType', 'Certificate'),
-            self.exists('certificateAuthentication')
-        ]).get_output_in_json()
+            # create virtual network with gateway subnet
+            self.cmd('network vnet create -g {rg} -n {vnet_name} '
+                     '--address-prefix 10.0.0.0/16 '
+                     '--subnet-name GatewaySubnet '
+                     '--subnet-prefix 10.0.255.0/24', checks=[
+                self.check('newVNet.name', '{vnet_name}'),
+                self.check('newVNet.subnets[0].name', 'GatewaySubnet')
+            ])
 
-        # verify certificate authentication configuration
-        cert_config = connection['certificateAuthentication']
-        self.assertEqual(cert_config['outboundAuthCertificate'], self.kwargs['cert_url'])
-        self.assertEqual(cert_config['inboundAuthCertificateSubjectName'], self.kwargs['subject_name'])
-        self.assertEqual(len(cert_config['inboundAuthCertificateChain']), 2)
+            # create public ip
+            self.cmd('network public-ip create -g {rg} -n {pip_name} '
+                     '--allocation-method Static '
+                     '--ip-tags FirstPartyUsage=/NonProd '
+                     '--sku Standard', checks=[
+                self.check('publicIp.name', '{pip_name}')
+            ])
 
-        # update certificate authentication
-        new_cert_auth_config = {
-            "outboundAuthCertificate": self.kwargs['cert_url'],
-            "inboundAuthCertificateChain": [inbound_cert1_base64, inbound_cert2_base64],
-            "inboundAuthCertificateSubjectName": self.kwargs['subject_name'] + "-new"
-        }
-        self.kwargs['new_cert_auth'] = json.dumps(new_cert_auth_config)
-        self.cmd('network vpn-connection update -g {rg} -n {connection_name} '
-                '--cert-auth \'{new_cert_auth}\'', checks=[
-            self.check('name', '{connection_name}'),
-            self.check('authenticationType', 'Certificate')
-        ])
+            # create vnet gateway with managed identity
+            self.cmd('network vnet-gateway create -g {rg} -n {vnet_gateway_name} '
+                     '--public-ip-address {pip_name} '
+                     '--vnet {vnet_name} '
+                     '--gateway-type Vpn '
+                     '--vpn-type RouteBased '
+                     '--sku VpnGw1 '
+                     '--mi-user-assigned {identity_id}', checks=[
+                self.check('vnetGateway.name', '{vnet_gateway_name}'),
+                self.check('vnetGateway.gatewayType', 'Vpn'),
+                self.exists('vnetGateway.identity')
+            ])
 
-        # delete connection
-        self.cmd('network vpn-connection delete -g {rg} -n {connection_name}')
+            # create local gateway
+            self.cmd('network local-gateway create -g {rg} -n {local_gateway_name} '
+                     '--gateway-ip-address 192.168.4.5 '
+                     '--local-address-prefixes 192.168.0.0/16', checks=[
+                self.check('name', '{local_gateway_name}')
+            ])
 
-        # create connection with PSK for comparison
-        self.cmd('network vpn-connection create -g {rg} -n {connection_name} '
-                '--vnet-gateway1 {vnet_gateway_name} '
-                '--local-gateway2 {local_gateway_name} '
-                '--shared-key {shared_key}')
+            # create vpn connection with certificate authentication
+            cert_auth_config = {
+                "outboundAuthCertificate": self.kwargs['cert_url'],
+                "inboundAuthCertificateChain": [inbound_root_base64, inbound_intermediate_base64],
+                "inboundAuthCertificateSubjectName": self.kwargs['subject_name']
+            }
+            self.kwargs['cert_auth'] = json.dumps(cert_auth_config)
+            self.cmd('network vpn-connection create -g {rg} -n {connection_name} '
+                     '--vnet-gateway1 {vnet_gateway_name} '
+                     '--local-gateway2 {local_gateway_name} '
+                     '--shared-key {shared_key} '
+                     '--auth-type Certificate '
+                     '--cert-auth \'{cert_auth}\'', checks=[
+                self.check('resource.connectionType', 'IPsec')
+            ])
 
-        # verify PSK connection
-        psk_connection = self.cmd('network vpn-connection show -g {rg} -n {connection_name}').get_output_in_json()
-        if 'authenticationType' in psk_connection:
-            self.assertIn(psk_connection['authenticationType'], ['PSK', None])
+            # verify connection with certificate authentication
+            connection = self.cmd('network vpn-connection show -g {rg} -n {connection_name}', checks=[
+                self.check('name', '{connection_name}'),
+                self.check('authenticationType', 'Certificate'),
+                self.exists('certificateAuthentication')
+            ]).get_output_in_json()
+
+            # verify certificate authentication configuration
+            cert_config = connection['certificateAuthentication']
+            self.assertEqual(cert_config['outboundAuthCertificate'], self.kwargs['cert_url'])
+            self.assertEqual(cert_config['inboundAuthCertificateSubjectName'], self.kwargs['subject_name'])
+            self.assertEqual(len(cert_config['inboundAuthCertificateChain']), 2)
+
+            # update certificate authentication
+            new_cert_auth_config = {
+                "outboundAuthCertificate": self.kwargs['cert_url'],
+                "inboundAuthCertificateChain": [inbound_root_base64, inbound_intermediate_base64],
+                "inboundAuthCertificateSubjectName": self.kwargs['subject_name'] + "-new"
+            }
+            self.kwargs['new_cert_auth'] = json.dumps(new_cert_auth_config)
+            self.cmd('network vpn-connection update -g {rg} -n {connection_name} '
+                     '--cert-auth \'{new_cert_auth}\'', checks=[
+                self.check('name', '{connection_name}'),
+                self.check('authenticationType', 'Certificate')
+            ])
+
+            # delete connection
+            self.cmd('network vpn-connection delete -g {rg} -n {connection_name}')
+
+            # create connection with PSK for comparison
+            self.cmd('network vpn-connection create -g {rg} -n {connection_name} '
+                     '--vnet-gateway1 {vnet_gateway_name} '
+                     '--local-gateway2 {local_gateway_name} '
+                     '--shared-key {shared_key}')
+
+            # verify PSK connection
+            psk_connection = self.cmd('network vpn-connection show -g {rg} -n {connection_name}').get_output_in_json()
+            if 'authenticationType' in psk_connection:
+                self.assertIn(psk_connection['authenticationType'], ['PSK', None])
+
+        finally:
+            # clean up temporary certificates
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
 
 
 class NetworkVnetGatewayIpSecPolicy(ScenarioTest):
@@ -7036,45 +7358,139 @@ class NetworkVpnGatewayScenarioTest(ScenarioTest):
 
 class NetworkVpnClientPackageScenarioTest(ScenarioTest):
 
+    @staticmethod
+    def _generate_p2s_root_cert_public_file(cert_path, common_name="VpnGatewayAuthCert"):
+        """
+        Generate a self-signed Root CA public certificate file for P2S root-cert upload.
+        The file content is PEM (BEGIN/END CERTIFICATE), which is acceptable for public cert data.
+        """
+        try:
+            from cryptography import x509
+            from cryptography.x509.oid import NameOID
+            from cryptography.hazmat.primitives import hashes, serialization
+            from cryptography.hazmat.primitives.asymmetric import rsa
+            from cryptography.hazmat.backends import default_backend
+            import datetime
+
+            # timezone-aware now
+            try:
+                from datetime import timezone
+                now = datetime.datetime.now(timezone.utc)
+            except ImportError:
+                now = datetime.datetime.utcnow()
+
+            # Root key (private key not exported; we only write public cert)
+            root_key = rsa.generate_private_key(
+                public_exponent=65537,
+                key_size=2048,
+                backend=default_backend()
+            )
+
+            subject = x509.Name([
+                x509.NameAttribute(NameOID.COUNTRY_NAME, u"US"),
+                x509.NameAttribute(NameOID.STATE_OR_PROVINCE_NAME, u"Washington"),
+                x509.NameAttribute(NameOID.LOCALITY_NAME, u"Redmond"),
+                x509.NameAttribute(NameOID.ORGANIZATION_NAME, u"Test Organization"),
+                x509.NameAttribute(NameOID.ORGANIZATIONAL_UNIT_NAME, u"IT"),
+                x509.NameAttribute(NameOID.COMMON_NAME, common_name),
+            ])
+
+            cert = x509.CertificateBuilder().subject_name(
+                subject
+            ).issuer_name(
+                subject  # self-signed root
+            ).public_key(
+                root_key.public_key()
+            ).serial_number(
+                x509.random_serial_number()
+            ).not_valid_before(
+                now - datetime.timedelta(minutes=5)
+            ).not_valid_after(
+                now + datetime.timedelta(days=3650)
+            ).add_extension(
+                x509.BasicConstraints(ca=True, path_length=1),
+                critical=True,
+            ).add_extension(
+                x509.KeyUsage(
+                    digital_signature=True,
+                    key_cert_sign=True,
+                    crl_sign=True,
+                    key_encipherment=False,
+                    content_commitment=False,
+                    data_encipherment=False,
+                    key_agreement=False,
+                    encipher_only=False,
+                    decipher_only=False,
+                ),
+                critical=True,
+            ).add_extension(
+                x509.SubjectKeyIdentifier.from_public_key(root_key.public_key()),
+                critical=False,
+            ).sign(root_key, hashes.SHA256(), default_backend())
+
+            os.makedirs(os.path.dirname(cert_path), exist_ok=True)
+            with open(cert_path, "wb") as f:
+                # write public cert as PEM (public only)
+                f.write(cert.public_bytes(serialization.Encoding.PEM))
+
+        except ImportError as e:
+            raise Exception("cryptography package is required for certificate generation. ")
+
     @ResourceGroupPreparer('cli_test_vpn_client_package')
     def test_vpn_client_package(self, resource_group):
-        self.kwargs.update({
-            'vnet': 'vnet1',
-            'public_ip': 'pip1',
-            'gateway_prefix': '100.1.1.0/24',
-            'gateway': 'vgw1',
-            'gw_sku': 'VpnGw1AZ',
-            'cert': 'cert1',
-            'cert_path': os.path.join(CERTS_DIR, 'VpnGatewayAuthCert.cer')
-        })
+        import tempfile
+        import shutil
 
-        self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
-        self.cmd('network public-ip create -g {rg} -n {public_ip}')
-        self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip} --sku {gw_sku}')
-        self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"')
+        # create a temporary folder for generated public root cert
+        temp_dir = tempfile.mkdtemp()
+        cert_path = os.path.join(temp_dir, 'VpnGatewayAuthCert.cer')
 
-        # test vnet-gateway revoked-cert create
-        # self.cmd('network vnet-gateway update -g {rg} -n {vg} --address-prefixes 40.1.0.0/24')
-        self.cmd('network vnet-gateway revoked-cert create -g {rg} -n MyCer --gateway-name {gateway} --thumbprint e806da0b7fe24f47e76fa269dc4ed76dac4b39d0')
+        try:
+            # generate a root cert public file dynamically (avoid static cert dependency)
+            self._generate_p2s_root_cert_public_file(cert_path)
 
-        # test vnet-gateway revoked-cert delete
-        self.cmd('network vnet-gateway revoked-cert delete -g {rg} -n MyCer --gateway-name {gateway}')
+            self.kwargs.update({
+                'vnet': 'vnet1',
+                'public_ip': 'pip1',
+                'gateway_prefix': '100.1.1.0/24',
+                'gateway': 'vgw1',
+                'gw_sku': 'VpnGw1AZ',
+                'cert': 'cert1',
+                'cert_path': cert_path,
+            })
 
-        output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}').get_output_in_json()
-        self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
-        output = self.cmd('network vnet-gateway vpn-client show-url -g {rg} -n {gateway}').get_output_in_json()
-        self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
-        self.cmd('network vnet-gateway vpn-client ipsec-policy set -g {rg} -n {gateway} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
-        self.cmd('network vnet-gateway vpn-client ipsec-policy show -g {rg} -n {gateway}', checks=[
-            self.check('dhGroup', 'DHGroup24'),
-            self.check('ikeEncryption', 'AES256'),
-            self.check('ikeIntegrity', 'SHA384'),
-            self.check('ipsecEncryption', 'GCMAES256'),
-            self.check('ipsecIntegrity', 'GCMAES256'),
-            self.check('pfsGroup', 'PFS24'),
-            self.check('saDataSizeKilobytes', 2048),
-            self.check('saLifeTimeSeconds', 7200),
-        ])
+            self.cmd('network vnet create -g {rg} -n {vnet} --subnet-name GatewaySubnet')
+            self.cmd('network public-ip create -g {rg} -n {public_ip}')
+            self.cmd('network vnet-gateway create -g {rg} -n {gateway} --address-prefix {gateway_prefix} --vnet {vnet} --public-ip-address {public_ip} --sku {gw_sku}')
+            self.cmd('network vnet-gateway root-cert create -g {rg} --gateway-name {gateway} -n {cert} --public-cert-data "{cert_path}"')
+
+            # test vnet-gateway revoked-cert create
+            self.cmd('network vnet-gateway revoked-cert create -g {rg} -n MyCer --gateway-name {gateway} --thumbprint e806da0b7fe24f47e76fa269dc4ed76dac4b39d0')
+
+            # test vnet-gateway revoked-cert delete
+            self.cmd('network vnet-gateway revoked-cert delete -g {rg} -n MyCer --gateway-name {gateway}')
+
+            output = self.cmd('network vnet-gateway vpn-client generate -g {rg} -n {gateway}').get_output_in_json()
+            self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
+
+            output = self.cmd('network vnet-gateway vpn-client show-url -g {rg} -n {gateway}').get_output_in_json()
+            self.assertTrue('.zip' in output, 'Expected ZIP file in output.\nActual: {}'.format(str(output)))
+
+            self.cmd('network vnet-gateway vpn-client ipsec-policy set -g {rg} -n {gateway} --ike-encryption AES256 --ike-integrity SHA384 --dh-group DHGroup24 --ipsec-encryption GCMAES256 --ipsec-integrity GCMAES256 --pfs-group PFS24 --sa-lifetime 7200 --sa-max-size 2048')
+            self.cmd('network vnet-gateway vpn-client ipsec-policy show -g {rg} -n {gateway}', checks=[
+                self.check('dhGroup', 'DHGroup24'),
+                self.check('ikeEncryption', 'AES256'),
+                self.check('ikeIntegrity', 'SHA384'),
+                self.check('ipsecEncryption', 'GCMAES256'),
+                self.check('ipsecIntegrity', 'GCMAES256'),
+                self.check('pfsGroup', 'PFS24'),
+                self.check('saDataSizeKilobytes', 2048),
+                self.check('saLifeTimeSeconds', 7200),
+            ])
+
+        finally:
+            if os.path.exists(temp_dir):
+                shutil.rmtree(temp_dir)
 
 
 class NetworkTrafficManagerScenarioTest(ScenarioTest):
