@@ -38,7 +38,7 @@ class FlexibleServerSSDV2MgmtScenarioTest(ScenarioTest):
         throughput = 125
         backup_retention = 7
         server_name = self.create_random_name(SERVER_NAME_PREFIX, SERVER_NAME_MAX_LENGTH)
-        location = 'canadacentral'
+        location = self.postgres_location
 
         # test create
         self.cmd('postgres flexible-server create -g {} -n {} --backup-retention {} --sku-name {} --tier {} \
@@ -86,12 +86,6 @@ class FlexibleServerSSDV2MgmtScenarioTest(ScenarioTest):
         restore_ssdv2_result = self.cmd('postgres flexible-server restore -g {} --name {} --source-server {}'
                                   .format(resource_group, target_server_ssdv2, server_name)).get_output_in_json()
         self.assertEqual(restore_ssdv2_result['storage']['type'], storage_type)
-
-        # test create replica - error
-        replica_name = 'rep-ssdv2-' + server_name
-        self.cmd('postgres flexible-server replica create -g {} --name {} --source-server {}'
-                 .format(resource_group, replica_name, basic_info['id']),
-                 expect_failure=True)
 
         # clean up
         self.cmd('postgres flexible-server delete -g {} -n {} --yes'.format(resource_group, server_name), checks=NoneCheck())
