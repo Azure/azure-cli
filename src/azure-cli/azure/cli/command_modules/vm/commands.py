@@ -6,8 +6,7 @@
 from azure.cli.command_modules.vm._client_factory import (cf_vm,
                                                           cf_vm_ext, cf_vm_ext_image,
                                                           cf_vm_image, cf_vm_image_term, cf_usage,
-                                                          cf_vmss, cf_disks, cf_snapshots,
-                                                          cf_images,
+                                                          cf_vmss, cf_images,
                                                           cf_galleries, cf_gallery_images, cf_gallery_image_versions,
                                                           cf_proximity_placement_groups,
                                                           cf_dedicated_hosts, cf_dedicated_host_groups,
@@ -63,20 +62,9 @@ def load_command_table(self, _):
         operation_group='availability_sets'
     )
 
-    compute_disk_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#DisksOperations.{}',
-        client_factory=cf_disks,
-        operation_group='disks'
-    )
-
     compute_image_sdk = CliCommandType(
         operations_tmpl='azure.mgmt.compute.operations#ImagesOperations.{}',
         client_factory=cf_images
-    )
-
-    compute_snapshot_sdk = CliCommandType(
-        operations_tmpl='azure.mgmt.compute.operations#SnapshotsOperations.{}',
-        client_factory=cf_snapshots
     )
 
     compute_vm_sdk = CliCommandType(
@@ -208,7 +196,7 @@ def load_command_table(self, _):
         from .operations.ppg import PPGShow
         self.command_table["ppg show"] = PPGShow(loader=self)
 
-    with self.command_group('disk', compute_disk_sdk, operation_group='disks') as g:
+    with self.command_group('disk', operation_group='disks') as g:
         g.custom_command('create', 'create_managed_disk', supports_no_wait=True, table_transformer=transform_disk_create_table_output, validator=process_disk_create_namespace)
         from .operations.disk import DiskUpdate, DiskGrantAccess
         self.command_table["disk grant-access"] = DiskGrantAccess(loader=self)
@@ -283,16 +271,17 @@ def load_command_table(self, _):
         g.custom_command('remove', 'remove_template_error_handler', supports_local_cache=True)
         g.custom_show_command('show', 'show_template_error_handler', supports_local_cache=True)
 
-    with self.command_group('snapshot', compute_snapshot_sdk, operation_group='snapshots') as g:
+    with self.command_group('snapshot', operation_group='snapshots') as g:
         g.custom_command('create', 'create_snapshot', validator=process_snapshot_create_namespace, supports_no_wait=True)
         from .operations.snapshot import SnapshotUpdate
         self.command_table['snapshot update'] = SnapshotUpdate(loader=self)
 
-    with self.command_group('vm', compute_vm_sdk) as g:
-        g.custom_command('identity assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
-        g.custom_command('identity remove', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
-        g.custom_show_command('identity show', 'show_vm_identity')
+    with self.command_group('vm identity') as g:
+        g.custom_command('assign', 'assign_vm_identity', validator=process_assign_identity_namespace)
+        g.custom_command('remove', 'remove_vm_identity', validator=process_remove_identity_namespace, min_api='2017-12-01')
+        g.custom_show_command('show', 'show_vm_identity')
 
+    with self.command_group('vm', compute_vm_sdk) as g:
         g.custom_command('application set', 'set_vm_applications', validator=process_set_applications_namespace, min_api='2021-07-01')
         g.custom_command('application list', 'list_vm_applications', min_api='2021-07-01')
 

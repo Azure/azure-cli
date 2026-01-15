@@ -2277,6 +2277,39 @@ class FileServicePropertiesTests(StorageScenarioMixin, ScenarioTest):
             JMESPathCheck('protocolSettings.smb.kerberosTicketEncryption', "RC4-HMAC;AES-256"),
             JMESPathCheck('protocolSettings.smb.versions', "SMB2.1;SMB3.0;SMB3.1.1"))
 
+    @ResourceGroupPreparer(name_prefix='cli_file_eit')
+    @StorageAccountPreparer(name_prefix='fileeit', kind='FileStorage', sku='Premium_LRS', location='eastus2euap')
+    def test_storage_account_file_smb_nfs_encryption_in_transit(self, resource_group, storage_account):
+        self.kwargs.update({
+            'sa': storage_account,
+            'rg': resource_group,
+            'cmd': 'storage account file-service-properties'
+        })
+
+        self.cmd(
+            '{cmd} update --require-smb-encryption-in-transit --require-nfs-encryption-in-transit '
+            '-n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('protocolSettings.smb.encryptionInTransit.required', True),
+            JMESPathCheck('protocolSettings.nfs.encryptionInTransit.required', True))
+
+        self.cmd(
+            '{cmd} update --require-smb-encryption-in-transit False --require-nfs-encryption-in-transit False'
+            ' -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('protocolSettings.smb.encryptionInTransit.required', False),
+            JMESPathCheck('protocolSettings.nfs.encryptionInTransit.required', False))
+
+        self.cmd(
+            '{cmd} update --require-smb-encryption-in-transit'
+            ' -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('protocolSettings.smb.encryptionInTransit.required', True),
+            JMESPathCheck('protocolSettings.nfs.encryptionInTransit.required', False))
+
+        self.cmd(
+            '{cmd} update --require-nfs-encryption-in-transit'
+            ' -n {sa} -g {rg}').assert_with_checks(
+            JMESPathCheck('protocolSettings.smb.encryptionInTransit.required', True),
+            JMESPathCheck('protocolSettings.nfs.encryptionInTransit.required', True))
+
 
 class StorageAccountPrivateLinkScenarioTest(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='cli_test_sa_plr')

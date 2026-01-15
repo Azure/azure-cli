@@ -1952,11 +1952,8 @@ def validate_vmss_disk(cmd, namespace):
         raise CLIError('usage error: --disk EXIST_DISK --instance-id ID')
 
 
-def _validate_gallery_image_reference(cmd, namespace):
-    from azure.cli.core.profiles import ResourceType
-    is_validate = 'gallery_image_reference' in namespace and namespace.gallery_image_reference is not None \
-                  and cmd.supported_api_version(resource_type=ResourceType.MGMT_COMPUTE,
-                                                operation_group='disks', min_api='2022-03-02')
+def _validate_gallery_image_reference(namespace):
+    is_validate = 'gallery_image_reference' in namespace and namespace.gallery_image_reference is not None
     if not is_validate:
         return
 
@@ -1985,9 +1982,9 @@ def process_disk_create_namespace(cmd, namespace):
     from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
-    _validate_gallery_image_reference(cmd, namespace)
+    _validate_gallery_image_reference(namespace)
     _validate_security_data_uri(namespace)
-    _validate_upload_type(cmd, namespace)
+    _validate_upload_type(namespace)
     _validate_secure_vm_disk_encryption_set(namespace)
     _validate_hyper_v_generation(namespace)
     if namespace.source:
@@ -2020,7 +2017,7 @@ def _validate_security_data_uri(namespace):
             'Please specify --source when using the --security-data-uri parameter')
 
 
-def _validate_upload_type(cmd, namespace):
+def _validate_upload_type(namespace):
     if 'upload_type' not in namespace:
         return
 
@@ -2028,12 +2025,6 @@ def _validate_upload_type(cmd, namespace):
         namespace.upload_type = 'Upload'
 
     if namespace.upload_type == 'UploadWithSecurityData':
-
-        if not cmd.supported_api_version(min_api='2021-08-01', operation_group='disks'):
-            raise ArgumentUsageError(
-                "'UploadWithSecurityData' is not supported in the current profile. "
-                "Please upgrade your profile with 'az cloud set --profile newerProfile' and try again")
-
         if not namespace.security_type:
             raise RequiredArgumentMissingError(
                 "Please specify --security-type when the value of --upload-type is 'UploadWithSecurityData'")
@@ -2069,7 +2060,7 @@ def process_snapshot_create_namespace(cmd, namespace):
     from azure.core.exceptions import HttpResponseError
     validate_tags(namespace)
     validate_edge_zone(cmd, namespace)
-    _validate_gallery_image_reference(cmd, namespace)
+    _validate_gallery_image_reference(namespace)
     if namespace.source:
         usage_error = 'usage error: --source {SNAPSHOT | DISK} | --source VHD_BLOB_URI [--source-storage-account-id ID]'
         try:

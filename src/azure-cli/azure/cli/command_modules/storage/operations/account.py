@@ -931,7 +931,8 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, chang
 def update_file_service_properties(cmd, instance, enable_delete_retention=None,
                                    delete_retention_days=None, enable_smb_multichannel=None,
                                    versions=None, authentication_methods=None, kerberos_ticket_encryption=None,
-                                   channel_encryption=None):
+                                   channel_encryption=None, require_smb_encryption_in_transit=None,
+                                   require_nfs_encryption_in_transit=None):
     from azure.cli.core.azclierror import ValidationError
     params = {}
     # set delete retention policy according input
@@ -958,11 +959,18 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
         params['share_delete_retention_policy'] = instance.share_delete_retention_policy
 
     # set protocol settings
-    if not instance.protocol_settings or not instance.protocol_settings.smb:
-        instance.protocol_settings = cmd.get_models('ProtocolSettings')(smb=cmd.get_models('SmbSetting')())
+    smbSetting = cmd.get_models('SmbSetting')
+    nfsSetting = cmd.get_models('NfsSetting')
+    if not instance.protocol_settings:
+        instance.protocol_settings = cmd.get_models('ProtocolSettings')(smb=smbSetting(), nfs=nfsSetting())
+    else:
+        if not instance.protocol_settings.smb:
+            instance.protocol_settings.smb = smbSetting()
+        if not instance.protocol_settings.nfs:
+            instance.protocol_settings.nfs = nfsSetting()
+
     if enable_smb_multichannel is not None:
         instance.protocol_settings.smb.multichannel = cmd.get_models('Multichannel')(enabled=enable_smb_multichannel)
-
     if versions is not None:
         instance.protocol_settings.smb.versions = versions
     if authentication_methods is not None:
@@ -971,7 +979,14 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
         instance.protocol_settings.smb.kerberos_ticket_encryption = kerberos_ticket_encryption
     if channel_encryption is not None:
         instance.protocol_settings.smb.channel_encryption = channel_encryption
-    if instance.protocol_settings and instance.protocol_settings.smb and any(instance.protocol_settings.smb.__dict__.values()):
+    if require_smb_encryption_in_transit is not None:
+        instance.protocol_settings.smb.encryption_in_transit = (
+            cmd.get_models('EncryptionInTransit')(required=require_smb_encryption_in_transit))
+    if require_nfs_encryption_in_transit is not None:
+        instance.protocol_settings.nfs.encryption_in_transit = (
+            cmd.get_models('EncryptionInTransit')(required=require_nfs_encryption_in_transit))
+
+    if any(instance.protocol_settings.smb.__dict__.values()) or any(instance.protocol_settings.nfs.__dict__.values()):
         params['protocol_settings'] = instance.protocol_settings
 
     return params

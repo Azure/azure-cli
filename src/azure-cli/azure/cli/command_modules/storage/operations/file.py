@@ -94,17 +94,26 @@ def create_file_url(client, protocol=None, **kwargs):
 def list_share_files(cmd, client, directory_name=None, timeout=None, exclude_dir=False, exclude_extended_info=False,
                      num_results=None, marker=None):
     from ..track2_util import list_generator
-    include = None
-    share_properties = client.get_share_properties()
-    if share_properties.protocols == ['NFS']:
-        if exclude_extended_info:
-            logger.warning('--exclude-extended-info is not supported for NFS shares.')
-    else:
+    # since get_share_properties requires share level read access, skip it, assume SMB share first
+    results = None
+    try:
         include = [] if exclude_extended_info else ["timestamps", "Etag", "Attributes", "PermissionKey"]
-    generator = client.list_directories_and_files(directory_name=directory_name, include=include,
-                                                  timeout=timeout, results_per_page=num_results)
-    pages = generator.by_page(continuation_token=marker)
-    results = list_generator(pages=pages, num_results=num_results)
+        generator = client.list_directories_and_files(directory_name=directory_name, include=include,
+                                                      timeout=timeout, results_per_page=num_results)
+        pages = generator.by_page(continuation_token=marker)
+        results = list_generator(pages=pages, num_results=num_results)
+    except HttpResponseError as ex:
+        if ex.error_code == "UnsupportedQueryParameter":
+            # try NFS share if include fails:
+            if exclude_extended_info:
+                logger.warning('--exclude-extended-info is not supported for NFS shares.')
+            include = None
+            generator = client.list_directories_and_files(directory_name=directory_name, include=include,
+                                                          timeout=timeout, results_per_page=num_results)
+            pages = generator.by_page(continuation_token=marker)
+            results = list_generator(pages=pages, num_results=num_results)
+        else:
+            raise ex
 
     if pages.continuation_token:
         logger.warning('Next Marker:')

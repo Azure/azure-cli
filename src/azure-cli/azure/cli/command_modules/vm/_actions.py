@@ -323,3 +323,36 @@ def _get_latest_image_version(cli_ctx, location, publisher, offer, sku, edge_zon
         if not top_one:
             raise InvalidArgumentValueError("Can't resolve the version of '{}:{}:{}'".format(publisher, offer, sku))
     return top_one[0].name
+
+
+def _get_latest_image_version_by_aaz(cli_ctx, location, publisher, offer, sku, edge_zone=None):
+    from azure.cli.core.azclierror import InvalidArgumentValueError
+    if edge_zone is not None:
+        from .aaz.latest.vm.image.edge_zone import List as VmImageEdgeZoneList
+        command_args = {
+            'edge_zone': edge_zone,
+            'location': location,
+            'offer': offer,
+            'publisher': publisher,
+            'sku': sku,
+            'orderby': 'name desc',
+            'top': 1,
+        }
+        top_one = VmImageEdgeZoneList(cli_ctx=cli_ctx)(command_args=command_args)
+        if not top_one:
+            raise InvalidArgumentValueError("Can't resolve the version of '{}:{}:{}:{}'"
+                                            .format(publisher, offer, sku, edge_zone))
+    else:
+        from .aaz.latest.vm.image import List as VmImageList
+        command_args = {
+            'location': location,
+            'offer': offer,
+            'publisher': publisher,
+            'sku': sku,
+            'orderby': 'name desc',
+            'top': 1,
+        }
+        top_one = VmImageList(cli_ctx=cli_ctx)(command_args=command_args)
+        if not top_one:
+            raise InvalidArgumentValueError("Can't resolve the version of '{}:{}:{}'".format(publisher, offer, sku))
+    return top_one[0].get('name')
