@@ -174,6 +174,16 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
                      JMESPathCheckNotExists('primaryEndpoints.ipv6Endpoints')
         ])
 
+        # test add ipv4 addresses as ipv6 and ipv6 address as ipv4, should fail
+        from azure.cli.core.azclierror import InvalidArgumentValueError
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ip-address {ipv6_1} {ip2} '
+                     '--ipv6-address {ip1} {ipv6_2}')
+
+        with self.assertRaises(InvalidArgumentValueError):
+            self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ip-address {ipv6_1} {ipv6_2} '
+                     '--ipv6-address {ip1} {ip2}')
+
         # test add both ipv4 and ipv6 addresses
         self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ip-address {ip1} {ip2} '
                  '--ipv6-address {ipv6_1} {ipv6_2}')
@@ -183,7 +193,6 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         ])
 
         # test add multiple ip addresses with overlaps between them
-        from azure.cli.core.azclierror import InvalidArgumentValueError
         with self.assertRaises(InvalidArgumentValueError):
             self.cmd('storage account network-rule add -g {rg} --account-name {sa} --ipv6-address {ipv6_1} {ipv6_3}')
         # test add multiple ip addresses with some overlaps with the server
