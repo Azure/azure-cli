@@ -784,7 +784,7 @@ examples:
 
 helps['apim backend create'] = """
 type: command
-short-summary: Create or Update an API Management Backend.
+short-summary: Create an API Management Backend.
 parameters:
   - name: --backend-id
     type: string
