@@ -89,6 +89,8 @@ class VirtualNetworkApplianceUpdate(_VirtualNetworkApplianceUpdate):
 
     class InstanceUpdateByJson(_VirtualNetworkApplianceUpdate.InstanceUpdateByJson):
 
+        # pylint: disable=too-many-locals
+        # pylint: disable=too-many-branches
         def _update_instance(self, instance):
             _instance_value, _builder = self.new_content_builder(
                 self.ctx.args,
