@@ -225,8 +225,8 @@ def _validate_deleted_server_resource_group(cmd, location, server_name, resource
         if ex.status_code == 404:
             raise ResourceNotFoundError(
                 f'Deleted server "{server_name}" not found in location "{location}". '
-                'The server may not have been deleted with soft delete enabled, or the retention period '
-                'has expired.',
+                'The server may not have been deleted with soft delete enabled, the retention period '
+                'has expired, or it was deleted in a different location.',
                 [f'Use "az sql server deleted-server list --location {location}" to view all available '
                  'deleted servers.',
                  'Verify the server name and location are correct.']) from ex
@@ -240,8 +240,8 @@ def _validate_deleted_server_resource_group(cmd, location, server_name, resource
     if not deleted_server or not deleted_server.original_id:
         raise ResourceNotFoundError(
             f'Deleted server "{server_name}" not found in location "{location}". '
-            'The server may not have been deleted with soft delete enabled, or the retention period '
-            'has expired.',
+            'The server may not have been deleted with soft delete enabled, the retention period '
+            'has expired, or it was deleted in a different location.',
             [f'Use "az sql server deleted-server list --location {location}" to view all available '
              'deleted servers.',
              'Verify the server name and location are correct.'])
