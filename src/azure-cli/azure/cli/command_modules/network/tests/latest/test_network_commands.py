@@ -8524,7 +8524,7 @@ class NetworkVnetGatewayRoutesAndResiliencyInfoScenarioTest(ScenarioTest):
             self.check('type(components)', 'array')
         ])
 
-class NetworkVirtualNetworKApplianceScenario(ScenarioTest):
+class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
     @ResourceGroupPreparer(name_prefix='test_vna', location='eastus')
     def test_network_virtual_network_appliance(self, resource_group):
         self.kwargs.update({
