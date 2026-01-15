@@ -8524,6 +8524,62 @@ class NetworkVnetGatewayRoutesAndResiliencyInfoScenarioTest(ScenarioTest):
             self.check('type(components)', 'array')
         ])
 
+class NetworkVirtualNetworKApplianceScenario(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_vna', location='eastus')
+    def test_network_virtual_network_appliance(self, resource_group):
+        self.kwargs.update({
+            'vnet1': 'vnet1',
+            'vnet2': 'vnet2',
+            'vnet_address': '10.10.0.0/16',
+            'subnet': 'VirtualNetworkApplianceSubnet',
+            'subnet_address': '10.10.0.0/24',
+            'vna1': 'vna1',
+            'vna2': 'vna2',
+            'tag1': 'tag1',
+            'tag2': 'tag2',
+        })
+
+        # Create vnet, subnet for first vna
+        self.cmd('network vnet create -g {rg} -n {vnet1} --address-prefixes {vnet_address}')
+
+        self.kwargs['subnet1_id'] = self.cmd('network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet1} --address-prefix {subnet_address} --default-outbound false --query id').get_output_in_json()
+
+        # Create first vna
+        self.cmd('network virtual-network-appliance create -g {rg} -n {vna1} --bandwidth-in-gbps 50 --subnet \"{{id:{subnet1_id}}}\" --tags \"{{name:{tag1}}}\"')
+
+        self.cmd('network virtual-network-appliance show -g {rg} -n {vna1}', checks=[
+            self.check('tags.name', '{tag1}'),
+            self.check('subnet.id', '{subnet1_id}'),
+            self.check('bandwidthInGbps', 50),
+        ])
+
+        self.cmd('network virtual-network-appliance update -g {rg} -n {vna1} --tags \"{{name:{tag2}}}\"', checks=[
+            self.check('tags.name', '{tag2}'),
+        ])
+
+        self.cmd('network virtual-network-appliance list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ])
+
+        # Create vnet, subnet for second vna
+        self.cmd('network vnet create -g {rg} -n {vnet2} --address-prefixes {vnet_address}')
+
+        self.kwargs['subnet2_id'] = self.cmd('network vnet subnet create -g {rg} -n {subnet} --vnet-name {vnet2} --address-prefix {subnet_address} --default-outbound false --query id').get_output_in_json()
+
+        # Create second vna
+        vna2_id = self.cmd('network virtual-network-appliance create -g {rg} -n {vna2} --bandwidth-in-gbps 50 --subnet \"{{id:{subnet2_id}}}\" --query id').get_output_in_json()
+
+        self.cmd('network virtual-network-appliance list -g {rg}', checks=[
+            self.check('length(@)', 2)
+        ])
+
+        self.cmd('network virtual-network-appliance delete -g {rg} -n {vna1} -y')
+
+        vna_list = self.cmd('network virtual-network-appliance list -g {rg}', checks=[
+            self.check('length(@)', 1)
+        ]).get_output_in_json()
+
+        self.assertTrue(vna_list[0].get('id') == vna2_id)
 
 if __name__ == '__main__':
     unittest.main()
