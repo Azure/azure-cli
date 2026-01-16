@@ -6253,7 +6253,7 @@ class VpnConnectionAuthenticationScenarioTest(ScenarioTest):
             )
             self.generate_outbound_pfx_with_chain(
                 pfx_path=outbound_cert_path,
-                password="Test-Pfx-Password-123!",
+                password="AAAAAAAA",
                 leaf_private_key=outbound_key,
                 leaf_cert=outbound_leaf_cert,
                 chain_certs=[inter_cert, root_cert]  # include chain
@@ -6284,7 +6284,7 @@ class VpnConnectionAuthenticationScenarioTest(ScenarioTest):
 
             # import outbound certificate to KV
             self.cmd(f'keyvault certificate import -n {{cert_name}} --vault-name {{kv}} '
-                     f'--file "{outbound_cert_path}" --password "Test-Pfx-Password-123!"', checks=[
+                     f'--file "{outbound_cert_path}" --password "AAAAAAAA"', checks=[
                 self.check('name', '{cert_name}')
             ])
 
