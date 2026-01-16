@@ -8,6 +8,7 @@ from knack.log import get_logger
 from knack.util import CLIError
 from azure.appconfiguration import AzureAppConfigurationClient
 from azure.core.exceptions import HttpResponseError
+from azure.core.credentials import AzureKeyCredential
 from azure.cli.core.azclierror import (ValidationError,
                                        AzureResponseError,
                                        InvalidArgumentValueError,
@@ -174,9 +175,10 @@ def get_appconfig_data_client(cmd, name, connection_string, auth_mode, endpoint)
 
     if auth_mode == "anonymous":
         try:
-            connection_string = "Endpoint={};Id=test-id;Secret=abcdefghijklmnopqrstuvwxyz1234567890".format(endpoint)
-            azconfig_client = AzureAppConfigurationClient.from_connection_string(
-                connection_string=connection_string,
+            azconfig_client = AzureAppConfigurationClient(
+                base_url=endpoint,
+                credential=AzureKeyCredential(key=""),
+                id_credential="",
                 user_agent=HttpHeaders.USER_AGENT,
                 transport=AuthHeaderRequestsTransport())
         except (ValueError, TypeError) as ex:
