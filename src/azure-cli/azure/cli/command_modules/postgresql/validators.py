@@ -176,7 +176,7 @@ def pg_arguments_validator(db_context, location, tier, sku_name, storage_gb, ser
         supported_storageV2_size = sku_info[tier.lower()]["supported_storageV2_size"]
     else:
         supported_storageV2_size = None
-    _pg_storage_type_validator(storage_type, auto_grow, geo_redundant_backup, performance_tier,
+    _pg_storage_type_validator(storage_type, auto_grow, performance_tier,
                                tier, supported_storageV2_size, iops, throughput, instance)
     _pg_storage_performance_tier_validator(performance_tier,
                                            sku_info,
@@ -705,7 +705,7 @@ def validate_identities(cmd, namespace):
         namespace.identities = [_validate_identity(cmd, namespace, identity) for identity in namespace.identities]
 
 
-def _pg_storage_type_validator(storage_type, auto_grow, geo_redundant_backup, performance_tier, tier,
+def _pg_storage_type_validator(storage_type, auto_grow, performance_tier, tier,
                                supported_storageV2_size, iops, throughput, instance):
     is_create_ssdv2 = storage_type == "PremiumV2_LRS"
     is_update_ssdv2 = instance is not None and instance.storage.type == "PremiumV2_LRS"
