@@ -446,6 +446,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_blob_geo_priority_replication', arg_type=get_three_state_flag(),
                    options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
                    help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
+        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(),
+                   arg_group='IPv6 Endpoint', is_preview=True,
+                   help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
 
     with self.argument_context('storage account private-endpoint-connection',
                                resource_type=ResourceType.MGMT_STORAGE) as c:
@@ -547,6 +550,9 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('enable_blob_geo_priority_replication', arg_type=get_three_state_flag(),
                    options_list=['--enable-blob-geo-priority-replication', '--blob-geo-sla'],
                    help='Indicates whether Blob Geo Priority Replication is enabled for the storage account.')
+        c.argument('publish_ipv6_endpoint', arg_type=get_three_state_flag(),
+                   arg_group='IPv6 Endpoint', is_preview=True,
+                   help='A boolean flag which indicates whether IPv6 storage endpoints are to be published.')
 
     for scope in ['storage account create', 'storage account update']:
         with self.argument_context(scope, arg_group='Customer managed key',
@@ -659,10 +665,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('account_name', acct_name_type, id_part=None)
 
     with self.argument_context('storage account network-rule', resource_type=ResourceType.MGMT_STORAGE) as c:
-        from ._validators import validate_ip_address
+        from ._validators import validate_ip_address, validate_ipv6_address
         c.argument('account_name', acct_name_type, id_part=None)
         c.argument('ip_address', nargs='*', help='IPv4 address or CIDR range. Can supply a list: --ip-address ip1 '
                                                  '[ip2]...', validator=validate_ip_address)
+        c.argument('ipv6_address', nargs='*', help='IPv6 address or CIDR range. Can supply a list: --ipv6-address ip1 '
+                                                   '[ip2]...', validator=validate_ipv6_address, is_preview=True)
         c.argument('subnet', help='Name or ID of subnet. If name is supplied, `--vnet-name` must be supplied.')
         c.argument('vnet_name', help='Name of a virtual network.', validator=validate_subnet)
         c.argument('action', action_type)
@@ -762,6 +770,12 @@ def load_arguments(self, _):  # pylint: disable=too-many-locals, too-many-statem
         c.argument('channel_encryption', arg_group='SMB Setting',
                    help="SMB channel encryption supported by server. Valid values are AES-128-CCM, AES-128-GCM, "
                         "AES-256-GCM. Should be passed as a string with delimiter ';' ")
+        c.argument('require_smb_encryption_in_transit', arg_group='SMB Setting',
+                   arg_type=get_three_state_flag(), options_list=['--require-smb-encryption-in-transit', '--smb-eit'],
+                   help="Whether SMB Encryption in transit is required.")
+        c.argument('require_nfs_encryption_in_transit', arg_group='NFS Setting',
+                   arg_type=get_three_state_flag(), options_list=['--require-nfs-encryption-in-transit', '--nfs-eit'],
+                   help="Whether NFS Encryption in transit is required.")
 
     with self.argument_context('storage account generate-sas', resource_type=ResourceType.DATA_STORAGE_BLOB) as c:
         t_account_permissions = self.get_sdk('_shared.models#AccountSasPermissions',

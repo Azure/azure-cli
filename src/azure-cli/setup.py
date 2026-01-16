@@ -17,7 +17,7 @@ except ImportError:
     logging.warning("Wheel is not available, disabling bdist_wheel hook")
     cmdclass = {}
 
-VERSION = "2.81.0"
+VERSION = "2.82.0"
 # If we have source, validate that our version numbers match
 # This should prevent uploading releases with mismatched versions.
 try:
@@ -147,7 +147,7 @@ DEPENDENCIES = [
     'paramiko>=2.0.8,<4.0.0',
     'pycomposefile>=0.0.34',
     'PyGithub~=1.38',
-    'PyNaCl~=1.5.0',
+    'PyNaCl~=1.6.2',
     'scp~=0.13.2',
     'semver~=3.0',
     'setuptools',
@@ -204,12 +204,16 @@ setup(
             '*.json',
             'randomname/adjectives.txt',
             'randomname/nouns.txt',
-            'templates/mysql_githubaction_template.yaml',
-            'templates/postgresql_githubaction_template.yaml'
+            'templates/mysql_githubaction_template.yaml'
         ],
         'azure.cli.command_modules.mysql': [
             'random/adjectives.txt',
             'random/nouns.txt'
+        ],
+        'azure.cli.command_modules.postgresql': [
+            'randomname/adjectives.txt',
+            'randomname/nouns.txt',
+            'templates/postgresql_githubaction_template.yaml'
         ]
     },
     cmdclass=cmdclass

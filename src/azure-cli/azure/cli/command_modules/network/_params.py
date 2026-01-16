@@ -35,6 +35,7 @@ from azure.cli.command_modules.network._completers import (
 from azure.cli.command_modules.network._actions import (
     TrustedClientCertificateCreate,
     SslProfilesCreate, AddMappingRequest, WAFRulesCreate)
+from azure.cli.core.util import shell_safe_json_parse
 
 
 # pylint: disable=too-many-locals, too-many-branches, too-many-statements
@@ -780,6 +781,11 @@ def load_arguments(self, _):
         c.ignore('connection_type')
         for item in ['vnet_gateway2', 'local_gateway2', 'express_route_circuit2']:
             c.argument(item, arg_group='Destination')
+
+        c.argument('auth_type', options_list=['--authentication-type', '--auth-type'], help='Authentication type for the VPN connection.', arg_type=get_enum_type(['Certificate', 'PSK']))
+        c.argument('cert_auth', options_list=['--certificate-authentication', '--cert-auth'],
+                   help='Certificate-based authentication configuration. Provide as JSON string or file path with @ prefix, Expected keys (outboundAuthCertificate, inboundAuthCertificateChain, inboundAuthCertificateSubjectName).',
+                   type=shell_safe_json_parse)
 
     with self.argument_context('network routeserver') as c:
         c.argument('virtual_hub_name', options_list=['--name', '-n'], id_part='name',

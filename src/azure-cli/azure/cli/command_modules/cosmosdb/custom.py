@@ -370,6 +370,9 @@ def _create_database_account(client,
         if disable_ttl is not None:
             restore_parameters.restore_with_ttl_disabled = disable_ttl
 
+        if source_backup_location is not None:
+            restore_parameters.source_backup_location = source_backup_location
+
     params = DatabaseAccountCreateUpdateParameters(
         location=arm_location,
         locations=locations,
@@ -402,8 +405,7 @@ def _create_database_account(client,
         enable_per_region_per_partition_autoscale=enable_prpp_autoscale,
         minimal_tls_version=minimal_tls_version,
         enable_pbe=enable_pbe,
-        default_priority_level=default_priority_level,
-        source_backup_location=source_backup_location
+        default_priority_level=default_priority_level
     )
 
     async_docdb_create = client.begin_create_or_update(resource_group_name, account_name, params)

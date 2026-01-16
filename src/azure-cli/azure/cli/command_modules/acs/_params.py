@@ -558,7 +558,7 @@ def load_arguments(self, _):
         # azure container storage
         c.argument(
             "enable_azure_container_storage",
-            arg_type=_get_enable_azure_container_storage_type(),
+            arg_type=_get_container_storage_enum_type(storage_pool_types),
             help="enable azure container storage. Can be used as a flag (defaults to True) or with a storage pool type value: (azureDisk, ephemeralDisk, elasticSan)",
         )
         c.argument(
@@ -764,12 +764,12 @@ def load_arguments(self, _):
         # azure container storage
         c.argument(
             "enable_azure_container_storage",
-            arg_type=_get_enable_azure_container_storage_type(),
+            arg_type=_get_container_storage_enum_type(storage_pool_types),
             help="enable azure container storage. Can be used as a flag (defaults to True) or with a storage pool type value: (azureDisk, ephemeralDisk, elasticSan)",
         )
         c.argument(
             "disable_azure_container_storage",
-            arg_type=_get_disable_azure_container_storage_type(),
+            arg_type=_get_container_storage_enum_type(disable_storage_pool_types),
             help="disable azure container storage or any one of the storage pool types. Can be used as a flag (defaults to True) or with a storagepool type value: azureDisk, ephemeralDisk, elasticSan, all (to disable all storage pools).",
         )
         c.argument(
@@ -1286,63 +1286,33 @@ def _get_default_install_location(exe_name):
     return install_location
 
 
-def _get_enable_azure_container_storage_type():
+def _get_container_storage_enum_type(choices):
     """Custom argument type that accepts both None and enum values"""
     import argparse
     from azure.cli.core.azclierror import InvalidArgumentValueError
 
     class AzureContainerStorageAction(argparse.Action):
         def __call__(self, parser, namespace, values, option_string=None):
-            if values is None:
+            if values in [[], None]:
                 # When used as a flag without value, set as True
                 setattr(namespace, self.dest, True)
                 return
 
-            if isinstance(values, str):
-                # Handle enum values (case insensitive)
-                for storage_type in storage_pool_types:
-                    if values.lower() == storage_type.lower():
-                        setattr(namespace, self.dest, storage_type)
-                        return
-
-            # Invalid value
-            valid_values = storage_pool_types
-            raise InvalidArgumentValueError(
-                f"Invalid value '{values}'. Valid values are: {', '.join(valid_values)}"
-            )
-
-    return CLIArgumentType(
-        nargs='?',  # Optional argument
-        action=AzureContainerStorageAction,
-    )
-
-
-def _get_disable_azure_container_storage_type():
-    """Custom argument type that accepts both None and enum values"""
-    import argparse
-    from azure.cli.core.azclierror import InvalidArgumentValueError
-
-    class AzureContainerStorageAction(argparse.Action):
-        def __call__(self, parser, namespace, values, option_string=None):
-            if values is None:
-                # When used as a flag without value, set as True
-                setattr(namespace, self.dest, True)
+            # Allow multiple enum values in a case insensitive manner
+            normalized_value_arr = values if isinstance(values, list) else str(values).split(',')
+            normalized_value_arr = [str(v).lower().strip() for v in normalized_value_arr]
+            valid_value_arr = [v for v in choices if v.lower() in normalized_value_arr]
+            if len(valid_value_arr) == len(normalized_value_arr):
+                normalized_values = valid_value_arr[0] if len(valid_value_arr) == 1 else valid_value_arr
+                setattr(namespace, self.dest, normalized_values)
                 return
 
-            if isinstance(values, str):
-                # Handle enum values (case insensitive)
-                for storage_type in disable_storage_pool_types:
-                    if values.lower() == storage_type.lower():
-                        setattr(namespace, self.dest, storage_type)
-                        return
-
             # Invalid value
-            valid_values = disable_storage_pool_types
             raise InvalidArgumentValueError(
-                f"Invalid value '{values}'. Valid values are: {', '.join(valid_values)}"
+                f"Invalid value '{values}'. Valid values are: {', '.join(choices)}"
             )
 
     return CLIArgumentType(
-        nargs='?',  # Optional argument
+        nargs='*',  # Allow multiple values
         action=AzureContainerStorageAction,
     )
