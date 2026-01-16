@@ -436,46 +436,43 @@ class StorageAccountTests(StorageScenarioMixin, ScenarioTest):
         self.cmd('az storage account update -n {} --allow-blob-public-access false'.format(storage_account),
                  checks=[JMESPathCheck('allowBlobPublicAccess', False)])
 
-    @unittest.skip('Failure due to service behavior change')
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     def test_storage_create_with_min_tls(self, resource_group):
         name1 = self.create_random_name(prefix='cli', length=24)
         name2 = self.create_random_name(prefix='cli', length=24)
         name3 = self.create_random_name(prefix='cli', length=24)
         name4 = self.create_random_name(prefix='cli', length=24)
-        self.cmd('az storage account create -n {} -g {}'.format(name1, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
 
-        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_0'.format(name2, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
-
-        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_1'.format(name3, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_1')])
-
-        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_2'.format(name4, resource_group),
+        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_0'.format(name1, resource_group),
                  checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
-        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_3'.format(name4, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
+        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_1'.format(name2, resource_group),
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
-    @unittest.skip('Failure due to service behavior change')
+        self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_2'.format(name3, resource_group),
+                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
+
+        # setting minimumTlsVersion 1.3 is not supported yet,
+        # https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal
+        # self.cmd('az storage account create -n {} -g {} --min-tls-version TLS1_3'.format(name4, resource_group),
+        #          checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
+
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account')
     @StorageAccountPreparer(name_prefix='tls')
     def test_storage_update_with_min_tls(self, storage_account, resource_group):
-        self.cmd('az storage account show -n {} -g {}'.format(storage_account, resource_group),
-                 checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
+        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
+            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_1'.format(
-            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_1')])
+            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
         self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_2'.format(
             storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_2')])
 
-        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_3'.format(
-            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
-
-        self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_0'.format(
-            storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_0')])
+        # setting minimumTlsVersion 1.3 is not supported yet,
+        # https://learn.microsoft.com/en-us/azure/storage/common/transport-layer-security-configure-minimum-version?tabs=portal
+        # self.cmd('az storage account update -n {} -g {} --min-tls-version TLS1_3'.format(
+        #     storage_account, resource_group), checks=[JMESPathCheck('minimumTlsVersion', 'TLS1_3')])
 
     @ResourceGroupPreparer(location='eastus', name_prefix='cli_storage_account_routing')
     def test_storage_account_with_routing_preference(self, resource_group):

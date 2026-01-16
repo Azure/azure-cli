@@ -261,6 +261,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.encryption.require_infrastructure_encryption = require_infrastructure_encryption
 
     if min_tls_version:
+        if min_tls_version in ['TLS1_0','TLS1_1']:
+            logger.warning('TLS 1.0 and TLS 1.1 has been deprecated by 02/03/2026, will use TLS 1.2 instead.')
+            min_tls_version = 'TLS1_2'
         params.minimum_tls_version = min_tls_version
 
     if allow_shared_key_access is not None:
@@ -680,7 +683,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if allow_blob_public_access is not None:
         params.allow_blob_public_access = allow_blob_public_access
+
     if min_tls_version:
+        if min_tls_version in ['TLS1_0','TLS1_1']:
+            logger.warning('TLS 1.0 and TLS 1.1 has been deprecated by 02/03/2026, will use TLS 1.2 instead.')
+            min_tls_version = 'TLS1_2'
         params.minimum_tls_version = min_tls_version
 
     if allow_shared_key_access is not None:
