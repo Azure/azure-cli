@@ -1739,16 +1739,18 @@ def set_vm(cmd, instance, lro_operation=None, no_wait=False):
     return LongRunningOperation(cmd.cli_ctx)(poller)
 
 
+# Notes: vm format is in snake_case
 def set_vm_by_aaz(cmd, vm, no_wait=False):
     from .aaz.latest.vm import Create as _VMCreate
 
-    parsed_id = _parse_rg_name(vm['id'])
+    parsed_id = _parse_rg_name(vm["id"])
+    vm["resource_group"] = parsed_id[0]
+    vm["vm_name"] = parsed_id[1]
 
     class SetVM(_VMCreate):
         def pre_operations(self):
             args = self.ctx.args
             args.no_wait = no_wait
-            args.os_profile.secrets = vm.get('os_profile', {}).get('secrets', [])
 
         def _output(self, *args, **kwargs):
             from azure.cli.core.aaz import AAZUndefined, has_value
@@ -1769,10 +1771,7 @@ def set_vm_by_aaz(cmd, vm, no_wait=False):
             return result
 
     vm = LongRunningOperation(cmd.cli_ctx)(
-        SetVM(cli_ctx=cmd.cli_ctx)(command_args={
-            'resource_group': parsed_id[0],
-            "vm_name": parsed_id[1]
-        }))
+        SetVM(cli_ctx=cmd.cli_ctx)(command_args=vm))
 
     return vm
 
