@@ -169,7 +169,7 @@ def load_arguments(self, _):
                    help='This parameter can be used for indicating how a data operation is to be authorized. ' +
                    'If the auth mode is "key", provide connection string or store name and your account access keys will be retrieved for authorization. ' +
                    'If the auth mode is "login", provide the `--endpoint` or `--name` and your "az login" credentials will be used for authorization. ' +
-                   'If the auth mode is "anonymous", provide the `--endpoint` that will be used for authorization. Anonymous mode only allows HTTP endpoints ' +
+                   'If the auth mode is "anonymous", provide the `--endpoint` that will be used for authorization. Anonymous mode only allows HTTP endpoints. ' +
                    'You can configure the default auth mode using `az configure --defaults appconfig_auth_mode=<auth_mode>`. ' +
                    'For more information, see https://learn.microsoft.com/azure/azure-app-configuration/concept-enable-rbac')
 
