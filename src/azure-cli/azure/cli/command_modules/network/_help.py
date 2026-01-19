@@ -6251,7 +6251,7 @@ short-summary: Create a DDoS custom policy.
 examples:
   - name: Create DDoS custom policy
     text: |
-        az network ddos-custom-policy create --resource-group rg1 --ddos-custom-policy-name test-ddos-custom-policy 
-        --location centraluseuap --detection-rule-name detectionRuleTcp --detection-mode TrafficThreshold 
-        --traffic-type Tcp --packets-per-second 1000000
+        az network ddos-custom-policy create --resource-group rg1 --ddos-custom-policy-name test-
+        ddos-custom-policy --location centraluseuap --detection-rule-name detectionRuleTcp 
+        --detection-mode TrafficThreshold --traffic-type Tcp --packets-per-second 1000000
 """
