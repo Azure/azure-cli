@@ -517,3 +517,40 @@ def build_vpn_connection_resource(cmd, name, location, tags, gateway1, gateway2,
         'properties': vpn_properties if vpn_type != 'VpnClient' else {}
     }
     return vpn_connection
+
+
+def build_ddos_custom_policy(cmd, ddos_custom_policy_name, location=None, tags=None, detection_rule_name=None,
+                             detection_mode=None, packets_per_second=None, traffic_type=False, ip_config_id=None):
+    policy = {'ddos_custom_policy_name': ddos_custom_policy_name}
+
+    if location:
+        policy['location'] = location
+
+    if tags:
+        policy['tags'] = tags
+
+    detection_rules = {}
+    traffic_detection_rule = {}
+
+    if detection_rule_name:
+        detection_rules['name'] = detection_rule_name
+
+    if detection_mode:
+        detection_rules['detection_mode'] = detection_mode
+
+    if packets_per_second:
+        traffic_detection_rule['packets_per_second'] = packets_per_second
+
+    if traffic_type:
+        traffic_detection_rule['traffic_type'] = traffic_type
+
+    detection_rules['traffic_detection_rule'] = traffic_detection_rule
+    policy['detection_rules'] = [detection_rules]
+
+    if ip_config_id:
+        front_end_ip_configuration = []
+        for id in ip_config_id:
+            front_end_ip_configuration.append({'id': id})
+        policy['front_end_ip_configuration'] = front_end_ip_configuration
+
+    return policy

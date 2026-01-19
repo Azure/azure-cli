@@ -6718,3 +6718,18 @@ class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
         args_schema.state.enum = AAZArgEnum({"commission": "Commissioning", "decommission": "Decommissioning", "deprovision": "Deprovisioning", "provision": "Provisioning"})
 
         return args_schema
+
+
+def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name, location=None, tags=None,
+                              detection_rule_name=None, detection_mode=None, traffic_type=None,
+                              packets_per_second=None, ip_config_id=None, no_wait=None):
+    from .aaz.latest.network.ddos_custom_policy import Create as DdosCustomPolicyCreate
+    from ._template_builder import build_ddos_custom_policy
+
+    policy = build_ddos_custom_policy(cmd, ddos_custom_policy_name, location, tags, detection_rule_name, detection_mode,
+                                      packets_per_second, traffic_type, ip_config_id)
+
+    policy['resource_group'] = resource_group_name
+    policy['no_wait'] = no_wait
+    
+    return DdosCustomPolicyCreate(cli_ctx=cmd.cli_ctx)(command_args=policy)
