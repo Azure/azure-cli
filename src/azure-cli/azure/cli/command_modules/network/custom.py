@@ -6723,13 +6723,82 @@ class CustomIpPrefixUpdate(_CustomIpPrefixUpdate):
 def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name, location=None, tags=None,
                               detection_rule_name=None, detection_mode=None, traffic_type=None,
                               packets_per_second=None, ip_config_id=None, no_wait=None):
-    from .aaz.latest.network.ddos_custom_policy import Create as DdosCustomPolicyCreate
+    from .aaz.latest.network.ddos_custom_policy import Create as DdosCustomPolicyCreate, Show as DdosCustomPolicyShow
     from ._template_builder import build_ddos_custom_policy
+
+    existing_policy = None
+
+    try:
+        existing_policy = DdosCustomPolicyShow(cli_ctx=cmd.cli_ctx)(command_args={
+            'ddos_custom_policy_name': ddos_custom_policy_name,
+            'resource_group': resource_group_name
+        })
+
+        existing_policy = convert_ddos_custom_policy_to_snake_case(existing_policy)
+    except Exception as err:
+        pass
 
     policy = build_ddos_custom_policy(cmd, ddos_custom_policy_name, location, tags, detection_rule_name, detection_mode,
                                       packets_per_second, traffic_type, ip_config_id)
 
+    if existing_policy:
+        policy = combine_old_and_new_custom_policy(existing_policy, policy)
+
+
     policy['resource_group'] = resource_group_name
     policy['no_wait'] = no_wait
-    
+
     return DdosCustomPolicyCreate(cli_ctx=cmd.cli_ctx)(command_args=policy)
+
+
+def combine_old_and_new_custom_policy(old_policy, new_policy):
+    new_rule_name = [rule['name'] for rule in new_policy['detection_rules']]
+
+    for old_rule in old_policy['detection_rules']:
+        if old_rule['name'] in new_rule_name:
+            continue
+
+        new_policy['detection_rules'].append(old_rule)
+
+    return new_policy
+
+
+def convert_ddos_custom_policy_to_snake_case(policy):
+    new_policy = {}
+
+    if 'location' in policy:
+        new_policy['location'] = policy['location']
+
+    if 'name' in policy:
+        new_policy['name'] = policy['name']
+
+    if 'detectionRules' in policy:
+        new_policy['detection_rules'] = []
+
+        for rule in policy['detectionRules']:
+            detection_rule = {}
+            if 'name' in rule:
+                detection_rule['name'] = rule['name']
+
+            if 'detectionMode' in rule:
+                detection_rule['detection_mode'] = rule['detectionMode']
+
+            if 'trafficDetectionRule' in rule:
+                traffic_detection_rule = rule['trafficDetectionRule']
+
+                if 'packetsPerSecond' in traffic_detection_rule:
+                    traffic_detection_rule['packets_per_second'] = traffic_detection_rule['packetsPerSecond']
+                    traffic_detection_rule.pop('packetsPerSecond')
+
+                if 'trafficType' in traffic_detection_rule:
+                    traffic_detection_rule['traffic_type'] = traffic_detection_rule['trafficType']
+                    traffic_detection_rule.pop('trafficType')
+
+                detection_rule['traffic_detection_rule'] = traffic_detection_rule
+
+            new_policy['detection_rules'].append(detection_rule)
+
+    if 'frontEndIpConfiguration' in policy:
+        new_policy['front_end_ip_configuration'] = policy['frontEndIpConfiguration']
+
+    return new_policy
