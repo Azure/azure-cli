@@ -519,103 +519,79 @@ class VMCustomImageTest(ScenarioTest):
             'pubip5': 'pubip5',
             'pubip6': 'pubip6',
             'pubip7': 'pubip7',
-            'ssh_key': TEST_SSH_KEY_PUB,
         })
 
-        # ---------- unmanaged disk VM -> image ----------
+        # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip1} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd(
-            'vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest '
-            '--use-unmanaged-disk '
-            '--admin-username sdk-test-admin --admin-password testPassword0 '
-            '--subnet {subnet} --vnet-name {vnet} '
-            '--size Standard_B2ms --public-ip-address {pubip1} --nsg-rule NONE'
-        )
+            'vm create -g {rg} -n {vm1} --image Debian:debian-10:10:latest --use-unmanaged-disk --admin-username sdk-test-admin '
+            '--admin-password testPassword0 --subnet {subnet} --vnet-name {vnet} '
+            '--size Standard_B2ms --public-ip-address {pubip1} --nsg-rule NONE')
 
+        # Disable default outbound access
         self.cmd(
-            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} '
-            '--default-outbound-access false'
-        )
+            'network vnet subnet update -g {rg} --vnet-name {vnet} -n {subnet} --default-outbound-access false')
 
+        # deprovision the VM, but we have to do it async to avoid hanging the run-command itself
         self.cmd(
-            'vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript '
-            '--scripts "echo $0 $1" --parameters hello world'
-        )
+            'vm run-command invoke -g {rg} -n {vm1} --command-id RunShellScript --scripts "echo $0 $1" --parameters hello world')
         time.sleep(70)
         self.cmd('vm deallocate -g {rg} -n {vm1}')
         self.cmd('vm generalize -g {rg} -n {vm1}')
         self.cmd('image create -g {rg} -n {image1} --source {vm1}')
 
-        # ---------- managed disk VM -> image ----------
+        # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip2} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd(
-            'vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest '
-            '--storage-sku standard_lrs --data-disk-sizes-gb 1 1 1 1 '
-            '--admin-username sdk-test-admin --admin-password testPassword0 '
-            '--subnet {subnet} --vnet-name {vnet} '
-            '--size Standard_B2ms --public-ip-address {pubip2} --nsg-rule NONE'
-        )
-
+            'vm create -g {rg} -n {vm2} --image Debian:debian-10:10:latest --storage-sku standard_lrs '
+            '--data-disk-sizes-gb 1 1 1 1 --admin-username sdk-test-admin --admin-password testPassword0 '
+            '--subnet {subnet} --vnet-name {vnet} --size Standard_B2ms --public-ip-address {pubip2} --nsg-rule NONE')
         data_disks = self.cmd('vm show -g {rg} -n {vm2}').get_output_in_json()['storageProfile']['dataDisks']
         self.kwargs['disk_0_name'] = data_disks[0]['name']
         self.kwargs['disk_2_name'] = data_disks[2]['name']
 
+        # detach the 0th and 2nd disks leaving disks at lun 1 and 3
         self.cmd('vm disk detach -n {disk_0_name} --vm-name {vm2} -g {rg}')
         self.cmd('vm disk detach -n {disk_2_name} --vm-name {vm2} -g {rg}')
+
         self.cmd('vm show -g {rg} -n {vm2}', checks=self.check("length(storageProfile.dataDisks)", 2))
 
         self.cmd(
-            'vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript '
-            '--scripts "echo $0 $1" --parameters hello world'
-        )
+            'vm run-command invoke -g {rg} -n {vm2} --command-id RunShellScript --scripts "echo $0 $1" --parameters hello world')
         time.sleep(70)
         self.cmd('vm deallocate -g {rg} -n {vm2}')
         self.cmd('vm generalize -g {rg} -n {vm2}')
         self.cmd('image create -g {rg} -n {image2} --source {vm2}')
 
-        # ---------- new VM from unmanaged image ----------
+        # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip3} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd(
-            'vm create -g {rg} -n {newvm1} --image {image1} '
-            '--admin-username sdk-test-admin --admin-password testPassword0 '
-            '--authentication-type password '
-            '--subnet {subnet} --vnet-name {vnet} '
-            '--size Standard_B2ms --public-ip-address {pubip3} --nsg-rule NONE'
-        )
-
+            'vm create -g {rg} -n {newvm1} --image {image1} --admin-username sdk-test-admin --admin-password testPassword0 '
+            '--authentication-type password --subnet {subnet} --vnet-name {vnet} '
+            '--size Standard_B2ms --public-ip-address {pubip3} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {newvm1}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage')
         ])
 
-        # ---------- VMSS from unmanaged image ----------
         self.cmd('network nsg create -g {rg} -n {nsg}')
+        # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip4} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd(
-            'vmss create -g {rg} -n vmss1 '
-            '--image {image1} '
-            '--vm-sku Standard_D2s_v3 '
-            '--admin-username sdk-test-admin --admin-password testPassword0 '
-            '--authentication-type password '
-            '--orchestration-mode Flexible '
-            '--public-ip-address {pubip4} --nsg {nsg}',
+            'vmss create -g {rg} -n vmss1 --image {image1} --admin-username sdk-test-admin '
+            '--admin-password testPassword0 --authentication-type password --public-ip-address {pubip4} '
+            '--vm-sku Standard_D2s_v3 --orchestration-mode Flexible --nsg {nsg}',
             checks=[
                 self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
                 self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage')
-            ]
-        )
+            ])
 
-        # ---------- new VM from managed image (SSH only) ----------
+        # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip5} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd(
-            'vm create -g {rg} -n {newvm2} --image {image2} '
-            '--admin-username sdk-test-admin '
-            '--authentication-type ssh '
-            '--ssh-key-value "{ssh_key}" '
-            '--subnet {subnet} --vnet-name {vnet} '
-            '--size Standard_B2ms --public-ip-address {pubip5} --nsg-rule NONE'
-        )
-
+            'vm create -g {rg} -n {newvm2} --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 '
+            '--authentication-type password --subnet {subnet} --vnet-name {vnet} --size Standard_D2s_v5 '
+            '--public-ip-address {pubip5} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n {newvm2}', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
@@ -624,19 +600,12 @@ class VMCustomImageTest(ScenarioTest):
             self.check('storageProfile.dataDisks[0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
-        # ---------- VM with extra data disks from managed image (SSH only) ----------
+        # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip6} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd(
-            'vm create -g {rg} -n vm3 --image {image2} '
-            '--admin-username sdk-test-admin '
-            '--authentication-type ssh '
-            '--ssh-key-value "{ssh_key}" '
-            '--storage-sku os=Premium_LRS 0=StandardSSD_LRS '
-            '--data-disk-sizes-gb 10 20 '
-            '--subnet {subnet} --vnet-name {vnet} '
-            '--size Standard_B2ms --public-ip-address {pubip6} --nsg-rule NONE'
-        )
-
+            'vm create -g {rg} -n vm3 --image {image2} --admin-username sdk-test-admin --admin-password testPassword0 '
+            '--authentication-type password --size Standard_D2s_v5 --storage-sku os=Premium_LRS 0=StandardSSD_LRS '
+            '--data-disk-sizes-gb 1 --subnet {subnet} --vnet-name {vnet} --public-ip-address {pubip6} --nsg-rule NONE')
         self.cmd('vm show -g {rg} -n vm3', checks=[
             self.check('storageProfile.imageReference.resourceGroup', '{rg}'),
             self.check('storageProfile.osDisk.createOption', 'FromImage'),
@@ -647,21 +616,17 @@ class VMCustomImageTest(ScenarioTest):
             self.check("storageProfile.dataDisks[?lun == `1`] | [0].createOption", 'FromImage'),
             self.check("storageProfile.dataDisks[?lun == `3`] | [0].createOption", 'FromImage'),
 
-            self.check("storageProfile.dataDisks[?lun == `0`] | [0].managedDisk.storageAccountType", 'StandardSSD_LRS'),
-            self.check("storageProfile.dataDisks[?lun == `1`] | [0].managedDisk.storageAccountType", 'Standard_LRS'),
-            self.check("storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType", 'Standard_LRS')
+            self.check('storageProfile.dataDisks[?lun == `0`] | [0].managedDisk.storageAccountType', 'StandardSSD_LRS'),
+            self.check('storageProfile.dataDisks[?lun == `1`] | [0].managedDisk.storageAccountType', 'Standard_LRS'),
+            self.check('storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType', 'Standard_LRS')
         ])
 
-        # ---------- VMSS from managed image (SSH only) ----------
+        # Create a public IP resource with service tag
         self.cmd('network public-ip create --name {pubip7} -g {rg} --ip-tags FirstPartyUsage=/NonProd')
         self.cmd(
-            'vmss create -g {rg} -n vmss2 --image {image2} '
-            '--vm-sku Standard_D2s_v3 '
-            '--admin-username sdk-test-admin '
-            '--authentication-type ssh '
-            '--ssh-key-value "{ssh_key}" '
-            '--orchestration-mode Flexible '
-            '--public-ip-address {pubip7} --nsg {nsg}',
+            'vmss create -g {rg} -n vmss2 --image {image2} --admin-username sdk-test-admin '
+            '--admin-password testPassword0 --authentication-type password --vm-sku Standard_D2s_v3 '
+            '--orchestration-mode Flexible --public-ip-address {pubip7} --nsg {nsg}',
             checks=[
                 self.check('vmss.virtualMachineProfile.storageProfile.imageReference.resourceGroup', '{rg}'),
                 self.check('vmss.virtualMachineProfile.storageProfile.osDisk.createOption', 'FromImage'),
@@ -676,8 +641,7 @@ class VMCustomImageTest(ScenarioTest):
                 self.check(
                     "vmss.virtualMachineProfile.storageProfile.dataDisks[?lun == `3`] | [0].managedDisk.storageAccountType",
                     'Standard_LRS')
-            ]
-        )
+            ])
 
     @AllowLargeResponse(size_kb=99999)
     @ResourceGroupPreparer(name_prefix='cli_test_vm_custom_image_debian')

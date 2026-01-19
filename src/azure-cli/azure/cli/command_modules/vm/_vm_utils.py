@@ -782,6 +782,8 @@ def safe_get(d: dict, path: str, default=None):
         else:
             return default
     return cur
+
+
 def _gen_guid():
     import uuid
     return uuid.uuid4()
