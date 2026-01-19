@@ -1746,12 +1746,9 @@ def set_vm_by_aaz(cmd, vm, no_wait=False):
     parsed_id = _parse_rg_name(vm["id"])
     vm["resource_group"] = parsed_id[0]
     vm["vm_name"] = parsed_id[1]
+    vm["no_wait"] = no_wait
 
     class SetVM(_VMCreate):
-        def pre_operations(self):
-            args = self.ctx.args
-            args.no_wait = no_wait
-
         def _output(self, *args, **kwargs):
             from azure.cli.core.aaz import AAZUndefined, has_value
 
