@@ -61,6 +61,7 @@ from .aaz.latest.network.application_gateway.waf_policy.custom_rule.match_condit
     Add as _WAFCustomRuleMatchConditionAdd
 from .aaz.latest.network.application_gateway.waf_policy.policy_setting import Update as _WAFPolicySettingUpdate
 from .aaz.latest.network.custom_ip.prefix import Create as _CustomIpPrefixCreate, Update as _CustomIpPrefixUpdate
+from .aaz.latest.network.ddos_custom_policy import Update as _DdosCustomPolicyUpdate
 from .aaz.latest.network.dns.record_set import List as _DNSRecordSetListByZone
 from .aaz.latest.network.dns.zone import Create as _DNSZoneCreate
 from .aaz.latest.network.express_route import Create as _ExpressRouteCreate, Update as _ExpressRouteUpdate
@@ -6750,7 +6751,6 @@ def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name,
     if existing_policy:
         policy = combine_old_and_new_custom_policy(existing_policy, policy)
 
-
     policy['resource_group'] = resource_group_name
     policy['no_wait'] = no_wait
 
@@ -6822,9 +6822,6 @@ def convert_ddos_custom_policy_to_snake_case(policy):
         new_policy['front_end_ip_configuration'] = policy['frontEndIpConfiguration']
 
     return new_policy
-
-
-from .aaz.latest.network.ddos_custom_policy import Update as _DdosCustomPolicyUpdate
 
 
 class DdosCustomPolicyUpdate(_DdosCustomPolicyUpdate):
