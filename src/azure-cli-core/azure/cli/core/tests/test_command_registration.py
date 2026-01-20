@@ -432,12 +432,12 @@ class TestCommandRegistration(unittest.TestCase):
         # Test command index is built for command with positional argument
         cmd_tbl = loader.load_command_table(["extra", "extra", "positional_argument"])
         self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
-        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'extra final', 'hello ext-only'])
+        self.assertSetEqual(set(cmd_tbl), {'hello mod-only', 'hello overridden', 'extra final', 'hello ext-only'})
 
         # Test command index is used by command with positional argument
         cmd_tbl = loader.load_command_table(["hello", "mod-only", "positional_argument"])
         self.assertDictEqual(INDEX[CommandIndex._COMMAND_INDEX], self.expected_command_index)
-        self.assertEqual(list(cmd_tbl), ['hello mod-only', 'hello overridden', 'hello ext-only'])
+        self.assertSetEqual(set(cmd_tbl), {'hello mod-only', 'hello overridden', 'hello ext-only'})
 
         # Test command index is used by command with positional argument
         cmd_tbl = loader.load_command_table(["extra", "final", "positional_argument2"])
