@@ -8997,5 +8997,69 @@ class NetworkVirtualNetworkApplianceScenario(ScenarioTest):
 
         self.assertTrue(vna_list[0].get('id') == vna2_id)
 
+
+class DdosCustomPolicyScenarioTest(ScenarioTest):
+    @ResourceGroupPreparer(name_prefix='test_ddos_cuspol', location='eastus')
+    def test_ddos_custom_policy(self, resource_group):
+        self.kwargs.update({
+            'policy_name': 'policy1',
+            'detection_mode': 'TrafficThreshold',
+            'detection_rule_name1': 'RuleName1',
+            'traffic_type1': 'Tcp',
+            'packets_per_second1': '1000000',
+            'detection_rule_name2': 'RuleName2',
+            'traffic_type2': 'Udp',
+            'packets_per_second2': '200000',
+            'detection_rule_name3': 'RuleName3',
+        })
+
+        self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} --detection-rule-name {detection_rule_name1} '
+                 '--detection-mode {detection_mode} --traffic-type {traffic_type1} --packets-per-second {packets_per_second1}', checks=[
+            self.check('length(detectionRules)', 1),
+            self.check('detectionRules[0].name', '{detection_rule_name1}'),
+            self.check('detectionRules[0].trafficDetectionRule.packetsPerSecond', '{packets_per_second1}'),
+            self.check('detectionRules[0].trafficDetectionRule.trafficType', '{traffic_type1}'),
+            self.check('name', '{policy_name}'),
+        ])
+
+        self.cmd('network ddos-custom-policy show -g {rg} -n {policy_name}', checks=[
+            self.check('length(detectionRules)', 1),
+            self.check('detectionRules[0].name', '{detection_rule_name1}'),
+            self.check('detectionRules[0].trafficDetectionRule.packetsPerSecond', '{packets_per_second1}'),
+            self.check('detectionRules[0].trafficDetectionRule.trafficType', '{traffic_type1}'),
+            self.check('name', '{policy_name}'),
+        ])
+
+        self.cmd('network ddos-custom-policy create -g {rg} -n {policy_name} --detection-rule-name {detection_rule_name2} '
+                 '--detection-mode {detection_mode} --traffic-type {traffic_type2} --packets-per-second {packets_per_second2}', checks=[
+            self.check('length(detectionRules)', 2),
+            self.check('detectionRules[0].name', '{detection_rule_name1}'),
+            self.check('detectionRules[0].trafficDetectionRule.packetsPerSecond', '{packets_per_second1}'),
+            self.check('detectionRules[0].trafficDetectionRule.trafficType', '{traffic_type1}'),
+            self.check('detectionRules[1].name', '{detection_rule_name2}'),
+            self.check('detectionRules[1].trafficDetectionRule.packetsPerSecond', '{packets_per_second2}'),
+            self.check('detectionRules[1].trafficDetectionRule.trafficType', '{traffic_type2}'),
+            self.check('name', '{policy_name}'),
+        ])
+
+        self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} --set detectionRules[0].name={detection_rule_name3}', checks=[
+            self.check('length(detectionRules)', 2),
+            self.check('detectionRules[0].name', '{detection_rule_name3}'),
+            self.check('detectionRules[0].trafficDetectionRule.packetsPerSecond', '{packets_per_second1}'),
+            self.check('detectionRules[0].trafficDetectionRule.trafficType', '{traffic_type1}'),
+            self.check('detectionRules[1].name', '{detection_rule_name2}'),
+            self.check('detectionRules[1].trafficDetectionRule.packetsPerSecond', '{packets_per_second2}'),
+            self.check('detectionRules[1].trafficDetectionRule.trafficType', '{traffic_type2}'),
+        ])
+
+        self.cmd('network ddos-custom-policy update -g {rg} -n {policy_name} --remove detectionRules 0', checks=[
+            self.check('length(detectionRules)', 1),
+            self.check('detectionRules[0].name', '{detection_rule_name2}'),
+            self.check('detectionRules[0].trafficDetectionRule.packetsPerSecond', '{packets_per_second2}'),
+            self.check('detectionRules[0].trafficDetectionRule.trafficType', '{traffic_type2}'),
+        ])
+
+        self.cmd('network ddos-custom-policy delete -g {rg} -n {policy_name} -y', checks=self.is_empty())
+
 if __name__ == '__main__':
     unittest.main()
