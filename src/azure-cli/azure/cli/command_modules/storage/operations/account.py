@@ -79,7 +79,7 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, dns_endpoint_type=None,
                            enable_smb_oauth=None, zones=None, zone_placement_policy=None,
-                           enable_blob_geo_priority_replication=None):
+                           enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None):
     StorageAccountCreateParameters, Kind, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet = \
         cmd.get_models('StorageAccountCreateParameters', 'Kind', 'Sku', 'CustomDomain', 'AccessTier', 'Identity',
                        'Encryption', 'NetworkRuleSet')
@@ -261,6 +261,9 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
         params.encryption.require_infrastructure_encryption = require_infrastructure_encryption
 
     if min_tls_version:
+        if min_tls_version in ['TLS1_0', 'TLS1_1']:
+            logger.warning('TLS 1.0 and TLS 1.1 have been retired on 2026/02/03, will use TLS 1.2 instead.')
+            min_tls_version = 'TLS1_2'
         params.minimum_tls_version = min_tls_version
 
     if allow_shared_key_access is not None:
@@ -324,6 +327,12 @@ def create_storage_account(cmd, resource_group_name, account_name, sku=None, loc
     if enable_blob_geo_priority_replication is not None:
         GeoPriorityReplicationStatus = cmd.get_models('GeoPriorityReplicationStatus')
         params.geo_priority_replication_status = GeoPriorityReplicationStatus(is_blob_enabled=enable_blob_geo_priority_replication)
+
+    if publish_ipv6_endpoint is not None:
+        DualStackEndpointPreference = cmd.get_models('DualStackEndpointPreference')
+        params.dual_stack_endpoint_preference = DualStackEndpointPreference(
+            publish_ipv6_endpoint=publish_ipv6_endpoint
+        )
 
     return scf.storage_accounts.begin_create(resource_group_name, account_name, params)
 
@@ -420,7 +429,7 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
                            immutability_period_since_creation_in_days=None, immutability_policy_state=None,
                            allow_protected_append_writes=None, public_network_access=None, upgrade_to_storagev2=None,
                            yes=None, enable_smb_oauth=None, zones=None, zone_placement_policy=None,
-                           enable_blob_geo_priority_replication=None):
+                           enable_blob_geo_priority_replication=None, publish_ipv6_endpoint=None):
     StorageAccountUpdateParameters, Sku, CustomDomain, AccessTier, Identity, Encryption, NetworkRuleSet, Kind = \
         cmd.get_models('StorageAccountUpdateParameters', 'Sku', 'CustomDomain', 'AccessTier', 'Identity', 'Encryption',
                        'NetworkRuleSet', 'Kind')
@@ -674,7 +683,11 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
 
     if allow_blob_public_access is not None:
         params.allow_blob_public_access = allow_blob_public_access
+
     if min_tls_version:
+        if min_tls_version in ['TLS1_0', 'TLS1_1']:
+            logger.warning('TLS 1.0 and TLS 1.1 have been retired on 2026/02/03, will use TLS 1.2 instead.')
+            min_tls_version = 'TLS1_2'
         params.minimum_tls_version = min_tls_version
 
     if allow_shared_key_access is not None:
@@ -734,6 +747,12 @@ def update_storage_account(cmd, instance, sku=None, tags=None, custom_domain=Non
         GeoPriorityReplicationStatus = cmd.get_models('GeoPriorityReplicationStatus')
         params.geo_priority_replication_status = GeoPriorityReplicationStatus(is_blob_enabled=enable_blob_geo_priority_replication)
 
+    if publish_ipv6_endpoint is not None:
+        DualStackEndpointPreference = cmd.get_models('DualStackEndpointPreference')
+        params.dual_stack_endpoint_preference = DualStackEndpointPreference(
+            publish_ipv6_endpoint=publish_ipv6_endpoint
+        )
+
     return params
 
 
@@ -746,11 +765,12 @@ def list_network_rules(client, resource_group_name, account_name):
 
 
 def add_network_rule(cmd, client, resource_group_name, account_name, action='Allow', subnet=None,
-                     vnet_name=None, ip_address=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
+                     vnet_name=None, ip_address=None, ipv6_address=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
-    if not subnet and not ip_address:
+    if not subnet and not ip_address and not ipv6_address:
         logger.warning('No subnet or ip address supplied.')
+
     if subnet:
         from azure.mgmt.core.tools import is_valid_resource_id
         if not is_valid_resource_id(subnet):
@@ -761,22 +781,13 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
         rules.virtual_network_rules = [r for r in rules.virtual_network_rules
                                        if r.virtual_network_resource_id.lower() != subnet.lower()]
         rules.virtual_network_rules.append(VirtualNetworkRule(virtual_network_resource_id=subnet, action=action))
+
     if ip_address:
-        IpRule = cmd.get_models('IPRule')
-        if not rules.ip_rules:
-            rules.ip_rules = []
-        for ip in ip_address:
-            to_modify = True
-            for x in rules.ip_rules:
-                existing_ip_network = ip_network(x.ip_address_or_range)
-                new_ip_network = ip_network(ip)
-                if new_ip_network.overlaps(existing_ip_network):
-                    logger.warning("IP/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
-                                   ip, x.ip_address_or_range)
-                    to_modify = False
-                    break
-            if to_modify:
-                rules.ip_rules.append(IpRule(ip_address_or_range=ip, action=action))
+        rules.ip_rules = _process_add_ip(cmd, ip_address, rules.ip_rules, action=action, ipv6=False)
+
+    if ipv6_address:
+        rules.ipv6_rules = _process_add_ip(cmd, ipv6_address, rules.ipv6_rules, action=action, ipv6=True)
+
     if resource_id:
         ResourceAccessRule = cmd.get_models('ResourceAccessRule')
         if not rules.resource_access_rules:
@@ -790,7 +801,26 @@ def add_network_rule(cmd, client, resource_group_name, account_name, action='All
     return client.update(resource_group_name, account_name, params)
 
 
-def remove_network_rule(cmd, client, resource_group_name, account_name, ip_address=None, subnet=None,
+def _process_add_ip(cmd, ip_address, ip_rules, action, ipv6=False):
+    IpRule = cmd.get_models('IPRule')
+    if not ip_rules:
+        ip_rules = []
+    for ip in ip_address:
+        to_modify = True
+        for x in ip_rules:
+            existing_ip_network = ip_network(x.ip_address_or_range)
+            new_ip_network = ip_network(ip)
+            if new_ip_network.overlaps(existing_ip_network):
+                logger.warning("IP%s/CIDR %s overlaps with %s, which exists already. Not adding duplicates.",
+                               "v6" if ipv6 else "v4", ip, x.ip_address_or_range)
+                to_modify = False
+                break
+        if to_modify:
+            ip_rules.append(IpRule(ip_address_or_range=ip, action=action))
+    return ip_rules
+
+
+def remove_network_rule(cmd, client, resource_group_name, account_name, ip_address=None, ipv6_address=None, subnet=None,
                         vnet_name=None, tenant_id=None, resource_id=None):  # pylint: disable=unused-argument
     sa = client.get_properties(resource_group_name, account_name)
     rules = sa.network_rule_set
@@ -801,6 +831,11 @@ def remove_network_rule(cmd, client, resource_group_name, account_name, ip_addre
         to_remove = [ip_network(x) for x in ip_address]
         rules.ip_rules = list(filter(lambda x: all(ip_network(x.ip_address_or_range) != i for i in to_remove),
                                      rules.ip_rules))
+
+    if ipv6_address:
+        to_remove = [ip_network(x) for x in ipv6_address]
+        rules.ipv6_rules = list(filter(lambda x: all(ip_network(x.ip_address_or_range) != i for i in to_remove),
+                                       rules.ipv6_rules))
 
     if resource_id:
         rules.resource_access_rules = [x for x in rules.resource_access_rules if
@@ -931,7 +966,8 @@ def update_blob_service_properties(cmd, instance, enable_change_feed=None, chang
 def update_file_service_properties(cmd, instance, enable_delete_retention=None,
                                    delete_retention_days=None, enable_smb_multichannel=None,
                                    versions=None, authentication_methods=None, kerberos_ticket_encryption=None,
-                                   channel_encryption=None):
+                                   channel_encryption=None, require_smb_encryption_in_transit=None,
+                                   require_nfs_encryption_in_transit=None):
     from azure.cli.core.azclierror import ValidationError
     params = {}
     # set delete retention policy according input
@@ -958,11 +994,18 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
         params['share_delete_retention_policy'] = instance.share_delete_retention_policy
 
     # set protocol settings
-    if not instance.protocol_settings or not instance.protocol_settings.smb:
-        instance.protocol_settings = cmd.get_models('ProtocolSettings')(smb=cmd.get_models('SmbSetting')())
+    smbSetting = cmd.get_models('SmbSetting')
+    nfsSetting = cmd.get_models('NfsSetting')
+    if not instance.protocol_settings:
+        instance.protocol_settings = cmd.get_models('ProtocolSettings')(smb=smbSetting(), nfs=nfsSetting())
+    else:
+        if not instance.protocol_settings.smb:
+            instance.protocol_settings.smb = smbSetting()
+        if not instance.protocol_settings.nfs:
+            instance.protocol_settings.nfs = nfsSetting()
+
     if enable_smb_multichannel is not None:
         instance.protocol_settings.smb.multichannel = cmd.get_models('Multichannel')(enabled=enable_smb_multichannel)
-
     if versions is not None:
         instance.protocol_settings.smb.versions = versions
     if authentication_methods is not None:
@@ -971,7 +1014,14 @@ def update_file_service_properties(cmd, instance, enable_delete_retention=None,
         instance.protocol_settings.smb.kerberos_ticket_encryption = kerberos_ticket_encryption
     if channel_encryption is not None:
         instance.protocol_settings.smb.channel_encryption = channel_encryption
-    if instance.protocol_settings and instance.protocol_settings.smb and any(instance.protocol_settings.smb.__dict__.values()):
+    if require_smb_encryption_in_transit is not None:
+        instance.protocol_settings.smb.encryption_in_transit = (
+            cmd.get_models('EncryptionInTransit')(required=require_smb_encryption_in_transit))
+    if require_nfs_encryption_in_transit is not None:
+        instance.protocol_settings.nfs.encryption_in_transit = (
+            cmd.get_models('EncryptionInTransit')(required=require_nfs_encryption_in_transit))
+
+    if any(instance.protocol_settings.smb.__dict__.values()) or any(instance.protocol_settings.nfs.__dict__.values()):
         params['protocol_settings'] = instance.protocol_settings
 
     return params

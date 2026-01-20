@@ -22,9 +22,9 @@ class List(AAZCommand):
     """
 
     _aaz_info = {
-        "version": "2024-07-01",
+        "version": "2025-01-01",
         "resources": [
-            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/connections", "2024-07-01"],
+            ["mgmt-plane", "/subscriptions/{}/resourcegroups/{}/providers/microsoft.network/connections", "2025-01-01"],
         ]
     }
 
@@ -112,7 +112,7 @@ class List(AAZCommand):
         def query_parameters(self):
             parameters = {
                 **self.serialize_query_param(
-                    "api-version", "2024-07-01",
+                    "api-version", "2025-01-01",
                     required=True,
                 ),
             }
@@ -172,8 +172,14 @@ class List(AAZCommand):
             )
 
             properties = cls._schema_on_200.value.Element.properties
+            properties.authentication_type = AAZStrType(
+                serialized_name="authenticationType",
+            )
             properties.authorization_key = AAZStrType(
                 serialized_name="authorizationKey",
+            )
+            properties.certificate_authentication = AAZObjectType(
+                serialized_name="certificateAuthentication",
             )
             properties.connection_mode = AAZStrType(
                 serialized_name="connectionMode",
@@ -239,6 +245,7 @@ class List(AAZCommand):
             )
             properties.shared_key = AAZStrType(
                 serialized_name="sharedKey",
+                flags={"secret": True},
             )
             properties.traffic_selector_policies = AAZListType(
                 serialized_name="trafficSelectorPolicies",
@@ -265,6 +272,20 @@ class List(AAZCommand):
                 serialized_name="virtualNetworkGateway2",
             )
             _ListHelper._build_schema_virtual_network_gateway_read(properties.virtual_network_gateway2)
+
+            certificate_authentication = cls._schema_on_200.value.Element.properties.certificate_authentication
+            certificate_authentication.inbound_auth_certificate_chain = AAZListType(
+                serialized_name="inboundAuthCertificateChain",
+            )
+            certificate_authentication.inbound_auth_certificate_subject_name = AAZStrType(
+                serialized_name="inboundAuthCertificateSubjectName",
+            )
+            certificate_authentication.outbound_auth_certificate = AAZStrType(
+                serialized_name="outboundAuthCertificate",
+            )
+
+            inbound_auth_certificate_chain = cls._schema_on_200.value.Element.properties.certificate_authentication.inbound_auth_certificate_chain
+            inbound_auth_certificate_chain.Element = AAZStrType()
 
             egress_nat_rules = cls._schema_on_200.value.Element.properties.egress_nat_rules
             egress_nat_rules.Element = AAZObjectType()
@@ -402,6 +423,7 @@ class _ListHelper:
     def _build_schema_address_space_read(cls, _schema):
         if cls._schema_address_space_read is not None:
             _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+            _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
             return
 
         cls._schema_address_space_read = _schema_address_space_read = AAZObjectType()
@@ -410,11 +432,36 @@ class _ListHelper:
         address_space_read.address_prefixes = AAZListType(
             serialized_name="addressPrefixes",
         )
+        address_space_read.ipam_pool_prefix_allocations = AAZListType(
+            serialized_name="ipamPoolPrefixAllocations",
+        )
 
         address_prefixes = _schema_address_space_read.address_prefixes
         address_prefixes.Element = AAZStrType()
 
+        ipam_pool_prefix_allocations = _schema_address_space_read.ipam_pool_prefix_allocations
+        ipam_pool_prefix_allocations.Element = AAZObjectType()
+
+        _element = _schema_address_space_read.ipam_pool_prefix_allocations.Element
+        _element.allocated_address_prefixes = AAZListType(
+            serialized_name="allocatedAddressPrefixes",
+            flags={"read_only": True},
+        )
+        _element.number_of_ip_addresses = AAZStrType(
+            serialized_name="numberOfIpAddresses",
+        )
+        _element.pool = AAZObjectType(
+            flags={"client_flatten": True},
+        )
+
+        allocated_address_prefixes = _schema_address_space_read.ipam_pool_prefix_allocations.Element.allocated_address_prefixes
+        allocated_address_prefixes.Element = AAZStrType()
+
+        pool = _schema_address_space_read.ipam_pool_prefix_allocations.Element.pool
+        pool.id = AAZStrType()
+
         _schema.address_prefixes = cls._schema_address_space_read.address_prefixes
+        _schema.ipam_pool_prefix_allocations = cls._schema_address_space_read.ipam_pool_prefix_allocations
 
     _schema_bgp_settings_read = None
 
@@ -868,6 +915,7 @@ class _ListHelper:
         )
         vpn_client_configuration.radius_server_secret = AAZStrType(
             serialized_name="radiusServerSecret",
+            flags={"secret": True},
         )
         vpn_client_configuration.radius_servers = AAZListType(
             serialized_name="radiusServers",
@@ -908,6 +956,7 @@ class _ListHelper:
         )
         _element.radius_server_secret = AAZStrType(
             serialized_name="radiusServerSecret",
+            flags={"secret": True},
         )
 
         vng_client_connection_configurations = _schema_virtual_network_gateway_read.properties.vpn_client_configuration.vng_client_connection_configurations

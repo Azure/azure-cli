@@ -5576,6 +5576,11 @@ examples:
     text: |
         az network vpn-connection create --local-gateway2 MyLocalGateway --location westus2 --name MyConnection --resource-group MyResourceGroup --shared-key Abc123 --vnet-gateway1 MyVnetGateway
     crafted: true
+  - name: Create a VPN connection with Certificate authentication using inline JSON.
+    text: |
+        az network vpn-connection create -g MyResourceGroup -n MyConnection \
+          --vnet-gateway1 MyVnetGateway --local-gateway2 MyLocalGateway \
+          --auth-type Certificate --cert-auth '{"outboundAuthCertificate":"https://customerKv.vault/Certificates/outBoundcert/Version","inboundAuthCertificateChain":["MIIC+TCCAeGgAwIBAgIQFOJUqDaxV5xJcKpTKO..","MIIC+TCCAeGgAwIBAgIQPJerInitNblK7yBgkqh.."],"inboundAuthCertificateSubjectName":"CN=rootCert.com"}'
 """
 
 helps['network vpn-connection delete'] = """
