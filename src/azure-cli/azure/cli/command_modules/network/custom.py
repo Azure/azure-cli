@@ -6752,14 +6752,28 @@ def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name,
 
 
 def combine_old_and_new_custom_policy(old_policy, new_policy):
-    new_rule_name = [rule['name'] for rule in new_policy['detection_rules']]
+    old_rules = old_policy.get('detection_rules', [])
+    new_rules = new_policy.get('detection_rules', [])
 
-    for old_rule in old_policy['detection_rules']:
-        if old_rule['name'] in new_rule_name:
+    new_rule_name = {rule['name']: rule for rule in new_rules}
+    combined_rule = []
+    used = []
+
+    for rule in old_rules:
+        name = rule.get('name')
+        if name in new_rule_name:
+            combined_rule.append(new_rule_name[name])
+            used.append(name)
             continue
 
-        new_policy['detection_rules'].append(old_rule)
+        combined_rule.append(rule)
 
+    for rule in new_rules:
+        name = rule.get('name')
+        if name not in used:
+            combined_rule.append(rule)
+
+    new_policy['detection_rules'] = combined_rule
     return new_policy
 
 
