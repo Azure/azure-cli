@@ -10,7 +10,6 @@ import os
 import sys
 import timeit
 from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 from typing import Dict, Any, Optional
 
 from knack.cli import CLI
@@ -198,13 +197,13 @@ class AzCli(CLI):
         format_styled_text.theme = theme
 
 
-@dataclass
 class ModuleLoadResult:
-    module_name: str
-    command_table: Dict[str, Any]
-    group_table: Dict[str, Any]
-    elapsed_time: float
-    error: Optional[Exception] = None
+    def __init__(self, module_name, command_table, group_table, elapsed_time, error=None):
+        self.module_name = module_name
+        self.command_table = command_table
+        self.group_table = group_table
+        self.elapsed_time = elapsed_time
+        self.error = error
 
 
 class MainCommandsLoader(CLICommandsLoader):
@@ -265,7 +264,7 @@ class MainCommandsLoader(CLICommandsLoader):
                 except ImportError as e:
                     logger.warning(e)
 
-            results = self._load_modules_threaded(args, command_modules)
+            results = self._load_modules(args, command_modules)
 
             # @TODO: export to own method:
             count, cumulative_elapsed_time, cumulative_group_count, cumulative_command_count = \
@@ -546,25 +545,44 @@ class MainCommandsLoader(CLICommandsLoader):
                 self.extra_argument_registry.update(loader.extra_argument_registry)
                 loader._update_command_definitions()  # pylint: disable=protected-access
 
-    def _load_modules_threaded(self, args, command_modules):
-        """Load command modules using ThreadPoolExecutor for parallel processing."""
-        from azure.cli.core.commands import _load_module_command_loader, BLOCKED_MODS
-        from azure.cli.core.breaking_change import import_module_breaking_changes
-        
-        def load_single_module(mod):
-            try:
-                start_time = timeit.default_timer()
-                module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
-                import_module_breaking_changes(mod)
-                elapsed_time = timeit.default_timer() - start_time
-                return ModuleLoadResult(mod, module_command_table, module_group_table, elapsed_time)
-            except Exception as ex:  # pylint: disable=broad-except
-                return ModuleLoadResult(mod, {}, {}, 0, ex)
-        
+    def _load_modules(self, args, command_modules):
+        """Load command modules using ThreadPoolExecutor with timeout protection."""
+        from azure.cli.core.commands import BLOCKED_MODS
+        import concurrent.futures
+
+        results = []
         with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = [executor.submit(load_single_module, mod) 
-                      for mod in command_modules if mod not in BLOCKED_MODS]
-            return [future.result() for future in futures]
+            future_to_module = {executor.submit(self._load_single_module, mod, args): mod
+                               for mod in command_modules if mod not in BLOCKED_MODS}
+
+            for future in concurrent.futures.as_completed(future_to_module, timeout=60):
+                try:
+                    # @NOTE: Timeout to counteract deadlocks, but how to test?
+                    result = future.result(timeout=30)
+                    results.append(result)
+                except concurrent.futures.TimeoutError:
+                    mod = future_to_module[future]
+                    logger.warning("Module '%s' load timeout", mod)
+                    results.append(ModuleLoadResult(mod, {}, {}, 0,
+                                  Exception(f"Module '{mod}' load timeout")))
+                except Exception as ex:
+                    mod = future_to_module[future]
+                    logger.warning("Module '%s' load failed: %s", mod, ex)
+                    results.append(ModuleLoadResult(mod, {}, {}, 0, ex))
+
+        return results
+
+    def _load_single_module(self, mod, args):
+        from azure.cli.core.breaking_change import import_module_breaking_changes
+        from azure.cli.core.commands import _load_module_command_loader
+        try:
+            start_time = timeit.default_timer()
+            module_command_table, module_group_table = _load_module_command_loader(self, args, mod)
+            import_module_breaking_changes(mod)
+            elapsed_time = timeit.default_timer() - start_time
+            return ModuleLoadResult(mod, module_command_table, module_group_table, elapsed_time)
+        except Exception as ex:  # pylint: disable=broad-except
+            return ModuleLoadResult(mod, {}, {}, 0, ex)
 
     def _handle_module_load_error(self, result):
         """Handle errors that occurred during module loading."""
