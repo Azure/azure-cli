@@ -6735,8 +6735,14 @@ def create_ddos_custom_policy(cmd, ddos_custom_policy_name, resource_group_name,
         })
 
         existing_policy = convert_ddos_custom_policy_to_snake_case(existing_policy)
-    except Exception as err:
-        pass
+    except ResourceNotFoundError:
+        # No existing DDoS custom policy; proceed with creation.
+        logger.debug("DDoS custom policy '%s' not found in resource group '%s'.",
+                     ddos_custom_policy_name, resource_group_name)
+    except Exception as err:  # pylint: disable=broad-except
+        # Log unexpected errors while preserving previous behavior of not failing the command.
+        logger.warning("Failed to retrieve existing DDoS custom policy '%s' in resource group '%s': %s",
+                       ddos_custom_policy_name, resource_group_name, err)
 
     policy = build_ddos_custom_policy(cmd, ddos_custom_policy_name, location, tags, detection_rule_name, detection_mode,
                                       packets_per_second, traffic_type, ip_config_id)
