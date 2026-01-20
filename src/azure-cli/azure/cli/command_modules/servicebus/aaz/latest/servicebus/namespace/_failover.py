@@ -15,7 +15,7 @@ from azure.cli.core.aaz import *
     "servicebus namespace failover",
 )
 class Failover(AAZCommand):
-    """GeoDR Failover
+    """Geo-Replication Failover
     """
 
     _aaz_info = {
