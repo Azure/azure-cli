@@ -788,4 +788,6 @@ def load_command_table(self, _):
     # region DdosCustomPolicy
     with self.command_group('network ddos-custom-policy') as g:
         g.custom_command('create', 'create_ddos_custom_policy', supports_no_wait=True)
+        from .custom import DdosCustomPolicyUpdate
+        self.command_table["network ddos-custom-policy update"] = DdosCustomPolicyUpdate(loader=self)
     # endregion

@@ -6822,3 +6822,15 @@ def convert_ddos_custom_policy_to_snake_case(policy):
         new_policy['front_end_ip_configuration'] = policy['frontEndIpConfiguration']
 
     return new_policy
+
+
+from .aaz.latest.network.ddos_custom_policy import Update as _DdosCustomPolicyUpdate
+
+
+class DdosCustomPolicyUpdate(_DdosCustomPolicyUpdate):
+
+    @classmethod
+    def _build_arguments_schema(cls, *args, **kwargs):
+        args_schema = super()._build_arguments_schema(*args, **kwargs)
+        args_schema.front_end_ip_configuration._options = ["--ip-config-id", "--front-end-ip-configuration"]
+        return args_schema
