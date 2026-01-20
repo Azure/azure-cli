@@ -549,8 +549,8 @@ def build_ddos_custom_policy(cmd, ddos_custom_policy_name, location=None, tags=N
 
     if ip_config_id:
         front_end_ip_configuration = []
-        for id in ip_config_id:
-            front_end_ip_configuration.append({'id': id})
+        for config_id in ip_config_id:
+            front_end_ip_configuration.append({'id': config_id})
         policy['front_end_ip_configuration'] = front_end_ip_configuration
 
     return policy
