@@ -453,16 +453,33 @@ class MainCommandsLoader(CLICommandsLoader):
         # Set fallback=False to turn off command index in case of regression
         use_command_index = self.cli_ctx.config.getboolean('core', 'use_command_index', fallback=True)
         
-        # Fast path for top-level help (az --help or az with no args)
-        # Check if we can use cached help index to skip module loading
-        if use_command_index and (not args or args[0] in ('--help', '-h', 'help')):
+        # Fast path for help requests - check if we can use cached help index to skip module loading
+        if use_command_index and args and '--help' in args or '-h' in args or (args and args[-1] == 'help'):
+            # Parse the command path from args (e.g., ['vm', '--help'] -> 'vm')
+            command_path_parts = []
+            for arg in args:
+                if arg in ('--help', '-h', 'help'):
+                    break
+                if not arg.startswith('-'):
+                    command_path_parts.append(arg)
+            
+            command_path = ' '.join(command_path_parts) if command_path_parts else 'root'
+            
             command_index = CommandIndex(self.cli_ctx)
             help_index = command_index.get_help_index()
-            if help_index:
-                logger.debug("Using cached help index, skipping module loading")
+            if help_index and command_path in help_index:
+                logger.debug("Using cached help index for '%s', skipping module loading", command_path)
                 # Display help directly from cached data without loading modules
-                self._display_cached_help(help_index)
+                self._display_cached_help(help_index[command_path], command_path)
                 # Raise SystemExit to stop execution (similar to how --help normally works)
+                sys.exit(0)
+        # Fast path for top-level with no args (az with no arguments)
+        elif use_command_index and not args:
+            command_index = CommandIndex(self.cli_ctx)
+            help_index = command_index.get_help_index()
+            if help_index and 'root' in help_index:
+                logger.debug("Using cached help index for root, skipping module loading")
+                self._display_cached_help(help_index['root'], 'root')
                 sys.exit(0)
         
         if use_command_index:
@@ -545,7 +562,7 @@ class MainCommandsLoader(CLICommandsLoader):
 
         return self.command_table
     
-    def _display_cached_help(self, help_index):
+    def _display_cached_help(self, help_data, command_path='root'):
         """Display help from cached help index without loading modules."""
         from azure.cli.core._help import WELCOME_MESSAGE, PRIVACY_STATEMENT
         import re
@@ -564,15 +581,20 @@ class MainCommandsLoader(CLICommandsLoader):
         # Show welcome message
         print(WELCOME_MESSAGE)
         
-        print("\nGroup")
-        print("    az")
+        # Display the group breadcrumb
+        if command_path == 'root':
+            print("\nGroup")
+            print("    az")
+        else:
+            print("\nGroup")
+            print(f"    az {command_path}")
         
         # Import knack's formatting functions
         from knack.help import _print_indent, FIRST_LINE_PREFIX, _get_hanging_indent
         
         # Separate groups and commands
-        groups_data = help_index.get('groups', {})
-        commands_data = help_index.get('commands', {})
+        groups_data = help_data.get('groups', {})
+        commands_data = help_data.get('commands', {})
         
         # Helper function matching knack's _get_line_len
         def _get_line_len(name, tags):
@@ -644,55 +666,118 @@ class MainCommandsLoader(CLICommandsLoader):
         show_updates_available(new_line_after=True)
     
     def _cache_help_index(self, command_index):
-        """Cache help summaries for top-level commands to speed up `az --help`."""
+        """Cache help summaries for all commands/groups recursively using parallel processing."""
         try:
-            # Create a temporary parser to extract help information
+            import concurrent.futures
+            from concurrent.futures import ThreadPoolExecutor
             from azure.cli.core.parser import AzCliCommandParser
+            from azure.cli.core._help import CliGroupHelpFile
+            
+            # Create a temporary parser to extract help information
             parser = AzCliCommandParser(self.cli_ctx)
             parser.load_command_table(self)
             
-            # Get the help file for the root level
-            from azure.cli.core._help import CliGroupHelpFile
-            subparser = parser.subparsers.get(tuple())
-            if subparser:
-                # Use cli_ctx.help which is the AzCliHelp instance
-                help_file = CliGroupHelpFile(self.cli_ctx.invocation.help, '', subparser)
-                help_file.load(subparser)
-                
-                # Helper to build tag string for an item
-                def _get_tags(item):
-                    tags = []
-                    if hasattr(item, 'deprecate_info') and item.deprecate_info:
-                        tags.append(str(item.deprecate_info.tag))
-                    if hasattr(item, 'preview_info') and item.preview_info:
-                        tags.append(str(item.preview_info.tag))
-                    if hasattr(item, 'experimental_info') and item.experimental_info:
-                        tags.append(str(item.experimental_info.tag))
-                    return ' '.join(tags)
-                
-                # Separate groups and commands
-                groups = {}
-                commands = {}
-                
-                for child in help_file.children:
-                    if hasattr(child, 'name') and hasattr(child, 'short_summary'):
-                        if ' ' not in child.name:  # Only top-level items
+            # Helper to build tag string for an item
+            def _get_tags(item):
+                tags = []
+                if hasattr(item, 'deprecate_info') and item.deprecate_info:
+                    tags.append(str(item.deprecate_info.tag))
+                if hasattr(item, 'preview_info') and item.preview_info:
+                    tags.append(str(item.preview_info.tag))
+                if hasattr(item, 'experimental_info') and item.experimental_info:
+                    tags.append(str(item.experimental_info.tag))
+                return ' '.join(tags)
+            
+            # Function to cache help for a single group
+            def _cache_single_group_help(group_path, subparser):
+                """Cache help for a single group and return its data along with subgroups to process."""
+                try:
+                    help_file = CliGroupHelpFile(self.cli_ctx.invocation.help, group_path, subparser)
+                    help_file.load(subparser)
+                    
+                    groups = {}
+                    commands = {}
+                    subgroup_names = []
+                    
+                    for child in help_file.children:
+                        if hasattr(child, 'name') and hasattr(child, 'short_summary'):
+                            # Extract just the last part of the name (after the group path)
+                            child_name = child.name
+                            if group_path and child_name.startswith(group_path + ' '):
+                                child_name = child_name[len(group_path) + 1:]
+                            elif not group_path and ' ' in child_name:
+                                # Skip nested items at root level
+                                continue
+                            
                             tags = _get_tags(child)
                             item_data = {
                                 'summary': child.short_summary,
                                 'tags': tags
                             }
-                            # Check if it's a group or command
+                            
                             if child.type == 'group':
-                                groups[child.name] = item_data
+                                groups[child_name] = item_data
+                                # Build full path for recursion
+                                if group_path:
+                                    full_subgroup_name = f"{group_path} {child_name}"
+                                else:
+                                    full_subgroup_name = child_name
+                                subgroup_names.append(full_subgroup_name)
                             else:
-                                commands[child.name] = item_data
+                                commands[child_name] = item_data
+                    
+                    level_key = group_path if group_path else 'root'
+                    level_data = None
+                    if groups or commands:
+                        level_data = {'groups': groups, 'commands': commands}
+                    
+                    return level_key, level_data, subgroup_names
                 
-                # Store in the command index
-                help_index_data = {'groups': groups, 'commands': commands}
-                if groups or commands:
-                    command_index.INDEX[command_index._HELP_INDEX] = help_index_data
-                    logger.debug("Cached %d groups and %d commands", len(groups), len(commands))
+                except Exception as ex:  # pylint: disable=broad-except
+                    logger.debug("Failed to cache help for '%s': %s", group_path, ex)
+                    return None, None, []
+            
+            # Build help index using BFS with parallel processing at each level
+            help_index_data = {}
+            to_process = [('', parser.subparsers.get(tuple()))]  # (group_path, subparser) tuples
+            
+            while to_process:
+                # Process current level in parallel
+                with ThreadPoolExecutor(max_workers=4) as executor:
+                    futures = {}
+                    for group_path, subparser in to_process:
+                        if subparser:
+                            future = executor.submit(_cache_single_group_help, group_path, subparser)
+                            futures[future] = group_path
+                    
+                    next_level = []
+                    for future in concurrent.futures.as_completed(futures):
+                        try:
+                            level_key, level_data, subgroup_names = future.result(timeout=10)
+                            if level_data:
+                                help_index_data[level_key] = level_data
+                            
+                            # Queue subgroups for next level
+                            for subgroup_name in subgroup_names:
+                                subgroup_tuple = tuple(subgroup_name.split())
+                                sub_subparser = parser.subparsers.get(subgroup_tuple)
+                                if sub_subparser:
+                                    next_level.append((subgroup_name, sub_subparser))
+                        
+                        except concurrent.futures.TimeoutError:
+                            group_path = futures[future]
+                            logger.debug("Help caching timeout for '%s'", group_path)
+                        except Exception as ex:  # pylint: disable=broad-except
+                            group_path = futures[future]
+                            logger.debug("Failed to cache help for '%s': %s", group_path, ex)
+                    
+                    to_process = next_level
+            
+            # Store the complete help index in one operation
+            if help_index_data:
+                command_index.INDEX[command_index._HELP_INDEX] = help_index_data
+                logger.debug("Cached help for %d command levels", len(help_index_data))
+        
         except Exception as ex:  # pylint: disable=broad-except
             logger.debug("Failed to cache help data: %s", ex)
 
